@@ -182,15 +182,23 @@ class MainActivity : ComponentActivity() {
                                             }
                                         },
                                         actions = {
+                                            var showMenu by remember { mutableStateOf(false) }
+
                                             IconButton({
                                                 navController.popBackStack()
                                             }) {
                                                 Icon(Icons.Outlined.AccountCircle, "View card")
                                             }
-                                            IconButton({
 
+                                            IconButton({
+                                                showMenu = !showMenu
                                             }) {
                                                 Icon(Icons.Outlined.MoreVert, "More")
+                                            }
+
+                                            DropdownMenu(showMenu, { showMenu = false }) {
+                                                DropdownMenuItem({ Text("Delete") }, { showMenu = false })
+                                                DropdownMenuItem({ Text("Report") }, { showMenu = false })
                                             }
                                         },
                                         colors = TopAppBarDefaults.smallTopAppBarColors(
