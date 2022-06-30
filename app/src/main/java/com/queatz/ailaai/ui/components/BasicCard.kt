@@ -266,7 +266,11 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                                                 "Go back",
                                                 modifier = Modifier.padding(end = PaddingDefault)
                                             )
-                                            Text(cardConversation.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                                            Text(
+                                                backstack.last().message.takeIf { it.isNotBlank() } ?: "Go back",
+                                                overflow = TextOverflow.Ellipsis,
+                                                maxLines = 1
+                                            )
                                         }
                                     }
 
@@ -279,9 +283,16 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                                             cardConversation.message = it
                                         },
                                         shape = MaterialTheme.shapes.large,
-                                        label = { Text("Your message") },
+                                        label = { Text(if (backstack.isEmpty()) "Your message" else "Your reply") },
                                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                                         modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Text(
+                                        "This message is shown on the card ${if (backstack.isEmpty()) "under your name" else "when someone chooses \"${cardConversation.title}\""}.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
                                     )
 
                                     cardConversation.items.forEach {
@@ -313,11 +324,12 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                                                     }
                                             )
                                             if (titleState.isNotBlank()) {
-                                                IconButton({
-                                                    backstack.add(cardConversation)
-                                                    cardConversation = it
-                                                    recomposeScope.invalidate()
-                                                },
+                                                IconButton(
+                                                    {
+                                                        backstack.add(cardConversation)
+                                                        cardConversation = it
+                                                        recomposeScope.invalidate()
+                                                    },
                                                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                                 ) {
                                                     Icon(Icons.Outlined.ArrowForward, "Continue conversation")
@@ -325,18 +337,20 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                                             }
                                         }
                                     }
-                                    TextButton(
-                                        {
-                                            cardConversation.items.add(ConversationItem())
-                                            recomposeScope.invalidate()
+                                    if (cardConversation.items.size < 4) {
+                                        TextButton(
+                                            {
+                                                cardConversation.items.add(ConversationItem())
+                                                recomposeScope.invalidate()
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.Add,
+                                                "Add an option",
+                                                modifier = Modifier.padding(end = PaddingDefault)
+                                            )
+                                            Text("Add an option")
                                         }
-                                    ) {
-                                        Icon(
-                                            Icons.Outlined.Add,
-                                            "Add an option",
-                                            modifier = Modifier.padding(end = PaddingDefault)
-                                        )
-                                        Text("Add an option")
                                     }
                                 }
                                 Row(
