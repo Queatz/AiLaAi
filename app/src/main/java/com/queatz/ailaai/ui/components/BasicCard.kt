@@ -1,14 +1,9 @@
 package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -22,26 +17,36 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.doOnAttach
+import androidx.core.view.doOnDetach
 import androidx.navigation.NavHostController
+import at.bluesource.choicesdk.maps.common.CameraPosition
+import at.bluesource.choicesdk.maps.common.CameraUpdateFactory
+import at.bluesource.choicesdk.maps.common.LatLng
+import at.bluesource.choicesdk.maps.common.MapFragment
+import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlin.random.Random
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, String>) {
+fun BasicCard(
+    navController: NavHostController,
+    nameAndLocation: Pair<String, String>
+) {
     val seed = remember { Random.nextInt() }
 
     Card(
@@ -153,12 +158,9 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                         Surface(
                             shape = MaterialTheme.shapes.extraLarge
                         ) {
-                            val scrollState = rememberScrollState()
-
                             Column(
                                 modifier = Modifier
                                     .padding(PaddingDefault * 3)
-                                    .verticalScroll(scrollState)
                             ) {
                                 Text(
                                     "Card location",
@@ -176,7 +178,8 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                                     shape = MaterialTheme.shapes.large,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .fillMaxWidth()
                                 )
                                 Box(
                                     modifier = Modifier
@@ -184,8 +187,57 @@ fun BasicCard(navController: NavHostController, nameAndLocation: Pair<String, St
                                         .aspectRatio(1f)
                                         .padding(PaddingValues(vertical = PaddingDefault * 2))
                                         .clip(MaterialTheme.shapes.large)
-                                        .background(Color.Magenta)
-                                )
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                ) {
+                                    AndroidViewBinding(
+                                        LayoutMapBinding::inflate,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                    ) {
+                                        mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
+
+                                        val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
+
+                                        mapFragment.getMapObservable().subscribe { map ->
+                                            map.clear()
+
+                                            map.getUiSettings().isMapToolbarEnabled = true
+                                            map.getUiSettings().isMyLocationButtonEnabled = true
+
+                                            val position = LatLng(
+                                                10.7773886,
+                                                106.7114015
+                                            )
+
+                                            val marker = map.addMarker(
+                                                MarkerOptions
+                                                    .create()
+                                                    .position(position)
+                                                    .draggable(true)
+                                                    .title(locationName)
+                                            )!!
+
+                                            map.setOnMapClickListener {
+                                                marker.position = it
+                                            }
+
+                                            map.mapType = at.bluesource.choicesdk.maps.common.Map.MAP_TYPE_HYBRID
+
+                                            map.moveCamera(
+                                                CameraUpdateFactory.get().newCameraPosition(
+                                                    CameraPosition.Builder().setTarget(position)
+                                                        .setZoom(12f)
+                                                        .build()
+                                                )
+                                            )
+                                            }
+
+                                        mapFragment.getMapAsync {
+
+                                        }
+                                    }
+                                }
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
                                     modifier = Modifier.fillMaxWidth()

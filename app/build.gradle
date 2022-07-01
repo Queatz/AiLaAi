@@ -1,15 +1,23 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.huawei.agconnect'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def GOOGLE_MAPS_API_KEY = properties.getProperty('GOOGLE_MAPS_API_KEY')
+def HMS_APP_ID = properties.getProperty('HMS_APP_ID')
 android {
     compileSdk 32
 
     defaultConfig {
+        manifestPlaceholders.put('GOOGLE_MAPS_API_KEY', GOOGLE_MAPS_API_KEY)
+        manifestPlaceholders.put('HMS_APP_ID', HMS_APP_ID)
+
         applicationId "com.queatz.ailaai"
         minSdk 26
-        targetSdk 32
+        targetSdk 30
         versionCode 1
         versionName "1.0"
 
@@ -18,7 +26,9 @@ android {
             useSupportLibrary true
         }
     }
-
+    buildFeatures {
+        viewBinding = true
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -48,18 +58,25 @@ android {
 }
 
 dependencies {
+    def choicesdk_version = '0.3.0'
+
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     implementation "androidx.compose.ui:ui:$compose_version"
-    implementation("androidx.compose.material3:material3:1.0.0-alpha13")
-    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-alpha13")
+    implementation 'androidx.compose.material3:material3:1.0.0-alpha13'
+    implementation 'androidx.compose.material3:material3-window-size-class:1.0.0-alpha13'
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation "androidx.navigation:navigation-compose:2.4.2"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1"
+    implementation 'androidx.navigation:navigation-compose:2.4.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
     implementation 'androidx.activity:activity-compose:1.6.0-alpha05'
-//    implementation 'io.coil-kt:coil:2.1.0'
+    implementation "at.bluesource.choicesdk:choicesdk-location:$choicesdk_version"
+    implementation "at.bluesource.choicesdk:choicesdk-maps:$choicesdk_version"
+    implementation "at.bluesource.choicesdk:choicesdk-messaging:$choicesdk_version"
+    implementation 'androidx.fragment:fragment-ktx:1.5.0'
+    implementation 'androidx.compose.ui:ui-viewbinding:1.1.1'
+    implementation 'com.android.volley:volley:1.2.1'
     implementation 'io.coil-kt:coil-compose:2.1.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
