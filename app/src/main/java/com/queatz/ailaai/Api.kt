@@ -3,18 +3,25 @@ package com.queatz.ailaai
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.google.gson.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.http.parsing.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.Instant
+import java.lang.reflect.Type
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 
 val api = Api()
@@ -31,8 +38,11 @@ class Api {
         expectSuccess = true
 
         install(ContentNegotiation) {
-            gson()
+            gson {
+                registerTypeAdapter(Instant::class.java, InstantTypeConverter())
+            }
         }
+
         install(HttpTimeout) {
             requestTimeoutMillis = 10.seconds.inWholeMilliseconds
         }
@@ -48,15 +58,16 @@ class Api {
         }
     }
 
-    suspend fun signUp(code: String): TokenResponse = post("sign/up", SignUpRequest(code))
-
-    private suspend inline fun <reified T : Any> post(url: String, body: Any): T = http.post("$baseUrl/${url}") {
+    private suspend inline fun <reified T : Any> post(url: String, body: Any? = null): T = http.post("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
         contentType(ContentType.Application.Json)
-        setBody(body)
+
+        if (body != null) {
+            setBody(body)
+        }
     }.body()
 
     private suspend inline fun <reified T : Any> get(url: String): T = http.get("$baseUrl/${url}") {
@@ -82,6 +93,14 @@ class Api {
     }
 
     fun hasToken() = token != null
+
+    suspend fun signUp(code: String): TokenResponse = post("sign/up", SignUpRequest(code))
+
+    suspend fun myCards(): List<Card> = get("me/cards")
+
+    suspend fun newCard(): Card = post("cards")
+
+    suspend fun updateCard(id: String, card: Card): Card = post("cards/${id}", card)
 }
 
 data class SignUpRequest(
@@ -96,3 +115,22 @@ data class SignOnRequest(
 data class TokenResponse(
     val token: String
 )
+
+class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
+    override fun serialize(
+        src: Instant,
+        srcType: Type,
+        context: JsonSerializationContext
+    ) = JsonPrimitive(DateTimeFormatter.ISO_INSTANT.format(src.toJavaInstant()))
+
+    override fun deserialize(
+        json: JsonElement,
+        type: Type,
+        context: JsonDeserializationContext
+    ) = try {
+        json.asString.toInstant()
+    } catch (e: ParseException) {
+        null
+    }
+}
+

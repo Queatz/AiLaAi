@@ -1,5 +1,6 @@
 package com.queatz.ailaai
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -87,12 +88,14 @@ class MainActivity : AppCompatActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(PaddingValues(
-                                top = PaddingDefault,
-                                start = PaddingDefault,
-                                end = PaddingDefault,
-                                bottom = PaddingDefault * 8
-                            ))
+                            .padding(
+                                PaddingValues(
+                                    top = PaddingDefault,
+                                    start = PaddingDefault,
+                                    end = PaddingDefault,
+                                    bottom = PaddingDefault * 8
+                                )
+                            )
                     ) {
                         Text("Xin chào, bạn!", style = MaterialTheme.typography.headlineMedium)
                         OutlinedTextField(
@@ -115,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                             ),
                             keyboardActions = KeyboardActions(onDone = {
                                 codeValueEnabled = false
-                                signUp(it)
+                                signUp(codeValue)
                             }),
                         )
                     }
@@ -173,7 +176,9 @@ class MainActivity : AppCompatActivity() {
                                             "Tracy Huynh" to "Dallas, TX"
                                         )
                                     ) {
-                                        BasicCard(navController, it)
+                                        BasicCard({
+                                            navController.navigate("messages/${it.first}")
+                                        }, navController.context as Activity, Card(name = it.first, location = it.second))
                                     }
                                 }
                                 Card(
@@ -314,6 +319,13 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                         composable("me") {
+                            var myCards by remember { mutableStateOf(listOf<Card>()) }
+                            val coroutineScope = rememberCoroutineScope()
+
+                            coroutineScope.launch {
+                                myCards = api.myCards()
+                            }
+
                             Column {
                                 SmallTopAppBar(
                                     {
@@ -329,16 +341,38 @@ class MainActivity : AppCompatActivity() {
                                 )
                                 LazyColumn(
                                     contentPadding = PaddingValues(PaddingDefault),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                                     modifier = Modifier.fillMaxWidth().weight(1f)
                                 ) {
-                                    items(
-                                        listOf(
-                                            "Jacob Ferrero" to "Austin, TX",
-                                            "Jacob Ferrero" to "Saigon, VN"
-                                        )
-                                    ) {
-                                        BasicCard(navController, it)
+                                    items(myCards) {
+                                        BasicCard({
+                                            // todo upload a new image
+                                        }, navController.context as Activity, it, true)
+                                    }
+
+                                    if (myCards.isEmpty()) {
+                                        item {
+                                            Text(
+                                                "You currently have no cards.",
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.
+                                                        padding(PaddingDefault * 2)
+                                            )
+                                        }
+                                    }
+
+                                    item {
+                                        OutlinedButton(
+                                            {
+                                                coroutineScope.launch {
+                                                    api.newCard()
+                                                    myCards = api.myCards()
+                                                }
+                                            }
+                                        ) {
+                                            Text("Add a card")
+                                        }
                                     }
                                 }
                             }
