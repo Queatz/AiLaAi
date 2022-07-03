@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,19 +30,21 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.navigation.NavHostController
-import at.bluesource.choicesdk.maps.common.CameraPosition
-import at.bluesource.choicesdk.maps.common.CameraUpdateFactory
-import at.bluesource.choicesdk.maps.common.LatLng
-import at.bluesource.choicesdk.maps.common.MapFragment
+import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
+import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlin.random.Random
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun BasicCard(
     navController: NavHostController,
@@ -152,6 +155,20 @@ fun BasicCard(
                 if (openLocationDialog) {
                     var locationName by remember { mutableStateOf("") }
 
+                    val permissionState = rememberPermissionState(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+
+                    when (permissionState.status) {
+                        is PermissionStatus.Denied -> {
+                            if (!permissionState.status.shouldShowRationale) {
+                                LaunchedEffect(permissionState) {
+                                    permissionState.launchPermissionRequest()
+                                }
+                            }
+                        }
+                    }
+
                     Dialog({
                         openLocationDialog = false
                     }) {
@@ -181,6 +198,12 @@ fun BasicCard(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 )
+                                Text(
+                                    "The location name is shown on the card to help others quickly understand where you are generally located.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(PaddingValues(top = PaddingDefault * 2))
+                                )
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -190,14 +213,23 @@ fun BasicCard(
                                         .background(MaterialTheme.colorScheme.primaryContainer)
                                         .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                                 ) {
+                                    var composed by remember { mutableStateOf(false) }
+
                                     AndroidViewBinding(
                                         LayoutMapBinding::inflate,
                                         modifier = Modifier
                                             .fillMaxSize()
                                     ) {
+                                        if (composed) return@AndroidViewBinding else composed = true
+
                                         mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
 
                                         val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
+
+                                        val activity = navController.context as Activity
+                                        val client = FusedLocationProviderFactory.getFusedLocationProviderClient(
+                                            activity
+                                        )
 
                                         mapFragment.getMapObservable().subscribe { map ->
                                             map.clear()
@@ -215,7 +247,6 @@ fun BasicCard(
                                                     .create()
                                                     .position(position)
                                                     .draggable(true)
-                                                    .title(locationName)
                                             )!!
 
                                             map.setOnMapClickListener {
@@ -224,20 +255,36 @@ fun BasicCard(
 
                                             map.mapType = at.bluesource.choicesdk.maps.common.Map.MAP_TYPE_HYBRID
 
-                                            map.moveCamera(
-                                                CameraUpdateFactory.get().newCameraPosition(
-                                                    CameraPosition.Builder().setTarget(position)
-                                                        .setZoom(12f)
-                                                        .build()
-                                                )
-                                            )
-                                            }
+                                            map.setOnMarkerClickListener { true }
 
-                                        mapFragment.getMapAsync {
+                                            client.getLastLocation()
+                                                .addOnFailureListener(activity) {
+                                                    it.printStackTrace()
+                                                }
+                                                .addOnSuccessListener(activity) { location ->
+                                                    if (location == null) {
+                                                        return@addOnSuccessListener
+                                                    }
 
+                                                    map.moveCamera(
+                                                        CameraUpdateFactory.get().newCameraPosition(
+                                                            CameraPosition.Builder().setTarget(
+                                                                LatLng(location.latitude, location.longitude)
+                                                            )
+                                                                .setZoom(12f)
+                                                                .build()
+                                                        )
+                                                    )
+                                                }
                                         }
                                     }
                                 }
+                                Text(
+                                    "Tap on the map to set the location of this card.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
+                                )
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
                                     modifier = Modifier.fillMaxWidth()
