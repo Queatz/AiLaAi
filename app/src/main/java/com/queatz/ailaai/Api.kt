@@ -3,6 +3,7 @@ package com.queatz.ailaai
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.gson.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -58,7 +59,10 @@ class Api {
         }
     }
 
-    private suspend inline fun <reified T : Any> post(url: String, body: Any? = null): T = http.post("$baseUrl/${url}") {
+    private suspend inline fun <reified T : Any> post(
+        url: String,
+        body: Any? = null
+    ): T = http.post("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
@@ -70,12 +74,17 @@ class Api {
         }
     }.body()
 
-    private suspend inline fun <reified T : Any> get(url: String): T = http.get("$baseUrl/${url}") {
+    private suspend inline fun <reified T : Any> get(
+        url: String,
+        parameters: Map<String, String>? = null
+    ): T = http.get("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
         accept(ContentType.Application.Json)
+
+        parameters?.forEach { (key, value) -> parameter(key, value) }
     }.body()
 
     fun setToken(token: String?) {
@@ -95,6 +104,12 @@ class Api {
     fun hasToken() = token != null
 
     suspend fun signUp(code: String): TokenResponse = post("sign/up", SignUpRequest(code))
+
+    suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
+        "geo" to "${geo.latitude},${geo.longitude}"
+    ) + (search?.let {
+        mapOf("search" to search)
+    } ?: mapOf()))
 
     suspend fun myCards(): List<Card> = get("me/cards")
 

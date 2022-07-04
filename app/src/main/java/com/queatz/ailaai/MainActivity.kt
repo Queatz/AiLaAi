@@ -33,6 +33,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.MessageItem
@@ -154,6 +155,11 @@ class MainActivity : AppCompatActivity() {
                     NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
                         composable("explore") {
                             var value by remember { mutableStateOf("") }
+                            var cards by remember { mutableStateOf(listOf<Card>()) }
+
+                            LaunchedEffect(value) {
+                                cards = api.cards(LatLng(0.0, 0.0), value.takeIf { it.isNotBlank() })
+                            }
 
                             Box {
                                 LazyColumn(
@@ -166,19 +172,14 @@ class MainActivity : AppCompatActivity() {
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                                     modifier = Modifier.fillMaxSize()
                                 ) {
-                                    items(
-                                        listOf(
-                                            "Nate Ferrero" to "Detroit, MI",
-                                            "Jacob Ferrero" to "Saigon, VN",
-                                            "Aaron Dubois" to "Waco, TX",
-                                            "Mai Ferrero" to "Saigon, VN",
-                                            "Bun Seng" to "Dallas, TX",
-                                            "Tracy Huynh" to "Dallas, TX"
+                                    items(cards) {
+                                        BasicCard(
+                                            {
+                                                navController.navigate("messages/${it.person}")
+                                            },
+                                            navController.context as Activity,
+                                            it
                                         )
-                                    ) {
-                                        BasicCard({
-                                            navController.navigate("messages/${it.first}")
-                                        }, navController.context as Activity, Card(name = it.first, location = it.second))
                                     }
                                 }
                                 Card(

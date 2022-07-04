@@ -57,8 +57,6 @@ fun BasicCard(
     card: Card,
     isMine: Boolean = false
 ) {
-    val seed = remember { Random.nextInt() }
-
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(),
@@ -154,6 +152,27 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
             .align(Alignment.End)
             .padding(PaddingValues(top = PaddingDefault))
     ) {
+        var active by remember { mutableStateOf(card.active ?: false) }
+        var activeCommitted by remember { mutableStateOf(active) }
+        val coroutineScope = rememberCoroutineScope()
+
+        Switch(active, {
+            active = it
+            coroutineScope.launch {
+                val update = api.updateCard(card.id!!, Card(active = active))
+                card.active = update.active
+                activeCommitted = update.active ?: false
+            }
+        })
+        Text(
+            if (activeCommitted) "Card is active" else "Card is inactive",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(start = PaddingDefault)
+        )
+        Box(modifier = Modifier.weight(1f))
         IconButton({
             openLocationDialog = true
         }) {
