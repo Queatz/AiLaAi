@@ -2,10 +2,14 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,14 +23,18 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.navigation.NavController
@@ -43,9 +51,11 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.api
 import com.queatz.ailaai.databinding.LayoutMapBinding
+import com.queatz.ailaai.gson
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.util.logging.Logger
 import kotlin.random.Random
 
 @SuppressLint("UnrememberedMutableState")
@@ -89,8 +99,12 @@ fun BasicCard(
                     .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
                     .padding(PaddingDefault * 2)
             ) {
+                val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
+                var current by remember { mutableStateOf(conversation) }
+
                 Text(
                     text = buildAnnotatedString {
+                        pushStyle(ParagraphStyle(lineHeight = MaterialTheme.typography.titleMedium.lineHeight * 1.125f))
                         withStyle(
                             MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
                         ) {
@@ -103,7 +117,8 @@ fun BasicCard(
                         ) {
                             append(card.location ?: "Somewhere")
                         }
-                        append("\nI'm an app developer from Austin who loves prototyping and brainstorming ideas. Let's chat!")
+                        append("\n")
+                        append(current.message)
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier
@@ -113,25 +128,30 @@ fun BasicCard(
 
                 val recomposeScope = currentRecomposeScope
 
-                listOf(
-                    "I want to talk about an app idea",
-                    "I want to learn programming",
-                    "\uD83D\uDCEC Send a message",
-                )
-                    .sortedBy { Random.nextInt(1, 4) }
-                    .take(Random.nextInt(1, 4))
-                    .forEach {
+                current.items.forEach {
                         Button({
-                            recomposeScope.invalidate()
+                            current = it
                         }) {
-                            Text(it, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                            Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                         }
                     }
-//                IconButton({
-//                    recomposeScope.invalidate()
-//                }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-//                    Icon(Icons.Outlined.Refresh, "Refresh")
-//                }
+
+                if (current.items.isEmpty()) {
+                    Button({
+                        onClick()
+                    }) {
+                        Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
+                        Text("Send a message", overflow = TextOverflow.Ellipsis, maxLines = 1)
+                    }
+                }
+
+                AnimatedVisibility(current.title.isNotBlank(), modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    IconButton({
+                        current = conversation
+                    }) {
+                        Icon(Icons.Outlined.Refresh, "Refresh", tint = MaterialTheme.colorScheme.tertiary)
+                    }
+                }
 
                 if (isMine) showToolbar(activity, recomposeScope, card)
             }
@@ -145,6 +165,7 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current!!
 
     Row(
         modifier = Modifier
@@ -167,7 +188,7 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
         Text(
             if (activeCommitted) "Card is active" else "Card is inactive",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(start = PaddingDefault)
@@ -230,7 +251,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                         },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            keyboardController.hide()
+                        }),
                         modifier = Modifier
                             .fillMaxWidth()
                     )
@@ -364,14 +388,20 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
     }
 
     if (openEditDialog) {
+        val conversation = remember {
+            card.conversation?.let {
+                gson.fromJson(it, ConversationItem::class.java)
+            } ?: ConversationItem()
+        }
+
         var cardName by remember { mutableStateOf(card.name ?: "") }
         val backstack = remember { mutableListOf<ConversationItem>() }
-        var cardConversation by remember { mutableStateOf(ConversationItem()) }
+        var cardConversation by remember { mutableStateOf(conversation) }
         val coroutineScope = rememberCoroutineScope()
 
         Dialog({
             openEditDialog = false
-        }) {
+        }, DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)) {
             Surface(
                 shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier
@@ -398,7 +428,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                         },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            keyboardController.hide()
+                        }),
                         modifier = Modifier.fillMaxWidth()
                     )
                     Column(
@@ -438,7 +471,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                             },
                             shape = MaterialTheme.shapes.large,
                             label = { Text(if (backstack.isEmpty()) "Your message" else "Your reply") },
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                keyboardController.hide()
+                            }),
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -466,7 +502,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                                     },
                                     shape = MaterialTheme.shapes.large,
                                     singleLine = true,
-                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
+                                    keyboardActions = KeyboardActions(onSearch = {
+                                        keyboardController.hide()
+                                    }),
                                     modifier = Modifier
                                         .weight(1f)
                                         .onKeyEvent { keyEvent ->
@@ -527,9 +566,12 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
 
                                 coroutineScope.launch {
                                     try {
-                                        val update = api.updateCard(card.id!!, Card(name = cardName))
+                                        val update = api.updateCard(card.id!!, Card(name = cardName, conversation = gson.toJson(conversation)))
+
+                                        Logger.getAnonymousLogger().warning(gson.toJson(conversation))
 
                                         card.name = update.name
+                                        card.conversation = update.conversation
 
                                         openEditDialog = false
                                         recomposeScope.invalidate()

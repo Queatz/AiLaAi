@@ -12,6 +12,11 @@ class Card(
     var active: Boolean? = null
 ) : Model()
 
+class Invite(
+    var person: String? = null,
+    var code: String? = null
+) : Model()
+
 open class Model {
     var id: String? = null
 

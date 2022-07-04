@@ -321,7 +321,42 @@ class MainActivity : AppCompatActivity() {
                         }
                         composable("me") {
                             var myCards by remember { mutableStateOf(listOf<Card>()) }
+                            var inviteDialog by remember { mutableStateOf(false) }
                             val coroutineScope = rememberCoroutineScope()
+                            var inviteCode by remember { mutableStateOf("") }
+
+                            coroutineScope.launch {
+                                try {
+                                    inviteCode = api.invite().code ?: ""
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                    inviteCode = "Error"
+                                }
+                            }
+
+                            if (inviteDialog) {
+                                AlertDialog(
+                                    {
+                                        inviteDialog = false
+                                        inviteCode = ""
+                                    },
+                                    {
+                                        TextButton(
+                                            {
+                                                inviteDialog = false
+                                            }
+                                        ) {
+                                            Text("Close")
+                                        }
+                                    },
+                                    title = { Text("Invite code") },
+                                    text = {
+                                        Column {
+                                            Text(inviteCode, style = MaterialTheme.typography.displayMedium)
+                                        }
+                                    }
+                                )
+                            }
 
                             coroutineScope.launch {
                                 myCards = api.myCards()
@@ -333,6 +368,19 @@ class MainActivity : AppCompatActivity() {
                                         Text("My cards")
                                     },
                                     actions = {
+                                        ElevatedButton(
+                                            {
+                                                inviteDialog = true
+                                            },
+                                            enabled = !inviteDialog
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.Add,
+                                                "Invite",
+                                                modifier = Modifier.padding(end = PaddingDefault)
+                                            )
+                                            Text("Invite")
+                                        }
                                         IconButton({
                                             navController.navigate("settings")
                                         }) {
@@ -357,14 +405,13 @@ class MainActivity : AppCompatActivity() {
                                             Text(
                                                 "You currently have no cards.",
                                                 color = MaterialTheme.colorScheme.secondary,
-                                                modifier = Modifier.
-                                                        padding(PaddingDefault * 2)
+                                                modifier = Modifier.padding(PaddingDefault * 2)
                                             )
                                         }
                                     }
 
                                     item {
-                                        OutlinedButton(
+                                        ElevatedButton(
                                             {
                                                 coroutineScope.launch {
                                                     api.newCard()

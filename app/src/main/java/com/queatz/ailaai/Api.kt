@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 
 val api = Api()
+val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()
 
 class Api {
 
@@ -116,6 +117,8 @@ class Api {
     suspend fun newCard(): Card = post("cards")
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/${id}", card)
+
+    suspend fun invite(): Invite = get("invite")
 }
 
 data class SignUpRequest(
