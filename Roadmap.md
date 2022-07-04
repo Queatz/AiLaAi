@@ -7,7 +7,7 @@ General
 
  [X] UI: Enter invite code screen  
  [X] UI: Add card button  
- [ ] UI: Find my location  
+ [ ] UI: Find my location on main card  
  [ ] UI: Upload card photo  
  [ ] UI: Sign out warning if account has no email  
  [ ] UI: Add email in settings  

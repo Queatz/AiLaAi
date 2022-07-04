@@ -1,12 +1,17 @@
 package com.queatz.ailaai
 
+import android.Manifest
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,6 +30,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.DialogProperties
@@ -34,7 +40,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.accompanist.permissions.*
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.MessageItem
@@ -44,12 +52,13 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavHostController
 
-    @OptIn(ExperimentalComposeUiApi::class)
+    @OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -155,77 +164,137 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
                         composable("explore") {
+                            val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
+                                navController.context as Activity
+                            )
                             var value by remember { mutableStateOf("") }
+                            var geo: LatLng? by remember { mutableStateOf(null) }
                             var isLoading by remember { mutableStateOf(true) }
                             var cards by remember { mutableStateOf(listOf<Card>()) }
+                            val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
-                            LaunchedEffect(value) {
-                                isLoading = true
-                                try {
-                                    cards = api.cards(LatLng(0.0, 0.0), value.takeIf { it.isNotBlank() })
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                }
-                                isLoading = false
-                            }
-
-                            Box {
-                                LazyColumn(
-                                    contentPadding = PaddingValues(
-                                        PaddingDefault,
-                                        PaddingDefault,
-                                        PaddingDefault,
-                                        PaddingDefault + 80.dp
-                                    ),
-                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-                                    modifier = Modifier.fillMaxSize()
+                            if (!permissionState.status.isGranted) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2, Alignment.CenterVertically),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(PaddingDefault)
                                 ) {
-                                    if (isLoading) {
-                                        item {
-                                            LinearProgressIndicator(
-                                                color = MaterialTheme.colorScheme.tertiary,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = PaddingDefault)
+                                    Button(
+                                        {
+                                        if (permissionState.status.shouldShowRationale) {
+                                            permissionState.launchPermissionRequest()
+                                        } else {
+                                            val intent = Intent(
+                                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                Uri.parse("package:${navController.context.packageName}")
                                             )
+                                            (navController.context as Activity).startActivity(intent)
                                         }
                                     }
-                                    items(cards) {
-                                        BasicCard(
-                                            {
-                                                navController.navigate("messages/${it.person}")
-                                            },
-                                            activity = navController.context as Activity,
-                                            card = it
+                                    ) {
+                                        Text(if (permissionState.status.shouldShowRationale) "Find my location" else "Open Settings")
+                                    }
+
+                                    if (permissionState.status.shouldShowRationale.not()) {
+                                        Text(
+                                            "The location permission is disabled in settings.",
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .align(Alignment.CenterHorizontally)
                                         )
                                     }
                                 }
-                                Card(
-                                    shape = MaterialTheme.shapes.large,
-                                    colors = CardDefaults.elevatedCardColors(),
-                                    elevation = CardDefaults.elevatedCardElevation(ElevationDefault / 2),
+                            } else if (geo == null) {
+                                locationClient.getLastLocation()
+                                    .addOnFailureListener(navController.context as Activity) {
+                                        it.printStackTrace()
+                                    }
+                                    .addOnSuccessListener {
+                                        if (it != null) {
+                                            geo = LatLng(it.latitude, it.longitude)
+                                        }
+                                    }
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
                                     modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(PaddingDefault * 2)
-                                        .fillMaxWidth()
+                                        .fillMaxSize()
+                                        .padding(PaddingDefault)
                                 ) {
-                                    val keyboardController = LocalSoftwareKeyboardController.current!!
-                                    OutlinedTextField(
-                                        value,
-                                        onValueChange = { value = it },
-                                        placeholder = { Text("Search") },
-                                        shape = MaterialTheme.shapes.large,
-                                        singleLine = true,
-                                        keyboardOptions = KeyboardOptions(
-                                            capitalization = KeyboardCapitalization.Words,
-                                            imeAction = ImeAction.Search
+                                    Text("Finding your location...", color = MaterialTheme.colorScheme.secondary)
+                                }
+                            } else {
+                                LaunchedEffect(value) {
+                                    isLoading = true
+                                    try {
+                                        cards = api.cards(geo!!, value.takeIf { it.isNotBlank() })
+                                    } catch (ex: Exception) {
+                                        ex.printStackTrace()
+                                    }
+                                    isLoading = false
+                                }
+
+                                Box {
+                                    LazyColumn(
+                                        contentPadding = PaddingValues(
+                                            PaddingDefault,
+                                            PaddingDefault,
+                                            PaddingDefault,
+                                            PaddingDefault + 80.dp
                                         ),
-                                        keyboardActions = KeyboardActions(onSearch = {
-                                            keyboardController.hide()
-                                        }),
-                                        modifier = Modifier.fillMaxWidth()
-                                            .background(MaterialTheme.colorScheme.surface)
-                                    )
+                                        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        if (isLoading) {
+                                            item {
+                                                LinearProgressIndicator(
+                                                    color = MaterialTheme.colorScheme.tertiary,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = PaddingDefault)
+                                                )
+                                            }
+                                        }
+                                        items(cards) {
+                                            BasicCard(
+                                                {
+                                                    navController.navigate("messages/${it.person}")
+                                                },
+                                                activity = navController.context as Activity,
+                                                card = it
+                                            )
+                                        }
+                                    }
+                                    Card(
+                                        shape = MaterialTheme.shapes.large,
+                                        colors = CardDefaults.elevatedCardColors(),
+                                        elevation = CardDefaults.elevatedCardElevation(ElevationDefault / 2),
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(PaddingDefault * 2)
+                                            .fillMaxWidth()
+                                    ) {
+                                        val keyboardController = LocalSoftwareKeyboardController.current!!
+                                        OutlinedTextField(
+                                            value,
+                                            onValueChange = { value = it },
+                                            placeholder = { Text("Search") },
+                                            shape = MaterialTheme.shapes.large,
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(
+                                                capitalization = KeyboardCapitalization.Words,
+                                                imeAction = ImeAction.Search
+                                            ),
+                                            keyboardActions = KeyboardActions(onSearch = {
+                                                keyboardController.hide()
+                                            }),
+                                            modifier = Modifier.fillMaxWidth()
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        )
+                                    }
                                 }
                             }
                         }

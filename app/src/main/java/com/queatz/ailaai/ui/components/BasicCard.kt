@@ -119,8 +119,6 @@ fun BasicCard(
                         .padding(bottom = PaddingDefault)
                 )
 
-                val recomposeScope = currentRecomposeScope
-
                 current.items.forEach {
                     Button({
                         current = it
@@ -224,9 +222,6 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                         permissionState.launchPermissionRequest()
                     }
                 }
-            }
-            is PermissionStatus.Granted -> {
-
             }
         }
 
