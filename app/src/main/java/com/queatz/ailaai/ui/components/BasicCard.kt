@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,32 +36,26 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.*
+import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
 import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
+import com.google.accompanist.permissions.*
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.api
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.gson
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import java.util.logging.Logger
-import kotlin.random.Random
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
+    onChange: () -> Unit = {},
     activity: Activity,
     card: Card,
     isMine: Boolean = false
@@ -129,12 +122,12 @@ fun BasicCard(
                 val recomposeScope = currentRecomposeScope
 
                 current.items.forEach {
-                        Button({
-                            current = it
-                        }) {
-                            Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                        }
+                    Button({
+                        current = it
+                    }) {
+                        Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                     }
+                }
 
                 if (current.items.isEmpty()) {
                     Button({
@@ -145,7 +138,10 @@ fun BasicCard(
                     }
                 }
 
-                AnimatedVisibility(current.title.isNotBlank(), modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                AnimatedVisibility(
+                    current.title.isNotBlank(),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
                     IconButton({
                         current = conversation
                     }) {
@@ -153,7 +149,7 @@ fun BasicCard(
                     }
                 }
 
-                if (isMine) showToolbar(activity, recomposeScope, card)
+                if (isMine) showToolbar(activity, onChange, card)
             }
         }
     }
@@ -161,7 +157,7 @@ fun BasicCard(
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class)
 @Composable
-private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: RecomposeScope, card: Card) {
+private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, card: Card) {
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(false) }
@@ -212,7 +208,12 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
     }
 
     if (openLocationDialog) {
+        val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
+            activity
+        )
+
         var locationName by remember { mutableStateOf(card.location ?: "") }
+        var position by remember { mutableStateOf(LatLng(card.geo?.get(0) ?: 0.0, card.geo?.get(1) ?: 0.0)) }
         val coroutineScope = rememberCoroutineScope()
         val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -224,6 +225,21 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                     }
                 }
             }
+            is PermissionStatus.Granted -> {
+
+            }
+        }
+
+        if (position.toList().sum() == 0.0) {
+            locationClient.getLastLocation()
+                .addOnFailureListener(activity) {
+                    it.printStackTrace()
+                }
+                .addOnSuccessListener {
+                    if (it != null) {
+                        position = LatLng(it.latitude, it.longitude)
+                    }
+                }
         }
 
         Dialog({
@@ -251,7 +267,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                         },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Words,
+                            imeAction = ImeAction.Next
+                        ),
                         keyboardActions = KeyboardActions(onSearch = {
                             keyboardController.hide()
                         }),
@@ -274,67 +293,74 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                             .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                     ) {
                         var composed by remember { mutableStateOf(false) }
+                        var marker: Marker? by remember { mutableStateOf(null) }
+                        var map: at.bluesource.choicesdk.maps.common.Map? by remember { mutableStateOf(null) }
 
                         AndroidViewBinding(
                             LayoutMapBinding::inflate,
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            if (composed) return@AndroidViewBinding else composed = true
+
+                            if (composed) {
+                                if (marker != null) {
+                                    marker?.position = position
+
+                                    map?.moveCamera(
+                                        CameraUpdateFactory.get().newCameraPosition(
+                                            CameraPosition.Builder()
+                                                .setTarget(position)
+                                                .setZoom(14f)
+                                                .build()
+                                        )
+                                    )
+                                }
+                                return@AndroidViewBinding
+                            } else composed = true
 
                             mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
 
                             val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
 
-                            val client = FusedLocationProviderFactory.getFusedLocationProviderClient(
-                                activity
-                            )
+                            mapFragment.getMapObservable().subscribe {
+                                map = it
+                                map?.clear()
 
-                            mapFragment.getMapObservable().subscribe { map ->
-                                map.clear()
+                                map?.getUiSettings()?.isMapToolbarEnabled = true
+                                map?.getUiSettings()?.isMyLocationButtonEnabled = true
 
-                                map.getUiSettings().isMapToolbarEnabled = true
-                                map.getUiSettings().isMyLocationButtonEnabled = true
-
-                                val position = LatLng(
-                                    10.7773886,
-                                    106.7114015
-                                )
-
-                                val marker = map.addMarker(
+                                marker = map?.addMarker(
                                     MarkerOptions
                                         .create()
                                         .position(position)
                                         .draggable(true)
                                 )!!
 
-                                map.setOnMapClickListener {
-                                    marker.position = it
+                                map?.setOnMapClickListener {
+                                    position = it
                                 }
 
-                                map.mapType = at.bluesource.choicesdk.maps.common.Map.MAP_TYPE_HYBRID
+                                map?.mapType = at.bluesource.choicesdk.maps.common.Map.MAP_TYPE_HYBRID
 
-                                map.setOnMarkerClickListener { true }
+                                map?.setOnMarkerClickListener { true }
+                                map?.setOnMarkerDragListener(object : OnMarkerDragListener {
+                                    override fun onMarkerDrag(marker: Marker) {}
 
-                                client.getLastLocation()
-                                    .addOnFailureListener(activity) {
-                                        it.printStackTrace()
+                                    override fun onMarkerDragEnd(marker: Marker) {
+                                        position = marker.position
                                     }
-                                    .addOnSuccessListener(activity) { location ->
-                                        if (location == null) {
-                                            return@addOnSuccessListener
-                                        }
 
-                                        map.moveCamera(
-                                            CameraUpdateFactory.get().newCameraPosition(
-                                                CameraPosition.Builder().setTarget(
-                                                    LatLng(location.latitude, location.longitude)
-                                                )
-                                                    .setZoom(12f)
-                                                    .build()
-                                            )
-                                        )
-                                    }
+                                    override fun onMarkerDragStart(marker: Marker) {}
+                                })
+
+                                map?.moveCamera(
+                                    CameraUpdateFactory.get().newCameraPosition(
+                                        CameraPosition.Builder()
+                                            .setTarget(position)
+                                            .setZoom(14f)
+                                            .build()
+                                    )
+                                )
                             }
                         }
                     }
@@ -363,12 +389,16 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
 
                                 coroutineScope.launch {
                                     try {
-                                        val update = api.updateCard(card.id!!, Card(location = locationName))
+                                        val update = api.updateCard(
+                                            card.id!!,
+                                            Card(location = locationName, geo = position.toList())
+                                        )
 
                                         card.location = update.location
+                                        card.geo = update.geo
 
                                         openLocationDialog = false
-                                        recomposeScope.invalidate()
+                                        onChange()
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     } finally {
@@ -428,7 +458,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                         },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Words,
+                            imeAction = ImeAction.Next
+                        ),
                         keyboardActions = KeyboardActions(onSearch = {
                             keyboardController.hide()
                         }),
@@ -444,7 +477,7 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                             TextButton(
                                 {
                                     cardConversation = backstack.removeLast()
-                                    recomposeScope.invalidate()
+                                    onChange()
                                 },
                                 modifier = Modifier.padding(PaddingValues(top = PaddingDefault * 2))
                             ) {
@@ -471,7 +504,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                             },
                             shape = MaterialTheme.shapes.large,
                             label = { Text(if (backstack.isEmpty()) "Your message" else "Your reply") },
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                                imeAction = ImeAction.Next
+                            ),
                             keyboardActions = KeyboardActions(onSearch = {
                                 keyboardController.hide()
                             }),
@@ -502,7 +538,10 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                                     },
                                     shape = MaterialTheme.shapes.large,
                                     singleLine = true,
-                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
+                                    keyboardOptions = KeyboardOptions(
+                                        capitalization = KeyboardCapitalization.Sentences,
+                                        imeAction = ImeAction.Next
+                                    ),
                                     keyboardActions = KeyboardActions(onSearch = {
                                         keyboardController.hide()
                                     }),
@@ -511,7 +550,7 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                                         .onKeyEvent { keyEvent ->
                                             if (it.title.isEmpty() && keyEvent.key == Key.Backspace) {
                                                 cardConversation.items.remove(it)
-                                                recomposeScope.invalidate()
+                                                onChange()
                                                 true
                                             } else false
                                         }
@@ -521,7 +560,7 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                                         {
                                             backstack.add(cardConversation)
                                             cardConversation = it
-                                            recomposeScope.invalidate()
+                                            onChange()
                                         },
                                         colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                     ) {
@@ -534,7 +573,7 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
                             TextButton(
                                 {
                                     cardConversation.items.add(ConversationItem())
-                                    recomposeScope.invalidate()
+                                    onChange()
                                 }
                             ) {
                                 Icon(
@@ -566,21 +605,21 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
 
                                 coroutineScope.launch {
                                     try {
-                                        val update = api.updateCard(card.id!!, Card(name = cardName, conversation = gson.toJson(conversation)))
-
-                                        Logger.getAnonymousLogger().warning(gson.toJson(conversation))
+                                        val update = api.updateCard(
+                                            card.id!!,
+                                            Card(name = cardName, conversation = gson.toJson(conversation))
+                                        )
 
                                         card.name = update.name
                                         card.conversation = update.conversation
 
                                         openEditDialog = false
-                                        recomposeScope.invalidate()
+                                        onChange()
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     } finally {
                                         disableSaveButton = false
                                     }
-
                                 }
                             },
                             enabled = !disableSaveButton
@@ -594,6 +633,9 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
     }
 
     if (openDeleteDialog) {
+        var disableSubmit by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
+
         AlertDialog(
             {
                 openDeleteDialog = false
@@ -601,9 +643,22 @@ private fun ColumnScope.showToolbar(activity: Activity, recomposeScope: Recompos
             confirmButton = {
                 TextButton(
                     {
-                        openDeleteDialog = false
+                        disableSubmit = true
+
+                        coroutineScope.launch {
+                            try {
+                                api.deleteCard(card.id!!)
+                                onChange()
+                            } catch (ex: Exception) {
+                                ex.printStackTrace()
+                            } finally {
+                                disableSubmit = false
+                                openDeleteDialog = false
+                            }
+                        }
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    enabled = !disableSubmit
                 ) {
                     Text("Delete card")
                 }
@@ -629,3 +684,5 @@ data class ConversationItem(
     var message: String = "",
     var items: MutableList<ConversationItem> = mutableListOf()
 )
+
+fun LatLng.toList() = listOf(latitude, longitude)

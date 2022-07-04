@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -155,10 +156,17 @@ class MainActivity : AppCompatActivity() {
                     NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
                         composable("explore") {
                             var value by remember { mutableStateOf("") }
+                            var isLoading by remember { mutableStateOf(true) }
                             var cards by remember { mutableStateOf(listOf<Card>()) }
 
                             LaunchedEffect(value) {
-                                cards = api.cards(LatLng(0.0, 0.0), value.takeIf { it.isNotBlank() })
+                                isLoading = true
+                                try {
+                                    cards = api.cards(LatLng(0.0, 0.0), value.takeIf { it.isNotBlank() })
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                                isLoading = false
                             }
 
                             Box {
@@ -172,13 +180,23 @@ class MainActivity : AppCompatActivity() {
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                                     modifier = Modifier.fillMaxSize()
                                 ) {
+                                    if (isLoading) {
+                                        item {
+                                            LinearProgressIndicator(
+                                                color = MaterialTheme.colorScheme.tertiary,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = PaddingDefault)
+                                            )
+                                        }
+                                    }
                                     items(cards) {
                                         BasicCard(
                                             {
                                                 navController.navigate("messages/${it.person}")
                                             },
-                                            navController.context as Activity,
-                                            it
+                                            activity = navController.context as Activity,
+                                            card = it
                                         )
                                     }
                                 }
@@ -322,15 +340,20 @@ class MainActivity : AppCompatActivity() {
                         composable("me") {
                             var myCards by remember { mutableStateOf(listOf<Card>()) }
                             var inviteDialog by remember { mutableStateOf(false) }
+                            var isLoading by remember { mutableStateOf(true) }
                             val coroutineScope = rememberCoroutineScope()
                             var inviteCode by remember { mutableStateOf("") }
 
-                            coroutineScope.launch {
-                                try {
-                                    inviteCode = api.invite().code ?: ""
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                    inviteCode = "Error"
+                            LaunchedEffect(inviteDialog) {
+                                if (inviteDialog) {
+                                    inviteCode = ""
+
+                                    try {
+                                        inviteCode = api.invite().code ?: ""
+                                    } catch (ex: Exception) {
+                                        ex.printStackTrace()
+                                        inviteCode = "Error"
+                                    }
                                 }
                             }
 
@@ -338,7 +361,6 @@ class MainActivity : AppCompatActivity() {
                                 AlertDialog(
                                     {
                                         inviteDialog = false
-                                        inviteCode = ""
                                     },
                                     {
                                         TextButton(
@@ -349,17 +371,29 @@ class MainActivity : AppCompatActivity() {
                                             Text("Close")
                                         }
                                     },
+                                    properties = DialogProperties(usePlatformDefaultWidth = false),
                                     title = { Text("Invite code") },
                                     text = {
-                                        Column {
-                                            Text(inviteCode, style = MaterialTheme.typography.displayMedium)
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(PaddingDefault)
+                                        ) {
+                                            if (inviteCode.isBlank()) {
+                                                CircularProgressIndicator()
+                                            } else {
+                                                Text(inviteCode, style = MaterialTheme.typography.displayMedium)
+                                                Text(
+                                                    "This code will be active for 48 hours.",
+                                                    color = MaterialTheme.colorScheme.secondary
+                                                )
+                                            }
                                         }
                                     }
                                 )
                             }
 
-                            coroutineScope.launch {
+                            LaunchedEffect(true) {
                                 myCards = api.myCards()
+                                isLoading = false
                             }
 
                             Column {
@@ -394,19 +428,38 @@ class MainActivity : AppCompatActivity() {
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                                     modifier = Modifier.fillMaxWidth().weight(1f)
                                 ) {
-                                    items(myCards) {
+                                    items(myCards, key = { it.id!! }) {
                                         BasicCard({
                                             // todo upload a new image
+                                        }, {
+                                            coroutineScope.launch {
+                                                try {
+                                                    myCards = api.myCards()
+                                                } catch (ex: Exception) {
+                                                    ex.printStackTrace()
+                                                }
+                                            }
                                         }, navController.context as Activity, it, true)
                                     }
 
                                     if (myCards.isEmpty()) {
-                                        item {
-                                            Text(
-                                                "You currently have no cards.",
-                                                color = MaterialTheme.colorScheme.secondary,
-                                                modifier = Modifier.padding(PaddingDefault * 2)
-                                            )
+                                        if (isLoading) {
+                                            item {
+                                                LinearProgressIndicator(
+                                                    color = MaterialTheme.colorScheme.tertiary,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = PaddingDefault)
+                                                )
+                                            }
+                                        } else {
+                                            item {
+                                                Text(
+                                                    "You currently have no cards.",
+                                                    color = MaterialTheme.colorScheme.secondary,
+                                                    modifier = Modifier.padding(PaddingDefault * 2)
+                                                )
+                                            }
                                         }
                                     }
 

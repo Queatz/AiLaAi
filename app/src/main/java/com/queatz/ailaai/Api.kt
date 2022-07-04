@@ -118,6 +118,8 @@ class Api {
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/${id}", card)
 
+    suspend fun deleteCard(id: String): Card = post("cards/${id}/delete")
+
     suspend fun invite(): Invite = get("invite")
 }
 
