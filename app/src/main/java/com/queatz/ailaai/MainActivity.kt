@@ -3,15 +3,17 @@ package com.queatz.ailaai
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,11 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import at.bluesource.choicesdk.core.Outcome
+import at.bluesource.choicesdk.location.common.LocationRequest
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.*
@@ -50,6 +56,10 @@ import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
+import io.reactivex.rxjava3.functions.Action
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.future.future
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 
@@ -208,15 +218,12 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 }
                             } else if (geo == null) {
-                                locationClient.getLastLocation()
-                                    .addOnFailureListener(navController.context as Activity) {
-                                        it.printStackTrace()
-                                    }
-                                    .addOnSuccessListener {
-                                        if (it != null) {
-                                            geo = LatLng(it.latitude, it.longitude)
-                                        }
-                                    }
+                                locationClient.observeLocation(LocationRequest.createDefault())
+                                    .filter { it is Outcome.Success && it.value.lastLocation != null }
+                                    .takeWhile { lifecycleScope.isActive }
+                                    .take(1)
+                                    .subscribe { geo = (it as Outcome.Success).value.lastLocation!!.toLatLng() }
+
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center,
@@ -497,9 +504,22 @@ class MainActivity : AppCompatActivity() {
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                                     modifier = Modifier.fillMaxWidth().weight(1f)
                                 ) {
-                                    items(myCards, key = { it.id!! }) {
+                                    items(myCards, key = { it.id!! }) { card ->
+                                        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+                                            if (it == null) return@rememberLauncherForActivityResult
+
+                                            coroutineScope.launch {
+                                                try {
+                                                    api.uploadCardPhoto(card.id!!, it)
+                                                    myCards = api.myCards()
+                                                } catch (ex: Exception) {
+                                                    ex.printStackTrace()
+                                                }
+                                            }
+                                        }
+
                                         BasicCard({
-                                            // todo upload a new image
+                                            launcher.launch("image/*")
                                         }, {
                                             coroutineScope.launch {
                                                 try {
@@ -508,7 +528,7 @@ class MainActivity : AppCompatActivity() {
                                                     ex.printStackTrace()
                                                 }
                                             }
-                                        }, navController.context as Activity, it, true)
+                                        }, navController.context as Activity, card, true)
                                     }
 
                                     if (myCards.isEmpty()) {
@@ -591,3 +611,4 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+fun Location.toLatLng() = LatLng(latitude, longitude)

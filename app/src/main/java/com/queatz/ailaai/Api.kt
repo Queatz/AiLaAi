@@ -1,6 +1,7 @@
 package com.queatz.ailaai
 
 import android.content.Context
+import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.maps.common.LatLng
@@ -10,6 +11,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.http.parsing.*
 import io.ktor.serialization.gson.*
@@ -18,9 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
-import kotlinx.datetime.Instant
 import java.lang.reflect.Type
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
@@ -50,6 +52,10 @@ class Api {
         }
     }
 
+    private val httpData = HttpClient {
+        expectSuccess = true
+    }
+
     private var token: String? = null
 
     fun init(context: Context) {
@@ -60,15 +66,16 @@ class Api {
         }
     }
 
+    fun url(it: String) = "$baseUrl/$it"
+
     private suspend inline fun <reified T : Any> post(
         url: String,
-        body: Any? = null
-    ): T = http.post("$baseUrl/${url}") {
+        body: Any? = null,
+        client: HttpClient = http
+    ): T = client.post("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
-
-        contentType(ContentType.Application.Json)
 
         if (body != null) {
             setBody(body)
@@ -77,13 +84,12 @@ class Api {
 
     private suspend inline fun <reified T : Any> get(
         url: String,
-        parameters: Map<String, String>? = null
-    ): T = http.get("$baseUrl/${url}") {
+        parameters: Map<String, String>? = null,
+        client: HttpClient = http
+    ): T = client.get("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
-
-        accept(ContentType.Application.Json)
 
         parameters?.forEach { (key, value) -> parameter(key, value) }
     }.body()
@@ -118,9 +124,18 @@ class Api {
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/${id}", card)
 
-    suspend fun deleteCard(id: String): Card = post("cards/${id}/delete")
+    suspend fun deleteCard(id: String): HttpStatusCode = post("cards/${id}/delete")
 
     suspend fun invite(): Invite = get("invite")
+
+    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode = post("cards/${id}/photo", MultiPartFormDataContent(
+        formData {
+            append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
+                append(HttpHeaders.ContentType, "image/jpg")
+                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+            })
+        }
+    ), client = httpData)
 }
 
 data class SignUpRequest(

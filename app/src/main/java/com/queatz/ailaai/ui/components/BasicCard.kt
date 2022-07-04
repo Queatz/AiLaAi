@@ -77,7 +77,7 @@ fun BasicCard(
             card.photo?.also {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(it)
+                        .data(api.url(it))
                         .crossfade(true)
                         .build(),
                     contentDescription = "Image",
@@ -97,7 +97,6 @@ fun BasicCard(
 
                 Text(
                     text = buildAnnotatedString {
-                        pushStyle(ParagraphStyle(lineHeight = MaterialTheme.typography.titleMedium.lineHeight * 1.125f))
                         withStyle(
                             MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
                         ) {

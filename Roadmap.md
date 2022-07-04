@@ -7,12 +7,12 @@ General
 
  [X] UI: Enter invite code screen  
  [X] UI: Add card button  
- [ ] UI: Find my location on main card  
- [ ] UI: Upload card photo  
+ [X] UI: Find my location on main card  
+ [X] UI: Upload card photo  
+ [X] Backend: Upload and process photo for profile, card  
  [ ] UI: Sign out warning if account has no email  
  [ ] UI: Add email in settings  
  [ ] UI: Sign in with email  
- [ ] Backend: Upload and process photo for profile, card  
 
 Messaging
 ---------
