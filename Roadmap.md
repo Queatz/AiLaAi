@@ -2,31 +2,34 @@
 Todo
 ====
 
-General
+Frontend
+--------
+
+ * [ ] UI: Sign out warning if account has no email
+ * [ ] UI: Add email in settings
+ * [ ] UI: Sign in with email (button)
+ * [ ] UI: Edit my photo (for chat)
+ * [ ] UI: Edit my name (for chat)
+ * [ ] Receive push notifications
+ * [ ] Listen on MQTT channel
+ * [ ] Show notifications
+
+Backend
 -------
 
- [X] UI: Enter invite code screen  
- [X] UI: Add card button  
- [X] UI: Find my location on main card  
- [X] UI: Upload card photo  
- [X] Backend: Upload and process photo for profile, card  
- [ ] UI: Sign out warning if account has no email  
- [ ] UI: Add email in settings  
- [ ] UI: Sign in with email  
-
-Messaging
----------
-
- [ ] UI: Edit my photo  
- [ ] UI: Edit my name  
- [ ] Setup GMS / HMS push notifications  
- [ ] Keep track of device GMS / HMS type on server  
- [ ] Send push notifications  
- [ ] Set up MQTT  
- [ ] Finish all UI  
- [ ] Finish all routes  
+ * [X] Messages routes
+ * [ ] Set up MQTT server (mqtt.wekpo.com)
+ * [ ] Save device ID + GMS / HMS type on server
+ * [ ] Send new messages over MQTT / Push Notification
 
 Other
 -----
 
- [ ] Website "Real/Great People Club" + Download APK button + explain unknown sources
+ * [ ] Setup app on HMS Connect for Push Notifications
+ * [ ] Setup app on Google Play for Push Notifications
+ * [ ] Setup website "Direct Connect" + Download APK button + explain unknown sources
+
+Post launch
+-----------
+
+ * [ ] Message reactions

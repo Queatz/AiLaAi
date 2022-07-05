@@ -17,8 +17,33 @@ class Invite(
     var code: String? = null
 ) : Model()
 
+class Group(
+    var seen: Instant? = null
+) : Model()
+
+class Person(
+    var name: String? = null,
+    var photo: String? = null,
+    var seen: Instant? = null,
+    var inviter: String? = null
+) : Model()
+
+class Member(
+    var seen: Instant? = null
+) : Edge()
+
+class Message(
+    var group: String? = null,
+    var member: String? = null,
+    var text: String? = null
+) : Model()
+
+open class Edge : Model() {
+    var from: String? = null
+    var to: String? = null
+}
+
 open class Model {
     var id: String? = null
-
     var createdAt: Instant? = null
 }

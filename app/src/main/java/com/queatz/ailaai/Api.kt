@@ -28,7 +28,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 
 val api = Api()
-val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()
+val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()!!
 
 class Api {
 
@@ -77,6 +77,10 @@ class Api {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
+        if (client == http) {
+            contentType(ContentType.Application.Json)
+        }
+
         if (body != null) {
             setBody(body)
         }
@@ -89,6 +93,10 @@ class Api {
     ): T = client.get("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (client == http) {
+            contentType(ContentType.Application.Json)
         }
 
         parameters?.forEach { (key, value) -> parameter(key, value) }
@@ -112,6 +120,8 @@ class Api {
 
     suspend fun signUp(code: String): TokenResponse = post("sign/up", SignUpRequest(code))
 
+    suspend fun me(): Person = get("me")
+
     suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
         "geo" to "${geo.latitude},${geo.longitude}"
     ) + (search?.let {
@@ -122,13 +132,13 @@ class Api {
 
     suspend fun newCard(): Card = post("cards")
 
-    suspend fun updateCard(id: String, card: Card): Card = post("cards/${id}", card)
+    suspend fun updateCard(id: String, card: Card): Card = post("cards/$id", card)
 
-    suspend fun deleteCard(id: String): HttpStatusCode = post("cards/${id}/delete")
+    suspend fun deleteCard(id: String): HttpStatusCode = post("cards/$id/delete")
 
     suspend fun invite(): Invite = get("invite")
 
-    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode = post("cards/${id}/photo", MultiPartFormDataContent(
+    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode = post("cards/$id/photo", MultiPartFormDataContent(
         formData {
             append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
                 append(HttpHeaders.ContentType, "image/jpg")
@@ -136,6 +146,16 @@ class Api {
             })
         }
     ), client = httpData)
+
+    suspend fun cardGroup(card: String): Group = get("cards/$card/group")
+
+    suspend fun groups(): List<GroupExtended> = get("groups")
+
+    suspend fun group(id: String): GroupExtended = get("groups/$id")
+
+    suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
+
+    suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 }
 
 data class SignUpRequest(
@@ -150,6 +170,18 @@ data class SignOnRequest(
 data class TokenResponse(
     val token: String
 )
+
+class GroupExtended(
+    var group: Group? = null,
+    var members: List<MemberAndPerson>? = null,
+    var latestMessage: Message? = null,
+)
+
+class MemberAndPerson(
+    var person: Person? = null,
+    var member: Member? = null
+)
+
 
 class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
     override fun serialize(

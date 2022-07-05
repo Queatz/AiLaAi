@@ -139,10 +139,11 @@ fun BasicCard(
                     current.title.isNotBlank(),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    IconButton({
+                    TextButton({
                         current = conversation
                     }) {
-                        Icon(Icons.Outlined.Refresh, "Refresh", tint = MaterialTheme.colorScheme.tertiary)
+                        Icon(Icons.Outlined.Refresh, "Reset")
+                        Text("Reset", modifier = Modifier.padding(start = PaddingDefault))
                     }
                 }
 

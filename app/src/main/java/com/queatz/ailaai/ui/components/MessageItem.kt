@@ -11,20 +11,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.queatz.ailaai.Message
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlin.random.Random
 
 @Composable
-fun MessageItem() {
+fun MessageItem(message: Message, isMe: Boolean) {
     Row(modifier = Modifier.fillMaxWidth()) {
         var showMessageDialog by remember { mutableStateOf(false) }
-        val isMe = Random.nextBoolean()
 
         if (!isMe) ProfileImage(PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault))
 
@@ -46,7 +45,7 @@ fun MessageItem() {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "Message ".repeat(Random.nextInt(1, 20)),
+                message.text ?: "",
                 color = if (isMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .align(if (isMe) Alignment.End else Alignment.Start)
