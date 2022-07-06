@@ -10,19 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.Navigator
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.GroupExtended
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.datetime.Clock
-import kotlinx.datetime.toJavaInstant
-import java.time.Duration
 import kotlin.random.Random
 
 @Composable
-fun ContactItem(navController: NavHostController, groupExtended: GroupExtended) {
+fun ContactItem(navController: NavController, groupExtended: GroupExtended) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
         .clip(MaterialTheme.shapes.large)
         .clickable {
@@ -39,16 +35,18 @@ fun ContactItem(navController: NavHostController, groupExtended: GroupExtended) 
                 .clip(CircleShape)
         )
         Column(modifier = Modifier.weight(1f)) {
-            Text(groupExtended.members?.firstOrNull()?.person?.name ?: "Someone", style = MaterialTheme.typography.titleMedium)
-            Text(groupExtended.latestMessage?.text ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+            Text(
+                groupExtended.members?.firstOrNull()?.person?.name ?: "Someone",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                groupExtended.latestMessage?.text ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
         Text(
-            groupExtended.latestMessage?.createdAt?.toJavaInstant()?.let {
-                Duration.between(
-                    it,
-                    Clock.System.now().toJavaInstant()
-                ).toString()
-            } ?: "",
+            groupExtended.latestMessage?.createdAt?.timeAgo() ?: "",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(PaddingDefault)

@@ -1,8 +1,7 @@
 package com.queatz.ailaai.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenuItem
@@ -13,17 +12,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.queatz.ailaai.Message
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlin.random.Random
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MessageItem(message: Message, isMe: Boolean) {
     Row(modifier = Modifier.fillMaxWidth()) {
         var showMessageDialog by remember { mutableStateOf(false) }
+        var showTime by remember { mutableStateOf(false) }
 
         if (!isMe) ProfileImage(PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault))
 
@@ -63,11 +66,22 @@ fun MessageItem(message: Message, isMe: Boolean) {
                         MaterialTheme.colorScheme.secondaryContainer,
                         MaterialTheme.shapes.large
                     )
-                    .clickable {
-                        showMessageDialog = true
-                    }
+                    .combinedClickable(
+                        onClick =  { showTime = !showTime },
+                        onLongClick = { showMessageDialog = true }
+                    )
                     .padding(PaddingDefault * 2, PaddingDefault)
             )
+            AnimatedVisibility(showTime) {
+                Text(message.createdAt!!.timeAgo(),
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = if (isMe) TextAlign.End else TextAlign.Start,
+                    modifier = Modifier
+                        .padding(horizontal = PaddingDefault)
+                        .fillMaxWidth()
+                )
+            }
         }
     }
 }
