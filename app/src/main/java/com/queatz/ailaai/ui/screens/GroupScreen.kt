@@ -97,12 +97,6 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     var showMenu by remember { mutableStateOf(false) }
 
                     IconButton({
-                        navController.popBackStack()
-                    }) {
-                        Icon(Icons.Outlined.AccountCircle, "View card")
-                    }
-
-                    IconButton({
                         showMenu = !showMenu
                     }) {
                         Icon(Icons.Outlined.MoreVert, "More")
