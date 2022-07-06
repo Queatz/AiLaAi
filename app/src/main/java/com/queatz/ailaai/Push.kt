@@ -1,13 +1,17 @@
 package com.queatz.ailaai
 
+import android.util.Log
+
 val push = Push()
 
 class Push {
     fun receive(data: Map<String, String>) {
         if (!data.containsKey("action")) {
-            System.err.println("Push notification does not contain 'action'")
+            Log.w("PUSH", "Push notification does not contain 'action'")
             return
         }
+
+        Log.w("PUSH", "Got push: ${data["action"]}")
 
         try {
             when (PushAction.valueOf(data["action"]!!)) {
@@ -19,7 +23,7 @@ class Push {
     }
 
     private fun receive(data: MessagePushData) {
-        println("Got it! group=${data.group.id} person=${data.person.id} text=${data.message.text}")
+        Log.d("PUSH", "Got it! group=${data.group.id} person=${data.person.id} text=${data.message.text}")
     }
 }
 

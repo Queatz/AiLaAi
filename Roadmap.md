@@ -32,8 +32,16 @@ Backend
 Other
 -----
 
+ * [ ] Save name even after leaving settings screen
+ * [ ] Refresh photo after upload in settings
+ * [ ] Refresh card after edit of details
+ * [ ] Error presentations (all known: enter invite code error)
+ * [ ] Why on tablet permission is disabled (API 33?)
  * [ ] Delete device tokens that are identified as expired
  * [ ] Setup website "Direct Connect" + Download APK button + explain unknown sources
+ * [ ] App icon
+ * [ ] Loading group animation after clicking send message
+ * [ ] Send message doesn't seem to work the first click?
 
 Post launch
 -----------

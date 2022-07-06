@@ -34,7 +34,8 @@ class Api {
 
     private lateinit var context: Context
 
-    private val baseUrl = "http://10.0.2.2:8080"
+    private val baseUrl = "https://api.ailaai.app"
+//    private val baseUrl = "http://10.0.2.2:8080"
 
     private val tokenKey = stringPreferencesKey("token")
 
