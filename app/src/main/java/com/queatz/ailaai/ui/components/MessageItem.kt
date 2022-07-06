@@ -22,13 +22,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getSystemService
 import coil.compose.AsyncImage
 import com.queatz.ailaai.Message
+import com.queatz.ailaai.Person
+import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlin.random.Random
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MessageItem(message: Message, isMe: Boolean) {
+fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean) {
     var showMessageDialog by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -57,7 +59,7 @@ fun MessageItem(message: Message, isMe: Boolean) {
     }
 
     Row(modifier = Modifier.fillMaxWidth()) {
-        if (!isMe) ProfileImage(PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault))
+        if (!isMe) ProfileImage(getPerson(message.member!!), PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -100,11 +102,9 @@ fun MessageItem(message: Message, isMe: Boolean) {
 }
 
 @Composable
-fun ProfileImage(padding: PaddingValues) {
+fun ProfileImage(person: Person?, padding: PaddingValues) {
     AsyncImage(
-        model = "https://minimaltoolkit.com/images/randomdata/${
-            listOf("female", "male").random()
-        }/${Random.nextInt(1, 100)}.jpg",
+        model = person?.photo?.let { api.url(it) } ?: "",
         contentDescription = "Image",
         contentScale = ContentScale.Crop,
         alignment = Alignment.TopCenter,

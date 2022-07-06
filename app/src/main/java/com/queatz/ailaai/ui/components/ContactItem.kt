@@ -1,7 +1,11 @@
 package com.queatz.ailaai.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,21 +18,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.GroupExtended
+import com.queatz.ailaai.Person
+import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlin.random.Random
 
 @Composable
-fun ContactItem(navController: NavController, groupExtended: GroupExtended) {
+fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: Person?) {
+    val person = groupExtended.members?.find { it.person?.id != me?.id }?.person
+
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
         .clip(MaterialTheme.shapes.large)
         .clickable {
             navController.navigate("group/${groupExtended.group!!.id!!}")
         }) {
         AsyncImage(
-            model = "https://minimaltoolkit.com/images/randomdata/${
-                listOf("female", "male").random(Random(groupExtended.group!!.id!!.hashCode()))
-            }/${Random(groupExtended.group!!.id!!.hashCode()).nextInt(1, 100)}.jpg",
+            model = person?.photo?.let { api.url(it) } ?: "",
             contentDescription = "Image",
             contentScale = ContentScale.Crop,
             alignment = Alignment.TopCenter,
@@ -36,10 +41,13 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended) {
                 .padding(PaddingDefault)
                 .requiredSize(64.dp)
                 .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
         )
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
-                groupExtended.members?.firstOrNull()?.person?.name ?: "Someone",
+                person?.name ?: "Someone",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(

@@ -72,12 +72,13 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 )
             }
         } else {
-            val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }?.member
+            val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
+            val otherMember = groupExtended!!.members?.find { it.person?.id != me()?.id }
 
             SmallTopAppBar(
                 {
                     Column {
-                        Text(groupExtended?.members?.firstOrNull()?.person?.name ?: "Someone")
+                        Text(otherMember?.person?.name ?: "Someone")
                         Text(
                             "Active now",
                             style = MaterialTheme.typography.labelMedium,
@@ -119,7 +120,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             )
             LazyColumn(reverseLayout = true, modifier = Modifier.weight(1f)) {
                 items(messages) {
-                    MessageItem(it, myMember?.id == it.member)
+                    MessageItem(it, {
+                        groupExtended?.members?.find { member -> member.member?.id == it }?.person
+                    }, myMember?.member?.id == it.member)
                 }
             }
 

@@ -57,7 +57,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         }
 
         items(groups, key = { it.group!!.id!! }) {
-            ContactItem(navController, it)
+            ContactItem(navController, it, me())
         }
     }
 }

@@ -95,7 +95,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
                     .padding(PaddingDefault)
                     .requiredSize(84.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.tertiary)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clickable {
                         launcher.launch("image/*")
                     }
