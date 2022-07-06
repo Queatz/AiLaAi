@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -28,8 +29,10 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended) {
             model = "https://minimaltoolkit.com/images/randomdata/${
                 listOf("female", "male").random(Random(groupExtended.group!!.id!!.hashCode()))
             }/${Random(groupExtended.group!!.id!!.hashCode()).nextInt(1, 100)}.jpg",
-            "",
-            Modifier
+            contentDescription = "Image",
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier
                 .padding(PaddingDefault)
                 .requiredSize(64.dp)
                 .clip(CircleShape)

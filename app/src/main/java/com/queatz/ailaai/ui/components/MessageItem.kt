@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -104,8 +105,10 @@ fun ProfileImage(padding: PaddingValues) {
         model = "https://minimaltoolkit.com/images/randomdata/${
             listOf("female", "male").random()
         }/${Random.nextInt(1, 100)}.jpg",
-        "",
-        Modifier
+        contentDescription = "Image",
+        contentScale = ContentScale.Crop,
+        alignment = Alignment.TopCenter,
+        modifier = Modifier
             .padding(padding)
             .requiredSize(32.dp)
             .clip(CircleShape)

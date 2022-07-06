@@ -122,6 +122,8 @@ class Api {
 
     suspend fun me(): Person = get("me")
 
+    suspend fun updateMe(person: Person): Person = post("me", person)
+
     suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
         "geo" to "${geo.latitude},${geo.longitude}"
     ) + (search?.let {
@@ -137,6 +139,15 @@ class Api {
     suspend fun deleteCard(id: String): HttpStatusCode = post("cards/$id/delete")
 
     suspend fun invite(): Invite = get("invite")
+
+    suspend fun updateMyPhoto(photo: Uri): HttpStatusCode = post("me/photo", MultiPartFormDataContent(
+        formData {
+            append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
+                append(HttpHeaders.ContentType, "image/jpg")
+                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+            })
+        }
+    ), client = httpData)
 
     suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode = post("cards/$id/photo", MultiPartFormDataContent(
         formData {

@@ -2,22 +2,29 @@
 Todo
 ====
 
+ * [ ] Release app
+
 Frontend
 --------
 
- * [ ] UI: Sign out warning if account has no email
- * [ ] UI: Add email in settings
- * [ ] UI: Sign in with email (button)
  * [ ] UI: Edit my photo (for chat)
  * [ ] UI: Edit my name (for chat)
  * [ ] Receive push notifications
  * [ ] Listen on MQTT channel
  * [ ] Show notifications
+ * [ ] Delete chat
+ * [ ] Person last active time on group screen
+
+Email
+-----
+
+ * [ ] UI: Sign out warning if account has no email (you will lose access to your account forever)
+ * [ ] UI: Add email in settings
+ * [ ] UI: Sign in with email (button)
 
 Backend
 -------
 
- * [X] Messages routes
  * [ ] Set up MQTT server (mqtt.wekpo.com)
  * [ ] Save device ID + GMS / HMS type on server
  * [ ] Send new messages over MQTT / Push Notification
@@ -33,3 +40,4 @@ Post launch
 -----------
 
  * [ ] Message reactions
+ * [ ] Report chat

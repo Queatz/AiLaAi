@@ -147,9 +147,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 trailingIcon = {
                     Crossfade(targetState = sendMessage.isNotBlank()) { show ->
                         when (show) {
-                            true -> IconButton({
-                                send()
-                            }) {
+                            true -> IconButton({ send() }) {
                                 Icon(
                                     Icons.Default.Send,
                                     Icons.Default.Send.name,
