@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'com.huawei.agconnect'
+    id 'com.google.gms.google-services'
 }
 
 Properties properties = new Properties()
@@ -17,7 +18,7 @@ android {
         manifestPlaceholders.put('GOOGLE_MAPS_API_KEY', GOOGLE_MAPS_API_KEY)
         manifestPlaceholders.put('HMS_APP_ID', HMS_APP_ID)
 
-        applicationId "com.queatz.ailaai"
+        applicationId "com.ailaai.app"
         minSdk 26
         targetSdk 30
         versionCode 1
@@ -91,6 +92,8 @@ dependencies {
     implementation "io.ktor:ktor-serialization-gson:$ktorVersion"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2'
+    implementation 'com.huawei.hms:base:6.2.0.300'
+    implementation platform('com.google.firebase:firebase-bom:30.2.0')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

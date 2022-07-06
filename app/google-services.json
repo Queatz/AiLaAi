@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "627167738450",
+    "project_id": "ai-la-ai",
+    "storage_bucket": "ai-la-ai.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:627167738450:android:91f4ad3be847a65620fd8b",
+        "android_client_info": {
+          "package_name": "com.ailaai.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "627167738450-clr6i3mk1o50g7o6k1304aeafj156tdk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ailaai.app",
+            "certificate_hash": "69fa864245ba1a052e63a91b0dcf6fe3b3fb8501"
+          }
+        },
+        {
+          "client_id": "627167738450-480m1m2jebk39qsut42mmtkqogjqhpd1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr4jsEpTXQq5Gr9QTK9m-GhuO6m_KApX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "627167738450-480m1m2jebk39qsut42mmtkqogjqhpd1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

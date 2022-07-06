@@ -122,6 +122,8 @@ class Api {
 
     suspend fun me(): Person = get("me")
 
+    suspend fun myDevice(deviceType: DeviceType, deviceToken: String): HttpStatusCode = post("me/device", Device(deviceType, deviceToken))
+
     suspend fun updateMe(person: Person): Person = post("me", person)
 
     suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
@@ -193,6 +195,10 @@ class MemberAndPerson(
     var member: Member? = null
 )
 
+class Device(
+    val type: DeviceType,
+    val token: String
+)
 
 class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
     override fun serialize(

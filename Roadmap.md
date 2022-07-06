@@ -32,8 +32,7 @@ Backend
 Other
 -----
 
- * [ ] Setup app on HMS Connect for Push Notifications
- * [ ] Setup app on Google Play for Push Notifications
+ * [ ] Delete device tokens that are identified as expired
  * [ ] Setup website "Direct Connect" + Download APK button + explain unknown sources
 
 Post launch
