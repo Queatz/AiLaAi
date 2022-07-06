@@ -7,23 +7,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.em
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.google.accompanist.permissions.*
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
-import com.queatz.ailaai.ui.theme.PaddingDefault
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +29,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavHostController
 
-    @OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -89,11 +86,11 @@ class MainActivity : AppCompatActivity() {
                         },
                     ) {
                         NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
-                            composable("explore") { ExploreScreen(navController, me) }
-                            composable("messages") { MessagesScreen(navController, me) }
-                            composable("group/{id}") { GroupScreen(it, navController, me) }
-                            composable("me") { MeScreen(navController, me) }
-                            composable("settings") { SettingsScreen(navController, me) }
+                            composable("explore") { ExploreScreen(navController) { me } }
+                            composable("messages") { MessagesScreen(navController) { me } }
+                            composable("group/{id}") { GroupScreen(it, navController) { me } }
+                            composable("me") { MeScreen(navController) { me } }
+                            composable("settings") { SettingsScreen(navController) { me } }
                         }
                     }
                 }

@@ -17,14 +17,14 @@ import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun MessagesScreen(navController: NavController, me: Person?) {
+fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var isLoading by remember { mutableStateOf(false) }
     var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
 
     LaunchedEffect(true) {
         isLoading = true
         try {
-            groups = api.groups()
+            groups = api.groups().reversed()
         } catch (ex: Exception) {
             ex.printStackTrace()
         }

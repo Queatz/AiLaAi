@@ -1,10 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -34,7 +31,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 @Composable
-fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: Person?) {
+fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val groupId = navBackStackEntry.arguments!!.getString("id")!!
     var sendMessage by remember { mutableStateOf("") }
     var groupExtended by remember { mutableStateOf<GroupExtended?>(null) }
@@ -61,9 +58,21 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    Column {
-        if (groupExtended != null) {
-            val myMember = groupExtended!!.members?.find { it.person?.id == me?.id }?.member
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (groupExtended == null) {
+            if (isLoading) {
+                LinearProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingDefault)
+                )
+            }
+        } else {
+            val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }?.member
 
             SmallTopAppBar(
                 {
@@ -100,7 +109,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
                     DropdownMenu(showMenu, { showMenu = false }) {
                         DropdownMenuItem({ Text("Delete") }, { showMenu = false })
-                        DropdownMenuItem({ Text("Report") }, { showMenu = false })
+                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
                     }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(

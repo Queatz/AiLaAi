@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MeScreen(navController: NavController, me: Person?) {
+fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by remember { mutableStateOf(listOf<Card>()) }
     var inviteDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }

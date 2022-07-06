@@ -13,7 +13,7 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun SettingsScreen(navController: NavController, me: Person?) {
+fun SettingsScreen(navController: NavController, me: () -> Person?) {
     Column {
         SmallTopAppBar(
             {

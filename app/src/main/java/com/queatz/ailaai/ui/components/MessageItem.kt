@@ -1,5 +1,7 @@
 package com.queatz.ailaai.ui.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -12,9 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.getSystemService
 import coil.compose.AsyncImage
 import com.queatz.ailaai.Message
 import com.queatz.ailaai.extensions.timeAgo
@@ -24,27 +28,35 @@ import kotlin.random.Random
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MessageItem(message: Message, isMe: Boolean) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        var showMessageDialog by remember { mutableStateOf(false) }
-        var showTime by remember { mutableStateOf(false) }
+    var showMessageDialog by remember { mutableStateOf(false) }
+    var showTime by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-        if (!isMe) ProfileImage(PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault))
-
-        if (showMessageDialog) {
-            Dialog({
-                showMessageDialog = false
-            }) {
-                Surface(
-                    shape = MaterialTheme.shapes.large
-                ) {
-                    Column {
-                        DropdownMenuItem({ Text("Copy") }, { showMessageDialog = false })
-                        DropdownMenuItem({ Text("Delete") }, { showMessageDialog = false })
-                        DropdownMenuItem({ Text("Report") }, { showMessageDialog = false })
-                    }
+    if (showMessageDialog) {
+        Dialog({
+            showMessageDialog = false
+        }) {
+            Surface(
+                shape = MaterialTheme.shapes.large
+            ) {
+                Column {
+                    DropdownMenuItem({ Text("Copy") }, {
+                        getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
+                            ClipData.newPlainText("Message content",message.text ?: "")
+                        )
+                        showMessageDialog = false
+                    })
+                    DropdownMenuItem({ Text("Delete") }, {
+                        // todo implementation
+                        showMessageDialog = false
+                    })
                 }
             }
         }
+    }
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        if (!isMe) ProfileImage(PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(

@@ -22,5 +22,4 @@ fun Instant.timeAgo() = Duration.between(
         it < 365.days -> RelativeDateTimeFormatter.getInstance().format(-(it.inWholeDays / 30).toDouble(), RelativeDateTimeFormatter.RelativeDateTimeUnit.MONTH)
         else -> RelativeDateTimeFormatter.getInstance().format(-(it.inWholeDays / 365).toDouble(), RelativeDateTimeFormatter.RelativeDateTimeUnit.YEAR)
     }
-}
-
+}!!

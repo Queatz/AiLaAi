@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreScreen(navController: NavController, me: Person?) {
+fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
         navController.context as Activity
     )
@@ -112,7 +112,7 @@ fun ExploreScreen(navController: NavController, me: Person?) {
         LaunchedEffect(geo, value) {
             isLoading = true
             try {
-                cards = api.cards(geo!!, value.takeIf { it.isNotBlank() })
+                cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
