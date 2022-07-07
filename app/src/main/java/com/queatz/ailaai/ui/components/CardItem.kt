@@ -334,7 +334,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                     position = it
                                 }
 
-                                map?.mapType = at.bluesource.choicesdk.maps.common.Map.MAP_TYPE_HYBRID
+                                map?.getUiSettings()?.isMyLocationButtonEnabled = true
 
                                 map?.setOnMarkerClickListener { true }
                                 map?.setOnMarkerDragListener(object : OnMarkerDragListener {

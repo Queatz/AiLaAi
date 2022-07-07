@@ -32,6 +32,9 @@ Backend
 Other
 -----
 
+ * [ ] Change Reset to Go back
+ * [ ] When sending a message from a card, automatically post that card in the chat
+ * [ ] Resize card and portfolio images
  * [ ] Save name even after leaving settings screen
  * [ ] Refresh photo after upload in settings
  * [ ] Refresh card after edit of details
