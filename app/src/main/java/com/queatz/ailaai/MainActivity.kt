@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             AiLaAiTheme {
                 navController = rememberNavController()
+                push.navController = navController
 
                 val showBottomBar = navController.currentBackStackEntryAsState()
                     .value
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                         NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
                             composable("explore") { ExploreScreen(navController) { me } }
                             composable("messages") { MessagesScreen(navController) { me } }
-                            composable("group/{id}") { GroupScreen(it, navController) { me } }
+                            composable("group/{id}", deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })) { GroupScreen(it, navController) { me } }
                             composable("me") { MeScreen(navController) { me } }
                             composable("settings") { SettingsScreen(navController) { me } }
                         }

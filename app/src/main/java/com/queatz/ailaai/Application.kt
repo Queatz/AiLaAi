@@ -22,6 +22,7 @@ class Application : android.app.Application() {
         super.onCreate()
         ChoiceSdk.init(this)
         api.init(this)
+        push.init(this)
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 
         val deviceType = when (HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == ConnectionResult.SUCCESS) {

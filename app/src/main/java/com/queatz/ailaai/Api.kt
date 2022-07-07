@@ -30,6 +30,8 @@ import kotlin.time.Duration.Companion.seconds
 val api = Api()
 val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()!!
 
+val appDomain = "https://ailaai.app"
+
 class Api {
 
     private lateinit var context: Context

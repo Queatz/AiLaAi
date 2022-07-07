@@ -112,5 +112,6 @@ fun ProfileImage(person: Person?, padding: PaddingValues) {
             .padding(padding)
             .requiredSize(32.dp)
             .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
     )
 }

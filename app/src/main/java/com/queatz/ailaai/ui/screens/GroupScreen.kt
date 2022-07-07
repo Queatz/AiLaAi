@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
@@ -21,13 +20,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.queatz.ailaai.GroupExtended
-import com.queatz.ailaai.Message
-import com.queatz.ailaai.Person
-import com.queatz.ailaai.api
+import com.queatz.ailaai.*
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,6 +55,16 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             messages = api.messages(groupId)
         } catch (ex: Exception) {
             ex.printStackTrace()
+        }
+    }
+
+    LaunchedEffect(true) {
+        push.latestMessage.filter { it != null }.collect {
+            try {
+                messages = api.messages(groupId)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
         }
     }
 
