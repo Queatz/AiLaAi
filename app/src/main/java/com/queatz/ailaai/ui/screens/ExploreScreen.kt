@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +33,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.Person
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.toLatLng
 import com.queatz.ailaai.ui.components.BasicCard
@@ -77,12 +79,12 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
             ) {
-                Text(if (showOpenSettings) "Open Settings" else "Find my location")
+                Text(if (showOpenSettings) stringResource(R.string.open_settings) else stringResource(R.string.find_my_location))
             }
 
             if (showOpenSettings) {
                 Text(
-                    "The location permission is disabled in settings.",
+                    stringResource(R.string.location_disabled_description),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -108,7 +110,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 .fillMaxSize()
                 .padding(PaddingDefault)
         ) {
-            Text("Finding your location...", color = MaterialTheme.colorScheme.secondary)
+            Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
         }
     } else {
         LaunchedEffect(geo, value) {
@@ -146,7 +148,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     if (cards.isEmpty()) {
                         item {
                             Text(
-                                "No cards to show.",
+                                stringResource(R.string.no_cards_to_show),
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(PaddingDefault * 2)
                             )
@@ -183,7 +185,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 OutlinedTextField(
                     value,
                     onValueChange = { value = it },
-                    placeholder = { Text("Search") },
+                    placeholder = { Text(stringResource(R.string.search)) },
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(

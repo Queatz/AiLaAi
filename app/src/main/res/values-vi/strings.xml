@@ -19,4 +19,10 @@
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Thêm một thẻ</string>
     <string name="you_have_no_conversations">Bạn hiện không có cuộc trò chuyện nào.</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="open_settings">Mở cài đặt</string>
+    <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
+    <string name="find_my_location">Tìm vị trí của mình</string>
+    <string name="finding_your_location">Đang tìm vị trí của bạn…</string>
+    <string name="no_cards_to_show">Không có thẻ để cho bạn xem.</string>
 </resources>

@@ -18,4 +18,10 @@
     <string name="you_have_no_cards">You currently have no cards.</string>
     <string name="add_a_card">Add a card</string>
     <string name="you_have_no_conversations">You currently have no conversations.</string>
+    <string name="no_cards_to_show">No cards to show.</string>
+    <string name="finding_your_location">Finding your location…</string>
+    <string name="find_my_location">Find my location</string>
+    <string name="open_settings">Open settings</string>
+    <string name="location_disabled_description">The location permission is disabled in settings.</string>
+    <string name="search">Search</string>
 </resources>
