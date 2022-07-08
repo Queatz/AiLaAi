@@ -26,6 +26,7 @@ Post launch
  * [ ] L `Feature` Report chat
  * [ ] M `Feature` Self-check for app updates
 * [ ] L `UI` `Backend` Get help (from group screen)
+* [ ] L `UI` `Backend` Submit feedback on the app
 
 Way later
 ---------

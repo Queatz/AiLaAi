@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.queatz.ailaai">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -14,6 +15,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:usesCleartextTraffic="true"
             android:supportsRtl="true"
+            android:localeConfig="@xml/locales_config"
             android:theme="@style/Theme.AiLaAi">
         <activity
                 android:name=".MainActivity"
@@ -35,6 +37,16 @@
 
         </activity>
 
+        <service
+                android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+                android:enabled="false"
+                android:exported="false">
+            <meta-data
+                    android:name="autoStoreLocales"
+                    android:value="true" />
+        </service>
+
+
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
                 android:value="${GOOGLE_MAPS_API_KEY}"/>
@@ -42,6 +54,9 @@
         <meta-data
                 android:name="com.huawei.hms.client.appid"
                 android:value="appid=${HMS_APP_ID}"/>
+
+        <receiver android:name="com.huawei.hms.support.api.push.PushMsgReceiver" android:exported="true" tools:node="merge" />
+        <receiver android:name="com.huawei.hms.support.api.push.PushReceiver" android:exported="true" tools:node="merge" />
     </application>
 
 </manifest>

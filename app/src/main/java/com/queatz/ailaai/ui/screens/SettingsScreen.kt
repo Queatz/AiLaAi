@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.Person
@@ -147,7 +149,11 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-        }, {})
+        }, {
+            val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags("en,vn")
+            AppCompatDelegate.setApplicationLocales(appLocale)
+
+        })
 
         DropdownMenuItem({
             Text(

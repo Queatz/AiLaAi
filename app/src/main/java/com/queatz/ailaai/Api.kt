@@ -26,12 +26,14 @@ import kotlinx.datetime.toJavaInstant
 import java.lang.reflect.Type
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 val api = Api()
 val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()!!
 
 val appDomain = "https://ailaai.app"
 
+@OptIn(ExperimentalTime::class)
 class Api {
 
     private lateinit var context: Context

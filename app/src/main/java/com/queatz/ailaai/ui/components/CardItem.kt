@@ -227,6 +227,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                     }
                 }
             }
+            else -> {}
         }
 
         if (position.toList().sum() == 0.0) {
