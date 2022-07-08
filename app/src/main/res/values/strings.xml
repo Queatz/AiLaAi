@@ -40,4 +40,26 @@
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
+    <string name="somewhere">Somewhere</string>
+    <string name="send_a_message">Send a message</string>
+    <string name="go_back">Go back</string>
+    <string name="card_active">Card is active</string>
+    <string name="card_inactive">Card is inactive</string>
+    <string name="card_location">Card location</string>
+    <string name="location_name">Location name</string>
+    <string name="location_name_description">The location name is shown on the card to help others quickly understand where you are generally located.</string>
+    <string name="map_description">Tap on the map to set the location of this card.</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="card_conversation">Card conversation</string>
+    <string name="your_message">Your message</string>
+    <string name="your_reply">Your reply</string>
+    <string name="card_message_description">This message is shown on the card under your name</string>
+    <string name="card_reply_description">This reply is shown under your name when someone chooses \"%1$s\"</string>
+    <string name="option">Option</string>
+    <string name="continue_conversation">Continue conversation</string>
+    <string name="add_an_option">Add an option</string>
+    <string name="delete_card">Delete card</string>
+    <string name="delete_this_card_q">Delete this card?</string>
+    <string name="you_cannot_undo_this">You cannot undo this.</string>
 </resources>

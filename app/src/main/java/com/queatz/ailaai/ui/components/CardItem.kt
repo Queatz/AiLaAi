@@ -23,7 +23,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -44,10 +44,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.accompanist.permissions.*
 import com.queatz.ailaai.Card
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.gson
-import com.queatz.ailaai.push
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -82,7 +82,7 @@ fun BasicCard(
                         .data(api.url(it))
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Image",
+                    contentDescription = "",
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.TopCenter,
                     modifier = Modifier.matchParentSize()
@@ -103,7 +103,7 @@ fun BasicCard(
                         withStyle(
                             MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
                         ) {
-                            append(card.name ?: "Someone")
+                            append(card.name ?: stringResource(R.string.someone))
                         }
 
                         append("  ")
@@ -112,7 +112,7 @@ fun BasicCard(
                             MaterialTheme.typography.titleSmall.toSpanStyle()
                                 .copy(color = MaterialTheme.colorScheme.secondary)
                         ) {
-                            append(card.location ?: "Somewhere")
+                            append(card.location ?: stringResource(R.string.somewhere))
                         }
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
@@ -143,7 +143,7 @@ fun BasicCard(
                         onClick()
                     }, enabled = !isMine) {
                         Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
-                        Text("Send a message", overflow = TextOverflow.Ellipsis, maxLines = 1)
+                        Text(stringResource(R.string.send_a_message), overflow = TextOverflow.Ellipsis, maxLines = 1)
                     }
                 }
 
@@ -156,8 +156,8 @@ fun BasicCard(
                             current = stack.removeLast()
                         }
                     }) {
-                        Icon(Icons.Outlined.ArrowBack, "Go back")
-                        Text("Go back", modifier = Modifier.padding(start = PaddingDefault))
+                        Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
+                        Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = PaddingDefault))
                     }
                 }
 
@@ -194,7 +194,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
             }
         })
         Text(
-            if (activeCommitted) "Card is active" else "Card is inactive",
+            if (activeCommitted) stringResource(R.string.card_active) else stringResource(R.string.card_inactive),
             style = MaterialTheme.typography.labelMedium,
             color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier
@@ -263,7 +263,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                         .padding(PaddingDefault * 3)
                 ) {
                     Text(
-                        "Card location",
+                        stringResource(R.string.card_location),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(bottom = PaddingDefault)
                     )
@@ -273,7 +273,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             locationName = it
                         },
                         label = {
-                            Text("Location name")
+                            Text(stringResource(R.string.location_name))
                         },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
@@ -288,7 +288,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             .fillMaxWidth()
                     )
                     Text(
-                        "The location name is shown on the card to help others quickly understand where you are generally located.",
+                        stringResource(R.string.location_name_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.padding(PaddingValues(top = PaddingDefault * 2))
@@ -373,7 +373,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                         }
                     }
                     Text(
-                        "Tap on the map to set the location of this card.",
+                        stringResource(R.string.map_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
@@ -389,7 +389,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                 openLocationDialog = false
                             }
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                         TextButton(
                             {
@@ -417,7 +417,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             },
                             enabled = !disableSaveButton
                         ) {
-                            Text("Save")
+                            Text(stringResource(R.string.save))
                         }
                     }
                 }
@@ -454,7 +454,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                     modifier = Modifier.padding(PaddingDefault * 3)
                 ) {
                     Text(
-                        "Card conversation",
+                        stringResource(R.string.card_conversation),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(bottom = PaddingDefault)
                     )
@@ -464,7 +464,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             cardName = it
                         },
                         label = {
-                            Text("Your name")
+                            Text(stringResource(R.string.your_name))
                         },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
@@ -493,11 +493,11 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             ) {
                                 Icon(
                                     Icons.Outlined.ArrowBack,
-                                    "Go back",
+                                    stringResource(R.string.go_back),
                                     modifier = Modifier.padding(end = PaddingDefault)
                                 )
                                 Text(
-                                    backstack.last().message.takeIf { it.isNotBlank() } ?: "Go back",
+                                    backstack.last().message.takeIf { it.isNotBlank() } ?: stringResource(R.string.go_back),
                                     overflow = TextOverflow.Ellipsis,
                                     maxLines = 1
                                 )
@@ -513,7 +513,9 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                 cardConversation.message = it
                             },
                             shape = MaterialTheme.shapes.large,
-                            label = { Text(if (backstack.isEmpty()) "Your message" else "Your reply") },
+                            label = { Text(if (backstack.isEmpty()) stringResource(R.string.your_message) else stringResource(
+                                                            R.string.your_reply)
+                                                        ) },
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Sentences,
                                 imeAction = ImeAction.Next
@@ -525,7 +527,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                         )
 
                         Text(
-                            "This ${if (backstack.isEmpty()) "message" else "reply"} is shown on the card ${if (backstack.isEmpty()) "under your name" else "when someone chooses \"${cardConversation.title}\""}.",
+                            if (backstack.isEmpty()) stringResource(R.string.card_message_description) else stringResource(R.string.card_reply_description, cardConversation.title),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
@@ -544,7 +546,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                         it.title = value
                                     },
                                     placeholder = {
-                                        Text("Option")
+                                        Text(stringResource(R.string.option))
                                     },
                                     shape = MaterialTheme.shapes.large,
                                     singleLine = true,
@@ -574,7 +576,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                         },
                                         colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                     ) {
-                                        Icon(Icons.Outlined.ArrowForward, "Continue conversation")
+                                        Icon(Icons.Outlined.ArrowForward, stringResource(R.string.continue_conversation))
                                     }
                                 }
                             }
@@ -588,10 +590,10 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             ) {
                                 Icon(
                                     Icons.Outlined.Add,
-                                    "Add an option",
+                                    stringResource(R.string.add_an_option),
                                     modifier = Modifier.padding(end = PaddingDefault)
                                 )
-                                Text("Add an option")
+                                Text(stringResource(R.string.add_an_option))
                             }
                         }
                     }
@@ -607,7 +609,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                 openEditDialog = false
                             }
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                         TextButton(
                             {
@@ -642,7 +644,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             },
                             enabled = !disableSaveButton
                         ) {
-                            Text("Save")
+                            Text(stringResource(R.string.save))
                         }
                     }
                 }
@@ -678,21 +680,21 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     enabled = !disableSubmit
                 ) {
-                    Text("Delete card")
+                    Text(stringResource(R.string.delete_card))
                 }
             },
             dismissButton = {
                 TextButton({
                     openDeleteDialog = false
                 }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             title = {
-                Text("Delete this card?")
+                Text(stringResource(R.string.delete_this_card_q))
             },
             text = {
-                Text("You cannot undo this.")
+                Text(stringResource(R.string.you_cannot_undo_this))
             })
     }
 }

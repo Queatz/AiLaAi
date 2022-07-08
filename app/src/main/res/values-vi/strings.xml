@@ -31,9 +31,9 @@
     <string name="cant_connect">Không thể kết nối với mạng</string>
     <string name="hello">Xin chào, bạn!</string>
     <string name="enter_invite_code">Nhập mã mời</string>
-    <string name="hide_conversation">Ẩn cuộc trò chuyện</string>
+    <string name="hide_conversation">Ẩn cuộc trò chuyện này</string>
     <string name="more">Nhiều hơn</string>
-    <string name="show_conversation">Bỏ ẩn cuộc trò chuyện</string>
+    <string name="show_conversation">Bỏ ẩn cuộc trò chuyện này</string>
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
     <string name="active">Hoạt động</string>
@@ -41,4 +41,28 @@
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa bỏ</string>
     <string name="connected">Đã kết nối</string>
+    <string name="somewhere">Một nơi nào đó</string>
+    <string name="send_a_message">Gửi tin nhắn</string>
+    <string name="go_back">Quay lại</string>
+    <string name="card_active">Thẻ đang hoạt động</string>
+    <string name="card_inactive">Thẻ không hoạt động</string>
+    <string name="card_location">Vị trí thẻ</string>
+    <string name="location_name">Tên vị trí</string>
+    <string name="location_name_description">Tên vị trí được hiển thị trên thẻ để giúp người khác nhanh chóng hiểu vị
+        trí của bạn nói chung.
+    </string>
+    <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
+    <string name="cancel">Hủy</string>
+    <string name="save">Lữu</string>
+    <string name="card_conversation">Cuộc trò chuyện của thẻ</string>
+    <string name="your_message">Tin nhắn của bạn</string>
+    <string name="your_reply">Câu trả lời của bạn</string>
+    <string name="card_message_description">Tin nhắn này được hiển thị trên thẻ dưới tên của bạn</string>
+    <string name="card_reply_description">Tin nhắn này được hiển thị dưới tên của bạn khi ai đó chọn \"%1$s\"</string>
+    <string name="option">Lựa chọn</string>
+    <string name="continue_conversation">Tiếp tục cuộc trò chuyện này</string>
+    <string name="add_an_option">Lựa chọn mới</string>
+    <string name="delete_card">Xóa thẻ</string>
+    <string name="delete_this_card_q">Xóa thể này?</string>
+    <string name="you_cannot_undo_this">Bạn không thể hoàn tác điều này.</string>
 </resources>

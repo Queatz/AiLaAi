@@ -155,11 +155,11 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     Column {
                         DropdownMenuItem({ Text("Tiếng Việt") }, {
                             chooseLanguageDialog = false
-                            setLanguage("vi-VN,en-US")
+                            setLanguage("vi,en")
                         })
                         DropdownMenuItem({ Text("English") }, {
                             chooseLanguageDialog = false
-                            setLanguage("en-US,vi-VN")
+                            setLanguage("en,vi")
                         })
                     }
                 }
