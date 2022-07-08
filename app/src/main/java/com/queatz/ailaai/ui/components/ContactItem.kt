@@ -14,11 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -34,7 +36,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
         }) {
         AsyncImage(
             model = person?.photo?.let { api.url(it) } ?: "",
-            contentDescription = "Image",
+            contentDescription = "",
             contentScale = ContentScale.Crop,
             alignment = Alignment.TopCenter,
             modifier = Modifier
@@ -47,11 +49,11 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                person?.name ?: "Someone",
+                person?.name ?: stringResource(R.string.someone),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                groupExtended.latestMessage?.text ?: person?.seen?.timeAgo() ?.let { "Active $it" } ?: "Connected ${groupExtended.group!!.createdAt!!.timeAgo()}",
+                groupExtended.latestMessage?.text ?: person?.seen?.timeAgo() ?.let { "${stringResource(R.string.active)} $it" } ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
             )

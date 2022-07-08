@@ -39,4 +39,5 @@
     <string name="notification_channel_description">Messages from people using the app.</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
+    <string name="connected">Connected</string>
 </resources>

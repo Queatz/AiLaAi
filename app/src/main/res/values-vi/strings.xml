@@ -40,4 +40,5 @@
     <string name="notification_channel_description">Tin nhắn từ những người sử dụng ứng dụng này.</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa bỏ</string>
+    <string name="connected">Đã kết nối</string>
 </resources>
