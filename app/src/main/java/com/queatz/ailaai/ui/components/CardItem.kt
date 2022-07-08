@@ -57,6 +57,7 @@ fun BasicCard(
     onChange: () -> Unit = {},
     activity: Activity,
     card: Card,
+    edit: Boolean = false,
     isMine: Boolean = false
 ) {
     Card(
@@ -150,7 +151,7 @@ fun BasicCard(
                     }
                 }
 
-                if (isMine) showToolbar(activity, onChange, card)
+                if (isMine) showToolbar(activity, onChange, card, edit)
             }
         }
     }
@@ -158,10 +159,10 @@ fun BasicCard(
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class)
 @Composable
-private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, card: Card) {
+private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean) {
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
-    var openLocationDialog by remember { mutableStateOf(false) }
+    var openLocationDialog by remember { mutableStateOf(edit) }
     val keyboardController = LocalSoftwareKeyboardController.current!!
 
     Row(

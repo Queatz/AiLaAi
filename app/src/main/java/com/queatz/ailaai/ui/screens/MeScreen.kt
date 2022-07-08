@@ -6,6 +6,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
@@ -14,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.queatz.ailaai.Card
@@ -21,16 +24,19 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by remember { mutableStateOf(listOf<Card>()) }
+    var addedCardId by remember { mutableStateOf<String?>(null) }
     var inviteDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
     var inviteCode by remember { mutableStateOf("") }
+    val state = rememberLazyListState()
 
     LaunchedEffect(inviteDialog) {
         if (inviteDialog) {
@@ -111,6 +117,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             }
         )
         LazyColumn(
+            state = state,
             contentPadding = PaddingValues(PaddingDefault),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
@@ -149,8 +156,13 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     },
                     navController.context as Activity,
                     card,
+                    card.id == addedCardId,
                     true
                 )
+
+                if (card.id == addedCardId) {
+                    addedCardId = null
+                }
             }
 
             if (myCards.isEmpty()) {
@@ -178,8 +190,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 ElevatedButton(
                     {
                         coroutineScope.launch {
-                            api.newCard()
+                            addedCardId = api.newCard().id
                             myCards = api.myCards()
+                            delay(100)
+                            state.animateScrollToItem(0)
                         }
                     }
                 ) {

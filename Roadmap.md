@@ -2,8 +2,6 @@
 Todo
 ====
 
- * [ ] S 3 `BUG` Scroll to new card when added + open location modal
-
  * [ ] M 2 `UI` When sending a message from a card, automatically post a link to that card in the chat
 
  * [ ] M 2 `Backend` Resize card and portfolio images to reduce image sizes
