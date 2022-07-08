@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
+import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -86,11 +88,11 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             SmallTopAppBar(
                 {
                     Column {
-                        Text(otherMember?.person?.name ?: "Someone")
+                        Text(otherMember?.person?.name ?: stringResource(R.string.someone))
 
                         otherMember?.person?.seen?.let {
                             Text(
-                                "Active ${it.timeAgo()}",
+                                "${stringResource(R.string.active)} ${it.timeAgo()}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )
@@ -110,13 +112,15 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     IconButton({
                         showMenu = !showMenu
                     }) {
-                        Icon(Icons.Outlined.MoreVert, "More")
+                        Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
                     }
 
                     DropdownMenu(showMenu, { showMenu = false }) {
                         val hidden = myMember!!.member?.hide == true
 
-                        DropdownMenuItem({ Text("${if (hidden) "Show" else "Hide"} conversation") }, {
+                        DropdownMenuItem({ Text(if (hidden) stringResource(R.string.show_conversation) else stringResource(
+                                                    R.string.hide_conversation)
+                                                ) }, {
                             coroutineScope.launch {
                                 try {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
@@ -193,7 +197,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     }
                 },
                 placeholder = {
-                    Text("Message")
+                    Text(stringResource(R.string.message))
                 },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,

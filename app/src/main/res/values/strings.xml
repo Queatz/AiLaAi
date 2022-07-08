@@ -30,4 +30,10 @@
     <string name="cant_connect">Can\'t connect to the internet</string>
     <string name="enter_invite_code">Enter invite code</string>
     <string name="hello">Xin chào, bạn!</string>
+    <string name="show_conversation">Show conversation</string>
+    <string name="hide_conversation">Hide conversation</string>
+    <string name="more">More</string>
+    <string name="message">Message</string>
+    <string name="someone">Someone</string>
+    <string name="active">Active</string>
 </resources>

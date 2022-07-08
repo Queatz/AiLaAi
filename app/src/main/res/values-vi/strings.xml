@@ -31,4 +31,10 @@
     <string name="cant_connect">Không thể kết nối với mạng</string>
     <string name="hello">Xin chào, bạn!</string>
     <string name="enter_invite_code">Nhập mã mời</string>
+    <string name="hide_conversation">Ẩn cuộc trò chuyện</string>
+    <string name="more">Nhiều hơn</string>
+    <string name="show_conversation">Bỏ ẩn cuộc trò chuyện</string>
+    <string name="message">Nhắn tin</string>
+    <string name="someone">Một người ai đó</string>
+    <string name="active">Hoạt động</string>
 </resources>
