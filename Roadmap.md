@@ -2,8 +2,8 @@
 Hôm nay
 ====
 
-* [ ] S `BUG` Send message button on My Cards should do nothing
-* [ ] S `BUG` Why location permission is disabled (API 33?)
+* [X] S `BUG` Send message button on My Cards should do nothing
+* [X] S `BUG` Why location permission is disabled (API 33?)
 * [ ] S `BUG` Save name even after leaving settings screen
 * [ ] S `BUG` Refresh photo after upload in settings
 * [ ] S `BUG` Refresh card after edit of details

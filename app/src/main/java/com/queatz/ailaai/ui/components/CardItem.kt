@@ -128,7 +128,7 @@ fun BasicCard(
                 if (current.items.isEmpty()) {
                     Button({
                         onClick()
-                    }) {
+                    }, enabled = !isMine) {
                         Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
                         Text("Send a message", overflow = TextOverflow.Ellipsis, maxLines = 1)
                     }
