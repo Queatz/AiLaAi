@@ -169,6 +169,8 @@ class Api {
 
     suspend fun group(id: String): GroupExtended = get("groups/$id")
 
+    suspend fun updateMember(id: String, member: Member): HttpStatusCode = post("members/$id", member)
+
     suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)

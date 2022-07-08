@@ -51,7 +51,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                groupExtended.latestMessage?.text ?: "",
+                groupExtended.latestMessage?.text ?: person?.seen?.timeAgo() ?.let { "Active $it" } ?: "Connected ${groupExtended.group!!.createdAt!!.timeAgo()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
             )

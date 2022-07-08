@@ -49,7 +49,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         } else if (groups.isEmpty()) {
             item {
                 Text(
-                    "You currently have no messages.",
+                    "You have no active conversations.",
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(PaddingDefault * 2)
                 )

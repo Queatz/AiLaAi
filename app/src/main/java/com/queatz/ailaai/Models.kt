@@ -29,7 +29,8 @@ class Person(
 ) : Model()
 
 class Member(
-    var seen: Instant? = null
+    var seen: Instant? = null,
+    var hide: Boolean? = null
 ) : Edge()
 
 class Message(

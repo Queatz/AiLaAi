@@ -114,8 +114,21 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     }
 
                     DropdownMenu(showMenu, { showMenu = false }) {
-                        DropdownMenuItem({ Text("Delete") }, { showMenu = false })
-                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
+                        val hidden = myMember!!.member?.hide == true
+
+                        DropdownMenuItem({ Text("${if (hidden) "Show" else "Hide"} conversation") }, {
+                            coroutineScope.launch {
+                                try {
+                                    api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
+
+                                    navController.popBackStack()
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                            showMenu = false
+                        })
+//                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
                     }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(

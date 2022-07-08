@@ -14,10 +14,10 @@ Todo
 
  * [ ] S `BUG` Scroll to new card when added + open location modal
 
- * [ ] S `UI` `Backend` Delete chat
  * [ ] L `UI` Choose language + extract all strings
- * [ ] M `UI` Auto send a message to the invitor (create a group chat) when someone accepts an invite (no push notification) 
- * [ ] L `UI` `Backend` Get help on someone's profile 
+ * [ ] M `UI` Auto send a message to the invitor (create a group chat) when someone accepts an invite (no push notification)
+ * [ ] S `UI` `Backend` Delete chat
+ * [ ] L `UI` `Backend` Get help (from group screen)
 
  * [ ] M `UI` When sending a message from a card, automatically post that card in the chat
  * [ ] S `Ui` Loading group animation after clicking send message while api is getting group id
