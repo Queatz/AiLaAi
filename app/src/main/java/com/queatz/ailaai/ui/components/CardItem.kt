@@ -300,7 +300,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                 if (marker != null) {
                                     marker?.position = position
 
-                                    map?.moveCamera(
+                                    map?.animateCamera(
                                         CameraUpdateFactory.get().newCameraPosition(
                                             CameraPosition.Builder()
                                                 .setTarget(position)
@@ -333,8 +333,6 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                 map?.setOnMapClickListener {
                                     position = it
                                 }
-
-                                map?.getUiSettings()?.isMyLocationButtonEnabled = true
 
                                 map?.setOnMarkerClickListener { true }
                                 map?.setOnMarkerDragListener(object : OnMarkerDragListener {

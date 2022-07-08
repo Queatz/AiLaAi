@@ -62,23 +62,25 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 .fillMaxSize()
                 .padding(PaddingDefault)
         ) {
+            val showOpenSettings = permissionState.status.shouldShowRationale
+
             Button(
                 {
-                    if (permissionState.status.shouldShowRationale) {
-                        permissionState.launchPermissionRequest()
-                    } else {
+                    if (showOpenSettings) {
                         val intent = Intent(
                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                             Uri.parse("package:${navController.context.packageName}")
                         )
                         (navController.context as Activity).startActivity(intent)
+                    } else {
+                        permissionState.launchPermissionRequest()
                     }
                 }
             ) {
-                Text(if (permissionState.status.shouldShowRationale) "Find my location" else "Open Settings")
+                Text(if (showOpenSettings) "Open Settings" else "Find my location")
             }
 
-            if (permissionState.status.shouldShowRationale.not()) {
+            if (showOpenSettings) {
                 Text(
                     "The location permission is disabled in settings.",
                     textAlign = TextAlign.Center,
