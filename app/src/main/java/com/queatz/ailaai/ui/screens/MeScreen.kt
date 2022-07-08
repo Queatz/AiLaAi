@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
@@ -16,11 +15,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.Person
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -38,6 +38,8 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     var inviteCode by remember { mutableStateOf("") }
     val state = rememberLazyListState()
 
+    val errorString = stringResource(R.string.error)
+
     LaunchedEffect(inviteDialog) {
         if (inviteDialog) {
             inviteCode = ""
@@ -46,7 +48,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 inviteCode = api.invite().code ?: ""
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                inviteCode = "Error"
+                inviteCode = errorString
             }
         }
     }
@@ -62,11 +64,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         inviteDialog = false
                     }
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close))
                 }
             },
             properties = DialogProperties(usePlatformDefaultWidth = false),
-            title = { Text("Invite code") },
+            title = { Text(stringResource(R.string.invite_code)) },
             text = {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(PaddingDefault)
@@ -76,7 +78,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     } else {
                         Text(inviteCode, style = MaterialTheme.typography.displayMedium)
                         Text(
-                            "This code will be active for 48 hours.",
+                            stringResource(R.string.invite_code_description),
                             color = MaterialTheme.colorScheme.secondary
                         )
                     }
@@ -93,7 +95,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     Column {
         SmallTopAppBar(
             {
-                Text("My cards")
+                Text(stringResource(R.string.my_cards))
             },
             actions = {
                 ElevatedButton(
@@ -104,10 +106,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 ) {
                     Icon(
                         Icons.Outlined.Add,
-                        "Invite",
+                        stringResource(R.string.invite),
                         modifier = Modifier.padding(end = PaddingDefault)
                     )
-                    Text("Invite")
+                    Text(stringResource(R.string.invite))
                 }
                 IconButton({
                     navController.navigate("settings")
@@ -178,7 +180,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 } else {
                     item {
                         Text(
-                            "You currently have no cards.",
+                            stringResource(R.string.you_have_no_cards),
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(PaddingDefault * 2)
                         )
@@ -197,7 +199,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         }
                     }
                 ) {
-                    Text("Add a card")
+                    Text(stringResource(R.string.add_a_card))
                 }
             }
         }

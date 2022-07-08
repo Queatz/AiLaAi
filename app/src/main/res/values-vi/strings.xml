@@ -10,4 +10,12 @@
     <string name="update_your_name">Cập nhật tên của bạn</string>
     <string name="your_name">Tên của bạn</string>
     <string name="your_photo">Ảnh của bạn</string>
+    <string name="close">Đóng</string>
+    <string name="invite_code">Mã mời</string>
+    <string name="error">Lỗi</string>
+    <string name="invite_code_description">Mã này sẽ hoạt động trong 48 giờ.</string>
+    <string name="my_cards">Thẻ mình</string>
+    <string name="invite">Mời ai đó</string>
+    <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
+    <string name="add_a_card">Thêm một thẻ</string>
 </resources>

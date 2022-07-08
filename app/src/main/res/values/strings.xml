@@ -9,4 +9,12 @@
     <string name="update_your_name">Update your name</string>
     <string name="your_name">Your name</string>
     <string name="your_photo">Your photo</string>
+    <string name="close">Close</string>
+    <string name="invite_code">Invite code</string>
+    <string name="error">Error</string>
+    <string name="invite_code_description">This code will be active for 48 hours.</string>
+    <string name="my_cards">My cards</string>
+    <string name="invite">Invite</string>
+    <string name="you_have_no_cards">You currently have no cards.</string>
+    <string name="add_a_card">Add a card</string>
 </resources>

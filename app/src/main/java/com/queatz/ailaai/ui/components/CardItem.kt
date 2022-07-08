@@ -23,6 +23,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -46,6 +47,7 @@ import com.queatz.ailaai.Card
 import com.queatz.ailaai.api
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.gson
+import com.queatz.ailaai.push
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -94,7 +96,7 @@ fun BasicCard(
             ) {
                 val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
                 var current by remember { mutableStateOf(conversation) }
-                var stack = remember { mutableListOf<ConversationItem>() }
+                val stack = remember { mutableListOf<ConversationItem>() }
 
                 Text(
                     text = buildAnnotatedString {
@@ -103,20 +105,28 @@ fun BasicCard(
                         ) {
                             append(card.name ?: "Someone")
                         }
+
                         append("  ")
+
                         withStyle(
                             MaterialTheme.typography.titleSmall.toSpanStyle()
                                 .copy(color = MaterialTheme.colorScheme.secondary)
                         ) {
                             append(card.location ?: "Somewhere")
                         }
-                        append("\n")
-                        append(current.message)
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = PaddingDefault)
+                )
+
+                Text(
+                    text = current.message,
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = PaddingDefault * 2)
                 )
 
                 current.items.forEach {
