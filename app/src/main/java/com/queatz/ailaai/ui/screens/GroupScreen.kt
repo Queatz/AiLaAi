@@ -135,7 +135,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     val text = sendMessage
                     coroutineScope.launch {
                         try {
-                            api.sendMessage(groupId, Message(text = text))
+                            api.sendMessage(groupId, Message(text = text.trim()))
                             messages = api.messages(groupId)
                         } catch (ex: Exception) {
                             ex.printStackTrace()

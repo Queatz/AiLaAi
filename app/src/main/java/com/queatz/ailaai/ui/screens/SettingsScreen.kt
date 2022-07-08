@@ -45,7 +45,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
             .filter { it.isNotBlank() }
             .collect {
                 try {
-                    api.updateMe(Person(name = it))
+                    api.updateMe(Person(name = it.trim()))
                     me()?.name = it
                 } catch (ex: Exception) {
                     ex.printStackTrace()
@@ -117,7 +117,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
         }
 
         Text(
-            "Your name and photo are used for messages. You can use a different name on each of your cards.",
+            "Your name and photo are used for messaging. You can use a different name on each of your cards.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier

@@ -93,6 +93,7 @@ fun BasicCard(
             ) {
                 val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
                 var current by remember { mutableStateOf(conversation) }
+                var stack = remember { mutableListOf<ConversationItem>() }
 
                 Text(
                     text = buildAnnotatedString {
@@ -119,6 +120,7 @@ fun BasicCard(
 
                 current.items.forEach {
                     Button({
+                        stack.add(current)
                         current = it
                     }) {
                         Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
@@ -135,14 +137,16 @@ fun BasicCard(
                 }
 
                 AnimatedVisibility(
-                    current.title.isNotBlank(),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    stack.isNotEmpty(),
+                    modifier = Modifier.align(Alignment.Start)
                 ) {
                     TextButton({
-                        current = conversation
+                        if (stack.isNotEmpty()) {
+                            current = stack.removeLast()
+                        }
                     }) {
-                        Icon(Icons.Outlined.Refresh, "Reset")
-                        Text("Reset", modifier = Modifier.padding(start = PaddingDefault))
+                        Icon(Icons.Outlined.ArrowBack, "Go back")
+                        Text("Go back", modifier = Modifier.padding(start = PaddingDefault))
                     }
                 }
 
@@ -383,7 +387,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                     try {
                                         val update = api.updateCard(
                                             card.id!!,
-                                            Card(location = locationName, geo = position.toList())
+                                            Card(location = locationName.trim(), geo = position.toList())
                                         )
 
                                         card.location = update.location
@@ -595,11 +599,19 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             {
                                 disableSaveButton = true
 
+                                fun trim(it: ConversationItem) {
+                                    it.title.trim()
+                                    it.message.trim()
+                                    it.items.forEach { trim(it) }
+                                }
+
+                                trim(conversation)
+
                                 coroutineScope.launch {
                                     try {
                                         val update = api.updateCard(
                                             card.id!!,
-                                            Card(name = cardName, conversation = gson.toJson(conversation))
+                                            Card(name = cardName.trim(), conversation = gson.toJson(conversation))
                                         )
 
                                         card.name = update.name
