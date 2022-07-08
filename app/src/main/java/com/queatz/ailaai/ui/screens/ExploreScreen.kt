@@ -129,6 +129,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     PaddingDefault,
                     PaddingDefault + 80.dp
                 ),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -141,22 +142,32 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                                 .padding(horizontal = PaddingDefault)
                         )
                     }
-                }
-
-                items(cards) {
-                    BasicCard(
-                        {
-                            coroutineScope.launch {
-                                try {
-                                    navController.navigate("group/${api.cardGroup(it.id!!).id!!}")
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                }
-                            }
-                        },
-                        activity = navController.context as Activity,
-                        card = it
-                    )
+                } else {
+                    if (cards.isEmpty()) {
+                        item {
+                            Text(
+                                "No cards to show.",
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(PaddingDefault * 2)
+                            )
+                        }
+                    } else {
+                        items(cards) {
+                            BasicCard(
+                                {
+                                    coroutineScope.launch {
+                                        try {
+                                            navController.navigate("group/${api.cardGroup(it.id!!).id!!}")
+                                        } catch (ex: Exception) {
+                                            ex.printStackTrace()
+                                        }
+                                    }
+                                },
+                                activity = navController.context as Activity,
+                                card = it
+                            )
+                        }
+                    }
                 }
             }
             Card(

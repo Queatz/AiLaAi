@@ -69,7 +69,7 @@ class Api {
         }
     }
 
-    fun url(it: String) = "$baseUrl/$it"
+    fun url(it: String) = "$baseUrl$it"
 
     private suspend inline fun <reified T : Any> post(
         url: String,
@@ -172,6 +172,8 @@ class Api {
     suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
+
+    suspend fun deleteMessage(message: String): HttpStatusCode = post("messages/$message/delete")
 }
 
 data class SignUpRequest(

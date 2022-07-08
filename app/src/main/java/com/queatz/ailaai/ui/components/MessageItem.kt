@@ -26,14 +26,15 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlin.random.Random
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean) {
+fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean, onDeleted: () -> Unit) {
     var showMessageDialog by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     if (showMessageDialog) {
         Dialog({
@@ -49,10 +50,20 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean)
                         )
                         showMessageDialog = false
                     })
-                    DropdownMenuItem({ Text("Delete") }, {
-                        // todo implementation
-                        showMessageDialog = false
-                    })
+
+                    if (isMe) {
+                        DropdownMenuItem({ Text("Delete") }, {
+                            coroutineScope.launch {
+                                try {
+                                    api.deleteMessage(message.id!!)
+                                    onDeleted()
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                            showMessageDialog = false
+                        })
+                    }
                 }
             }
         }

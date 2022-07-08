@@ -21,12 +21,10 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -89,11 +87,14 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 {
                     Column {
                         Text(otherMember?.person?.name ?: "Someone")
-                        Text(
-                            "Active now",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+
+                        otherMember?.person?.seen?.let {
+                            Text(
+                                "Active ${it.timeAgo()}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -124,9 +125,22 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             )
             LazyColumn(reverseLayout = true, modifier = Modifier.weight(1f)) {
                 items(messages) {
-                    MessageItem(it, {
-                        groupExtended?.members?.find { member -> member.member?.id == it }?.person
-                    }, myMember?.member?.id == it.member)
+                    MessageItem(
+                        it,
+                        {
+                            groupExtended?.members?.find { member -> member.member?.id == it }?.person
+                        },
+                        myMember?.member?.id == it.member,
+                        {
+                            coroutineScope.launch {
+                                try {
+                                    messages = api.messages(groupId)
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                        }
+                    )
                 }
             }
 

@@ -2,18 +2,9 @@
 Hôm nay
 ====
 
-* [X] S `BUG` Send message button on My Cards should do nothing
-* [X] S `BUG` Why location permission is disabled (API 33?)
 * [ ] S `BUG` Save name even after leaving settings screen
 * [ ] S `BUG` Refresh photo after upload in settings
 * [ ] S `BUG` Refresh card after edit of details
-* [X] S `BUG` Trim everything: Name, Card name, text, options, etc.
-* [ ] S `BUG` When no cards found on Explore: No cards to show.
-* [ ] XS `UI` Person last active time on group screen should come from Person.seen
-* [ ] M `UI` Delete message
-* [ ] XS `UI` Change Reset to Go back (up 1 level)
-* [ ] S `UI` Error presentations (all known: enter invite code error) (snackbar?)
-
 
 Todo
 ====
@@ -21,7 +12,6 @@ Todo
  * [ ] M `Release` Download app on ailaai.app, explain unknown sources
  * [ ] M `Release` App icon
 
- * [X] S `BUG` Send message doesn't seem to work the first click?
  * [ ] S `BUG` Scroll to new card when added + open location modal
 
  * [ ] S `UI` `Backend` Delete chat

@@ -24,7 +24,6 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : AppCompatActivity() {
 
@@ -49,12 +48,14 @@ class MainActivity : AppCompatActivity() {
                     InitialScreen { known = true }
                 } else {
                     var me by remember { mutableStateOf<Person?>(null) }
+                    val snackbarHostState = remember { SnackbarHostState() }
 
                     LaunchedEffect(true) {
                         try {
                             me = api.me()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
+                            snackbarHostState.showSnackbar("Can't connect to the internet", withDismissAction = true)
                         }
                     }
 
@@ -86,6 +87,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         },
+                        snackbarHost = { SnackbarHost(snackbarHostState) }
                     ) {
                         NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
                             composable("explore") { ExploreScreen(navController) { me } }
