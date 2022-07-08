@@ -20,6 +20,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class Application : android.app.Application() {
     override fun onCreate() {
         super.onCreate()
+
         ChoiceSdk.init(this)
         api.init(this)
         push.init(this)

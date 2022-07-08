@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ai là ai</string>
+    <string name="settings">Cài đặt</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="language_english">English</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="sign_out">Đăng xuất</string>
+    <string name="photo_and_name_description">Tên và ảnh của bạn được sử dụng để nhắn tin. Bạn có thể sử dụng một tên khác trên mỗi thẻ của mình.</string>
+    <string name="update_your_name">Cập nhật tên của bạn</string>
+    <string name="your_name">Tên của bạn</string>
+    <string name="your_photo">Ảnh của bạn</string>
+</resources>

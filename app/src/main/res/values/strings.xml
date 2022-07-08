@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Ai la ai</string>
+    <string name="settings">Settings</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="language_english">English</string>
+    <string name="language">Language</string>
+    <string name="sign_out">Sign out</string>
+    <string name="photo_and_name_description">Your name and photo are used for messaging. You can use a different name on each of your cards.</string>
+    <string name="update_your_name">Update your name</string>
+    <string name="your_name">Your name</string>
+    <string name="your_photo">Your photo</string>
 </resources>
