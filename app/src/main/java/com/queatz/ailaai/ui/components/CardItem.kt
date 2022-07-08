@@ -435,6 +435,8 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                     .fillMaxHeight(.9f)
             ) {
                 val scrollState = rememberScrollState()
+                val currentRecomposeScope = currentRecomposeScope
+                fun invalidate() { currentRecomposeScope.invalidate() }
 
                 Column(
                     modifier = Modifier.padding(PaddingDefault * 3)
@@ -473,7 +475,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             TextButton(
                                 {
                                     cardConversation = backstack.removeLast()
-                                    onChange()
+                                    invalidate()
                                 },
                                 modifier = Modifier.padding(PaddingValues(top = PaddingDefault * 2))
                             ) {
@@ -546,7 +548,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                         .onKeyEvent { keyEvent ->
                                             if (it.title.isEmpty() && keyEvent.key == Key.Backspace) {
                                                 cardConversation.items.remove(it)
-                                                onChange()
+                                                invalidate()
                                                 true
                                             } else false
                                         }
@@ -556,7 +558,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                         {
                                             backstack.add(cardConversation)
                                             cardConversation = it
-                                            onChange()
+                                            invalidate()
                                         },
                                         colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                     ) {
@@ -569,7 +571,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             TextButton(
                                 {
                                     cardConversation.items.add(ConversationItem())
-                                    onChange()
+                                    invalidate()
                                 }
                             ) {
                                 Icon(

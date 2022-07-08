@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsScreen(navController: NavController, me: () -> Person?) {
+fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     var myName by remember { mutableStateOf(me()?.name ?: "") }
     var myNameUnsaved by remember { mutableStateOf(false) }
@@ -44,7 +44,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
         coroutineScope.launch {
             try {
                 api.updateMyPhoto(it)
-                // todo refresh me
+                updateMe()
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
@@ -109,7 +109,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
                                     saving = true
                                     api.updateMe(Person(name = myName.trim()))
                                     myNameUnsaved = false
-                                    me()?.name = myName
+                                    updateMe()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
                                 } finally {
@@ -121,7 +121,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
                         modifier = Modifier
                             .padding(PaddingDefault)
                     ) {
-                        Text("Update")
+                        Text("Update your name")
                     }
                 }
             }

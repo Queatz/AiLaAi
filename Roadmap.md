@@ -1,10 +1,4 @@
 
-Hôm nay
-====
-
-* [ ] S 1 `BUG` Refresh photo after upload in settings
-* [ ] S 1 `BUG` Refresh card after edit of details
-
 Todo
 ====
 

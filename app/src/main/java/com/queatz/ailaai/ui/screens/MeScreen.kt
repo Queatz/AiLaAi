@@ -130,17 +130,27 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
 
-                BasicCard({
-                    launcher.launch("image/*")
-                }, {
-                    coroutineScope.launch {
-                        try {
-                            myCards = api.myCards()
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
+                BasicCard(
+                    {
+                        launcher.launch("image/*")
+                    },
+                    onChange = {
+                        coroutineScope.launch {
+                            isLoading = true
+                            myCards = listOf()
+                            try {
+                                myCards = api.myCards()
+                            } catch (ex: Exception) {
+                                ex.printStackTrace()
+                            } finally {
+                                isLoading = false
+                            }
                         }
-                    }
-                }, navController.context as Activity, card, true)
+                    },
+                    navController.context as Activity,
+                    card,
+                    true
+                )
             }
 
             if (myCards.isEmpty()) {

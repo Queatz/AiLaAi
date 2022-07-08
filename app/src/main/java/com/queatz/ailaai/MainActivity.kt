@@ -23,6 +23,7 @@ import androidx.navigation.navDeepLink
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : AppCompatActivity() {
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     var me by remember { mutableStateOf<Person?>(null) }
                     val snackbarHostState = remember { SnackbarHostState() }
+                    val coroutineScope = rememberCoroutineScope()
 
                     LaunchedEffect(true) {
                         try {
@@ -92,9 +94,26 @@ class MainActivity : AppCompatActivity() {
                         NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
                             composable("explore") { ExploreScreen(navController) { me } }
                             composable("messages") { MessagesScreen(navController) { me } }
-                            composable("group/{id}", deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })) { GroupScreen(it, navController) { me } }
+                            composable(
+                                "group/{id}",
+                                deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
+                            ) { GroupScreen(it, navController) { me } }
                             composable("me") { MeScreen(navController) { me } }
-                            composable("settings") { SettingsScreen(navController) { me } }
+                            composable("settings") {
+                                SettingsScreen(navController, { me }) {
+                                    coroutineScope.launch {
+                                        try {
+                                            me = api.me()
+                                        } catch (ex: Exception) {
+                                            ex.printStackTrace()
+                                            snackbarHostState.showSnackbar(
+                                                "Can't connect to the internet",
+                                                withDismissAction = true
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
