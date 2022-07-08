@@ -28,4 +28,6 @@
     <string name="messages">Messages</string>
     <string name="me">Me</string>
     <string name="cant_connect">Can\'t connect to the internet</string>
+    <string name="enter_invite_code">Enter invite code</string>
+    <string name="hello">Xin chào, bạn!</string>
 </resources>

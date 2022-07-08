@@ -10,8 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
@@ -55,7 +57,7 @@ fun InitialScreen(onKnown: () -> Unit) {
             )
     ) {
         Text(
-            "Xin chào, bạn!",
+            stringResource(R.string.hello),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.headlineMedium
         )
@@ -70,7 +72,7 @@ fun InitialScreen(onKnown: () -> Unit) {
                 }
             },
             enabled = codeValueEnabled,
-            label = { Text("Enter invite code") },
+            label = { Text(stringResource(R.string.enter_invite_code)) },
             shape = MaterialTheme.shapes.large,
             singleLine = true,
             keyboardOptions = KeyboardOptions(
