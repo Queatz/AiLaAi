@@ -17,4 +17,5 @@
     <string name="invite">Invite</string>
     <string name="you_have_no_cards">You currently have no cards.</string>
     <string name="add_a_card">Add a card</string>
+    <string name="you_have_no_conversations">You currently have no conversations.</string>
 </resources>

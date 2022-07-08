@@ -9,9 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -49,7 +51,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         } else if (groups.isEmpty()) {
             item {
                 Text(
-                    "You have no active conversations.",
+                    stringResource(R.string.you_have_no_conversations),
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(PaddingDefault * 2)
                 )
