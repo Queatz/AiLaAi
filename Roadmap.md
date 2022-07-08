@@ -2,32 +2,29 @@
 Hôm nay
 ====
 
-* [ ] S `BUG` Save name even after leaving settings screen
-* [ ] S `BUG` Refresh photo after upload in settings
-* [ ] S `BUG` Refresh card after edit of details
+* [ ] S 1 `BUG` Refresh photo after upload in settings
+* [ ] S 1 `BUG` Refresh card after edit of details
 
 Todo
 ====
 
- * [ ] M `Release` Download app on ailaai.app, explain unknown sources
- * [ ] M `Release` App icon
+ * [ ] S 3 `BUG` Scroll to new card when added + open location modal
 
- * [ ] S `BUG` Scroll to new card when added + open location modal
+ * [ ] M 2 `UI` When sending a message from a card, automatically post a link to that card in the chat
 
- * [ ] L `UI` Choose language + extract all strings
- * [ ] M `UI` Auto send a message to the invitor (create a group chat) when someone accepts an invite (no push notification)
- * [ ] S `UI` `Backend` Delete chat
- * [ ] L `UI` `Backend` Get help (from group screen)
+ * [ ] M 2 `Backend` Resize card and portfolio images to reduce image sizes
+ * [ ] S 2 `Backend` Delete device tokens that are identified as expired
 
- * [ ] M `UI` When sending a message from a card, automatically post that card in the chat
- * [ ] S `Ui` Loading group animation after clicking send message while api is getting group id
+ * [ ] S 3 `UI` `Email` Sign out warning if account has no email (you will lose access to your account forever)
+ * [ ] XS 3 `UI` `Email` Add email in settings (also only return email on /me endpoint)
+ * [ ] M 3 `UI` `Email` Sign in with email (button)
 
- * [ ] S `UI` `Email` Sign out warning if account has no email (you will lose access to your account forever)
- * [ ] XS `UI` `Email` Add email in settings (also only return email on /me endpoint)
- * [ ] M `UI` `Email` Sign in with email (button)
+Pre launch
+----------
 
- * [ ] M `Backend` Resize card and portfolio images to reduce image sizes
- * [ ] S `Backend` Delete device tokens that are identified as expired
+ * [ ] L 1 `UI` Choose language + extract all strings
+ * [ ] M 1 `Release` Download app on ailaai.app, explain unknown sources
+ * [ ] M 1 `Release` App icon
 
 Post launch
 -----------
@@ -36,6 +33,7 @@ Post launch
  * [ ] L `Feature` Message reactions
  * [ ] L `Feature` Report chat
  * [ ] M `Feature` Self-check for app updates
+* [ ] L `UI` `Backend` Get help (from group screen)
 
 Way later
 ---------

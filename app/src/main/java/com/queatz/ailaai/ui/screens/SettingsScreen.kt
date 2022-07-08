@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -35,24 +36,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(navController: NavController, me: () -> Person?) {
     val coroutineScope = rememberCoroutineScope()
     var myName by remember { mutableStateOf(me()?.name ?: "") }
-
-    val saveName = MutableStateFlow("")
-
-    coroutineScope.launch {
-        @OptIn(FlowPreview::class)
-        saveName
-            .debounce(1000)
-            .filter { it.isNotBlank() }
-            .collect {
-                try {
-                    api.updateMe(Person(name = it.trim()))
-                    me()?.name = it
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
-
-            }
-    }
+    var myNameUnsaved by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         if (it == null) return@rememberLauncherForActivityResult
@@ -101,19 +85,46 @@ fun SettingsScreen(navController: NavController, me: () -> Person?) {
                     }
             )
 
-            OutlinedTextField(
-                myName,
-                {
-                    myName = it
-                    saveName.value = it
-                },
-                label = {
-                    Text("Your name")
-                },
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier
-                    .padding(horizontal = PaddingDefault)
-            )
+            Column {
+                OutlinedTextField(
+                    myName,
+                    {
+                        myName = it
+                        myNameUnsaved = true
+                    },
+                    label = {
+                        Text("Your name")
+                    },
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier
+                        .padding(horizontal = PaddingDefault)
+                )
+
+                AnimatedVisibility(myNameUnsaved) {
+                    var saving by remember { mutableStateOf(false) }
+                    Button(
+                        {
+                            coroutineScope.launch {
+                                try {
+                                    saving = true
+                                    api.updateMe(Person(name = myName.trim()))
+                                    myNameUnsaved = false
+                                    me()?.name = myName
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                } finally {
+                                    saving = false
+                                }
+                            }
+                        },
+                        enabled = !saving,
+                        modifier = Modifier
+                            .padding(PaddingDefault)
+                    ) {
+                        Text("Update")
+                    }
+                }
+            }
         }
 
         Text(
