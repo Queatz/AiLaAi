@@ -81,12 +81,12 @@ class Push {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
                 "messages",
-                "Messages",
+                context.getString(R.string.messages),
                 // Change importance
                 NotificationManager.IMPORTANCE_DEFAULT
             )
 
-            notificationChannel.description = "Messages from people using the app."
+            notificationChannel.description = context.getString(R.string.notification_channel_description)
 
             val notificationManager = context.getSystemService(NotificationManager::class.java)
 

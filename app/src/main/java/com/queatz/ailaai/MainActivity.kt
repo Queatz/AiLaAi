@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -52,13 +53,14 @@ class MainActivity : AppCompatActivity() {
                     var me by remember { mutableStateOf<Person?>(null) }
                     val snackbarHostState = remember { SnackbarHostState() }
                     val coroutineScope = rememberCoroutineScope()
+                    val cantConnectString = stringResource(R.string.cant_connect)
 
                     LaunchedEffect(true) {
                         try {
                             me = api.me()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
-                            snackbarHostState.showSnackbar("Can't connect to the internet", withDismissAction = true)
+                            snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
                         }
                     }
 

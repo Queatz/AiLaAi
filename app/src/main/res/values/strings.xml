@@ -36,4 +36,7 @@
     <string name="message">Message</string>
     <string name="someone">Someone</string>
     <string name="active">Active</string>
+    <string name="notification_channel_description">Messages from people using the app.</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
 </resources>

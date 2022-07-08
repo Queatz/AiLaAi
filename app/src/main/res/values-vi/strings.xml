@@ -37,4 +37,7 @@
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
     <string name="active">Hoạt động</string>
+    <string name="notification_channel_description">Tin nhắn từ những người sử dụng ứng dụng này.</string>
+    <string name="copy">Sao chép</string>
+    <string name="delete">Xóa bỏ</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -23,6 +24,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import coil.compose.AsyncImage
 import com.queatz.ailaai.Message
 import com.queatz.ailaai.Person
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -44,15 +46,16 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean,
                 shape = MaterialTheme.shapes.large
             ) {
                 Column {
-                    DropdownMenuItem({ Text("Copy") }, {
+                    val messageString = stringResource(R.string.message)
+                    DropdownMenuItem({ Text(stringResource(R.string.copy)) }, {
                         getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                            ClipData.newPlainText("Message content",message.text ?: "")
+                            ClipData.newPlainText(messageString,message.text ?: "")
                         )
                         showMessageDialog = false
                     })
 
                     if (isMe) {
-                        DropdownMenuItem({ Text("Delete") }, {
+                        DropdownMenuItem({ Text(stringResource(R.string.delete)) }, {
                             coroutineScope.launch {
                                 try {
                                     api.deleteMessage(message.id!!)
@@ -116,7 +119,7 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean,
 fun ProfileImage(person: Person?, padding: PaddingValues) {
     AsyncImage(
         model = person?.photo?.let { api.url(it) } ?: "",
-        contentDescription = "Image",
+        contentDescription = "",
         contentScale = ContentScale.Crop,
         alignment = Alignment.TopCenter,
         modifier = Modifier
