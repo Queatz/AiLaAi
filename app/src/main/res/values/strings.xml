@@ -24,4 +24,8 @@
     <string name="open_settings">Open settings</string>
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
     <string name="search">Search</string>
+    <string name="explore">Explore</string>
+    <string name="messages">Messages</string>
+    <string name="me">Me</string>
+    <string name="cant_connect">Can\'t connect to the internet</string>
 </resources>

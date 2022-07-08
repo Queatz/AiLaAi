@@ -25,4 +25,8 @@
     <string name="find_my_location">Tìm vị trí của mình</string>
     <string name="finding_your_location">Đang tìm vị trí của bạn…</string>
     <string name="no_cards_to_show">Không có thẻ để cho bạn xem.</string>
+    <string name="explore">Khám phá</string>
+    <string name="messages">Tin nhắn</string>
+    <string name="me">Mình</string>
+    <string name="cant_connect">Không thể kết nối với mạng</string>
 </resources>

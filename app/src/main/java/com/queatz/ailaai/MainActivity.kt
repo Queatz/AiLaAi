@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -71,17 +72,17 @@ class MainActivity : AppCompatActivity() {
                                 AnimatedVisibility(showBottomBar) {
                                     NavigationBar {
                                         listOf(
-                                            "Explore" to Icons.Outlined.Search,
-                                            "Messages" to Icons.Outlined.Email,
-                                            "Me" to Icons.Outlined.Person
+                                            NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
+                                        NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
+                                        NavButton("me", getString(R.string.me), Icons.Outlined.Person)
                                         ).forEachIndexed { index, item ->
                                             NavigationBarItem(
-                                                icon = { Icon(item.second, contentDescription = null) },
-                                                label = { Text(item.first) },
-                                                selected = navController.currentDestination?.route == item.first.lowercase(),
+                                                icon = { Icon(item.icon, contentDescription = null) },
+                                                label = { Text(item.text) },
+                                                selected = navController.currentDestination?.route == item.route,
                                                 onClick = {
                                                     navController.popBackStack()
-                                                    navController.navigate(item.first.lowercase())
+                                                    navController.navigate(item.route)
                                                 }
                                             )
                                         }
@@ -107,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                                         } catch (ex: Exception) {
                                             ex.printStackTrace()
                                             snackbarHostState.showSnackbar(
-                                                "Can't connect to the internet",
+                                                getString(R.string.cant_connect),
                                                 withDismissAction = true
                                             )
                                         }
@@ -123,3 +124,9 @@ class MainActivity : AppCompatActivity() {
 }
 
 fun Location.toLatLng() = LatLng(latitude, longitude)
+
+data class NavButton(
+    val route: String,
+    val text: String,
+    val icon: ImageVector
+)
