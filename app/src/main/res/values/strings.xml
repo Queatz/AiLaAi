@@ -47,7 +47,9 @@
     <string name="card_inactive">Card is inactive</string>
     <string name="card_location">Card location</string>
     <string name="location_name">Location name</string>
-    <string name="location_name_description">The location name is shown on the card to help others quickly understand where you are generally located.</string>
+    <string name="location_name_description">The location name is shown on the card to help others know where you are
+        located.
+    </string>
     <string name="map_description">Tap on the map to set the location of this card.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -62,4 +64,5 @@
     <string name="delete_card">Delete card</string>
     <string name="delete_this_card_q">Delete this card?</string>
     <string name="you_cannot_undo_this">You cannot undo this.</string>
+    <string name="enter_recovery_code">Enter recovery code</string>
 </resources>

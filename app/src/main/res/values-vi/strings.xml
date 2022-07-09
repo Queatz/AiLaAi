@@ -14,7 +14,7 @@
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Mã này sẽ hoạt động trong 48 giờ.</string>
-    <string name="my_cards">Thẻ mình</string>
+    <string name="my_cards">Thẻ của mình</string>
     <string name="invite">Mời ai đó</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Tạo thẻ mới</string>
@@ -24,7 +24,7 @@
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
     <string name="find_my_location">Tìm vị trí của mình</string>
     <string name="finding_your_location">Đang tìm vị trí của bạn…</string>
-    <string name="no_cards_to_show">Không có thẻ để cho bạn xem.</string>
+    <string name="no_cards_to_show">Không tìm được thẻ để cho bạn xem.</string>
     <string name="explore">Khám phá</string>
     <string name="messages">Tin nhắn</string>
     <string name="me">Mình</string>
@@ -39,18 +39,16 @@
     <string name="active">Hoạt động</string>
     <string name="notification_channel_description">Tin nhắn từ những người sử dụng ứng dụng này.</string>
     <string name="copy">Sao chép</string>
-    <string name="delete">Xóa bỏ</string>
+    <string name="delete">Xóa</string>
     <string name="connected">Đã kết nối</string>
     <string name="somewhere">Một nơi nào đó</string>
     <string name="send_a_message">Gửi tin nhắn</string>
     <string name="go_back">Quay lại</string>
     <string name="card_active">Thẻ đang hoạt động</string>
     <string name="card_inactive">Thẻ không hoạt động</string>
-    <string name="card_location">Vị trí thẻ</string>
-    <string name="location_name">Tên vị trí</string>
-    <string name="location_name_description">Tên vị trí được hiển thị trên thẻ để giúp người khác nhanh chóng hiểu vị
-        trí của bạn nói chung.
-    </string>
+    <string name="card_location">Vị trí của thẻ</string>
+    <string name="location_name">Tên vị của trí</string>
+    <string name="location_name_description">Tên của vị trí được hiển thị trên thẻ để giúp mọi người biết vị trí của bạn.</string>
     <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lữu</string>
@@ -63,6 +61,7 @@
     <string name="continue_conversation">Tiếp tục cuộc trò chuyện này</string>
     <string name="add_an_option">Lựa chọn mới</string>
     <string name="delete_card">Xóa thẻ</string>
-    <string name="delete_this_card_q">Xóa thể này?</string>
-    <string name="you_cannot_undo_this">Bạn không thể hoàn tác điều này.</string>
+    <string name="delete_this_card_q">Xóa thẻ này?</string>
+    <string name="you_cannot_undo_this">Bạn không thể lấy lại thẻ này.</string>
+    <string name="enter_recovery_code">Nhập mã khôi phục</string>
 </resources>

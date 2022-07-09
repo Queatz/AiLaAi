@@ -14,7 +14,6 @@ Todo
 Pre launch
 ----------
 
- * [ ] L 1 `UI` Choose language + extract all strings
  * [ ] M 1 `Release` Download app on ailaai.app, explain unknown sources
  * [ ] M 1 `Release` App icon
 

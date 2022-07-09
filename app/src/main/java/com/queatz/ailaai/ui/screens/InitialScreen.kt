@@ -4,9 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,5 +82,12 @@ fun InitialScreen(onKnown: () -> Unit) {
                 signUp(codeValue)
             }),
         )
+        TextButton(
+            {
+            // todo
+        }
+        ) {
+            Text(stringResource(R.string.enter_recovery_code))
+        }
     }
 }
