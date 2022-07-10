@@ -57,7 +57,7 @@ fun InitialScreen(onKnown: () -> Unit) {
                 }
             },
             title = {
-                Text("Enter transfer code")
+                Text(stringResource(R.string.enter_transfer_code))
             },
             text = {
                 Column(
@@ -73,7 +73,7 @@ fun InitialScreen(onKnown: () -> Unit) {
                                 signIn(transferCode)
                             }
                         },
-                        placeholder = { Text("Transfer code") },
+                        placeholder = { Text(stringResource(R.string.transfer_code)) },
                         shape = MaterialTheme.shapes.large,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(

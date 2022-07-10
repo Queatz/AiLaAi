@@ -66,5 +66,11 @@
     <string name="delete_this_card_q">Delete this card?</string>
     <string name="you_cannot_undo_this">You cannot undo this.</string>
     <string name="enter_transfer_code">Enter transfer code</string>
+    <string name="transfer_code">Transfer code</string>
     <string name="sign_out">Sign out</string>
+    <string name="your_transfer_code_is">Your transfer code is:</string>
+    <string name="sign_out_warning">Email this code to yourself or keep it somewhere where you won\'t lose it!\n\nYou will need this transfer code to regain access to your account after signing out.</string>
+    <string name="sign_out_confirmation">I understand that I need my transfer code in order to use this account again.</string>
+    <string name="sign_out_description">If you sign out without a transfer code you will permanently lose access to your account!</string>
+    <string name="show_transfer_code">Show transfer code</string>
 </resources>

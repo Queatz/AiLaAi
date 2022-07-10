@@ -101,10 +101,10 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                             Checkbox(confirmSignOutChecked, {
                                 confirmSignOutChecked = it
                             })
-                            Text("I understand that I need my transfer code in order to use this account again.")
+                            Text(stringResource(R.string.sign_out_confirmation))
                         }
                     } else if (transferCode.isNotBlank()) {
-                        Text("Your transfer code is:")
+                        Text(stringResource(R.string.your_transfer_code_is))
                         SelectionContainer {
                             Text(
                                 transferCode,
@@ -117,9 +117,9 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                                     .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
                             )
                         }
-                        Text("Email this code to yourself or keep it somewhere where you won't lose it!\n\nYou will need this transfer code to regain access to your account after signing out.")
+                        Text(stringResource(R.string.sign_out_warning))
                     } else {
-                        Text("If you sign out without a transfer code you will permanently lose access to your account!")
+                        Text(stringResource(R.string.sign_out_description))
                         Button(
                             {
                                 coroutineScope.launch {
@@ -131,7 +131,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                                 }
                             }
                         ) {
-                            Text("Show transfer code")
+                            Text(stringResource(R.string.show_transfer_code))
                         }
                     }
                 }

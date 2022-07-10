@@ -65,5 +65,11 @@
     <string name="delete_this_card_q">Xóa thẻ này?</string>
     <string name="you_cannot_undo_this">Bạn không thể lấy lại thẻ này.</string>
     <string name="enter_transfer_code">Nhập mã chuyển khoản</string>
+    <string name="transfer_code">Mã chuyển khoản</string>
     <string name="sign_out">Đăng xuất</string>
+    <string name="your_transfer_code_is">Mã chuyển khoản của bạn là:</string>
+    <string name="show_transfer_code">Nhận mã chuyển khoản</string>
+    <string name="sign_out_warning">Gửi mã này qua email cho chính bạn hoặc giữ ở nơi nào đó mà bạn sẽ không bị mất!\n\nBạn sẽ cần mã chuyển này để lấy lại quyền truy cập vào tài khoản của mình sau khi đăng xuất.</string>
+    <string name="sign_out_confirmation">Mình hiểu rằng mình cần mã chuyển khoản để sử dụng lại tài khoản này.</string>
+    <string name="sign_out_description">Nếu bạn đăng xuất mà không có mã chuyển khoản, bạn sẽ vĩnh viễn mất quyền truy cập vào tài khoản của mình!</string>
 </resources>
