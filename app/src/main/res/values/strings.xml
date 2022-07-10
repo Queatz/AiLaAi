@@ -4,7 +4,8 @@
     <string name="language_vietnamese">Tiếng Việt</string>
     <string name="language_english">English</string>
     <string name="language">Language</string>
-    <string name="sign_out">Sign out</string>
+    <string name="sign_out_or_transfer">Sign out or transfer</string>
+    <string name="sign_in">Sign in</string>
     <string name="photo_and_name_description">Your name and photo are used for messaging. You can use a different name on each of your cards.</string>
     <string name="update_your_name">Update your name</string>
     <string name="your_name">Your name</string>
@@ -64,5 +65,6 @@
     <string name="delete_card">Delete card</string>
     <string name="delete_this_card_q">Delete this card?</string>
     <string name="you_cannot_undo_this">You cannot undo this.</string>
-    <string name="enter_recovery_code">Enter recovery code</string>
+    <string name="enter_transfer_code">Enter transfer code</string>
+    <string name="sign_out">Sign out</string>
 </resources>

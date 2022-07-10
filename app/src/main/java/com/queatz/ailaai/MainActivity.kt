@@ -104,16 +104,20 @@ class MainActivity : AppCompatActivity() {
                             composable("me") { MeScreen(navController) { me } }
                             composable("settings") {
                                 SettingsScreen(navController, { me }) {
-                                    coroutineScope.launch {
-                                        try {
-                                            me = api.me()
-                                        } catch (ex: Exception) {
-                                            ex.printStackTrace()
-                                            snackbarHostState.showSnackbar(
-                                                getString(R.string.cant_connect),
-                                                withDismissAction = true
-                                            )
+                                    if (api.hasToken()) {
+                                        coroutineScope.launch {
+                                            try {
+                                                me = api.me()
+                                            } catch (ex: Exception) {
+                                                ex.printStackTrace()
+                                                snackbarHostState.showSnackbar(
+                                                    getString(R.string.cant_connect),
+                                                    withDismissAction = true
+                                                )
+                                            }
                                         }
+                                    } else {
+                                        known = false
                                     }
                                 }
                             }

@@ -31,6 +31,8 @@ Post launch
 Way later
 ---------
 
+ * [ ] M Set card visibility, specific people, all friends, etc.
+
  * [ ] M `Feature` Expire cards after 2 months of inactivty after sending a push notification
  * [ ] M `Feature` Discovered cards 3 / 5 of Jacob's cards - Can you find the other two?
  * [ ] L `Feature` Send photos, audio and videos

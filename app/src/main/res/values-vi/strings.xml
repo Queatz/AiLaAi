@@ -5,7 +5,8 @@
     <string name="language_vietnamese">Tiếng Việt</string>
     <string name="language_english">English</string>
     <string name="language">Ngôn ngữ</string>
-    <string name="sign_out">Đăng xuất</string>
+    <string name="sign_out_or_transfer">Đăng xuất hoặc chuyển khoản</string>
+    <string name="sign_in">Đăng nhập</string>
     <string name="photo_and_name_description">Tên và ảnh của bạn được sử dụng để nhắn tin. Bạn có thể sử dụng một tên khác trên mỗi thẻ của mình.</string>
     <string name="update_your_name">Cập nhật tên của bạn</string>
     <string name="your_name">Tên của bạn</string>
@@ -13,7 +14,7 @@
     <string name="close">Đóng</string>
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
-    <string name="invite_code_description">Mã này sẽ hoạt động trong 48 giờ.</string>
+    <string name="invite_code_description">Dùng mã này sẽ được trong vòng 48 giờ.</string>
     <string name="my_cards">Thẻ của mình</string>
     <string name="invite">Mời ai đó</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
@@ -63,5 +64,6 @@
     <string name="delete_card">Xóa thẻ</string>
     <string name="delete_this_card_q">Xóa thẻ này?</string>
     <string name="you_cannot_undo_this">Bạn không thể lấy lại thẻ này.</string>
-    <string name="enter_recovery_code">Nhập mã khôi phục</string>
+    <string name="enter_transfer_code">Nhập mã chuyển khoản</string>
+    <string name="sign_out">Đăng xuất</string>
 </resources>

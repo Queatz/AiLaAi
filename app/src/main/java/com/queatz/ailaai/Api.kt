@@ -26,20 +26,18 @@ import kotlinx.datetime.toJavaInstant
 import java.lang.reflect.Type
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 val api = Api()
 val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()!!
 
-val appDomain = "https://ailaai.app"
+const val appDomain = "https://ailaai.app"
 
-@OptIn(ExperimentalTime::class)
 class Api {
 
     private lateinit var context: Context
 
-    private val baseUrl = "https://api.ailaai.app"
-//    private val baseUrl = "http://10.0.2.2:8080"
+//    private val baseUrl = "https://api.ailaai.app"
+    private val baseUrl = "http://10.0.2.2:8080"
 
     private val tokenKey = stringPreferencesKey("token")
 
@@ -123,9 +121,13 @@ class Api {
 
     fun hasToken() = token != null
 
-    suspend fun signUp(code: String): TokenResponse = post("sign/up", SignUpRequest(code))
+    suspend fun signUp(inviteCode: String): TokenResponse = post("sign/up", SignUpRequest(inviteCode))
+
+    suspend fun signIn(transferCode: String): TokenResponse = post("sign/in", SignInRequest(transferCode))
 
     suspend fun me(): Person = get("me")
+
+    suspend fun transferCode(): Transfer = get("me/transfer")
 
     suspend fun myDevice(deviceType: DeviceType, deviceToken: String): HttpStatusCode = post("me/device", Device(deviceType, deviceToken))
 
@@ -184,9 +186,8 @@ data class SignUpRequest(
     val code: String
 )
 
-data class SignOnRequest(
-    val email: String,
-    val code: String?
+data class SignInRequest(
+    val code: String
 )
 
 data class TokenResponse(

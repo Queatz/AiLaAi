@@ -39,6 +39,10 @@ class Message(
     var text: String? = null
 ) : Model()
 
+class Transfer(
+    var code: String? = null
+) : Model()
+
 open class Edge : Model() {
     var from: String? = null
     var to: String? = null
