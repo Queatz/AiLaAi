@@ -2,6 +2,8 @@
 Todo
 ====
 
+ * [ ] M 3 `UI` Swipe up action to reveal closes card
+
  * [ ] S 2 `UI` Show error messages, i.e. in dialogs if network fails
  * [ ] S 2 `Bug` Changing languages clears name
 
@@ -14,7 +16,6 @@ Pre launch
 ----------
 
  * [ ] M 1 `Release` Download app on ailaai.app, explain unknown sources
- * [ ] M 1 `Release` App icon
 
 Post launch
 -----------
