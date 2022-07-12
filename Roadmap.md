@@ -2,14 +2,14 @@
 Todo
 ====
 
+ * [ ] S 2 `UI` Show "Invite code expired 6 days ago"
+ * [ ] S 2 `UI` Show error messages
+ * [ ] S 2 `Bug` Changing languages clears name
+
  * [ ] M 2 `UI` When sending a message from a card, automatically post a link to that card in the chat
 
  * [ ] M 2 `Backend` Resize card and portfolio images to reduce image sizes
  * [ ] S 2 `Backend` Delete device tokens that are identified as expired
-
- * [ ] S 3 `UI` `Email` Sign out warning if account has no email (you will lose access to your account forever)
- * [ ] XS 3 `UI` `Email` Add email in settings (also only return email on /me endpoint)
- * [ ] M 3 `UI` `Email` Sign in with email (button)
 
 Pre launch
 ----------

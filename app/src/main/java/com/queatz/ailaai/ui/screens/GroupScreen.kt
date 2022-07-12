@@ -92,7 +92,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
                         otherMember?.person?.seen?.let {
                             Text(
-                                "${stringResource(R.string.active)} ${it.timeAgo()}",
+                                "${stringResource(R.string.active)} ${it.timeAgo().lowercase()}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )

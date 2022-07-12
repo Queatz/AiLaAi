@@ -88,8 +88,13 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     }
 
     LaunchedEffect(true) {
-        myCards = api.myCards()
-        isLoading = false
+        try {
+            myCards = api.myCards()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            isLoading = false
+        }
     }
 
     Column {

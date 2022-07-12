@@ -69,7 +69,9 @@
     <string name="sign_out">Đăng xuất</string>
     <string name="your_transfer_code_is">Mã chuyển khoản của bạn là:</string>
     <string name="show_transfer_code">Nhận mã chuyển khoản</string>
-    <string name="sign_out_warning">Gửi mã này qua email cho chính bạn hoặc giữ ở nơi nào đó mà bạn sẽ không bị mất!\n\nBạn sẽ cần mã chuyển này để lấy lại quyền truy cập vào tài khoản của mình sau khi đăng xuất.</string>
+    <string name="sign_out_warning">Gửi mã này qua email của bạn hoặc giữ ở nơi nào đó mà bạn sẽ không bị mất!\n\nBạn sẽ cần mã chuyển này để lấy lại quyền truy cập vào tài khoản của mình sau khi đăng xuất.</string>
     <string name="sign_out_confirmation">Mình hiểu rằng mình cần mã chuyển khoản để sử dụng lại tài khoản này.</string>
     <string name="sign_out_description">Nếu bạn đăng xuất mà không có mã chuyển khoản, bạn sẽ vĩnh viễn mất quyền truy cập vào tài khoản của mình!</string>
+    <string name="delete_this_message">Xóa tin nhắn này?</string>
+    <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong cuộc trò chuyện.</string>
 </resources>

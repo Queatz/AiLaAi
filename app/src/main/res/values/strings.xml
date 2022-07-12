@@ -48,9 +48,7 @@
     <string name="card_inactive">Card is inactive</string>
     <string name="card_location">Card location</string>
     <string name="location_name">Location name</string>
-    <string name="location_name_description">The location name is shown on the card to help others know where you are
-        located.
-    </string>
+    <string name="location_name_description">The location name is shown on the card to help others know where you are located.</string>
     <string name="map_description">Tap on the map to set the location of this card.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -73,4 +71,6 @@
     <string name="sign_out_confirmation">I understand that I need my transfer code in order to use this account again.</string>
     <string name="sign_out_description">If you sign out without a transfer code you will permanently lose access to your account!</string>
     <string name="show_transfer_code">Show transfer code</string>
+    <string name="delete_this_message">Delete this message?</string>
+    <string name="delete_message_description">The message will be removed for everyone in the conversation.</string>
 </resources>
