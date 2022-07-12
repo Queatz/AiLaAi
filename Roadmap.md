@@ -2,8 +2,7 @@
 Todo
 ====
 
- * [ ] S 2 `UI` Show "Invite code expired 6 days ago"
- * [ ] S 2 `UI` Show error messages
+ * [ ] S 2 `UI` Show error messages, i.e. in dialogs if network fails
  * [ ] S 2 `Bug` Changing languages clears name
 
  * [ ] M 2 `UI` When sending a message from a card, automatically post a link to that card in the chat

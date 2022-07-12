@@ -74,4 +74,5 @@
     <string name="sign_out_description">Nếu bạn đăng xuất mà không có mã chuyển khoản, bạn sẽ vĩnh viễn mất quyền truy cập vào tài khoản của mình!</string>
     <string name="delete_this_message">Xóa tin nhắn này?</string>
     <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong cuộc trò chuyện.</string>
+    <string name="code_expired">Mã hết hạn hoặc không tồn tại</string>
 </resources>

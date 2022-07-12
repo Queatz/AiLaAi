@@ -17,12 +17,14 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
+import io.ktor.http.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InitialScreen(onKnown: () -> Unit) {
     var codeValue by remember { mutableStateOf("") }
+    var codeExpired by remember { mutableStateOf(false) }
     var codeValueEnabled by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current!!
@@ -67,7 +69,7 @@ fun InitialScreen(onKnown: () -> Unit) {
                     OutlinedTextField(
                         transferCode,
                         {
-                            transferCode = it
+                            transferCode = it.take(16)
 
                             if (transferCode.length == 16) {
                                 signIn(transferCode)
@@ -95,6 +97,8 @@ fun InitialScreen(onKnown: () -> Unit) {
             } catch (ex: Exception) {
                 if (ex !is ResponseException) {
                     ex.printStackTrace()
+                } else if (ex.response.status == HttpStatusCode.Unauthorized) {
+                    codeExpired = true
                 }
             } finally {
                 codeValueEnabled = true
@@ -103,7 +107,7 @@ fun InitialScreen(onKnown: () -> Unit) {
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault * 4, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -127,6 +131,10 @@ fun InitialScreen(onKnown: () -> Unit) {
             onValueChange = {
                 codeValue = it.take(6)
 
+                if (codeExpired) {
+                    codeExpired = false
+                }
+
                 if (it.length == 6) {
                     codeValueEnabled = false
                     signUp(it)
@@ -145,10 +153,16 @@ fun InitialScreen(onKnown: () -> Unit) {
                 signUp(codeValue)
             }),
         )
+
+        if (codeExpired) {
+            Text(stringResource(R.string.code_expired), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
+
         TextButton(
             {
                 signInDialog = true
-            }
+            },
+            modifier = Modifier.padding(vertical = PaddingDefault * 3)
         ) {
             Text(stringResource(R.string.sign_in))
         }
