@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -53,8 +54,10 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                groupExtended.latestMessage?.text ?: person?.seen?.timeAgo() ?.let { "${stringResource(R.string.active)} $it" } ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo()}",
+                groupExtended.latestMessage?.text ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo()}",
                 style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
                 color = MaterialTheme.colorScheme.secondary
             )
         }
