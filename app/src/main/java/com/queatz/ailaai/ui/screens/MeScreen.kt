@@ -197,10 +197,14 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 ElevatedButton(
                     {
                         coroutineScope.launch {
-                            addedCardId = api.newCard().id
-                            myCards = api.myCards()
-                            delay(100)
-                            state.animateScrollToItem(0)
+                            try {
+                                addedCardId = api.newCard().id
+                                myCards = api.myCards()
+                                delay(100)
+                                state.animateScrollToItem(0)
+                            } catch (ex: Exception) {
+                                ex.printStackTrace()
+                            }
                         }
                     }
                 ) {

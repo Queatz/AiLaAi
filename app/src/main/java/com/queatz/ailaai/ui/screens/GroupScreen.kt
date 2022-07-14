@@ -41,6 +41,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
     LaunchedEffect(true) {
         isLoading = true
+
         try {
             groupExtended = api.group(groupId)
         } catch (ex: Exception) {

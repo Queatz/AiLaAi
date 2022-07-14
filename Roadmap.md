@@ -6,10 +6,8 @@ Incoming
  * [ ] ? ? check if messages come in as push notifications if the screen is off but the app is open on that group
  * [ ] ? ? Messages badge in bottom bar
  * [ ] ? ? Notification icon in header is just a circle?
- * [ ] ? ? limit message length in push and contact list
  * [ ] ? ? load older messages paged
  * [ ] ? ? crash when typing message?
- * 
 
 Todo
 ====

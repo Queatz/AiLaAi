@@ -188,9 +188,13 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
         Switch(active, {
             active = it
             coroutineScope.launch {
-                val update = api.updateCard(card.id!!, Card(active = active))
-                card.active = update.active
-                activeCommitted = update.active ?: false
+                try {
+                    val update = api.updateCard(card.id!!, Card(active = active))
+                    card.active = update.active
+                    activeCommitted = update.active ?: false
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
             }
         })
         Text(
