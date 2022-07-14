@@ -39,7 +39,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
             model = person?.photo?.let { api.url(it) } ?: "",
             contentDescription = "",
             contentScale = ContentScale.Crop,
-            alignment = Alignment.TopCenter,
+            alignment = Alignment.Center,
             modifier = Modifier
                 .padding(PaddingDefault)
                 .requiredSize(64.dp)

@@ -160,7 +160,7 @@ fun ProfileImage(person: Person?, padding: PaddingValues) {
         model = person?.photo?.let { api.url(it) } ?: "",
         contentDescription = "",
         contentScale = ContentScale.Crop,
-        alignment = Alignment.TopCenter,
+        alignment = Alignment.Center,
         modifier = Modifier
             .padding(padding)
             .requiredSize(32.dp)

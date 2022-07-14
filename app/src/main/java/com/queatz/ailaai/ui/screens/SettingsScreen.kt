@@ -8,8 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -175,7 +173,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 model = me()?.photo?.let { api.url(it) } ?: "",
                 contentDescription = stringResource(R.string.your_photo),
                 contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter,
+                alignment = Alignment.Center,
                 modifier = Modifier
                     .padding(PaddingDefault)
                     .requiredSize(84.dp)

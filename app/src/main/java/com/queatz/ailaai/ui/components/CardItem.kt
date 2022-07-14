@@ -3,6 +3,9 @@ package com.queatz.ailaai.ui.components
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -15,7 +18,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -49,10 +54,12 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.gson
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
@@ -67,13 +74,29 @@ fun BasicCard(
         colors = CardDefaults.elevatedCardColors(),
         elevation = CardDefaults.elevatedCardElevation(),
     ) {
+        var hideContent by remember { mutableStateOf(false) }
+        val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
+        val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
+
+        LaunchedEffect(hideContent) {
+            if (hideContent) {
+                delay(2.seconds)
+                hideContent = false
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(.75f)
-                .clickable {
-                    onClick()
-                },
+                .combinedClickable(
+                    onClick = {
+                        onClick()
+                    },
+                    onLongClick = {
+                        hideContent = true
+                    }
+                ),
             contentAlignment = Alignment.BottomCenter
         ) {
             card.photo?.also {
@@ -84,13 +107,14 @@ fun BasicCard(
                         .build(),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopCenter,
-                    modifier = Modifier.matchParentSize()
+                    alignment = Alignment.Center,
+                    modifier = Modifier.matchParentSize().scale(scale)
                 )
             }
 
             Column(
                 modifier = Modifier
+                    .alpha(alpha)
                     .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
                     .padding(PaddingDefault * 2)
             ) {
@@ -143,7 +167,11 @@ fun BasicCard(
                         onClick()
                     }, enabled = !isMine) {
                         Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
-                        Text(stringResource(R.string.send_a_message), overflow = TextOverflow.Ellipsis, maxLines = 1)
+                        Text(
+                            stringResource(R.string.send_a_message),
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
                     }
                 }
 
@@ -241,6 +269,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                     }
                 }
             }
+
             else -> {}
         }
 
@@ -452,7 +481,9 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
             ) {
                 val scrollState = rememberScrollState()
                 val currentRecomposeScope = currentRecomposeScope
-                fun invalidate() { currentRecomposeScope.invalidate() }
+                fun invalidate() {
+                    currentRecomposeScope.invalidate()
+                }
 
                 Column(
                     modifier = Modifier.padding(PaddingDefault * 3)
@@ -501,7 +532,8 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                     modifier = Modifier.padding(end = PaddingDefault)
                                 )
                                 Text(
-                                    backstack.last().message.takeIf { it.isNotBlank() } ?: stringResource(R.string.go_back),
+                                    backstack.last().message.takeIf { it.isNotBlank() }
+                                        ?: stringResource(R.string.go_back),
                                     overflow = TextOverflow.Ellipsis,
                                     maxLines = 1
                                 )
@@ -517,9 +549,13 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                 cardConversation.message = it
                             },
                             shape = MaterialTheme.shapes.large,
-                            label = { Text(if (backstack.isEmpty()) stringResource(R.string.your_message) else stringResource(
-                                                            R.string.your_reply)
-                                                        ) },
+                            label = {
+                                Text(
+                                    if (backstack.isEmpty()) stringResource(R.string.your_message) else stringResource(
+                                        R.string.your_reply
+                                    )
+                                )
+                            },
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Sentences,
                                 imeAction = ImeAction.Next
@@ -531,7 +567,10 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                         )
 
                         Text(
-                            if (backstack.isEmpty()) stringResource(R.string.card_message_description) else stringResource(R.string.card_reply_description, cardConversation.title),
+                            if (backstack.isEmpty()) stringResource(R.string.card_message_description) else stringResource(
+                                R.string.card_reply_description,
+                                cardConversation.title
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
@@ -580,7 +619,10 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                                         },
                                         colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                                     ) {
-                                        Icon(Icons.Outlined.ArrowForward, stringResource(R.string.continue_conversation))
+                                        Icon(
+                                            Icons.Outlined.ArrowForward,
+                                            stringResource(R.string.continue_conversation)
+                                        )
                                     }
                                 }
                             }
