@@ -10,10 +10,9 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
-import java.util.concurrent.Flow
 
 val push = Push()
 
@@ -21,6 +20,7 @@ class Push {
 
     private lateinit var context: Context
     var navController: NavController? = null
+    var latestEvent: Lifecycle.Event? = null
 
     private val latestMessageFlow = MutableStateFlow<String?>(null)
     val latestMessage: StateFlow<String?> = latestMessageFlow
@@ -44,6 +44,7 @@ class Push {
 
     private fun receive(data: MessagePushData) {
         if (
+            latestEvent == Lifecycle.Event.ON_RESUME &&
             navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
             navController?.currentBackStackEntry?.arguments?.getString("id") == data.group.id
         ) {
