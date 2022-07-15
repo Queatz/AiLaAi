@@ -75,4 +75,5 @@
     <string name="delete_this_message">Xóa tin nhắn này?</string>
     <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong cuộc trò chuyện.</string>
     <string name="code_expired">Mã hết hạn hoặc không tồn tại</string>
+    <string name="you_x">Bạn: %1$s</string>
 </resources>

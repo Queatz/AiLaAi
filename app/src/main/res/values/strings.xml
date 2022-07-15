@@ -74,4 +74,5 @@
     <string name="delete_this_message">Delete this message?</string>
     <string name="delete_message_description">The message will be removed for everyone in the conversation.</string>
     <string name="code_expired">Code expired or doesn\'t exist</string>
+    <string name="you_x">You: %1$s</string>
 </resources>

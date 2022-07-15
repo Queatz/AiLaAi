@@ -19,10 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getSystemService
 import coil.compose.AsyncImage
-import com.queatz.ailaai.Message
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -114,8 +112,9 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean,
         )
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
+            LinkifyText(
                 message.text ?: "",
+                linkColor = MaterialTheme.colorScheme.primary,
                 color = if (isMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .align(if (isMe) Alignment.End else Alignment.Start)

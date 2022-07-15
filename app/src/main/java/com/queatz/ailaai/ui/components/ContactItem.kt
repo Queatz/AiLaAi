@@ -29,6 +29,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 @Composable
 fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: Person?) {
     val person = groupExtended.members?.find { it.person?.id != me?.id }?.person
+    val myMember = groupExtended.members?.find { it.person?.id == me?.id }
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
         .clip(MaterialTheme.shapes.large)
@@ -54,7 +55,9 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                groupExtended.latestMessage?.text ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo().lowercase()}",
+                groupExtended.latestMessage?.text?.let {
+                    if (groupExtended.latestMessage!!.member == myMember?.member?.id) stringResource(R.string.you_x, it) else it
+                } ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo().lowercase()}",
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,
