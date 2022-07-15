@@ -12,7 +12,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 val push = Push()
 
@@ -21,9 +24,10 @@ class Push {
     private lateinit var context: Context
     var navController: NavController? = null
     var latestEvent: Lifecycle.Event? = null
+    val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private val latestMessageFlow = MutableStateFlow<String?>(null)
-    val latestMessage: StateFlow<String?> = latestMessageFlow
+    private val latestMessageFlow = MutableSharedFlow<String?>()
+    val latestMessage: Flow<String?> = latestMessageFlow
 
     fun receive(data: Map<String, String>) {
         if (!data.containsKey("action")) {
@@ -48,7 +52,9 @@ class Push {
             navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
             navController?.currentBackStackEntry?.arguments?.getString("id") == data.group.id
         ) {
-            latestMessageFlow.tryEmit(data.group.id)
+            coroutineScope.launch {
+                latestMessageFlow.emit(data.group.id)
+            }
             return
         }
 

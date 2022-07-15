@@ -27,7 +27,8 @@ import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,15 +60,18 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    LaunchedEffect(true) {
-        push.latestMessage.filter { it != null }.collect {
+    push.latestMessage
+        .filter { it != null }
+        .conflate()
+        .catch { it.printStackTrace() }
+        .onEach {
             try {
                 messages = api.messages(groupId)
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
         }
-    }
+        .launchIn(coroutineScope)
 
     Column(
         verticalArrangement = Arrangement.Bottom,
@@ -119,9 +123,13 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     DropdownMenu(showMenu, { showMenu = false }) {
                         val hidden = myMember!!.member?.hide == true
 
-                        DropdownMenuItem({ Text(if (hidden) stringResource(R.string.show_conversation) else stringResource(
-                                                    R.string.hide_conversation)
-                                                ) }, {
+                        DropdownMenuItem({
+                            Text(
+                                if (hidden) stringResource(R.string.show_conversation) else stringResource(
+                                    R.string.hide_conversation
+                                )
+                            )
+                        }, {
                             coroutineScope.launch {
                                 try {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
@@ -193,6 +201,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+
                             false -> {}
                         }
                     }
