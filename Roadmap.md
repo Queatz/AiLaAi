@@ -5,9 +5,7 @@ Incoming
  * [ ] ? ? Bubble callout on messages screen to set your name and photo
  * [ ] ? ? check if messages come in as push notifications if the screen is off but the app is open on that group
  * [ ] ? ? Messages badge in bottom bar
- * [ ] ? ? Notification icon in header is just a circle?
  * [ ] ? ? load older messages paged when scrolling up
- * [ ] ? ? messages don't load when the screen is open in some situations like after a backgrounding
  * [ ] ? ? Auto link links
  * [ ] ? ? Lowercase on "Connected <<Time>>" also
  * [ ] ? ? Reload contacts list on new message as well

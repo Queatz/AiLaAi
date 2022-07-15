@@ -66,7 +66,7 @@ class Push {
         )
 
         val builder = NotificationCompat.Builder(context, "messages")
-            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(data.person.name)
             .setContentText(data.message.text)
             .setGroup(data.group.id)
