@@ -3,11 +3,9 @@ Incoming
 ====
 
  * [ ] ? ? Bubble callout on messages screen to set your name and photo
- * [ ] ? ? check if messages come in as push notifications if the screen is off but the app is open on that group
  * [ ] ? ? Messages badge in bottom bar
  * [ ] ? ? load older messages paged when scrolling up
  * [ ] ? ? Reload contacts list on new message as well
- * [ ] ? ? Opening app from notification does not send new messages to the activity
 
 Todo
 ====

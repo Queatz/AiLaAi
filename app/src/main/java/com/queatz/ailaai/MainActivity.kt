@@ -44,7 +44,9 @@ class MainActivity : AppCompatActivity() {
                 push.navController = navController
 
                 OnLifecycleEvent {
-                    push.latestEvent = it
+                    if (push.navController == navController) {
+                        push.latestEvent = it
+                    }
                 }
 
                 val showBottomBar = navController.currentBackStackEntryAsState()
