@@ -54,7 +54,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                groupExtended.latestMessage?.text ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo()}",
+                groupExtended.latestMessage?.text ?: "${stringResource(R.string.connected)} ${groupExtended.group!!.createdAt!!.timeAgo().lowercase()}",
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,

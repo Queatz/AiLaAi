@@ -7,7 +7,6 @@ Incoming
  * [ ] ? ? Messages badge in bottom bar
  * [ ] ? ? load older messages paged when scrolling up
  * [ ] ? ? Auto link links
- * [ ] ? ? Lowercase on "Connected <<Time>>" also
  * [ ] ? ? Reload contacts list on new message as well
  * [ ] ? ? Show You: On latest message
 
