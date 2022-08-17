@@ -27,7 +27,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by remember { mutableStateOf(listOf<Card>()) }

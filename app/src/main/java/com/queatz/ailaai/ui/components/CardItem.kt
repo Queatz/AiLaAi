@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
@@ -195,7 +195,8 @@ fun BasicCard(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class)
+@SuppressLint("MissingPermission")
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean) {
     var openDeleteDialog by remember { mutableStateOf(false) }
@@ -540,7 +541,9 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             }
                         }
 
-                        var messageState by mutableStateOf(cardConversation.message)
+                        var messageState by remember {
+                            mutableStateOf(cardConversation.message)
+                        }
 
                         OutlinedTextField(
                             messageState,

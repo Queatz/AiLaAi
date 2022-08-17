@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val groupId = navBackStackEntry.arguments!!.getString("id")!!
@@ -60,18 +61,20 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    push.latestMessage
-        .filter { it != null }
-        .conflate()
-        .catch { it.printStackTrace() }
-        .onEach {
-            try {
-                messages = api.messages(groupId)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+    LaunchedEffect(true) {
+        push.latestMessage
+            .filter { it != null }
+            .conflate()
+            .catch { it.printStackTrace() }
+            .onEach {
+                try {
+                    messages = api.messages(groupId)
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
             }
-        }
-        .launchIn(coroutineScope)
+            .launchIn(coroutineScope)
+    }
 
     Column(
         verticalArrangement = Arrangement.Bottom,

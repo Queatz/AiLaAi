@@ -6,6 +6,13 @@ Incoming
  * [ ] ? ? Messages badge in bottom bar
  * [ ] ? ? load older messages paged when scrolling up
  * [ ] ? ? Reload contacts list on new message as well
+ * [ ] ? ? Save draft messages
+ * [ ] ? ? Also allow pressing go button to submit code/transfer sign in
+ * [ ] ? ? Ability to report & block an account?
+ * [ ] ? ? Notifications: show all recent messages in 1 notification group
+
+ * [ ] ? ? Rank cards from active users higher (more important than distance)
+ * [ ] ? ? Web view version
 
 Todo
 ====
