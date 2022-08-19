@@ -195,7 +195,7 @@ fun BasicCard(
     }
 }
 
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "UnrememberedMutableState")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean) {
@@ -541,9 +541,7 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
                             }
                         }
 
-                        var messageState by remember {
-                            mutableStateOf(cardConversation.message)
-                        }
+                        var messageState by mutableStateOf(cardConversation.message)
 
                         OutlinedTextField(
                             messageState,
