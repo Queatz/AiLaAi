@@ -2,6 +2,8 @@
 Incoming
 ====
 
+https://docs.google.com/presentation/d/1Y0BRk3EHk1AtCz8O2UU-J_BBiK-eeSxmBNnbKtxoP50/edit#slide=id.g144eae74425_0_154
+
  * [ ] ? ? Bubble callout on messages screen to set your name and photo
  * [ ] ? ? Messages badge in bottom bar
  * [ ] ? ? load older messages paged when scrolling up

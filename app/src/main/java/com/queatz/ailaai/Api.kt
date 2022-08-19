@@ -129,7 +129,8 @@ class Api {
 
     suspend fun transferCode(): Transfer = get("me/transfer")
 
-    suspend fun myDevice(deviceType: DeviceType, deviceToken: String): HttpStatusCode = post("me/device", Device(deviceType, deviceToken))
+    suspend fun myDevice(deviceType: DeviceType, deviceToken: String): HttpStatusCode =
+        post("me/device", Device(deviceType, deviceToken))
 
     suspend fun updateMe(person: Person): Person = post("me", person)
 
@@ -158,14 +159,15 @@ class Api {
         }
     ), client = httpData)
 
-    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode = post("cards/$id/photo", MultiPartFormDataContent(
-        formData {
-            append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
-                append(HttpHeaders.ContentType, "image/jpg")
-                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-            })
-        }
-    ), client = httpData)
+    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode =
+        post("cards/$id/photo", MultiPartFormDataContent(
+            formData {
+                append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
+                    append(HttpHeaders.ContentType, "image/jpg")
+                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                })
+            }
+        ), client = httpData)
 
     suspend fun cardGroup(card: String): Group = get("cards/$card/group")
 

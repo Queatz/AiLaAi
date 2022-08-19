@@ -155,7 +155,11 @@ fun InitialScreen(onKnown: () -> Unit) {
         )
 
         if (codeExpired) {
-            Text(stringResource(R.string.code_expired), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            Text(
+                stringResource(R.string.code_expired),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         TextButton(

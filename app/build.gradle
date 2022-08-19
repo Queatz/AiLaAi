@@ -85,8 +85,8 @@ dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'io.coil-kt:coil-compose:2.1.0'
     implementation 'com.google.accompanist:accompanist-permissions:0.25.0'
-    implementation "io.ktor:ktor-client-core:$ktorVersion"
-    implementation "io.ktor:ktor-client-okhttp:$ktorVersion"
+    implementation "io.ktor:ktor-client-core-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-client-okhttp-jvm:$ktorVersion"
     implementation "io.ktor:ktor-client-content-negotiation:$ktorVersion"
     implementation "io.ktor:ktor-serialization-gson:$ktorVersion"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
