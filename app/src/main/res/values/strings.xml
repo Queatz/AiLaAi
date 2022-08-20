@@ -42,7 +42,7 @@
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
     <string name="somewhere">Somewhere</string>
-    <string name="send_a_message">Send a message</string>
+    <string name="reply">Reply</string>
     <string name="go_back">Go back</string>
     <string name="card_active">Card is active</string>
     <string name="card_inactive">Card is inactive</string>
@@ -75,4 +75,7 @@
     <string name="delete_message_description">The message will be removed for everyone in the conversation.</string>
     <string name="code_expired">Code expired or doesn\'t exist</string>
     <string name="you_x">You: %1$s</string>
+    <string name="on_the_map">On the map</string>
+    <string name="inside_another_card">In a card</string>
+    <string name="search_cards">Search for a card</string>
 </resources>

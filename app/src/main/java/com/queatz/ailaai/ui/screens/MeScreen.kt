@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
@@ -76,7 +77,9 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     if (inviteCode.isBlank()) {
                         CircularProgressIndicator()
                     } else {
-                        Text(inviteCode, style = MaterialTheme.typography.displayMedium)
+                        SelectionContainer {
+                            Text(inviteCode, style = MaterialTheme.typography.displayMedium)
+                        }
                         Text(
                             stringResource(R.string.invite_code_description),
                             color = MaterialTheme.colorScheme.secondary

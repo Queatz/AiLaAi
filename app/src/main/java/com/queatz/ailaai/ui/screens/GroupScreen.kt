@@ -153,7 +153,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)
             )
             LazyColumn(reverseLayout = true, modifier = Modifier.weight(1f)) {
-                items(messages) {
+                items(messages, { it.id!! }) {
                     MessageItem(
                         it,
                         {

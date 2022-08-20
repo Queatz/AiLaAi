@@ -154,7 +154,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                             )
                         }
                     } else {
-                        items(cards) {
+                        items(cards, { it.id!! }) {
                             BasicCard(
                                 {
                                     coroutineScope.launch {
