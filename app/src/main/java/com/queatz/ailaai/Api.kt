@@ -140,6 +140,8 @@ class Api {
         mapOf("search" to search)
     } ?: mapOf()))
 
+    suspend fun card(id: String): Card = get("cards/$id")
+
     suspend fun myCards(): List<Card> = get("me/cards")
 
     suspend fun newCard(): Card = post("cards")

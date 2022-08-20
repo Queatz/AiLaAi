@@ -66,7 +66,20 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     var cardParentType by remember {
-        mutableStateOf(CardParentType.Map)
+        mutableStateOf(when (card.parent) {
+            null -> CardParentType.Map
+            else -> CardParentType.Card
+        })
+    }
+
+    card.parent?.let {
+        LaunchedEffect(true) {
+            try {
+                parentCard = api.card(it)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
     }
 
     when (permissionState.status) {
@@ -77,7 +90,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 }
             }
         }
-
         else -> {}
     }
 
@@ -95,7 +107,10 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
     Dialog(onDismissRequest) {
         Surface(
-            shape = MaterialTheme.shapes.extraLarge
+            shape = MaterialTheme.shapes.extraLarge,
+            modifier = Modifier
+                .padding(PaddingDefault * 2)
+                .fillMaxHeight(.9f)
         ) {
             Column(
                 modifier = Modifier
@@ -176,7 +191,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 modifier = Modifier
                                     .fillMaxSize()
                             ) {
-
                                 if (composed) {
                                     if (marker != null) {
                                         marker?.position = position
@@ -281,12 +295,14 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 LazyColumn(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier
+                                        .weight(1f)
                                 ) {
                                     items(myCards, { it.id!! }) {
                                         BasicCard(
                                             {
                                                 parentCard = it
+                                                card.parent = it.id
                                             },
                                             activity = activity,
                                             card = it,
@@ -299,6 +315,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 BasicCard(
                                     {
                                         parentCard = null
+                                        card.parent = null
                                     },
                                     activity = activity,
                                     card = parentCard!!,
@@ -310,6 +327,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                    verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     var disableSaveButton by remember { mutableStateOf(false) }
@@ -329,7 +347,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 try {
                                     val update = api.updateCard(
                                         card.id!!,
-                                        Card(location = locationName.trim(), geo = position.toList())
+                                        Card(location = locationName.trim(), geo = position.toList(), parent = card.parent)
                                     )
 
                                     card.location = update.location

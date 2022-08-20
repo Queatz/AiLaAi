@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -43,6 +44,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
@@ -195,7 +197,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     keyboardActions = KeyboardActions(onSearch = {
                         keyboardController.hide()
                     }),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
                 )
             }

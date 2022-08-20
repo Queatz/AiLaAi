@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 
 class Card(
     var person: String? = null,
+    var parent: String? = null,
     var name: String? = null,
     var photo: String? = null,
     var location: String? = null,

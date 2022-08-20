@@ -8,55 +8,31 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.compose.ui.window.Dialog
-import androidx.core.view.doOnAttach
-import androidx.core.view.doOnDetach
-import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.*
-import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
-import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
-import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.gson
 import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
@@ -199,7 +175,9 @@ fun BasicCard(
                         }
                     }
 
-                    if (isMine) showToolbar(activity, onChange, card, edit)
+                    if (isMine) {
+                        CardToolbar(activity, onChange, card, edit)
+                    }
                 }
             }
         }
@@ -208,7 +186,7 @@ fun BasicCard(
 
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @Composable
-private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean) {
+private fun ColumnScope.CardToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean) {
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(edit) }
@@ -264,25 +242,19 @@ private fun ColumnScope.showToolbar(activity: Activity, onChange: () -> Unit, ca
     if (openLocationDialog) {
         EditCardLocationDialog(card, activity, {
             openLocationDialog = false
-        }) {
-            onChange()
-        }
+        }, onChange)
     }
 
     if (openEditDialog) {
         EditCardDialog(card, {
             openEditDialog = false
-        }) {
-            onChange()
-        }
+        }, onChange)
     }
 
     if (openDeleteDialog) {
         DeleteCardDialog(card, {
-                openDeleteDialog = false
-            }) {
-            onChange()
-        }
+            openDeleteDialog = false
+        }, onChange)
     }
 }
 
