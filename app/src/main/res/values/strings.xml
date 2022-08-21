@@ -84,4 +84,5 @@
         <item quantity="one">%1$s card</item>
         <item quantity="other">%1$s cards</item>
     </plurals>
+    <string name="card_name">Card name</string>
 </resources>

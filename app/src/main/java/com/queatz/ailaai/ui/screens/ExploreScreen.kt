@@ -117,16 +117,21 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
         }
     } else {
-        if (cards.isEmpty()) {
-            LaunchedEffect(geo, value) {
-                isLoading = true
-                try {
-                    cards = api.cards(geo!!, value.takeIf { it.isNotBlank() })//.filter { it.person != me()?.id }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
-                isLoading = false
+        var initialSearch by remember { mutableStateOf(cards.isEmpty()) }
+
+        LaunchedEffect(geo, value) {
+            if (!initialSearch) {
+                initialSearch = true
+                return@LaunchedEffect
             }
+
+            isLoading = true
+            try {
+                cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+            isLoading = false
         }
 
         Box {

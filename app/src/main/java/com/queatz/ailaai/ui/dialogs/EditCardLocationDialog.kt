@@ -65,14 +65,11 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     val coroutineScope = rememberCoroutineScope()
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
-    var cardParentType by remember {
-        mutableStateOf(when (card.parent) {
-            null -> CardParentType.Map
-            else -> CardParentType.Card
-        })
-    }
+    var cardParentType by remember { mutableStateOf(CardParentType.Map) }
 
     card.parent?.let {
+        cardParentType = CardParentType.Card
+
         LaunchedEffect(true) {
             try {
                 parentCard = api.card(it)

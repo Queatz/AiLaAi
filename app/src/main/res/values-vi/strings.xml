@@ -10,6 +10,7 @@
     <string name="photo_and_name_description">Tên và ảnh của bạn được sử dụng để nhắn tin. Bạn có thể sử dụng một tên khác trên mỗi thẻ của mình.</string>
     <string name="update_your_name">Cập nhật tên của bạn</string>
     <string name="your_name">Tên của bạn</string>
+    <string name="card_name">Tên của thẻ</string>
     <string name="your_photo">Ảnh của bạn</string>
     <string name="close">Đóng</string>
     <string name="invite_code">Mã mời</string>

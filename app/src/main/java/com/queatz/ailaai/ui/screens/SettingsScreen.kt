@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -39,8 +40,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    var myName by remember { mutableStateOf(me()?.name ?: "") }
-    var myNameUnsaved by remember { mutableStateOf(false) }
+    var myName by rememberSaveable { mutableStateOf(me()?.name ?: "") }
+    var myNameUnsaved by rememberSaveable { mutableStateOf(false) }
     var signOutDialog by remember { mutableStateOf(false) }
 
     if (signOutDialog) {

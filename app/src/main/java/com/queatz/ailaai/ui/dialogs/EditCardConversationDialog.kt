@@ -77,7 +77,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         cardName = it
                     },
                     label = {
-                        Text(stringResource(R.string.your_name))
+                        Text(stringResource(R.string.card_name))
                     },
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
