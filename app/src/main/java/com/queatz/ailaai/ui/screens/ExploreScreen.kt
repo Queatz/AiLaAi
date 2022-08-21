@@ -10,10 +10,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -32,11 +35,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.Person
+import com.google.gson.reflect.TypeToken
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
-import com.queatz.ailaai.toLatLng
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -48,15 +49,23 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
+    val GsonSaver = Saver<List<Card>, String>(
+        { gson.toJson(it) },
+        { gson.fromJson(it, object : TypeToken<List<Card>>() {}.type) }
+    )
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
         navController.context as Activity
     )
-    var value by remember { mutableStateOf("") }
-    var geo: LatLng? by remember { mutableStateOf(null) }
+    var value by rememberSaveable { mutableStateOf("") }
+    var geo: LatLng? by rememberSaveable(stateSaver = Saver(
+        { if (it == null) null else listOf(it.latitude, it.longitude) },
+        { if (it.isEmpty()) null else LatLng.getFactory().create(it[0], it[1]) })
+    ) { mutableStateOf(null) }
     var isLoading by remember { mutableStateOf(false) }
-    var cards by remember { mutableStateOf(listOf<Card>()) }
+    var cards by rememberSaveable(stateSaver = GsonSaver) { mutableStateOf(listOf<Card>()) }
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
     if (!permissionState.status.isGranted) {
         Column(
@@ -95,15 +104,17 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             }
         }
     } else if (geo == null) {
-        locationClient.observeLocation(LocationRequest.createDefault())
-            .filter { it is Outcome.Success && it.value.lastLocation != null }
-            .takeWhile { coroutineScope.isActive }
+        LaunchedEffect(true) {
+            locationClient.observeLocation(LocationRequest.createDefault())
+                .filter { it is Outcome.Success && it.value.lastLocation != null }
+                .takeWhile { coroutineScope.isActive }
                 // todo dispose on close
-            .take(1)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                geo = (it as Outcome.Success).value.lastLocation!!.toLatLng()
-            }
+                .take(1)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    geo = (it as Outcome.Success).value.lastLocation!!.toLatLng()
+                }
+        }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -115,18 +126,21 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
         }
     } else {
-        LaunchedEffect(geo, value) {
-            isLoading = true
-            try {
-                cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+        if (cards.isEmpty()) {
+            LaunchedEffect(geo, value) {
+                isLoading = true
+                try {
+                    cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
+                isLoading = false
             }
-            isLoading = false
         }
 
         Box {
             LazyColumn(
+                state = listState,
                 contentPadding = PaddingValues(
                     PaddingDefault,
                     PaddingDefault,
@@ -135,7 +149,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 if (isLoading) {
                     item {
@@ -158,6 +172,9 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     } else {
                         items(cards, { it.id!! }) {
                             BasicCard(
+                                {
+                                    navController.navigate("card/${it.id!!}")
+                                },
                                 {
                                     coroutineScope.launch {
                                         try {

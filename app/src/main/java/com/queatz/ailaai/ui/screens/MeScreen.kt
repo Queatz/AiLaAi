@@ -164,10 +164,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             }
                         }
                     },
-                    navController.context as Activity,
-                    card,
-                    card.id == addedCardId,
-                    true
+                    activity = navController.context as Activity,
+                    card = card,
+                    edit = card.id == addedCardId,
+                    isMine = true
                 )
 
                 if (card.id == addedCardId) {

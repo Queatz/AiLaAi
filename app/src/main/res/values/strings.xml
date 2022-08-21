@@ -78,4 +78,5 @@
     <string name="on_the_map">On the map</string>
     <string name="inside_another_card">In a card</string>
     <string name="search_cards">Search for a card</string>
+    <string name="created_ago">Created %1$s</string>
 </resources>

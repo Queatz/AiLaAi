@@ -79,4 +79,5 @@
     <string name="on_the_map">Trên bản đồ</string>
     <string name="inside_another_card">Trong thẻ</string>
     <string name="search_cards">Tìm kiếm thẻ</string>
+    <string name="created_ago">Tạo %1$s</string>
 </resources>

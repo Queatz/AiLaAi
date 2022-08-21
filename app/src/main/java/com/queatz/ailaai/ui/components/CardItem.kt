@@ -47,6 +47,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
+    onReply: () -> Unit = {},
     onChange: () -> Unit = {},
     activity: Activity,
     card: Card,
@@ -150,7 +151,7 @@ fun BasicCard(
 
                     if (current.items.isEmpty()) {
                         Button({
-                            onClick()
+                            onReply()
                         }, enabled = !isMine) {
                             Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
                             Text(

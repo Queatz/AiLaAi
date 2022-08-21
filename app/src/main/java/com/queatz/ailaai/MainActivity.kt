@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                     .value
                     ?.destination
                     ?.route
-                    ?.startsWith("group/") != true
+                    ?.let { it.startsWith("group/") || it.startsWith("card/") } != true
 
                 var known by remember { mutableStateOf(api.hasToken()) }
 
@@ -85,8 +85,8 @@ class MainActivity : AppCompatActivity() {
                                     NavigationBar {
                                         listOf(
                                             NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
-                                        NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
-                                        NavButton("me", getString(R.string.me), Icons.Outlined.Person)
+                                            NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
+                                            NavButton("me", getString(R.string.me), Icons.Outlined.Person)
                                         ).forEachIndexed { index, item ->
                                             NavigationBarItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
@@ -104,8 +104,15 @@ class MainActivity : AppCompatActivity() {
                         },
                         snackbarHost = { SnackbarHost(snackbarHostState) }
                     ) {
-                        NavHost(navController, "explore", modifier = Modifier.padding(it).fillMaxSize()) {
+                        NavHost(
+                            navController,
+                            "explore",
+                            modifier = Modifier
+                                .padding(it)
+                                .fillMaxSize()
+                        ) {
                             composable("explore") { ExploreScreen(navController) { me } }
+                            composable("card/{id}") { CardScreen(it, navController) { me } }
                             composable("messages") { MessagesScreen(navController) { me } }
                             composable(
                                 "group/{id}",
