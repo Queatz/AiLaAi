@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -18,6 +19,7 @@ import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -27,8 +29,8 @@ import kotlinx.coroutines.launch
 fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val cardId = navBackStackEntry.arguments!!.getString("id")!!
     var isLoading by remember { mutableStateOf(false) }
-    var card by remember { mutableStateOf<Card?>(null) }
-    var cards by remember { mutableStateOf(emptyList<Card>()) }
+    var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
+    var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(true) {

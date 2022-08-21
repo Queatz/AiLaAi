@@ -10,12 +10,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -35,10 +33,11 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.google.gson.reflect.TypeToken
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.state.gsonSaver
+import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -49,23 +48,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
-    val GsonSaver = Saver<List<Card>, String>(
-        { gson.toJson(it) },
-        { gson.fromJson(it, object : TypeToken<List<Card>>() {}.type) }
-    )
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
         navController.context as Activity
     )
     var value by rememberSaveable { mutableStateOf("") }
-    var geo: LatLng? by rememberSaveable(stateSaver = Saver(
-        { if (it == null) null else listOf(it.latitude, it.longitude) },
-        { if (it.isEmpty()) null else LatLng.getFactory().create(it[0], it[1]) })
-    ) { mutableStateOf(null) }
+    var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var isLoading by remember { mutableStateOf(false) }
-    var cards by rememberSaveable(stateSaver = GsonSaver) { mutableStateOf(listOf<Card>()) }
+    var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coroutineScope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
 
     if (!permissionState.status.isGranted) {
         Column(
@@ -140,7 +131,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
 
         Box {
             LazyColumn(
-                state = listState,
                 contentPadding = PaddingValues(
                     PaddingDefault,
                     PaddingDefault,
