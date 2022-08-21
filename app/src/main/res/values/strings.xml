@@ -19,6 +19,7 @@
     <string name="you_have_no_cards">You currently have no cards.</string>
     <string name="add_a_card">Add a card</string>
     <string name="you_have_no_conversations">You currently have no conversations.</string>
+    <string name="no_cards">No cards.</string>
     <string name="no_cards_to_show">No cards to show.</string>
     <string name="finding_your_location">Finding your location…</string>
     <string name="find_my_location">Find my location</string>
@@ -79,4 +80,8 @@
     <string name="inside_another_card">In a card</string>
     <string name="search_cards">Search for a card</string>
     <string name="created_ago">Created %1$s</string>
+    <plurals name="number_of_cards">
+        <item quantity="one">%1$s card</item>
+        <item quantity="other">%1$s cards</item>
+    </plurals>
 </resources>

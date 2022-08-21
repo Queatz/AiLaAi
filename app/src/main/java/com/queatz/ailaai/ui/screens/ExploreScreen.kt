@@ -121,7 +121,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             LaunchedEffect(geo, value) {
                 isLoading = true
                 try {
-                    cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
+                    cards = api.cards(geo!!, value.takeIf { it.isNotBlank() })//.filter { it.person != me()?.id }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                 }

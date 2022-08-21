@@ -38,7 +38,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
         try {
             card = api.card(cardId)
-            cards = listOf(card!!)
+            cards = api.cardsCards(cardId)
         } catch (ex: Exception) {
             ex.printStackTrace()
         } finally {
@@ -55,7 +55,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 Column {
                     Text(card?.name ?: "")
 
-                    card?.location?.let {
+                    card?.location?.takeIf { it.isNotBlank() }?.let {
                         Text(
                             it,
                             style = MaterialTheme.typography.labelMedium,
@@ -96,7 +96,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 if (cards.isEmpty()) {
                     item {
                         Text(
-                            stringResource(R.string.no_cards_to_show),
+                            stringResource(R.string.no_cards),
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(PaddingDefault * 2)
                         )

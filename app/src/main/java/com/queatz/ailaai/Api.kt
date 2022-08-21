@@ -36,8 +36,8 @@ class Api {
 
     private lateinit var context: Context
 
-    private val baseUrl = "https://api.ailaai.app"
-//    private val baseUrl = "http://10.0.2.2:8080"
+//    private val baseUrl = "https://api.ailaai.app"
+    private val baseUrl = "http://10.0.2.2:8080"
 
     private val tokenKey = stringPreferencesKey("token")
 
@@ -141,6 +141,8 @@ class Api {
     } ?: mapOf()))
 
     suspend fun card(id: String): Card = get("cards/$id")
+
+    suspend fun cardsCards(id: String): List<Card> = get("cards/$id/cards")
 
     suspend fun myCards(): List<Card> = get("me/cards")
 

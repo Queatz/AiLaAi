@@ -16,15 +16,18 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import at.bluesource.choicesdk.maps.common.*
@@ -43,7 +46,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
@@ -95,6 +98,23 @@ fun BasicCard(
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.Center,
                     modifier = Modifier.matchParentSize().scale(scale)
+                )
+            }
+
+            if ((card.cardCount ?: 0) > 0) {
+                Text(
+                    pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(PaddingDefault)
+                        .background(
+                            MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                            MaterialTheme.shapes.extraLarge
+                        )
+                        .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
                 )
             }
 

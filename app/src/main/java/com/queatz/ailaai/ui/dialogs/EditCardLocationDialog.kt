@@ -126,6 +126,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 ) {
                     OutlinedIconToggleButton(cardParentType == CardParentType.Map, {
                         cardParentType = CardParentType.Map
+                        card.parent = null
+                        parentCard = null
                     }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Outlined.Place, "")
                     }
@@ -262,6 +264,15 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         when (parentCard) {
                             null -> {
                                 var myCards by remember { mutableStateOf(listOf<Card>()) }
+                                var shownCards by remember { mutableStateOf(listOf<Card>()) }
+
+                                LaunchedEffect(myCards, searchCardsValue) {
+                                    shownCards = if (searchCardsValue.isBlank()) myCards else myCards.filter {
+                                        it.conversation?.contains(searchCardsValue, true) == true ||
+                                                it.name?.contains(searchCardsValue, true) == true ||
+                                                it.location?.contains(searchCardsValue, true) == true
+                                    }
+                                }
 
                                 LaunchedEffect(true) {
                                     try {
@@ -273,12 +284,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
                                 OutlinedTextField(
                                     searchCardsValue,
-                                    onValueChange = {
-                                        searchCardsValue = it
-                                    },
-                                    label = {
-                                        Text(stringResource(R.string.search_cards))
-                                    },
+                                    onValueChange = { searchCardsValue = it },
+                                    label = { Text(stringResource(R.string.search_cards)) },
                                     shape = MaterialTheme.shapes.large,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
@@ -298,7 +305,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                     modifier = Modifier
                                         .weight(1f)
                                 ) {
-                                    items(myCards, { it.id!! }) {
+                                    items(shownCards, { it.id!! }) {
                                         BasicCard(
                                             {
                                                 parentCard = it
@@ -363,7 +370,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
                             }
                         },
-                        enabled = !disableSaveButton
+                        enabled = !disableSaveButton && !(cardParentType == CardParentType.Card && card.parent == null)
                     ) {
                         Text(stringResource(R.string.save))
                     }

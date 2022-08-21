@@ -80,4 +80,8 @@
     <string name="inside_another_card">Trong thẻ</string>
     <string name="search_cards">Tìm kiếm thẻ</string>
     <string name="created_ago">Tạo %1$s</string>
+    <string name="no_cards">Không có thẻ đây.</string>
+    <plurals name="number_of_cards">
+        <item quantity="other">%1$s thẻ</item>
+    </plurals>
 </resources>

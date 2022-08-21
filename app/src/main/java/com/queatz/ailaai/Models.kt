@@ -10,7 +10,8 @@ class Card(
     var location: String? = null,
     var geo: List<Double>? = null,
     var conversation: String? = null,
-    var active: Boolean? = null
+    var active: Boolean? = null,
+    var cardCount: Int? = null
 ) : Model()
 
 class Invite(
