@@ -61,7 +61,7 @@
     <string name="card_reply_description">Tin nhắn này được hiển thị dưới tên của bạn khi ai đó chọn \"%1$s\"</string>
     <string name="option">Lựa chọn</string>
     <string name="continue_conversation">Tiếp tục cuộc trò chuyện này</string>
-    <string name="add_an_option">Lựa chọn mới</string>
+    <string name="add_an_option">Thêm lựa chọn</string>
     <string name="delete_card">Xóa thẻ</string>
     <string name="delete_this_card_q">Xóa thẻ này?</string>
     <string name="you_cannot_undo_this">Bạn không thể lấy lại thẻ này.</string>
@@ -82,6 +82,7 @@
     <string name="search_cards">Tìm kiếm thẻ</string>
     <string name="created_ago">Tạo %1$s</string>
     <string name="no_cards">Không có thẻ đây.</string>
+    <string name="you">Bạn</string>
     <plurals name="number_of_cards">
         <item quantity="other">%1$s thẻ</item>
     </plurals>

@@ -117,7 +117,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 }
                             },
                             activity = navController.context as Activity,
-                            card = it
+                            card = it,
+                            isMine = it.person == me()?.id
                         )
                     }
                 }

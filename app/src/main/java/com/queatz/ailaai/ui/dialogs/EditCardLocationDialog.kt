@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
@@ -121,6 +122,13 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
                 ) {
+                    OutlinedIconToggleButton(cardParentType == CardParentType.Person, {
+                        cardParentType = CardParentType.Person
+                        card.parent = null
+                        parentCard = null
+                    }, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Outlined.Person, "")
+                    }
                     OutlinedIconToggleButton(cardParentType == CardParentType.Map, {
                         cardParentType = CardParentType.Map
                         card.parent = null
@@ -138,6 +146,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     when (cardParentType) {
                         CardParentType.Map -> stringResource(R.string.on_the_map)
                         CardParentType.Card -> stringResource(R.string.inside_another_card)
+                        CardParentType.Person -> stringResource(R.string.you)
                     },
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().padding(top = PaddingDefault, bottom = PaddingDefault * 2),
@@ -145,6 +154,9 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     color = MaterialTheme.colorScheme.secondary
                 )
                 when (cardParentType) {
+                    CardParentType.Person -> {
+
+                    }
                     CardParentType.Map -> {
                         OutlinedTextField(
                             locationName,

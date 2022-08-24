@@ -2,6 +2,8 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.animation.core.animateFloatAsState
@@ -101,21 +103,48 @@ fun BasicCard(
                 )
             }
 
-            if ((card.cardCount ?: 0) > 0) {
-                Text(
-                    pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(PaddingDefault)
-                        .background(
-                            MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                            MaterialTheme.shapes.extraLarge
-                        )
-                        .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
-                )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(PaddingDefault)
+                    .align(Alignment.TopEnd)
+            ) {
+                if (isMine) {
+                    val coroutineScope = rememberCoroutineScope()
+                    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+                        if (it == null) return@rememberLauncherForActivityResult
+
+                        coroutineScope.launch {
+                            try {
+                                api.uploadCardPhoto(card.id!!, it)
+                                onChange()
+                            } catch (ex: Exception) {
+                                ex.printStackTrace()
+                            }
+                        }
+                    }
+                    IconButton({
+                        launcher.launch("image/*")
+                    }, modifier = Modifier) {
+                        Icon(Icons.Outlined.Edit, "")
+                    }
+                }
+
+                if ((card.cardCount ?: 0) > 0) {
+                    Text(
+                        pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                MaterialTheme.shapes.extraLarge
+                            )
+                            .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
+                    )
+                }
             }
 
             Column(
@@ -289,5 +318,6 @@ fun LatLng.toList() = listOf(latitude, longitude)
 
 enum class CardParentType {
     Map,
-    Card
+    Card,
+    Person
 }

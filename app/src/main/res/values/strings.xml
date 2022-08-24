@@ -85,4 +85,5 @@
         <item quantity="other">%1$s cards</item>
     </plurals>
     <string name="card_name">Card name</string>
+    <string name="you">You</string>
 </resources>

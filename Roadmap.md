@@ -5,7 +5,7 @@ Incoming
 https://docs.google.com/presentation/d/1Y0BRk3EHk1AtCz8O2UU-J_BBiK-eeSxmBNnbKtxoP50/edit#slide=id.g144eae74425_0_154
 
  * [ ] ? ? Bubble callout on messages screen to set your name and photo if not yet set
- * [ ] ? ? Messages badge in bottom bar
+ * [ ] ? ? Messages badge in bottom bar, + indicator on each group
  * [ ] ? ? load older messages paged when scrolling up
  * [ ] ? ? Reload contacts list on new message as well
  * [ ] ? ? Save draft messages per group

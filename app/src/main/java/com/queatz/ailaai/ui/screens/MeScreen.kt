@@ -134,22 +134,9 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
             items(myCards, key = { it.id!! }) { card ->
-                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-                    if (it == null) return@rememberLauncherForActivityResult
-
-                    coroutineScope.launch {
-                        try {
-                            api.uploadCardPhoto(card.id!!, it)
-                            myCards = api.myCards()
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                        }
-                    }
-                }
-
                 BasicCard(
                     {
-                        launcher.launch("image/*")
+                        navController.navigate("card/${card.id!!}")
                     },
                     onChange = {
                         coroutineScope.launch {
