@@ -22,6 +22,7 @@ import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val cardId = navBackStackEntry.arguments!!.getString("id")!!
     var isLoading by remember { mutableStateOf(false) }
+    var addedCardId by remember { mutableStateOf<String?>(null) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
@@ -118,8 +120,33 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             },
                             activity = navController.context as Activity,
                             card = it,
+                            edit = it.id == addedCardId,
                             isMine = it.person == me()?.id
                         )
+
+                        if (it.id == addedCardId) {
+                            addedCardId = null
+                        }
+                    }
+                }
+            }
+
+            if (me()?.id == card?.person) {
+                item {
+                    ElevatedButton(
+                        {
+                            coroutineScope.launch {
+                                try {
+                                    addedCardId = api.newCard(Card(parent = cardId)).id
+                                    cards = api.cardsCards(cardId)
+                                    delay(100)
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.add_a_card))
                     }
                 }
             }

@@ -146,7 +146,7 @@ class Api {
 
     suspend fun myCards(): List<Card> = get("me/cards")
 
-    suspend fun newCard(): Card = post("cards")
+    suspend fun newCard(card: Card? = null): Card = post("cards", card)
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/$id", card)
 
