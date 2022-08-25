@@ -68,14 +68,18 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
     var cardParentType by remember { mutableStateOf(CardParentType.Map) }
 
-    card.parent?.let {
-        cardParentType = CardParentType.Card
+    if (card.equipped == true) {
+        cardParentType = CardParentType.Person
+    } else {
+        card.parent?.let {
+            cardParentType = CardParentType.Card
 
-        LaunchedEffect(true) {
-            try {
-                parentCard = api.card(it)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+            LaunchedEffect(true) {
+                try {
+                    parentCard = api.card(it)
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
             }
         }
     }
@@ -126,6 +130,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         cardParentType = CardParentType.Person
                         card.parent = null
                         parentCard = null
+                        card.equipped = true
                     }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Outlined.Person, "")
                     }
@@ -133,8 +138,10 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         cardParentType = CardParentType.Map
                         card.parent = null
                         parentCard = null
+                        card.equipped = false
                     }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Outlined.Place, "")
+                        card.equipped = false
                     }
                     OutlinedIconToggleButton(cardParentType == CardParentType.Card, {
                         cardParentType = CardParentType.Card
@@ -363,10 +370,17 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 try {
                                     val update = api.updateCard(
                                         card.id!!,
-                                        Card(location = locationName.trim(), geo = position.toList(), parent = card.parent)
+                                        Card(
+                                            location = locationName.trim(),
+                                            geo = position.toList(),
+                                            parent = card.parent,
+                                            equipped = card.equipped
+                                        )
                                     )
 
                                     card.location = update.location
+                                    card.equipped = update.equipped
+                                    card.parent = update.parent
                                     card.geo = update.geo
 
                                     onDismissRequest()

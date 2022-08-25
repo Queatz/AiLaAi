@@ -1,8 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +11,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -24,6 +23,7 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
-    var myCards by remember { mutableStateOf(listOf<Card>()) }
+    var myCards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var addedCardId by remember { mutableStateOf<String?>(null) }
     var inviteDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
@@ -45,11 +45,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         if (inviteDialog) {
             inviteCode = ""
 
-            try {
-                inviteCode = api.invite().code ?: ""
+            inviteCode = try {
+                api.invite().code ?: ""
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                inviteCode = errorString
+                errorString
             }
         }
     }

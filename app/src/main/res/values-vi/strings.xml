@@ -82,7 +82,7 @@
     <string name="search_cards">Tìm kiếm thẻ</string>
     <string name="created_ago">Tạo %1$s</string>
     <string name="no_cards">Không có thẻ đây.</string>
-    <string name="you">Bạn</string>
+    <string name="you">Với bạn</string>
     <plurals name="number_of_cards">
         <item quantity="other">%1$s thẻ</item>
     </plurals>

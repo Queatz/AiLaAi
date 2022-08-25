@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.*
@@ -30,10 +31,10 @@ import kotlinx.coroutines.launch
 fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val cardId = navBackStackEntry.arguments!!.getString("id")!!
     var isLoading by remember { mutableStateOf(false) }
-    var addedCardId by remember { mutableStateOf<String?>(null) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
+    val state = rememberLazyListState()
 
     LaunchedEffect(true) {
         isLoading = true
@@ -80,6 +81,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
         )
 
         LazyColumn(
+            state = state,
             contentPadding = PaddingValues(PaddingDefault),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
@@ -118,15 +120,23 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                     }
                                 }
                             },
+                            onChange = {
+                                coroutineScope.launch {
+                                    isLoading = true
+                                    cards = listOf()
+                                    try {
+                                        cards = api.cardsCards(cardId)
+                                    } catch (ex: Exception) {
+                                        ex.printStackTrace()
+                                    } finally {
+                                        isLoading = false
+                                    }
+                                }
+                            },
                             activity = navController.context as Activity,
                             card = it,
-                            edit = it.id == addedCardId,
                             isMine = it.person == me()?.id
                         )
-
-                        if (it.id == addedCardId) {
-                            addedCardId = null
-                        }
                     }
                 }
             }
@@ -137,9 +147,10 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         {
                             coroutineScope.launch {
                                 try {
-                                    addedCardId = api.newCard(Card(parent = cardId)).id
+                                    api.newCard(Card(parent = cardId)).id
                                     cards = api.cardsCards(cardId)
                                     delay(100)
+                                    state.animateScrollToItem(0)
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
                                 }
