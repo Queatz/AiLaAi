@@ -8,8 +8,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Place
@@ -44,6 +46,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.components.toList
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -65,6 +68,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     var position by remember { mutableStateOf(LatLng(card.geo?.get(0) ?: 0.0, card.geo?.get(1) ?: 0.0)) }
     val coroutineScope = rememberCoroutineScope()
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val scrollState = rememberScrollState()
 
     var cardParentType by remember { mutableStateOf(CardParentType.Map) }
 
@@ -92,6 +96,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 }
             }
         }
+
         else -> {}
     }
 
@@ -123,97 +128,147 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = PaddingDefault)
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
-                ) {
-                    OutlinedIconToggleButton(cardParentType == CardParentType.Person, {
-                        cardParentType = CardParentType.Person
-                        card.parent = null
-                        parentCard = null
-                        card.equipped = true
-                    }, modifier = Modifier.weight(1f)) {
-                        Icon(Icons.Outlined.Person, "")
-                    }
-                    OutlinedIconToggleButton(cardParentType == CardParentType.Map, {
-                        cardParentType = CardParentType.Map
-                        card.parent = null
-                        parentCard = null
-                        card.equipped = false
-                    }, modifier = Modifier.weight(1f)) {
-                        Icon(Icons.Outlined.Place, "")
-                        card.equipped = false
-                    }
-                    OutlinedIconToggleButton(cardParentType == CardParentType.Card, {
-                        cardParentType = CardParentType.Card
-                    }, modifier = Modifier.weight(1f)) {
-                        Icon(Icons.Outlined.Search, "")
+                OutlinedTextField(
+                    locationName,
+                    onValueChange = {
+                        locationName = it
+                    },
+                    label = {
+                        Text(stringResource(R.string.location_name))
+                    },
+                    shape = MaterialTheme.shapes.large,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        keyboardController.hide()
+                    }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Text(
+                    stringResource(R.string.location_name_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(PaddingValues(vertical = PaddingDefault * 2))
+                )
+                CardParentSelector(cardParentType) {
+                    cardParentType = it
+
+                    when (it) {
+                        CardParentType.Person -> {
+                            card.parent = null
+                            parentCard = null
+                            card.equipped = true
+                        }
+                        CardParentType.Map -> {
+                            card.parent = null
+                            parentCard = null
+                            card.equipped = false
+                        }
+                        CardParentType.Card -> {
+                            card.equipped = false
+                        }
                     }
                 }
-                Text(
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState)
+                ) {
+                    Text(
+                        when (cardParentType) {
+                            CardParentType.Map -> stringResource(R.string.on_the_map)
+                            CardParentType.Card -> stringResource(R.string.inside_another_card)
+                            CardParentType.Person -> stringResource(R.string.you)
+                        },
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = PaddingDefault),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                     when (cardParentType) {
-                        CardParentType.Map -> stringResource(R.string.on_the_map)
-                        CardParentType.Card -> stringResource(R.string.inside_another_card)
-                        CardParentType.Person -> stringResource(R.string.you)
-                    },
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(top = PaddingDefault, bottom = PaddingDefault * 2),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                when (cardParentType) {
-                    CardParentType.Person -> {
-
-                    }
-                    CardParentType.Map -> {
-                        OutlinedTextField(
-                            locationName,
-                            onValueChange = {
-                                locationName = it
-                            },
-                            label = {
-                                Text(stringResource(R.string.location_name))
-                            },
-                            shape = MaterialTheme.shapes.large,
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Words,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onSearch = {
-                                keyboardController.hide()
-                            }),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
-                        Text(
-                            stringResource(R.string.location_name_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(PaddingValues(top = PaddingDefault * 2))
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .padding(PaddingValues(vertical = PaddingDefault * 2))
-                                .clip(MaterialTheme.shapes.large)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                        ) {
-                            var composed by remember { mutableStateOf(false) }
-                            var marker: Marker? by remember { mutableStateOf(null) }
-                            var map: Map? by remember { mutableStateOf(null) }
-
-                            AndroidViewBinding(
-                                LayoutMapBinding::inflate,
+                        CardParentType.Person -> {
+                            Text(
+                                stringResource(R.string.with_you_description),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
-                                    .fillMaxSize()
-                            ) {
-                                if (composed) {
-                                    if (marker != null) {
-                                        marker?.position = position
+                                    .padding(PaddingDefault)
+                            )
+                        }
 
-                                        map?.animateCamera(
+                        CardParentType.Map -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                                    .padding(PaddingValues(vertical = PaddingDefault * 2))
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                            ) {
+                                var composed by remember { mutableStateOf(false) }
+                                var marker: Marker? by remember { mutableStateOf(null) }
+                                var map: Map? by remember { mutableStateOf(null) }
+
+                                AndroidViewBinding(
+                                    LayoutMapBinding::inflate,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                ) {
+                                    if (composed) {
+                                        if (marker != null) {
+                                            marker?.position = position
+
+                                            map?.animateCamera(
+                                                CameraUpdateFactory.get().newCameraPosition(
+                                                    CameraPosition.Builder()
+                                                        .setTarget(position)
+                                                        .setZoom(14f)
+                                                        .build()
+                                                )
+                                            )
+                                        }
+                                        return@AndroidViewBinding
+                                    } else composed = true
+
+                                    mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
+
+                                    val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
+
+                                    mapFragment.getMapObservable().subscribe {
+                                        map = it
+                                        map?.clear()
+
+                                        map?.getUiSettings()?.isMapToolbarEnabled = true
+                                        map?.getUiSettings()?.isMyLocationButtonEnabled = true
+
+                                        marker = map?.addMarker(
+                                            MarkerOptions
+                                                .create()
+                                                .position(position)
+                                                .draggable(true)
+                                        )!!
+
+                                        map?.setOnMapClickListener {
+                                            position = it
+                                        }
+
+                                        map?.setOnMarkerClickListener { true }
+                                        map?.setOnMarkerDragListener(object : OnMarkerDragListener {
+                                            override fun onMarkerDrag(marker: Marker) {}
+
+                                            override fun onMarkerDragEnd(marker: Marker) {
+                                                position = marker.position
+                                            }
+
+                                            override fun onMarkerDragStart(marker: Marker) {}
+                                        })
+
+                                        map?.moveCamera(
                                             CameraUpdateFactory.get().newCameraPosition(
                                                 CameraPosition.Builder()
                                                     .setTarget(position)
@@ -222,128 +277,86 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                             )
                                         )
                                     }
-                                    return@AndroidViewBinding
-                                } else composed = true
+                                }
+                            }
+                            Text(
+                                stringResource(R.string.map_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
+                            )
+                        }
 
-                                mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
+                        CardParentType.Card -> {
+                            when (parentCard) {
+                                null -> {
+                                    var myCards by remember { mutableStateOf(listOf<Card>()) }
+                                    var shownCards by remember { mutableStateOf(listOf<Card>()) }
 
-                                val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
-
-                                mapFragment.getMapObservable().subscribe {
-                                    map = it
-                                    map?.clear()
-
-                                    map?.getUiSettings()?.isMapToolbarEnabled = true
-                                    map?.getUiSettings()?.isMyLocationButtonEnabled = true
-
-                                    marker = map?.addMarker(
-                                        MarkerOptions
-                                            .create()
-                                            .position(position)
-                                            .draggable(true)
-                                    )!!
-
-                                    map?.setOnMapClickListener {
-                                        position = it
+                                    LaunchedEffect(myCards, searchCardsValue) {
+                                        shownCards = if (searchCardsValue.isBlank()) myCards else myCards.filter {
+                                            it.conversation?.contains(searchCardsValue, true) == true ||
+                                                    it.name?.contains(searchCardsValue, true) == true ||
+                                                    it.location?.contains(searchCardsValue, true) == true
+                                        }
                                     }
 
-                                    map?.setOnMarkerClickListener { true }
-                                    map?.setOnMarkerDragListener(object : OnMarkerDragListener {
-                                        override fun onMarkerDrag(marker: Marker) {}
-
-                                        override fun onMarkerDragEnd(marker: Marker) {
-                                            position = marker.position
+                                    LaunchedEffect(true) {
+                                        try {
+                                            myCards = api.myCards().filter { it.id != card.id }
+                                        } catch (ex: Exception) {
+                                            ex.printStackTrace()
                                         }
+                                    }
 
-                                        override fun onMarkerDragStart(marker: Marker) {}
-                                    })
+                                    OutlinedTextField(
+                                        searchCardsValue,
+                                        onValueChange = { searchCardsValue = it },
+                                        label = { Text(stringResource(R.string.search_cards)) },
+                                        shape = MaterialTheme.shapes.large,
+                                        singleLine = true,
+                                        keyboardOptions = KeyboardOptions(
+                                            capitalization = KeyboardCapitalization.Words,
+                                            imeAction = ImeAction.Next
+                                        ),
+                                        keyboardActions = KeyboardActions(onSearch = {
+                                            keyboardController.hide()
+                                        }),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = PaddingDefault)
+                                    )
+                                    LazyColumn(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                    ) {
+                                        items(shownCards, { it.id!! }) {
+                                            BasicCard(
+                                                {
+                                                    parentCard = it
+                                                    card.parent = it.id
+                                                },
+                                                activity = activity,
+                                                card = it,
+                                                isChoosing = true
+                                            )
+                                        }
+                                    }
+                                }
 
-                                    map?.moveCamera(
-                                        CameraUpdateFactory.get().newCameraPosition(
-                                            CameraPosition.Builder()
-                                                .setTarget(position)
-                                                .setZoom(14f)
-                                                .build()
-                                        )
+                                else -> {
+                                    BasicCard(
+                                        {
+                                            parentCard = null
+                                            card.parent = null
+                                        },
+                                        activity = activity,
+                                        card = parentCard!!,
+                                        isChoosing = true
                                     )
                                 }
-                            }
-                        }
-                        Text(
-                            stringResource(R.string.map_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
-                        )
-                    }
-                    CardParentType.Card -> {
-                        when (parentCard) {
-                            null -> {
-                                var myCards by remember { mutableStateOf(listOf<Card>()) }
-                                var shownCards by remember { mutableStateOf(listOf<Card>()) }
-
-                                LaunchedEffect(myCards, searchCardsValue) {
-                                    shownCards = if (searchCardsValue.isBlank()) myCards else myCards.filter {
-                                        it.conversation?.contains(searchCardsValue, true) == true ||
-                                                it.name?.contains(searchCardsValue, true) == true ||
-                                                it.location?.contains(searchCardsValue, true) == true
-                                    }
-                                }
-
-                                LaunchedEffect(true) {
-                                    try {
-                                        myCards = api.myCards().filter { it.id != card.id }
-                                    } catch (ex: Exception) {
-                                        ex.printStackTrace()
-                                    }
-                                }
-
-                                OutlinedTextField(
-                                    searchCardsValue,
-                                    onValueChange = { searchCardsValue = it },
-                                    label = { Text(stringResource(R.string.search_cards)) },
-                                    shape = MaterialTheme.shapes.large,
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(
-                                        capitalization = KeyboardCapitalization.Words,
-                                        imeAction = ImeAction.Next
-                                    ),
-                                    keyboardActions = KeyboardActions(onSearch = {
-                                        keyboardController.hide()
-                                    }),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = PaddingDefault)
-                                )
-                                LazyColumn(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                ) {
-                                    items(shownCards, { it.id!! }) {
-                                        BasicCard(
-                                            {
-                                                parentCard = it
-                                                card.parent = it.id
-                                            },
-                                            activity = activity,
-                                            card = it,
-                                            isChoosing = true
-                                        )
-                                    }
-                                }
-                            }
-                            else -> {
-                                BasicCard(
-                                    {
-                                        parentCard = null
-                                        card.parent = null
-                                    },
-                                    activity = activity,
-                                    card = parentCard!!,
-                                    isChoosing = true
-                                )
                             }
                         }
                     }

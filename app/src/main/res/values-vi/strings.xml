@@ -86,4 +86,7 @@
     <plurals name="number_of_cards">
         <item quantity="other">%1$s thẻ</item>
     </plurals>
+    <string name="with_you_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào
+        bạn mở Ai Là Ai.
+    </string>
 </resources>

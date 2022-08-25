@@ -171,7 +171,7 @@ fun BasicCard(
                             MaterialTheme.typography.titleSmall.toSpanStyle()
                                 .copy(color = MaterialTheme.colorScheme.secondary)
                         ) {
-                            append(card.location ?: stringResource(R.string.somewhere))
+                            append(card.location ?: "")
                         }
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),

@@ -135,8 +135,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                             )
                         },
                         keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Next
+                            capitalization = KeyboardCapitalization.Sentences
                         ),
                         keyboardActions = KeyboardActions(onSearch = {
                             keyboardController.hide()

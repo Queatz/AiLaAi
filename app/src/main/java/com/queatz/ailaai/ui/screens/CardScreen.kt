@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -56,11 +57,13 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
         SmallTopAppBar(
             {
                 Column {
-                    Text(card?.name ?: "")
+                    Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                     card?.location?.takeIf { it.isNotBlank() }?.let {
                         Text(
                             it,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -147,7 +150,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         {
                             coroutineScope.launch {
                                 try {
-                                    api.newCard(Card(parent = cardId)).id
+                                    api.newCard(Card(parent = cardId, name = "")).id
                                     cards = api.cardsCards(cardId)
                                     delay(100)
                                     state.animateScrollToItem(0)
