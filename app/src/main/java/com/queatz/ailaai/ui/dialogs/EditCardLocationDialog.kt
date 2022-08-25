@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.dialogs
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
+import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -69,6 +73,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     val coroutineScope = rememberCoroutineScope()
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val scrollState = rememberScrollState()
+    var scrollEnabled by remember { mutableStateOf(true) }
 
     var cardParentType by remember { mutableStateOf(CardParentType.Map) }
 
@@ -176,7 +181,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .verticalScroll(scrollState)
+                        .verticalScroll(scrollState, enabled = scrollEnabled)
                 ) {
                     Text(
                         when (cardParentType) {
@@ -201,6 +206,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         }
 
                         CardParentType.Map -> {
+                            val disallow = remember { RequestDisallowInterceptTouchEvent() }
+
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -209,6 +216,17 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                     .clip(MaterialTheme.shapes.large)
                                     .background(MaterialTheme.colorScheme.primaryContainer)
                                     .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                    .motionEventSpy {
+                                        if (it.action == MotionEvent.ACTION_UP) {
+                                            scrollEnabled = true
+                                        }
+                                    }
+                                    .pointerInteropFilter(disallow) {
+                                        if (it.action == MotionEvent.ACTION_DOWN) {
+                                            scrollEnabled = false
+                                        }
+                                        false
+                                    }
                             ) {
                                 var composed by remember { mutableStateOf(false) }
                                 var marker: Marker? by remember { mutableStateOf(null) }

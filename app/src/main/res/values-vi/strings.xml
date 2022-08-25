@@ -50,7 +50,7 @@
     <string name="card_inactive">Thẻ không hoạt động</string>
     <string name="card_location">Vị trí của thẻ</string>
     <string name="location_name">Tên của vị trí</string>
-    <string name="location_name_description">Tên của vị trí được hiển thị trên thẻ để giúp mọi người biết vị trí của bạn.</string>
+    <string name="location_name_description">Tên của vị trí được hiển thị trên thẻ để giúp mọi người biết vị trí của thẻ.</string>
     <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lữu</string>

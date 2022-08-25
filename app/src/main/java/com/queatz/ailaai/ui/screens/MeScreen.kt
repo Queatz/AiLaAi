@@ -131,6 +131,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         )
         CardParentSelector(cardParentType, modifier = Modifier
             .padding(horizontal = PaddingDefault)
+            .padding(bottom = PaddingDefault / 2)
         ) {
             cardParentType = if (it == cardParentType) null else it
         }
@@ -202,6 +203,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     {
                         coroutineScope.launch {
                             try {
+                                cardParentType = null
                                 addedCardId = api.newCard().id
                                 myCards = api.myCards()
                                 delay(100)

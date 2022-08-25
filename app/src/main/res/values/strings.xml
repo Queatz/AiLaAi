@@ -49,7 +49,7 @@
     <string name="card_inactive">Card is inactive</string>
     <string name="card_location">Card location</string>
     <string name="location_name">Location name</string>
-    <string name="location_name_description">The location name is shown on the card to help others know where you are located.</string>
+    <string name="location_name_description">The location name is shown on the card to help others know where it is located.</string>
     <string name="map_description">Tap on the map to set the location of this card.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
