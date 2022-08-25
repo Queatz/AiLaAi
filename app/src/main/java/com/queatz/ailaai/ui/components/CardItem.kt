@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import at.bluesource.choicesdk.maps.common.*
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -124,10 +125,16 @@ fun BasicCard(
                             }
                         }
                     }
-                    IconButton({
-                        launcher.launch("image/*")
-                    }, modifier = Modifier) {
+                    TextButton(
+                        {
+                            launcher.launch("image/*")
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                    ) {
                         Icon(Icons.Outlined.Edit, "")
+                        Text(stringResource(R.string.set_photo), modifier = Modifier.padding(start = PaddingDefault))
                     }
                 }
 
@@ -251,18 +258,23 @@ private fun ColumnScope.CardToolbar(activity: Activity, onChange: () -> Unit, ca
         var activeCommitted by remember { mutableStateOf(active) }
         val coroutineScope = rememberCoroutineScope()
 
-        Switch(active, {
-            active = it
-            coroutineScope.launch {
-                try {
-                    val update = api.updateCard(card.id!!, Card(active = active))
-                    card.active = update.active
-                    activeCommitted = update.active ?: false
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
+        Switch(
+            active,
+            {
+                active = it
+                coroutineScope.launch {
+                    try {
+                        val update = api.updateCard(card.id!!, Card(active = active))
+                        card.active = update.active
+                        activeCommitted = update.active ?: false
+                        active = activeCommitted
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
                 }
-            }
-        })
+            },
+            enabled = card.photo != null
+        )
         Text(
             if (activeCommitted) stringResource(R.string.card_active) else stringResource(R.string.card_inactive),
             style = MaterialTheme.typography.labelMedium,
