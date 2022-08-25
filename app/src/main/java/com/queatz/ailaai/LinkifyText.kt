@@ -208,9 +208,9 @@ private class SpannableStr(source: CharSequence): SpannableString(source) {
         fun getLinkInfos(text: String): List<LinkInfo> {
             val spannableStr = SpannableStr(text)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                Linkify.addLinks(spannableStr, Linkify.ALL) { str: String -> URLSpan(str)  }
+                Linkify.addLinks(spannableStr, Linkify.WEB_URLS) { str: String -> URLSpan(str)  }
             } else {
-                Linkify.addLinks(spannableStr, Linkify.ALL)
+                Linkify.addLinks(spannableStr, Linkify.WEB_URLS)
             }
             return spannableStr.linkInfos
         }

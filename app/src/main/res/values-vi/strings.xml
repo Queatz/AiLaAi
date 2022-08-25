@@ -16,7 +16,7 @@
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Dùng mã này sẽ được trong vòng 48 giờ.</string>
-    <string name="my_cards">Thẻ của mình</string>
+    <string name="your_cards">Thẻ của bạn</string>
     <string name="invite">Mời ai đó</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Tạo thẻ mới</string>

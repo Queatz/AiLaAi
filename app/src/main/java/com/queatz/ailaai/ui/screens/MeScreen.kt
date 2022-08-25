@@ -23,6 +23,8 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.components.CardParentSelector
+import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
@@ -38,6 +40,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     val coroutineScope = rememberCoroutineScope()
     var inviteCode by remember { mutableStateOf("") }
     val state = rememberLazyListState()
+    var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
 
     val errorString = stringResource(R.string.error)
 
@@ -103,7 +106,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     Column {
         SmallTopAppBar(
             {
-                Text(stringResource(R.string.my_cards))
+                Text(stringResource(R.string.your_cards))
             },
             actions = {
                 ElevatedButton(
@@ -126,6 +129,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 }
             }
         )
+        CardParentSelector(cardParentType, modifier = Modifier
+            .padding(horizontal = PaddingDefault)
+        ) {
+            cardParentType = if (it == cardParentType) null else it
+        }
         LazyColumn(
             state = state,
             contentPadding = PaddingValues(PaddingDefault),
@@ -133,7 +141,13 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
-            items(myCards, key = { it.id!! }) { card ->
+            val cards = when (cardParentType) {
+                CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
+                CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true }
+                CardParentType.Card -> myCards.filter { it.parent != null }
+                else -> myCards
+            }
+            items(cards, key = { it.id!! }) { card ->
                 BasicCard(
                     {
                         navController.navigate("card/${card.id!!}")
@@ -162,7 +176,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 }
             }
 
-            if (myCards.isEmpty()) {
+            if (cards.isEmpty()) {
                 if (isLoading) {
                     item {
                         LinearProgressIndicator(
@@ -175,7 +189,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 } else {
                     item {
                         Text(
-                            stringResource(R.string.you_have_no_cards),
+                            stringResource(if (cardParentType == null) R.string.you_have_no_cards else R.string.no_cards_to_show),
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(PaddingDefault * 2)
                         )

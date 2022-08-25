@@ -15,9 +15,14 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun CardParentSelector(value: CardParentType, onChange: (CardParentType) -> Unit) {
+fun CardParentSelector(
+    value: CardParentType?,
+    modifier: Modifier = Modifier,
+    onChange: (CardParentType) -> Unit
+) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+        modifier = modifier
     ) {
         OutlinedIconToggleButton(value == CardParentType.Person, {
             onChange(CardParentType.Person)
