@@ -39,7 +39,8 @@ class Member(
 class Message(
     var group: String? = null,
     var member: String? = null,
-    var text: String? = null
+    var text: String? = null,
+    var attachment: String? = null
 ) : Model()
 
 class Transfer(

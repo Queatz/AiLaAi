@@ -114,10 +114,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             {
                                 navController.navigate("card/${it.id!!}")
                             },
-                            {
+                            onReply = {
                                 coroutineScope.launch {
                                     try {
-                                        navController.navigate("group/${api.cardGroup(it.id!!).id!!}")
+                                        val groupId = api.cardGroup(it.id!!).id!!
+                                        api.sendMessage(groupId, Message(attachment = gson.toJson(CardAttachment(it.id!!))))
+                                        navController.navigate("group/${groupId}")
                                     } catch (ex: Exception) {
                                         ex.printStackTrace()
                                     }

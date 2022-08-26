@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import android.app.Activity
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +29,6 @@ import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,7 +168,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     ex.printStackTrace()
                                 }
                             }
-                        }
+                        },
+                        navController.context as Activity,
+                        navController
                     )
                 }
             }

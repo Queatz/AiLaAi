@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.components
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.animation.AnimatedVisibility
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
@@ -27,12 +29,23 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean, onDeleted: () -> Unit) {
+fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean, onDeleted: () -> Unit, activity: Activity, navController: NavController) {
     var showMessageDialog by remember { mutableStateOf(false) }
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var attachedCard by remember { mutableStateOf<Card?>(null) }
+
+        LaunchedEffect(message.getAttachment()) {
+            message.getAttachment()?.let { attachment ->
+                try {
+                    attachedCard = api.card(attachment.card!!)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
 
     if (showDeleteMessageDialog) {
         var disableSubmit by remember { mutableStateOf(false) }
@@ -112,32 +125,54 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean,
         )
 
         Column(modifier = Modifier.weight(1f)) {
-            LinkifyText(
-                message.text ?: "",
-                linkColor = MaterialTheme.colorScheme.primary,
-                color = if (isMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .align(if (isMe) Alignment.End else Alignment.Start)
+            attachedCard?.let {
+                Box(modifier = Modifier
                     .padding(PaddingDefault)
                     .let {
                         when (isMe) {
-                            true -> it.padding(PaddingValues(start = PaddingDefault * 8))
-                            false -> it.padding(PaddingValues(end = PaddingDefault * 8))
+                            true -> it.padding(PaddingValues(start = PaddingDefault * 12))
+                            false -> it.padding(PaddingValues(end = PaddingDefault * 12))
                         }
                     }
-                    .clip(MaterialTheme.shapes.large)
-                    .background(if (isMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background)
-                    .border(
-                        if (isMe) 0.dp else 1.dp,
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        MaterialTheme.shapes.large
+                ) {
+                    BasicCard(
+                        {
+                            navController.navigate("card/${it.id!!}")
+                        },
+                        activity = activity,
+                        card = it,
+                        isChoosing = true
                     )
-                    .combinedClickable(
-                        onClick = { showTime = !showTime },
-                        onLongClick = { showMessageDialog = true }
-                    )
-                    .padding(PaddingDefault * 2, PaddingDefault)
-            )
+                }
+            }
+            if (message.text != null) {
+                LinkifyText(
+                    message.text ?: "",
+                    linkColor = MaterialTheme.colorScheme.primary,
+                    color = if (isMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .align(if (isMe) Alignment.End else Alignment.Start)
+                        .padding(PaddingDefault)
+                        .let {
+                            when (isMe) {
+                                true -> it.padding(PaddingValues(start = PaddingDefault * 8))
+                                false -> it.padding(PaddingValues(end = PaddingDefault * 8))
+                            }
+                        }
+                        .clip(MaterialTheme.shapes.large)
+                        .background(if (isMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background)
+                        .border(
+                            if (isMe) 0.dp else 1.dp,
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.shapes.large
+                        )
+                        .combinedClickable(
+                            onClick = { showTime = !showTime },
+                            onLongClick = { showMessageDialog = true }
+                        )
+                        .padding(PaddingDefault * 2, PaddingDefault)
+                )
+            }
             AnimatedVisibility(showTime) {
                 Text(
                     message.createdAt!!.timeAgo(),
