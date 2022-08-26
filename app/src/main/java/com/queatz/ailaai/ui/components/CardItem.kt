@@ -176,87 +176,19 @@ fun BasicCard(
             ) {
                 val (topRef, bottomRef) = createRefs()
 
-                val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
-                var current by remember { mutableStateOf(conversation) }
-                val stack = remember { mutableListOf<ConversationItem>() }
-
-                Column(modifier = Modifier
-                    .constrainAs(topRef) {
-                        bottom.linkTo(bottomRef.top)
-                        top.linkTo(parent.top)
-                        height = Dimension.preferredWrapContent
-                    }
-                    .verticalScroll(conversationScrollState)
-                ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
-                            ) {
-                                append(card.name ?: stringResource(R.string.someone))
-                            }
-
-                            append("  ")
-
-                            withStyle(
-                                MaterialTheme.typography.titleSmall.toSpanStyle()
-                                    .copy(color = MaterialTheme.colorScheme.secondary)
-                            ) {
-                                append(card.location ?: "")
-                            }
-                        },
-                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = PaddingDefault)
-                    )
-
-                    Text(
-                        text = current.message,
-                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = PaddingDefault * 2)
-                    )
-
-                    if (!isChoosing) {
-                        current.items.forEach {
-                            Button({
-                                stack.add(current)
-                                current = it
-                            }) {
-                                Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                            }
+                CardConversation(
+                    card,
+                    interactable = !isChoosing,
+                    onReply = onReply,
+                    isMine = isMine,
+                    modifier = Modifier
+                        .constrainAs(topRef) {
+                            bottom.linkTo(bottomRef.top)
+                            top.linkTo(parent.top)
+                            height = Dimension.preferredWrapContent
                         }
-
-                        if (current.items.isEmpty()) {
-                            Button({
-                                onReply()
-                            }, enabled = !isMine) {
-                                Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
-                                Text(
-                                    stringResource(R.string.reply),
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1
-                                )
-                            }
-                        }
-
-                        AnimatedVisibility(
-                            stack.isNotEmpty(),
-                            modifier = Modifier.align(Alignment.Start)
-                        ) {
-                            TextButton({
-                                if (stack.isNotEmpty()) {
-                                    current = stack.removeLast()
-                                }
-                            }) {
-                                Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
-                                Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = PaddingDefault))
-                            }
-                        }
-                    }
-                }
+                        .verticalScroll(conversationScrollState)
+                )
 
                 if (isMine) {
                     CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(bottomRef) {
@@ -281,9 +213,11 @@ class MaxAspectRatioModifier(
     }
 
     override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
-        val placeable = measurable.measure(constraints.copy(
-            maxHeight = (constraints.maxWidth.toFloat() / aspectRatio).toInt()
-        ))
+        val placeable = measurable.measure(
+            constraints.copy(
+                maxHeight = (constraints.maxWidth.toFloat() / aspectRatio).toInt()
+            )
+        )
         return layout(placeable.width, placeable.height) {
             placeable.placeRelative(IntOffset.Zero)
         }
@@ -292,7 +226,13 @@ class MaxAspectRatioModifier(
 
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @Composable
-private fun CardToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean, modifier: Modifier = Modifier) {
+private fun CardToolbar(
+    activity: Activity,
+    onChange: () -> Unit,
+    card: Card,
+    edit: Boolean,
+    modifier: Modifier = Modifier
+) {
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(edit) }
