@@ -5,16 +5,17 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -32,8 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
-import at.bluesource.choicesdk.maps.common.*
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.Card
@@ -154,104 +159,147 @@ fun BasicCard(
                 }
             }
 
-            Column(
+            val conversationScrollState = rememberScrollState()
+
+            ConstraintLayout(
                 modifier = Modifier
                     .alpha(alpha)
                     .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
                     .padding(PaddingDefault * 2)
+                    .minAspectRatio(1.5f)
+                    .animateContentSize(
+                        spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                            visibilityThreshold = IntSize.VisibilityThreshold
+                        )
+                    )
             ) {
+                val (topRef, bottomRef) = createRefs()
+
                 val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
                 var current by remember { mutableStateOf(conversation) }
                 val stack = remember { mutableListOf<ConversationItem>() }
 
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
-                        ) {
-                            append(card.name ?: stringResource(R.string.someone))
-                        }
-
-                        append("  ")
-
-                        withStyle(
-                            MaterialTheme.typography.titleSmall.toSpanStyle()
-                                .copy(color = MaterialTheme.colorScheme.secondary)
-                        ) {
-                            append(card.location ?: "")
-                        }
-                    },
-                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = PaddingDefault)
-                )
-
-                Text(
-                    text = current.message,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = PaddingDefault * 2)
-                )
-
-                if (!isChoosing) {
-                    current.items.forEach {
-                        Button({
-                            stack.add(current)
-                            current = it
-                        }) {
-                            Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                        }
+                Column(modifier = Modifier
+                    .constrainAs(topRef) {
+                        bottom.linkTo(bottomRef.top)
+                        top.linkTo(parent.top)
+                        height = Dimension.preferredWrapContent
                     }
-
-                    if (current.items.isEmpty()) {
-                        Button({
-                            onReply()
-                        }, enabled = !isMine) {
-                            Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
-                            Text(
-                                stringResource(R.string.reply),
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1
-                            )
-                        }
-                    }
-
-                    AnimatedVisibility(
-                        stack.isNotEmpty(),
-                        modifier = Modifier.align(Alignment.Start)
-                    ) {
-                        TextButton({
-                            if (stack.isNotEmpty()) {
-                                current = stack.removeLast()
+                    .verticalScroll(conversationScrollState)
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
+                            ) {
+                                append(card.name ?: stringResource(R.string.someone))
                             }
-                        }) {
-                            Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
-                            Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = PaddingDefault))
+
+                            append("  ")
+
+                            withStyle(
+                                MaterialTheme.typography.titleSmall.toSpanStyle()
+                                    .copy(color = MaterialTheme.colorScheme.secondary)
+                            ) {
+                                append(card.location ?: "")
+                            }
+                        },
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = PaddingDefault)
+                    )
+
+                    Text(
+                        text = current.message,
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = PaddingDefault * 2)
+                    )
+
+                    if (!isChoosing) {
+                        current.items.forEach {
+                            Button({
+                                stack.add(current)
+                                current = it
+                            }) {
+                                Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                            }
+                        }
+
+                        if (current.items.isEmpty()) {
+                            Button({
+                                onReply()
+                            }, enabled = !isMine) {
+                                Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
+                                Text(
+                                    stringResource(R.string.reply),
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            stack.isNotEmpty(),
+                            modifier = Modifier.align(Alignment.Start)
+                        ) {
+                            TextButton({
+                                if (stack.isNotEmpty()) {
+                                    current = stack.removeLast()
+                                }
+                            }) {
+                                Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
+                                Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = PaddingDefault))
+                            }
                         }
                     }
+                }
 
-                    if (isMine) {
-                        CardToolbar(activity, onChange, card, edit)
-                    }
+                if (isMine) {
+                    CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(bottomRef) {
+                        top.linkTo(topRef.bottom)
+                        bottom.linkTo(parent.bottom)
+                    })
                 }
             }
         }
     }
 }
 
+private fun Modifier.minAspectRatio(ratio: Float) = then(
+    MaxAspectRatioModifier(ratio)
+)
+
+class MaxAspectRatioModifier(
+    private val aspectRatio: Float
+) : LayoutModifier {
+    init {
+        require(aspectRatio > 0f) { "aspectRatio $aspectRatio must be > 0" }
+    }
+
+    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
+        val placeable = measurable.measure(constraints.copy(
+            maxHeight = (constraints.maxWidth.toFloat() / aspectRatio).toInt()
+        ))
+        return layout(placeable.width, placeable.height) {
+            placeable.placeRelative(IntOffset.Zero)
+        }
+    }
+}
+
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @Composable
-private fun ColumnScope.CardToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean) {
+private fun CardToolbar(activity: Activity, onChange: () -> Unit, card: Card, edit: Boolean, modifier: Modifier = Modifier) {
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(edit) }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Transparent)
-            .align(Alignment.End)
             .padding(PaddingValues(top = PaddingDefault))
     ) {
         var active by remember { mutableStateOf(card.active ?: false) }
