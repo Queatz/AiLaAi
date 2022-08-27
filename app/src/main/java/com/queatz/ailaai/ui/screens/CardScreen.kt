@@ -132,6 +132,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         CardConversation(
                             it,
                             interactable = true,
+                            showTitle = false,
                             isMine = isMine,
                             onReply = {
                                 coroutineScope.launch {
