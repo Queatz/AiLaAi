@@ -29,7 +29,14 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean, onDeleted: () -> Unit, activity: Activity, navController: NavController) {
+fun MessageItem(
+    message: Message,
+    getPerson: (String) -> Person?,
+    isMe: Boolean,
+    onDeleted: () -> Unit,
+    activity: Activity,
+    navController: NavController
+) {
     var showMessageDialog by remember { mutableStateOf(false) }
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
@@ -37,15 +44,15 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean,
     val coroutineScope = rememberCoroutineScope()
     var attachedCard by remember { mutableStateOf<Card?>(null) }
 
-        LaunchedEffect(message.getAttachment()) {
-            message.getAttachment()?.let { attachment ->
-                try {
-                    attachedCard = api.card(attachment.card!!)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+    LaunchedEffect(message.getAttachment()) {
+        message.getAttachment()?.let { attachment ->
+            try {
+                attachedCard = api.card(attachment.card!!)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
+    }
 
     if (showDeleteMessageDialog) {
         var disableSubmit by remember { mutableStateOf(false) }
@@ -128,10 +135,14 @@ fun MessageItem(message: Message, getPerson: (String) -> Person?, isMe: Boolean,
             attachedCard?.let {
                 Box(modifier = Modifier
                     .padding(PaddingDefault)
+                    .widthIn(max = 320.dp)
                     .let {
                         when (isMe) {
                             true -> it.padding(PaddingValues(start = PaddingDefault * 12))
+                                .align(Alignment.End)
+
                             false -> it.padding(PaddingValues(end = PaddingDefault * 12))
+                                .align(Alignment.Start)
                         }
                     }
                 ) {

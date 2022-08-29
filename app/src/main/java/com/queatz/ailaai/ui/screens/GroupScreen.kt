@@ -5,6 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -92,6 +93,11 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         } else {
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
             val otherMember = groupExtended!!.members?.find { it.person?.id != me()?.id }
+            val state = rememberLazyListState()
+
+            LaunchedEffect(messages) {
+                state.animateScrollToItem(0)
+            }
 
             SmallTopAppBar(
                 {
@@ -152,7 +158,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 ),
                 modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)
             )
-            LazyColumn(reverseLayout = true, modifier = Modifier.weight(1f)) {
+            LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
                 items(messages, { it.id!! }) {
                     MessageItem(
                         it,

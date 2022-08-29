@@ -26,7 +26,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     LaunchedEffect(true) {
         isLoading = true
         try {
-            groups = api.groups().reversed()
+            groups = api.groups()
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
@@ -37,7 +37,8 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         contentPadding = PaddingValues(PaddingDefault),
         verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        reverseLayout = true
     ) {
         if (isLoading) {
             item {

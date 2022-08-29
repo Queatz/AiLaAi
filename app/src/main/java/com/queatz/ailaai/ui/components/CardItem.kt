@@ -236,11 +236,13 @@ private fun CardToolbar(
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(edit) }
+    val scrollState = rememberScrollState()
 
     Row(
         modifier = modifier
             .background(Color.Transparent)
             .padding(PaddingValues(top = PaddingDefault))
+            .horizontalScroll(scrollState)
     ) {
         var active by remember { mutableStateOf(card.active ?: false) }
         var activeCommitted by remember { mutableStateOf(active) }

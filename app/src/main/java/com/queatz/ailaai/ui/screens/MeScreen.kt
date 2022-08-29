@@ -2,9 +2,11 @@ package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -16,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.queatz.ailaai.Card
@@ -39,7 +43,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     var isLoading by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
     var inviteCode by remember { mutableStateOf("") }
-    val state = rememberLazyListState()
+    val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
 
     val errorString = stringResource(R.string.error)
@@ -135,12 +139,13 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         ) {
             cardParentType = if (it == cardParentType) null else it
         }
-        LazyColumn(
+        LazyVerticalGrid(
             state = state,
             contentPadding = PaddingValues(PaddingDefault),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-            modifier = Modifier.fillMaxWidth().weight(1f)
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            columns = GridCells.Adaptive(240.dp)
         ) {
             val cards = when (cardParentType) {
                 CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
@@ -188,33 +193,36 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         )
                     }
                 } else {
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             stringResource(if (cardParentType == null) R.string.you_have_no_cards else R.string.no_cards_to_show),
                             color = MaterialTheme.colorScheme.secondary,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier.padding(PaddingDefault * 2)
                         )
                     }
                 }
             }
 
-            item {
-                ElevatedButton(
-                    {
-                        coroutineScope.launch {
-                            try {
-                                cardParentType = null
-                                addedCardId = api.newCard().id
-                                myCards = api.myCards()
-                                delay(100)
-                                state.animateScrollToItem(0)
-                            } catch (ex: Exception) {
-                                ex.printStackTrace()
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(contentAlignment = Alignment.Center) {
+                    ElevatedButton(
+                        {
+                            coroutineScope.launch {
+                                try {
+                                    cardParentType = null
+                                    addedCardId = api.newCard().id
+                                    myCards = api.myCards()
+                                    delay(100)
+                                    state.animateScrollToItem(0)
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
                             }
                         }
+                    ) {
+                        Text(stringResource(R.string.add_a_card))
                     }
-                ) {
-                    Text(stringResource(R.string.add_a_card))
                 }
             }
         }

@@ -8,8 +8,9 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -134,57 +135,56 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             isLoading = false
         }
 
-        Box {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault + 80.dp
-                ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                if (isLoading) {
-                    item {
-                        LinearProgressIndicator(
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = PaddingDefault)
-                        )
-                    }
-                } else {
-                    if (cards.isEmpty()) {
-                        item {
-                            Text(
-                                stringResource(R.string.no_cards_to_show),
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(PaddingDefault * 2)
-                            )
-                        }
-                    } else {
-                        items(cards, { it.id!! }) {
-                            BasicCard(
-                                {
-                                    navController.navigate("card/${it.id!!}")
-                                },
-                                onReply = {
-                                    coroutineScope.launch {
-                                        try {
-                                            val groupId = api.cardGroup(it.id!!).id!!
-                                            api.sendMessage(groupId, Message(attachment = gson.toJson(CardAttachment(it.id!!))))
-                                            navController.navigate("group/${groupId}")
-                                        } catch (ex: Exception) {
-                                            ex.printStackTrace()
-                                        }
+        Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
+            if (isLoading) {
+                LinearProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)
+                )
+            } else if (cards.isEmpty()) {
+                    Text(
+                        stringResource(R.string.no_cards_to_show),
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)
+                    )
+            } else {
+                LazyVerticalGrid(
+                    contentPadding = PaddingValues(
+                        PaddingDefault,
+                        PaddingDefault,
+                        PaddingDefault,
+                        PaddingDefault + 80.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
+                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                    modifier = Modifier.fillMaxSize(),
+                    columns = GridCells.Adaptive(240.dp)
+                ) {
+                    items(items = cards, key = { it.id!! }) {
+                        BasicCard(
+                            {
+                                navController.navigate("card/${it.id!!}")
+                            },
+                            onReply = {
+                                coroutineScope.launch {
+                                    try {
+                                        val groupId = api.cardGroup(it.id!!).id!!
+                                        api.sendMessage(
+                                            groupId,
+                                            Message(attachment = gson.toJson(CardAttachment(it.id!!)))
+                                        )
+                                        navController.navigate("group/${groupId}")
+                                    } catch (ex: Exception) {
+                                        ex.printStackTrace()
                                     }
-                                },
-                                activity = navController.context as Activity,
-                                card = it
-                            )
-                        }
+                                }
+                            },
+                            activity = navController.context as Activity,
+                            card = it
+                        )
                     }
                 }
             }
@@ -195,6 +195,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(PaddingDefault * 2)
+                    .widthIn(max = 480.dp)
                     .fillMaxWidth()
             ) {
                 val keyboardController = LocalSoftwareKeyboardController.current!!

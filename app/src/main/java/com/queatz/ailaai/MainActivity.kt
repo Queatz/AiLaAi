@@ -4,7 +4,7 @@ import android.location.Location
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
@@ -15,8 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
@@ -28,6 +30,7 @@ import androidx.navigation.navDeepLink
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
+import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +52,9 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                val showBottomBar = navController.currentBackStackEntryAsState()
+                val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
+
+                val showNavigation = navController.currentBackStackEntryAsState()
                     .value
                     ?.destination
                     ?.route
@@ -81,13 +86,13 @@ class MainActivity : AppCompatActivity() {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Bottom
                             ) {
-                                AnimatedVisibility(showBottomBar) {
+                                AnimatedVisibility(showNavigation && !isLandscape) {
                                     NavigationBar {
                                         listOf(
                                             NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
                                             NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
                                             NavButton("me", getString(R.string.me), Icons.Outlined.Person)
-                                        ).forEachIndexed { index, item ->
+                                        ).forEach { item ->
                                             NavigationBarItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
                                                 label = { Text(item.text) },
@@ -104,41 +109,71 @@ class MainActivity : AppCompatActivity() {
                         },
                         snackbarHost = { SnackbarHost(snackbarHostState) }
                     ) {
-                        NavHost(
-                            navController,
-                            "explore",
-                            modifier = Modifier
-                                .padding(it)
-                                .fillMaxSize()
-                        ) {
-                            composable("explore") { ExploreScreen(navController) { me } }
-                            composable("card/{id}") { CardScreen(it, navController) { me } }
-                            composable("messages") { MessagesScreen(navController) { me } }
-                            composable(
-                                "group/{id}",
-                                deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
-                            ) { GroupScreen(it, navController) { me } }
-                            composable("me") { MeScreen(navController) { me } }
-                            composable("settings") {
-                                SettingsScreen(navController, { me }) {
-                                    if (api.hasToken()) {
-                                        coroutineScope.launch {
-                                            try {
-                                                me = api.me()
-                                            } catch (ex: Exception) {
-                                                ex.printStackTrace()
-                                                snackbarHostState.showSnackbar(
-                                                    getString(R.string.cant_connect),
-                                                    withDismissAction = true
-                                                )
-                                            }
+                        PermanentNavigationDrawer(
+                            drawerContent = {
+                                AnimatedVisibility(
+                                    showNavigation && isLandscape,
+                                    enter = fadeIn() + expandHorizontally(expandFrom = Alignment.Start),
+                                    exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut()
+                                ) {
+                                    PermanentDrawerSheet(Modifier.width(240.dp)) {
+                                        Spacer(Modifier.height(PaddingDefault))
+                                        listOf(
+                                            NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
+                                            NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
+                                            NavButton("me", getString(R.string.me), Icons.Outlined.Person)
+                                        ).forEach { item ->
+                                            NavigationDrawerItem(
+                                                icon = { Icon(item.icon, contentDescription = null) },
+                                                label = { Text(item.text) },
+                                                selected = navController.currentDestination?.route == item.route,
+                                                onClick = {
+                                                    navController.popBackStack()
+                                                    navController.navigate(item.route)
+                                                },
+                                                modifier = Modifier.padding(horizontal = PaddingDefault / 2)
+                                            )
                                         }
-                                    } else {
-                                        known = false
                                     }
                                 }
-                            }
-                        }
+                            },
+                            content = {
+                                NavHost(
+                                    navController,
+                                    "explore",
+                                    modifier = Modifier
+                                        .padding(it)
+                                        .fillMaxSize()
+                                ) {
+                                    composable("explore") { ExploreScreen(navController) { me } }
+                                    composable("card/{id}") { CardScreen(it, navController) { me } }
+                                    composable("messages") { MessagesScreen(navController) { me } }
+                                    composable(
+                                        "group/{id}",
+                                        deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
+                                    ) { GroupScreen(it, navController) { me } }
+                                    composable("me") { MeScreen(navController) { me } }
+                                    composable("settings") {
+                                        SettingsScreen(navController, { me }) {
+                                            if (api.hasToken()) {
+                                                coroutineScope.launch {
+                                                    try {
+                                                        me = api.me()
+                                                    } catch (ex: Exception) {
+                                                        ex.printStackTrace()
+                                                        snackbarHostState.showSnackbar(
+                                                            getString(R.string.cant_connect),
+                                                            withDismissAction = true
+                                                        )
+                                                    }
+                                                }
+                                            } else {
+                                                known = false
+                                            }
+                                        }
+                                    }
+                                }
+                            })
                     }
                 }
             }
