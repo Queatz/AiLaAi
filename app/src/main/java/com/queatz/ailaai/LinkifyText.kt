@@ -8,9 +8,8 @@ import android.text.SpannableString
 import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.view.MotionEvent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +18,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.*
@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.TextUnit
 fun LinkifyText(
     text: String,
     modifier: Modifier = Modifier,
-    linkColor: Color = Color.Blue,
+    linkColor: Color = MaterialTheme.colorScheme.primary,
     linkEntire: Boolean = false,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -158,21 +158,34 @@ private fun ClickableText(
     onClick: (Int) -> Unit
 ) {
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
-    val pressIndicator = Modifier.pointerInteropFilter {
-        when (it.action) {
-            MotionEvent.ACTION_DOWN -> {
-                layoutResult.value?.getOffsetForPosition(Offset(it.x, it.y))?.let {
-                    hasClick(it)
-                } ?: false
+    val disallow = remember { RequestDisallowInterceptTouchEvent() }
+    val pressIndicator = Modifier
+        .motionEventSpy {
+            if (it.action == MotionEvent.ACTION_UP) {
+                disallow.invoke(false)
             }
-            MotionEvent.ACTION_UP -> {
-                layoutResult.value?.let { layoutResult ->
-                    onClick(layoutResult.getOffsetForPosition(Offset(it.x, it.y)))
-                }?.let { true } ?: false
-            }
-            else -> false
         }
-    }
+        .pointerInteropFilter(disallow) {
+            when (it.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    layoutResult.value?.getOffsetForPosition(Offset(it.x, it.y))?.let {
+                        hasClick(it).also {
+                            if (it) {
+                                disallow.invoke(true)
+                            }
+                        }
+                    } ?: false
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    layoutResult.value?.let { layoutResult ->
+                        onClick(layoutResult.getOffsetForPosition(Offset(it.x, it.y)))
+                    }?.let { true } ?: false
+                }
+
+                else -> false
+            }
+        }
 
     Text(
         text = text,
@@ -203,23 +216,25 @@ private data class LinkInfo(
     val end: Int
 )
 
-private class SpannableStr(source: CharSequence): SpannableString(source) {
+private class SpannableStr(source: CharSequence) : SpannableString(source) {
     companion object {
         fun getLinkInfos(text: String): List<LinkInfo> {
             val spannableStr = SpannableStr(text)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                Linkify.addLinks(spannableStr, Linkify.WEB_URLS) { str: String -> URLSpan(str)  }
+                Linkify.addLinks(spannableStr, Linkify.WEB_URLS) { str: String -> URLSpan(str) }
             } else {
                 Linkify.addLinks(spannableStr, Linkify.WEB_URLS)
             }
             return spannableStr.linkInfos
         }
     }
+
     private inner class Data(
         val what: Any?,
         val start: Int,
         val end: Int
     )
+
     private val spanList = mutableListOf<Data>()
 
     private val linkInfos: List<LinkInfo>

@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.components
 
+import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
@@ -20,16 +23,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import com.queatz.ailaai.Card
+import com.queatz.ailaai.LinkifyText
 import com.queatz.ailaai.R
 import com.queatz.ailaai.gson
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CardConversation(card: Card, modifier: Modifier = Modifier, interactable: Boolean = true, onReply: () -> Unit = {}, isMine: Boolean = false, showTitle: Boolean = true) {
+fun CardConversation(
+    card: Card,
+    modifier: Modifier = Modifier,
+    interactable: Boolean = true,
+    onReply: () -> Unit = {},
+    isMine: Boolean = false,
+    showTitle: Boolean = true,
+    selectingText: ((Boolean) -> Unit)? = null
+) {
     val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
     var current by remember { mutableStateOf(conversation) }
     val stack = remember { mutableListOf<ConversationItem>() }
+
     Column(modifier = modifier) {
         if (showTitle) {
             Text(
@@ -56,10 +69,21 @@ fun CardConversation(card: Card, modifier: Modifier = Modifier, interactable: Bo
             )
         }
 
-        SelectionContainer(modifier = Modifier.pointerInteropFilter {
-            true
-        }) {
-            Text(
+        SelectionContainer(
+            modifier = Modifier
+                .motionEventSpy {
+                    if (it.action == MotionEvent.ACTION_UP) {
+                        selectingText?.invoke(false)
+                    }
+                }
+                .pointerInteropFilter() {
+                    if (it.action == MotionEvent.ACTION_DOWN) {
+                        selectingText?.invoke(true)
+                    }
+                    false
+                }
+        ) {
+            LinkifyText(
                 text = current.message,
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                 modifier = Modifier

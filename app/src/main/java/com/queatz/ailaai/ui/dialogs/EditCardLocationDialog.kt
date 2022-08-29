@@ -206,8 +206,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         }
 
                         CardParentType.Map -> {
-                            val disallow = remember { RequestDisallowInterceptTouchEvent() }
-
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -221,7 +219,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                             scrollEnabled = true
                                         }
                                     }
-                                    .pointerInteropFilter(disallow) {
+                                    .pointerInteropFilter {
                                         if (it.action == MotionEvent.ACTION_DOWN) {
                                             scrollEnabled = false
                                         }

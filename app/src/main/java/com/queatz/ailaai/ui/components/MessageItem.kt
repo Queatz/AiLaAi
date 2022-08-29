@@ -159,7 +159,6 @@ fun MessageItem(
             if (message.text != null) {
                 LinkifyText(
                     message.text ?: "",
-                    linkColor = MaterialTheme.colorScheme.primary,
                     color = if (isMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier
                         .align(if (isMe) Alignment.End else Alignment.Start)

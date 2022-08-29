@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -49,6 +50,7 @@ import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.NonDisposableHandle.parent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -74,6 +76,7 @@ fun BasicCard(
         var hideContent by remember { mutableStateOf(false) }
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
+        var isSelectingText by remember { mutableStateOf(false) }
 
         LaunchedEffect(hideContent) {
             if (hideContent) {
@@ -87,6 +90,7 @@ fun BasicCard(
                 .fillMaxWidth()
                 .aspectRatio(.75f)
                 .combinedClickable(
+                    enabled = !isSelectingText,
                     onClick = {
                         onClick()
                     },
@@ -113,6 +117,7 @@ fun BasicCard(
                 horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .alpha(alpha)
                     .padding(PaddingDefault)
                     .align(Alignment.TopEnd)
             ) {
@@ -181,6 +186,9 @@ fun BasicCard(
                     interactable = !isChoosing,
                     onReply = onReply,
                     isMine = isMine,
+                    selectingText = {
+                        isSelectingText = it
+                    },
                     modifier = Modifier
                         .constrainAs(topRef) {
                             bottom.linkTo(bottomRef.top)
