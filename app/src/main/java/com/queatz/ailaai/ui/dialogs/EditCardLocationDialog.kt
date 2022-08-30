@@ -208,8 +208,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         CardParentType.Map -> {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f)
+                                    .fillMaxSize()
+                                    .weight(1f)
                                     .padding(PaddingValues(vertical = PaddingDefault * 2))
                                     .clip(MaterialTheme.shapes.large)
                                     .background(MaterialTheme.colorScheme.primaryContainer)

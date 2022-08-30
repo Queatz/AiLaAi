@@ -136,44 +136,44 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     }
                                 }
-                            },
-                            content = {
-                                NavHost(
-                                    navController,
-                                    "explore",
-                                    modifier = Modifier
-                                        .padding(it)
-                                        .fillMaxSize()
-                                ) {
-                                    composable("explore") { ExploreScreen(navController) { me } }
-                                    composable("card/{id}") { CardScreen(it, navController) { me } }
-                                    composable("messages") { MessagesScreen(navController) { me } }
-                                    composable(
-                                        "group/{id}",
-                                        deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
-                                    ) { GroupScreen(it, navController) { me } }
-                                    composable("me") { MeScreen(navController) { me } }
-                                    composable("settings") {
-                                        SettingsScreen(navController, { me }) {
-                                            if (api.hasToken()) {
-                                                coroutineScope.launch {
-                                                    try {
-                                                        me = api.me()
-                                                    } catch (ex: Exception) {
-                                                        ex.printStackTrace()
-                                                        snackbarHostState.showSnackbar(
-                                                            getString(R.string.cant_connect),
-                                                            withDismissAction = true
-                                                        )
-                                                    }
+                            }, modifier = Modifier.fillMaxSize()
+                        ) {
+                            NavHost(
+                                navController,
+                                "explore",
+                                modifier = Modifier
+                                    .padding(it)
+                                    .fillMaxSize()
+                            ) {
+                                composable("explore") { ExploreScreen(navController) { me } }
+                                composable("card/{id}") { CardScreen(it, navController) { me } }
+                                composable("messages") { MessagesScreen(navController) { me } }
+                                composable(
+                                    "group/{id}",
+                                    deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
+                                ) { GroupScreen(it, navController) { me } }
+                                composable("me") { MeScreen(navController) { me } }
+                                composable("settings") {
+                                    SettingsScreen(navController, { me }) {
+                                        if (api.hasToken()) {
+                                            coroutineScope.launch {
+                                                try {
+                                                    me = api.me()
+                                                } catch (ex: Exception) {
+                                                    ex.printStackTrace()
+                                                    snackbarHostState.showSnackbar(
+                                                        getString(R.string.cant_connect),
+                                                        withDismissAction = true
+                                                    )
                                                 }
-                                            } else {
-                                                known = false
                                             }
+                                        } else {
+                                            known = false
                                         }
                                     }
                                 }
-                            })
+                            }
+                        }
                     }
                 }
             }

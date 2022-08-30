@@ -69,27 +69,31 @@ fun CardConversation(
             )
         }
 
-        SelectionContainer(
-            modifier = Modifier
-                .motionEventSpy {
-                    if (it.action == MotionEvent.ACTION_UP) {
-                        selectingText?.invoke(false)
-                    }
-                }
-                .pointerInteropFilter() {
-                    if (it.action == MotionEvent.ACTION_DOWN) {
-                        selectingText?.invoke(true)
-                    }
-                    false
-                }
-        ) {
-            LinkifyText(
-                text = current.message,
-                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+        if (current.message.isNotBlank()) {
+            SelectionContainer(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = PaddingDefault * 2)
-            )
+                    .motionEventSpy {
+                        if (it.action == MotionEvent.ACTION_UP || it.action == MotionEvent.ACTION_CANCEL) {
+                            selectingText?.invoke(false)
+                        } else if (it.action != MotionEvent.ACTION_MOVE && it.action != MotionEvent.ACTION_DOWN) {
+                            selectingText?.invoke(false)
+                        }
+                    }
+                    .pointerInteropFilter {
+                        if (it.action == MotionEvent.ACTION_DOWN) {
+                            selectingText?.invoke(true)
+                        }
+                        false
+                    }
+            ) {
+                LinkifyText(
+                    text = current.message,
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = PaddingDefault * 2)
+                )
+            }
         }
 
         if (interactable) {

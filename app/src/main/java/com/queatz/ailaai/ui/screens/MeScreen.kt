@@ -143,7 +143,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             state = state,
             contentPadding = PaddingValues(PaddingDefault),
             horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
+            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
             modifier = Modifier.fillMaxWidth().weight(1f),
             columns = GridCells.Adaptive(240.dp)
         ) {
