@@ -88,4 +88,6 @@
     <string name="you">With you</string>
     <string name="with_you_description">The location of this card will be updated to your current location every time you open Ai La Ai.</string>
     <string name="set_photo">Choose photo</string>
+    <string name="copy_link">Copy link</string>
+    <string name="card">Card</string>
 </resources>

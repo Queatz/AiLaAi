@@ -1,11 +1,14 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -45,6 +49,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
     val state = rememberLazyGridState()
+    val context = LocalContext.current
 
     LaunchedEffect(true) {
         isLoading = true
@@ -86,6 +91,30 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     navController.popBackStack()
                 }) {
                     Icon(Icons.Outlined.ArrowBack, Icons.Outlined.ArrowBack.name)
+                }
+            },
+            actions = {
+                var showMenu by remember { mutableStateOf(false) }
+
+                IconButton({
+                    showMenu = !showMenu
+                }) {
+                    Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
+                }
+
+                val cardString = stringResource(R.string.card)
+
+                DropdownMenu(showMenu, { showMenu = false }) {
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.copy_link))
+                    }, {
+                        card?.let { card ->
+                            ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
+                                ClipData.newPlainText(card.name ?: cardString, "${appDomain}/card/${card.id}")
+                            )
+                        }
+                        showMenu = false
+                    })
                 }
             },
             colors = TopAppBarDefaults.smallTopAppBarColors(

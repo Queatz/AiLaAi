@@ -146,7 +146,10 @@ class MainActivity : AppCompatActivity() {
                                     .fillMaxSize()
                             ) {
                                 composable("explore") { ExploreScreen(navController) { me } }
-                                composable("card/{id}") { CardScreen(it, navController) { me } }
+                                composable(
+                                    "card/{id}",
+                                    deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
+                                ) { CardScreen(it, navController) { me } }
                                 composable("messages") { MessagesScreen(navController) { me } }
                                 composable(
                                     "group/{id}",

@@ -2,17 +2,15 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.view.MotionEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Place
@@ -24,16 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -45,12 +39,10 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
-import com.queatz.ailaai.gson
 import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.NonDisposableHandle.parent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -89,6 +81,11 @@ fun BasicCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(.75f)
+                .motionEventSpy {
+                    if (it.action == MotionEvent.ACTION_UP) {
+                        isSelectingText = false
+                    }
+                }
                 .combinedClickable(
                     enabled = !isSelectingText,
                     onClick = {
@@ -247,10 +244,12 @@ private fun CardToolbar(
     val scrollState = rememberScrollState()
 
     Row(
+        horizontalArrangement = Arrangement.End,
         modifier = modifier
+            .fillMaxWidth()
             .background(Color.Transparent)
             .padding(PaddingValues(top = PaddingDefault))
-            .horizontalScroll(scrollState)
+            .horizontalScroll(scrollState, reverseScrolling = true)
     ) {
         var active by remember { mutableStateOf(card.active ?: false) }
         var activeCommitted by remember { mutableStateOf(active) }
