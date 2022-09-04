@@ -20,8 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
@@ -177,6 +182,7 @@ fun BasicCard(
                     )
             ) {
                 val (topRef, bottomRef) = createRefs()
+                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
 
                 CardConversation(
                     card,
@@ -193,6 +199,9 @@ fun BasicCard(
                             height = Dimension.preferredWrapContent
                         }
                         .verticalScroll(conversationScrollState)
+                        .graphicsLayer(alpha = 0.99f)
+                        .onPlaced { viewport = it.boundsInParent().size }
+                        .fadingEdge(viewport, conversationScrollState)
                 )
 
                 if (isMine) {
@@ -205,6 +214,39 @@ fun BasicCard(
         }
     }
 }
+
+private fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
+    Modifier.drawWithContent {
+        drawContent()
+
+        val h = scrollState.value.toFloat().coerceAtMost(viewport.height / 3f)
+        val h2 = (
+                scrollState.maxValue.toFloat() - scrollState.value.toFloat()
+                ).coerceAtMost(viewport.height / 3f)
+
+        if (scrollState.value != 0) {
+            drawRect(
+                Brush.verticalGradient(
+                    colors = listOf(Color.Black, Color.Transparent),
+                    startY = h + scrollState.value,
+                    endY = 0.0f + scrollState.value
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+
+        if (scrollState.value != scrollState.maxValue) {
+            drawRect(
+                Brush.verticalGradient(
+                    colors = listOf(Color.Black, Color.Transparent),
+                    startY = viewport.height - h2 + scrollState.value,
+                    endY = viewport.height + scrollState.value
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+    }
+)
 
 private fun Modifier.minAspectRatio(ratio: Float) = then(
     MaxAspectRatioModifier(ratio)
