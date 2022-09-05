@@ -229,6 +229,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                 addedCardId = api.newCard().id
                                 myCards = api.myCards()
                                 delay(100)
+
+                                if (state.firstVisibleItemIndex > 2) {
+                                    state.scrollToItem(2)
+                                }
+
                                 state.animateScrollToItem(0)
                             } catch (ex: Exception) {
                                 ex.printStackTrace()
