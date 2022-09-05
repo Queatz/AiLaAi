@@ -38,9 +38,11 @@ fun CardConversation(
     showTitle: Boolean = true,
     selectingText: ((Boolean) -> Unit)? = null
 ) {
-    val conversation = gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
-    var current by remember { mutableStateOf(conversation) }
-    val stack = remember { mutableListOf<ConversationItem>() }
+    val conversation = remember(card.conversation) {
+        gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
+    }
+    var current by remember(conversation) { mutableStateOf(conversation) }
+    val stack = remember(conversation) { mutableListOf<ConversationItem>() }
 
     Column(modifier = modifier) {
         if (showTitle) {

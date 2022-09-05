@@ -197,7 +197,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 onChange = {
                                     coroutineScope.launch {
                                         isLoading = true
-                                        cards = listOf()
                                         try {
                                             cards = api.cardsCards(cardId)
                                         } catch (ex: Exception) {

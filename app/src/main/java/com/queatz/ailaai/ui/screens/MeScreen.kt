@@ -108,6 +108,15 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    val cards = remember(myCards, cardParentType) {
+        when (cardParentType) {
+            CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
+            CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true }
+            CardParentType.Card -> myCards.filter { it.parent != null }
+            else -> myCards
+        }
+    }
+
     Column {
         SmallTopAppBar(
             {
@@ -158,12 +167,6 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 modifier = Modifier.fillMaxSize(),
                 columns = GridCells.Adaptive(240.dp)
             ) {
-                val cards = when (cardParentType) {
-                    CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
-                    CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true }
-                    CardParentType.Card -> myCards.filter { it.parent != null }
-                    else -> myCards
-                }
                 items(cards, key = { it.id!! }) { card ->
                     BasicCard(
                         {
@@ -172,7 +175,6 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         onChange = {
                             coroutineScope.launch {
                                 isLoading = true
-                                myCards = listOf()
                                 try {
                                     myCards = api.myCards()
                                 } catch (ex: Exception) {
