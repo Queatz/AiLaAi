@@ -1,15 +1,20 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,7 +22,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -46,6 +55,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     var inviteCode by remember { mutableStateOf("") }
     val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
+    var searchText by rememberSaveable { mutableStateOf("") }
 
     val errorString = stringResource(R.string.error)
 
@@ -108,12 +118,14 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    val cards = remember(myCards, cardParentType) {
+    val cards = remember(myCards, cardParentType, searchText) {
         when (cardParentType) {
             CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
             CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true }
             CardParentType.Card -> myCards.filter { it.parent != null }
             else -> myCards
+        }.filter {
+            searchText.isBlank() || it.name?.contains(searchText, true) ?: false
         }
     }
 
@@ -160,7 +172,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     PaddingDefault,
                     PaddingDefault,
                     PaddingDefault,
-                    PaddingDefault + 70.dp
+                    PaddingDefault + 80.dp + 50.dp
                 ),
                 horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
@@ -217,7 +229,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
             }
-            Box(contentAlignment = Alignment.Center, modifier = Modifier
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                modifier = Modifier
                 .padding(PaddingDefault * 2)
                 .widthIn(max = 480.dp)
                 .fillMaxWidth()
@@ -245,6 +260,32 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 ) {
                     Text(stringResource(R.string.add_a_card))
                 }
+                val keyboardController = LocalSoftwareKeyboardController.current!!
+                OutlinedTextField(
+                    searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = { Text(stringResource(R.string.search)) },
+                    shape = MaterialTheme.shapes.large,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        keyboardController.hide()
+                    }),
+                    trailingIcon = {
+                        if (searchText.isNotEmpty()) {
+                            Icon(Icons.Outlined.Close, stringResource(R.string.clear), modifier = Modifier.clickable {
+                                searchText = ""
+                            })
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.surface)
+                )
             }
         }
     }

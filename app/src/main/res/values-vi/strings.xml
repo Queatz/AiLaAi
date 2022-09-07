@@ -92,4 +92,5 @@
     <string name="set_photo">Chọn ảnh</string>
     <string name="card">Thẻ</string>
     <string name="copy_link">Sao chép liên kết</string>
+    <string name="clear">Bỏ</string>
 </resources>
