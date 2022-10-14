@@ -41,6 +41,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -59,11 +60,12 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var value by rememberSaveable { mutableStateOf("") }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var showSetMyLocation by remember { mutableStateOf(false) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coroutineScope = rememberCoroutineScope()
 
-    if (!permissionState.status.isGranted) {
+    if (geo == null && !permissionState.status.isGranted) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2, Alignment.CenterVertically),
@@ -98,6 +100,11 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         .align(Alignment.CenterHorizontally)
                 )
             }
+            TextButton({
+                showSetMyLocation = true
+            }) {
+                Text(stringResource(R.string.set_my_location))
+            }
         }
     } else if (geo == null) {
         LaunchedEffect(true) {
@@ -114,12 +121,17 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(PaddingDefault)
         ) {
             Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
+            TextButton({
+                showSetMyLocation = true
+            }) {
+                Text(stringResource(R.string.set_my_location))
+            }
         }
     } else {
         var initialSearch by remember { mutableStateOf(cards.isEmpty()) }
@@ -230,5 +242,9 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 )
             }
         }
+    }
+
+    if (showSetMyLocation) {
+        SetLocationDialog({ showSetMyLocation = false}) { geo = it }
     }
 }

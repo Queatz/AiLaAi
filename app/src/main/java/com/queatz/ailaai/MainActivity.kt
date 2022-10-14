@@ -31,7 +31,9 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : AppCompatActivity() {
@@ -71,11 +73,12 @@ class MainActivity : AppCompatActivity() {
                     val cantConnectString = stringResource(R.string.cant_connect)
 
                     LaunchedEffect(true) {
-                        try {
+                        while (me == null) try {
                             me = api.me()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                             snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
+                            delay(5.seconds)
                         }
                     }
 

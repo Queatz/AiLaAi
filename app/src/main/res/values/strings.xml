@@ -56,7 +56,7 @@
     <string name="card_conversation">Card conversation</string>
     <string name="your_message">Your message</string>
     <string name="your_reply">Your reply</string>
-    <string name="card_message_description">This message is shown on the card under your name</string>
+    <string name="card_message_description">This message is shown on the card below the name</string>
     <string name="card_reply_description">This reply is shown under your name when someone chooses \"%1$s\"</string>
     <string name="option">Option</string>
     <string name="continue_conversation">Continue conversation</string>
@@ -91,4 +91,5 @@
     <string name="copy_link">Copy link</string>
     <string name="card">Card</string>
     <string name="clear">Clear</string>
+    <string name="set_my_location">Set my location</string>
 </resources>

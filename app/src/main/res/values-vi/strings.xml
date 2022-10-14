@@ -57,7 +57,7 @@
     <string name="card_conversation">Cuộc trò chuyện của thẻ</string>
     <string name="your_message">Tin nhắn của bạn</string>
     <string name="your_reply">Câu trả lời của bạn</string>
-    <string name="card_message_description">Tin nhắn này được hiển thị trên thẻ dưới tên của bạn</string>
+    <string name="card_message_description">Tin nhắn này được hiển thị trên thẻ dưới tên</string>
     <string name="card_reply_description">Tin nhắn này được hiển thị dưới tên của bạn khi ai đó chọn \"%1$s\"</string>
     <string name="option">Lựa chọn</string>
     <string name="continue_conversation">Tiếp tục cuộc trò chuyện này</string>
@@ -93,4 +93,5 @@
     <string name="card">Thẻ</string>
     <string name="copy_link">Sao chép liên kết</string>
     <string name="clear">Bỏ</string>
+    <string name="set_my_location">Đặt vị trí của tôi</string>
 </resources>

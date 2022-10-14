@@ -4,10 +4,6 @@ import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -129,7 +125,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SmallTopAppBar(
             {
                 Text(stringResource(R.string.your_cards))
@@ -157,6 +153,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         )
         CardParentSelector(
             cardParentType, modifier = Modifier
+                .widthIn(max = 480.dp)
                 .padding(horizontal = PaddingDefault)
                 .padding(bottom = PaddingDefault / 2)
         ) {
@@ -209,7 +206,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
 
                 if (cards.isEmpty()) {
                     if (isLoading) {
-                        item {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                             LinearProgressIndicator(
                                 color = MaterialTheme.colorScheme.tertiary,
                                 modifier = Modifier
@@ -220,7 +217,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     } else {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                stringResource(if (cardParentType == null) R.string.you_have_no_cards else R.string.no_cards_to_show),
+                                stringResource(if (cardParentType == null && searchText.isBlank()) R.string.you_have_no_cards else R.string.no_cards_to_show),
                                 color = MaterialTheme.colorScheme.secondary,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(PaddingDefault * 2)
