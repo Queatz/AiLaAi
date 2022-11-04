@@ -6,27 +6,17 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -41,10 +31,10 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.isActive
@@ -204,43 +194,10 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
             }
-            Card(
-                shape = MaterialTheme.shapes.large,
-                colors = CardDefaults.elevatedCardColors(),
-                elevation = CardDefaults.elevatedCardElevation(ElevationDefault / 2),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(PaddingDefault * 2)
-                    .widthIn(max = 480.dp)
-                    .fillMaxWidth()
-            ) {
-                val keyboardController = LocalSoftwareKeyboardController.current!!
-                OutlinedTextField(
-                    value,
-                    onValueChange = { value = it },
-                    placeholder = { Text(stringResource(R.string.search)) },
-                    shape = MaterialTheme.shapes.large,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Search
-                    ),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        keyboardController.hide()
-                    }),
-                    trailingIcon = {
-                        if (value.isNotEmpty()) {
-                            Icon(Icons.Outlined.Close, stringResource(R.string.clear), modifier = Modifier.clickable {
-                                value = ""
-                            })
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surface)
-                )
-            }
+            SearchField(value, { value = it }, modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(PaddingDefault * 2)
+            )
         }
     }
 

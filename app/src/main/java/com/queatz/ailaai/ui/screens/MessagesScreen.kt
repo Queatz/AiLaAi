@@ -10,17 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.ContactItem
+import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var isLoading by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
     var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
 
     LaunchedEffect(true) {
@@ -33,34 +36,45 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         isLoading = false
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(PaddingDefault),
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize(),
-        reverseLayout = true
-    ) {
-        if (isLoading) {
-            item {
-                LinearProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = PaddingDefault)
-                )
+    Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            contentPadding = PaddingValues(
+                PaddingDefault,
+                PaddingDefault,
+                PaddingDefault,
+                PaddingDefault + 80.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize(),
+            reverseLayout = true
+        ) {
+            if (isLoading) {
+                item {
+                    LinearProgressIndicator(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = PaddingDefault)
+                    )
+                }
+            } else if (groups.isEmpty()) {
+                item {
+                    Text(
+                        stringResource(R.string.you_have_no_conversations),
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(PaddingDefault * 2)
+                    )
+                }
             }
-        } else if (groups.isEmpty()) {
-            item {
-                Text(
-                    stringResource(R.string.you_have_no_conversations),
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(PaddingDefault * 2)
-                )
-            }
-        }
 
-        items(groups, key = { it.group!!.id!! }) {
-            ContactItem(navController, it, me())
+            items(groups, key = { it.group!!.id!! }) {
+                ContactItem(navController, it, me())
+            }
         }
+        SearchField(searchText, { searchText = it }, modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(PaddingDefault * 2)
+        )
     }
 }

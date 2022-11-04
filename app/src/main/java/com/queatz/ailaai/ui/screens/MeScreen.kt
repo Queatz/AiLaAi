@@ -1,16 +1,11 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,11 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -34,6 +25,7 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardParentType
+import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -257,32 +249,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 ) {
                     Text(stringResource(R.string.add_a_card))
                 }
-                val keyboardController = LocalSoftwareKeyboardController.current!!
-                OutlinedTextField(
-                    searchText,
-                    onValueChange = { searchText = it },
-                    placeholder = { Text(stringResource(R.string.search)) },
-                    shape = MaterialTheme.shapes.large,
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Search
-                    ),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        keyboardController.hide()
-                    }),
-                    trailingIcon = {
-                        if (searchText.isNotEmpty()) {
-                            Icon(Icons.Outlined.Close, stringResource(R.string.clear), modifier = Modifier.clickable {
-                                searchText = ""
-                            })
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surface)
-                )
+                SearchField(searchText, { searchText = it }, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
     }
