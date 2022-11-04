@@ -126,7 +126,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        SmallTopAppBar(
+        TopAppBar(
             {
                 Text(stringResource(R.string.your_cards))
             },

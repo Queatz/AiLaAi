@@ -70,7 +70,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
     ) {
-        SmallTopAppBar(
+        TopAppBar(
             {
                 Column {
                     Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)

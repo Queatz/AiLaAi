@@ -99,7 +99,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 state.animateScrollToItem(0)
             }
 
-            SmallTopAppBar(
+            TopAppBar(
                 {
                     Column {
                         Text(otherMember?.person?.name ?: stringResource(R.string.someone))

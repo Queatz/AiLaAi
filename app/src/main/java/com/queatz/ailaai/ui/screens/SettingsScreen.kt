@@ -152,7 +152,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     }
 
     Column {
-        SmallTopAppBar(
+        TopAppBar(
             {
                 Text(stringResource(R.string.settings))
             },
