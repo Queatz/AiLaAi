@@ -24,16 +24,27 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var isLoading by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
+    var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
 
     LaunchedEffect(true) {
         isLoading = true
         try {
-            groups = api.groups()
+            allGroups = api.groups()
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
         isLoading = false
+    }
+
+    LaunchedEffect(searchText) {
+        // todo search server, set allGroups
+    }
+
+    LaunchedEffect(allGroups, searchText) {
+        groups = if (searchText.isBlank()) allGroups else allGroups.filter {
+            it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
+        }
     }
 
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
@@ -61,7 +72,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
             } else if (groups.isEmpty()) {
                 item {
                     Text(
-                        stringResource(R.string.you_have_no_conversations),
+                        stringResource(if (searchText.isBlank()) R.string.you_have_no_conversations else R.string.no_conversations_to_show),
                         color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.padding(PaddingDefault * 2)
                     )
