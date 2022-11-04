@@ -94,4 +94,5 @@
     <string name="copy_link">Sao chép liên kết</string>
     <string name="clear">Bỏ</string>
     <string name="set_my_location">Đặt vị trí của tôi</string>
+    <string name="reset_location">Đặt lại vị trí</string>
 </resources>

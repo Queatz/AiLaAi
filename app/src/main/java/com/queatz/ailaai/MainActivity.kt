@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                                     .padding(it)
                                     .fillMaxSize()
                             ) {
-                                composable("explore") { ExploreScreen(navController) { me } }
+                                composable("explore") { ExploreScreen(this@MainActivity, navController) { me } }
                                 composable(
                                     "card/{id}",
                                     deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
