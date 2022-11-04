@@ -96,4 +96,6 @@
     <string name="set_my_location">Đặt vị trí của tôi</string>
     <string name="reset_location">Đặt lại vị trí</string>
     <string name="no_conversations_to_show">Không tìm được trò chuyện để cho bạn xem.</string>
+    <string name="new_group">Tạo nhóm</string>
+    <string name="your_conversations">Trò chuyện của bạn</string>
 </resources>

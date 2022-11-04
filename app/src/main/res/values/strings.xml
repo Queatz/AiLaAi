@@ -94,4 +94,6 @@
     <string name="set_my_location">Set my location</string>
     <string name="reset_location">Reset location</string>
     <string name="no_conversations_to_show">No conversations to show</string>
+    <string name="new_group">Create group</string>
+    <string name="your_conversations">Your conversations</string>
 </resources>
