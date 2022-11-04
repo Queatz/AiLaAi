@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
@@ -154,7 +155,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     Column {
         TopAppBar(
             {
-                Text(stringResource(R.string.settings))
+                Text(stringResource(R.string.settings), maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             navigationIcon = {
                 IconButton({

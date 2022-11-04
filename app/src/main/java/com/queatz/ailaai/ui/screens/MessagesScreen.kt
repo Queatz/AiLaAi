@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.GroupExtended
@@ -52,13 +53,14 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     Column {
         TopAppBar(
             {
-                Text(stringResource(R.string.your_conversations))
+                Text(stringResource(R.string.your_conversations), maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             actions = {
                 ElevatedButton(
                     {
                         // todo
-                    }
+                    },
+                    modifier = Modifier.padding(start = PaddingDefault)
                 ) {
                     Icon(
                         Icons.Outlined.Add,

@@ -15,6 +15,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
@@ -120,14 +121,15 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopAppBar(
             {
-                Text(stringResource(R.string.your_cards))
+                Text(stringResource(R.string.your_cards), maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             actions = {
                 ElevatedButton(
                     {
                         inviteDialog = true
                     },
-                    enabled = !inviteDialog
+                    enabled = !inviteDialog,
+                    modifier = Modifier.padding(start = PaddingDefault)
                 ) {
                     Icon(
                         Icons.Outlined.Add,

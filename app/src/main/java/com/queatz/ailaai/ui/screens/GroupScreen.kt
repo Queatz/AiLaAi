@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
@@ -102,7 +103,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             TopAppBar(
                 {
                     Column {
-                        Text(otherMember?.person?.name ?: stringResource(R.string.someone))
+                        Text(otherMember?.person?.name ?: stringResource(R.string.someone), maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                         otherMember?.person?.seen?.let {
                             Text(
