@@ -14,6 +14,7 @@ properties.load(file("../local.properties").inputStream())
 
 android {
     compileSdk = 33
+    namespace = "com.queatz.ailaai"
 
     defaultConfig {
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY")
