@@ -22,12 +22,20 @@ import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import com.queatz.ailaai.R
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 
 @SuppressLint("MissingPermission")
 @Composable
 fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit) {
     var position by remember { mutableStateOf(LatLng(0.0, 0.0)) }
+    val disposable = remember { CompositeDisposable() }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            disposable.dispose()
+        }
+    }
 
     Dialog(onDismissRequest) {
         Surface(
@@ -77,7 +85,6 @@ fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit
                         mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
 
                         val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
-
                         mapFragment.getMapObservable().subscribe {
                             map = it
                             map?.clear()
@@ -115,7 +122,7 @@ fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit
                                         .build()
                                 )
                             )
-                        }
+                        }.let(disposable::add)
                     }
                 }
                 Row(

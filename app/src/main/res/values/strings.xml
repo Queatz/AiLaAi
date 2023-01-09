@@ -97,4 +97,8 @@
     <string name="no_conversations_to_show">No conversations to show</string>
     <string name="new_group">Create group</string>
     <string name="your_conversations">Conversations</string>
+    <string name="new_group_with_person">Create group with %1$s</string>
+    <string name="new_group_with_people">Create group with %1$s and %2$s</string>
+    <string name="new_group_with_x_people">Create group with %1$s people</string>
+    <string name="didnt_work">That didn\'t work</string>
 </resources>

@@ -13,17 +13,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -54,6 +49,7 @@ import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.components.toList
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -76,6 +72,14 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     var scrollEnabled by remember { mutableStateOf(true) }
 
     var cardParentType by remember { mutableStateOf(CardParentType.Map) }
+
+    val disposable = remember { CompositeDisposable() }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            disposable.dispose()
+        }
+    }
 
     if (card.equipped == true) {
         cardParentType = CardParentType.Person
@@ -292,7 +296,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                                     .build()
                                             )
                                         )
-                                    }
+                                    }.let(disposable::add)
                                 }
                             }
                             Text(

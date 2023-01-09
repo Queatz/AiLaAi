@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +19,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
+import com.queatz.ailaai.ui.dialogs.CreateGroupDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +29,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
+    var showCreateGroup by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         isLoading = true
@@ -58,9 +59,9 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
             actions = {
                 ElevatedButton(
                     {
-                        // todo
+                        showCreateGroup = true
                     },
-                    modifier = Modifier.padding(start = PaddingDefault)
+                    modifier = Modifier.padding(horizontal = PaddingDefault)
                 ) {
                     Icon(
                         Icons.Outlined.Add,
@@ -101,10 +102,10 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                             modifier = Modifier.padding(PaddingDefault * 2)
                         )
                     }
-                }
-
-                items(groups, key = { it.group!!.id!! }) {
-                    ContactItem(navController, it, me())
+                } else {
+                    items(groups, key = { it.group!!.id!! }) {
+                        ContactItem(navController, it, me())
+                    }
                 }
             }
             SearchField(
@@ -113,5 +114,13 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     .padding(PaddingDefault * 2)
             )
         }
+    }
+
+    if (showCreateGroup) {
+        CreateGroupDialog({
+            showCreateGroup = false
+        }, {
+           navController.navigate("group/${it.id!!}")
+        }, me)
     }
 }

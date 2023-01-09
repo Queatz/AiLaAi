@@ -32,6 +32,8 @@ val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeCon
 
 const val appDomain = "https://ailaai.app"
 
+private data class CreateGroupBody(val people: List<String>)
+
 class Api {
 
     private lateinit var context: Context
@@ -174,6 +176,8 @@ class Api {
         ), client = httpData)
 
     suspend fun cardGroup(card: String): Group = get("cards/$card/group")
+
+    suspend fun createGroup(people: List<String>): Group = post("groups", CreateGroupBody(people))
 
     suspend fun groups(): List<GroupExtended> = get("groups")
 
