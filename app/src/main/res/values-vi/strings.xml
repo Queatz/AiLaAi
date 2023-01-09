@@ -103,4 +103,5 @@
     <string name="new_group_with_people">Tạo nhóm vơi %1$s và %2$s</string>
     <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người khác</string>
     <string name="didnt_work">Điều đó đã không làm được</string>
+    <string name="connected_ago">Đã kết nối %1$s</string>
 </resources>

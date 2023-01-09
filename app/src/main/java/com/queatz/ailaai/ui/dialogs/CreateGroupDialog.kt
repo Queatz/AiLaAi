@@ -69,7 +69,7 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
     }
 
     LaunchedEffect(selected) {
-        disableSubmit = selected.isEmpty()
+        disableSubmit = selected.isEmpty() || selected.size >= 20
     }
 
     Dialog(onDismissRequest) {
@@ -158,7 +158,7 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
                                         .background(MaterialTheme.colorScheme.secondaryContainer)
                                 )
                                 Text(
-                                    "${it.name}",
+                                    it.name ?: stringResource(R.string.someone),
                                     color = contentColor,
                                     modifier = Modifier
                                         .padding(PaddingDefault)
@@ -206,7 +206,7 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
 @Composable
 fun newGroupText(selected: List<Person>) = when {
     selected.isEmpty() -> stringResource(R.string.new_group)
-    selected.size == 1 -> stringResource(R.string.new_group_with_person, *selected.map { it.name!! }.toTypedArray())
-    selected.size == 2 -> stringResource(R.string.new_group_with_people, *selected.map { it.name!! }.toTypedArray())
+    selected.size == 1 -> stringResource(R.string.new_group_with_person, *selected.map { it.name ?: stringResource(R.string.someone) }.toTypedArray())
+    selected.size == 2 -> stringResource(R.string.new_group_with_people, *selected.map { it.name ?: stringResource(R.string.someone) }.toTypedArray())
     else -> stringResource(R.string.new_group_with_x_people, selected.size)
 }

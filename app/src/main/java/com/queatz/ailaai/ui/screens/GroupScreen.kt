@@ -32,6 +32,7 @@ import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +94,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
         } else {
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
-            val otherMember = groupExtended!!.members?.find { it.person?.id != me()?.id }
+            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id } ?: emptyList()
             val state = rememberLazyListState()
 
             LaunchedEffect(messages) {
@@ -103,9 +104,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             TopAppBar(
                 {
                     Column {
-                        Text(otherMember?.person?.name ?: stringResource(R.string.someone), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        val someone = stringResource(R.string.someone)
+                        Text(otherMembers.joinToString { it.person?.name ?: someone }, maxLines = 1, overflow = TextOverflow.Ellipsis)
 
-                        otherMember?.person?.seen?.let {
+                        otherMembers.maxBy { it.person?.seen ?: Instant.fromEpochMilliseconds(0) }.person?.seen?.let {
                             Text(
                                 "${stringResource(R.string.active)} ${it.timeAgo().lowercase()}",
                                 style = MaterialTheme.typography.labelMedium,
@@ -154,7 +156,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 //                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
                     }
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)

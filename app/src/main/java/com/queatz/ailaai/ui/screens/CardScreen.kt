@@ -118,7 +118,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     })
                 }
             },
-            colors = TopAppBarDefaults.smallTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             ),
             modifier = Modifier

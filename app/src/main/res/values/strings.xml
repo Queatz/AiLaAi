@@ -101,4 +101,5 @@
     <string name="new_group_with_people">Create group with %1$s and %2$s</string>
     <string name="new_group_with_x_people">Create group with %1$s people</string>
     <string name="didnt_work">That didn\'t work</string>
+    <string name="connected_ago">Connected %1$s</string>
 </resources>
