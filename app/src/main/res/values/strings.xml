@@ -102,4 +102,6 @@
     <string name="new_group_with_x_people">Create group with %1$s people</string>
     <string name="didnt_work">That didn\'t work</string>
     <string name="connected_ago">Connected %1$s</string>
+    <string name="open_enclosing_card">Open enclosing card</string>
+    <string name="copied">Copied!</string>
 </resources>

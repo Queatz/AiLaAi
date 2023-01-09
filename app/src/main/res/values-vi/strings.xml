@@ -104,4 +104,6 @@
     <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người khác</string>
     <string name="didnt_work">Điều đó đã không làm được</string>
     <string name="connected_ago">Đã kết nối %1$s</string>
+    <string name="open_enclosing_card">Mở thẻ có thẻ này</string>
+    <string name="copied">Đã sao chép!</string>
 </resources>

@@ -3,6 +3,8 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -106,6 +108,15 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 val cardString = stringResource(R.string.card)
 
                 DropdownMenu(showMenu, { showMenu = false }) {
+                    if (card?.parent != null) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.open_enclosing_card))
+                        }, {
+                            navController.navigate("card/${card!!.parent!!}")
+                            showMenu = false
+                        })
+                    }
+                    val textCopied = stringResource(R.string.copied)
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
@@ -113,6 +124,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
                                 ClipData.newPlainText(card.name ?: cardString, "${appDomain}/card/${card.id}")
                             )
+                            Toast.makeText(context, textCopied, LENGTH_SHORT).show()
                         }
                         showMenu = false
                     })
