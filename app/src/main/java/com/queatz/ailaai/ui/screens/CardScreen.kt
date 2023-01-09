@@ -5,7 +5,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
@@ -147,6 +149,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             )
         } else {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
+            var verticalAspect by remember { mutableStateOf(false) }
+            val headerAspect by animateFloatAsState(if (verticalAspect) .75f else 1.5f )
 
             Row(
                 modifier = Modifier.fillMaxSize()
@@ -163,7 +167,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             .shadow(ElevationDefault)
                             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
                     ) {
-                        cardHeaderItems(card, isMine, coroutineScope, navController)
+                        cardHeaderItems(card, isMine, headerAspect, { verticalAspect = !verticalAspect }, coroutineScope, navController)
                     }
                 }
 
@@ -176,7 +180,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     columns = GridCells.Adaptive(240.dp)
                 ) {
                     if (!isLandscape) {
-                        cardHeaderItems(card, isMine, coroutineScope, navController)
+                        cardHeaderItems(card, isMine, headerAspect, { verticalAspect = !verticalAspect }, coroutineScope, navController)
                     }
                     if (cards.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -256,6 +260,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 private fun LazyGridScope.cardHeaderItems(
     card: Card?,
     isMine: Boolean,
+    aspect: Float,
+    toggleAspect: () -> Unit,
     coroutineScope: CoroutineScope,
     navController: NavController
 ) {
@@ -272,7 +278,10 @@ private fun LazyGridScope.cardHeaderItems(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.large)
-                    .aspectRatio(1.5f)
+                    .aspectRatio(aspect)
+                    .clickable {
+                        toggleAspect()
+                    }
             )
         }
     }

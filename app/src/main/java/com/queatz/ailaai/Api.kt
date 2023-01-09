@@ -12,6 +12,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.parsing.*
 import io.ktor.serialization.gson.*
@@ -190,6 +191,8 @@ class Api {
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 
     suspend fun deleteMessage(message: String): HttpStatusCode = post("messages/$message/delete")
+
+    suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
 }
 
 data class SignUpRequest(

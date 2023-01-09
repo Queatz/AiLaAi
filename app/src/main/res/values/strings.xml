@@ -104,4 +104,6 @@
     <string name="connected_ago">Connected %1$s</string>
     <string name="open_enclosing_card">Open enclosing card</string>
     <string name="copied">Copied!</string>
+    <string name="update_available">Update available</string>
+    <string name="download">Download</string>
 </resources>

@@ -2,6 +2,8 @@ package com.queatz.ailaai
 
 import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -71,6 +75,9 @@ class MainActivity : AppCompatActivity() {
                     val snackbarHostState = remember { SnackbarHostState() }
                     val coroutineScope = rememberCoroutineScope()
                     val cantConnectString = stringResource(R.string.cant_connect)
+                    val updateAvailableString = stringResource(R.string.update_available)
+                    val downloadString = stringResource(R.string.download)
+                    val context = LocalContext.current
 
                     LaunchedEffect(true) {
                         while (me == null) try {
@@ -79,6 +86,25 @@ class MainActivity : AppCompatActivity() {
                             ex.printStackTrace()
                             snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
                             delay(5.seconds)
+                        }
+                    }
+
+                    LaunchedEffect(true) {
+                        try {
+                            val version = api.latestAppVersion() ?: -1
+
+                            if (version > BuildConfig.VERSION_CODE) {
+                                if (snackbarHostState.showSnackbar(
+                                        updateAvailableString,
+                                        actionLabel = downloadString,
+                                        withDismissAction = true
+                                    ) == SnackbarResult.ActionPerformed
+                                ) {
+                                    appDomain.launchUrl(context)
+                                }
+                            }
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
                         }
                     }
 
