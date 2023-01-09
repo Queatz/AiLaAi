@@ -10,14 +10,19 @@ import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.DisposableObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class Application : android.app.Application() {
+
+    private var disposable = CompositeDisposable()
+
     override fun onCreate() {
         super.onCreate()
 
@@ -55,6 +60,7 @@ class Application : android.app.Application() {
         MessagingRepositoryFactory.getMessagingService()
             .getNewTokenObservable()
             .subscribeWith(tokenObserver)
+            .let(disposable::add)
 
         MessagingRepositoryFactory.getMessagingService().requestToken(this)
 
@@ -73,6 +79,12 @@ class Application : android.app.Application() {
             .getMessageReceivedObservable()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWith(messageObserver)
+            .let(disposable::add)
+    }
+
+    override fun onTerminate() {
+        disposable.dispose()
+        super.onTerminate()
     }
 }
 

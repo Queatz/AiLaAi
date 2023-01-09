@@ -38,6 +38,7 @@
     <string name="message">Message</string>
     <string name="someone">Someone</string>
     <string name="active">Active</string>
+    <string name="not_active">Not active</string>
     <string name="notification_channel_description">Messages from people using the app.</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
@@ -46,7 +47,7 @@
     <string name="reply">Reply</string>
     <string name="go_back">Go back</string>
     <string name="card_active">Card is active</string>
-    <string name="card_inactive">Card is inactive</string>
+    <string name="card_inactive">Card is not active</string>
     <string name="card_location">Card location</string>
     <string name="location_name">Location name</string>
     <string name="location_name_description">The location name is shown on the card to help others know where it is located.</string>
@@ -95,5 +96,5 @@
     <string name="reset_location">Reset location</string>
     <string name="no_conversations_to_show">No conversations to show</string>
     <string name="new_group">Create group</string>
-    <string name="your_conversations">Your conversations</string>
+    <string name="your_conversations">Conversations</string>
 </resources>

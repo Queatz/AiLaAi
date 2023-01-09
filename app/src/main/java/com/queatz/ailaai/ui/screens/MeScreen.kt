@@ -1,8 +1,10 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -23,6 +25,7 @@ import com.queatz.ailaai.Card
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardParentType
@@ -32,6 +35,11 @@ import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+enum class Filter {
+    Active,
+    NotActive
+}
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +53,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
     var searchText by rememberSaveable { mutableStateOf("") }
+    var filters by rememberSaveable { mutableStateOf(emptySet<Filter>()) }
 
     val errorString = stringResource(R.string.error)
 
@@ -107,14 +116,20 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    val cards = remember(myCards, cardParentType, searchText) {
+    val cards = remember(myCards, cardParentType, filters, searchText) {
         when (cardParentType) {
             CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
             CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true }
             CardParentType.Card -> myCards.filter { it.parent != null }
             else -> myCards
         }.filter {
-            searchText.isBlank() || it.name?.contains(searchText, true) ?: false
+            filters.all { filter ->
+                when(filter) {
+                    Filter.Active -> it.active == true
+                    Filter.NotActive -> it.active != true
+                }
+            } &&
+                    (searchText.isBlank() || it.name?.contains(searchText, true) ?: false)
         }
     }
 
@@ -145,13 +160,35 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 }
             }
         )
-        CardParentSelector(
-            cardParentType, modifier = Modifier
-                .widthIn(max = 480.dp)
-                .padding(horizontal = PaddingDefault)
-                .padding(bottom = PaddingDefault / 2)
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState())
         ) {
-            cardParentType = if (it == cardParentType) null else it
+            CardParentSelector(
+                cardParentType, modifier = Modifier
+                    .width(320.dp)
+                    .padding(horizontal = PaddingDefault)
+                    .padding(bottom = PaddingDefault / 2)
+            ) {
+                cardParentType = if (it == cardParentType) null else it
+            }
+            OutlinedButton(
+                {
+                    filters = filters.minus(Filter.NotActive).toggle(Filter.Active)
+                },
+                colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
+                modifier = Modifier.padding(end = PaddingDefault)
+            ) {
+                Text(stringResource(R.string.active))
+            }
+            OutlinedButton(
+                {
+                    filters = filters.minus(Filter.Active).toggle(Filter.NotActive)
+                },
+                colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
+                modifier = Modifier.padding(end = PaddingDefault)
+            ) {
+                Text(stringResource(R.string.not_active))
+            }
         }
         Box(
             contentAlignment = Alignment.BottomCenter,

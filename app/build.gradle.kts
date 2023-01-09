@@ -72,8 +72,8 @@ android {
 
 dependencies {
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.3.0"
-    val ktorVersion = "2.1.2"
+    val composeVersion = "1.3.2"
+    val ktorVersion = "2.2.2"
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha01")
@@ -82,8 +82,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation("androidx.compose.material3:material3:1.0.0-rc01")
-    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-rc01")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha03")
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.0-alpha03")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
     implementation("androidx.navigation:navigation-compose:2.5.3")
@@ -101,8 +101,8 @@ dependencies {
     implementation("com.huawei.hms:location:6.7.0.300")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.4")
-    implementation("androidx.compose.ui:ui-viewbinding:1.3.0")
+    implementation("androidx.fragment:fragment-ktx:1.5.5")
+    implementation("androidx.compose.ui:ui-viewbinding:1.3.2")
     implementation("com.android.volley:volley:1.2.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.accompanist:accompanist-permissions:0.27.0")
@@ -116,8 +116,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:31.0.2"))
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
 }

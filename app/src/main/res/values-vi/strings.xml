@@ -39,6 +39,7 @@
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
     <string name="active">Hoạt động</string>
+    <string name="not_active">Không hoạt động</string>
     <string name="notification_channel_description">Tin nhắn từ những người sử dụng ứng dụng này.</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa</string>
@@ -97,5 +98,5 @@
     <string name="reset_location">Đặt lại vị trí</string>
     <string name="no_conversations_to_show">Không tìm được trò chuyện để cho bạn xem.</string>
     <string name="new_group">Tạo nhóm</string>
-    <string name="your_conversations">Trò chuyện của bạn</string>
+    <string name="your_conversations">Trò chuyện</string>
 </resources>
