@@ -84,12 +84,10 @@ class Api {
         }
 
         if (client == http) {
-            contentType(ContentType.Application.Json)
+            contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
         }
 
-        if (body != null) {
-            setBody(body)
-        }
+        setBody(body)
     }.body()
 
     private suspend inline fun <reified T : Any> get(
@@ -102,7 +100,7 @@ class Api {
         }
 
         if (client == http) {
-            contentType(ContentType.Application.Json)
+            contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
         }
 
         parameters?.forEach { (key, value) -> parameter(key, value) }
@@ -149,7 +147,7 @@ class Api {
 
     suspend fun myCards(): List<Card> = get("me/cards")
 
-    suspend fun newCard(card: Card? = null): Card = post("cards", card)
+    suspend fun newCard(card: Card? = Card()): Card = post("cards", card)
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/$id", card)
 

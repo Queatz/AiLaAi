@@ -1,6 +1,8 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -13,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +42,7 @@ enum class Filter {
     NotActive
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
@@ -133,6 +134,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    LaunchedEffect(cardParentType) {
+        showFilter(navController.context, cardParentType)
+    }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopAppBar(
             {
@@ -175,6 +180,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 {
                     filters = filters.minus(Filter.NotActive).toggle(Filter.Active)
                 },
+                border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, filters.contains(Filter.Active)),
                 colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
                 modifier = Modifier.padding(end = PaddingDefault)
             ) {
@@ -184,6 +190,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 {
                     filters = filters.minus(Filter.Active).toggle(Filter.NotActive)
                 },
+                border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, filters.contains(Filter.NotActive)),
                 colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
                 modifier = Modifier.padding(end = PaddingDefault)
             ) {
@@ -248,7 +255,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     } else {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                stringResource(if (cardParentType == null && searchText.isBlank()) R.string.you_have_no_cards else R.string.no_cards_to_show),
+                                stringResource(if (cardParentType == null && filters.isEmpty() && searchText.isBlank()) R.string.you_have_no_cards else R.string.no_cards_to_show),
                                 color = MaterialTheme.colorScheme.secondary,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(PaddingDefault * 2)
@@ -291,5 +298,20 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 SearchField(searchText, { searchText = it }, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
+    }
+}
+
+fun showFilter(context: Context, cardParentType: CardParentType?) {
+    when (cardParentType) {
+        CardParentType.Person -> {
+            Toast.makeText(context, context.getString(R.string.on_you), Toast.LENGTH_SHORT).show()
+        }
+        CardParentType.Card -> {
+            Toast.makeText(context, context.getString(R.string.inside_another_card), Toast.LENGTH_SHORT).show()
+        }
+        CardParentType.Map -> {
+            Toast.makeText(context, context.getString(R.string.on_the_map), Toast.LENGTH_SHORT).show()
+        }
+        else -> {}
     }
 }

@@ -289,7 +289,6 @@ private fun CardToolbar(
         horizontalArrangement = Arrangement.End,
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.Transparent)
             .padding(PaddingValues(top = PaddingDefault))
             .horizontalScroll(scrollState, reverseScrolling = true)
     ) {

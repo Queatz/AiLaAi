@@ -1,0 +1,1 @@
+./gradlew assembleDebug && waydroid app install app/build/outputs/apk/debug/app-debug.apk

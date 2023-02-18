@@ -2,8 +2,6 @@ package com.queatz.ailaai
 
 import android.location.Location
 import android.os.Bundle
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
@@ -59,7 +57,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
-
                 val showNavigation = navController.currentBackStackEntryAsState()
                     .value
                     ?.destination

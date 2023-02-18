@@ -11,8 +11,8 @@
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:label="@string/app_name"
-            android:usesCleartextTraffic="true"
             android:localeConfig="@xml/locales_config"
+            android:appCategory="social"
             android:theme="@style/Theme.AiLaAi">
         <activity
                 android:name=".MainActivity"
@@ -20,13 +20,13 @@
                 android:theme="@style/Theme.AiLaAi.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="ailaai.app" />
+                <data android:scheme="https" android:host="ailaai.app" android:pathPattern=".*" />
             </intent-filter>
 
         </activity>

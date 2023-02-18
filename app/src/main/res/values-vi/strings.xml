@@ -106,4 +106,8 @@
     <string name="connected_ago">Đã kết nối %1$s</string>
     <string name="open_enclosing_card">Mở thẻ có thẻ này</string>
     <string name="copied">Đã sao chép!</string>
+    <string name="update_available">Có cập nhật mới nè</string>
+    <string name="download">tải xuống ngay</string>
+    <string name="card_not_found">Không tìm đoực thẻ này</string>
+    <string name="on_you">Với bạn</string>
 </resources>

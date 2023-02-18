@@ -36,6 +36,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
 import com.queatz.ailaai.ui.state.gsonSaver
@@ -50,6 +51,7 @@ import kotlinx.coroutines.launch
 fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val cardId = navBackStackEntry.arguments!!.getString("id")!!
     var isLoading by remember { mutableStateOf(false) }
+    var notFound by remember { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
@@ -58,12 +60,14 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
     LaunchedEffect(true) {
         isLoading = true
+        notFound = false
 
         try {
             card = api.card(cardId)
             cards = api.cardsCards(cardId)
         } catch (ex: Exception) {
             ex.printStackTrace()
+            notFound = true
         } finally {
             isLoading = false
         }
@@ -93,7 +97,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             },
             navigationIcon = {
                 IconButton({
-                    navController.popBackStack()
+                    navController.popBackStackOrFinish()
                 }) {
                     Icon(Icons.Outlined.ArrowBack, Icons.Outlined.ArrowBack.name)
                 }
@@ -147,10 +151,19 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     .fillMaxWidth()
                     .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
             )
+        } else if (notFound) {
+            Text(
+                stringResource(R.string.card_not_found),
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PaddingDefault * 2)
+            )
         } else {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
             var verticalAspect by remember { mutableStateOf(false) }
-            val headerAspect by animateFloatAsState(if (verticalAspect) .75f else 1.5f )
+            val headerAspect by animateFloatAsState(if (verticalAspect) .75f else 1.5f)
 
             Row(
                 modifier = Modifier.fillMaxSize()
@@ -167,7 +180,14 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             .shadow(ElevationDefault)
                             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
                     ) {
-                        cardHeaderItems(card, isMine, headerAspect, { verticalAspect = !verticalAspect }, coroutineScope, navController)
+                        cardHeaderItems(
+                            card,
+                            isMine,
+                            headerAspect,
+                            { verticalAspect = !verticalAspect },
+                            coroutineScope,
+                            navController
+                        )
                     }
                 }
 
@@ -180,17 +200,24 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     columns = GridCells.Adaptive(240.dp)
                 ) {
                     if (!isLandscape) {
-                        cardHeaderItems(card, isMine, headerAspect, { verticalAspect = !verticalAspect }, coroutineScope, navController)
+                        cardHeaderItems(
+                            card,
+                            isMine,
+                            headerAspect,
+                            { verticalAspect = !verticalAspect },
+                            coroutineScope,
+                            navController
+                        )
                     }
                     if (cards.isEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Text(
-                                stringResource(R.string.no_cards),
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(PaddingDefault * 2)
-                            )
-                        }
+//                        item(span = { GridItemSpan(maxLineSpan) }) {
+//                            Text(
+//                                stringResource(R.string.no_cards),
+//                                textAlign = TextAlign.Center,
+//                                color = MaterialTheme.colorScheme.secondary,
+//                                modifier = Modifier.padding(PaddingDefault * 2)
+//                            )
+//                        }
                     } else {
                         items(cards, { it.id!! }) {
                             BasicCard(
@@ -263,7 +290,7 @@ private fun LazyGridScope.cardHeaderItems(
     aspect: Float,
     toggleAspect: () -> Unit,
     coroutineScope: CoroutineScope,
-    navController: NavController
+    navController: NavController,
 ) {
     card?.photo?.also {
         item(span = { GridItemSpan(maxCurrentLineSpan) }) {
@@ -279,6 +306,7 @@ private fun LazyGridScope.cardHeaderItems(
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.large)
                     .aspectRatio(aspect)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
                     .clickable {
                         toggleAspect()
                     }

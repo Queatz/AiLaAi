@@ -106,4 +106,6 @@
     <string name="copied">Copied!</string>
     <string name="update_available">Update available</string>
     <string name="download">Download</string>
+    <string name="card_not_found">Card not found</string>
+    <string name="on_you">On you</string>
 </resources>
