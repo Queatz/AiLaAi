@@ -34,6 +34,8 @@ import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
@@ -83,6 +85,12 @@ class MainActivity : AppCompatActivity() {
                             ex.printStackTrace()
                             snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
                             delay(5.seconds)
+                        }
+                    }
+
+                    LaunchedEffect(Unit) {
+                        api.onUnauthorized.collect {
+                            me = null
                         }
                     }
 

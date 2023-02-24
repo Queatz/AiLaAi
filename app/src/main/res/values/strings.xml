@@ -108,4 +108,10 @@
     <string name="download">Download</string>
     <string name="card_not_found">Card not found</string>
     <string name="on_you">On you</string>
+    <string name="leave">Leave</string>
+    <string name="leave_group">Leave group?</string>
+    <string name="members">Members</string>
+    <string name="rename">Rename</string>
+    <string name="rename_group">Rename group</string>
+    <string name="group_name">Group name</string>
 </resources>

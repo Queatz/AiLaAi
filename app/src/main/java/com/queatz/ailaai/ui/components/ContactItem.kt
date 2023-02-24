@@ -22,6 +22,7 @@ import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -83,7 +84,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
         ) {
             val someone = stringResource(R.string.someone)
             Text(
-                people.joinToString { it.name ?: someone },
+                groupExtended.group?.name?.nullIfBlank ?: people.joinToString { it.name ?: someone },
                 style = MaterialTheme.typography.titleMedium
             )
             Text(

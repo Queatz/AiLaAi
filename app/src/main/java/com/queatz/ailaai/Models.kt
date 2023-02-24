@@ -21,6 +21,7 @@ class Invite(
 ) : Model()
 
 class Group(
+    var name: String? = null,
     var seen: Instant? = null
 ) : Model()
 
@@ -33,7 +34,8 @@ class Person(
 
 class Member(
     var seen: Instant? = null,
-    var hide: Boolean? = null
+    var hide: Boolean? = null,
+    var gone: Boolean? = null
 ) : Edge()
 
 class Message(

@@ -26,8 +26,11 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
+import com.queatz.ailaai.ui.dialogs.GroupMembersDialog
+import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.*
@@ -42,6 +45,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var groupExtended by remember { mutableStateOf<GroupExtended?>(null) }
     var messages by remember { mutableStateOf<List<Message>>(listOf()) }
     var isLoading by remember { mutableStateOf(false) }
+    var showLeaveGroup by remember { mutableStateOf(false) }
+    var showReameGroup by remember { mutableStateOf(false) }
+    var showGroupMembers by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(true) {
@@ -105,7 +111,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 {
                     Column {
                         val someone = stringResource(R.string.someone)
-                        Text(otherMembers.joinToString { it.person?.name ?: someone }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(groupExtended?.group?.name?.nullIfBlank ?: otherMembers.joinToString { it.person?.name ?: someone }, maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                         otherMembers.maxBy { it.person?.seen ?: Instant.fromEpochMilliseconds(0) }.person?.seen?.let {
                             Text(
@@ -135,6 +141,23 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     DropdownMenu(showMenu, { showMenu = false }) {
                         val hidden = myMember!!.member?.hide == true
 
+                        if (otherMembers.size > 1) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.members))
+                            }, {
+                                showGroupMembers = true
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.rename))
+                            }, {
+                                showReameGroup = true
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.leave))
+                            }, {
+                                showLeaveGroup = true
+                            })
+                        }
                         DropdownMenuItem({
                             Text(
                                 if (hidden) stringResource(R.string.show_conversation) else stringResource(
@@ -235,6 +258,62 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     .heightIn(max = 128.dp)
                     .padding(PaddingDefault)
             )
+
+            if (showGroupMembers) {
+                GroupMembersDialog({
+                    showGroupMembers = false
+                }, otherMembers.map { it.person!! }) {
+                    coroutineScope.launch {
+                        val group = api.createGroup(listOf(myMember!!.person!!.id!!, it.id!!))
+                        navController.navigate("group/${group.id!!}")
+                    }
+                }
+            }
+
+            if (showReameGroup) {
+                val scope = currentRecomposeScope
+                RenameGroupDialog({
+                    showReameGroup = false
+                }, groupExtended!!.group!!, {
+                    groupExtended!!.group = it
+                    scope.invalidate()
+                })
+            }
+
+            if (showLeaveGroup) {
+                AlertDialog(
+                    {
+                        showLeaveGroup = false
+                    },
+                    title = {
+                        Text(stringResource(R.string.leave_group))
+                    },
+                    text = {
+                    },
+                    confirmButton = {
+                        TextButton({
+                            coroutineScope.launch {
+                                try {
+                                    api.removeMember(myMember!!.member!!.id!!)
+
+                                    navController.popBackStack()
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                        }) {
+                            Text(stringResource(R.string.leave))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton({
+                            showLeaveGroup = false
+                        }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    },
+                )
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.observer.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -18,6 +19,8 @@ import io.ktor.http.parsing.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -36,6 +39,9 @@ const val appDomain = "https://ailaai.app"
 private data class CreateGroupBody(val people: List<String>)
 
 class Api {
+
+    private val _onUnauthorized = MutableSharedFlow<Unit>()
+    val onUnauthorized = _onUnauthorized.asSharedFlow()
 
     private lateinit var context: Context
 
@@ -56,6 +62,15 @@ class Api {
         install(HttpTimeout) {
             requestTimeoutMillis = 10.seconds.inWholeMilliseconds
         }
+
+        install(ResponseObserver) {
+            onResponse { response ->
+                if (response.status == HttpStatusCode.Unauthorized) {
+                    _onUnauthorized.emit(Unit)
+                    signout()
+                }
+            }
+        }
     }
 
     private val httpData = HttpClient {
@@ -70,6 +85,10 @@ class Api {
         runBlocking {
             token = context.dataStore.data.first()[tokenKey]
         }
+    }
+
+    fun signout() {
+        setToken(null)
     }
 
     fun url(it: String) = "$baseUrl$it"
@@ -178,11 +197,15 @@ class Api {
 
     suspend fun createGroup(people: List<String>): Group = post("groups", CreateGroupBody(people))
 
+    suspend fun updateGroup(id: String, groupUpdate: Group): Group = post("groups/$id", groupUpdate)
+
     suspend fun groups(): List<GroupExtended> = get("groups")
 
     suspend fun group(id: String): GroupExtended = get("groups/$id")
 
     suspend fun updateMember(id: String, member: Member): HttpStatusCode = post("members/$id", member)
+
+    suspend fun removeMember(id: String) : HttpStatusCode = post("members/$id/delete")
 
     suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
 

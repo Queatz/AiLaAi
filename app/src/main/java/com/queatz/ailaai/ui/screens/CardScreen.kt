@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -335,6 +334,7 @@ private fun LazyGridScope.cardHeaderItems(
                     }
                 },
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(PaddingDefault)
             )
         }

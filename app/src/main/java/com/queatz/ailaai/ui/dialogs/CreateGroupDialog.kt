@@ -32,6 +32,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.toggle
+import com.queatz.ailaai.ui.components.GroupMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -130,39 +131,8 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
                     } else {
                         items(people, key = { it.id!! }) {
                             val isSelected = selected.any { person -> person.id == it.id }
-                            val backgroundColor by animateColorAsState(
-                                if (isSelected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.surface
-                            )
-                            val contentColor by animateColorAsState(
-                                if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                            )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(MaterialTheme.shapes.large)
-                                    .background(backgroundColor)
-                                    .clickable {
-                                        selected = selected.toggle(it) { person -> person.id == it.id }
-                                    }) {
-                                AsyncImage(
-                                    model = it.photo?.let { api.url(it) } ?: "",
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Crop,
-                                    alignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .padding(PaddingDefault)
-                                        .requiredSize(32.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                                )
-                                Text(
-                                    it.name ?: stringResource(R.string.someone),
-                                    color = contentColor,
-                                    modifier = Modifier
-                                        .padding(PaddingDefault)
-                                )
+                            GroupMember(it, isSelected) {
+                                selected = selected.toggle(it) { person -> person.id == it.id }
                             }
                         }
                     }

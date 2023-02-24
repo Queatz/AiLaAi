@@ -12,3 +12,5 @@ fun String.launchUrl(context: Context) {
         )
     )
 }
+
+val String.nullIfBlank get() = takeIf { it.isNotBlank() }

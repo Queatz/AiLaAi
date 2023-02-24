@@ -107,7 +107,11 @@
     <string name="open_enclosing_card">Mở thẻ có thẻ này</string>
     <string name="copied">Đã sao chép!</string>
     <string name="update_available">Có cập nhật mới nè</string>
-    <string name="download">tải xuống ngay</string>
-    <string name="card_not_found">Không tìm đoực thẻ này</string>
+    <string name="download">Tải xuống ngay</string>
+    <string name="card_not_found">Không tìm được thẻ này</string>
     <string name="on_you">Với bạn</string>
+    <string name="leave">Rời khỏi</string>
+    <string name="leave_group">Rời khỏi nhóm này không?</string>
+    <string name="members">Thành viên</string>
+    <string name="rename">Đổi tên</string>
 </resources>

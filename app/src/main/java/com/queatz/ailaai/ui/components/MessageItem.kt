@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -125,7 +126,14 @@ fun MessageItem(
         }
     }
 
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .clickable(
+            interactionSource = MutableInteractionSource(),
+            indication = null
+        ) {
+            showTime = !showTime
+        }) {
         if (!isMe) ProfileImage(
             getPerson(message.member!!),
             PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault)
@@ -185,7 +193,7 @@ fun MessageItem(
             }
             AnimatedVisibility(showTime) {
                 Text(
-                    message.createdAt!!.timeAgo(),
+                    "${message.createdAt!!.timeAgo()}, ${getPerson(message.member!!)?.name ?: stringResource(R.string.someone)}",
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = if (isMe) TextAlign.End else TextAlign.Start,
