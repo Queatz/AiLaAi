@@ -97,6 +97,7 @@ dependencies {
     implementation("com.huawei.hms:base:6.7.0.300")
     implementation("com.huawei.hms:maps:6.7.0.300")
     implementation("com.huawei.hms:push:6.7.0.300")
+    implementation("com.huawei.hms:scan:2.9.0.300")
     implementation("com.huawei.hms:hianalytics:6.7.0.300")
     implementation("com.huawei.hms:hianalytics:6.7.0.300")
     implementation("com.huawei.hms:hwid:6.7.0.300")

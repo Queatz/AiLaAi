@@ -114,4 +114,7 @@
     <string name="leave_group">Rời khỏi nhóm này không?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
+    <string name="rename_group">Đổi tên của nhóm này</string>
+    <string name="group_name">Tên của nhóm này</string>
+    <string name="qr_code">Mã QR</string>
 </resources>

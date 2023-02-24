@@ -36,8 +36,10 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.popBackStackOrFinish
+import com.queatz.ailaai.extensions.url
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
+import com.queatz.ailaai.ui.dialogs.ShareCardQrCodeDialog
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -51,6 +53,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val cardId = navBackStackEntry.arguments!!.getString("id")!!
     var isLoading by remember { mutableStateOf(false) }
     var notFound by remember { mutableStateOf(false) }
+    var showQrCode by rememberSaveable { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
@@ -121,13 +124,19 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             showMenu = false
                         })
                     }
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.qr_code))
+                    }, {
+                        showQrCode = true
+                        showMenu = false
+                    })
                     val textCopied = stringResource(R.string.copied)
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
                         card?.let { card ->
                             ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                                ClipData.newPlainText(card.name ?: cardString, "${appDomain}/card/${card.id}")
+                                ClipData.newPlainText(card.name ?: cardString, card.url)
                             )
                             Toast.makeText(context, textCopied, LENGTH_SHORT).show()
                         }
@@ -280,6 +289,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
             }
         }
+    }
+
+    if (showQrCode) {
+        ShareCardQrCodeDialog({
+            showQrCode = false
+        }, card!!)
     }
 }
 
