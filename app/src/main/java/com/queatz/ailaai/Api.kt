@@ -176,7 +176,7 @@ class Api {
 
     suspend fun updateMyPhoto(photo: Uri): HttpStatusCode = post("me/photo", MultiPartFormDataContent(
         formData {
-            append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
+            append("photo", photo.asScaledJpeg(context), Headers.build {
                 append(HttpHeaders.ContentType, "image/jpg")
                 append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
             })
@@ -186,7 +186,7 @@ class Api {
     suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode =
         post("cards/$id/photo", MultiPartFormDataContent(
             formData {
-                append("photo", context.contentResolver.openInputStream(photo)!!.readBytes(), Headers.build {
+                append("photo", photo.asScaledJpeg(context), Headers.build {
                     append(HttpHeaders.ContentType, "image/jpg")
                     append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
                 })

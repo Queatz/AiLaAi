@@ -117,4 +117,5 @@
     <string name="rename_group">Đổi tên của nhóm này</string>
     <string name="group_name">Tên của nhóm này</string>
     <string name="qr_code">Mã QR</string>
+    <string name="conversation_not_found">Không được tìm thấy trò chuyện này</string>
 </resources>

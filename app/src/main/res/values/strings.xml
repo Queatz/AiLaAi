@@ -115,4 +115,5 @@
     <string name="rename_group">Rename group</string>
     <string name="group_name">Group name</string>
     <string name="qr_code">QR Code</string>
+    <string name="conversation_not_found">Conversation not found</string>
 </resources>

@@ -45,8 +45,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var groupExtended by remember { mutableStateOf<GroupExtended?>(null) }
     var messages by remember { mutableStateOf<List<Message>>(listOf()) }
     var isLoading by remember { mutableStateOf(false) }
+    var showGroupNotFound by remember { mutableStateOf(false) }
     var showLeaveGroup by remember { mutableStateOf(false) }
-    var showReameGroup by remember { mutableStateOf(false) }
+    var showRenameGroup by remember { mutableStateOf(false) }
     var showGroupMembers by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -57,6 +58,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             groupExtended = api.group(groupId)
         } catch (ex: Exception) {
             ex.printStackTrace()
+            showGroupNotFound = true
         } finally {
             isLoading = false
         }
@@ -111,7 +113,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 {
                     Column {
                         val someone = stringResource(R.string.someone)
-                        Text(groupExtended?.group?.name?.nullIfBlank ?: otherMembers.joinToString { it.person?.name ?: someone }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(groupExtended?.group?.name?.nullIfBlank ?: otherMembers.joinToString {
+                            it.person?.name ?: someone
+                        }, maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                         otherMembers.maxBy { it.person?.seen ?: Instant.fromEpochMilliseconds(0) }.person?.seen?.let {
                             Text(
@@ -145,16 +149,19 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             DropdownMenuItem({
                                 Text(stringResource(R.string.members))
                             }, {
+                                showMenu = false
                                 showGroupMembers = true
                             })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.rename))
                             }, {
-                                showReameGroup = true
+                                showMenu = false
+                                showRenameGroup = true
                             })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.leave))
                             }, {
+                                showMenu = false
                                 showLeaveGroup = true
                             })
                         }
@@ -270,10 +277,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 }
             }
 
-            if (showReameGroup) {
+            if (showRenameGroup) {
                 val scope = currentRecomposeScope
                 RenameGroupDialog({
-                    showReameGroup = false
+                    showRenameGroup = false
                 }, groupExtended!!.group!!, {
                     groupExtended!!.group = it
                     scope.invalidate()
@@ -295,7 +302,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             coroutineScope.launch {
                                 try {
                                     api.removeMember(myMember!!.member!!.id!!)
-
+                                    showLeaveGroup = false
                                     navController.popBackStack()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
@@ -312,6 +319,27 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             Text(stringResource(R.string.cancel))
                         }
                     },
+                )
+            }
+
+            if (showGroupNotFound) {
+                AlertDialog(
+                    {
+                        showGroupNotFound = false
+                    },
+                    title = {
+                        Text(stringResource(R.string.conversation_not_found))
+                    },
+                    text = {
+                    },
+                    confirmButton = {
+                        TextButton({
+                            showGroupNotFound = false
+                            navController.popBackStack()
+                        }) {
+                            Text(stringResource(R.string.leave))
+                        }
+                    }
                 )
             }
         }
