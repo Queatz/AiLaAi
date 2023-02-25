@@ -96,7 +96,7 @@
     <string name="reset_location">Reset location</string>
     <string name="no_conversations_to_show">No conversations to show</string>
     <string name="new_group">Create group</string>
-    <string name="your_conversations">Conversations</string>
+    <string name="conversations">Conversations</string>
     <string name="new_group_with_person">Create group with %1$s</string>
     <string name="new_group_with_people">Create group with %1$s and %2$s</string>
     <string name="new_group_with_x_people">Create group with %1$s people</string>
@@ -116,4 +116,10 @@
     <string name="group_name">Group name</string>
     <string name="qr_code">QR Code</string>
     <string name="conversation_not_found">Conversation not found</string>
+    <string name="conversation_hidden">Conversation hidden until new messages are sent</string>
+    <string name="saved">Saved</string>
+    <string name="save_card">Save card</string>
+    <string name="card_saved">Card saved</string>
+    <string name="card_unsaved">Card unsaved</string>
+    <string name="unsave_card">Unsave card</string>
 </resources>

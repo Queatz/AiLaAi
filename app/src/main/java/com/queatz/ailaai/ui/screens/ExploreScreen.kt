@@ -8,9 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material3.*
@@ -20,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -35,8 +31,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.components.BasicCard
-import com.queatz.ailaai.ui.components.SearchField
+import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
@@ -183,85 +178,23 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             isLoading = false
         }
 
-        Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
-            if (isLoading) {
-                LinearProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)
-                )
-            } else if (cards.isEmpty()) {
-                Text(
-                    stringResource(R.string.no_cards_to_show),
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)
-                )
-            } else {
-                LazyVerticalGrid(
-                    contentPadding = PaddingValues(
-                        PaddingDefault,
-                        PaddingDefault,
-                        PaddingDefault,
-                        PaddingDefault + 80.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
-                    modifier = Modifier.fillMaxSize(),
-                    columns = GridCells.Adaptive(240.dp)
-                ) {
-                    items(items = cards, key = { it.id!! }) {
-                        BasicCard(
-                            {
-                                navController.navigate("card/${it.id!!}")
-                            },
-                            onReply = {
-                                coroutineScope.launch {
-                                    try {
-                                        val groupId = api.cardGroup(it.id!!).id!!
-                                        api.sendMessage(
-                                            groupId,
-                                            Message(attachment = gson.toJson(CardAttachment(it.id!!)))
-                                        )
-                                        navController.navigate("group/${groupId}")
-                                    } catch (ex: Exception) {
-                                        ex.printStackTrace()
-                                    }
-                                }
-                            },
-                            activity = navController.context as Activity,
-                            card = it
-                        )
-                    }
-                }
-            }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(PaddingDefault * 2)
-                    .fillMaxWidth()
-            ) {
-                if (geoManual) {
-                    ElevatedButton(
-                        elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-                        onClick = {
-                            coroutineScope.launch {
-                                context.dataStore.edit {
-                                    it.remove(geoKey)
-                                    it.remove(geoManualKey)
-                                }
-                                geo = null
+        CardsList(cards, isLoading, value, { value = it}, navController) {
+            if (geoManual) {
+                ElevatedButton(
+                    elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
+                    onClick = {
+                        coroutineScope.launch {
+                            context.dataStore.edit {
+                                it.remove(geoKey)
+                                it.remove(geoManualKey)
                             }
+                            geo = null
                         }
-                    ) {
-                        Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
-                        Icon(Icons.Outlined.Clear, "")
                     }
+                ) {
+                    Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
+                    Icon(Icons.Outlined.Clear, "")
                 }
-                SearchField(value, { value = it }, modifier = Modifier)
             }
         }
     }

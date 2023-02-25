@@ -47,14 +47,15 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(allGroups, searchText) {
         groups = if (searchText.isBlank()) allGroups else allGroups.filter {
-            it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
+            (it.group?.name?.contains(searchText, true) ?: false) ||
+                    it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
         }
     }
 
     Column {
         TopAppBar(
             {
-                Text(stringResource(R.string.your_conversations), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.conversations), maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             actions = {
                 ElevatedButton(

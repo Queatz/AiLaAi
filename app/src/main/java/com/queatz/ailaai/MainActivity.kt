@@ -7,9 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,8 +32,6 @@ import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
@@ -90,6 +86,7 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(Unit) {
                         api.onUnauthorized.collect {
+                            known = false
                             me = null
                         }
                     }
@@ -113,6 +110,10 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
+                    LaunchedEffect(me) {
+                        saves.reload()
+                    }
+
                     Scaffold(
                         bottomBar = {
                             Column(
@@ -124,6 +125,7 @@ class MainActivity : AppCompatActivity() {
                                     NavigationBar {
                                         listOf(
                                             NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
+                                            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
                                             NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
                                             NavButton("me", getString(R.string.me), Icons.Outlined.Person)
                                         ).forEach { item ->
@@ -154,7 +156,8 @@ class MainActivity : AppCompatActivity() {
                                         Spacer(Modifier.height(PaddingDefault))
                                         listOf(
                                             NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
-                                            NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
+                                            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
+                                            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
                                             NavButton("me", getString(R.string.me), Icons.Outlined.Person)
                                         ).forEach { item ->
                                             NavigationDrawerItem(
@@ -180,6 +183,7 @@ class MainActivity : AppCompatActivity() {
                                     .fillMaxSize()
                             ) {
                                 composable("explore") { ExploreScreen(this@MainActivity, navController) { me } }
+                                composable("saved") { SavedScreen(this@MainActivity, navController) { me } }
                                 composable(
                                     "card/{id}",
                                     deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })

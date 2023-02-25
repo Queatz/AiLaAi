@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -175,7 +176,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             coroutineScope.launch {
                                 try {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
-
+                                    Toast.makeText(navController.context, navController.context.getString(R.string.conversation_hidden), Toast.LENGTH_SHORT).show()
                                     navController.popBackStack()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()

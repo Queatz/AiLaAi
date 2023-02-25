@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.components
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.MotionEvent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
@@ -11,9 +12,7 @@ import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,9 +40,8 @@ import androidx.constraintlayout.compose.Dimension
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.Card
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
@@ -74,6 +72,7 @@ fun BasicCard(
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(hideContent) {
             if (hideContent) {
@@ -124,7 +123,6 @@ fun BasicCard(
                     .align(Alignment.TopEnd)
             ) {
                 if (isMine) {
-                    val coroutineScope = rememberCoroutineScope()
                     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
                         if (it == null) return@rememberLauncherForActivityResult
 
@@ -147,6 +145,25 @@ fun BasicCard(
                     ) {
                         Icon(Icons.Outlined.Edit, "")
                         Text(stringResource(R.string.set_photo), modifier = Modifier.padding(start = PaddingDefault))
+                    }
+                } else {
+                    val context = LocalContext.current
+                    IconButton({
+                        coroutineScope.launch {
+                            when (saves.toggleSave(card)) {
+                                ToggleSaveResult.Saved -> {
+                                    Toast.makeText(context, context.getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
+                                }
+                                ToggleSaveResult.Unsaved -> {
+                                    Toast.makeText(context, context.getString(R.string.card_unsaved), Toast.LENGTH_SHORT).show()
+                                }
+                                else -> {
+                                    Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }) {
+                        SavedIcon(card)
                     }
                 }
 

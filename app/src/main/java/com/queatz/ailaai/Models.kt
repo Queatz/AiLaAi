@@ -20,6 +20,11 @@ class Invite(
     var code: String? = null
 ) : Model()
 
+class Save(
+    var person: String? = null,
+    var card: String? = null
+) : Model()
+
 class Group(
     var name: String? = null,
     var seen: Instant? = null

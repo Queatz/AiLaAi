@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -106,6 +107,34 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             },
             actions = {
                 var showMenu by remember { mutableStateOf(false) }
+
+                card?.let { card ->
+                    IconButton({
+                        coroutineScope.launch {
+                            when (saves.toggleSave(card)) {
+                                ToggleSaveResult.Saved -> {
+                                    Toast.makeText(context, context.getString(R.string.card_saved), LENGTH_SHORT)
+                                        .show()
+                                }
+
+                                ToggleSaveResult.Unsaved -> {
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.card_unsaved),
+                                        LENGTH_SHORT
+                                    ).show()
+                                }
+
+                                else -> {
+                                    Toast.makeText(context, context.getString(R.string.didnt_work), LENGTH_SHORT)
+                                        .show()
+                                }
+                            }
+                        }
+                    }) {
+                        SavedIcon(card)
+                    }
+                }
 
                 IconButton({
                     showMenu = !showMenu

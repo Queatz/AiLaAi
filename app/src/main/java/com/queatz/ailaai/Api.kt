@@ -166,11 +166,19 @@ class Api {
 
     suspend fun myCards(): List<Card> = get("me/cards")
 
+    suspend fun savedCards(search: String? = null): List<SaveAndCard> = get("me/saved", search?.let {
+        mapOf("search" to search)
+    } ?: mapOf())
+
     suspend fun newCard(card: Card? = Card()): Card = post("cards", card)
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/$id", card)
 
     suspend fun deleteCard(id: String): HttpStatusCode = post("cards/$id/delete")
+
+    suspend fun saveCard(id: String): HttpStatusCode = post("cards/$id/save")
+
+    suspend fun unsaveCard(id: String): HttpStatusCode = post("cards/$id/unsave")
 
     suspend fun invite(): Invite = get("invite")
 
@@ -239,6 +247,11 @@ class MemberAndPerson(
     var member: Member? = null
 )
 
+class SaveAndCard(
+    var save: Save? = null,
+    var card: Card? = null
+)
+
 class Device(
     val type: DeviceType,
     val token: String
@@ -261,4 +274,3 @@ class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> 
         null
     }
 }
-
