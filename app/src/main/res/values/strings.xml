@@ -122,4 +122,6 @@
     <string name="card_saved">Card saved</string>
     <string name="card_unsaved">Card unsaved</string>
     <string name="unsave_card">Unsave card</string>
+    <string name="discoverable_by_link">This card will only be discoverable by sharing its link.</string>
+    <string name="another_location">Elsewhere</string>
 </resources>

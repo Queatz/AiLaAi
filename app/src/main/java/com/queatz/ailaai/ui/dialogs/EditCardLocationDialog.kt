@@ -71,7 +71,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     val scrollState = rememberScrollState()
     var scrollEnabled by remember { mutableStateOf(true) }
 
-    var cardParentType by remember { mutableStateOf(CardParentType.Map) }
+    var cardParentType by remember { mutableStateOf<CardParentType?>(null) }
 
     val disposable = remember { CompositeDisposable() }
 
@@ -164,9 +164,13 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     modifier = Modifier.padding(PaddingValues(vertical = PaddingDefault * 2))
                 )
                 CardParentSelector(cardParentType) {
-                    cardParentType = it
+                    cardParentType = if (cardParentType == it) {
+                        null
+                    } else {
+                        it
+                    }
 
-                    when (it) {
+                    when (cardParentType) {
                         CardParentType.Person -> {
                             card.parent = null
                             parentCard = null
@@ -180,6 +184,12 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         CardParentType.Card -> {
                             card.equipped = false
                         }
+                        else -> {
+                            card.parent = null
+                            parentCard = null
+                            card.equipped = false
+                            card.geo = null
+                        }
                     }
                 }
                 Column(
@@ -192,6 +202,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                             CardParentType.Map -> stringResource(R.string.on_the_map)
                             CardParentType.Card -> stringResource(R.string.inside_another_card)
                             CardParentType.Person -> stringResource(R.string.you)
+                            else -> stringResource(R.string.another_location)
                         },
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(vertical = PaddingDefault),
@@ -208,7 +219,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                     .padding(PaddingDefault)
                             )
                         }
-
                         CardParentType.Map -> {
                             Box(
                                 modifier = Modifier
@@ -306,7 +316,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
                             )
                         }
-
                         CardParentType.Card -> {
                             when (parentCard) {
                                 null -> {
@@ -378,6 +387,15 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                     )
                                 }
                             }
+                        }
+                        else -> {
+                            Text(
+                                stringResource(R.string.discoverable_by_link),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier
+                                    .padding(PaddingDefault)
+                            )
                         }
                     }
                 }

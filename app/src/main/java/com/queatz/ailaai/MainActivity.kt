@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
                                         listOf(
                                             NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
                                             NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-                                            NavButton("messages", getString(R.string.messages), Icons.Outlined.Email),
+                                            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
                                             NavButton("me", getString(R.string.me), Icons.Outlined.Person)
                                         ).forEach { item ->
                                             NavigationBarItem(

@@ -124,4 +124,6 @@
     <string name="card_saved">Thẻ được lưu</string>
     <string name="card_unsaved">Thẻ được bỏ lưu</string>
     <string name="unsave_card">Bỏ lưu thẻ</string>
+    <string name="discoverable_by_link">Thẻ này sẽ chỉ có thể được khám phá bằng cách chia sẻ liên kết của nó.</string>
+    <string name="another_location">Chỗ khác</string>
 </resources>
