@@ -53,7 +53,7 @@ fun GroupPhoto(photos: List<String>, size: Dp = 64.dp) {
                             if (size < 64.dp) {
                                 it.requiredSize(size / 1.5f)
                             } else {
-                                it.padding(padding / 2)
+                                it.padding(padding)
                                     .requiredSize(size / 2)
                             }
                         }

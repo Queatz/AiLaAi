@@ -58,7 +58,7 @@ fun BasicCard(
     onReply: () -> Unit = {},
     onChange: () -> Unit = {},
     activity: Activity,
-    card: Card,
+    card: Card?,
     edit: Boolean = false,
     isMine: Boolean = false,
     isChoosing: Boolean = false
@@ -101,131 +101,152 @@ fun BasicCard(
                 ),
             contentAlignment = Alignment.BottomCenter
         ) {
-            card.photo?.also {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(api.url(it))
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier.matchParentSize().scale(scale)
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .alpha(alpha)
-                    .padding(PaddingDefault)
-                    .align(Alignment.TopEnd)
-            ) {
-                if (isMine) {
-                    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-                        if (it == null) return@rememberLauncherForActivityResult
-
-                        coroutineScope.launch {
-                            try {
-                                api.uploadCardPhoto(card.id!!, it)
-                                onChange()
-                            } catch (ex: Exception) {
-                                ex.printStackTrace()
-                            }
-                        }
-                    }
-                    TextButton(
-                        {
-                            launcher.launch("image/*")
-                        },
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        Icon(Icons.Outlined.Edit, "")
-                        Text(stringResource(R.string.set_photo), modifier = Modifier.padding(start = PaddingDefault))
-                    }
-                } else {
-                    val context = LocalContext.current
-                    IconButton({
-                        coroutineScope.launch {
-                            when (saves.toggleSave(card)) {
-                                ToggleSaveResult.Saved -> {
-                                    Toast.makeText(context, context.getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
-                                }
-                                ToggleSaveResult.Unsaved -> {
-                                    Toast.makeText(context, context.getString(R.string.card_unsaved), Toast.LENGTH_SHORT).show()
-                                }
-                                else -> {
-                                    Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }) {
-                        SavedIcon(card)
-                    }
-                }
-
-                if ((card.cardCount ?: 0) > 0) {
-                    Text(
-                        pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                MaterialTheme.shapes.extraLarge
-                            )
-                            .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
+            if (card == null) {
+                // Loading
+            } else {
+                card.photo?.also {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(api.url(it))
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                        modifier = Modifier.matchParentSize().scale(scale)
                     )
                 }
-            }
 
-            val conversationScrollState = rememberScrollState()
-
-            ConstraintLayout(
-                modifier = Modifier
-                    .alpha(alpha)
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
-                    .padding(PaddingDefault * 2)
-                    .minAspectRatio(1.5f)
-                    .animateContentSize(
-                        spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            visibilityThreshold = IntSize.VisibilityThreshold
-                        )
-                    )
-            ) {
-                val (topRef, bottomRef) = createRefs()
-                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-
-                CardConversation(
-                    card,
-                    interactable = !isChoosing,
-                    onReply = onReply,
-                    isMine = isMine,
-                    selectingText = {
-                        isSelectingText = it
-                    },
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .constrainAs(topRef) {
-                            bottom.linkTo(bottomRef.top)
-                            top.linkTo(parent.top)
-                            height = Dimension.preferredWrapContent
-                        }
-                        .verticalScroll(conversationScrollState)
-                        .graphicsLayer(alpha = 0.99f)
-                        .onPlaced { viewport = it.boundsInParent().size }
-                        .fadingEdge(viewport, conversationScrollState)
-                )
+                        .alpha(alpha)
+                        .padding(PaddingDefault)
+                        .align(Alignment.TopEnd)
+                ) {
+                    if (isMine) {
+                        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+                            if (it == null) return@rememberLauncherForActivityResult
 
-                if (isMine) {
-                    CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(bottomRef) {
-                        top.linkTo(topRef.bottom)
-                        bottom.linkTo(parent.bottom)
-                    })
+                            coroutineScope.launch {
+                                try {
+                                    api.uploadCardPhoto(card.id!!, it)
+                                    onChange()
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                        }
+                        TextButton(
+                            {
+                                launcher.launch("image/*")
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                        ) {
+                            Icon(Icons.Outlined.Edit, "")
+                            Text(
+                                stringResource(R.string.set_photo),
+                                modifier = Modifier.padding(start = PaddingDefault)
+                            )
+                        }
+                    } else {
+                        val context = LocalContext.current
+                        IconButton({
+                            coroutineScope.launch {
+                                when (saves.toggleSave(card)) {
+                                    ToggleSaveResult.Saved -> {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.card_saved),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    ToggleSaveResult.Unsaved -> {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.card_unsaved),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    else -> {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.didnt_work),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            }
+                        }) {
+                            SavedIcon(card)
+                        }
+                    }
+
+                    if ((card.cardCount ?: 0) > 0) {
+                        Text(
+                            pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                    MaterialTheme.shapes.extraLarge
+                                )
+                                .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
+                        )
+                    }
+                }
+
+                val conversationScrollState = rememberScrollState()
+
+                ConstraintLayout(
+                    modifier = Modifier
+                        .alpha(alpha)
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
+                        .padding(PaddingDefault * 2)
+                        .minAspectRatio(1.5f)
+                        .animateContentSize(
+                            spring(
+                                stiffness = Spring.StiffnessMediumLow,
+                                visibilityThreshold = IntSize.VisibilityThreshold
+                            )
+                        )
+                ) {
+                    val (topRef, bottomRef) = createRefs()
+                    var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+
+                    CardConversation(
+                        card,
+                        interactable = !isChoosing,
+                        onReply = onReply,
+                        isMine = isMine,
+                        selectingText = {
+                            isSelectingText = it
+                        },
+                        modifier = Modifier
+                            .constrainAs(topRef) {
+                                bottom.linkTo(bottomRef.top)
+                                top.linkTo(parent.top)
+                                height = Dimension.preferredWrapContent
+                            }
+                            .verticalScroll(conversationScrollState)
+                            .graphicsLayer(alpha = 0.99f)
+                            .onPlaced { viewport = it.boundsInParent().size }
+                            .fadingEdge(viewport, conversationScrollState)
+                    )
+
+                    if (isMine) {
+                        CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(bottomRef) {
+                            top.linkTo(topRef.bottom)
+                            bottom.linkTo(parent.bottom)
+                        })
+                    }
                 }
             }
         }

@@ -43,14 +43,18 @@ fun MessageItem(
     var showTime by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedCard by remember { mutableStateOf<Card?>(null) }
 
-    LaunchedEffect(message.getAttachment()) {
-        message.getAttachment()?.let { attachment ->
+    attachedCardId = message.getAttachment()?.card
+
+    LaunchedEffect(Unit) {
+        attachedCardId?.let { cardId ->
             try {
-                attachedCard = api.card(attachment.card!!)
+                attachedCard = api.card(cardId)
             } catch (e: Exception) {
                 e.printStackTrace()
+                // todo show failed to load
             }
         }
     }
@@ -140,7 +144,7 @@ fun MessageItem(
         )
 
         Column(modifier = Modifier.weight(1f)) {
-            attachedCard?.let {
+            attachedCardId?.let {
                 Box(modifier = Modifier
                     .padding(PaddingDefault)
                     .widthIn(max = 320.dp)
@@ -156,10 +160,10 @@ fun MessageItem(
                 ) {
                     BasicCard(
                         {
-                            navController.navigate("card/${it.id!!}")
+                            navController.navigate("card/$it")
                         },
                         activity = activity,
-                        card = it,
+                        card = attachedCard,
                         isChoosing = true
                     )
                 }

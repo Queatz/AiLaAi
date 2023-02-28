@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,18 +24,28 @@ import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var isLoading by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
-    var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
-    var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
+    var searchText by rememberSaveable { mutableStateOf("") }
+    var allGroups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
+    var groups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
     var showCreateGroup by remember { mutableStateOf(false) }
+    var hasInitialGroups by remember { mutableStateOf(allGroups.isNotEmpty()) }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
+        if (hasInitialGroups) {
+            hasInitialGroups = false
+
+            if (allGroups.isNotEmpty()) {
+                return@LaunchedEffect
+            }
+        }
+
         isLoading = true
         try {
             allGroups = api.groups()

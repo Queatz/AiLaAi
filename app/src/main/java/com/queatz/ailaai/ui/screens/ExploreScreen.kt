@@ -60,6 +60,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coroutineScope = rememberCoroutineScope()
+    var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
 
     LaunchedEffect(true) {
         geoManual = !permissionState.status.isGranted || context.dataStore.data.first()[geoManualKey] == true
@@ -161,12 +162,13 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             }
         }
     } else {
-        var initialSearch by remember { mutableStateOf(cards.isEmpty()) }
-
         LaunchedEffect(geo, value) {
-            if (!initialSearch) {
-                initialSearch = true
-                return@LaunchedEffect
+            if (hasInitialCards) {
+                hasInitialCards = false
+
+                if (cards.isNotEmpty()) {
+                    return@LaunchedEffect
+                }
             }
 
             isLoading = true
