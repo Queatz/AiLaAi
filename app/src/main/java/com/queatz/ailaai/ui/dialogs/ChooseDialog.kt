@@ -1,14 +1,9 @@
 package com.queatz.ailaai.ui.dialogs
 
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,56 +13,55 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import coil.compose.AsyncImage
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.GroupMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
+@Composable
+fun <T> defaultConfirmFormatter(
+    @StringRes none: Int,
+    @StringRes one: Int,
+    @StringRes two: Int,
+    @StringRes many: Int,
+    nameFormatter: (T) -> String
+): @Composable (List<T>) -> String = { item ->
+    when {
+        item.isEmpty() -> stringResource(none)
+        item.size == 1 -> stringResource(one, *item.map { nameFormatter(it) }.toTypedArray())
+        item.size == 2 -> stringResource(two, *item.map { nameFormatter(it) }.toTypedArray())
+        else -> stringResource(many, item.size)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit, me: () -> Person?) {
+fun <T> ChooseDialog(
+    onDismissRequest: () -> Unit,
+    isLoading: Boolean,
+    title: String,
+    photoFormatter: @Composable (T) -> List<String>,
+    nameFormatter: @Composable (T) -> String,
+    confirmFormatter: @Composable (List<T>) -> String,
+    textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,
+    searchText: String,
+    searchTextChange: (String) -> Unit,
+    items: List<T>,
+    key: (item: T) -> String,
+    selected: List<T>,
+    onSelectedChange: (List<T>) -> Unit,
+    onConfirm: suspend (List<T>) -> Unit
+) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
-    var disableSubmit by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
-    var isLoading by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
-    var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
-    var people by remember { mutableStateOf(listOf<Person>()) }
-    var selected by remember { mutableStateOf(listOf<Person>()) }
-
-    LaunchedEffect(true) {
-        isLoading = true
-        try {
-            allGroups = api.groups()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-        isLoading = false
-    }
-
-    LaunchedEffect(allGroups, selected, searchText) {
-        val me = me()
-        val allPeople = allGroups
-            .flatMap { it.members!!.map { it.person!! } }
-            .distinctBy { it.id!! }
-            .filter { it.id != me?.id }
-        people = (if (searchText.isBlank()) allPeople else allPeople.filter {
-            it.name?.contains(searchText, true) ?: false
-        })
-    }
+    var disableSubmit by remember { mutableStateOf(true) }
 
     LaunchedEffect(selected) {
         disableSubmit = selected.isEmpty() || selected.size >= 20
@@ -85,13 +79,13 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
                     .padding(PaddingDefault * 3)
             ) {
                 Text(
-                    stringResource(R.string.new_group),
+                    title,
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = PaddingDefault)
                 )
                 OutlinedTextField(
                     searchText,
-                    onValueChange = { searchText = it },
+                    onValueChange = searchTextChange,
                     label = { Text(stringResource(R.string.search)) },
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
@@ -120,19 +114,25 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
                                     .padding(horizontal = PaddingDefault)
                             )
                         }
-                    } else if (people.isEmpty()) {
+                    } else if (items.isEmpty()) {
                         item {
                             Text(
-                                stringResource(if (searchText.isBlank()) R.string.you_have_no_conversations else R.string.no_conversations_to_show),
+                                textWhenEmpty(searchText.isBlank()),
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(PaddingDefault * 2)
                             )
                         }
                     } else {
-                        items(people, key = { it.id!! }) {
-                            val isSelected = selected.any { person -> person.id == it.id }
-                            GroupMember(it, isSelected) {
-                                selected = selected.toggle(it) { person -> person.id == it.id }
+                        items(items, key = key) {
+                            val isSelected = selected.any { item -> key(item) == key(it) }
+                            GroupMember(
+                                photoFormatter(it),
+                                nameFormatter(it),
+                                isSelected
+                            ) {
+                                onSelectedChange(
+                                    selected.toggle(it) { item -> key(item) == key(it) }
+                                )
                             }
                         }
                     }
@@ -142,20 +142,14 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
                     verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val context = LocalContext.current
-                    val didntWork = stringResource(R.string.didnt_work)
                     TextButton(
                         {
                             disableSubmit = true
 
                             coroutineScope.launch {
                                 try {
-                                    val group = api.createGroup(selected.map { it.id!! })
-                                    onNewGroup(group)
+                                    onConfirm(selected)
                                     onDismissRequest()
-                                } catch (ex: Exception) {
-                                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
-                                    ex.printStackTrace()
                                 } finally {
                                     disableSubmit = false
                                 }
@@ -164,19 +158,11 @@ fun CreateGroupDialog(onDismissRequest: () -> Unit, onNewGroup: (Group) -> Unit,
                         enabled = !disableSubmit,
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
-                        Text(newGroupText(selected), textAlign = TextAlign.End, modifier = Modifier.weight(0.5f, false))
-                        Icon(Icons.Outlined.ArrowForward, "", modifier = Modifier.padding(start = PaddingDefault))
+                        Text(confirmFormatter(selected), textAlign = TextAlign.End, modifier = Modifier.weight(0.5f, false))
+                        Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.padding(start = PaddingDefault))
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-fun newGroupText(selected: List<Person>) = when {
-    selected.isEmpty() -> stringResource(R.string.new_group)
-    selected.size == 1 -> stringResource(R.string.new_group_with_person, *selected.map { it.name ?: stringResource(R.string.someone) }.toTypedArray())
-    selected.size == 2 -> stringResource(R.string.new_group_with_people, *selected.map { it.name ?: stringResource(R.string.someone) }.toTypedArray())
-    else -> stringResource(R.string.new_group_with_x_people, selected.size)
 }

@@ -124,4 +124,9 @@
     <string name="unsave_card">Unsave card</string>
     <string name="discoverable_by_link">This card will only be discoverable by sharing its link.</string>
     <string name="another_location">Elsewhere</string>
+    <string name="send_card">Send card</string>
+    <string name="send_card_to_conversation">Send card to %1$s</string>
+    <string name="send_card_to_conversations">Send card to %1$s and %2$s</string>
+    <string name="send_card_to_x_conversations">Send card to %1$s conversations</string>
+    <string name="sent">Sent!</string>
 </resources>

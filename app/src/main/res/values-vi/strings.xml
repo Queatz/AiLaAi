@@ -126,4 +126,9 @@
     <string name="unsave_card">Bỏ lưu thẻ</string>
     <string name="discoverable_by_link">Thẻ này sẽ chỉ có thể được khám phá bằng cách chia sẻ liên kết của nó.</string>
     <string name="another_location">Chỗ khác</string>
+    <string name="send_card">Gửi thẻ</string>
+    <string name="send_card_to_conversation">Giử thẻ đến %1$s</string>
+    <string name="send_card_to_conversations">Giử thẻ đến %1$s và %2$s</string>
+    <string name="send_card_to_x_conversations">Giử thẻ đến %1$s trò chuyện</string>
+    <string name="sent">Đã gửi!</string>
 </resources>

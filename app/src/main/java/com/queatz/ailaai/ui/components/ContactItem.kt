@@ -1,28 +1,23 @@
 package com.queatz.ailaai.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
-import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -36,55 +31,13 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
         .clickable {
             navController.navigate("group/${groupExtended.group!!.id!!}")
         }) {
-        if (people.size == 1) {
-            AsyncImage(
-                model = people.firstOrNull()?.photo?.let { api.url(it) } ?: "",
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center,
-                modifier = Modifier
-                    .padding(PaddingDefault)
-                    .requiredSize(64.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-            )
-        } else if (people.size >= 2) {
-            val show = remember { people.shuffled() }
-            Box(modifier = Modifier.requiredSize(64.dp)) {
-                AsyncImage(
-                    model = show[0].photo?.let { api.url(it) } ?: "",
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(PaddingDefault)
-                        .requiredSize(32.dp)
-                        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
-                )
-                AsyncImage(
-                    model = show[1].photo?.let { api.url(it) } ?: "",
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(PaddingDefault)
-                        .requiredSize(32.dp)
-                        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
-                )
-            }
-        }
+        GroupPhoto(groupExtended.photos(me?.let(::listOf) ?: emptyList()))
         Column(
             modifier = Modifier.weight(1f)
         ) {
             val someone = stringResource(R.string.someone)
             Text(
-                groupExtended.group?.name?.nullIfBlank ?: people.joinToString { it.name ?: someone },
+                groupExtended.name(someone),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(

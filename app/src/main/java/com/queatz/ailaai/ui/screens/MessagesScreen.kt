@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -19,7 +21,8 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
-import com.queatz.ailaai.ui.dialogs.CreateGroupDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,10 +121,30 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     }
 
     if (showCreateGroup) {
-        CreateGroupDialog({
-            showCreateGroup = false
-        }, {
-           navController.navigate("group/${it.id!!}")
-        }, me)
+        val context = LocalContext.current
+        val didntWork = stringResource(R.string.didnt_work)
+        val someone = stringResource(R.string.someone)
+        ChoosePeopleDialog(
+            {
+                showCreateGroup = false
+            },
+            title = stringResource(R.string.new_group),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.new_group,
+                R.string.new_group_with_person,
+                R.string.new_group_with_people,
+                R.string.new_group_with_x_people
+            ) { it.name ?: someone },
+            { people ->
+                try {
+                    val group = api.createGroup(people.map { it.id!! })
+                    navController.navigate("group/${group.id!!}")
+                } catch (ex: Exception) {
+                    Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
+                    ex.printStackTrace()
+                }
+            },
+            me()?.let(::listOf) ?: emptyList()
+        )
     }
 }

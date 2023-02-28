@@ -40,12 +40,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavHostController
 
-    private val menuItems = listOf(
-        NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
-        NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
-        NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-        NavButton("me", getString(R.string.me), Icons.Outlined.Person)
-    )
+    private val menuItems by lazy {
+        listOf(
+            NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
+            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
+            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
+            NavButton("me", getString(R.string.me), Icons.Outlined.Person)
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

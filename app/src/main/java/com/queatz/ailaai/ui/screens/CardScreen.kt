@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,17 +35,18 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.url
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
+import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ShareCardQrCodeDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +55,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var isLoading by remember { mutableStateOf(false) }
     var notFound by remember { mutableStateOf(false) }
     var showQrCode by rememberSaveable { mutableStateOf(false) }
+    var showSendDialog by rememberSaveable { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
@@ -153,6 +154,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             showMenu = false
                         })
                     }
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.send_card))
+                    }, {
+                        showSendDialog = true
+                        showMenu = false
+                    })
                     DropdownMenuItem({
                         Text(stringResource(R.string.qr_code))
                     }, {
@@ -318,6 +325,44 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
             }
         }
+    }
+
+    if (showSendDialog) {
+        val context = LocalContext.current
+        val didntWork = stringResource(R.string.didnt_work)
+        val sent = stringResource(R.string.sent)
+        val someone = stringResource(R.string.someone)
+        ChooseGroupDialog(
+            {
+                showSendDialog = false
+            },
+            title = stringResource(R.string.send_card),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.send_card,
+                R.string.send_card_to_conversation,
+                R.string.send_card_to_conversations,
+                R.string.send_card_to_x_conversations
+            ) { it.name(someone) },
+            me = me(),
+            onGroupsSelected = { groups ->
+                try {
+                    coroutineScope {
+                        groups.map {
+                            async {
+                                api.sendMessage(
+                                    it.id!!,
+                                    Message(attachment = gson.toJson(CardAttachment(card!!.id!!)))
+                                )
+                            }
+                        }.awaitAll()
+                    }
+                    Toast.makeText(context, sent, LENGTH_SHORT).show()
+                } catch (ex: Exception) {
+                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
+                    ex.printStackTrace()
+                }
+            }
+        )
     }
 
     if (showQrCode) {
