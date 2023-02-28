@@ -40,6 +40,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavHostController
 
+    private val menuItems = listOf(
+        NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
+        NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
+        NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
+        NavButton("me", getString(R.string.me), Icons.Outlined.Person)
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -123,12 +130,7 @@ class MainActivity : AppCompatActivity() {
                             ) {
                                 AnimatedVisibility(showNavigation && !isLandscape) {
                                     NavigationBar {
-                                        listOf(
-                                            NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
-                                            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-                                            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
-                                            NavButton("me", getString(R.string.me), Icons.Outlined.Person)
-                                        ).forEach { item ->
+                                        menuItems.forEach { item ->
                                             NavigationBarItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
                                                 label = { Text(item.text) },
@@ -154,12 +156,7 @@ class MainActivity : AppCompatActivity() {
                                 ) {
                                     PermanentDrawerSheet(Modifier.width(240.dp)) {
                                         Spacer(Modifier.height(PaddingDefault))
-                                        listOf(
-                                            NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
-                                            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-                                            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
-                                            NavButton("me", getString(R.string.me), Icons.Outlined.Person)
-                                        ).forEach { item ->
+                                        menuItems.forEach { item ->
                                             NavigationDrawerItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
                                                 label = { Text(item.text) },

@@ -6,9 +6,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import java.io.ByteArrayOutputStream
 
-fun Uri.asScaledJpeg(context: Context): ByteArray {
+fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 800): ByteArray {
     val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(this))
-    val longestEdge = 1600
     val w = if (bitmap.width > bitmap.height) longestEdge else (longestEdge * bitmap.aspect).toInt()
     val h = if (bitmap.height > bitmap.width) longestEdge else (longestEdge / bitmap.aspect).toInt()
     val scaled = Bitmap.createScaledBitmap(bitmap, w, h, true)

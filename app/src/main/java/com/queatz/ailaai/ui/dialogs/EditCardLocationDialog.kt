@@ -131,6 +131,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
             Column(
                 modifier = Modifier
                     .padding(PaddingDefault * 3)
+                    .verticalScroll(scrollState, enabled = scrollEnabled)
             ) {
                 Text(
                     stringResource(R.string.card_location),
@@ -194,8 +195,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 }
                 Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(scrollState, enabled = scrollEnabled)
+//                        .weight(1f)
+//                        .verticalScroll(scrollState, enabled = scrollEnabled)
                 ) {
                     Text(
                         when (cardParentType) {
@@ -222,8 +223,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         CardParentType.Map -> {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
                                     .padding(PaddingValues(vertical = PaddingDefault * 2))
                                     .clip(MaterialTheme.shapes.large)
                                     .background(MaterialTheme.colorScheme.primaryContainer)
@@ -359,7 +360,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                                         modifier = Modifier
-                                            .weight(1f)
+                                            .fillMaxWidth()
+                                            .aspectRatio(.75f)
                                     ) {
                                         items(shownCards, { it.id!! }) {
                                             BasicCard(

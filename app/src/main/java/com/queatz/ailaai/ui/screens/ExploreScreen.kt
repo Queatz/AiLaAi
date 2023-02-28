@@ -178,7 +178,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             isLoading = false
         }
 
-        CardsList(cards, isLoading, value, { value = it}, navController) {
+        CardsList(cards, isLoading, value, { value = it }, navController) {
             if (geoManual) {
                 ElevatedButton(
                     elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),

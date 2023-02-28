@@ -278,6 +278,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         coroutineScope.launch {
                             try {
                                 cardParentType = null
+                                filters = emptySet()
                                 addedCardId = api.newCard().id
                                 myCards = api.myCards()
                                 delay(100)
