@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -43,8 +45,8 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
-            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
             NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
+            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
             NavButton("me", getString(R.string.me), Icons.Outlined.Person)
         )
     }
@@ -135,7 +137,7 @@ class MainActivity : AppCompatActivity() {
                                         menuItems.forEach { item ->
                                             NavigationBarItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
-                                                label = { Text(item.text) },
+                                                label = { Text(item.text, overflow = TextOverflow.Ellipsis, maxLines = 1, textAlign = TextAlign.Center) },
                                                 selected = navController.currentDestination?.route == item.route,
                                                 onClick = {
                                                     navController.popBackStack()

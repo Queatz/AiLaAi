@@ -16,12 +16,20 @@ fun SavedScreen(context: Context, navController: NavController, me: () -> Person
     var value by rememberSaveable { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
 
     LaunchedEffect(Unit) {
         saves.reload()
     }
 
     LaunchedEffect(value) {
+        if (hasInitialCards) {
+            hasInitialCards = false
+
+            if (cards.isNotEmpty()) {
+                return@LaunchedEffect
+            }
+        }
         isLoading = true
         try {
             cards = api.savedCards(value.takeIf { it.isNotBlank() }).mapNotNull { it.card }

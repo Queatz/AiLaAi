@@ -20,6 +20,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +34,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.sendEmail
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,6 +46,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     var myName by rememberSaveable { mutableStateOf(me()?.name ?: "") }
     var myNameUnsaved by rememberSaveable { mutableStateOf(false) }
     var signOutDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     if (signOutDialog) {
         var transferCode by remember { mutableStateOf("") }
@@ -283,6 +286,16 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }
         }, {
             chooseLanguageDialog = true
+        })
+
+        DropdownMenuItem({
+            Text(
+                stringResource(R.string.app_feedback),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(PaddingDefault)
+            )
+        }, {
+            "Jacob<jacobaferrero@gmail.com>".sendEmail(context, "Ai Là Ai feedback")
         })
 
         DropdownMenuItem({
