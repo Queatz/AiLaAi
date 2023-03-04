@@ -23,7 +23,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 14
+        versionCode = 15
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

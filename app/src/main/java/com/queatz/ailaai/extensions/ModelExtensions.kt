@@ -5,9 +5,12 @@ import com.queatz.ailaai.*
 
 val Card.url get() = "$appDomain/card/$id"
 
-fun GroupExtended.name(someone: String) =
+fun GroupExtended.name(someone: String, omit: List<String>) =
     group?.name?.nullIfBlank
-        ?: members?.mapNotNull { it.person }?.joinToString { it.name ?: someone }
+        ?: members
+            ?.filter { !omit.contains(it.person?.id) }
+            ?.mapNotNull { it.person }
+            ?.joinToString { it.name ?: someone }
         ?: ""
 
 fun GroupExtended.photos(omit: List<Person> = emptyList()) = members

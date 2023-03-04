@@ -40,7 +40,7 @@ fun ChooseGroupDialog(
         val all = allGroups
             .filter { omit.none { group -> it.group?.id == group.id } }
         groups = (if (searchText.isBlank()) all else all.filter {
-            it.name(someone).contains(searchText, true)
+            it.name(someone, me?.id?.let(::listOf) ?: emptyList()).contains(searchText, true)
         })
     }
 
@@ -49,7 +49,7 @@ fun ChooseGroupDialog(
         isLoading = isLoading,
         title = title,
         photoFormatter = { it.photos(me?.let(::listOf) ?: emptyList()) },
-        nameFormatter = { it.name(someone) },
+        nameFormatter = { it.name(someone, me?.id?.let(::listOf) ?: emptyList()) },
         confirmFormatter = confirmFormatter,
         textWhenEmpty = { isBlank -> stringResource(if (isBlank) R.string.you_have_no_conversations else R.string.no_conversations_to_show) },
         searchText = searchText,

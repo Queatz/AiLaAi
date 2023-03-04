@@ -356,7 +356,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 R.string.send_card_to_conversation,
                 R.string.send_card_to_conversations,
                 R.string.send_card_to_x_conversations
-            ) { it.name(someone) },
+            ) { it.name(someone, me()?.id?.let(::listOf) ?: emptyList()) },
             me = me(),
             onGroupsSelected = { groups ->
                 try {

@@ -37,7 +37,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
         ) {
             val someone = stringResource(R.string.someone)
             Text(
-                groupExtended.name(someone),
+                groupExtended.name(someone, me?.id?.let(::listOf) ?: emptyList()),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
