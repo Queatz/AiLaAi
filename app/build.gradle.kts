@@ -23,7 +23,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 13
+        versionCode = 14
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -74,7 +74,7 @@ android {
 dependencies {
     val choiceSdkVersion = "0.3.0"
     val composeVersion = "1.3.3"
-    val ktorVersion = "2.2.3"
+    val ktorVersion = "2.2.4"
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha02")

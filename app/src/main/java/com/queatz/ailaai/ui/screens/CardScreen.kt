@@ -63,6 +63,9 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val context = LocalContext.current
 
     LaunchedEffect(true) {
+        if (card != null) {
+            return@LaunchedEffect
+        }
         isLoading = true
         notFound = false
 

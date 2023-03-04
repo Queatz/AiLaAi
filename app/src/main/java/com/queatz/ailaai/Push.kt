@@ -6,12 +6,13 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import com.queatz.ailaai.extensions.attachmentText
+import com.queatz.ailaai.extensions.nullIfBlank
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -68,7 +69,7 @@ class Push {
         val builder = NotificationCompat.Builder(context, "messages")
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(data.person.name)
-            .setContentText(data.message.text)
+            .setContentText(data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: "")
             .setGroup(data.group.id)
             .setAutoCancel(true)
             .setContentIntent(TaskStackBuilder.create(context).run {
@@ -79,26 +80,25 @@ class Push {
 
         val notificationManager = context.getSystemService(NotificationManager::class.java)
 
+        // todo do we need to prompt for POST_NOTIFICATIONS
         notificationManager.notify("group/${data.group.id}", 1, builder.build())
     }
 
     fun init(context: Context) {
         this.context = context
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                "messages",
-                context.getString(R.string.messages),
-                // Change importance
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
+        val notificationChannel = NotificationChannel(
+            "messages",
+            context.getString(R.string.messages),
+            // Change importance
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
 
-            notificationChannel.description = context.getString(R.string.notification_channel_description)
+        notificationChannel.description = context.getString(R.string.notification_channel_description)
 
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
 
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
+        notificationManager.createNotificationChannel(notificationChannel)
     }
 }
 

@@ -132,4 +132,5 @@
     <string name="send_card_to_x_conversations">Giử thẻ đến %1$s trò chuyện</string>
     <string name="sent">Đã gửi!</string>
     <string name="app_feedback">Gửi phản hồi về ứng dụng</string>
+    <string name="sent_a_card">đã gửi thẻ</string>
 </resources>

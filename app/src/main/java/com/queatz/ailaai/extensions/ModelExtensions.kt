@@ -1,5 +1,6 @@
 package com.queatz.ailaai.extensions
 
+import android.content.Context
 import com.queatz.ailaai.*
 
 val Card.url get() = "$appDomain/card/$id"
@@ -16,3 +17,14 @@ fun GroupExtended.photos(omit: List<Person> = emptyList()) = members
     ?.map {
         it.person?.photo ?: ""
     } ?: listOf("")
+
+fun Message.attachmentText(context: Context): String? = when (val attachment = getAttachment()) {
+    is CardAttachment -> {
+        if (attachment.card != null) {
+            context.getString(R.string.sent_a_card)
+        } else {
+            null
+        }
+    }
+    else -> null
+}

@@ -120,7 +120,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     val cards = remember(myCards, cardParentType, filters, searchText) {
         when (cardParentType) {
             CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
-            CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true }
+            CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true && it.geo != null }
             CardParentType.Card -> myCards.filter { it.parent != null }
             else -> myCards
         }.filter {

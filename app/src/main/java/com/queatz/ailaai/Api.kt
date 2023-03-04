@@ -96,7 +96,7 @@ class Api {
     private suspend inline fun <reified T : Any> post(
         url: String,
         body: Any? = null,
-        client: HttpClient = http
+        client: HttpClient = http,
     ): T = client.post("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
@@ -112,7 +112,7 @@ class Api {
     private suspend inline fun <reified T : Any> get(
         url: String,
         parameters: Map<String, String>? = null,
-        client: HttpClient = http
+        client: HttpClient = http,
     ): T = client.get("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
@@ -213,7 +213,7 @@ class Api {
 
     suspend fun updateMember(id: String, member: Member): HttpStatusCode = post("members/$id", member)
 
-    suspend fun removeMember(id: String) : HttpStatusCode = post("members/$id/delete")
+    suspend fun removeMember(id: String): HttpStatusCode = post("members/$id/delete")
 
     suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
 
@@ -225,15 +225,15 @@ class Api {
 }
 
 data class SignUpRequest(
-    val code: String
+    val code: String,
 )
 
 data class SignInRequest(
-    val code: String
+    val code: String,
 )
 
 data class TokenResponse(
-    val token: String
+    val token: String,
 )
 
 class GroupExtended(
@@ -244,30 +244,30 @@ class GroupExtended(
 
 class MemberAndPerson(
     var person: Person? = null,
-    var member: Member? = null
+    var member: Member? = null,
 )
 
 class SaveAndCard(
     var save: Save? = null,
-    var card: Card? = null
+    var card: Card? = null,
 )
 
 class Device(
     val type: DeviceType,
-    val token: String
+    val token: String,
 )
 
 class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
     override fun serialize(
         src: Instant,
         srcType: Type,
-        context: JsonSerializationContext
+        context: JsonSerializationContext,
     ) = JsonPrimitive(DateTimeFormatter.ISO_INSTANT.format(src.toJavaInstant()))
 
     override fun deserialize(
         json: JsonElement,
         type: Type,
-        context: JsonDeserializationContext
+        context: JsonDeserializationContext,
     ) = try {
         json.asString.toInstant()
     } catch (e: ParseException) {

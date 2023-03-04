@@ -130,4 +130,5 @@
     <string name="send_card_to_x_conversations">Send card to %1$s conversations</string>
     <string name="sent">Sent!</string>
     <string name="app_feedback">Send app feedback</string>
+    <string name="sent_a_card">Sent a card</string>
 </resources>
