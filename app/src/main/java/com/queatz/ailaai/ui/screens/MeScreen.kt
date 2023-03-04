@@ -27,10 +27,7 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.toggle
-import com.queatz.ailaai.ui.components.BasicCard
-import com.queatz.ailaai.ui.components.CardParentSelector
-import com.queatz.ailaai.ui.components.CardParentType
-import com.queatz.ailaai.ui.components.SearchField
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -233,7 +230,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         },
                         activity = navController.context as Activity,
                         card = card,
-                        edit = card.id == addedCardId,
+                        edit = if (card.id == addedCardId) EditCard.Location else null,
                         isMine = true
                     )
 

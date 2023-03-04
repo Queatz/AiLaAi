@@ -37,6 +37,11 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var showCreateGroup by remember { mutableStateOf(false) }
     var hasInitialGroups by remember { mutableStateOf(allGroups.isNotEmpty()) }
 
+    // The LaunchedEffect below could have lag and allow isLoading to initially be false
+    if (!hasInitialGroups) {
+        isLoading = allGroups.isEmpty()
+    }
+
     LaunchedEffect(Unit) {
         if (hasInitialGroups) {
             hasInitialGroups = false

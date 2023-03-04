@@ -59,7 +59,7 @@ fun BasicCard(
     onChange: () -> Unit = {},
     activity: Activity,
     card: Card?,
-    edit: Boolean = false,
+    edit: EditCard? = null,
     isMine: Boolean = false,
     isChoosing: Boolean = false
 ) {
@@ -315,12 +315,12 @@ private fun CardToolbar(
     activity: Activity,
     onChange: () -> Unit,
     card: Card,
-    edit: Boolean,
+    edit: EditCard?,
     modifier: Modifier = Modifier
 ) {
     var openDeleteDialog by remember { mutableStateOf(false) }
-    var openEditDialog by remember { mutableStateOf(false) }
-    var openLocationDialog by remember { mutableStateOf(edit) }
+    var openEditDialog by remember { mutableStateOf(edit == EditCard.Conversation) }
+    var openLocationDialog by remember { mutableStateOf(edit == EditCard.Location) }
     val scrollState = rememberScrollState()
 
     Row(
@@ -408,4 +408,9 @@ enum class CardParentType {
     Map,
     Card,
     Person
+}
+
+enum class EditCard {
+    Conversation,
+    Location
 }

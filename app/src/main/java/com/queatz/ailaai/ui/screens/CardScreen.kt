@@ -40,6 +40,7 @@ import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.url
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
+import com.queatz.ailaai.ui.components.EditCard
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ShareCardQrCodeDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -52,6 +53,7 @@ import kotlinx.coroutines.*
 @Composable
 fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val cardId = navBackStackEntry.arguments!!.getString("id")!!
+    var addedCardId by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var notFound by remember { mutableStateOf(false) }
     var showQrCode by rememberSaveable { mutableStateOf(false) }
@@ -299,8 +301,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 },
                                 activity = navController.context as Activity,
                                 card = it,
+                                edit = if (it.id == addedCardId) EditCard.Conversation else null,
                                 isMine = it.person == me()?.id
                             )
+                            if (it.id == addedCardId) {
+                                addedCardId = null
+                            }
                         }
                     }
                     if (isMine) {
@@ -310,9 +316,14 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                     {
                                         coroutineScope.launch {
                                             try {
-                                                api.newCard(Card(parent = cardId, name = "")).id
+                                                addedCardId = api.newCard(Card(parent = cardId, name = "")).id
                                                 cards = api.cardsCards(cardId)
                                                 delay(100)
+
+                                                if (state.firstVisibleItemIndex > 2) {
+                                                    state.scrollToItem(2)
+                                                }
+
                                                 state.animateScrollToItem(0)
                                             } catch (ex: Exception) {
                                                 ex.printStackTrace()

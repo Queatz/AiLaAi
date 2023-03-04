@@ -22,6 +22,11 @@ fun SavedScreen(context: Context, navController: NavController, me: () -> Person
         saves.reload()
     }
 
+    // The LaunchedEffect below could have lag and allow isLoading to initially be false
+    if (!hasInitialCards) {
+        isLoading = cards.isEmpty()
+    }
+
     LaunchedEffect(value) {
         if (hasInitialCards) {
             hasInitialCards = false

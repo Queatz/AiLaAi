@@ -162,6 +162,11 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             }
         }
     } else {
+        // The LaunchedEffect below could have lag and allow isLoading to initially be false
+        if (!hasInitialCards) {
+            isLoading = cards.isEmpty()
+        }
+
         LaunchedEffect(geo, value) {
             if (hasInitialCards) {
                 hasInitialCards = false
