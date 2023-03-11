@@ -73,13 +73,14 @@ android {
 
 dependencies {
     val choiceSdkVersion = "0.3.0"
+    val hmsVersion = "6.9.0.300"
     val composeVersion = "1.3.3"
     val ktorVersion = "2.2.4"
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha02")
     implementation("androidx.appcompat:appcompat-resources:1.7.0-alpha02")
-    implementation("com.google.android.material:material:1.8.0")
+    implementation("com.google.android.material:material:1.8.0") // todo is this needed?
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
@@ -94,14 +95,14 @@ dependencies {
     implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-messaging:$choiceSdkVersion")
-    implementation("com.huawei.hms:base:6.7.0.300")
-    implementation("com.huawei.hms:maps:6.7.0.300")
-    implementation("com.huawei.hms:push:6.7.0.300")
+    implementation("com.huawei.hms:base:$hmsVersion")
+    implementation("com.huawei.hms:maps:$hmsVersion")
+    implementation("com.huawei.hms:push:$hmsVersion")
     implementation("com.huawei.hms:scan:2.9.0.300")
-    implementation("com.huawei.hms:hianalytics:6.7.0.300")
-    implementation("com.huawei.hms:hianalytics:6.7.0.300")
-    implementation("com.huawei.hms:hwid:6.7.0.300")
-    implementation("com.huawei.hms:location:6.7.0.300")
+    implementation("com.huawei.hms:hianalytics:$hmsVersion")
+    implementation("com.huawei.hms:hianalytics:$hmsVersion")
+    implementation("com.huawei.hms:hwid:$hmsVersion")
+    implementation("com.huawei.hms:location:$hmsVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
     implementation("androidx.fragment:fragment-ktx:1.5.5")

@@ -33,16 +33,21 @@ fun CardConversation(
     card: Card,
     modifier: Modifier = Modifier,
     interactable: Boolean = true,
-    onReply: () -> Unit = {},
+    onReply: (List<String>) -> Unit = {},
     isMine: Boolean = false,
     showTitle: Boolean = true,
-    selectingText: ((Boolean) -> Unit)? = null
+    selectingText: ((Boolean) -> Unit)? = null,
+    conversationChange: ((List<ConversationItem>) -> Unit)? = null
 ) {
     val conversation = remember(card.conversation) {
         gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
     }
     var current by remember(conversation) { mutableStateOf(conversation) }
-    val stack = remember(conversation) { mutableListOf<ConversationItem>() }
+    var stack by remember(conversation) { mutableStateOf(emptyList<ConversationItem>()) }
+
+    LaunchedEffect(stack) {
+        conversationChange?.invoke(stack)
+    }
 
     Column(modifier = modifier) {
         if (showTitle) {
@@ -51,7 +56,7 @@ fun CardConversation(
                     withStyle(
                         MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
                     ) {
-                        append(card.name ?: stringResource(R.string.someone))
+                        append(current.title.takeIf { stack.isNotEmpty() } ?: card.name ?: "")
                     }
 
                     append("  ")
@@ -60,7 +65,7 @@ fun CardConversation(
                         MaterialTheme.typography.titleSmall.toSpanStyle()
                             .copy(color = MaterialTheme.colorScheme.secondary)
                     ) {
-                        append(card.location ?: "")
+                        append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.location ?: "")
                     }
                 },
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
@@ -100,7 +105,7 @@ fun CardConversation(
         if (interactable) {
             current.items.forEach {
                 Button({
-                    stack.add(current)
+                    stack = stack + current
                     current = it
                 }) {
                     Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
@@ -109,7 +114,7 @@ fun CardConversation(
 
             if (current.items.isEmpty()) {
                 Button({
-                    onReply()
+                    onReply(stack.map { it.title } + current.title)
                 }, enabled = !isMine) {
                     Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
                     Text(
@@ -126,7 +131,8 @@ fun CardConversation(
             ) {
                 TextButton({
                     if (stack.isNotEmpty()) {
-                        current = stack.removeLast()
+                        current = stack.last()
+                        stack = stack.dropLast(1)
                     }
                 }) {
                     Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))

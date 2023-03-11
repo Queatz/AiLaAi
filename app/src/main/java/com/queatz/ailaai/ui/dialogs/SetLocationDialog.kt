@@ -21,21 +21,17 @@ import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
 import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import com.queatz.ailaai.R
 import com.queatz.ailaai.databinding.LayoutMapBinding
+import com.queatz.ailaai.ui.components.MapWithMarker
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 
 @SuppressLint("MissingPermission")
 @Composable
 fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit) {
     var position by remember { mutableStateOf(LatLng(0.0, 0.0)) }
-    val disposable = remember { CompositeDisposable() }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            disposable.dispose()
-        }
-    }
 
     Dialog(onDismissRequest) {
         Surface(
@@ -57,72 +53,8 @@ fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                 ) {
-                    var composed by remember { mutableStateOf(false) }
-                    var marker: Marker? by remember { mutableStateOf(null) }
-                    var map: Map? by remember { mutableStateOf(null) }
-
-                    AndroidViewBinding(
-                        LayoutMapBinding::inflate,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        if (composed) {
-                            if (marker != null) {
-                                marker?.position = position
-
-                                map?.animateCamera(
-                                    CameraUpdateFactory.get().newCameraPosition(
-                                        CameraPosition.Builder()
-                                            .setTarget(position)
-                                            .setZoom(5f)
-                                            .build()
-                                    )
-                                )
-                            }
-                            return@AndroidViewBinding
-                        } else composed = true
-
-                        mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
-
-                        val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
-                        mapFragment.getMapObservable().subscribe {
-                            map = it
-                            map?.clear()
-
-                            map?.getUiSettings()?.isMapToolbarEnabled = true
-                            map?.getUiSettings()?.isMyLocationButtonEnabled = true
-
-                            marker = map?.addMarker(
-                                MarkerOptions
-                                    .create()
-                                    .position(position)
-                                    .draggable(true)
-                            )!!
-
-                            map?.setOnMapClickListener {
-                                position = it
-                            }
-
-                            map?.setOnMarkerClickListener { true }
-                            map?.setOnMarkerDragListener(object : OnMarkerDragListener {
-                                override fun onMarkerDrag(marker: Marker) {}
-
-                                override fun onMarkerDragEnd(marker: Marker) {
-                                    position = marker.position
-                                }
-
-                                override fun onMarkerDragStart(marker: Marker) {}
-                            })
-
-                            map?.moveCamera(
-                                CameraUpdateFactory.get().newCameraPosition(
-                                    CameraPosition.Builder()
-                                        .setTarget(position)
-                                        .setZoom(5f)
-                                        .build()
-                                )
-                            )
-                        }.let(disposable::add)
+                    MapWithMarker(5f, position) {
+                        position = it
                     }
                 }
                 Row(

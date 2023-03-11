@@ -35,15 +35,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.popBackStackOrFinish
-import com.queatz.ailaai.extensions.url
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
 import com.queatz.ailaai.ui.components.EditCard
-import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
-import com.queatz.ailaai.ui.dialogs.ShareCardQrCodeDialog
-import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -56,6 +52,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var addedCardId by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var notFound by remember { mutableStateOf(false) }
+    var openLocationDialog by remember { mutableStateOf(false) }
+    var openEditDialog by remember { mutableStateOf(false) }
     var showQrCode by rememberSaveable { mutableStateOf(false) }
     var showSendDialog by rememberSaveable { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
@@ -83,6 +81,23 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     }
 
     val isMine = me()?.id == card?.person
+    val recomposeScope = currentRecomposeScope
+
+    if (openLocationDialog) {
+        EditCardLocationDialog(card!!, navController.context as Activity, {
+            openLocationDialog = false
+        }, {
+            recomposeScope.invalidate()
+        })
+    }
+
+    if (openEditDialog) {
+        EditCardDialog(card!!, {
+            openEditDialog = false
+        }, {
+            recomposeScope.invalidate()
+        })
+    }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -151,6 +166,20 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 val cardString = stringResource(R.string.card)
 
                 DropdownMenu(showMenu, { showMenu = false }) {
+                    if (isMine) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.edit_card))
+                        }, {
+                            openEditDialog = true
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.change_location))
+                        }, {
+                            openLocationDialog = true
+                            showMenu = false
+                        })
+                    }
                     if (card?.parent != null) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.open_enclosing_card))
@@ -273,17 +302,10 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 {
                                     navController.navigate("card/${it.id!!}")
                                 },
-                                onReply = {
+                                onReply = { conversation ->
                                     coroutineScope.launch {
-                                        try {
-                                            val groupId = api.cardGroup(it.id!!).id!!
-                                            api.sendMessage(
-                                                groupId,
-                                                Message(attachment = gson.toJson(CardAttachment(it.id!!)))
-                                            )
+                                        it.reply(conversation) { groupId ->
                                             navController.navigate("group/${groupId}")
-                                        } catch (ex: Exception) {
-                                            ex.printStackTrace()
                                         }
                                     }
                                 },
@@ -422,17 +444,10 @@ private fun LazyGridScope.cardHeaderItems(
                 interactable = true,
                 showTitle = false,
                 isMine = isMine,
-                onReply = {
+                onReply = { conversation ->
                     coroutineScope.launch {
-                        try {
-                            val groupId = api.cardGroup(it.id!!).id!!
-                            api.sendMessage(
-                                groupId,
-                                Message(attachment = gson.toJson(CardAttachment(it.id!!)))
-                            )
+                        it.reply(conversation) { groupId ->
                             navController.navigate("group/${groupId}")
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
                         }
                     }
                 },

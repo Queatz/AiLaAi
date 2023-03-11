@@ -58,7 +58,7 @@
     <string name="your_message">Your message</string>
     <string name="your_reply">Your reply</string>
     <string name="card_message_description">This message is shown on the card below the name</string>
-    <string name="card_reply_description">This reply is shown under your name when someone chooses \"%1$s\"</string>
+    <string name="card_reply_description">This message is shown when someone chooses \"%1$s\"</string>
     <string name="option">Option</string>
     <string name="continue_conversation">Continue conversation</string>
     <string name="add_an_option">Add an option</string>
@@ -122,8 +122,8 @@
     <string name="card_saved">Card saved</string>
     <string name="card_unsaved">Card unsaved</string>
     <string name="unsave_card">Unsave card</string>
-    <string name="discoverable_by_link">This card will only be discoverable by sharing its link.</string>
-    <string name="another_location">Elsewhere</string>
+    <string name="discoverable_by_link">This card will only be discoverable by its link.</string>
+    <string name="offline">Offline</string>
     <string name="send_card">Send card</string>
     <string name="send_card_to_conversation">Send card to %1$s</string>
     <string name="send_card_to_conversations">Send card to %1$s and %2$s</string>
@@ -131,4 +131,12 @@
     <string name="sent">Sent!</string>
     <string name="app_feedback">Send app feedback</string>
     <string name="sent_a_card">Sent a card</string>
+    <string name="unpublished">Your cards are unpublished</string>
+    <string name="published">Your cards are published</string>
+    <string name="publish_your_cards_to_the_explore_tab">Publish your cards to the Explore tab</string>
+    <string name="your_cards_are_discoverable_on_the_explore_tab">Your cards are discoverable on the Explore tab
+    </string>
+    <string name="add_photo_to_activate">Add a photo to activate</string>
+    <string name="change_location">Change location</string>
+    <string name="edit_card">Edit card</string>
 </resources>

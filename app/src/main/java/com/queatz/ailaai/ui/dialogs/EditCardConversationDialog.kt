@@ -55,7 +55,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .padding(PaddingDefault * 2)
-                .fillMaxHeight(.9f)
+                .wrapContentHeight()
         ) {
             val scrollState = rememberScrollState()
             val currentRecomposeScope = currentRecomposeScope
@@ -65,6 +65,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
 
             Column(
                 modifier = Modifier.padding(PaddingDefault * 3)
+                    .verticalScroll(scrollState)
             ) {
                 Text(
                     stringResource(R.string.card_conversation),
@@ -93,8 +94,6 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 Column(
                     verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(scrollState)
                 ) {
                     if (backstack.isNotEmpty()) {
                         TextButton(
@@ -128,11 +127,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         },
                         shape = MaterialTheme.shapes.large,
                         label = {
-                            Text(
-                                if (backstack.isEmpty()) stringResource(R.string.your_message) else stringResource(
-                                    R.string.your_reply
-                                )
-                            )
+                            Text(stringResource(R.string.your_message))
                         },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Sentences
@@ -239,9 +234,9 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                             disableSaveButton = true
 
                             fun trim(it: ConversationItem) {
-                                it.title.trim()
-                                it.message.trim()
-                                it.items.forEach { trim(it) }
+                                it.title = it.title.trim()
+                                it.message = it.message.trim()
+                                it.items = it.items.onEach { trim(it) }
                             }
 
                             trim(conversation)

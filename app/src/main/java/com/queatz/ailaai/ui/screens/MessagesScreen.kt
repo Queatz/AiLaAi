@@ -30,17 +30,12 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
-    var isLoading by remember { mutableStateOf(false) }
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
     var groups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
+    var isLoading by remember { mutableStateOf(allGroups.isEmpty()) }
     var showCreateGroup by remember { mutableStateOf(false) }
     var hasInitialGroups by remember { mutableStateOf(allGroups.isNotEmpty()) }
-
-    // The LaunchedEffect below could have lag and allow isLoading to initially be false
-    if (!hasInitialGroups) {
-        isLoading = allGroups.isEmpty()
-    }
 
     LaunchedEffect(Unit) {
         if (hasInitialGroups) {

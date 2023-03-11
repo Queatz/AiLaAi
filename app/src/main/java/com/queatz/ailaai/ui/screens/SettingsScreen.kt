@@ -269,6 +269,30 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }
         }
 
+        var isPublished by remember { mutableStateOf(false) }
+
+        DropdownMenuItem({
+            Column(modifier = Modifier.padding(PaddingDefault)) {
+                Text(
+                    stringResource(if (isPublished) R.string.published else R.string.unpublished),
+                    style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+                )
+                Text(
+                    when (isPublished) {
+                        false -> stringResource(R.string.publish_your_cards_to_the_explore_tab)
+                        true -> stringResource(R.string.your_cards_are_discoverable_on_the_explore_tab)
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }, {
+            when (isPublished) {
+                false -> isPublished = true
+                true -> isPublished = false
+            }
+        })
+
         DropdownMenuItem({
             Column(modifier = Modifier.padding(PaddingDefault)) {
                 Text(

@@ -3,8 +3,6 @@ package com.queatz.ailaai.extensions
 import android.content.Context
 import com.queatz.ailaai.*
 
-val Card.url get() = "$appDomain/card/$id"
-
 fun GroupExtended.name(someone: String, omit: List<String>) =
     group?.name?.nullIfBlank
         ?: members

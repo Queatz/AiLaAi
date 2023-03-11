@@ -14,17 +14,12 @@ import com.queatz.ailaai.ui.state.gsonSaver
 @Composable
 fun SavedScreen(context: Context, navController: NavController, me: () -> Person?) {
     var value by rememberSaveable { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var isLoading by remember { mutableStateOf(cards.isEmpty()) }
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
 
     LaunchedEffect(Unit) {
         saves.reload()
-    }
-
-    // The LaunchedEffect below could have lag and allow isLoading to initially be false
-    if (!hasInitialCards) {
-        isLoading = cards.isEmpty()
     }
 
     LaunchedEffect(value) {
@@ -35,13 +30,14 @@ fun SavedScreen(context: Context, navController: NavController, me: () -> Person
                 return@LaunchedEffect
             }
         }
-        isLoading = true
         try {
+            isLoading = true
             cards = api.savedCards(value.takeIf { it.isNotBlank() }).mapNotNull { it.card }
         } catch (ex: Exception) {
             ex.printStackTrace()
+        } finally {
+            isLoading = false
         }
-        isLoading = false
     }
 
     CardsList(cards, isLoading, value, { value = it}, navController)

@@ -26,6 +26,8 @@ import com.queatz.ailaai.Card
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.isFalse
+import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.gsonSaver
@@ -116,8 +118,8 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
 
     val cards = remember(myCards, cardParentType, filters, searchText) {
         when (cardParentType) {
-            CardParentType.Person -> myCards.filter { it.parent == null && it.equipped == true }
-            CardParentType.Map -> myCards.filter { it.parent == null && it.equipped != true && it.geo != null }
+            CardParentType.Person -> myCards.filter { it.parent == null && it.equipped.isTrue }
+            CardParentType.Map -> myCards.filter { it.parent == null && it.equipped.isFalse && it.geo != null && it.offline.isFalse }
             CardParentType.Card -> myCards.filter { it.parent != null }
             else -> myCards
         }.filter {
@@ -230,7 +232,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         },
                         activity = navController.context as Activity,
                         card = card,
-                        edit = if (card.id == addedCardId) EditCard.Location else null,
+                        edit = if (card.id == addedCardId) EditCard.Conversation else null,
                         isMine = true
                     )
 

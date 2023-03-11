@@ -55,12 +55,12 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
     var value by rememberSaveable { mutableStateOf("") }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var geoManual by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
     var showSetMyLocation by remember { mutableStateOf(false) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coroutineScope = rememberCoroutineScope()
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
+    var isLoading by remember { mutableStateOf(cards.isEmpty()) }
 
     LaunchedEffect(true) {
         geoManual = !permissionState.status.isGranted || context.dataStore.data.first()[geoManualKey] == true
@@ -162,11 +162,6 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             }
         }
     } else {
-        // The LaunchedEffect below could have lag and allow isLoading to initially be false
-        if (!hasInitialCards) {
-            isLoading = cards.isEmpty()
-        }
-
         LaunchedEffect(geo, value) {
             if (hasInitialCards) {
                 hasInitialCards = false
@@ -176,13 +171,14 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
                 }
             }
 
-            isLoading = true
             try {
+                isLoading = true
                 cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
             } catch (ex: Exception) {
                 ex.printStackTrace()
+            } finally {
+                isLoading = false
             }
-            isLoading = false
         }
 
         CardsList(cards, isLoading, value, { value = it }, navController) {

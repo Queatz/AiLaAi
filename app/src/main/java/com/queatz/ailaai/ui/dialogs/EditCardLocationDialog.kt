@@ -27,15 +27,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.compose.ui.window.Dialog
-import androidx.core.view.doOnAttach
-import androidx.core.view.doOnDetach
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.*
-import at.bluesource.choicesdk.maps.common.Map
-import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
-import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -43,13 +37,9 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
-import com.queatz.ailaai.databinding.LayoutMapBinding
-import com.queatz.ailaai.ui.components.BasicCard
-import com.queatz.ailaai.ui.components.CardParentSelector
-import com.queatz.ailaai.ui.components.CardParentType
-import com.queatz.ailaai.ui.components.toList
+import com.queatz.ailaai.extensions.isTrue
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -73,28 +63,22 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
     var cardParentType by remember { mutableStateOf<CardParentType?>(null) }
 
-    val disposable = remember { CompositeDisposable() }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            disposable.dispose()
-        }
-    }
-
-    if (card.equipped == true) {
+    if (card.offline.isTrue) {
+        cardParentType = null
+    } else if (card.equipped == true) {
         cardParentType = CardParentType.Person
-    } else {
-        card.parent?.let {
-            cardParentType = CardParentType.Card
+    } else if (card.parent != null) {
+        cardParentType = CardParentType.Card
 
-            LaunchedEffect(true) {
-                try {
-                    parentCard = api.card(it)
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
+        LaunchedEffect(true) {
+            try {
+                parentCard = api.card(card.parent!!)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
             }
         }
+    } else if (card.geo != null) {
+        cardParentType = CardParentType.Map
     }
 
     when (permissionState.status) {
@@ -126,7 +110,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .padding(PaddingDefault * 2)
-                .fillMaxHeight(.9f)
+                .wrapContentHeight()
         ) {
             Column(
                 modifier = Modifier
@@ -174,36 +158,37 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     when (cardParentType) {
                         CardParentType.Person -> {
                             card.parent = null
+                            card.offline = null
                             parentCard = null
                             card.equipped = true
                         }
                         CardParentType.Map -> {
                             card.parent = null
+                            card.offline = null
                             parentCard = null
                             card.equipped = false
                         }
                         CardParentType.Card -> {
                             card.equipped = false
+                            card.offline = false
                         }
                         else -> {
+                            card.offline = true
                             card.parent = null
                             parentCard = null
                             card.equipped = false
-                            card.geo = null
                         }
                     }
                 }
                 Column(
                     modifier = Modifier
-//                        .weight(1f)
-//                        .verticalScroll(scrollState, enabled = scrollEnabled)
                 ) {
                     Text(
                         when (cardParentType) {
                             CardParentType.Map -> stringResource(R.string.on_the_map)
                             CardParentType.Card -> stringResource(R.string.inside_another_card)
                             CardParentType.Person -> stringResource(R.string.you)
-                            else -> stringResource(R.string.another_location)
+                            else -> stringResource(R.string.offline)
                         },
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(vertical = PaddingDefault),
@@ -241,73 +226,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         false
                                     }
                             ) {
-                                var composed by remember { mutableStateOf(false) }
-                                var marker: Marker? by remember { mutableStateOf(null) }
-                                var map: Map? by remember { mutableStateOf(null) }
-
-                                AndroidViewBinding(
-                                    LayoutMapBinding::inflate,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                ) {
-                                    if (composed) {
-                                        if (marker != null) {
-                                            marker?.position = position
-
-                                            map?.animateCamera(
-                                                CameraUpdateFactory.get().newCameraPosition(
-                                                    CameraPosition.Builder()
-                                                        .setTarget(position)
-                                                        .setZoom(14f)
-                                                        .build()
-                                                )
-                                            )
-                                        }
-                                        return@AndroidViewBinding
-                                    } else composed = true
-
-                                    mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
-
-                                    val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
-
-                                    mapFragment.getMapObservable().subscribe {
-                                        map = it
-                                        map?.clear()
-
-                                        map?.getUiSettings()?.isMapToolbarEnabled = true
-                                        map?.getUiSettings()?.isMyLocationButtonEnabled = true
-
-                                        marker = map?.addMarker(
-                                            MarkerOptions
-                                                .create()
-                                                .position(position)
-                                                .draggable(true)
-                                        )!!
-
-                                        map?.setOnMapClickListener {
-                                            position = it
-                                        }
-
-                                        map?.setOnMarkerClickListener { true }
-                                        map?.setOnMarkerDragListener(object : OnMarkerDragListener {
-                                            override fun onMarkerDrag(marker: Marker) {}
-
-                                            override fun onMarkerDragEnd(marker: Marker) {
-                                                position = marker.position
-                                            }
-
-                                            override fun onMarkerDragStart(marker: Marker) {}
-                                        })
-
-                                        map?.moveCamera(
-                                            CameraUpdateFactory.get().newCameraPosition(
-                                                CameraPosition.Builder()
-                                                    .setTarget(position)
-                                                    .setZoom(14f)
-                                                    .build()
-                                            )
-                                        )
-                                    }.let(disposable::add)
+                                MapWithMarker(14f, position) {
+                                    position = it
                                 }
                             }
                             Text(
@@ -433,6 +353,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
                                     card.location = update.location
                                     card.equipped = update.equipped
+                                    card.offline = update.offline
                                     card.parent = update.parent
                                     card.geo = update.geo
 

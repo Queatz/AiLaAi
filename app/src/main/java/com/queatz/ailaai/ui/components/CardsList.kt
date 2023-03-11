@@ -15,8 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.*
+import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -56,17 +57,10 @@ fun CardsList(cards: List<Card>, isLoading: Boolean, value: String, valueChange:
                         {
                             navController.navigate("card/${it.id!!}")
                         },
-                        onReply = {
+                        onReply = { conversation ->
                             coroutineScope.launch {
-                                try {
-                                    val groupId = api.cardGroup(it.id!!).id!!
-                                    api.sendMessage(
-                                        groupId,
-                                        Message(attachment = gson.toJson(CardAttachment(it.id!!)))
-                                    )
+                                it.reply(conversation) { groupId ->
                                     navController.navigate("group/${groupId}")
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
                                 }
                             }
                         },

@@ -9,6 +9,7 @@ class Card(
     var photo: String? = null,
     var location: String? = null,
     var equipped: Boolean? = null,
+    var offline: Boolean? = null,
     var geo: List<Double>? = null,
     var conversation: String? = null,
     var active: Boolean? = null,

@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -55,7 +56,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
-    onReply: () -> Unit = {},
+    onReply: (List<String>) -> Unit = {},
     onChange: () -> Unit = {},
     activity: Activity,
     card: Card?,
@@ -204,21 +205,30 @@ fun BasicCard(
                 }
 
                 val conversationScrollState = rememberScrollState()
+                var conversation by remember { mutableStateOf(emptyList<ConversationItem>()) }
+                val recomposeScope = currentRecomposeScope
+
+                LaunchedEffect(conversation) {
+                    recomposeScope.invalidate()
+                }
 
                 ConstraintLayout(
                     modifier = Modifier
                         .alpha(alpha)
                         .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
-                        .padding(PaddingDefault * 2)
-                        .minAspectRatio(1.5f)
                         .animateContentSize(
                             spring(
                                 stiffness = Spring.StiffnessMediumLow,
+//                                dampingRatio = Spring.DampingRatioLowBouncy,
                                 visibilityThreshold = IntSize.VisibilityThreshold
                             )
                         )
+                        .let {
+                            it.minAspectRatio(if (conversation.isNotEmpty()) .75f else 1.5f)
+                        }
+                        .padding(PaddingDefault * 2)
                 ) {
-                    val (topRef, bottomRef) = createRefs()
+                    val (conversationRef, toolbarRef) = createRefs()
                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
 
                     CardConversation(
@@ -229,11 +239,14 @@ fun BasicCard(
                         selectingText = {
                             isSelectingText = it
                         },
+                        conversationChange = {
+                            conversation = it
+                        },
                         modifier = Modifier
-                            .constrainAs(topRef) {
-                                bottom.linkTo(bottomRef.top)
-                                top.linkTo(parent.top)
+                            .constrainAs(conversationRef) {
+                                linkTo(parent.top, toolbarRef.top, bias = 1f)
                                 height = Dimension.preferredWrapContent
+
                             }
                             .verticalScroll(conversationScrollState)
                             .graphicsLayer(alpha = 0.99f)
@@ -242,9 +255,9 @@ fun BasicCard(
                     )
 
                     if (isMine) {
-                        CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(bottomRef) {
-                            top.linkTo(topRef.bottom)
-                            bottom.linkTo(parent.bottom)
+                        CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(toolbarRef) {
+                            linkTo(conversationRef.bottom, parent.bottom, bias = 1f)
+                            height = Dimension.preferredWrapContent
                         })
                     }
                 }
@@ -352,7 +365,7 @@ private fun CardToolbar(
             enabled = card.photo != null
         )
         Text(
-            if (activeCommitted) stringResource(R.string.card_active) else stringResource(R.string.card_inactive),
+            if (activeCommitted) stringResource(R.string.card_active) else if (card.photo == null) stringResource(R.string.add_photo_to_activate) else stringResource(R.string.card_inactive),
             style = MaterialTheme.typography.labelMedium,
             color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier
