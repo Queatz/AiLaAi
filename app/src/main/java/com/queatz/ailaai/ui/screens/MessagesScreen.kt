@@ -35,24 +35,17 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var groups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
     var isLoading by remember { mutableStateOf(allGroups.isEmpty()) }
     var showCreateGroup by remember { mutableStateOf(false) }
-    var hasInitialGroups by remember { mutableStateOf(allGroups.isNotEmpty()) }
 
     LaunchedEffect(Unit) {
-        if (hasInitialGroups) {
-            hasInitialGroups = false
-
-            if (allGroups.isNotEmpty()) {
-                return@LaunchedEffect
-            }
-        }
-
-        isLoading = true
+        // Reload, but only show loading indicator when there are no groups
+        isLoading = allGroups.isEmpty()
         try {
             allGroups = api.groups()
         } catch (ex: Exception) {
             ex.printStackTrace()
+        } finally {
+            isLoading = false
         }
-        isLoading = false
     }
 
     LaunchedEffect(searchText) {

@@ -50,7 +50,7 @@ fun ChoosePeopleDialog(
         photoFormatter = { listOf(it.photo ?: "") },
         nameFormatter = { it.name ?: stringResource(R.string.someone) },
         confirmFormatter = confirmFormatter,
-        textWhenEmpty = { isBlank -> stringResource(if (isBlank) R.string.you_have_no_conversations else R.string.no_conversations_to_show) },
+        textWhenEmpty = { stringResource(R.string.no_people_to_show) },
         searchText = searchText,
         searchTextChange = { searchText = it },
         items = people,

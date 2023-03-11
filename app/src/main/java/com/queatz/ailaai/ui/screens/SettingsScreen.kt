@@ -4,9 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -189,7 +187,11 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     }
             )
 
-            Column {
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+            ) {
                 OutlinedTextField(
                     myName,
                     {
@@ -269,29 +271,28 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }
         }
 
-        var isPublished by remember { mutableStateOf(false) }
-
-        DropdownMenuItem({
-            Column(modifier = Modifier.padding(PaddingDefault)) {
-                Text(
-                    stringResource(if (isPublished) R.string.published else R.string.unpublished),
-                    style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
-                )
-                Text(
-                    when (isPublished) {
-                        false -> stringResource(R.string.publish_your_cards_to_the_explore_tab)
-                        true -> stringResource(R.string.your_cards_are_discoverable_on_the_explore_tab)
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
-        }, {
-            when (isPublished) {
-                false -> isPublished = true
-                true -> isPublished = false
-            }
-        })
+//        var isPublished by remember { mutableStateOf(false) }
+//        DropdownMenuItem({
+//            Column(modifier = Modifier.padding(PaddingDefault)) {
+//                Text(
+//                    stringResource(if (isPublished) R.string.published else R.string.unpublished),
+//                    style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+//                )
+//                Text(
+//                    when (isPublished) {
+//                        false -> stringResource(R.string.publish_your_cards_to_the_explore_tab)
+//                        true -> stringResource(R.string.your_cards_are_discoverable_on_the_explore_tab)
+//                    },
+//                    style = MaterialTheme.typography.labelMedium,
+//                    color = MaterialTheme.colorScheme.secondary
+//                )
+//            }
+//        }, {
+//            when (isPublished) {
+//                false -> isPublished = true
+//                true -> isPublished = false
+//            }
+//        })
 
         DropdownMenuItem({
             Column(modifier = Modifier.padding(PaddingDefault)) {

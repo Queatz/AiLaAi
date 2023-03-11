@@ -17,6 +17,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -30,8 +31,10 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
+import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.GroupMembersDialog
 import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.*
@@ -50,6 +53,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showLeaveGroup by remember { mutableStateOf(false) }
     var showRenameGroup by remember { mutableStateOf(false) }
     var showGroupMembers by remember { mutableStateOf(false) }
+    var showInviteMembers by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(true) {
@@ -62,6 +66,14 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             showGroupNotFound = true
         } finally {
             isLoading = false
+        }
+    }
+
+    suspend fun reload() {
+        try {
+            groupExtended = api.group(groupId)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
         }
     }
 
@@ -148,6 +160,12 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
                         if (otherMembers.size > 1) {
                             DropdownMenuItem({
+                                Text(stringResource(R.string.invite))
+                            }, {
+                                showMenu = false
+                                showInviteMembers = true
+                            })
+                            DropdownMenuItem({
                                 Text(stringResource(R.string.members))
                             }, {
                                 showMenu = false
@@ -184,6 +202,14 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             }
                             showMenu = false
                         })
+                        if (otherMembers.size == 1) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.leave))
+                            }, {
+                                showMenu = false
+                                showLeaveGroup = true
+                            })
+                        }
 //                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
                     }
                 },
@@ -272,10 +298,52 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     showGroupMembers = false
                 }, otherMembers.map { it.person!! }) {
                     coroutineScope.launch {
-                        val group = api.createGroup(listOf(myMember!!.person!!.id!!, it.id!!))
+                        val group = api.createGroup(listOf(myMember!!.person!!.id!!, it.id!!), reuse = true)
                         navController.navigate("group/${group.id!!}")
                     }
                 }
+            }
+
+            if (showInviteMembers) {
+                val context = LocalContext.current
+                val didntWork = stringResource(R.string.didnt_work)
+                val someone = stringResource(R.string.someone)
+                ChoosePeopleDialog(
+                    {
+                        showInviteMembers = false
+                    },
+                    title = stringResource(R.string.invite),
+                    confirmFormatter = defaultConfirmFormatter(
+                        R.string.invite,
+                        R.string.invite_person,
+                        R.string.invite_people,
+                        R.string.invite_x_people
+                    ) { it.name ?: someone },
+                    { people ->
+                        var anySucceeded = false
+                        var anyFailed = false
+                        people.forEach { person ->
+                            try {
+                                api.createMember(Member().apply {
+                                    from = person.id!!
+                                    to = groupId
+                                })
+                                Toast.makeText(context, context.getString(R.string.person_invited, person.name?.nullIfBlank ?: someone), Toast.LENGTH_SHORT).show()
+                                anySucceeded = true
+                            } catch (ex: Exception) {
+                                anyFailed = true
+                                ex.printStackTrace()
+                            }
+                        }
+                        if (anySucceeded) {
+                            reload()
+                        }
+                        if (anyFailed) {
+                            Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    groupExtended!!.members!!.mapNotNull { it.person }
+                )
             }
 
             if (showRenameGroup) {

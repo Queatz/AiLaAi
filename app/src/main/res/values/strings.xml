@@ -16,6 +16,9 @@
     <string name="invite_code_description">This code will be active for 48 hours.</string>
     <string name="your_cards">Your cards</string>
     <string name="invite">Invite</string>
+    <string name="invite_person">Invite %1$s</string>
+    <string name="invite_people">Invite %1$s and %2$s</string>
+    <string name="invite_x_people">Invite %1$s people</string>
     <string name="you_have_no_cards">You currently have no cards.</string>
     <string name="add_a_card">Add a card</string>
     <string name="you_have_no_conversations">You currently have no conversations.</string>
@@ -94,7 +97,7 @@
     <string name="clear">Clear</string>
     <string name="set_my_location">Set my location</string>
     <string name="reset_location">Reset location</string>
-    <string name="no_conversations_to_show">No conversations to show</string>
+    <string name="no_conversations_to_show">No conversations to show.</string>
     <string name="new_group">Create group</string>
     <string name="conversations">Conversations</string>
     <string name="new_group_with_person">Create group with %1$s</string>
@@ -109,7 +112,7 @@
     <string name="card_not_found">Card not found</string>
     <string name="on_you">On you</string>
     <string name="leave">Leave</string>
-    <string name="leave_group">Leave group?</string>
+    <string name="leave_group">Leave conversation?</string>
     <string name="members">Members</string>
     <string name="rename">Rename</string>
     <string name="rename_group">Rename group</string>
@@ -139,4 +142,6 @@
     <string name="add_photo_to_activate">Add a photo to activate</string>
     <string name="change_location">Change location</string>
     <string name="edit_card">Edit card</string>
+    <string name="no_people_to_show">No people to show.</string>
+    <string name="person_invited">%1$s invited</string>
 </resources>

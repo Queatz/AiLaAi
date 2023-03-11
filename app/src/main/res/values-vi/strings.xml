@@ -18,6 +18,9 @@
     <string name="invite_code_description">Dùng mã này sẽ được trong vòng 48 giờ.</string>
     <string name="your_cards">Thẻ của bạn</string>
     <string name="invite">Mời ai đó</string>
+    <string name="invite_person">Mời %1$s</string>
+    <string name="invite_people">Mời %1$s và %2$s</string>
+    <string name="invite_x_people">Mời %1$s người</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Tạo thẻ mới</string>
     <string name="you_have_no_conversations">Bạn hiện không có cuộc trò chuyện nào.</string>
@@ -101,7 +104,7 @@
     <string name="conversations">Trò chuyện</string>
     <string name="new_group_with_person">Tạo nhóm vơi %1$s</string>
     <string name="new_group_with_people">Tạo nhóm vơi %1$s và %2$s</string>
-    <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người khác</string>
+    <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người</string>
     <string name="didnt_work">Điều đó đã không làm được</string>
     <string name="connected_ago">Đã kết nối %1$s</string>
     <string name="open_enclosing_card">Mở thẻ có thẻ này</string>
@@ -111,7 +114,7 @@
     <string name="card_not_found">Không tìm được thẻ này</string>
     <string name="on_you">Với bạn</string>
     <string name="leave">Rời khỏi</string>
-    <string name="leave_group">Rời khỏi nhóm này không?</string>
+    <string name="leave_group">Rời khỏi trò chuyện này?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
     <string name="rename_group">Đổi tên của nhóm này</string>
@@ -140,4 +143,7 @@
     <string name="add_photo_to_activate">Thêm ảnh để kích hoạt</string>
     <string name="change_location">Đổi vị trí</string>
     <string name="edit_card">Chỉnh sửa</string>
+    <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
+    <string name="person_invited">%1$s invited</string>
+
 </resources>

@@ -36,7 +36,7 @@ val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeCon
 
 const val appDomain = "https://ailaai.app"
 
-private data class CreateGroupBody(val people: List<String>)
+private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
 
 class Api {
 
@@ -203,13 +203,15 @@ class Api {
 
     suspend fun cardGroup(card: String): Group = get("cards/$card/group")
 
-    suspend fun createGroup(people: List<String>): Group = post("groups", CreateGroupBody(people))
+    suspend fun createGroup(people: List<String>, reuse: Boolean = false): Group = post("groups", CreateGroupBody(people, reuse))
 
     suspend fun updateGroup(id: String, groupUpdate: Group): Group = post("groups/$id", groupUpdate)
 
     suspend fun groups(): List<GroupExtended> = get("groups")
 
     suspend fun group(id: String): GroupExtended = get("groups/$id")
+
+    suspend fun createMember(member: Member): Member = post("members", member)
 
     suspend fun updateMember(id: String, member: Member): HttpStatusCode = post("members/$id", member)
 
