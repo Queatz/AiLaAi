@@ -145,5 +145,7 @@
     <string name="edit_card">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
     <string name="person_invited">%1$s invited</string>
+    <string name="copy_location">Sao chép vị trí</string>
+    <string name="show_on_map">Mở trên bản đồ</string>
 
 </resources>

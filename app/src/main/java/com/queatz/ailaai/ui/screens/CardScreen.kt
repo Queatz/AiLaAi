@@ -3,6 +3,8 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.animation.core.animateFloatAsState
@@ -201,6 +203,31 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         showMenu = false
                     })
                     val textCopied = stringResource(R.string.copied)
+                    if (card?.geo?.size == 2) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.show_on_map))
+                        }, {
+                            card?.let { card ->
+                                val uri = Uri.parse("geo:${card.geo!![0]},${card.geo!![1]}?q=${card.geo!![0]},${card.geo!![1]}(${Uri.encode(card.name ?: cardString)})")
+                                val intent = Intent(Intent.ACTION_VIEW, uri)
+                                navController.context.startActivity(Intent.createChooser(intent, null))
+                            }
+                            showMenu = false
+                        })
+                    }
+                    if (card?.location.isNullOrBlank().not()) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.copy_location))
+                        }, {
+                            card?.let { card ->
+                                ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
+                                    ClipData.newPlainText(card.name ?: cardString, card.location)
+                                )
+                                Toast.makeText(context, textCopied, LENGTH_SHORT).show()
+                            }
+                            showMenu = false
+                        })
+                    }
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
@@ -264,7 +291,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             headerAspect,
                             { verticalAspect = !verticalAspect },
                             coroutineScope,
-                            navController
+                            navController,
+                            elevation = 2
                         )
                     }
                 }
@@ -364,7 +392,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     }
 
     if (showSendDialog) {
-        val context = LocalContext.current
         val didntWork = stringResource(R.string.didnt_work)
         val sent = stringResource(R.string.sent)
         val someone = stringResource(R.string.someone)
@@ -415,6 +442,7 @@ private fun LazyGridScope.cardHeaderItems(
     toggleAspect: () -> Unit,
     coroutineScope: CoroutineScope,
     navController: NavController,
+    elevation: Int = 1,
 ) {
     card?.photo?.also {
         item(span = { GridItemSpan(maxCurrentLineSpan) }) {
@@ -430,7 +458,7 @@ private fun LazyGridScope.cardHeaderItems(
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.large)
                     .aspectRatio(aspect)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
                     .clickable {
                         toggleAspect()
                     }

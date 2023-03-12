@@ -144,4 +144,6 @@
     <string name="edit_card">Edit card</string>
     <string name="no_people_to_show">No people to show.</string>
     <string name="person_invited">%1$s invited</string>
+    <string name="copy_location">Copy location</string>
+    <string name="show_on_map">Show on map</string>
 </resources>

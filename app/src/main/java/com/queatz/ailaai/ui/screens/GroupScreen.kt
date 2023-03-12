@@ -158,32 +158,30 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     DropdownMenu(showMenu, { showMenu = false }) {
                         val hidden = myMember!!.member?.hide == true
 
-                        if (otherMembers.size > 1) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.invite))
-                            }, {
-                                showMenu = false
-                                showInviteMembers = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.members))
-                            }, {
-                                showMenu = false
-                                showGroupMembers = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.rename))
-                            }, {
-                                showMenu = false
-                                showRenameGroup = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.leave))
-                            }, {
-                                showMenu = false
-                                showLeaveGroup = true
-                            })
-                        }
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.invite))
+                        }, {
+                            showMenu = false
+                            showInviteMembers = true
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.members))
+                        }, {
+                            showMenu = false
+                            showGroupMembers = true
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.rename))
+                        }, {
+                            showMenu = false
+                            showRenameGroup = true
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.leave))
+                        }, {
+                            showMenu = false
+                            showLeaveGroup = true
+                        })
                         DropdownMenuItem({
                             Text(
                                 if (hidden) stringResource(R.string.show_conversation) else stringResource(
@@ -202,14 +200,6 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             }
                             showMenu = false
                         })
-                        if (otherMembers.size == 1) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.leave))
-                            }, {
-                                showMenu = false
-                                showLeaveGroup = true
-                            })
-                        }
 //                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
                     }
                 },
