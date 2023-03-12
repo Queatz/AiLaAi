@@ -1,13 +1,17 @@
 package com.queatz.ailaai
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.PermissionChecker
+import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
@@ -48,6 +52,12 @@ class Push {
     }
 
     private fun receive(data: MessagePushData) {
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+
+        if (!notificationManager.areNotificationsEnabled()) {
+            return
+        }
+
         if (
             latestEvent == Lifecycle.Event.ON_RESUME &&
             navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
@@ -78,9 +88,6 @@ class Push {
                 }
             )
 
-        val notificationManager = context.getSystemService(NotificationManager::class.java)
-
-        // todo do we need to prompt for POST_NOTIFICATIONS
         notificationManager.notify("group/${data.group.id}", 1, builder.build())
     }
 

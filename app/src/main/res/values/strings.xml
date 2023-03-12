@@ -117,7 +117,7 @@
     <string name="rename">Rename</string>
     <string name="rename_group">Rename group</string>
     <string name="group_name">Group name</string>
-    <string name="qr_code">QR Code</string>
+    <string name="qr_code">QR code</string>
     <string name="conversation_not_found">Conversation not found</string>
     <string name="conversation_hidden">Conversation hidden until new messages are sent</string>
     <string name="saved">Saved</string>

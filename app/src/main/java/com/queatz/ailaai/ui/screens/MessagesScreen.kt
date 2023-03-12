@@ -1,5 +1,11 @@
 package com.queatz.ailaai.ui.screens
 
+import android.Manifest
+import android.app.Activity
+import android.app.NotificationManager
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +22,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
@@ -27,7 +37,7 @@ import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -35,16 +45,32 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var groups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
     var isLoading by remember { mutableStateOf(allGroups.isEmpty()) }
     var showCreateGroup by remember { mutableStateOf(false) }
+    var showPushPermissionDialog by remember { mutableStateOf(false) }
+    val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         // Reload, but only show loading indicator when there are no groups
         isLoading = allGroups.isEmpty()
         try {
-            allGroups = api.groups()
+            allGroups = api.groups().filter { it.group != null }
         } catch (ex: Exception) {
             ex.printStackTrace()
         } finally {
             isLoading = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        if (!notificationManager.areNotificationsEnabled()) {
+            if (!notificationPermissionState.status.isGranted) {
+                if (notificationPermissionState.status.shouldShowRationale) {
+                    showPushPermissionDialog = true
+                } else {
+                    notificationPermissionState.launchPermissionRequest()
+                }
+            }
         }
     }
 
@@ -122,6 +148,31 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     .padding(PaddingDefault * 2)
             )
         }
+    }
+
+    if (showPushPermissionDialog) {
+        AlertDialog(
+            {
+                showPushPermissionDialog = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val intent = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.parse("package:${navController.context.packageName}")
+                        )
+                        (navController.context as Activity).startActivity(intent)
+                        showPushPermissionDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.open_settings))
+                }
+            },
+            text = {
+                Text("Message notifications are disabled")
+            }
+        )
     }
 
     if (showCreateGroup) {
