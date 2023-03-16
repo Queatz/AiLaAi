@@ -146,4 +146,5 @@
     <string name="person_invited">%1$s invited</string>
     <string name="copy_location">Copy location</string>
     <string name="show_on_map">Show on map</string>
+    <string name="youve_been_signed_out">It looks like you\'ve been signed out.</string>
 </resources>

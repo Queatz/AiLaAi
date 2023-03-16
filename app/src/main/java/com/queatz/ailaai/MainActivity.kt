@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
                     InitialScreen { known = true }
                 } else {
                     var me by remember { mutableStateOf<Person?>(null) }
+                    var showSignedOut by remember { mutableStateOf(true) }
                     val snackbarHostState = remember { SnackbarHostState() }
                     val coroutineScope = rememberCoroutineScope()
                     val cantConnectString = stringResource(R.string.cant_connect)
@@ -97,8 +98,7 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(Unit) {
                         api.onUnauthorized.collect {
-                            known = false
-                            me = null
+                            showSignedOut = true
                         }
                     }
 
@@ -123,6 +123,37 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(me) {
                         saves.reload()
+                    }
+
+                    if (showSignedOut) {
+                        AlertDialog(
+                            {
+                                showSignedOut = false
+                            },
+                            text = {
+                               Text(getString(R.string.youve_been_signed_out))
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    {
+                                        known = false
+                                        me = null
+                                        showSignedOut = false
+                                    }
+                                ) {
+                                    Text(stringResource(R.string.sign_out))
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    {
+                                        showSignedOut = false
+                                    }
+                                ) {
+                                    Text(stringResource(R.string.cancel))
+                                }
+                            }
+                        )
                     }
 
                     Scaffold(

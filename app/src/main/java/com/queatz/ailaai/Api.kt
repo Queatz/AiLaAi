@@ -67,7 +67,6 @@ class Api {
             onResponse { response ->
                 if (response.status == HttpStatusCode.Unauthorized) {
                     _onUnauthorized.emit(Unit)
-                    signout()
                 }
             }
         }

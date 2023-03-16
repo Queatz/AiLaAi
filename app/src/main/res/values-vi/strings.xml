@@ -147,5 +147,6 @@
     <string name="person_invited">%1$s được mời</string>
     <string name="copy_location">Sao chép vị trí</string>
     <string name="show_on_map">Mở trên bản đồ</string>
+    <string name="youve_been_signed_out">Có vẻ như bạn đã bị đăng xuất.</string>
 
 </resources>
