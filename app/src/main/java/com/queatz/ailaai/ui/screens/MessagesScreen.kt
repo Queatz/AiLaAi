@@ -199,7 +199,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     ex.printStackTrace()
                 }
             },
-            me()?.let(::listOf) ?: emptyList()
+            { it.id == me()?.id }
         )
     }
 }

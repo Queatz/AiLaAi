@@ -14,7 +14,7 @@ fun ChoosePeopleDialog(
     title: String,
     confirmFormatter: @Composable (List<Person>) -> String,
     onPeopleSelected: suspend (List<Person>) -> Unit,
-    omit: List<Person> = emptyList()
+    omit: (Person) -> Boolean = { false }
 ) {
 
     var isLoading by remember { mutableStateOf(false) }
@@ -37,7 +37,7 @@ fun ChoosePeopleDialog(
         val allPeople = allGroups
             .flatMap { it.members!!.map { it.person!! } }
             .distinctBy { it.id!! }
-            .filter { omit.none { person -> it.id == person.id } }
+            .filter { !omit(it) }
         people = (if (searchText.isBlank()) allPeople else allPeople.filter {
             it.name?.contains(searchText, true) ?: false
         })

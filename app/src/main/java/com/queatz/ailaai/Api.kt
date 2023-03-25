@@ -165,6 +165,8 @@ class Api {
 
     suspend fun myCards(): List<Card> = get("me/cards")
 
+    suspend fun myCollaborations(): List<Card> = get("me/collaborations")
+
     suspend fun savedCards(search: String? = null): List<SaveAndCard> = get("me/saved", search?.let {
         mapOf("search" to search)
     } ?: mapOf())

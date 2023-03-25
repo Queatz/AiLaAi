@@ -58,6 +58,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var openEditDialog by remember { mutableStateOf(false) }
     var showQrCode by rememberSaveable { mutableStateOf(false) }
     var showSendDialog by rememberSaveable { mutableStateOf(false) }
+    var openAddCollaboratorDialog by rememberSaveable { mutableStateOf(false) }
+    var openCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
@@ -83,6 +85,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     }
 
     val isMine = me()?.id == card?.person
+    val isMineOrIAmACollaborator = isMine || card?.collaborators?.contains(me()?.id) == true
     val recomposeScope = currentRecomposeScope
 
     if (openLocationDialog) {
@@ -181,6 +184,20 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             openLocationDialog = true
                             showMenu = false
                         })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.add_collaborators))
+                        }, {
+                            openAddCollaboratorDialog = true
+                            showMenu = false
+                        })
+                        if (card?.collaborators?.isNotEmpty() == true) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.collaborators))
+                            }, {
+                                openCollaboratorsDialog = true
+                                showMenu = false
+                            })
+                        }
                     }
                     if (card?.parent != null) {
                         DropdownMenuItem({
@@ -359,7 +376,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             }
                         }
                     }
-                    if (isMine) {
+                    if (isMineOrIAmACollaborator) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Box(contentAlignment = Alignment.Center) {
                                 ElevatedButton(
@@ -389,6 +406,65 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
             }
         }
+    }
+
+    val didntWork = stringResource(R.string.didnt_work)
+    val someone = stringResource(R.string.someone)
+
+    if (openAddCollaboratorDialog) {
+        ChoosePeopleDialog(
+            {
+                openAddCollaboratorDialog = false
+            },
+            title = stringResource(R.string.add_collaborators),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.add,
+                R.string.add_person,
+                R.string.add_people,
+                R.string.add_x_people
+            ) { it.name ?: someone },
+            { people ->
+                try {
+                    card!!.collaborators = (card?.collaborators ?: emptyList()) + people.map { it.id!! }
+                    val updatedCard = api.updateCard(card!!.id!!, Card().apply {
+                        collaborators = card!!.collaborators
+                    })
+                    card = updatedCard
+                } catch (ex: Exception) {
+                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
+                    ex.printStackTrace()
+                }
+            },
+            { it.id == me()?.id }
+        )
+    }
+
+    if (openCollaboratorsDialog) {
+        ChoosePeopleDialog(
+            {
+                openCollaboratorsDialog = false
+            },
+            title = stringResource(R.string.add_collaborators),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.remove,
+                R.string.remove_person,
+                R.string.remove_people,
+                R.string.remove_x_people
+            ) { it.name ?: someone },
+            { people ->
+                try {
+                    card!!.collaborators = (card?.collaborators ?: emptyList()) - people.map { it.id!! }.toSet()
+                    val updatedCard = api.updateCard(card!!.id!!, Card().apply {
+                        collaborators = card!!.collaborators
+                    })
+                    card = updatedCard
+                } catch (ex: Exception) {
+                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
+                    ex.printStackTrace()
+                }
+            },
+            { it.id !in (card!!.collaborators ?: emptyList()) }
+        )
     }
 
     if (showSendDialog) {

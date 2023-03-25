@@ -298,6 +298,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 val context = LocalContext.current
                 val didntWork = stringResource(R.string.didnt_work)
                 val someone = stringResource(R.string.someone)
+                val omit = groupExtended!!.members!!.mapNotNull { it.person?.id }
                 ChoosePeopleDialog(
                     {
                         showInviteMembers = false
@@ -332,7 +333,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
                         }
                     },
-                    groupExtended!!.members!!.mapNotNull { it.person }
+                    { it.id!! in omit }
                 )
             }
 

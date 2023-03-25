@@ -47,10 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () -> Unit, onChange: () -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
-
-    val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
-        activity
-    )
+    val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(activity)
 
     var locationName by remember { mutableStateOf(card.location ?: "") }
     var parentCard by remember { mutableStateOf<Card?>(null) }
@@ -253,7 +250,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
                                     LaunchedEffect(true) {
                                         try {
-                                            myCards = api.myCards().filter { it.id != card.id }
+                                            myCards = api.myCollaborations().filter { it.id != card.id }
                                         } catch (ex: Exception) {
                                             ex.printStackTrace()
                                         }
@@ -347,7 +344,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                             location = locationName.trim(),
                                             geo = position.toList(),
                                             parent = card.parent,
-                                            equipped = card.equipped
+                                            equipped = card.equipped,
+                                            offline = card.offline
                                         )
                                     )
 

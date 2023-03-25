@@ -35,8 +35,8 @@
     <string name="cant_connect">Can\'t connect to the internet</string>
     <string name="enter_invite_code">Enter invite code</string>
     <string name="hello">Xin chào, bạn!</string>
-    <string name="show_conversation">Show conversation</string>
-    <string name="hide_conversation">Hide conversation</string>
+    <string name="show_conversation">Unhide</string>
+    <string name="hide_conversation">Hide</string>
     <string name="more">More</string>
     <string name="message">Message</string>
     <string name="someone">Someone</string>
@@ -147,4 +147,14 @@
     <string name="copy_location">Copy location</string>
     <string name="show_on_map">Show on map</string>
     <string name="youve_been_signed_out">It looks like you\'ve been signed out.</string>
+    <string name="add_collaborators">Add collaborators</string>
+    <string name="collaborators">Collaborators</string>
+    <string name="add">Add</string>
+    <string name="add_person">Add %1$s</string>
+    <string name="add_people">Add %1$s and %2$s</string>
+    <string name="add_x_people">Add %1$s people</string>
+    <string name="remove">Remove</string>
+    <string name="remove_person">Remove %1$s</string>
+    <string name="remove_people">Remove %1$s and %2$s</string>
+    <string name="remove_x_people">Remove %1$s people</string>
 </resources>

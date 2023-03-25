@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                     InitialScreen { known = true }
                 } else {
                     var me by remember { mutableStateOf<Person?>(null) }
-                    var showSignedOut by remember { mutableStateOf(true) }
+                    var showSignedOut by remember { mutableStateOf(false) }
                     val snackbarHostState = remember { SnackbarHostState() }
                     val coroutineScope = rememberCoroutineScope()
                     val cantConnectString = stringResource(R.string.cant_connect)
