@@ -25,10 +25,10 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 
 
 @Composable
-fun ShareCardQrCodeDialog(onDismissRequest: () -> Unit, card: Card) {
+fun ShareCardQrCodeDialog(onDismissRequest: () -> Unit, url: String) {
     val logo = bitmapResource(R.drawable.ic_notification)
     val qrCode = remember { ScanUtil.buildBitmap(
-        card.url,
+        url,
         QRCODE_SCAN_TYPE,
         500,
         500,

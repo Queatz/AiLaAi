@@ -224,7 +224,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         showQrCode = true
                         showMenu = false
                     })
-                    val textCopied = stringResource(R.string.copied)
                     if (card?.geo?.size == 2) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.show_on_map))
@@ -237,6 +236,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             showMenu = false
                         })
                     }
+                    val textCopied = stringResource(R.string.copied)
                     if (card?.location.isNullOrBlank().not()) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.copy_location))
@@ -253,12 +253,10 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
-                        card?.let { card ->
-                            ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                                ClipData.newPlainText(card.name ?: cardString, card.url)
-                            )
-                            Toast.makeText(context, textCopied, LENGTH_SHORT).show()
-                        }
+                        ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
+                            ClipData.newPlainText(card?.name ?: cardString, cardUrl(cardId))
+                        )
+                        Toast.makeText(context, textCopied, LENGTH_SHORT).show()
                         showMenu = false
                     })
                 }
@@ -508,11 +506,11 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             onGroupsSelected = { groups ->
                 try {
                     coroutineScope {
-                        groups.map {
+                        groups.map { group ->
                             async {
                                 api.sendMessage(
-                                    it.id!!,
-                                    Message(attachment = gson.toJson(CardAttachment(card!!.id!!)))
+                                    group.id!!,
+                                    Message(attachment = gson.toJson(CardAttachment(cardId)))
                                 )
                             }
                         }.awaitAll()
@@ -529,7 +527,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     if (showQrCode) {
         ShareCardQrCodeDialog({
             showQrCode = false
-        }, card!!)
+        }, cardUrl(cardId))
     }
 }
 

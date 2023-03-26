@@ -4,6 +4,8 @@ import com.queatz.ailaai.*
 
 val Card.url get() = "$appDomain/card/$id"
 
+fun cardUrl(id: String) = "$appDomain/card/$id"
+
 suspend fun Card.reply(conversation: List<String>, onSuccess: (groupId: String) -> Unit = {}) {
     try {
         val groupId = api.cardGroup(id!!).id!!
