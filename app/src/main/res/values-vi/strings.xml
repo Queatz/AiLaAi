@@ -43,7 +43,8 @@
     <string name="someone">Một người ai đó</string>
     <string name="active">Hoạt động</string>
     <string name="not_active">Không hoạt động</string>
-    <string name="notification_channel_description">Tin nhắn từ những người sử dụng ứng dụng này.</string>
+    <string name="messages_notification_channel_description">Tin nhắn từ người.</string>
+    <string name="collaboration_notification_channel_description">Thông báo cộng tác.</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa</string>
     <string name="connected">Đã kết nối</string>
@@ -86,7 +87,7 @@
     <string name="search_cards">Tìm kiếm thẻ</string>
     <string name="created_ago">Tạo %1$s</string>
     <string name="no_cards">Không có thẻ đây.</string>
-    <string name="you">Với bạn</string>
+    <string name="with_you">Với bạn</string>
     <plurals name="number_of_cards">
         <item quantity="other">%1$s thẻ</item>
     </plurals>
@@ -158,5 +159,19 @@
     <string name="remove_person">Bỏ %1$s</string>
     <string name="remove_people">Bỏ %1$s và %2$s</string>
     <string name="remove_x_people">Bỏ %1$s người</string>
-
+    <string name="collaboration">Cộng tác</string>
+    <string name="open_card">Mở thẻ</string>
+    <string name="person_added_person">%1$s đã thêm %2$s làm cộng tác</string>
+    <string name="person_removed_person">%1$s đã xóa %2$s khỏi cộng tác</string>
+    <string name="person_added_card">%1$s đã thêm %2$s</string>
+    <string name="person_removed_card">%1$s đã xóa %2$s</string>
+    <string name="person_updated_card">%1$s đã cập nhật %2$s của %3$s</string>
+    <string name="person_updated_details">%1$s đã cập nhật %2$s</string>
+    <string name="inline_photo">ảnh</string>
+    <string name="inline_conversation">trò chuyện</string>
+    <string name="inline_name">tên</string>
+    <string name="inline_location_name">tên của vị trí</string>
+    <string name="inline_you">bạn</string>
+    <string name="inline_someone">một người ai đó</string>
+    <string name="inline_a_card">một thẻ nào đó</string>
 </resources>

@@ -204,6 +204,8 @@ class Api {
 
     suspend fun cardGroup(card: String): Group = get("cards/$card/group")
 
+    suspend fun cardPeople(card: String): List<Person> = get("cards/$card/people")
+
     suspend fun createGroup(people: List<String>, reuse: Boolean = false): Group = post("groups", CreateGroupBody(people, reuse))
 
     suspend fun updateGroup(id: String, groupUpdate: Group): Group = post("groups/$id", groupUpdate)

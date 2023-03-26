@@ -42,7 +42,8 @@
     <string name="someone">Someone</string>
     <string name="active">Active</string>
     <string name="not_active">Not active</string>
-    <string name="notification_channel_description">Messages from people using the app.</string>
+    <string name="messages_notification_channel_description">Messages from people.</string>
+    <string name="collaboration_notification_channel_description">Collaboration notifications.</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
@@ -89,7 +90,7 @@
         <item quantity="other">%1$s cards</item>
     </plurals>
     <string name="card_name">Card name</string>
-    <string name="you">With you</string>
+    <string name="with_you">With you</string>
     <string name="with_you_description">The location of this card will be updated to your current location every time you open Ai La Ai.</string>
     <string name="set_photo">Choose photo</string>
     <string name="copy_link">Copy link</string>
@@ -137,8 +138,7 @@
     <string name="unpublished">Your cards are unpublished</string>
     <string name="published">Your cards are published</string>
     <string name="publish_your_cards_to_the_explore_tab">Publish your cards to the Explore tab</string>
-    <string name="your_cards_are_discoverable_on_the_explore_tab">Your cards are discoverable on the Explore tab
-    </string>
+    <string name="your_cards_are_discoverable_on_the_explore_tab">Your cards are discoverable on the Explore tab</string>
     <string name="add_photo_to_activate">Add a photo to activate</string>
     <string name="change_location">Change location</string>
     <string name="edit_card">Edit card</string>
@@ -157,4 +157,19 @@
     <string name="remove_person">Remove %1$s</string>
     <string name="remove_people">Remove %1$s and %2$s</string>
     <string name="remove_x_people">Remove %1$s people</string>
+    <string name="collaboration">Collaboration</string>
+    <string name="open_card">Open card</string>
+    <string name="person_added_person">%1$s added %2$s as a collaborator</string>
+    <string name="person_removed_person">%1$s removed %2$s as a collaborator</string>
+    <string name="person_added_card">%1$s added %2$s</string>
+    <string name="person_removed_card">%1$s removed %2$s</string>
+    <string name="person_updated_card">%1$s updated the %2$s of %3$s</string>
+    <string name="person_updated_details">%1$s updated the %2$s</string>
+    <string name="inline_photo">photo</string>
+    <string name="inline_conversation">conversation</string>
+    <string name="inline_name">name</string>
+    <string name="inline_location_name">location name</string>
+    <string name="inline_you">you</string>
+    <string name="inline_someone">someone</string>
+    <string name="inline_a_card">some card</string>
 </resources>

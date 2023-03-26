@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                     LaunchedEffect(true) {
                         while (me == null) try {
                             me = api.me()
+                            push.setMe(me!!.id!!)
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                             snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
@@ -232,6 +233,7 @@ class MainActivity : AppCompatActivity() {
                                             coroutineScope.launch {
                                                 try {
                                                     me = api.me()
+                                                    push.setMe(me!!.id!!)
                                                 } catch (ex: Exception) {
                                                     ex.printStackTrace()
                                                     snackbarHostState.showSnackbar(

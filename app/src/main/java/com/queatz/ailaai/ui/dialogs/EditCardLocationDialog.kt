@@ -184,7 +184,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         when (cardParentType) {
                             CardParentType.Map -> stringResource(R.string.on_the_map)
                             CardParentType.Card -> stringResource(R.string.inside_another_card)
-                            CardParentType.Person -> stringResource(R.string.you)
+                            CardParentType.Person -> stringResource(R.string.with_you)
                             else -> stringResource(R.string.offline)
                         },
                         textAlign = TextAlign.Center,

@@ -59,6 +59,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var showQrCode by rememberSaveable { mutableStateOf(false) }
     var showSendDialog by rememberSaveable { mutableStateOf(false) }
     var openAddCollaboratorDialog by rememberSaveable { mutableStateOf(false) }
+    var openRemoveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var openCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
@@ -190,14 +191,18 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             openAddCollaboratorDialog = true
                             showMenu = false
                         })
-                        if (card?.collaborators?.isNotEmpty() == true) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.collaborators))
-                            }, {
+                    }
+                    if (isMineOrIAmACollaborator && (card?.collaborators?.isNotEmpty() == true)) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.collaborators))
+                        }, {
+                            if (isMine) {
+                                openRemoveCollaboratorsDialog = true
+                            } else {
                                 openCollaboratorsDialog = true
-                                showMenu = false
-                            })
-                        }
+                            }
+                            showMenu = false
+                        })
                     }
                     if (card?.parent != null) {
                         DropdownMenuItem({
@@ -435,16 +440,16 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     ex.printStackTrace()
                 }
             },
-            { it.id == me()?.id }
+            { it.id == me()?.id || card!!.collaborators?.contains(it.id) == true }
         )
     }
 
-    if (openCollaboratorsDialog) {
+    if (openRemoveCollaboratorsDialog) {
         ChoosePeopleDialog(
             {
-                openCollaboratorsDialog = false
+                openRemoveCollaboratorsDialog = false
             },
-            title = stringResource(R.string.add_collaborators),
+            title = stringResource(R.string.collaborators),
             confirmFormatter = defaultConfirmFormatter(
                 R.string.remove,
                 R.string.remove_person,
@@ -467,10 +472,27 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
         )
     }
 
+    var collaborators by remember { mutableStateOf(emptyList<Person>()) }
+
+    LaunchedEffect(openCollaboratorsDialog) {
+        if (openCollaboratorsDialog) {
+            collaborators = api.cardPeople(cardId).filter { it.id != me()?.id }
+        }
+    }
+
+    if (openCollaboratorsDialog && collaborators.isNotEmpty()) {
+        GroupMembersDialog({
+            openCollaboratorsDialog = false
+        }, collaborators) { person ->
+            coroutineScope.launch {
+                val group = api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true)
+                navController.navigate("group/${group.id!!}")
+            }
+        }
+    }
+
     if (showSendDialog) {
-        val didntWork = stringResource(R.string.didnt_work)
         val sent = stringResource(R.string.sent)
-        val someone = stringResource(R.string.someone)
         ChooseGroupDialog(
             {
                 showSendDialog = false
