@@ -3,9 +3,7 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +15,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 fun CardParentSelector(
     value: CardParentType?,
     modifier: Modifier = Modifier,
+    showOffline: Boolean = false,
     onChange: (CardParentType) -> Unit
 ) {
     Row(
@@ -41,6 +40,13 @@ fun CardParentSelector(
             onChange(CardParentType.Card)
         }, colors = colors, modifier = Modifier.weight(1f)) {
             Icon(Icons.Outlined.Search, stringResource(R.string.inside_another_card))
+        }
+        if (showOffline) {
+            OutlinedIconToggleButton(value == CardParentType.Offline, {
+                onChange(CardParentType.Offline)
+            }, colors = colors, modifier = Modifier.weight(1f)) {
+                Icon(Icons.Outlined.ExitToApp, stringResource(R.string.offline))
+            }
         }
     }
 }

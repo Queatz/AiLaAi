@@ -17,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -37,6 +39,7 @@ import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -55,17 +58,23 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showGroupMembers by remember { mutableStateOf(false) }
     var showInviteMembers by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val focusRequester = remember { FocusRequester() }
+    val context = LocalContext.current
 
     LaunchedEffect(true) {
         isLoading = true
 
         try {
             groupExtended = api.group(groupId)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            showGroupNotFound = true
-        } finally {
             isLoading = false
+        } catch (ex: Exception) {
+            if (ex is CancellationException || ex is InterruptedException) {
+                // Ignore
+            } else {
+                ex.printStackTrace()
+                showGroupNotFound = true
+                isLoading = false
+            }
         }
     }
 
@@ -245,6 +254,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 }
 
                 sendMessage = ""
+                focusRequester.requestFocus()
             }
 
             OutlinedTextField(
@@ -281,12 +291,17 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     .fillMaxWidth()
                     .heightIn(max = 128.dp)
                     .padding(PaddingDefault)
+                    .focusRequester(focusRequester)
             )
 
             if (showGroupMembers) {
                 GroupMembersDialog({
                     showGroupMembers = false
-                }, otherMembers.map { it.person!! }) {
+                }, otherMembers.map { it.person!! }, infoFormatter = { person ->
+                    person.seen?.timeAgo()?.let { timeAgo ->
+                        "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                    }
+                }) {
                     coroutineScope.launch {
                         val group = api.createGroup(listOf(myMember!!.person!!.id!!, it.id!!), reuse = true)
                         navController.navigate("group/${group.id!!}")

@@ -35,8 +35,9 @@ class Group(
 class Person(
     var name: String? = null,
     var photo: String? = null,
+    var inviter: String? = null,
     var seen: Instant? = null,
-    var inviter: String? = null
+    var source: PersonSource? = null
 ) : Model()
 
 class Member(
@@ -64,4 +65,8 @@ open class Edge : Model() {
 open class Model {
     var id: String? = null
     var createdAt: Instant? = null
+}
+
+enum class PersonSource {
+    Web
 }

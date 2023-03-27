@@ -83,7 +83,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(onSearch = {

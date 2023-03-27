@@ -37,6 +37,7 @@ val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeCon
 const val appDomain = "https://ailaai.app"
 
 private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
+private data class LeaveCollaborationBody(val card: String)
 
 class Api {
 
@@ -166,6 +167,7 @@ class Api {
     suspend fun myCards(): List<Card> = get("me/cards")
 
     suspend fun myCollaborations(): List<Card> = get("me/collaborations")
+    suspend fun leaveCollaboration(card: String): HttpStatusCode = post("me/collaborations/leave", LeaveCollaborationBody(card))
 
     suspend fun savedCards(search: String? = null): List<SaveAndCard> = get("me/saved", search?.let {
         mapOf("search" to search)

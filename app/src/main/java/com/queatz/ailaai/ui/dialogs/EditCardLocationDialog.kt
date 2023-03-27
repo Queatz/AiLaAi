@@ -130,7 +130,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(onSearch = {
@@ -199,6 +199,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(PaddingDefault)
                             )
                         }
@@ -263,7 +264,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         shape = MaterialTheme.shapes.large,
                                         singleLine = true,
                                         keyboardOptions = KeyboardOptions(
-                                            capitalization = KeyboardCapitalization.Words,
+                                            capitalization = KeyboardCapitalization.Sentences,
                                             imeAction = ImeAction.Next
                                         ),
                                         keyboardActions = KeyboardActions(onSearch = {
@@ -313,6 +314,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(PaddingDefault)
                             )
                         }

@@ -62,7 +62,7 @@ fun RenameGroupDialog(onDismissRequest: () -> Unit, group: Group, onGroupUpdated
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(onSearch = {

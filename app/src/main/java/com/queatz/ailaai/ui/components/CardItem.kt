@@ -420,7 +420,8 @@ fun LatLng.toList() = listOf(latitude, longitude)
 enum class CardParentType {
     Map,
     Card,
-    Person
+    Person,
+    Offline
 }
 
 enum class EditCard {

@@ -90,7 +90,7 @@ fun <T> ChooseDialog(
                     shape = MaterialTheme.shapes.large,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(onSearch = {
@@ -128,6 +128,7 @@ fun <T> ChooseDialog(
                             GroupMember(
                                 photoFormatter(it),
                                 nameFormatter(it),
+                                null,
                                 isSelected
                             ) {
                                 onSelectedChange(

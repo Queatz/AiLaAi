@@ -111,7 +111,6 @@
     <string name="update_available">Update available</string>
     <string name="download">Download</string>
     <string name="card_not_found">Card not found</string>
-    <string name="on_you">On you</string>
     <string name="leave">Leave</string>
     <string name="leave_group">Leave conversation?</string>
     <string name="members">Members</string>
@@ -172,4 +171,7 @@
     <string name="inline_you">you</string>
     <string name="inline_someone">someone</string>
     <string name="inline_a_card">some card</string>
+    <string name="deactivate">Deactivate</string>
+    <string name="activate">Activate</string>
+    <string name="leave_card">Leave this card?</string>
 </resources>

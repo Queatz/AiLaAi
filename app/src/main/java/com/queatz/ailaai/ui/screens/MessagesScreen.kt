@@ -36,6 +36,7 @@ import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.ktor.utils.io.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -43,7 +44,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
     var groups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
-    var isLoading by remember { mutableStateOf(allGroups.isEmpty()) }
+    var isLoading by remember { mutableStateOf(groups.isEmpty()) }
     var showCreateGroup by remember { mutableStateOf(false) }
     var showPushPermissionDialog by remember { mutableStateOf(false) }
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -51,13 +52,16 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(Unit) {
         // Reload, but only show loading indicator when there are no groups
-        isLoading = allGroups.isEmpty()
+        isLoading = groups.isEmpty()
         try {
             allGroups = api.groups().filter { it.group != null }
         } catch (ex: Exception) {
-            ex.printStackTrace()
-        } finally {
-            isLoading = false
+            if (ex is CancellationException || ex is InterruptedException) {
+                // Ignore
+            } else {
+                // See below why isLoading is not here
+                ex.printStackTrace()
+            }
         }
     }
 
@@ -83,6 +87,8 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
             (it.group?.name?.contains(searchText, true) ?: false) ||
                     it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
         }
+        // This is where the loading actually stops
+        isLoading = false
     }
 
     Column {

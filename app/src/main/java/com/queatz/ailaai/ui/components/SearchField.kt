@@ -40,7 +40,7 @@ fun SearchField(value: String, onValueChange: (value: String) -> Unit, modifier:
             shape = MaterialTheme.shapes.large,
             singleLine = true,
             keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Words,
+                capitalization = KeyboardCapitalization.Sentences,
                 imeAction = ImeAction.Search
             ),
             keyboardActions = KeyboardActions(onSearch = {

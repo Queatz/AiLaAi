@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,19 +19,21 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
-@Composable fun PersonMember(person: Person, selected: Boolean = false, onClick: () -> Unit) {
+@Composable fun PersonMember(person: Person, selected: Boolean = false, infoFormatter: (Person) -> String? = { null }, onClick: () -> Unit) {
     GroupMember(
         listOf(person.photo?.let { api.url(it) } ?: ""),
         person.name ?: stringResource(R.string.someone),
+        infoFormatter(person),
         selected,
         onClick
     )
 }
 
 @Composable
-fun GroupMember(photos: List<String>, name: String, selected: Boolean = false, onClick: () -> Unit) {
+fun GroupMember(photos: List<String>, name: String, info: String?, selected: Boolean = false, onClick: () -> Unit) {
     val backgroundColor by animateColorAsState(
         if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.surface
@@ -48,11 +51,21 @@ fun GroupMember(photos: List<String>, name: String, selected: Boolean = false, o
                 onClick()
             }) {
         GroupPhoto(photos, 32.dp)
-        Text(
-            name,
-            color = contentColor,
+        Column(
             modifier = Modifier
                 .padding(PaddingDefault)
-        )
+        ) {
+            Text(
+                name,
+                color = contentColor
+            )
+            if (info != null) {
+                Text(
+                    info,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
     }
 }

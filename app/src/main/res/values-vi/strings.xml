@@ -113,9 +113,8 @@
     <string name="update_available">Có cập nhật mới nè</string>
     <string name="download">Tải xuống ngay</string>
     <string name="card_not_found">Không tìm được thẻ này</string>
-    <string name="on_you">Với bạn</string>
     <string name="leave">Rời khỏi</string>
-    <string name="leave_group">Rời khỏi trò chuyện này?</string>
+    <string name="leave_group">Rời khỏi trò chuyện này không?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
     <string name="rename_group">Đổi tên của nhóm này</string>
@@ -174,4 +173,7 @@
     <string name="inline_you">bạn</string>
     <string name="inline_someone">một người ai đó</string>
     <string name="inline_a_card">một thẻ nào đó</string>
+    <string name="deactivate">Hủy kích hoạt</string>
+    <string name="activate">Kích hoạt</string>
+    <string name="leave_card">Rời khỏi thẻ này không?</string>
 </resources>

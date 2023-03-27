@@ -18,7 +18,7 @@ import com.queatz.ailaai.ui.components.PersonMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupMembersDialog(onDismissRequest: () -> Unit, people: List<Person>, onClick: (Person) -> Unit) {
+fun GroupMembersDialog(onDismissRequest: () -> Unit, people: List<Person>, infoFormatter: (Person) -> String? = { null }, onClick: (Person) -> Unit) {
     Dialog(onDismissRequest) {
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
@@ -31,7 +31,7 @@ fun GroupMembersDialog(onDismissRequest: () -> Unit, people: List<Person>, onCli
             ) {
                 LazyColumn {
                     items(people, key = { it.id!! }) {
-                        PersonMember(it) { onClick(it) }
+                        PersonMember(it, infoFormatter = infoFormatter) { onClick(it) }
                     }
                 }
                 Row(

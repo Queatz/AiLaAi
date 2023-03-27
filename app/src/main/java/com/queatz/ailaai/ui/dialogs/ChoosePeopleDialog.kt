@@ -2,10 +2,8 @@ package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.GroupExtended
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
 
 
 @Composable
@@ -37,6 +35,7 @@ fun ChoosePeopleDialog(
         val allPeople = allGroups
             .flatMap { it.members!!.map { it.person!! } }
             .distinctBy { it.id!! }
+            .filter { it.source != PersonSource.Web }
             .filter { !omit(it) }
         people = (if (searchText.isBlank()) allPeople else allPeople.filter {
             it.name?.contains(searchText, true) ?: false

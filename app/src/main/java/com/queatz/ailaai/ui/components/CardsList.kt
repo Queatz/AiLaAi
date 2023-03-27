@@ -22,7 +22,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 @Composable
-fun CardsList(cards: List<Card>, isLoading: Boolean, value: String, valueChange: (String) -> Unit, navController: NavController, aboveSearchFieldContent: @Composable () -> Unit = {}) {
+fun CardsList(cards: List<Card>, isLoading: Boolean, isError: Boolean, value: String, valueChange: (String) -> Unit, navController: NavController, aboveSearchFieldContent: @Composable () -> Unit = {}) {
     val coroutineScope = rememberCoroutineScope()
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
@@ -32,9 +32,9 @@ fun CardsList(cards: List<Card>, isLoading: Boolean, value: String, valueChange:
                     .fillMaxWidth()
                     .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)
             )
-        } else if (cards.isEmpty()) {
+        } else if (isError || cards.isEmpty()) {
             Text(
-                stringResource(R.string.no_cards_to_show),
+                stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
                     .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)

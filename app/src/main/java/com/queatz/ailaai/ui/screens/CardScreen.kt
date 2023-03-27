@@ -61,6 +61,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var openAddCollaboratorDialog by rememberSaveable { mutableStateOf(false) }
     var openRemoveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var openCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
+    var openLeaveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
@@ -173,6 +174,25 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
                 DropdownMenu(showMenu, { showMenu = false }) {
                     if (isMine) {
+                        DropdownMenuItem({
+                            Text(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate))
+                        }, {
+                            card?.let { card ->
+                                coroutineScope.launch {
+                                    try {
+                                        val update = api.updateCard(
+                                            card.id!!,
+                                            Card(active = card.active?.not() ?: true)
+                                        )
+                                        card.active = update.active
+                                        Toast.makeText(context, context.getString(if (card.active == true) R.string.card_active else R.string.card_inactive), LENGTH_SHORT).show()
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            }
+                            showMenu = false
+                        })
                         DropdownMenuItem({
                             Text(stringResource(R.string.edit_card))
                         }, {
@@ -414,6 +434,39 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val didntWork = stringResource(R.string.didnt_work)
     val someone = stringResource(R.string.someone)
 
+    if (openLeaveCollaboratorsDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                openLeaveCollaboratorsDialog = false
+            },
+            title = {
+                Text(stringResource(R.string.leave_card))
+            },
+            confirmButton = {
+                TextButton({
+                    coroutineScope.launch {
+                        try {
+                            api.leaveCollaboration(cardId)
+                            card = api.card(cardId)
+                            openLeaveCollaboratorsDialog = false
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                    }
+                }) {
+                    Text(stringResource(R.string.leave))
+                }
+            },
+            dismissButton = {
+                TextButton({
+                    openLeaveCollaboratorsDialog = false
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+
     if (openAddCollaboratorDialog) {
         ChoosePeopleDialog(
             {
@@ -474,17 +527,31 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
     LaunchedEffect(openCollaboratorsDialog) {
         if (openCollaboratorsDialog) {
-            collaborators = api.cardPeople(cardId).filter { it.id != me()?.id }
+            collaborators = api.cardPeople(cardId)//.filter { it.id != me()?.id }
         }
     }
 
     if (openCollaboratorsDialog && collaborators.isNotEmpty()) {
         GroupMembersDialog({
             openCollaboratorsDialog = false
-        }, collaborators) { person ->
-            coroutineScope.launch {
-                val group = api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true)
-                navController.navigate("group/${group.id!!}")
+        }, collaborators, infoFormatter = { person ->
+            if (person.id == me()?.id) {
+                context.getString(R.string.leave)
+            } else {
+                person.seen?.timeAgo()?.let { timeAgo ->
+                    "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                }
+            }
+        }) { person ->
+            if (person.id == me()?.id) {
+                openLeaveCollaboratorsDialog = true
+                openCollaboratorsDialog = false
+            } else {
+                coroutineScope.launch {
+                    val group = api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true)
+                    navController.navigate("group/${group.id!!}")
+                }
+                openCollaboratorsDialog = false
             }
         }
     }

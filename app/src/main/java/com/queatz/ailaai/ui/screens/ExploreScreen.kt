@@ -25,18 +25,21 @@ import at.bluesource.choicesdk.core.Outcome
 import at.bluesource.choicesdk.location.common.LocationRequest
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
+import at.bluesource.choicesdk.maps.common.LatLng.Companion.toGmsLatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.ktor.utils.io.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
@@ -54,6 +57,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
     )
     var value by rememberSaveable { mutableStateOf("") }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var geoManual by remember { mutableStateOf(false) }
     var showSetMyLocation by remember { mutableStateOf(false) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
@@ -61,6 +65,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
     val coroutineScope = rememberCoroutineScope()
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
+    var isError by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         geoManual = !permissionState.status.isGranted || context.dataStore.data.first()[geoManualKey] == true
@@ -88,6 +93,42 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
                 } else {
                     it[geoKey] = "${geo!!.latitude},${geo!!.longitude}"
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(geo, value) {
+        if (geo == null) {
+            return@LaunchedEffect
+        }
+
+        if (hasInitialCards) {
+            hasInitialCards = false
+
+            if (cards.isNotEmpty()) {
+                return@LaunchedEffect
+            }
+        }
+
+        // Don't reload if moving < 100m
+        if (shownGeo != null && geo!!.distance(shownGeo!!) < 100) {
+            return@LaunchedEffect
+        }
+
+        try {
+            isLoading = true
+            cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
+
+            shownGeo = geo
+            isError = false
+            isLoading = false
+        } catch (ex: Exception) {
+            if (ex is CancellationException || ex is InterruptedException) {
+                // Ignore, probably geo or search value changed
+            } else {
+                isError = true
+                isLoading = false
+                ex.printStackTrace()
             }
         }
     }
@@ -162,26 +203,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             }
         }
     } else {
-        LaunchedEffect(geo, value) {
-            if (hasInitialCards) {
-                hasInitialCards = false
-
-                if (cards.isNotEmpty()) {
-                    return@LaunchedEffect
-                }
-            }
-
-            try {
-                isLoading = true
-                cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            } finally {
-                isLoading = false
-            }
-        }
-
-        CardsList(cards, isLoading, value, { value = it }, navController) {
+        CardsList(cards, isLoading, isError, value, { value = it }, navController) {
             if (geoManual) {
                 ElevatedButton(
                     elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),

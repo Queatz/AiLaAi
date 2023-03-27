@@ -121,6 +121,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             CardParentType.Person -> myCards.filter { it.parent == null && it.equipped.isTrue }
             CardParentType.Map -> myCards.filter { it.parent == null && it.equipped.isFalse && it.geo != null && it.offline.isFalse }
             CardParentType.Card -> myCards.filter { it.parent != null }
+            CardParentType.Offline -> myCards.filter { it.offline == true }
             else -> myCards
         }.filter {
             filters.all { filter ->
@@ -168,10 +169,12 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             modifier = Modifier.horizontalScroll(rememberScrollState())
         ) {
             CardParentSelector(
-                cardParentType, modifier = Modifier
+                cardParentType,
+                modifier = Modifier
                     .width(320.dp)
                     .padding(horizontal = PaddingDefault)
-                    .padding(bottom = PaddingDefault / 2)
+                    .padding(bottom = PaddingDefault / 2),
+                showOffline = true
             ) {
                 cardParentType = if (it == cardParentType) null else it
             }
@@ -304,13 +307,16 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
 fun showFilter(context: Context, cardParentType: CardParentType?) {
     when (cardParentType) {
         CardParentType.Person -> {
-            Toast.makeText(context, context.getString(R.string.on_you), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.with_you), Toast.LENGTH_SHORT).show()
         }
         CardParentType.Card -> {
             Toast.makeText(context, context.getString(R.string.inside_another_card), Toast.LENGTH_SHORT).show()
         }
         CardParentType.Map -> {
             Toast.makeText(context, context.getString(R.string.on_the_map), Toast.LENGTH_SHORT).show()
+        }
+        CardParentType.Offline -> {
+            Toast.makeText(context, context.getString(R.string.offline), Toast.LENGTH_SHORT).show()
         }
         else -> {}
     }
