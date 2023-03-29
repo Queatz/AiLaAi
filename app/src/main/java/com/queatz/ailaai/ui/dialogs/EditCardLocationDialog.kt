@@ -23,6 +23,7 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -182,25 +183,26 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 ) {
                     Text(
                         when (cardParentType) {
-                            CardParentType.Map -> stringResource(R.string.on_the_map)
+                            CardParentType.Map -> stringResource(R.string.at_a_location)
                             CardParentType.Card -> stringResource(R.string.inside_another_card)
                             CardParentType.Person -> stringResource(R.string.with_you)
                             else -> stringResource(R.string.offline)
                         },
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = PaddingDefault),
-                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = PaddingDefault),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.secondary
                     )
                     when (cardParentType) {
                         CardParentType.Person -> {
                             Text(
                                 stringResource(R.string.with_you_description),
-                                textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(PaddingDefault)
+                                    .padding(vertical = PaddingDefault)
                             )
                         }
                         CardParentType.Map -> {
@@ -303,7 +305,9 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         },
                                         activity = activity,
                                         card = parentCard!!,
-                                        isChoosing = true
+                                        isChoosing = true,
+                                        modifier = Modifier
+                                            .padding(top = PaddingDefault)
                                     )
                                 }
                             }
@@ -311,11 +315,10 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         else -> {
                             Text(
                                 stringResource(R.string.discoverable_by_link),
-                                textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(PaddingDefault)
+                                    .padding(vertical = PaddingDefault)
                             )
                         }
                     }

@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -212,15 +213,31 @@ fun MessageItem(
 
 @Composable
 fun ProfileImage(person: Person?, padding: PaddingValues) {
-    AsyncImage(
-        model = person?.photo?.let { api.url(it) } ?: "",
-        contentDescription = "",
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.Center,
-        modifier = Modifier
-            .padding(padding)
-            .requiredSize(32.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-    )
+    if (person?.photo?.nullIfBlank == null) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(padding)
+                .requiredSize(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Text(
+                person?.name?.take(1) ?: "",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    } else {
+        AsyncImage(
+            model = person.photo?.let { api.url(it) } ?: "",
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.Center,
+            modifier = Modifier
+                .padding(padding)
+                .requiredSize(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        )
+    }
 }

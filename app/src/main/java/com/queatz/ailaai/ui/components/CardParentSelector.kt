@@ -34,7 +34,7 @@ fun CardParentSelector(
         OutlinedIconToggleButton(value == CardParentType.Map, {
             onChange(CardParentType.Map)
         }, colors = colors, modifier = Modifier.weight(1f)) {
-            Icon(Icons.Outlined.Place, stringResource(R.string.on_the_map))
+            Icon(Icons.Outlined.Place, stringResource(R.string.at_a_location))
         }
         OutlinedIconToggleButton(value == CardParentType.Card, {
             onChange(CardParentType.Card)

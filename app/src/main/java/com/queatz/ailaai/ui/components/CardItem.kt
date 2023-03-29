@@ -43,12 +43,15 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
@@ -60,14 +63,18 @@ fun BasicCard(
     onChange: () -> Unit = {},
     activity: Activity,
     card: Card?,
+    showDistance: LatLng? = null,
     edit: EditCard? = null,
     isMine: Boolean = false,
-    isChoosing: Boolean = false
+    isMineToolbar: Boolean = true,
+    isChoosing: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(),
         elevation = CardDefaults.elevatedCardElevation(),
+        modifier = modifier
     ) {
         var hideContent by remember { mutableStateOf(false) }
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
@@ -126,7 +133,7 @@ fun BasicCard(
                         .padding(PaddingDefault)
                         .align(Alignment.TopEnd)
                 ) {
-                    if (isMine) {
+                    if (isMine && isMineToolbar) {
                         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
                             if (it == null) return@rememberLauncherForActivityResult
 
@@ -153,7 +160,7 @@ fun BasicCard(
                                 modifier = Modifier.padding(start = PaddingDefault)
                             )
                         }
-                    } else {
+                    } else if (!isMine) {
                         val context = LocalContext.current
                         IconButton({
                             coroutineScope.launch {
@@ -188,9 +195,23 @@ fun BasicCard(
                         }
                     }
 
-                    if ((card.cardCount ?: 0) > 0) {
+                    val hasCards = (card.cardCount ?: 0) > 0
+                    val distanceText = showDistance?.let {
+                        if (card.geo != null) {
+                            it.distance(card.latLng!!).takeIf { it < 1_000_000 }?.let { metersAway ->
+                                when {
+                                    metersAway >= 1000f -> ceil(metersAway / 1000).toInt().let { km -> pluralStringResource(R.plurals.km_away, km, km) }
+                                    else -> metersAway.approximate(10).let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters) }
+                                } + (if (hasCards) " • " else "")
+                            }
+                        } else {
+                            null
+                        }
+                    }
+
+                    if (hasCards || distanceText != null) {
                         Text(
-                            pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0),
+                            (distanceText ?: "") + if (hasCards) pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0) else "",
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyMedium,
@@ -254,7 +275,7 @@ fun BasicCard(
                             .fadingEdge(viewport, conversationScrollState)
                     )
 
-                    if (isMine) {
+                    if (isMine && isMineToolbar) {
                         CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(toolbarRef) {
                             linkTo(conversationRef.bottom, parent.bottom, bias = 1f)
                             height = Dimension.preferredWrapContent
@@ -416,6 +437,7 @@ data class ConversationItem(
 )
 
 fun LatLng.toList() = listOf(latitude, longitude)
+val Card.latLng get() = geo?.let { LatLng(it[0], it[1]) }
 
 enum class CardParentType {
     Map,
@@ -428,3 +450,5 @@ enum class EditCard {
     Conversation,
     Location
 }
+
+fun Float.approximate(unit: Int) = ceil(this / unit).times(unit).toInt()

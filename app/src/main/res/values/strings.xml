@@ -81,7 +81,7 @@
     <string name="delete_message_description">The message will be removed for everyone in the conversation.</string>
     <string name="code_expired">Code expired or doesn\'t exist</string>
     <string name="you_x">You: %1$s</string>
-    <string name="on_the_map">On the map</string>
+    <string name="at_a_location">At a specific location</string>
     <string name="inside_another_card">In a card</string>
     <string name="search_cards">Search for a card</string>
     <string name="created_ago">Created %1$s</string>
@@ -174,4 +174,16 @@
     <string name="deactivate">Deactivate</string>
     <string name="activate">Activate</string>
     <string name="leave_card">Leave this card?</string>
+    <string name="share">Share</string>
+    <string name="no_cards_nearby">No cards nearby. Showing your friend\'s cards.</string>
+    <string name="no_more_cards_nearby">No more cards nearby. Showing your friend\'s cards.</string>
+    <string name="friends">Friends</string>
+    <plurals name="meters_away">
+        <item quantity="one">%1$s meter away</item>
+        <item quantity="other">%1$s meters away</item>
+    </plurals>
+    <plurals name="km_away">
+        <item quantity="one">%1$s km away</item>
+        <item quantity="other">%1$s km away</item>
+    </plurals>
 </resources>

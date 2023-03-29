@@ -82,7 +82,7 @@
     <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong cuộc trò chuyện.</string>
     <string name="code_expired">Mã hết hạn hoặc không tồn tại</string>
     <string name="you_x">Bạn: %1$s</string>
-    <string name="on_the_map">Trên bản đồ</string>
+    <string name="at_a_location">Tại một vị trí nào đó</string>
     <string name="inside_another_card">Trong thẻ</string>
     <string name="search_cards">Tìm kiếm thẻ</string>
     <string name="created_ago">Tạo %1$s</string>
@@ -176,4 +176,14 @@
     <string name="deactivate">Hủy kích hoạt</string>
     <string name="activate">Kích hoạt</string>
     <string name="leave_card">Rời khỏi thẻ này không?</string>
+    <string name="share">Chia sẻ</string>
+    <plurals name="meters_away">
+        <item quantity="other">xa %1$s mét</item>
+    </plurals>
+    <plurals name="km_away">
+        <item quantity="other">xa %1$s km</item>
+    </plurals>
+    <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Phía dưới là thẻ của bạn bè nè.</string>
+    <string name="no_more_cards_nearby">Không còn thẻ nào gần bạn ở nữa. Phía dưới là thẻ của bạn bè nè.</string>
+    <string name="friends">Bạn bè</string>
 </resources>

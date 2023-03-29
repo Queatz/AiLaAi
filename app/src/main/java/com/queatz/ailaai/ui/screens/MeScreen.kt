@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -134,10 +135,6 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    LaunchedEffect(cardParentType) {
-        showFilter(navController.context, cardParentType)
-    }
-
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopAppBar(
             {
@@ -216,6 +213,25 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 modifier = Modifier.fillMaxSize(),
                 columns = GridCells.Adaptive(240.dp)
             ) {
+                if (cardParentType != null) {
+                    item {
+                        Text(
+                            when (cardParentType) {
+                                CardParentType.Map -> stringResource(R.string.at_a_location)
+                                CardParentType.Card -> stringResource(R.string.inside_another_card)
+                                CardParentType.Person -> stringResource(R.string.with_you)
+                                else -> stringResource(R.string.offline)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = PaddingDefault),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
                 items(cards, key = { it.id!! }) { card ->
                     BasicCard(
                         {
@@ -301,23 +317,5 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 SearchField(searchText, { searchText = it }, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
-    }
-}
-
-fun showFilter(context: Context, cardParentType: CardParentType?) {
-    when (cardParentType) {
-        CardParentType.Person -> {
-            Toast.makeText(context, context.getString(R.string.with_you), Toast.LENGTH_SHORT).show()
-        }
-        CardParentType.Card -> {
-            Toast.makeText(context, context.getString(R.string.inside_another_card), Toast.LENGTH_SHORT).show()
-        }
-        CardParentType.Map -> {
-            Toast.makeText(context, context.getString(R.string.on_the_map), Toast.LENGTH_SHORT).show()
-        }
-        CardParentType.Offline -> {
-            Toast.makeText(context, context.getString(R.string.offline), Toast.LENGTH_SHORT).show()
-        }
-        else -> {}
     }
 }

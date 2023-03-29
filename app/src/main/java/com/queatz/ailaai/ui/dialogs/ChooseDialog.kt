@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.GroupMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -47,7 +48,7 @@ fun <T> ChooseDialog(
     onDismissRequest: () -> Unit,
     isLoading: Boolean,
     title: String,
-    photoFormatter: @Composable (T) -> List<String>,
+    photoFormatter: @Composable (T) -> List<ContactPhoto>,
     nameFormatter: @Composable (T) -> String,
     confirmFormatter: @Composable (List<T>) -> String,
     textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,

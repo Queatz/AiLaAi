@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.ContactPhoto
 
 
 @Composable
@@ -46,7 +47,7 @@ fun ChoosePeopleDialog(
         onDismissRequest = onDismissRequest,
         isLoading = isLoading,
         title = title,
-        photoFormatter = { listOf(it.photo ?: "") },
+        photoFormatter = { listOf(ContactPhoto(it.name ?: "", it.photo)) },
         nameFormatter = { it.name ?: stringResource(R.string.someone) },
         confirmFormatter = confirmFormatter,
         textWhenEmpty = { stringResource(R.string.no_people_to_show) },

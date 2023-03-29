@@ -3,6 +3,11 @@ package com.queatz.ailaai.extensions
 import android.content.Context
 import com.queatz.ailaai.*
 
+data class ContactPhoto(
+    val name: String = "",
+    val photo: String? = null
+)
+
 fun GroupExtended.name(someone: String, omit: List<String>) =
     group?.name?.nullIfBlank
         ?: members
@@ -16,8 +21,11 @@ fun GroupExtended.photos(omit: List<Person> = emptyList()) = members
         omit.none { person -> it.person?.id == person.id }
     }
     ?.map {
-        it.person?.photo ?: ""
-    } ?: listOf("")
+        ContactPhoto(it.person?.name ?: "", it.person?.photo)
+    } ?: listOf(ContactPhoto())
+
+fun GroupExtended.isUnread(member: Member?) =
+    (member?.seen?.toEpochMilliseconds() ?: 0L) < (latestMessage?.createdAt?.toEpochMilliseconds() ?: 0L)
 
 fun Message.attachmentText(context: Context): String? = when (val attachment = getAttachment()) {
     is CardAttachment -> {

@@ -11,20 +11,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.queatz.ailaai.GroupExtended
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.isUnread
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.datetime.Instant
 
 @Composable
 fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: Person?) {
     val people = groupExtended.members?.filter { it.person?.id != me?.id }?.map { it.person!! } ?: emptyList()
     val myMember = groupExtended.members?.find { it.person?.id == me?.id }
+    val isUnread = groupExtended.isUnread(myMember?.member)
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
         .clip(MaterialTheme.shapes.large)
@@ -38,7 +42,8 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
             val someone = stringResource(R.string.someone)
             Text(
                 groupExtended.name(someone, me?.id?.let(::listOf) ?: emptyList()),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
             )
             Text(
                 groupExtended.latestMessage?.text?.let {
@@ -57,6 +62,7 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
             groupExtended.latestMessage?.createdAt?.timeAgo() ?: "",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
+            fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.padding(PaddingDefault)
         )
     }

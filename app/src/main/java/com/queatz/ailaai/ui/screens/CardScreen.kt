@@ -7,6 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -172,6 +174,19 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
                 val cardString = stringResource(R.string.card)
 
+                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+                    if (it == null) return@rememberLauncherForActivityResult
+
+                    coroutineScope.launch {
+                        try {
+                            api.uploadCardPhoto(card!!.id!!, it)
+                            card = api.card(cardId)
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                    }
+                }
+
                 DropdownMenu(showMenu, { showMenu = false }) {
                     if (isMine) {
                         DropdownMenuItem({
@@ -203,6 +218,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             Text(stringResource(R.string.change_location))
                         }, {
                             openLocationDialog = true
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.set_photo))
+                        }, {
+                            launcher.launch("image/*")
                             showMenu = false
                         })
                         DropdownMenuItem({
@@ -270,6 +291,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             showMenu = false
                         })
                     }
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.share))
+                    }, {
+                        cardUrl(cardId).shareAsUrl(context, card?.name)
+                        showMenu = false
+                    })
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
@@ -448,6 +475,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         try {
                             api.leaveCollaboration(cardId)
                             card = api.card(cardId)
+                            cards = api.cardsCards(cardId)
                             openLeaveCollaboratorsDialog = false
                         } catch (ex: Exception) {
                             ex.printStackTrace()
@@ -594,7 +622,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     if (showQrCode) {
         ShareCardQrCodeDialog({
             showQrCode = false
-        }, cardUrl(cardId))
+        }, cardUrl(cardId), card?.name)
     }
 }
 

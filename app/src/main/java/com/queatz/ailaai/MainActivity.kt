@@ -5,18 +5,22 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,6 +38,7 @@ import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
@@ -44,10 +49,10 @@ class MainActivity : AppCompatActivity() {
 
     private val menuItems by lazy {
         listOf(
-            NavButton("explore", getString(R.string.explore), Icons.Outlined.Search),
+            NavButton("explore", getString(R.string.explore), Icons.Outlined.Place),
             NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-            NavButton("messages", getString(R.string.conversations), Icons.Outlined.Email),
-            NavButton("me", getString(R.string.me), Icons.Outlined.Person)
+            NavButton("messages", getString(R.string.friends), Icons.Outlined.Person),
+            NavButton("me", getString(R.string.me), Icons.Outlined.Home)
         )
     }
 
@@ -58,6 +63,8 @@ class MainActivity : AppCompatActivity() {
             AiLaAiTheme {
                 navController = rememberNavController()
                 push.navController = navController
+
+                var newMessages by remember { mutableStateOf(0) }
 
                 OnLifecycleEvent {
                     if (push.navController == navController) {
@@ -85,6 +92,17 @@ class MainActivity : AppCompatActivity() {
                     val updateAvailableString = stringResource(R.string.update_available)
                     val downloadString = stringResource(R.string.download)
                     val context = LocalContext.current
+
+                    LaunchedEffect(me) {
+                        if (me == null) {
+                            messages.clear()
+                        } else {
+                            messages.refresh(me!!, api.groups())
+                            messages.new.collectLatest {
+                                newMessages = it
+                            }
+                        }
+                    }
 
                     LaunchedEffect(true) {
                         while (me == null) try {
@@ -168,7 +186,26 @@ class MainActivity : AppCompatActivity() {
                                     NavigationBar {
                                         menuItems.forEach { item ->
                                             NavigationBarItem(
-                                                icon = { Icon(item.icon, contentDescription = null) },
+                                                icon = {
+                                                    Box(
+                                                        modifier = Modifier
+                                                    ) {
+                                                        Icon(item.icon, contentDescription = null)
+                                                        if (item.route == "messages" && newMessages > 0)
+                                                            Text(
+                                                                newMessages.toString(),
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                fontWeight = FontWeight.Bold,
+                                                                modifier = Modifier
+                                                                    .offset(PaddingDefault * 2, -PaddingDefault / 2)
+                                                                    .align(Alignment.TopEnd)
+                                                                    .clip(CircleShape)
+                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                                    .padding(PaddingDefault, PaddingDefault / 4)
+                                                            )
+                                                    }
+                                               },
                                                 label = { Text(item.text, overflow = TextOverflow.Ellipsis, maxLines = 1, textAlign = TextAlign.Center) },
                                                 selected = navController.currentDestination?.route == item.route,
                                                 onClick = {

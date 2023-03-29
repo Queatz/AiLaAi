@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,25 +18,46 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupPhoto(photos: List<String>, size: Dp = 64.dp) {
+fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
     val padding = PaddingDefault
+
     if (photos.size == 1) {
-        AsyncImage(
-            model = photos.firstOrNull()?.let { api.url(it) } ?: "",
-            contentDescription = "",
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.Center,
-            modifier = Modifier
-                .padding(padding)
-                .requiredSize(size)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer)
-        )
+        val contact = photos.firstOrNull()
+        val photo = contact?.photo?.nullIfBlank?.let { api.url(it) }
+        if (photo == null) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(padding)
+                    .requiredSize(size)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+            ) {
+                Text(
+                    contact?.name?.take(1) ?: "",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+        } else {
+            AsyncImage(
+                model = photos.firstOrNull()?.photo?.let { api.url(it) } ?: "",
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(padding)
+                    .requiredSize(size)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+            )
+        }
     } else if (photos.size >= 2) {
-        val show = remember { photos.shuffled() }
+        val show = remember { photos.shuffled().map { it.photo ?: "" } }
         Box(
             modifier = Modifier
                 .padding(padding)

@@ -41,6 +41,16 @@
                     android:value="true" />
         </service>
 
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="app.ailaai.share.fileprovider"
+                android:grantUriPermissions="true"
+                android:exported="false">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/filepaths" />
+        </provider>
+
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
                 android:value="${GOOGLE_MAPS_API_KEY}"/>

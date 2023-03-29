@@ -19,12 +19,13 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable fun PersonMember(person: Person, selected: Boolean = false, infoFormatter: (Person) -> String? = { null }, onClick: () -> Unit) {
     GroupMember(
-        listOf(person.photo?.let { api.url(it) } ?: ""),
+        listOf(ContactPhoto(person.name ?: "", person.photo?.let { api.url(it) })),
         person.name ?: stringResource(R.string.someone),
         infoFormatter(person),
         selected,
@@ -33,7 +34,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 }
 
 @Composable
-fun GroupMember(photos: List<String>, name: String, info: String?, selected: Boolean = false, onClick: () -> Unit) {
+fun GroupMember(photos: List<ContactPhoto>, name: String, info: String?, selected: Boolean = false, onClick: () -> Unit) {
     val backgroundColor by animateColorAsState(
         if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.surface

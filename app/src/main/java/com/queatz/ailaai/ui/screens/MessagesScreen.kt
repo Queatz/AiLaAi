@@ -26,10 +26,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.queatz.ailaai.GroupExtended
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
@@ -55,6 +53,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         isLoading = groups.isEmpty()
         try {
             allGroups = api.groups().filter { it.group != null }
+            messages.refresh(me(), allGroups)
         } catch (ex: Exception) {
             if (ex is CancellationException || ex is InterruptedException) {
                 // Ignore

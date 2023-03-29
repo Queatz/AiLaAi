@@ -58,6 +58,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
     var value by rememberSaveable { mutableStateOf("") }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var shownValue by rememberSaveable { mutableStateOf("") }
     var geoManual by remember { mutableStateOf(false) }
     var showSetMyLocation by remember { mutableStateOf(false) }
     var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
@@ -111,15 +112,16 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
         }
 
         // Don't reload if moving < 100m
-        if (shownGeo != null && geo!!.distance(shownGeo!!) < 100) {
+        if (shownGeo != null && geo!!.distance(shownGeo!!) < 100 && shownValue == value) {
             return@LaunchedEffect
         }
 
         try {
             isLoading = true
-            cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.person != me()?.id }
+            cards = api.cards(geo!!, value.takeIf { it.isNotBlank() }).filter { it.equipped != true || it.person != me()?.id }
 
             shownGeo = geo
+            shownValue = value
             isError = false
             isLoading = false
         } catch (ex: Exception) {
@@ -203,7 +205,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             }
         }
     } else {
-        CardsList(cards, isLoading, isError, value, { value = it }, navController) {
+        CardsList(cards, { it.person == me()?.id }, geo, isLoading, isError, value, { value = it }, navController) {
             if (geoManual) {
                 ElevatedButton(
                     elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),

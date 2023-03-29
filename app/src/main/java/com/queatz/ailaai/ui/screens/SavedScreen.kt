@@ -48,5 +48,5 @@ fun SavedScreen(context: Context, navController: NavController, me: () -> Person
         }
     }
 
-    CardsList(cards, isLoading, isError, value, { value = it}, navController)
+    CardsList(cards, { it.person == me()?.id }, null, isLoading, isError, value, { value = it}, navController)
 }
