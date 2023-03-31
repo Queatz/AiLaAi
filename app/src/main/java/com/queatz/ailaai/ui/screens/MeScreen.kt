@@ -214,7 +214,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 columns = GridCells.Adaptive(240.dp)
             ) {
                 if (cardParentType != null) {
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             when (cardParentType) {
                                 CardParentType.Map -> stringResource(R.string.at_a_location)

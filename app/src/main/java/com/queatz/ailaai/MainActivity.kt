@@ -232,7 +232,21 @@ class MainActivity : AppCompatActivity() {
                                         menuItems.forEach { item ->
                                             NavigationDrawerItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
-                                                label = { Text(item.text) },
+                                                label = {
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                    ) {
+                                                        Text(item.text)
+                                                        if (item.route == "messages" && newMessages > 0) {
+                                                            Text(
+                                                                newMessages.toString(),
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+                                                    }
+                                                },
                                                 selected = navController.currentDestination?.route == item.route,
                                                 onClick = {
                                                     navController.popBackStack()

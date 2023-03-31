@@ -78,26 +78,29 @@ fun CardsList(cards: List<Card>, isMine: (Card) -> Boolean, geo: LatLng?, isLoad
                 val nearbyCards = cards.takeWhile {
                     geo != null && it.geo != null && it.latLng!!.distance(geo) < farDistance
                 }
+                val remainingCards = cards.drop(nearbyCards.size)
                 items(items = nearbyCards, key = { it.id!! }) {
                     basicCard(it)
                 }
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    if (geo != null) {
-                        Text(
-                            if (nearbyCards.isEmpty()) {
-                                stringResource(R.string.no_cards_nearby)
-                            } else {
-                                stringResource(R.string.no_more_cards_nearby)
-                            },
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(PaddingDefault)
-                        )
+                if (remainingCards.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        if (geo != null) {
+                            Text(
+                                if (nearbyCards.isEmpty()) {
+                                    stringResource(R.string.no_cards_nearby)
+                                } else {
+                                    stringResource(R.string.no_more_cards_nearby)
+                                },
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(PaddingDefault)
+                            )
+                        }
                     }
-                }
-                items(items = cards.drop(nearbyCards.size), key = { it.id!! }) {
-                    basicCard(it)
+                    items(items = remainingCards, key = { it.id!! }) {
+                        basicCard(it)
+                    }
                 }
             }
         }

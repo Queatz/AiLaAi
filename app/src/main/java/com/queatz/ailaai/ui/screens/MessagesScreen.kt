@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.provider.SyncStateContract.Helpers.update
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,18 +49,27 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
 
+    fun update() {
+        groups = if (searchText.isBlank()) allGroups else allGroups.filter {
+            (it.group?.name?.contains(searchText, true) ?: false) ||
+                    it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
+        }
+    }
+
     LaunchedEffect(Unit) {
         // Reload, but only show loading indicator when there are no groups
         isLoading = groups.isEmpty()
         try {
             allGroups = api.groups().filter { it.group != null }
             messages.refresh(me(), allGroups)
+            update()
+            isLoading = false
         } catch (ex: Exception) {
             if (ex is CancellationException || ex is InterruptedException) {
                 // Ignore
             } else {
-                // See below why isLoading is not here
                 ex.printStackTrace()
+                isLoading = false
             }
         }
     }
@@ -79,15 +89,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(searchText) {
         // todo search server, set allGroups
-    }
-
-    LaunchedEffect(allGroups, searchText) {
-        groups = if (searchText.isBlank()) allGroups else allGroups.filter {
-            (it.group?.name?.contains(searchText, true) ?: false) ||
-                    it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
-        }
-        // This is where the loading actually stops
-        isLoading = false
+        update()
     }
 
     Column {

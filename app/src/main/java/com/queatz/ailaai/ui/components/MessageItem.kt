@@ -224,7 +224,7 @@ fun ProfileImage(person: Person?, padding: PaddingValues) {
         ) {
             Text(
                 person?.name?.take(1) ?: "",
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.titleMedium
             )
         }
     } else {

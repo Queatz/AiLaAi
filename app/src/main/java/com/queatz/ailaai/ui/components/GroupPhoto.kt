@@ -40,12 +40,12 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
             ) {
                 Text(
                     contact?.name?.take(1) ?: "",
-                    style = MaterialTheme.typography.titleLarge
+                    style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
                 )
             }
         } else {
             AsyncImage(
-                model = photos.firstOrNull()?.photo?.let { api.url(it) } ?: "",
+                model = photo,
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.Center,

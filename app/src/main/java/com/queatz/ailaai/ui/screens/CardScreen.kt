@@ -188,7 +188,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
 
                 DropdownMenu(showMenu, { showMenu = false }) {
-                    if (isMine) {
+                    if (isMine && card?.photo != null) {
                         DropdownMenuItem({
                             Text(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate))
                         }, {

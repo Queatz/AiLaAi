@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-//    id("com.huawei.agconnect") // todo IncrementalTaskInputs
+//    id("com.huawei.agconnect") // todo IncrementalTaskInputs, try again after April, 2023
     id("com.google.gms.google-services")
 }
 
@@ -23,7 +23,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 21
+        versionCode = 22
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
