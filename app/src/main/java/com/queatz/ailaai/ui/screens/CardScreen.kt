@@ -188,26 +188,32 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
 
                 DropdownMenu(showMenu, { showMenu = false }) {
-                    if (isMine && card?.photo != null) {
-                        DropdownMenuItem({
-                            Text(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate))
-                        }, {
-                            card?.let { card ->
-                                coroutineScope.launch {
-                                    try {
-                                        val update = api.updateCard(
-                                            card.id!!,
-                                            Card(active = card.active?.not() ?: true)
-                                        )
-                                        card.active = update.active
-                                        Toast.makeText(context, context.getString(if (card.active == true) R.string.card_active else R.string.card_inactive), LENGTH_SHORT).show()
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
+                    if (isMine) {
+                        if (card?.photo != null) {
+                            DropdownMenuItem({
+                                Text(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate))
+                            }, {
+                                card?.let { card ->
+                                    coroutineScope.launch {
+                                        try {
+                                            val update = api.updateCard(
+                                                card.id!!,
+                                                Card(active = card.active?.not() ?: true)
+                                            )
+                                            card.active = update.active
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(if (card.active == true) R.string.card_active else R.string.card_inactive),
+                                                LENGTH_SHORT
+                                            ).show()
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
                                     }
                                 }
-                            }
-                            showMenu = false
-                        })
+                                showMenu = false
+                            })
+                        }
                         DropdownMenuItem({
                             Text(stringResource(R.string.edit_card))
                         }, {
