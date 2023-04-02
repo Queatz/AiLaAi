@@ -35,12 +35,13 @@ fun ChooseGroupDialog(
     }
 
     val someone = stringResource(R.string.someone)
+    val emptyGroup = stringResource(R.string.empty_group_name)
 
     LaunchedEffect(allGroups, selected, searchText) {
         val all = allGroups
             .filter { omit.none { group -> it.group?.id == group.id } }
         groups = (if (searchText.isBlank()) all else all.filter {
-            it.name(someone, me?.id?.let(::listOf) ?: emptyList()).contains(searchText, true)
+            it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()).contains(searchText, true)
         })
     }
 
@@ -48,8 +49,9 @@ fun ChooseGroupDialog(
         onDismissRequest = onDismissRequest,
         isLoading = isLoading,
         title = title,
+        allowNone = false,
         photoFormatter = { it.photos(me?.let(::listOf) ?: emptyList()) },
-        nameFormatter = { it.name(someone, me?.id?.let(::listOf) ?: emptyList()) },
+        nameFormatter = { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
         confirmFormatter = confirmFormatter,
         textWhenEmpty = { isBlank -> stringResource(if (isBlank) R.string.you_have_no_conversations else R.string.no_conversations_to_show) },
         searchText = searchText,

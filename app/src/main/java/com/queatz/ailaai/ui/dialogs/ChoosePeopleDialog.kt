@@ -12,6 +12,7 @@ fun ChoosePeopleDialog(
     onDismissRequest: () -> Unit,
     title: String,
     confirmFormatter: @Composable (List<Person>) -> String,
+    allowNone: Boolean = false,
     onPeopleSelected: suspend (List<Person>) -> Unit,
     omit: (Person) -> Boolean = { false }
 ) {
@@ -47,6 +48,7 @@ fun ChoosePeopleDialog(
         onDismissRequest = onDismissRequest,
         isLoading = isLoading,
         title = title,
+        allowNone = allowNone,
         photoFormatter = { listOf(ContactPhoto(it.name ?: "", it.photo)) },
         nameFormatter = { it.name ?: stringResource(R.string.someone) },
         confirmFormatter = confirmFormatter,

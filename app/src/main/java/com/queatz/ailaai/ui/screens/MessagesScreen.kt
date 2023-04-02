@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.provider.SyncStateContract.Helpers.update
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -190,14 +189,15 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
             {
                 showCreateGroup = false
             },
-            title = stringResource(R.string.new_group),
+            title = stringResource(R.string.invite_people),
             confirmFormatter = defaultConfirmFormatter(
                 R.string.new_group,
                 R.string.new_group_with_person,
                 R.string.new_group_with_people,
                 R.string.new_group_with_x_people
             ) { it.name ?: someone },
-            { people ->
+            allowNone = true,
+            onPeopleSelected = { people ->
                 try {
                     val group = api.createGroup(people.map { it.id!! })
                     navController.navigate("group/${group.id!!}")
@@ -206,7 +206,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     ex.printStackTrace()
                 }
             },
-            { it.id == me()?.id }
+            omit = { it.id == me()?.id }
         )
     }
 }

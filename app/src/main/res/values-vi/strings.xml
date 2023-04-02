@@ -19,7 +19,7 @@
     <string name="your_cards">Thẻ của bạn</string>
     <string name="invite">Mời ai đó</string>
     <string name="invite_person">Mời %1$s</string>
-    <string name="invite_people">Mời %1$s và %2$s</string>
+    <string name="invite_x_and_y">Mời %1$s và %2$s</string>
     <string name="invite_x_people">Mời %1$s người</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Tạo thẻ mới</string>
@@ -186,4 +186,8 @@
     <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Phía dưới là thẻ của bạn bè nè.</string>
     <string name="no_more_cards_nearby">Không còn thẻ nào gần bạn ở nữa. Phía dưới là thẻ của bạn bè nè.</string>
     <string name="friends">Bạn bè</string>
+    <string name="invite_people">Mời ai vào</string>
+    <string name="empty_group_name">Nhóm mới</string>
+    <string name="manage">Quản lý</string>
+    <string name="x_removed">%1$s đã xóa khỏi</string>
 </resources>

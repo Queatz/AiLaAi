@@ -26,7 +26,22 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
     val padding = PaddingDefault
 
-    if (photos.size == 1) {
+    if (photos.isEmpty()) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(padding)
+                .requiredSize(size)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Text(
+                "+",
+                style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+    else if (photos.size == 1) {
         val contact = photos.firstOrNull()
         val photo = contact?.photo?.nullIfBlank?.let { api.url(it) }
         if (photo == null) {
@@ -56,7 +71,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
                     .background(MaterialTheme.colorScheme.secondaryContainer)
             )
         }
-    } else if (photos.size >= 2) {
+    } else {
         val show = remember { photos.shuffled().map { it.photo ?: "" } }
         Box(
             modifier = Modifier

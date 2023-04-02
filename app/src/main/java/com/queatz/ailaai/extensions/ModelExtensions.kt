@@ -8,13 +8,14 @@ data class ContactPhoto(
     val photo: String? = null
 )
 
-fun GroupExtended.name(someone: String, omit: List<String>) =
+fun GroupExtended.name(someone: String, emptyGroup: String, omit: List<String>) =
     group?.name?.nullIfBlank
         ?: members
             ?.filter { !omit.contains(it.person?.id) }
             ?.mapNotNull { it.person }
             ?.joinToString { it.name ?: someone }
-        ?: ""
+            ?.nullIfBlank
+        ?: emptyGroup
 
 fun GroupExtended.photos(omit: List<Person> = emptyList()) = members
     ?.filter {

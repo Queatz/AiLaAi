@@ -43,7 +43,8 @@ class Person(
 class Member(
     var seen: Instant? = null,
     var hide: Boolean? = null,
-    var gone: Boolean? = null
+    var gone: Boolean? = null,
+    var host: Boolean? = null
 ) : Edge()
 
 class Message(

@@ -30,6 +30,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
@@ -56,6 +57,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showLeaveGroup by remember { mutableStateOf(false) }
     var showRenameGroup by remember { mutableStateOf(false) }
     var showGroupMembers by remember { mutableStateOf(false) }
+    var showRemoveGroupMembers by remember { mutableStateOf(false) }
     var showInviteMembers by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
@@ -135,11 +137,18 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 {
                     Column {
                         val someone = stringResource(R.string.someone)
-                        Text(groupExtended?.group?.name?.nullIfBlank ?: otherMembers.joinToString {
-                            it.person?.name ?: someone
-                        }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        val emptyGroup = stringResource(R.string.empty_group_name)
+                        Text(
+                            groupExtended!!.name(
+                                someone,
+                                emptyGroup,
+                                me()?.id?.let(::listOf) ?: emptyList()
+                            ), maxLines = 1, overflow = TextOverflow.Ellipsis
+                        )
 
-                        otherMembers.maxBy { it.person?.seen ?: Instant.fromEpochMilliseconds(0) }.person?.seen?.let {
+                        otherMembers.maxByOrNull {
+                            it.person?.seen ?: Instant.fromEpochMilliseconds(0)
+                        }?.person?.seen?.let {
                             Text(
                                 "${stringResource(R.string.active)} ${it.timeAgo().lowercase()}",
                                 style = MaterialTheme.typography.labelMedium,
@@ -201,7 +210,11 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             coroutineScope.launch {
                                 try {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
-                                    Toast.makeText(navController.context, navController.context.getString(R.string.conversation_hidden), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        navController.context,
+                                        navController.context.getString(R.string.conversation_hidden),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     navController.popBackStack()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
@@ -297,16 +310,76 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             if (showGroupMembers) {
                 GroupMembersDialog({
                     showGroupMembers = false
-                }, otherMembers.map { it.person!! }, infoFormatter = { person ->
-                    person.seen?.timeAgo()?.let { timeAgo ->
-                        "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
-                    }
-                }) {
+                },
+                    otherMembers.map { it.person!! },
+                    infoFormatter = { person ->
+                        person.seen?.timeAgo()?.let { timeAgo ->
+                            "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                        }
+                    },
+                    extraButtons = {
+                        if (myMember?.member?.host == true) {
+                            TextButton(
+                                {
+                                    showGroupMembers = false
+                                    showRemoveGroupMembers = true
+                                }
+                            ) {
+                                Text(stringResource(R.string.manage))
+                            }
+                        }
+                    }) {
                     coroutineScope.launch {
                         val group = api.createGroup(listOf(myMember!!.person!!.id!!, it.id!!), reuse = true)
                         navController.navigate("group/${group.id!!}")
                     }
                 }
+            }
+
+            if (showRemoveGroupMembers) {
+                val context = LocalContext.current
+                val didntWork = stringResource(R.string.didnt_work)
+                val someone = stringResource(R.string.someone)
+                val members = groupExtended!!.members!!
+                    .mapNotNull { it.person?.id }
+                    .filter { it != me()?.id }
+                ChoosePeopleDialog(
+                    {
+                        showRemoveGroupMembers = false
+                    },
+                    title = stringResource(R.string.manage),
+                    confirmFormatter = defaultConfirmFormatter(
+                        R.string.remove,
+                        R.string.remove_person,
+                        R.string.remove_people,
+                        R.string.remove_x_people
+                    ) { it.name ?: someone },
+                    onPeopleSelected = { people ->
+                        var anySucceeded = false
+                        var anyFailed = false
+                        people.forEach { person ->
+                            try {
+                                api.removeMember(otherMembers.find { member -> member.person?.id == person.id }?.member?.id ?: return@forEach)
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.x_removed, person.name?.nullIfBlank ?: someone),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                anySucceeded = true
+                            } catch (ex: Exception) {
+                                anyFailed = true
+                                ex.printStackTrace()
+                            }
+                        }
+                        if (anySucceeded) {
+                            reload()
+                        }
+                        if (anyFailed) {
+                            Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    omit = { it.id!! !in members }
+                )
             }
 
             if (showInviteMembers) {
@@ -322,10 +395,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     confirmFormatter = defaultConfirmFormatter(
                         R.string.invite,
                         R.string.invite_person,
-                        R.string.invite_people,
+                        R.string.invite_x_and_y,
                         R.string.invite_x_people
                     ) { it.name ?: someone },
-                    { people ->
+                    onPeopleSelected = { people ->
                         var anySucceeded = false
                         var anyFailed = false
                         people.forEach { person ->
@@ -334,7 +407,11 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     from = person.id!!
                                     to = groupId
                                 })
-                                Toast.makeText(context, context.getString(R.string.person_invited, person.name?.nullIfBlank ?: someone), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.person_invited, person.name?.nullIfBlank ?: someone),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 anySucceeded = true
                             } catch (ex: Exception) {
                                 anyFailed = true
@@ -348,7 +425,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
                         }
                     },
-                    { it.id!! in omit }
+                    omit = { it.id!! in omit }
                 )
             }
 

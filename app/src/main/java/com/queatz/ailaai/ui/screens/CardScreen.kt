@@ -466,6 +466,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
     val didntWork = stringResource(R.string.didnt_work)
     val someone = stringResource(R.string.someone)
+    val emptyGroup = stringResource(R.string.empty_group_name)
 
     if (openLeaveCollaboratorsDialog) {
         AlertDialog(
@@ -513,7 +514,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 R.string.add_people,
                 R.string.add_x_people
             ) { it.name ?: someone },
-            { people ->
+            onPeopleSelected = { people ->
                 try {
                     card!!.collaborators = (card?.collaborators ?: emptyList()) + people.map { it.id!! }
                     val updatedCard = api.updateCard(card!!.id!!, Card().apply {
@@ -525,7 +526,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     ex.printStackTrace()
                 }
             },
-            { it.id == me()?.id || card!!.collaborators?.contains(it.id) == true }
+            omit = { it.id == me()?.id || card!!.collaborators?.contains(it.id) == true }
         )
     }
 
@@ -541,7 +542,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 R.string.remove_people,
                 R.string.remove_x_people
             ) { it.name ?: someone },
-            { people ->
+            onPeopleSelected = { people ->
                 try {
                     card!!.collaborators = (card?.collaborators ?: emptyList()) - people.map { it.id!! }.toSet()
                     val updatedCard = api.updateCard(card!!.id!!, Card().apply {
@@ -553,7 +554,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     ex.printStackTrace()
                 }
             },
-            { it.id !in (card!!.collaborators ?: emptyList()) }
+            omit = { it.id !in (card!!.collaborators ?: emptyList()) }
         )
     }
 
@@ -602,7 +603,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 R.string.send_card_to_conversation,
                 R.string.send_card_to_conversations,
                 R.string.send_card_to_x_conversations
-            ) { it.name(someone, me()?.id?.let(::listOf) ?: emptyList()) },
+            ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
             me = me(),
             onGroupsSelected = { groups ->
                 try {

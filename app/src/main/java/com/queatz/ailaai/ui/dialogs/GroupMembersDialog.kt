@@ -18,7 +18,13 @@ import com.queatz.ailaai.ui.components.PersonMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupMembersDialog(onDismissRequest: () -> Unit, people: List<Person>, infoFormatter: (Person) -> String? = { null }, onClick: (Person) -> Unit) {
+fun GroupMembersDialog(
+    onDismissRequest: () -> Unit,
+    people: List<Person>,
+    infoFormatter: (Person) -> String? = { null },
+    extraButtons: @Composable RowScope.() -> Unit = {},
+    onClick: (Person) -> Unit,
+) {
     Dialog(onDismissRequest) {
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
@@ -39,6 +45,7 @@ fun GroupMembersDialog(onDismissRequest: () -> Unit, people: List<Person>, infoF
                     verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    extraButtons()
                     TextButton(
                         {
                             onDismissRequest()

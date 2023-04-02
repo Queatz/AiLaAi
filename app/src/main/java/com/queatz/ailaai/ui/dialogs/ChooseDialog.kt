@@ -48,6 +48,7 @@ fun <T> ChooseDialog(
     onDismissRequest: () -> Unit,
     isLoading: Boolean,
     title: String,
+    allowNone: Boolean,
     photoFormatter: @Composable (T) -> List<ContactPhoto>,
     nameFormatter: @Composable (T) -> String,
     confirmFormatter: @Composable (List<T>) -> String,
@@ -65,7 +66,7 @@ fun <T> ChooseDialog(
     var disableSubmit by remember { mutableStateOf(true) }
 
     LaunchedEffect(selected) {
-        disableSubmit = selected.isEmpty() || selected.size >= 20
+        disableSubmit = (selected.isEmpty() && !allowNone) || selected.size >= 50
     }
 
     Dialog(onDismissRequest) {

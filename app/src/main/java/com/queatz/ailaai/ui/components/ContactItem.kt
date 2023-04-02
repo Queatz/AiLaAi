@@ -22,7 +22,6 @@ import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.datetime.Instant
 
 @Composable
 fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: Person?) {
@@ -40,8 +39,9 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
             modifier = Modifier.weight(1f)
         ) {
             val someone = stringResource(R.string.someone)
+            val emptyGroup = stringResource(R.string.empty_group_name)
             Text(
-                groupExtended.name(someone, me?.id?.let(::listOf) ?: emptyList()),
+                groupExtended.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
             )
