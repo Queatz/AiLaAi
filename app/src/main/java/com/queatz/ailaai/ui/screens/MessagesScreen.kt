@@ -105,10 +105,10 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                 ) {
                     Icon(
                         Icons.Outlined.Add,
-                        stringResource(R.string.new_group),
+                        stringResource(R.string.new_),
                         modifier = Modifier.padding(end = PaddingDefault)
                     )
-                    Text(stringResource(R.string.new_group))
+                    Text(stringResource(R.string.new_))
                 }
             }
         )
