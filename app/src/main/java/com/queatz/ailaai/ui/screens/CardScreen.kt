@@ -562,7 +562,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
     LaunchedEffect(openCollaboratorsDialog) {
         if (openCollaboratorsDialog) {
-            collaborators = api.cardPeople(cardId)//.filter { it.id != me()?.id }
+            collaborators = api.cardPeople(cardId)
         }
     }
 
@@ -600,9 +600,9 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             title = stringResource(R.string.send_card),
             confirmFormatter = defaultConfirmFormatter(
                 R.string.send_card,
-                R.string.send_card_to_conversation,
-                R.string.send_card_to_conversations,
-                R.string.send_card_to_x_conversations
+                R.string.send_card_to_group,
+                R.string.send_card_to_groups,
+                R.string.send_card_to_x_groups
             ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
             me = me(),
             onGroupsSelected = { groups ->

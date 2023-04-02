@@ -74,7 +74,7 @@ android {
 dependencies {
     val choiceSdkVersion = "0.3.0"
     val hmsVersion = "6.9.0.300"
-    val composeVersion = "1.3.3"
+    val composeVersion = "1.4.0"
     val ktorVersion = "2.2.4"
 
     implementation("androidx.core:core-ktx:1.9.0")
@@ -86,6 +86,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation("androidx.compose.material3:material3:1.1.0-alpha06")
     implementation("androidx.compose.material3:material3-window-size-class:1.1.0-alpha06")
+    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
     implementation("androidx.navigation:navigation-compose:2.5.3")
@@ -105,8 +106,8 @@ dependencies {
     implementation("com.huawei.hms:location:$hmsVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.5")
-    implementation("androidx.compose.ui:ui-viewbinding:1.3.3")
+    implementation("androidx.fragment:fragment-ktx:1.5.6")
+    implementation("androidx.compose.ui:ui-viewbinding:1.4.0")
     implementation("com.android.volley:volley:1.2.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.accompanist:accompanist-permissions:0.27.0")

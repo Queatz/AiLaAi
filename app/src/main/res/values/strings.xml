@@ -22,7 +22,7 @@
     <string name="invite_x_people">Invite %1$s people</string>
     <string name="you_have_no_cards">You currently have no cards.</string>
     <string name="add_a_card">Add a card</string>
-    <string name="you_have_no_conversations">You currently have no conversations.</string>
+    <string name="you_have_no_groups">You currently have no groups.</string>
     <string name="no_cards">No cards.</string>
     <string name="no_cards_to_show">No cards to show.</string>
     <string name="finding_your_location">Finding your location…</string>
@@ -36,8 +36,8 @@
     <string name="cant_connect">Can\'t connect to the internet</string>
     <string name="enter_invite_code">Enter invite code</string>
     <string name="hello">Xin chào, bạn!</string>
-    <string name="show_conversation">Unhide</string>
-    <string name="hide_conversation">Hide</string>
+    <string name="show">Unhide</string>
+    <string name="hide">Hide</string>
     <string name="more">More</string>
     <string name="message">Message</string>
     <string name="someone">Someone</string>
@@ -79,7 +79,7 @@
     <string name="sign_out_description">If you sign out without a transfer code you will permanently lose access to your account!</string>
     <string name="show_transfer_code">Show transfer code</string>
     <string name="delete_this_message">Delete this message?</string>
-    <string name="delete_message_description">The message will be removed for everyone in the conversation.</string>
+    <string name="delete_message_description">The message will be removed for everyone in the group.</string>
     <string name="code_expired">Code expired or doesn\'t exist</string>
     <string name="you_x">You: %1$s</string>
     <string name="at_a_location">At a specific location</string>
@@ -99,9 +99,8 @@
     <string name="clear">Clear</string>
     <string name="set_my_location">Set my location</string>
     <string name="reset_location">Reset location</string>
-    <string name="no_conversations_to_show">No conversations to show.</string>
-    <string name="new_group">Create group</string>
-    <string name="conversations">Conversations</string>
+    <string name="no_groups_to_show">No groups to show.</string>
+    <string name="new_group">New</string>
     <string name="new_group_with_person">Create group with %1$s</string>
     <string name="new_group_with_people">Create group with %1$s and %2$s</string>
     <string name="new_group_with_x_people">Create group with %1$s people</string>
@@ -113,14 +112,14 @@
     <string name="download">Download</string>
     <string name="card_not_found">Card not found</string>
     <string name="leave">Leave</string>
-    <string name="leave_group">Leave conversation?</string>
+    <string name="leave_group">Leave group?</string>
     <string name="members">Members</string>
     <string name="rename">Rename</string>
     <string name="rename_group">Rename group</string>
     <string name="group_name">Group name</string>
     <string name="qr_code">QR code</string>
-    <string name="conversation_not_found">Conversation not found</string>
-    <string name="conversation_hidden">Conversation hidden until new messages are sent</string>
+    <string name="group_not_found">Group not found</string>
+    <string name="group_hidden">Group hidden until new messages are sent</string>
     <string name="saved">Saved</string>
     <string name="save_card">Save card</string>
     <string name="card_saved">Card saved</string>
@@ -129,9 +128,9 @@
     <string name="discoverable_by_link">This card will only be discoverable by its link.</string>
     <string name="offline">Offline</string>
     <string name="send_card">Send card</string>
-    <string name="send_card_to_conversation">Send card to %1$s</string>
-    <string name="send_card_to_conversations">Send card to %1$s and %2$s</string>
-    <string name="send_card_to_x_conversations">Send card to %1$s conversations</string>
+    <string name="send_card_to_group">Send card to %1$s</string>
+    <string name="send_card_to_groups">Send card to %1$s and %2$s</string>
+    <string name="send_card_to_x_groups">Send card to %1$s groups</string>
     <string name="sent">Sent!</string>
     <string name="app_feedback">Send app feedback</string>
     <string name="sent_a_card">Sent a card</string>
@@ -166,7 +165,7 @@
     <string name="person_updated_card">%1$s updated the %2$s of %3$s</string>
     <string name="person_updated_details">%1$s updated the %2$s</string>
     <string name="inline_photo">photo</string>
-    <string name="inline_conversation">conversation</string>
+    <string name="inline_group">group</string>
     <string name="inline_name">name</string>
     <string name="inline_location_name">location name</string>
     <string name="inline_you">you</string>
@@ -182,6 +181,7 @@
     <string name="empty_group_name">New group</string>
     <string name="manage">Manage</string>
     <string name="x_removed">%1$s removed</string>
+    <string name="your_groups">Your groups</string>
     <plurals name="meters_away">
         <item quantity="one">%1$s meter away</item>
         <item quantity="other">%1$s meters away</item>
@@ -189,5 +189,9 @@
     <plurals name="km_away">
         <item quantity="one">%1$s km away</item>
         <item quantity="other">%1$s km away</item>
+    </plurals>
+    <plurals name="sent_photos">
+        <item quantity="one">Sent a photo</item>
+        <item quantity="other">Sent $1%s photos</item>
     </plurals>
 </resources>

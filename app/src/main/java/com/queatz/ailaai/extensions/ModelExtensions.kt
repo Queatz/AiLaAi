@@ -36,5 +36,8 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
             null
         }
     }
+    is PhotosAttachment -> {
+        context.resources.getQuantityString(R.plurals.sent_photos, attachment.photos?.size ?: 0, attachment.photos?.size ?: 0)
+    }
     else -> null
 }

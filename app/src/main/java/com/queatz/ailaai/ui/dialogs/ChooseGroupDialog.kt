@@ -53,7 +53,7 @@ fun ChooseGroupDialog(
         photoFormatter = { it.photos(me?.let(::listOf) ?: emptyList()) },
         nameFormatter = { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
         confirmFormatter = confirmFormatter,
-        textWhenEmpty = { isBlank -> stringResource(if (isBlank) R.string.you_have_no_conversations else R.string.no_conversations_to_show) },
+        textWhenEmpty = { isBlank -> stringResource(if (isBlank) R.string.you_have_no_groups else R.string.no_groups_to_show) },
         searchText = searchText,
         searchTextChange = { searchText = it },
         items = groups,

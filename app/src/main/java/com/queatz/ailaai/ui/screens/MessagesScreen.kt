@@ -94,7 +94,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     Column {
         TopAppBar(
             {
-                Text(stringResource(R.string.conversations), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(stringResource(R.string.your_groups), maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             actions = {
                 ElevatedButton(
@@ -137,7 +137,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                 } else if (groups.isEmpty()) {
                     item {
                         Text(
-                            stringResource(if (searchText.isBlank()) R.string.you_have_no_conversations else R.string.no_conversations_to_show),
+                            stringResource(if (searchText.isBlank()) R.string.you_have_no_groups else R.string.no_groups_to_show),
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(PaddingDefault * 2)
                         )

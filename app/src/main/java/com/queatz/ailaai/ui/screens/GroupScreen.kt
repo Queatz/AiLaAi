@@ -1,33 +1,52 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.transform.RoundedCornersTransformation
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.name
@@ -40,12 +59,13 @@ import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.Shapes
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val groupId = navBackStackEntry.arguments!!.getString("id")!!
@@ -59,9 +79,24 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showGroupMembers by remember { mutableStateOf(false) }
     var showRemoveGroupMembers by remember { mutableStateOf(false) }
     var showInviteMembers by remember { mutableStateOf(false) }
+    var showPhoto by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        coroutineScope.launch {
+            try {
+                api.sendPhoto(groupId, uri ?: return@launch)
+                messages = api.messages(groupId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     LaunchedEffect(true) {
         isLoading = true
@@ -202,8 +237,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         })
                         DropdownMenuItem({
                             Text(
-                                if (hidden) stringResource(R.string.show_conversation) else stringResource(
-                                    R.string.hide_conversation
+                                if (hidden) stringResource(R.string.show) else stringResource(
+                                    R.string.hide
                                 )
                             )
                         }, {
@@ -212,7 +247,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
                                     Toast.makeText(
                                         navController.context,
-                                        navController.context.getString(R.string.conversation_hidden),
+                                        navController.context.getString(R.string.group_hidden),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     navController.popBackStack()
@@ -247,6 +282,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 }
                             }
                         },
+                        onShowPhoto = { showPhoto = it },
                         navController.context as Activity,
                         navController
                     )
@@ -270,42 +306,106 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 focusRequester.requestFocus()
             }
 
-            OutlinedTextField(
-                value = sendMessage,
-                onValueChange = {
-                    sendMessage = it
-                },
-                trailingIcon = {
-                    Crossfade(targetState = sendMessage.isNotBlank()) { show ->
-                        when (show) {
-                            true -> IconButton({ send() }) {
-                                Icon(
-                                    Icons.Default.Send,
-                                    Icons.Default.Send.name,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    OutlinedTextField(
+                        value = sendMessage,
+                        onValueChange = {
+                            sendMessage = it
+                        },
+                        trailingIcon = {
+                            Crossfade(targetState = sendMessage.isNotBlank()) { show ->
+                                when (show) {
+                                    true -> IconButton({ send() }) {
+                                        Icon(
+                                            Icons.Default.Send,
+                                            Icons.Default.Send.name,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
 
-                            false -> {}
+                                    false -> {}
+                                }
+                            }
+                        },
+                        placeholder = {
+                            Text(stringResource(R.string.message))
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            imeAction = ImeAction.Send
+                        ),
+                        keyboardActions = KeyboardActions(onSend = {
+                            send()
+                        }),
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 128.dp)
+                            .padding(PaddingDefault)
+                            .focusRequester(focusRequester)
+                    )
+                }
+                AnimatedVisibility(sendMessage.isBlank()) {
+                    IconButton(
+                        onClick = {
+                            launcher.launch("image/*")
+                        },
+                        modifier = Modifier
+                            .padding(end = PaddingDefault)
+                    ) {
+                        Icon(Icons.Outlined.AddPhotoAlternate, stringResource(R.string.add))
+                    }
+                }
+            }
+
+            if (showPhoto != null) {
+                Dialog(
+                    {
+                        showPhoto = null
+                    }, properties = DialogProperties(
+                        usePlatformDefaultWidth = false
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        val photos = messages.photos()
+                        val photosListState = rememberLazyListState(photos.indexOf(showPhoto))
+                        LazyRow(
+                            state = photosListState,
+                            flingBehavior = rememberSnapFlingBehavior(photosListState),
+                            reverseLayout = true,
+                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(photos, key = { it }) { photo ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .align(Alignment.Center)
+                                ) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(api.url(photo))
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        alignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .fillParentMaxSize()
+                                    )
+                                }
+                            }
                         }
                     }
-                },
-                placeholder = {
-                    Text(stringResource(R.string.message))
-                },
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Send
-                ),
-                keyboardActions = KeyboardActions(onSend = {
-                    send()
-                }),
-                shape = MaterialTheme.shapes.large, modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 128.dp)
-                    .padding(PaddingDefault)
-                    .focusRequester(focusRequester)
-            )
+                }
+            }
 
             if (showGroupMembers) {
                 GroupMembersDialog({
@@ -359,7 +459,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         var anyFailed = false
                         people.forEach { person ->
                             try {
-                                api.removeMember(otherMembers.find { member -> member.person?.id == person.id }?.member?.id ?: return@forEach)
+                                api.removeMember(
+                                    otherMembers.find { member -> member.person?.id == person.id }?.member?.id
+                                        ?: return@forEach
+                                )
                                 Toast.makeText(
                                     context,
                                     context.getString(R.string.x_removed, person.name?.nullIfBlank ?: someone),
@@ -480,7 +583,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         showGroupNotFound = false
                     },
                     title = {
-                        Text(stringResource(R.string.conversation_not_found))
+                        Text(stringResource(R.string.group_not_found))
                     },
                     text = {
                     },
@@ -497,3 +600,6 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 }
+
+private fun List<Message>.photos() =
+    flatMap { message -> (message.getAttachment() as? PhotosAttachment)?.photos ?: emptyList() }

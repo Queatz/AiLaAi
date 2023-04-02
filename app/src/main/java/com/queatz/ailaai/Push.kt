@@ -111,7 +111,7 @@ class Push {
     private fun cardDetailName(detail: CollaborationEventDataDetails?): String {
         return when (detail) {
             CollaborationEventDataDetails.Photo -> context.getString(R.string.inline_photo)
-            CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_conversation)
+            CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_group)
             CollaborationEventDataDetails.Name -> context.getString(R.string.inline_name)
             CollaborationEventDataDetails.Location -> context.getString(R.string.inline_location_name)
             else -> ""

@@ -34,12 +34,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
                 .requiredSize(size)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
-        ) {
-            Text(
-                "+",
-                style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
-            )
-        }
+        ) {}
     }
     else if (photos.size == 1) {
         val contact = photos.firstOrNull()

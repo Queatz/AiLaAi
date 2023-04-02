@@ -23,7 +23,7 @@
     <string name="invite_x_people">Mời %1$s người</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Tạo thẻ mới</string>
-    <string name="you_have_no_conversations">Bạn hiện không có cuộc trò chuyện nào.</string>
+    <string name="you_have_no_groups">Bạn hiện không có nhóm nào.</string>
     <string name="search">Tìm kiếm</string>
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
@@ -36,8 +36,8 @@
     <string name="cant_connect">Không thể kết nối với mạng</string>
     <string name="hello">Xin chào, bạn!</string>
     <string name="enter_invite_code">Nhập mã mời</string>
-    <string name="hide_conversation">Ẩn</string>
-    <string name="show_conversation">Bỏ ẩn</string>
+    <string name="hide">Ẩn</string>
+    <string name="show">Bỏ ẩn</string>
     <string name="more">Nhiều hơn</string>
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
@@ -79,7 +79,7 @@
     <string name="sign_out_confirmation">Mình hiểu rằng mình cần mã chuyển khoản để sử dụng lại tài khoản này.</string>
     <string name="sign_out_description">Nếu bạn đăng xuất mà không có mã chuyển khoản, bạn sẽ vĩnh viễn mất quyền truy cập vào tài khoản của mình!</string>
     <string name="delete_this_message">Xóa tin nhắn này?</string>
-    <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong cuộc trò chuyện.</string>
+    <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong nhóm.</string>
     <string name="code_expired">Mã hết hạn hoặc không tồn tại</string>
     <string name="you_x">Bạn: %1$s</string>
     <string name="at_a_location">Tại một vị trí nào đó</string>
@@ -100,9 +100,9 @@
     <string name="clear">Bỏ</string>
     <string name="set_my_location">Đặt vị trí của tôi</string>
     <string name="reset_location">Đặt lại vị trí</string>
-    <string name="no_conversations_to_show">Không tìm được trò chuyện để cho bạn xem.</string>
-    <string name="new_group">Tạo nhóm</string>
-    <string name="conversations">Trò chuyện</string>
+    <string name="no_groups_to_show">Không tìm được nhóm để cho bạn xem.</string>
+    <string name="new_group">Nhóm mới</string>
+    <string name="your_groups">Nhóm của bạn</string>
     <string name="new_group_with_person">Tạo nhóm vơi %1$s</string>
     <string name="new_group_with_people">Tạo nhóm vơi %1$s và %2$s</string>
     <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người</string>
@@ -114,14 +114,14 @@
     <string name="download">Tải xuống ngay</string>
     <string name="card_not_found">Không tìm được thẻ này</string>
     <string name="leave">Rời khỏi</string>
-    <string name="leave_group">Rời khỏi trò chuyện này không?</string>
+    <string name="leave_group">Rời khỏi nhóm này không?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
     <string name="rename_group">Đổi tên của nhóm này</string>
     <string name="group_name">Tên của nhóm này</string>
     <string name="qr_code">Mã QR</string>
-    <string name="conversation_not_found">Không được tìm thấy trò chuyện này</string>
-    <string name="conversation_hidden">Cuộc trò chuyện ẩn đến khi tin nhắn mới được gửi</string>
+    <string name="group_not_found">Không được tìm thấy nhóm này</string>
+    <string name="group_hidden">hóm ẩn đến khi tin nhắn mới được gửi</string>
     <string name="saved">Đã lưu</string>
     <string name="save_card">Lưu thẻ</string>
     <string name="card_saved">Thẻ được lưu</string>
@@ -130,9 +130,9 @@
     <string name="discoverable_by_link">Thẻ này sẽ chỉ có thể được khám phá bằng liên kết của nó.</string>
     <string name="offline">Ngoại tuyến</string>
     <string name="send_card">Gửi thẻ</string>
-    <string name="send_card_to_conversation">Giử thẻ đến %1$s</string>
-    <string name="send_card_to_conversations">Giử thẻ đến %1$s và %2$s</string>
-    <string name="send_card_to_x_conversations">Giử thẻ đến %1$s trò chuyện</string>
+    <string name="send_card_to_group">Giử thẻ đến %1$s</string>
+    <string name="send_card_to_groups">Giử thẻ đến %1$s và %2$s</string>
+    <string name="send_card_to_x_groups">Giử thẻ đến %1$s nhóm</string>
     <string name="sent">Đã gửi!</string>
     <string name="app_feedback">Gửi phản hồi về ứng dụng</string>
     <string name="sent_a_card">đã gửi thẻ</string>
@@ -167,7 +167,7 @@
     <string name="person_updated_card">%1$s đã cập nhật %2$s của %3$s</string>
     <string name="person_updated_details">%1$s đã cập nhật %2$s</string>
     <string name="inline_photo">ảnh</string>
-    <string name="inline_conversation">trò chuyện</string>
+    <string name="inline_group">nhóm</string>
     <string name="inline_name">tên</string>
     <string name="inline_location_name">tên của vị trí</string>
     <string name="inline_you">bạn</string>
@@ -190,4 +190,8 @@
     <string name="empty_group_name">Nhóm mới</string>
     <string name="manage">Quản lý</string>
     <string name="x_removed">%1$s đã xóa khỏi</string>
+    <plurals name="sent_photos">
+        <item quantity="one">Đã gửi ảnh</item>
+        <item quantity="other">Đã gửi $1%s ảnh</item>
+    </plurals>
 </resources>
