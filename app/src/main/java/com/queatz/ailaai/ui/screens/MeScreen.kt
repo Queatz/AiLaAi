@@ -200,77 +200,107 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             contentAlignment = Alignment.BottomCenter,
             modifier = Modifier.fillMaxWidth().weight(1f)
         ) {
-            LazyVerticalGrid(
-                state = state,
-                contentPadding = PaddingValues(
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault + 80.dp + 50.dp
-                ),
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
-                modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(240.dp)
-            ) {
-                if (cardParentType != null) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            when (cardParentType) {
-                                CardParentType.Map -> stringResource(R.string.at_a_location)
-                                CardParentType.Card -> stringResource(R.string.inside_another_card)
-                                CardParentType.Person -> stringResource(R.string.with_you)
-                                else -> stringResource(R.string.offline)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = PaddingDefault),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-                items(cards, key = { it.id!! }) { card ->
-                    BasicCard(
-                        {
-                            navController.navigate("card/${card.id!!}")
-                        },
-                        onChange = {
-                            coroutineScope.launch {
-                                isLoading = true
-                                try {
-                                    myCards = api.myCards()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                } finally {
-                                    isLoading = false
-                                }
-                            }
-                        },
-                        activity = navController.context as Activity,
-                        card = card,
-                        edit = if (card.id == addedCardId) EditCard.Conversation else null,
-                        isMine = true
-                    )
-
-                    if (card.id == addedCardId) {
-                        addedCardId = null
-                    }
-                }
-
-                if (cards.isEmpty()) {
-                    if (isLoading) {
+            if (isLoading) {
+                LinearProgressIndicator(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp)
+                )
+            } else {
+                LazyVerticalGrid(
+                    state = state,
+                    contentPadding = PaddingValues(
+                        PaddingDefault,
+                        PaddingDefault,
+                        PaddingDefault,
+                        PaddingDefault + 80.dp + 50.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                    modifier = Modifier.fillMaxSize(),
+                    columns = GridCells.Adaptive(240.dp)
+                ) {
+                    if (cardParentType != null) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            LinearProgressIndicator(
-                                color = MaterialTheme.colorScheme.tertiary,
+                            Text(
+                                when (cardParentType) {
+                                    CardParentType.Map -> stringResource(R.string.at_a_location)
+                                    CardParentType.Card -> stringResource(R.string.inside_another_card)
+                                    CardParentType.Person -> stringResource(R.string.with_you)
+                                    else -> stringResource(R.string.offline)
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = PaddingDefault)
+                                    .padding(bottom = PaddingDefault),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         }
-                    } else {
+                    } else if (filters.isEmpty()) {
+                        item {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                ElevatedButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            try {
+                                                cardParentType = null
+                                                filters = emptySet()
+                                                addedCardId = api.newCard().id
+                                                myCards = api.myCards()
+                                                delay(100)
+
+                                                if (state.firstVisibleItemIndex > 2) {
+                                                    state.scrollToItem(2)
+                                                }
+
+                                                state.animateScrollToItem(0)
+                                            } catch (ex: Exception) {
+                                                ex.printStackTrace()
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Text(stringResource(R.string.add_a_card))
+                                }
+                            }
+                        }
+                    }
+
+                    items(cards, key = { it.id!! }) { card ->
+                        BasicCard(
+                            {
+                                navController.navigate("card/${card.id!!}")
+                            },
+                            onChange = {
+                                coroutineScope.launch {
+                                    isLoading = true
+                                    try {
+                                        myCards = api.myCards()
+                                    } catch (ex: Exception) {
+                                        ex.printStackTrace()
+                                    } finally {
+                                        isLoading = false
+                                    }
+                                }
+                            },
+                            activity = navController.context as Activity,
+                            card = card,
+                            edit = if (card.id == addedCardId) EditCard.Conversation else null,
+                            isMine = true
+                        )
+
+                        if (card.id == addedCardId) {
+                            addedCardId = null
+                        }
+                    }
+
+                    if (cards.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
                                 stringResource(if (cardParentType == null && filters.isEmpty() && searchText.isBlank()) R.string.you_have_no_cards else R.string.no_cards_to_show),
@@ -290,30 +320,6 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 .widthIn(max = 480.dp)
                 .fillMaxWidth()
             ) {
-                ElevatedButton(
-                    elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-                    onClick = {
-                        coroutineScope.launch {
-                            try {
-                                cardParentType = null
-                                filters = emptySet()
-                                addedCardId = api.newCard().id
-                                myCards = api.myCards()
-                                delay(100)
-
-                                if (state.firstVisibleItemIndex > 2) {
-                                    state.scrollToItem(2)
-                                }
-
-                                state.animateScrollToItem(0)
-                            } catch (ex: Exception) {
-                                ex.printStackTrace()
-                            }
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.add_a_card))
-                }
                 SearchField(searchText, { searchText = it }, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }

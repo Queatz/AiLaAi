@@ -1,8 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import android.graphics.Bitmap
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,29 +9,28 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -46,7 +43,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import coil.transform.RoundedCornersTransformation
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.name
@@ -59,7 +55,6 @@ import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.ailaai.ui.theme.Shapes
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -291,13 +286,17 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
             fun send() {
                 if (sendMessage.isNotBlank()) {
-                    val text = sendMessage
+                    val text = sendMessage.trim()
                     coroutineScope.launch {
                         try {
-                            api.sendMessage(groupId, Message(text = text.trim()))
+                            api.sendMessage(groupId, Message(text = text))
                             messages = api.messages(groupId)
                         } catch (ex: Exception) {
                             ex.printStackTrace()
+                            if (sendMessage.isBlank()) {
+                                sendMessage = text
+                            }
+                            Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -372,7 +371,14 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     )
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null
+                            ) {
+                                showPhoto = null
+                            }
                     ) {
                         val photos = messages.photos()
                         val photosListState = rememberLazyListState(photos.indexOf(showPhoto))
