@@ -7,8 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -25,7 +23,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -39,7 +36,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
@@ -84,15 +80,17 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        coroutineScope.launch {
-            try {
-                api.sendPhoto(groupId, uri ?: return@launch)
-                messages = api.messages(groupId)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_LONG).show()
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            coroutineScope.launch {
+                try {
+                    api.sendPhotos(groupId, uris)
+                    messages = api.messages(groupId)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -673,4 +671,4 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 }
 
 private fun List<Message>.photos() =
-    flatMap { message -> (message.getAttachment() as? PhotosAttachment)?.photos ?: emptyList() }
+    flatMap { message -> (message.getAttachment() as? PhotosAttachment)?.photos?.asReversed() ?: emptyList() }

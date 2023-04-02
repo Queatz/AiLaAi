@@ -2,7 +2,6 @@ package com.queatz.ailaai
 
 import android.content.Context
 import android.net.Uri
-import androidx.core.net.toFile
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.maps.common.LatLng
@@ -227,12 +226,14 @@ class Api {
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 
-    suspend fun sendPhoto(group: String, photo: Uri): HttpStatusCode = post("groups/$group/photos", MultiPartFormDataContent(
+    suspend fun sendPhotos(group: String, photos: List<Uri>): HttpStatusCode = post("groups/$group/photos", MultiPartFormDataContent(
         formData {
-            append("photo", photo.asScaledJpeg(context), Headers.build {
-                append(HttpHeaders.ContentType, "image/jpg")
-                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-            })
+            photos.forEachIndexed { index, photo ->
+                append("photo[$index]", photo.asScaledJpeg(context), Headers.build {
+                    append(HttpHeaders.ContentType, "image/jpg")
+                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                })
+            }
         }
     ), client = httpData)
 
