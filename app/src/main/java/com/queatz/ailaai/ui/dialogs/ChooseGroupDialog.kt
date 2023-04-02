@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.dialogs
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.*
@@ -15,6 +16,7 @@ fun ChooseGroupDialog(
     confirmFormatter: @Composable (List<GroupExtended>) -> String,
     me: Person?,
     omit: List<Group> = emptyList(),
+    extraButtons: @Composable RowScope.() -> Unit = {},
     onGroupsSelected: suspend (List<Group>) -> Unit
 ) {
 
@@ -50,6 +52,7 @@ fun ChooseGroupDialog(
         isLoading = isLoading,
         title = title,
         allowNone = false,
+        extraButtons = extraButtons,
         photoFormatter = { it.photos(me?.let(::listOf) ?: emptyList()) },
         nameFormatter = { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
         confirmFormatter = confirmFormatter,

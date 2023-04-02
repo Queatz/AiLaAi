@@ -53,6 +53,7 @@ fun <T> ChooseDialog(
     nameFormatter: @Composable (T) -> String,
     confirmFormatter: @Composable (List<T>) -> String,
     textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,
+    extraButtons: @Composable RowScope.() -> Unit = {},
     searchText: String,
     searchTextChange: (String) -> Unit,
     items: List<T>,
@@ -145,6 +146,9 @@ fun <T> ChooseDialog(
                     verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    if (selected.isEmpty()) {
+                        extraButtons()
+                    }
                     TextButton(
                         {
                             disableSubmit = true

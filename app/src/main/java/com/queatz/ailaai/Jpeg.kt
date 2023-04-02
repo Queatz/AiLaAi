@@ -10,7 +10,7 @@ fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 1200): ByteArray {
     val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(this))
     val w = if (bitmap.width > bitmap.height) longestEdge else (longestEdge * bitmap.aspect).toInt()
     val h = if (bitmap.height > bitmap.width) longestEdge else (longestEdge / bitmap.aspect).toInt()
-    val scaled = Bitmap.createScaledBitmap(bitmap, w, h, true)
+    val scaled = if (w < bitmap.width || h < bitmap.height) Bitmap.createScaledBitmap(bitmap, w, h, true) else bitmap
     return ByteArrayOutputStream(scaled.byteCount / 8).let {
         scaled.compress(Bitmap.CompressFormat.JPEG, 90, it)
         it.toByteArray()

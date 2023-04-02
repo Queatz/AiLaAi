@@ -232,12 +232,14 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             launcher.launch("image/*")
                             showMenu = false
                         })
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.add_collaborators))
-                        }, {
-                            openAddCollaboratorDialog = true
-                            showMenu = false
-                        })
+                        if (!((card?.collaborators?.isNotEmpty() == true))) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.add_collaborators))
+                            }, {
+                                openAddCollaboratorDialog = true
+                                showMenu = false
+                            })
+                        }
                     }
                     if (isMineOrIAmACollaborator && (card?.collaborators?.isNotEmpty() == true)) {
                         DropdownMenuItem({
@@ -542,6 +544,16 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 R.string.remove_people,
                 R.string.remove_x_people
             ) { it.name ?: someone },
+            extraButtons = {
+                TextButton(
+                    {
+                        openRemoveCollaboratorsDialog = false
+                        openAddCollaboratorDialog = true
+                    }
+                ) {
+                    Text(stringResource(R.string.add))
+                }
+            },
             onPeopleSelected = { people ->
                 try {
                     card!!.collaborators = (card?.collaborators ?: emptyList()) - people.map { it.id!! }.toSet()
