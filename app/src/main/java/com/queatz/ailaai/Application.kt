@@ -29,6 +29,7 @@ class Application : android.app.Application() {
         ChoiceSdk.init(this)
         api.init(this)
         push.init(this)
+        ui.init(this)
 
         val coroutineScope = CoroutineScope(Dispatchers.IO)
 

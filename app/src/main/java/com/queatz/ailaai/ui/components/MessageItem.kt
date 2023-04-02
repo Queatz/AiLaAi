@@ -191,7 +191,7 @@ fun MessageItem(
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "",
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             alignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxWidth()

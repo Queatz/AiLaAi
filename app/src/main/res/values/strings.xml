@@ -182,6 +182,8 @@
     <string name="manage">Manage</string>
     <string name="x_removed">%1$s removed</string>
     <string name="your_groups">Your groups</string>
+    <string name="description">Description</string>
+    <string name="update">Update</string>
     <plurals name="meters_away">
         <item quantity="one">%1$s meter away</item>
         <item quantity="other">%1$s meters away</item>

@@ -6,8 +6,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -19,23 +20,26 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.outlined.AddPhotoAlternate
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
@@ -49,10 +53,8 @@ import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.MessageItem
-import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
-import com.queatz.ailaai.ui.dialogs.GroupMembersDialog
-import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
-import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.components.fadingEdge
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
@@ -70,11 +72,13 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var isLoading by remember { mutableStateOf(false) }
     var showGroupNotFound by remember { mutableStateOf(false) }
     var showLeaveGroup by remember { mutableStateOf(false) }
+    var showDescriptionDialog by remember { mutableStateOf(false) }
     var showRenameGroup by remember { mutableStateOf(false) }
     var showGroupMembers by remember { mutableStateOf(false) }
     var showRemoveGroupMembers by remember { mutableStateOf(false) }
     var showInviteMembers by remember { mutableStateOf(false) }
     var showPhoto by remember { mutableStateOf<String?>(null) }
+    var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
@@ -197,6 +201,15 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 actions = {
                     var showMenu by remember { mutableStateOf(false) }
 
+                    if (!showDescription && groupExtended?.group?.description?.isBlank() == false) {
+                        IconButton({
+                            showDescription = !showDescription
+                            ui.setShowDescription(groupId, showDescription)
+                        }) {
+                            Icon(Icons.Outlined.Info, stringResource(R.string.description))
+                        }
+                    }
+
                     IconButton({
                         showMenu = !showMenu
                     }) {
@@ -223,6 +236,12 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         }, {
                             showMenu = false
                             showRenameGroup = true
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.description))
+                        }, {
+                            showMenu = false
+                            showDescriptionDialog = true
                         })
                         DropdownMenuItem({
                             Text(stringResource(R.string.leave))
@@ -260,6 +279,42 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 ),
                 modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)
             )
+            AnimatedVisibility(showDescription && groupExtended?.group?.description?.isBlank() == false) {
+                OutlinedCard(
+                    onClick = {
+                        showDescription = false
+                        ui.setShowDescription(groupId, showDescription)
+                    },
+                    shape = MaterialTheme.shapes.large,
+                    elevation = CardDefaults.elevatedCardElevation(ElevationDefault),
+                    modifier = Modifier
+                        .padding(PaddingDefault)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                        val textScrollState = rememberScrollState()
+                        Text(
+                            groupExtended?.group?.description ?: "",
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(max = 128.dp)
+                                .verticalScroll(textScrollState)
+                                .onPlaced { viewport = it.boundsInParent().size }
+                                .fadingEdge(viewport, textScrollState)
+                                .padding(PaddingDefault * 1.5f)
+                        )
+                        Icon(
+                            Icons.Outlined.Close,
+                            null,
+                            modifier = Modifier
+                                .padding(end = PaddingDefault * 1.5f)
+                        )
+                    }
+                }
+            }
             LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
                 items(messages, { it.id!! }) {
                     MessageItem(
@@ -542,6 +597,16 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 val scope = currentRecomposeScope
                 RenameGroupDialog({
                     showRenameGroup = false
+                }, groupExtended!!.group!!, {
+                    groupExtended!!.group = it
+                    scope.invalidate()
+                })
+            }
+
+            if (showDescriptionDialog) {
+                val scope = currentRecomposeScope
+                GroupDescriptionDialog({
+                    showDescriptionDialog = false
                 }, groupExtended!!.group!!, {
                     groupExtended!!.group = it
                     scope.invalidate()

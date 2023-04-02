@@ -29,7 +29,8 @@ class Save(
 
 class Group(
     var name: String? = null,
-    var seen: Instant? = null
+    var seen: Instant? = null,
+    var description: String? = null,
 ) : Model()
 
 class Person(

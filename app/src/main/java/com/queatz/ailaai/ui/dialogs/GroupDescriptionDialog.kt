@@ -10,19 +10,19 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 
 @Composable
-fun RenameGroupDialog(onDismissRequest: () -> Unit, group: Group, onGroupUpdated: (Group) -> Unit) {
+fun GroupDescriptionDialog(onDismissRequest: () -> Unit, group: Group, onGroupUpdated: (Group) -> Unit) {
     val context = LocalContext.current
     val didntWork = stringResource(R.string.didnt_work)
 
     TextFieldDialog(
         onDismissRequest,
-        stringResource(R.string.rename_group),
-        stringResource(R.string.rename),
-        true,
-        group.name ?: "",
+        stringResource(R.string.description),
+        stringResource(R.string.update),
+        false,
+        group.description ?: "",
     ) { value ->
         try {
-            val group = api.updateGroup(group.id!!, Group().apply { name = value })
+            val group = api.updateGroup(group.id!!, Group().apply { description = value })
             onGroupUpdated(group)
             onDismissRequest()
         } catch (ex: Exception) {

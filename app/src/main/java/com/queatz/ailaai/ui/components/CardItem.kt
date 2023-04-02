@@ -270,7 +270,6 @@ fun BasicCard(
 
                             }
                             .verticalScroll(conversationScrollState)
-                            .graphicsLayer(alpha = 0.99f)
                             .onPlaced { viewport = it.boundsInParent().size }
                             .fadingEdge(viewport, conversationScrollState)
                     )
@@ -287,37 +286,39 @@ fun BasicCard(
     }
 }
 
-private fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
-    Modifier.drawWithContent {
-        drawContent()
+fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
+    Modifier
+        .graphicsLayer(alpha = 0.99f)
+        .drawWithContent {
+            drawContent()
 
-        val h = scrollState.value.toFloat().coerceAtMost(viewport.height / 3f)
-        val h2 = (
-                scrollState.maxValue.toFloat() - scrollState.value.toFloat()
-                ).coerceAtMost(viewport.height / 3f)
+            val h = scrollState.value.toFloat().coerceAtMost(viewport.height / 3f)
+            val h2 = (
+                    scrollState.maxValue.toFloat() - scrollState.value.toFloat()
+                    ).coerceAtMost(viewport.height / 3f)
 
-        if (scrollState.value != 0) {
-            drawRect(
-                Brush.verticalGradient(
-                    colors = listOf(Color.Black, Color.Transparent),
-                    startY = h + scrollState.value,
-                    endY = 0.0f + scrollState.value
-                ),
-                blendMode = BlendMode.DstIn
-            )
+            if (scrollState.value != 0) {
+                drawRect(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startY = h + scrollState.value,
+                        endY = 0.0f + scrollState.value
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+
+            if (scrollState.value != scrollState.maxValue) {
+                drawRect(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startY = viewport.height - h2 + scrollState.value,
+                        endY = viewport.height + scrollState.value
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
         }
-
-        if (scrollState.value != scrollState.maxValue) {
-            drawRect(
-                Brush.verticalGradient(
-                    colors = listOf(Color.Black, Color.Transparent),
-                    startY = viewport.height - h2 + scrollState.value,
-                    endY = viewport.height + scrollState.value
-                ),
-                blendMode = BlendMode.DstIn
-            )
-        }
-    }
 )
 
 private fun Modifier.minAspectRatio(ratio: Float) = then(

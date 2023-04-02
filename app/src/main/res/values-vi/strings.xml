@@ -194,4 +194,6 @@
         <item quantity="one">Đã gửi ảnh</item>
         <item quantity="other">Đã gửi $1%s ảnh</item>
     </plurals>
+    <string name="description">Mô tả</string>
+    <string name="update">Cập nhật</string>
 </resources>
