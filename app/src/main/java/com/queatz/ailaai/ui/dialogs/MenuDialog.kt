@@ -25,15 +25,11 @@ annotation class MenuDialogMarker
 fun Menu(onDismissRequest: () -> Unit, block: @Composable ColumnScope.() -> Unit) {
     Dialog(onDismissRequest) {
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            modifier = Modifier
-                .padding(PaddingDefault * 2)
-                .wrapContentHeight()
+            shape = MaterialTheme.shapes.large
         ) {
             val scrollState = rememberScrollState()
             Column(
                 modifier = Modifier
-                    .padding(PaddingDefault * 1)
                     .verticalScroll(scrollState)
             ) {
                 block()

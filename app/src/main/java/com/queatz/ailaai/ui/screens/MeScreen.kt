@@ -240,7 +240,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             )
                         }
                     } else if (filters.isEmpty()) {
-                        item {
+                        item(span = { GridItemSpan(maxLineSpan) })  {
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier.fillMaxWidth()

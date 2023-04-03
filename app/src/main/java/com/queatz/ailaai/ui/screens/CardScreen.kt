@@ -56,8 +56,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var addedCardId by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var notFound by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+    var showManageMenu by remember { mutableStateOf(false) }
+    var openDeleteCard by remember { mutableStateOf(false) }
     var openLocationDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(false) }
+    var openChangeOwner by remember { mutableStateOf(false) }
     var showQrCode by rememberSaveable { mutableStateOf(false) }
     var showSendDialog by rememberSaveable { mutableStateOf(false) }
     var openAddCollaboratorDialog by rememberSaveable { mutableStateOf(false) }
@@ -69,6 +73,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val coroutineScope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
+    val didntWork = stringResource(R.string.didnt_work)
 
     LaunchedEffect(true) {
         if (card != null) {
@@ -108,6 +113,91 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
         })
     }
 
+    card?.let { card ->
+        if (openDeleteCard) {
+            DeleteCardDialog(card, {
+                openDeleteCard = false
+            }) {
+                navController.popBackStackOrFinish()
+            }
+        }
+    }
+
+    if (openChangeOwner) {
+        val someone = stringResource(R.string.someone)
+        ChoosePeopleDialog(
+            {
+                openChangeOwner = false
+            },
+            title = stringResource(R.string.change_owner),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.give,
+                R.string.give_to_person,
+                R.string.give_to_people,
+                R.string.give_to_x_people
+            ) { it.name ?: someone },
+            omit = { it.id == me()?.id },
+            multiple = false,
+            onPeopleSelected = {
+                if (it.size == 1) {
+                    val newOwner = it.first().id
+                    coroutineScope.launch {
+                        try {
+                            card!!.person = newOwner
+                            val updatedCard = api.updateCard(card!!.id!!, Card().apply {
+                                person = card!!.person
+                            })
+                            card = updatedCard
+                        } catch (ex: Exception) {
+                            Toast.makeText(context, didntWork, LENGTH_SHORT).show()
+                            ex.printStackTrace()
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+    if (showManageMenu) {
+        Menu(
+            {
+                showManageMenu = false
+            }
+        ) {
+            if (card?.photo != null) {
+                item(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate)) {
+                    card?.let { card ->
+                        coroutineScope.launch {
+                            try {
+                                val update = api.updateCard(
+                                    card.id!!,
+                                    Card(active = card.active?.not() ?: true)
+                                )
+                                card.active = update.active
+                                Toast.makeText(
+                                    context,
+                                    context.getString(if (card.active == true) R.string.card_active else R.string.card_inactive),
+                                    LENGTH_SHORT
+                                ).show()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                    showManageMenu = false
+                }
+            }
+            item(stringResource(R.string.change_owner)) {
+                openChangeOwner = true
+                showManageMenu = false
+            }
+            item(stringResource(R.string.delete_card)) {
+                openDeleteCard = true
+                showManageMenu = false
+            }
+        }
+    }
+
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
@@ -136,8 +226,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
             },
             actions = {
-                var showMenu by remember { mutableStateOf(false) }
-
                 card?.let { card ->
                     IconButton({
                         coroutineScope.launch {
@@ -189,31 +277,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
                 DropdownMenu(showMenu, { showMenu = false }) {
                     if (isMine) {
-                        if (card?.photo != null) {
-                            DropdownMenuItem({
-                                Text(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate))
-                            }, {
-                                card?.let { card ->
-                                    coroutineScope.launch {
-                                        try {
-                                            val update = api.updateCard(
-                                                card.id!!,
-                                                Card(active = card.active?.not() ?: true)
-                                            )
-                                            card.active = update.active
-                                            Toast.makeText(
-                                                context,
-                                                context.getString(if (card.active == true) R.string.card_active else R.string.card_inactive),
-                                                LENGTH_SHORT
-                                            ).show()
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
-                                }
-                                showMenu = false
-                            })
-                        }
                         DropdownMenuItem({
                             Text(stringResource(R.string.edit_card))
                         }, {
@@ -230,6 +293,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             Text(stringResource(R.string.set_photo))
                         }, {
                             launcher.launch("image/*")
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.manage))
+                        }, {
+                            showManageMenu = true
                             showMenu = false
                         })
                         if (!((card?.collaborators?.isNotEmpty() == true))) {
@@ -466,7 +535,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
         }
     }
 
-    val didntWork = stringResource(R.string.didnt_work)
     val someone = stringResource(R.string.someone)
     val emptyGroup = stringResource(R.string.empty_group_name)
 
@@ -487,6 +555,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             cards = api.cardsCards(cardId)
                             openLeaveCollaboratorsDialog = false
                         } catch (ex: Exception) {
+                            Toast.makeText(context, didntWork, LENGTH_SHORT).show()
                             ex.printStackTrace()
                         }
                     }

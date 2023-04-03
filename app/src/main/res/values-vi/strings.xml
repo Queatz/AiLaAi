@@ -194,4 +194,10 @@
     </plurals>
     <string name="description">Mô tả</string>
     <string name="update">Cập nhật</string>
+    <string name="send">Gửi</string>
+    <string name="change_owner">Đổi chủ</string>
+    <string name="give">Đưa cho</string>
+    <string name="give_to_person">Đưa cho %1$s</string>
+    <string name="give_to_people">Đưa cho %1$s và %2$s</string>
+    <string name="give_to_x_people">Đưa cho %1$s người</string>
 </resources>

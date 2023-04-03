@@ -14,6 +14,7 @@ fun ChoosePeopleDialog(
     title: String,
     confirmFormatter: @Composable (List<Person>) -> String,
     allowNone: Boolean = false,
+    multiple: Boolean = true,
     onPeopleSelected: suspend (List<Person>) -> Unit,
     extraButtons: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
@@ -61,7 +62,13 @@ fun ChoosePeopleDialog(
         items = people,
         key = { it.id!! },
         selected = selected,
-        onSelectedChange = { selected = it },
+        onSelectedChange = {
+            if (multiple) {
+                selected = it
+            } else {
+                selected = it - selected
+            }
+        },
         onConfirm = onPeopleSelected
     )
 }

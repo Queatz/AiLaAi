@@ -20,16 +20,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.imageLoader
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.share
 import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.item
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -42,7 +46,7 @@ fun MessageItem(
     onDeleted: () -> Unit,
     onShowPhoto: (String) -> Unit,
     activity: Activity,
-    navController: NavController
+    navController: NavController,
 ) {
     var showMessageDialog by remember { mutableStateOf(false) }
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
@@ -52,6 +56,7 @@ fun MessageItem(
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
     var attachedCard by remember { mutableStateOf<Card?>(null) }
+    var selectedBitmap by remember { mutableStateOf<String?>(null) }
 
     attachedCardId = (message.getAttachment() as? CardAttachment)?.card
     attachedPhotos = (message.getAttachment() as? PhotosAttachment)?.photos
@@ -112,27 +117,43 @@ fun MessageItem(
     }
 
     if (showMessageDialog) {
-        Dialog({
-            showMessageDialog = false
-        }) {
-            Surface(
-                shape = MaterialTheme.shapes.large
-            ) {
-                Column {
-                    val messageString = stringResource(R.string.message)
-                    DropdownMenuItem({ Text(stringResource(R.string.copy)) }, {
-                        getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                            ClipData.newPlainText(messageString, message.text ?: "")
+        val messageString = stringResource(R.string.message)
+        Menu(
+            {
+                showMessageDialog = false
+            }
+        ) {
+            if (attachedPhotos?.isNotEmpty() == true && selectedBitmap != null) {
+//                item(stringResource(R.string.send)) {
+//                    showSendPhoto = true
+//                }
+                item(stringResource(R.string.share)) {
+                    coroutineScope.launch {
+                        context.imageLoader.execute(
+                            ImageRequest.Builder(context)
+                                .data(selectedBitmap!!)
+                                .target { drawable ->
+                                    drawable.toBitmapOrNull()?.share(context, null)
+                                }
+                                .build()
                         )
-                        showMessageDialog = false
-                    })
-
-                    if (isMe) {
-                        DropdownMenuItem({ Text(stringResource(R.string.delete)) }, {
-                            showDeleteMessageDialog = true
-                            showMessageDialog = false
-                        })
                     }
+                }
+            }
+
+            if (message.text?.isBlank() == false) {
+                item(stringResource(R.string.copy)) {
+                    getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
+                        ClipData.newPlainText(messageString, message.text ?: "")
+                    )
+                    showMessageDialog = false
+                }
+            }
+
+            if (isMe) {
+                item(stringResource(R.string.delete)) {
+                    showDeleteMessageDialog = true
+                    showMessageDialog = false
                 }
             }
         }
@@ -178,14 +199,18 @@ fun MessageItem(
             }
             attachedPhotos?.ifNotEmpty?.let { photos ->
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, if (isMe) Alignment.End else Alignment.Start),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        PaddingDefault,
+                        if (isMe) Alignment.End else Alignment.Start
+                    ),
                     contentPadding = PaddingValues(PaddingDefault),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(photos, key = { it }) { photo ->
+                        val data = api.url(photo)
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(api.url(photo))
+                                .data(data)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = "",
@@ -195,9 +220,13 @@ fun MessageItem(
                                 .fillMaxWidth()
                                 .height(320.dp)
                                 .clip(MaterialTheme.shapes.large)
-                                .clickable {
-                                    onShowPhoto(photo)
-                                }
+                                .combinedClickable(
+                                    onClick = { onShowPhoto(photo) },
+                                    onLongClick = {
+                                        selectedBitmap = data
+                                        showMessageDialog = true
+                                    }
+                                )
                         )
                     }
                 }

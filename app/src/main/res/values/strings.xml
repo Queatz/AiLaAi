@@ -185,6 +185,12 @@
     <string name="your_groups">Your groups</string>
     <string name="description">Description</string>
     <string name="update">Update</string>
+    <string name="send">Send</string>
+    <string name="change_owner">Change owner</string>
+    <string name="give">Give</string>
+    <string name="give_to_person">Give to %1$s</string>
+    <string name="give_to_people">Give to %1$s and %2$s</string>
+    <string name="give_to_x_people">Give to %1$s people</string>
     <plurals name="meters_away">
         <item quantity="one">%1$s meter away</item>
         <item quantity="other">%1$s meters away</item>
