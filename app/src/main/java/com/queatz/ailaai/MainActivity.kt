@@ -50,8 +50,8 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("explore", getString(R.string.explore), Icons.Outlined.Place),
-            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
             NavButton("messages", getString(R.string.friends), Icons.Outlined.Person),
+            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
             NavButton("me", getString(R.string.me), Icons.Outlined.Home)
         )
     }

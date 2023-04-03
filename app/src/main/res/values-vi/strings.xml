@@ -91,9 +91,7 @@
     <plurals name="number_of_cards">
         <item quantity="other">%1$s thẻ</item>
     </plurals>
-    <string name="with_you_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào
-        bạn mở Ai Là Ai.
-    </string>
+    <string name="with_you_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
     <string name="set_photo">Chọn ảnh</string>
     <string name="card">Thẻ</string>
     <string name="copy_link">Sao chép liên kết</string>
@@ -192,8 +190,7 @@
     <string name="manage">Quản lý</string>
     <string name="x_removed">%1$s đã xóa khỏi</string>
     <plurals name="sent_photos">
-        <item quantity="one">Đã gửi ảnh</item>
-        <item quantity="other">Đã gửi $1%s ảnh</item>
+        <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
     <string name="description">Mô tả</string>
     <string name="update">Cập nhật</string>

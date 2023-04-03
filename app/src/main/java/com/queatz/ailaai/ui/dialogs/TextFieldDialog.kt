@@ -30,7 +30,6 @@ fun TextFieldDialog(
     initialValue: String = "",
     onSubmit: suspend (value: String) -> Unit
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current!!
     var disableSubmit by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
     var text by remember { mutableStateOf(initialValue) }

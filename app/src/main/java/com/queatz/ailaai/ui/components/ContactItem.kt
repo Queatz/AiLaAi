@@ -1,12 +1,14 @@
 package com.queatz.ailaai.ui.components
 
-import androidx.compose.foundation.clickable
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -14,26 +16,59 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
-import com.queatz.ailaai.GroupExtended
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.isUnread
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.item
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: Person?) {
+fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: Person?, onChange: () -> Unit) {
     val people = groupExtended.members?.filter { it.person?.id != me?.id }?.map { it.person!! } ?: emptyList()
     val myMember = groupExtended.members?.find { it.person?.id == me?.id }
     val isUnread = groupExtended.isUnread(myMember?.member)
+    var showMenu by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
-        .clip(MaterialTheme.shapes.large)
-        .clickable {
-            navController.navigate("group/${groupExtended.group!!.id!!}")
-        }) {
+    if (showMenu) {
+        Menu(
+            { showMenu = false }
+        ) {
+            item(stringResource(R.string.hide)) {
+                coroutineScope.launch {
+                    try {
+                        api.updateMember(myMember!!.member!!.id!!, Member(hide = true))
+                        Toast.makeText(
+                            navController.context,
+                            navController.context.getString(R.string.group_hidden),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        onChange()
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .combinedClickable(
+                onLongClick = {
+                    showMenu = true
+                }
+            ) {
+                navController.navigate("group/${groupExtended.group!!.id!!}")
+            }
+    ) {
         GroupPhoto(groupExtended.photos(me?.let(::listOf) ?: emptyList()))
         Column(
             modifier = Modifier.weight(1f)
@@ -51,7 +86,10 @@ fun ContactItem(navController: NavController, groupExtended: GroupExtended, me: 
                         R.string.you_x,
                         it
                     ) else it
-                } ?: stringResource(if (people.size == 1) R.string.connected_ago else R.string.created_ago, groupExtended.group!!.createdAt!!.timeAgo().lowercase()),
+                } ?: stringResource(
+                    if (people.size == 1) R.string.connected_ago else R.string.created_ago,
+                    groupExtended.group!!.createdAt!!.timeAgo().lowercase()
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,

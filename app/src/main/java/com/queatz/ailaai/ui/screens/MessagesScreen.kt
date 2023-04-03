@@ -35,6 +35,7 @@ import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.state.gsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -47,6 +48,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var showPushPermissionDialog by remember { mutableStateOf(false) }
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     fun update() {
         groups = if (searchText.isBlank()) allGroups else allGroups.filter {
@@ -55,8 +57,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    LaunchedEffect(Unit) {
-        // Reload, but only show loading indicator when there are no groups
+    suspend fun reload() {
         isLoading = groups.isEmpty()
         try {
             allGroups = api.groups().filter { it.group != null }
@@ -71,6 +72,11 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                 isLoading = false
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        // Reload, but only show loading indicator when there are no groups
+        reload()
     }
 
     LaunchedEffect(Unit) {
@@ -144,7 +150,11 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     }
                 } else {
                     items(groups, key = { it.group!!.id!! }) {
-                        ContactItem(navController, it, me())
+                        ContactItem(navController, it, me()) {
+                            scope.launch {
+                                reload()
+                            }
+                        }
                     }
                 }
             }

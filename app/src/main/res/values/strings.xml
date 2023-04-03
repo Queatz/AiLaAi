@@ -92,7 +92,7 @@
     </plurals>
     <string name="card_name">Card name</string>
     <string name="with_you">With you</string>
-    <string name="with_you_description">The location of this card will be updated to your current location every time you open Ai La Ai.</string>
+    <string name="with_you_description">The location of this card will be updated to your current location every time you open the app.</string>
     <string name="set_photo">Choose photo</string>
     <string name="copy_link">Copy link</string>
     <string name="card">Card</string>
@@ -195,6 +195,6 @@
     </plurals>
     <plurals name="sent_photos">
         <item quantity="one">Sent a photo</item>
-        <item quantity="other">Sent $1%s photos</item>
+        <item quantity="other">Sent %1$s photos</item>
     </plurals>
 </resources>

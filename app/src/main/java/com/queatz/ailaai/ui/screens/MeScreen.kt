@@ -251,6 +251,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                             try {
                                                 cardParentType = null
                                                 filters = emptySet()
+                                                searchText = ""
                                                 addedCardId = api.newCard().id
                                                 myCards = api.myCards()
                                                 delay(100)
