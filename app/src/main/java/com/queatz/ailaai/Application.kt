@@ -1,6 +1,7 @@
 package com.queatz.ailaai
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -93,3 +94,5 @@ enum class DeviceType {
     Hms,
     Gms
 }
+
+val appLanguage get() = AppCompatDelegate.getApplicationLocales().get(0)?.language

@@ -23,7 +23,7 @@ import com.queatz.ailaai.ui.theme.ElevationDefault
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun SearchField(value: String, onValueChange: (value: String) -> Unit, modifier: Modifier = Modifier) {
+fun SearchField(value: String, onValueChange: (value: String) -> Unit, placeholder: String? = null, modifier: Modifier = Modifier) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
     Card(
         shape = MaterialTheme.shapes.large,
@@ -36,7 +36,7 @@ fun SearchField(value: String, onValueChange: (value: String) -> Unit, modifier:
         OutlinedTextField(
             value,
             onValueChange = onValueChange,
-            placeholder = { Text(stringResource(R.string.search)) },
+            placeholder = { Text(placeholder ?: stringResource(R.string.search)) },
             shape = MaterialTheme.shapes.large,
             singleLine = true,
             keyboardOptions = KeyboardOptions(

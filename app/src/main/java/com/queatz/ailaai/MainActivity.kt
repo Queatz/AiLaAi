@@ -87,11 +87,28 @@ class MainActivity : AppCompatActivity() {
                     var me by remember { mutableStateOf<Person?>(null) }
                     var showSignedOut by remember { mutableStateOf(false) }
                     val snackbarHostState = remember { SnackbarHostState() }
-                    val coroutineScope = rememberCoroutineScope()
+                    val scope = rememberCoroutineScope()
                     val cantConnectString = stringResource(R.string.cant_connect)
                     val updateAvailableString = stringResource(R.string.update_available)
                     val downloadString = stringResource(R.string.download)
                     val context = LocalContext.current
+
+                    fun updateAppLanguage(me: Person?) {
+                        val language = appLanguage
+                        if (me != null && language != null && me.language != language) {
+                            scope.launch {
+                                api.updateMe(Person().also {
+                                    it.language = language
+                                })
+                            }
+                        }
+                    }
+
+                    suspend fun loadMe() {
+                        me = api.me()
+                        push.setMe(me!!.id!!)
+                        updateAppLanguage(me)
+                    }
 
                     LaunchedEffect(me) {
                         if (me == null) {
@@ -106,8 +123,7 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(true) {
                         while (me == null) try {
-                            me = api.me()
-                            push.setMe(me!!.id!!)
+                            loadMe()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                             snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
@@ -281,10 +297,9 @@ class MainActivity : AppCompatActivity() {
                                 composable("settings") {
                                     SettingsScreen(navController, { me }) {
                                         if (api.hasToken()) {
-                                            coroutineScope.launch {
+                                            scope.launch {
                                                 try {
-                                                    me = api.me()
-                                                    push.setMe(me!!.id!!)
+                                                    loadMe()
                                                 } catch (ex: Exception) {
                                                     ex.printStackTrace()
                                                     snackbarHostState.showSnackbar(

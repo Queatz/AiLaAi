@@ -13,7 +13,7 @@
     <string name="close">Close</string>
     <string name="invite_code">Invite code</string>
     <string name="error">Error</string>
-    <string name="invite_code_description">This code will be active for 48 hours.</string>
+    <string name="invite_code_description">This code will be usable for 48 hours.</string>
     <string name="your_cards">Your cards</string>
     <string name="invite">Invite</string>
     <string name="invite_people">Invite people</string>
@@ -30,6 +30,7 @@
     <string name="open_settings">Open settings</string>
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
     <string name="search">Search</string>
+    <string name="search_people_and_groups">Search people and groups</string>
     <string name="explore">Explore</string>
     <string name="messages">Messages</string>
     <string name="me">Me</string>
@@ -100,7 +101,6 @@
     <string name="set_my_location">Set my location</string>
     <string name="reset_location">Reset location</string>
     <string name="no_groups_to_show">No groups to show.</string>
-    <string name="new_">New</string>
     <string name="new_group">Create group</string>
     <string name="new_group_with_person">Create group with %1$s</string>
     <string name="new_group_with_people">Create group with %1$s and %2$s</string>
@@ -191,6 +191,9 @@
     <string name="give_to_person">Give to %1$s</string>
     <string name="give_to_people">Give to %1$s and %2$s</string>
     <string name="give_to_x_people">Give to %1$s people</string>
+    <string name="invite_text">%1$s invited you to play together! Download Ai Là Ai from https://ailaai.app and use invite code %2$s.</string>
+    <string name="group">Group</string>
+    <string name="not_connected_yet">Not connected</string>
     <plurals name="meters_away">
         <item quantity="one">%1$s meter away</item>
         <item quantity="other">%1$s meters away</item>

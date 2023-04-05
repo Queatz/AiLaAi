@@ -38,6 +38,8 @@ class Person(
     var photo: String? = null,
     var inviter: String? = null,
     var seen: Instant? = null,
+    var geo: List<Double>? = null,
+    var language: String? = null,
     var source: PersonSource? = null
 ) : Model()
 

@@ -294,7 +294,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     ) {
                         var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                         val textScrollState = rememberScrollState()
-                        Text(
+                        LinkifyText(
                             groupExtended?.group?.description ?: "",
                             modifier = Modifier
                                 .weight(1f)

@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,9 +116,9 @@ fun CardConversation(
                 Button({
                     onReply(stack.map { it.title } + current.title)
                 }, enabled = !isMine) {
-                    Icon(Icons.Filled.MailOutline, "", modifier = Modifier.padding(end = PaddingDefault))
+                    Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
                     Text(
-                        stringResource(R.string.reply),
+                        stringResource(R.string.message),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )

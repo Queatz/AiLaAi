@@ -23,7 +23,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 23
+        versionCode = 24
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -34,6 +34,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        compose = true
     }
     signingConfigs {
         create("release") {
@@ -44,11 +45,17 @@ android {
         }
     }
     buildTypes {
-        getByName("debug") {
+        debug {
             signingConfig = signingConfigs.getByName("release")
         }
-        getByName("release") {
+        release {
             signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -60,9 +67,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-    buildFeatures {
-        compose = true
     }
     packagingOptions {
         resources {

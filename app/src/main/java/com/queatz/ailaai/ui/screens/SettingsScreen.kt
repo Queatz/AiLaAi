@@ -32,6 +32,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.appLanguage
 import com.queatz.ailaai.extensions.sendEmail
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.Dispatchers
@@ -95,10 +96,10 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
                             modifier = Modifier
-                            .clip(MaterialTheme.shapes.large)
-                            .clickable {
-                                confirmSignOutChecked = !confirmSignOutChecked
-                            }) {
+                                .clip(MaterialTheme.shapes.large)
+                                .clickable {
+                                    confirmSignOutChecked = !confirmSignOutChecked
+                                }) {
                             Checkbox(confirmSignOutChecked, {
                                 confirmSignOutChecked = it
                             })
@@ -167,109 +168,111 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(horizontal = PaddingDefault)
-        ) {
-            AsyncImage(
-                model = me()?.photo?.let { api.url(it) } ?: "",
-                contentDescription = stringResource(R.string.your_photo),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center,
-                modifier = Modifier
-                    .padding(PaddingDefault)
-                    .requiredSize(84.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .clickable {
-                        launcher.launch("image/*")
-                    }
-            )
+        val scrollState = rememberScrollState()
 
-            val scrollState = rememberScrollState()
-            Column(
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .verticalScroll(scrollState)
+                    .padding(horizontal = PaddingDefault)
             ) {
-                OutlinedTextField(
-                    myName,
-                    {
-                        myName = it
-                        myNameUnsaved = true
-                    },
-                    label = {
-                        Text(stringResource(R.string.your_name))
-                    },
-                    shape = MaterialTheme.shapes.large,
+                AsyncImage(
+                    model = me()?.photo?.let { api.url(it) } ?: "",
+                    contentDescription = stringResource(R.string.your_photo),
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
                     modifier = Modifier
-                        .padding(horizontal = PaddingDefault)
+                        .padding(PaddingDefault)
+                        .requiredSize(84.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .clickable {
+                            launcher.launch("image/*")
+                        }
                 )
 
-                AnimatedVisibility(myNameUnsaved) {
-                    var saving by remember { mutableStateOf(false) }
-                    Button(
+                Column {
+                    OutlinedTextField(
+                        myName,
                         {
-                            coroutineScope.launch {
-                                try {
-                                    saving = true
-                                    api.updateMe(Person(name = myName.trim()))
-                                    myNameUnsaved = false
-                                    updateMe()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                } finally {
-                                    saving = false
-                                }
-                            }
+                            myName = it
+                            myNameUnsaved = true
                         },
-                        enabled = !saving,
+                        label = {
+                            Text(stringResource(R.string.your_name))
+                        },
+                        shape = MaterialTheme.shapes.large,
                         modifier = Modifier
-                            .padding(PaddingDefault)
+                            .padding(horizontal = PaddingDefault)
+                    )
+
+                    AnimatedVisibility(myNameUnsaved) {
+                        var saving by remember { mutableStateOf(false) }
+                        Button(
+                            {
+                                coroutineScope.launch {
+                                    try {
+                                        saving = true
+                                        api.updateMe(Person(name = myName.trim()))
+                                        myNameUnsaved = false
+                                        updateMe()
+                                    } catch (ex: Exception) {
+                                        ex.printStackTrace()
+                                    } finally {
+                                        saving = false
+                                    }
+                                }
+                            },
+                            enabled = !saving,
+                            modifier = Modifier
+                                .padding(PaddingDefault)
+                        ) {
+                            Text(stringResource(R.string.update_your_name))
+                        }
+                    }
+                }
+            }
+
+            Text(
+                stringResource(R.string.photo_and_name_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
+            )
+
+            var chooseLanguageDialog by remember { mutableStateOf(false) }
+
+            if (chooseLanguageDialog) {
+                fun setLanguage(language: String) {
+                    coroutineScope.launch(Dispatchers.Main) {
+                        val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(language)
+                        AppCompatDelegate.setApplicationLocales(appLocale)
+                    }
+                }
+
+                Dialog({
+                    chooseLanguageDialog = false
+                }) {
+                    Surface(
+                        shape = MaterialTheme.shapes.large
                     ) {
-                        Text(stringResource(R.string.update_your_name))
+                        Column {
+                            DropdownMenuItem({ Text("Tiếng Việt") }, {
+                                chooseLanguageDialog = false
+                                setLanguage("vi,en")
+                            })
+                            DropdownMenuItem({ Text("English") }, {
+                                chooseLanguageDialog = false
+                                setLanguage("en,vi")
+                            })
+                        }
                     }
                 }
             }
-        }
-
-        Text(
-            stringResource(R.string.photo_and_name_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
-        )
-
-        var chooseLanguageDialog by remember { mutableStateOf(false) }
-
-        if (chooseLanguageDialog) {
-            fun setLanguage(language: String) {
-                coroutineScope.launch(Dispatchers.Main) {
-                    val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(language)
-                    AppCompatDelegate.setApplicationLocales(appLocale)
-                }
-            }
-
-            Dialog({
-                chooseLanguageDialog = false
-            }) {
-                Surface(
-                    shape = MaterialTheme.shapes.large
-                ) {
-                    Column {
-                        DropdownMenuItem({ Text("Tiếng Việt") }, {
-                            chooseLanguageDialog = false
-                            setLanguage("vi,en")
-                        })
-                        DropdownMenuItem({ Text("English") }, {
-                            chooseLanguageDialog = false
-                            setLanguage("en,vi")
-                        })
-                    }
-                }
-            }
-        }
 
 //        var isPublished by remember { mutableStateOf(false) }
 //        DropdownMenuItem({
@@ -294,44 +297,45 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 //            }
 //        })
 
-        DropdownMenuItem({
-            Column(modifier = Modifier.padding(PaddingDefault)) {
-                Text(
-                    stringResource(R.string.language),
-                    style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
-                )
-                Text(
-                    when (AppCompatDelegate.getApplicationLocales().get(0)?.language) {
-                        "vi" -> stringResource(R.string.language_vietnamese)
-                        else -> stringResource(R.string.language_english)
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
-        }, {
-            chooseLanguageDialog = true
-        })
+            DropdownMenuItem({
+                Column(modifier = Modifier.padding(PaddingDefault)) {
+                    Text(
+                        stringResource(R.string.language),
+                        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+                    )
+                    Text(
+                        when (appLanguage) {
+                            "vi" -> stringResource(R.string.language_vietnamese)
+                            else -> stringResource(R.string.language_english)
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }, {
+                chooseLanguageDialog = true
+            })
 
-        DropdownMenuItem({
-            Text(
-                stringResource(R.string.app_feedback),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(PaddingDefault)
-            )
-        }, {
-            "Jacob<jacobaferrero@gmail.com>".sendEmail(context, "Ai Là Ai feedback")
-        })
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.app_feedback),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+                "Jacob<jacobaferrero@gmail.com>".sendEmail(context, "Ai Là Ai feedback")
+            })
 
-        DropdownMenuItem({
-            Text(
-                stringResource(R.string.sign_out_or_transfer),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(PaddingDefault)
-            )
-        }, {
-            signOutDialog = true
-        })
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.sign_out_or_transfer),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+                signOutDialog = true
+            })
+        }
     }
 }

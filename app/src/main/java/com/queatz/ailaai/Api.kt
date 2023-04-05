@@ -154,6 +154,8 @@ class Api {
 
     suspend fun updateMe(person: Person): Person = post("me", person)
 
+    suspend fun people(search: String): List<Person> = get("people", mapOf("search" to search))
+
     suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
         "geo" to "${geo.latitude},${geo.longitude}"
     ) + (search?.let {

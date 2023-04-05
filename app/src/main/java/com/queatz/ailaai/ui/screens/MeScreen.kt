@@ -1,15 +1,11 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.Person
@@ -32,7 +27,6 @@ import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.gsonSaver
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,65 +41,12 @@ enum class Filter {
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var addedCardId by remember { mutableStateOf<String?>(null) }
-    var inviteDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
-    var inviteCode by remember { mutableStateOf("") }
     val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
     var searchText by rememberSaveable { mutableStateOf("") }
     var filters by rememberSaveable { mutableStateOf(emptySet<Filter>()) }
-
-    val errorString = stringResource(R.string.error)
-
-    LaunchedEffect(inviteDialog) {
-        if (inviteDialog) {
-            inviteCode = ""
-
-            inviteCode = try {
-                api.invite().code ?: ""
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                errorString
-            }
-        }
-    }
-
-    if (inviteDialog) {
-        AlertDialog(
-            {
-                inviteDialog = false
-            },
-            {
-                TextButton(
-                    {
-                        inviteDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
-            },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            title = { Text(stringResource(R.string.invite_code)) },
-            text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault)
-                ) {
-                    if (inviteCode.isBlank()) {
-                        CircularProgressIndicator()
-                    } else {
-                        SelectionContainer {
-                            Text(inviteCode, style = MaterialTheme.typography.displayMedium)
-                        }
-                        Text(
-                            stringResource(R.string.invite_code_description),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-            }
-        )
-    }
 
     LaunchedEffect(true) {
         try {
@@ -142,18 +83,28 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             },
             actions = {
                 ElevatedButton(
-                    {
-                        inviteDialog = true
-                    },
-                    enabled = !inviteDialog,
-                    modifier = Modifier.padding(start = PaddingDefault)
+                    onClick = {
+                        coroutineScope.launch {
+                            try {
+                                cardParentType = null
+                                filters = emptySet()
+                                searchText = ""
+                                addedCardId = api.newCard().id
+                                myCards = api.myCards()
+                                delay(100)
+
+                                if (state.firstVisibleItemIndex > 2) {
+                                    state.scrollToItem(2)
+                                }
+
+                                state.animateScrollToItem(0)
+                            } catch (ex: Exception) {
+                                ex.printStackTrace()
+                            }
+                        }
+                    }
                 ) {
-                    Icon(
-                        Icons.Outlined.Add,
-                        stringResource(R.string.invite),
-                        modifier = Modifier.padding(end = PaddingDefault)
-                    )
-                    Text(stringResource(R.string.invite))
+                    Text(stringResource(R.string.add_a_card))
                 }
                 IconButton({
                     navController.navigate("settings")
@@ -238,38 +189,6 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.secondary
                             )
-                        }
-                    } else if (filters.isEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) })  {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                ElevatedButton(
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            try {
-                                                cardParentType = null
-                                                filters = emptySet()
-                                                searchText = ""
-                                                addedCardId = api.newCard().id
-                                                myCards = api.myCards()
-                                                delay(100)
-
-                                                if (state.firstVisibleItemIndex > 2) {
-                                                    state.scrollToItem(2)
-                                                }
-
-                                                state.animateScrollToItem(0)
-                                            } catch (ex: Exception) {
-                                                ex.printStackTrace()
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    Text(stringResource(R.string.add_a_card))
-                                }
-                            }
                         }
                     }
 

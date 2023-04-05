@@ -15,7 +15,7 @@
     <string name="close">Đóng</string>
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
-    <string name="invite_code_description">Dùng mã này sẽ được trong vòng 48 giờ.</string>
+    <string name="invite_code_description">Mã này xài được trong vòng 48 giờ.</string>
     <string name="your_cards">Thẻ của bạn</string>
     <string name="invite">Mời ai đó</string>
     <string name="invite_person">Mời %1$s</string>
@@ -99,7 +99,6 @@
     <string name="set_my_location">Đặt vị trí của tôi</string>
     <string name="reset_location">Đặt lại vị trí</string>
     <string name="no_groups_to_show">Không tìm được nhóm để cho bạn xem.</string>
-    <string name="new_">Tạo</string>
     <string name="your_groups">Nhóm của bạn</string>
     <string name="new_group">Tạo nhóm</string>
     <string name="new_group_with_person">Tạo nhóm vơi %1$s</string>
@@ -200,4 +199,8 @@
     <string name="give_to_person">Đưa cho %1$s</string>
     <string name="give_to_people">Đưa cho %1$s và %2$s</string>
     <string name="give_to_x_people">Đưa cho %1$s người</string>
+    <string name="invite_text">%1$s đã mời bạn chơi cùng! Tải xuống Ai Là Ai từ https://ailaai.app và xài mã mời %2$s.</string>
+    <string name="group">Nhóm</string>
+    <string name="search_people_and_groups">Tìm kiếm người và nhóm</string>
+    <string name="not_connected_yet">Chưa kết nối</string>
 </resources>

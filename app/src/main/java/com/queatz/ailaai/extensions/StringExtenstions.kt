@@ -41,6 +41,13 @@ fun String.shareAsUrl(context: Context, name: String?) {
     context.startActivity(Intent.createChooser(intent, null))
 }
 
+fun String.shareAsText(context: Context) {
+    val intent = Intent(Intent.ACTION_SEND)
+    intent.putExtra(Intent.EXTRA_TEXT, this)
+    intent.type = ContentType.Text.Plain.toString()
+    context.startActivity(Intent.createChooser(intent, null))
+}
+
 // Returns true if everything went well
 fun Bitmap.share(context: Context, name: String?): Boolean {
     val uri = uri(context) ?: return false
