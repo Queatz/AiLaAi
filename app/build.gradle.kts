@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    kotlin("plugin.serialization") version "1.8.10"
 //    id("com.huawei.agconnect") // todo IncrementalTaskInputs, try again after April, 2023
     id("com.google.gms.google-services")
 }
@@ -109,7 +110,8 @@ dependencies {
     implementation("com.huawei.hms:hwid:$hmsVersion")
     implementation("com.huawei.hms:location:$hmsVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("androidx.fragment:fragment-ktx:1.5.6")
     implementation("androidx.compose.ui:ui-viewbinding:1.4.0")
     implementation("com.android.volley:volley:1.2.1")
@@ -118,7 +120,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation(platform("com.google.firebase:firebase-bom:31.0.2"))

@@ -33,7 +33,7 @@ import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
-import com.queatz.ailaai.ui.state.gsonSaver
+import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
@@ -42,9 +42,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var searchText by rememberSaveable { mutableStateOf("") }
-    var allGroups by rememberSaveable(stateSaver = gsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
-    var allPeople by rememberSaveable(stateSaver = gsonSaver<List<Person>>()) { mutableStateOf(listOf()) }
-    var results by rememberSaveable(stateSaver = gsonSaver<List<SearchResult>>()) { mutableStateOf(listOf()) }
+    var allGroups by rememberSaveable(stateSaver = jsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
+    var allPeople by rememberSaveable(stateSaver = jsonSaver<List<Person>>()) { mutableStateOf(listOf()) }
+    var results by rememberSaveable(stateSaver = jsonSaver<List<SearchResult>>()) { mutableStateOf(listOf()) }
     var isLoading by remember { mutableStateOf(results.isEmpty()) }
     var showCreateGroup by remember { mutableStateOf(false) }
     var showPushPermissionDialog by remember { mutableStateOf(false) }

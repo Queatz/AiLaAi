@@ -44,10 +44,11 @@ import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
 import com.queatz.ailaai.ui.components.EditCard
 import com.queatz.ailaai.ui.dialogs.*
-import com.queatz.ailaai.ui.state.gsonSaver
+import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.*
+import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,8 +69,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var openRemoveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var openCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var openLeaveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
-    var card by rememberSaveable(stateSaver = gsonSaver<Card?>()) { mutableStateOf(null) }
-    var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
+    var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
+    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
@@ -693,7 +694,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             async {
                                 api.sendMessage(
                                     group.id!!,
-                                    Message(attachment = gson.toJson(CardAttachment(cardId)))
+                                    Message(attachment = json.encodeToString(CardAttachment(cardId)))
                                 )
                             }
                         }.awaitAll()

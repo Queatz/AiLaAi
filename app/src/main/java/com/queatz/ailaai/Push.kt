@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 
 val push = Push()
 
@@ -64,7 +66,7 @@ class Push {
         }
     }
 
-    private inline fun <reified T : Any> parse(action: String): T = gson.fromJson(action, T::class.java)!!
+    private inline fun <reified T : Any> parse(action: String): T = json.decodeFromString<T>(action)
 
     private fun receive(data: CollaborationPushData) {
         val deeplinkIntent = Intent(
@@ -205,6 +207,7 @@ enum class PushAction {
     Collaboration
 }
 
+@Serializable
 data class MessagePushData(
     val group: Group,
     val person: Person,
@@ -226,12 +229,14 @@ enum class CollaborationEventDataDetails {
     Location,
 }
 
+@Serializable
 data class CollaborationEventData (
     val card: Card? = null,
     val person: Person? = null,
     val details: CollaborationEventDataDetails? = null
 )
 
+@Serializable
 data class CollaborationPushData(
     val person: Person,
     val card: Card,

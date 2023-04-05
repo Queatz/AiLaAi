@@ -50,6 +50,7 @@ import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
@@ -431,6 +432,7 @@ private fun CardToolbar(
     }
 }
 
+@Serializable
 data class ConversationItem(
     var title: String = "",
     var message: String = "",

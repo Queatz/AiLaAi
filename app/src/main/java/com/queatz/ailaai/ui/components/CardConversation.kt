@@ -24,8 +24,9 @@ import androidx.compose.ui.text.withStyle
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.LinkifyText
 import com.queatz.ailaai.R
-import com.queatz.ailaai.gson
+import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.serialization.decodeFromString
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -40,7 +41,7 @@ fun CardConversation(
     conversationChange: ((List<ConversationItem>) -> Unit)? = null
 ) {
     val conversation = remember(card.conversation) {
-        gson.fromJson(card.conversation ?: "{}", ConversationItem::class.java)
+        json.decodeFromString<ConversationItem>(card.conversation ?: "{}")
     }
     var current by remember(conversation) { mutableStateOf(conversation) }
     var stack by remember(conversation) { mutableStateOf(emptyList<ConversationItem>()) }

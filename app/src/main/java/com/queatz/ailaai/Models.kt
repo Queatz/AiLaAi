@@ -1,7 +1,9 @@
 package com.queatz.ailaai
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
+@Serializable
 class Card(
     var person: String? = null,
     var parent: String? = null,
@@ -17,22 +19,26 @@ class Card(
     var cardCount: Int? = null
 ) : Model()
 
+@Serializable
 class Invite(
     var person: String? = null,
     var code: String? = null
 ) : Model()
 
+@Serializable
 class Save(
     var person: String? = null,
     var card: String? = null
 ) : Model()
 
+@Serializable
 class Group(
     var name: String? = null,
     var seen: Instant? = null,
     var description: String? = null,
 ) : Model()
 
+@Serializable
 class Person(
     var name: String? = null,
     var photo: String? = null,
@@ -43,6 +49,7 @@ class Person(
     var source: PersonSource? = null
 ) : Model()
 
+@Serializable
 class Member(
     var seen: Instant? = null,
     var hide: Boolean? = null,
@@ -50,6 +57,7 @@ class Member(
     var host: Boolean? = null
 ) : Edge()
 
+@Serializable
 class Message(
     var group: String? = null,
     var member: String? = null,
@@ -61,11 +69,13 @@ class Transfer(
     var code: String? = null
 ) : Model()
 
+@Serializable
 open class Edge : Model() {
     var from: String? = null
     var to: String? = null
 }
 
+@Serializable
 open class Model {
     var id: String? = null
     var createdAt: Instant? = null

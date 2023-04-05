@@ -1,10 +1,11 @@
 package com.queatz.ailaai.ui.state
 
 import androidx.compose.runtime.saveable.Saver
-import com.google.gson.reflect.TypeToken
-import com.queatz.ailaai.gson
+import com.queatz.ailaai.json
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
-inline fun <reified T> gsonSaver() = Saver<T, String>(
-    { gson.toJson(it) },
-    { gson.fromJson(it, object : TypeToken<T>() {}.type) }
+inline fun <reified T> jsonSaver() = Saver<T, String>(
+    { json.encodeToString(it) },
+    { json.decodeFromString(it) }
 )

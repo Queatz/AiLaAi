@@ -26,7 +26,7 @@ import com.queatz.ailaai.extensions.isFalse
 import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.state.gsonSaver
+import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,7 +39,7 @@ enum class Filter {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
-    var myCards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var myCards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var addedCardId by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()

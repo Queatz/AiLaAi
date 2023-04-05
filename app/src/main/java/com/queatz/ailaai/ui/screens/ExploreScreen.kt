@@ -25,7 +25,6 @@ import at.bluesource.choicesdk.core.Outcome
 import at.bluesource.choicesdk.location.common.LocationRequest
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
-import at.bluesource.choicesdk.maps.common.LatLng.Companion.toGmsLatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -35,7 +34,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
-import com.queatz.ailaai.ui.state.gsonSaver
+import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -61,7 +60,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
     var shownValue by rememberSaveable { mutableStateOf("") }
     var geoManual by remember { mutableStateOf(false) }
     var showSetMyLocation by remember { mutableStateOf(false) }
-    var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coroutineScope = rememberCoroutineScope()
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }

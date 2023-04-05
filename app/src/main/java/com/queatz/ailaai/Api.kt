@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.google.gson.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -15,8 +14,7 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.parsing.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,19 +22,18 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toJavaInstant
-import java.lang.reflect.Type
-import java.time.format.DateTimeFormatter
+import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.seconds
 
 val api = Api()
-val gson = GsonBuilder().registerTypeAdapter(Instant::class.java, InstantTypeConverter()).create()!!
+val json = DefaultJson
 
 const val appDomain = "https://ailaai.app"
 
+@Serializable
 private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
+
+@Serializable
 private data class LeaveCollaborationBody(val card: String)
 
 class Api {
@@ -55,9 +52,7 @@ class Api {
         expectSuccess = true
 
         install(ContentNegotiation) {
-            gson {
-                registerTypeAdapter(Instant::class.java, InstantTypeConverter())
-            }
+            json()
         }
 
         install(HttpTimeout) {
@@ -93,11 +88,16 @@ class Api {
 
     fun url(it: String) = "$baseUrl$it"
 
-    private suspend inline fun <reified T : Any> post(
+    private suspend inline fun <reified R : Any> post(
         url: String,
-        body: Any? = null,
         client: HttpClient = http,
-    ): T = client.post("$baseUrl/${url}") {
+    ): R = post(url, null as String?, client)
+
+        private suspend inline fun <reified R : Any, reified T : Any> post(
+        url: String,
+        body: T?,
+        client: HttpClient = http,
+    ): R = client.post("$baseUrl/${url}") {
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
@@ -244,53 +244,60 @@ class Api {
     suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
 }
 
+@Serializable
 data class SignUpRequest(
     val code: String,
 )
 
+@Serializable
 data class SignInRequest(
     val code: String,
 )
 
+@Serializable
 data class TokenResponse(
     val token: String,
 )
 
+@Serializable
 class GroupExtended(
     var group: Group? = null,
     var members: List<MemberAndPerson>? = null,
     var latestMessage: Message? = null,
 )
 
+@Serializable
 class MemberAndPerson(
     var person: Person? = null,
     var member: Member? = null,
 )
 
+@Serializable
 class SaveAndCard(
     var save: Save? = null,
     var card: Card? = null,
 )
 
+@Serializable
 class Device(
     val type: DeviceType,
     val token: String,
 )
-
-class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
-    override fun serialize(
-        src: Instant,
-        srcType: Type,
-        context: JsonSerializationContext,
-    ) = JsonPrimitive(DateTimeFormatter.ISO_INSTANT.format(src.toJavaInstant()))
-
-    override fun deserialize(
-        json: JsonElement,
-        type: Type,
-        context: JsonDeserializationContext,
-    ) = try {
-        json.asString.toInstant()
-    } catch (e: ParseException) {
-        null
-    }
-}
+//
+//class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
+//    override fun serialize(
+//        src: Instant,
+//        srcType: Type,
+//        context: JsonSerializationContext,
+//    ) = JsonPrimitive(DateTimeFormatter.ISO_INSTANT.format(src.toJavaInstant()))
+//
+//    override fun deserialize(
+//        json: JsonElement,
+//        type: Type,
+//        context: JsonDeserializationContext,
+//    ) = try {
+//        json.asString.toInstant()
+//    } catch (e: ParseException) {
+//        null
+//    }
+//}

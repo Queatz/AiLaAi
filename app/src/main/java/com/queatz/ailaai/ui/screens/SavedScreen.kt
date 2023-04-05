@@ -9,13 +9,13 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.api
 import com.queatz.ailaai.saves
 import com.queatz.ailaai.ui.components.CardsList
-import com.queatz.ailaai.ui.state.gsonSaver
+import com.queatz.ailaai.ui.state.jsonSaver
 import io.ktor.utils.io.*
 
 @Composable
 fun SavedScreen(context: Context, navController: NavController, me: () -> Person?) {
     var value by rememberSaveable { mutableStateOf("") }
-    var cards by rememberSaveable(stateSaver = gsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
     var isError by remember { mutableStateOf(false) }
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }

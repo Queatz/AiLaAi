@@ -28,10 +28,12 @@ import androidx.compose.ui.window.DialogProperties
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
-import com.queatz.ailaai.gson
+import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.components.ConversationItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
@@ -41,7 +43,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
 
     val conversation = remember {
         card.conversation?.let {
-            gson.fromJson(it, ConversationItem::class.java)
+            json.decodeFromString<ConversationItem>(it)
         } ?: ConversationItem()
     }
 
@@ -245,7 +247,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                                 try {
                                     val update = api.updateCard(
                                         card.id!!,
-                                        Card(name = cardName.trim(), conversation = gson.toJson(conversation))
+                                        Card(name = cardName.trim(), conversation = json.encodeToString(conversation))
                                     )
 
                                     card.name = update.name

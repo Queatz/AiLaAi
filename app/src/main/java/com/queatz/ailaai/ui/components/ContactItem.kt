@@ -24,6 +24,7 @@ import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.item
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 @Composable
 fun ContactItem(
@@ -170,7 +171,10 @@ fun ContactResult(
     }
 }
 
+@Serializable
 sealed class SearchResult {
+    @Serializable
     class Connect(val person: Person) : SearchResult()
+    @Serializable
     class Group(val groupExtended: GroupExtended) : SearchResult()
 }
