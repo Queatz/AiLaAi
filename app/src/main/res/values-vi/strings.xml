@@ -16,7 +16,7 @@
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Mã này xài được trong vòng 48 giờ.</string>
-    <string name="your_cards">Thẻ của bạn</string>
+    <string name="all_your_cards">Tất cả thẻ của bạn</string>
     <string name="invite">Mời ai đó</string>
     <string name="invite_person">Mời %1$s</string>
     <string name="invite_x_and_y">Mời %1$s và %2$s</string>
@@ -27,6 +27,7 @@
     <string name="search">Tìm kiếm</string>
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
+    <string name="camera_disabled_description">Quyền chụp ảnh bị tắt trong cài đặt.</string>
     <string name="find_my_location">Tìm vị trí của mình</string>
     <string name="finding_your_location">Đang tìm vị trí của bạn…</string>
     <string name="no_cards_to_show">Không tìm được thẻ để cho bạn xem.</string>
@@ -42,7 +43,6 @@
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
     <string name="active">Hoạt động</string>
-    <string name="not_active">Không hoạt động</string>
     <string name="messages_notification_channel_description">Tin nhắn từ người.</string>
     <string name="collaboration_notification_channel_description">Thông báo cộng tác.</string>
     <string name="copy">Sao chép</string>
@@ -51,8 +51,6 @@
     <string name="somewhere">Một nơi nào đó</string>
     <string name="reply">Trả lời</string>
     <string name="go_back">Quay lại</string>
-    <string name="card_active">Thẻ đang hoạt động</string>
-    <string name="card_inactive">Thẻ không hoạt động</string>
     <string name="card_location">Vị trí của thẻ</string>
     <string name="location_name">Tên của vị trí</string>
     <string name="location_name_description">Tên của vị trí được hiển thị trên thẻ để giúp mọi người biết vị trí của thẻ.</string>
@@ -134,11 +132,11 @@
     <string name="sent">Đã gửi!</string>
     <string name="app_feedback">Gửi phản hồi về ứng dụng</string>
     <string name="sent_a_card">đã gửi thẻ</string>
-    <string name="unpublished">Thẻ của bạn chưa xuất bản</string>
-    <string name="publish_your_cards_to_the_explore_tab">Xuất bản thẻ của bạn lên tab Khám phá</string>
-    <string name="your_cards_are_discoverable_on_the_explore_tab">Thẻ của bạn hiện khám phá được trên tab Khám phá</string>
-    <string name="published">Thẻ của bạn được xuất bản</string>
-    <string name="add_photo_to_activate">Thêm ảnh để kích hoạt</string>
+    <string name="unpublish">Hủy xuất bản</string>
+    <string name="publish">Xuất bản</string>
+    <string name="published">Được xuất bản</string>
+    <string name="draft">Bản nháp</string>
+    <string name="add_photo_to_publish">Thêm ảnh để xuất bản</string>
     <string name="change_location">Đổi vị trí</string>
     <string name="edit_card">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
@@ -171,18 +169,18 @@
     <string name="inline_you">bạn</string>
     <string name="inline_someone">một người ai đó</string>
     <string name="inline_a_card">một thẻ nào đó</string>
-    <string name="deactivate">Hủy kích hoạt</string>
-    <string name="activate">Kích hoạt</string>
     <string name="leave_card">Rời khỏi thẻ này không?</string>
     <string name="share">Chia sẻ</string>
+    <plurals name="x_cards_nearby">
+        <item quantity="other">%1$s thẻ gần bạn ở</item>
+    </plurals>
     <plurals name="meters_away">
         <item quantity="other">xa %1$s mét</item>
     </plurals>
     <plurals name="km_away">
         <item quantity="other">xa %1$s km</item>
     </plurals>
-    <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Phía dưới là thẻ của bạn bè nè.</string>
-    <string name="no_more_cards_nearby">Không còn thẻ nào gần bạn ở nữa. Phía dưới là thẻ của bạn bè nè.</string>
+    <string name="friends_cards">Thẻ của bạn bè</string>
     <string name="friends">Bạn bè</string>
     <string name="invite_people">Mời ai vào</string>
     <string name="empty_group_name">Nhóm mới</string>
@@ -191,6 +189,7 @@
     <plurals name="sent_photos">
         <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
+    <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Tất cả thẻ trong phạm vi 1km của bạn sẽ được hiển thị ở đây.</string>
     <string name="description">Mô tả</string>
     <string name="update">Cập nhật</string>
     <string name="send">Gửi</string>
@@ -203,4 +202,5 @@
     <string name="group">Nhóm</string>
     <string name="search_people_and_groups">Tìm kiếm người và nhóm</string>
     <string name="not_connected_yet">Chưa kết nối</string>
+    <string name="scan">Quét</string>
 </resources>

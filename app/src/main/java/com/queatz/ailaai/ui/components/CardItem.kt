@@ -2,7 +2,6 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -52,7 +51,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
@@ -245,9 +243,7 @@ fun BasicCard(
                                 visibilityThreshold = IntSize.VisibilityThreshold
                             )
                         )
-                        .let {
-                            it.minAspectRatio(if (conversation.isNotEmpty()) .75f else 1.5f)
-                        }
+                        .minAspectRatio(if (conversation.isNotEmpty()) .75f else 1.5f)
                         .padding(PaddingDefault * 2)
                 ) {
                     val (conversationRef, toolbarRef) = createRefs()
@@ -322,6 +318,41 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
         }
 )
 
+fun Modifier.horizontalFadingEdge(viewport: Size, scrollState: ScrollState) = then(
+    Modifier
+        .graphicsLayer(alpha = 0.99f)
+        .drawWithContent {
+            drawContent()
+
+            val w = scrollState.value.toFloat().coerceAtMost(viewport.width / 6f)
+            val w2 = (
+                scrollState.maxValue.toFloat() - scrollState.value.toFloat()
+            ).coerceAtMost(viewport.width / 6f)
+
+            if (scrollState.value != 0) {
+                drawRect(
+                    Brush.horizontalGradient(
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startX = w + scrollState.value,
+                        endX = 0.0f + scrollState.value
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+
+            if (scrollState.value != scrollState.maxValue) {
+                drawRect(
+                    Brush.horizontalGradient(
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startX = viewport.width - w2 + scrollState.value,
+                        endX = viewport.width + scrollState.value
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+        }
+)
+
 private fun Modifier.minAspectRatio(ratio: Float) = then(
     MaxAspectRatioModifier(ratio)
 )
@@ -388,7 +419,7 @@ private fun CardToolbar(
             enabled = card.photo != null
         )
         Text(
-            if (activeCommitted) stringResource(R.string.card_active) else if (card.photo == null) stringResource(R.string.add_photo_to_activate) else stringResource(R.string.card_inactive),
+            if (activeCommitted) stringResource(R.string.published) else if (card.photo == null) stringResource(R.string.add_photo_to_publish) else stringResource(R.string.draft),
             style = MaterialTheme.typography.labelMedium,
             color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier

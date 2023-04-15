@@ -10,11 +10,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -34,11 +34,12 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.appLanguage
 import com.queatz.ailaai.extensions.sendEmail
+import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
@@ -46,6 +47,13 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     var myNameUnsaved by rememberSaveable { mutableStateOf(false) }
     var signOutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    var inviteDialog by remember { mutableStateOf(false) }
+
+    if (inviteDialog) {
+        InviteDialog(
+            me()?.name ?: context.getString(R.string.someone)
+        ) { inviteDialog = false }
+    }
 
     if (signOutDialog) {
         var transferCode by remember { mutableStateOf("") }
@@ -158,6 +166,19 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
         TopAppBar(
             {
                 Text(stringResource(R.string.settings), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            },
+            actions = {
+                ElevatedButton(
+                    {
+                        inviteDialog = true
+                    },
+                    enabled = !inviteDialog,
+                    modifier = Modifier
+                        .padding(horizontal = PaddingDefault * 2)
+                ) {
+                    Icon(Icons.Outlined.PersonAdd, stringResource(R.string.invite), modifier = Modifier.padding(end = PaddingDefault))
+                    Text(stringResource(R.string.invite))
+                }
             },
             navigationIcon = {
                 IconButton({
@@ -273,29 +294,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     }
                 }
             }
-
-//        var isPublished by remember { mutableStateOf(false) }
-//        DropdownMenuItem({
-//            Column(modifier = Modifier.padding(PaddingDefault)) {
-//                Text(
-//                    stringResource(if (isPublished) R.string.published else R.string.unpublished),
-//                    style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
-//                )
-//                Text(
-//                    when (isPublished) {
-//                        false -> stringResource(R.string.publish_your_cards_to_the_explore_tab)
-//                        true -> stringResource(R.string.your_cards_are_discoverable_on_the_explore_tab)
-//                    },
-//                    style = MaterialTheme.typography.labelMedium,
-//                    color = MaterialTheme.colorScheme.secondary
-//                )
-//            }
-//        }, {
-//            when (isPublished) {
-//                false -> isPublished = true
-//                true -> isPublished = false
-//            }
-//        })
 
             DropdownMenuItem({
                 Column(modifier = Modifier.padding(PaddingDefault)) {

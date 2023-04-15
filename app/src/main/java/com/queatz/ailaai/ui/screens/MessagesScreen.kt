@@ -10,7 +10,8 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -27,7 +27,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.shareAsText
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.components.SearchResult
@@ -38,7 +37,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -48,73 +47,9 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     var isLoading by remember { mutableStateOf(results.isEmpty()) }
     var showCreateGroup by remember { mutableStateOf(false) }
     var showPushPermissionDialog by remember { mutableStateOf(false) }
-    var inviteDialog by remember { mutableStateOf(false) }
-    var inviteCode by remember { mutableStateOf("") }
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val errorString = stringResource(R.string.error)
-
-    LaunchedEffect(inviteDialog) {
-        if (inviteDialog) {
-            inviteCode = ""
-
-            inviteCode = try {
-                api.invite().code ?: ""
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                errorString
-            }
-        }
-    }
-
-    if (inviteDialog) {
-        AlertDialog(
-            {
-                inviteDialog = false
-            },
-            {
-                if (inviteCode != errorString && inviteCode.isNotBlank()) {
-                    TextButton(
-                        {
-                            inviteDialog = false
-                            context.getString(R.string.invite_text, me()?.name ?: context.getString(R.string.someone), inviteCode).shareAsText(context)
-                        }
-                    ) {
-                        Text(stringResource(R.string.share))
-                    }
-                } else {
-                    TextButton(
-                        {
-                            inviteDialog = false
-                        }
-                    ) {
-                        Text(stringResource(R.string.close))
-                    }
-                }
-            },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            title = { Text(stringResource(R.string.invite_code)) },
-            text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault)
-                ) {
-                    if (inviteCode.isBlank()) {
-                        CircularProgressIndicator()
-                    } else {
-                        SelectionContainer {
-                            Text(inviteCode, style = MaterialTheme.typography.displayMedium)
-                        }
-                        Text(
-                            stringResource(R.string.invite_code_description),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-            }
-        )
-    }
-
 
     fun update() {
         results = allPeople.map { SearchResult.Connect(it) } +
@@ -175,37 +110,6 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     }
 
     Column {
-        TopAppBar(
-            {
-                //Text(stringResource(R.string.your_groups), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ElevatedButton(
-                        {
-                            inviteDialog = true
-                        },
-                        enabled = !inviteDialog,
-                        modifier = Modifier.padding(start = PaddingDefault)
-                    ) {
-                        Text(stringResource(R.string.invite))
-                    }
-                    ElevatedButton(
-                        {
-                            showCreateGroup = true
-                        },
-                        modifier = Modifier.padding(horizontal = PaddingDefault)
-                    ) {
-                        Text(stringResource(R.string.new_group))
-                    }
-                }
-            },
-            actions = {
-
-            }
-        )
         Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 contentPadding = PaddingValues(
@@ -251,14 +155,33 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
             }
-            SearchField(
-                searchText,
-                { searchText = it },
-                placeholder = stringResource(R.string.search_people_and_groups),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(PaddingDefault * 2)
-            )
+                    .widthIn(max = 480.dp)
+            ) {
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .wrapContentWidth()
+                ) {
+                    SearchField(
+                        searchText,
+                        { searchText = it },
+                        placeholder = stringResource(R.string.search_people_and_groups),
+                    )
+                }
+                FloatingActionButton(
+                    onClick = {
+                        showCreateGroup = true
+                    },
+                    modifier = Modifier
+                        .padding(start = PaddingDefault * 2)
+                ) {
+                    Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                }
+            }
         }
     }
 
@@ -288,14 +211,13 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     }
 
     if (showCreateGroup) {
-        val context = LocalContext.current
         val didntWork = stringResource(R.string.didnt_work)
         val someone = stringResource(R.string.someone)
         ChoosePeopleDialog(
             {
                 showCreateGroup = false
             },
-            title = stringResource(R.string.invite_people),
+            title = stringResource(R.string.new_group),
             confirmFormatter = defaultConfirmFormatter(
                 R.string.new_group,
                 R.string.new_group_with_person,

@@ -2,6 +2,7 @@ package com.queatz.ailaai
 
 import android.location.Location
 import android.os.Bundle
+import android.view.WindowManager.LayoutParams.*
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             NavButton("explore", getString(R.string.explore), Icons.Outlined.Place),
             NavButton("messages", getString(R.string.friends), Icons.Outlined.Person),
             NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-            NavButton("me", getString(R.string.me), Icons.Outlined.Home)
+            NavButton("me", getString(R.string.me), Icons.Outlined.AccountCircle)
         )
     }
 
@@ -92,6 +93,8 @@ class MainActivity : AppCompatActivity() {
                     val updateAvailableString = stringResource(R.string.update_available)
                     val downloadString = stringResource(R.string.download)
                     val context = LocalContext.current
+
+                    window.setSoftInputMode(if (showNavigation || isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
 
                     fun updateAppLanguage(me: Person?) {
                         val language = appLanguage

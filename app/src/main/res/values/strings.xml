@@ -14,7 +14,7 @@
     <string name="invite_code">Invite code</string>
     <string name="error">Error</string>
     <string name="invite_code_description">This code will be usable for 48 hours.</string>
-    <string name="your_cards">Your cards</string>
+    <string name="all_your_cards">All your cards</string>
     <string name="invite">Invite</string>
     <string name="invite_people">Invite people</string>
     <string name="invite_person">Invite %1$s</string>
@@ -29,6 +29,7 @@
     <string name="find_my_location">Find my location</string>
     <string name="open_settings">Open settings</string>
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
+    <string name="camera_disabled_description">The camera permission is disabled in settings.</string>
     <string name="search">Search</string>
     <string name="search_people_and_groups">Search people and groups</string>
     <string name="explore">Explore</string>
@@ -43,7 +44,6 @@
     <string name="message">Message</string>
     <string name="someone">Someone</string>
     <string name="active">Active</string>
-    <string name="not_active">Not active</string>
     <string name="messages_notification_channel_description">Messages from people.</string>
     <string name="collaboration_notification_channel_description">Collaboration notifications.</string>
     <string name="copy">Copy</string>
@@ -52,8 +52,6 @@
     <string name="somewhere">Somewhere</string>
     <string name="reply">Reply</string>
     <string name="go_back">Go back</string>
-    <string name="card_active">Card is active</string>
-    <string name="card_inactive">Card is not active</string>
     <string name="card_location">Card location</string>
     <string name="location_name">Location name</string>
     <string name="location_name_description">The location name is shown on the card to help others know where it is located.</string>
@@ -135,11 +133,11 @@
     <string name="sent">Sent!</string>
     <string name="app_feedback">Send app feedback</string>
     <string name="sent_a_card">Sent a card</string>
-    <string name="unpublished">Your cards are unpublished</string>
-    <string name="published">Your cards are published</string>
-    <string name="publish_your_cards_to_the_explore_tab">Publish your cards to the Explore tab</string>
-    <string name="your_cards_are_discoverable_on_the_explore_tab">Your cards are discoverable on the Explore tab</string>
-    <string name="add_photo_to_activate">Add a photo to activate</string>
+    <string name="unpublish">Unpublish</string>
+    <string name="publish">Publish</string>
+    <string name="published">Published</string>
+    <string name="draft">Draft</string>
+    <string name="add_photo_to_publish">Add a photo to publish</string>
     <string name="change_location">Change location</string>
     <string name="edit_card">Edit card</string>
     <string name="no_people_to_show">No people to show.</string>
@@ -172,12 +170,9 @@
     <string name="inline_you">you</string>
     <string name="inline_someone">someone</string>
     <string name="inline_a_card">some card</string>
-    <string name="deactivate">Deactivate</string>
-    <string name="activate">Activate</string>
     <string name="leave_card">Leave this card?</string>
     <string name="share">Share</string>
-    <string name="no_cards_nearby">No cards nearby. Showing your friend\'s cards.</string>
-    <string name="no_more_cards_nearby">No more cards nearby. Showing your friend\'s cards.</string>
+    <string name="friends_cards">Friends\' cards</string>
     <string name="friends">Friends</string>
     <string name="empty_group_name">New group</string>
     <string name="manage">Manage</string>
@@ -193,7 +188,13 @@
     <string name="give_to_x_people">Give to %1$s people</string>
     <string name="invite_text">%1$s invited you to play together! Download Ai Là Ai from https://ailaai.app and use invite code %2$s.</string>
     <string name="group">Group</string>
-    <string name="not_connected_yet">Not connected</string>
+    <string name="not_connected_yet">Not connected yet</string>
+    <string name="no_cards_nearby">No cards nearby. All cards within 1km of you will be shown here.</string>
+    <string name="scan">Scan</string>
+    <plurals name="x_cards_nearby">
+        <item quantity="one">%1$s card nearby</item>
+        <item quantity="other">%1$s cards nearby</item>
+    </plurals>
     <plurals name="meters_away">
         <item quantity="one">%1$s meter away</item>
         <item quantity="other">%1$s meters away</item>

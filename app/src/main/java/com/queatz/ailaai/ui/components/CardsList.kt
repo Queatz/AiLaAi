@@ -6,13 +6,15 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,7 +28,19 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 @Composable
-fun CardsList(cards: List<Card>, isMine: (Card) -> Boolean, geo: LatLng?, isLoading: Boolean, isError: Boolean, value: String, valueChange: (String) -> Unit, navController: NavController, aboveSearchFieldContent: @Composable () -> Unit = {}) {
+fun CardsList(
+    cards: List<Card>,
+    isMine: (Card) -> Boolean,
+    geo: LatLng?,
+    isLoading: Boolean,
+    isError: Boolean,
+    value: String,
+    valueChange: (String) -> Unit,
+    navController: NavController,
+    action: (@Composable () -> Unit)? = null,
+    onAction: (() -> Unit)? = null,
+    aboveSearchFieldContent: @Composable () -> Unit = {},
+) {
     val coroutineScope = rememberCoroutineScope()
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
@@ -56,7 +70,8 @@ fun CardsList(cards: List<Card>, isMine: (Card) -> Boolean, geo: LatLng?, isLoad
                 modifier = Modifier.fillMaxSize(),
                 columns = GridCells.Adaptive(240.dp)
             ) {
-                @Composable fun basicCard(it: Card) {
+                @Composable
+                fun basicCard(it: Card) {
                     BasicCard(
                         {
                             navController.navigate("card/${it.id!!}")
@@ -75,10 +90,27 @@ fun CardsList(cards: List<Card>, isMine: (Card) -> Boolean, geo: LatLng?, isLoad
                         isMineToolbar = false
                     )
                 }
+
                 val nearbyCards = cards.takeWhile {
                     geo != null && it.geo != null && it.latLng!!.distance(geo) < farDistance
                 }
                 val remainingCards = cards.drop(nearbyCards.size)
+
+                if (nearbyCards.isNotEmpty() || remainingCards.isEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            if (nearbyCards.isNotEmpty())
+                                pluralStringResource(R.plurals.x_cards_nearby, nearbyCards.size, nearbyCards.size)
+                            else
+                                stringResource(R.string.no_cards_nearby),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(PaddingDefault)
+                        )
+                    }
+                }
+
                 items(items = nearbyCards, key = { it.id!! }) {
                     basicCard(it)
                 }
@@ -86,11 +118,7 @@ fun CardsList(cards: List<Card>, isMine: (Card) -> Boolean, geo: LatLng?, isLoad
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         if (geo != null) {
                             Text(
-                                if (nearbyCards.isEmpty()) {
-                                    stringResource(R.string.no_cards_nearby)
-                                } else {
-                                    stringResource(R.string.no_more_cards_nearby)
-                                },
+                                stringResource(R.string.friends_cards),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -110,10 +138,35 @@ fun CardsList(cards: List<Card>, isMine: (Card) -> Boolean, geo: LatLng?, isLoad
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(PaddingDefault * 2)
+                .widthIn(max = 480.dp)
                 .fillMaxWidth()
         ) {
             aboveSearchFieldContent()
-            SearchField(value, valueChange, modifier = Modifier)
+            if (action == null) {
+                SearchField(value, valueChange)
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth()
+                    ) {
+                        SearchField(value, valueChange)
+                    }
+                    FloatingActionButton(
+                        onClick = {
+                            onAction?.invoke()
+                        },
+                        modifier = Modifier
+                            .padding(start = PaddingDefault * 2)
+                    ) {
+                        action()
+                    }
+                }
+            }
         }
     }
 }

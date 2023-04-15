@@ -166,7 +166,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             }
         ) {
             if (card?.photo != null) {
-                item(stringResource(if (card?.active == true) R.string.deactivate else R.string.activate)) {
+                item(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
                     card?.let { card ->
                         coroutineScope.launch {
                             try {
@@ -177,7 +177,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 card.active = update.active
                                 Toast.makeText(
                                     context,
-                                    context.getString(if (card.active == true) R.string.card_active else R.string.card_inactive),
+                                    context.getString(if (card.active == true) R.string.published else R.string.draft),
                                     LENGTH_SHORT
                                 ).show()
                             } catch (e: Exception) {

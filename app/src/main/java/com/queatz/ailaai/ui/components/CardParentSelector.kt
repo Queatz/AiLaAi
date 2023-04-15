@@ -23,6 +23,7 @@ fun CardParentSelector(
         modifier = modifier
     ) {
         val colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+            containerColor = MaterialTheme.colorScheme.background,
             checkedContainerColor = MaterialTheme.colorScheme.primary,
             checkedContentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.primary)
         )
@@ -36,16 +37,17 @@ fun CardParentSelector(
         }, colors = colors, modifier = Modifier.weight(1f)) {
             Icon(Icons.Outlined.Place, stringResource(R.string.at_a_location))
         }
-        OutlinedIconToggleButton(value == CardParentType.Card, {
-            onChange(CardParentType.Card)
-        }, colors = colors, modifier = Modifier.weight(1f)) {
-            Icon(Icons.Outlined.Search, stringResource(R.string.inside_another_card))
-        }
         if (showOffline) {
             OutlinedIconToggleButton(value == CardParentType.Offline, {
                 onChange(CardParentType.Offline)
             }, colors = colors, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Outlined.ExitToApp, stringResource(R.string.offline))
+                Icon(Icons.Outlined.Forest, stringResource(R.string.offline))
+            }
+        } else {
+            OutlinedIconToggleButton(value == CardParentType.Card, {
+                onChange(CardParentType.Card)
+            }, colors = colors, modifier = Modifier.weight(1f)) {
+                Icon(Icons.Outlined.Search, stringResource(R.string.inside_another_card))
             }
         }
     }

@@ -23,7 +23,7 @@ import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
+fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: Dp = 64.dp) {
     val padding = PaddingDefault
 
     if (photos.isEmpty()) {
@@ -34,6 +34,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
                 .requiredSize(size)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
+                .then(modifier)
         ) {}
     }
     else if (photos.size == 1) {
@@ -47,6 +48,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
                     .requiredSize(size)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .then(modifier)
             ) {
                 Text(
                     contact?.name?.take(1) ?: "",
@@ -64,6 +66,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
                     .requiredSize(size)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .then(modifier)
             )
         }
     } else {
@@ -72,6 +75,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, size: Dp = 64.dp) {
             modifier = Modifier
                 .padding(padding)
                 .requiredSize(size)
+                .then(modifier)
         ) {
             listOf(Alignment.TopEnd, Alignment.BottomStart).forEachIndexed { index, alignment ->
                 AsyncImage(

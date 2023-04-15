@@ -51,7 +51,7 @@ fun GroupMember(photos: List<ContactPhoto>, name: String, info: String?, selecte
             .clickable {
                 onClick()
             }) {
-        GroupPhoto(photos, 32.dp)
+        GroupPhoto(photos, size = 32.dp)
         Column(
             modifier = Modifier
                 .padding(PaddingDefault)

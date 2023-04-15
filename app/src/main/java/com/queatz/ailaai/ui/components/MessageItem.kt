@@ -274,7 +274,7 @@ fun MessageItem(
 }
 
 @Composable
-fun ProfileImage(person: Person?, padding: PaddingValues) {
+private fun ProfileImage(person: Person?, padding: PaddingValues) {
     if (person?.photo?.nullIfBlank == null) {
         Box(
             contentAlignment = Alignment.Center,

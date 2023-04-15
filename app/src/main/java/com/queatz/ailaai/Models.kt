@@ -65,8 +65,10 @@ class Message(
     var attachment: String? = null
 ) : Model()
 
+@Serializable
 class Transfer(
-    var code: String? = null
+    var code: String? = null,
+    var person: String? = null
 ) : Model()
 
 @Serializable

@@ -23,10 +23,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
 val api = Api()
-val json = DefaultJson
+
+val json = Json {
+    encodeDefaults = true
+    isLenient = true
+    allowSpecialFloatingPointValues = true
+    ignoreUnknownKeys = true
+}
 
 const val appDomain = "https://ailaai.app"
 
@@ -175,7 +182,7 @@ class Api {
         mapOf("search" to search)
     } ?: mapOf())
 
-    suspend fun newCard(card: Card? = Card()): Card = post("cards", card)
+    suspend fun newCard(card: Card? = Card(offline = true)): Card = post("cards", card)
 
     suspend fun updateCard(id: String, card: Card): Card = post("cards/$id", card)
 
