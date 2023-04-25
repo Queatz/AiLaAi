@@ -1,9 +1,12 @@
 package com.queatz.ailaai.extensions
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import io.ktor.http.*
 import java.io.File
@@ -46,6 +49,12 @@ fun String.shareAsText(context: Context) {
     intent.putExtra(Intent.EXTRA_TEXT, this)
     intent.type = ContentType.Text.Plain.toString()
     context.startActivity(Intent.createChooser(intent, null))
+}
+
+fun String.copyToClipboard(context: Context, label: String? = null) {
+    ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
+        ClipData.newPlainText(label, this)
+    )
 }
 
 // Returns true if everything went well

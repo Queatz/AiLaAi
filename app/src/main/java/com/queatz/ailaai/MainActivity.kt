@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    LaunchedEffect(true) {
+                    LaunchedEffect(Unit) {
                         while (me == null) try {
                             loadMe()
                         } catch (ex: Exception) {
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    LaunchedEffect(true) {
+                    LaunchedEffect(Unit) {
                         try {
                             val version = api.latestAppVersion() ?: -1
 
@@ -285,18 +285,33 @@ class MainActivity : AppCompatActivity() {
                                     .padding(it)
                                     .fillMaxSize()
                             ) {
-                                composable("explore") { ExploreScreen(this@MainActivity, navController) { me } }
-                                composable("saved") { SavedScreen(this@MainActivity, navController) { me } }
+                                composable("profile/{id}") {
+                                    ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                }
+                                composable("explore") {
+                                    ExploreScreen(navController) { me }
+                                }
+                                composable("saved") {
+                                    SavedScreen(navController) { me }
+                                }
                                 composable(
                                     "card/{id}",
                                     deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
-                                ) { CardScreen(it, navController) { me } }
-                                composable("messages") { MessagesScreen(navController) { me } }
+                                ) {
+                                    CardScreen(it, navController) { me }
+                                }
+                                composable("messages") {
+                                    MessagesScreen(navController) { me }
+                                }
                                 composable(
                                     "group/{id}",
                                     deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
-                                ) { GroupScreen(it, navController) { me } }
-                                composable("me") { MeScreen(navController) { me } }
+                                ) {
+                                    GroupScreen(it, navController) { me }
+                                }
+                                composable("me") {
+                                    MeScreen(navController) { me }
+                                }
                                 composable("settings") {
                                     SettingsScreen(navController, { me }) {
                                         if (api.hasToken()) {

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -23,7 +24,7 @@ import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: Dp = 64.dp) {
+fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: Dp = 64.dp, border: Boolean = false) {
     val padding = PaddingDefault
 
     if (photos.isEmpty()) {
@@ -32,6 +33,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: 
             modifier = Modifier
                 .padding(padding)
                 .requiredSize(size)
+                .bordered(border)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
                 .then(modifier)
@@ -46,6 +48,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: 
                 modifier = Modifier
                     .padding(padding)
                     .requiredSize(size)
+                    .bordered(border)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .then(modifier)
@@ -64,6 +67,7 @@ fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: 
                 modifier = Modifier
                     .padding(padding)
                     .requiredSize(size)
+                    .bordered(border)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .then(modifier)
@@ -99,5 +103,13 @@ fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: 
                 )
             }
         }
+    }
+}
+
+private fun Modifier.bordered(border: Boolean) = composed {
+    if (border) {
+        this.border(4.dp, MaterialTheme.colorScheme.background, CircleShape)
+    } else {
+        this
     }
 }

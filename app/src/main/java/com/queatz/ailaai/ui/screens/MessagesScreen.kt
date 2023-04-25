@@ -162,9 +162,10 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     .padding(PaddingDefault * 2)
                     .widthIn(max = 480.dp)
             ) {
-                Box(modifier = Modifier
-                    .weight(1f)
-                    .wrapContentWidth()
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentWidth()
                 ) {
                     SearchField(
                         searchText,

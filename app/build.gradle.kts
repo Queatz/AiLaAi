@@ -24,7 +24,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 26
+        versionCode = 29
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -77,6 +77,10 @@ android {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-client-core-jvm:2.3.0")
+    implementation("io.ktor:ktor-client-okhttp-jvm:2.3.0")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.0")
     val choiceSdkVersion = "0.3.0"
     val hmsVersion = "6.9.0.300"
     val composeVersion = "1.4.0"
@@ -117,10 +121,6 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.accompanist:accompanist-permissions:0.27.0")
-    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation(platform("com.google.firebase:firebase-bom:31.0.2"))

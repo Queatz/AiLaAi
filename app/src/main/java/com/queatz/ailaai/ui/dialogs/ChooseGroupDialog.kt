@@ -26,7 +26,7 @@ fun ChooseGroupDialog(
     var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var selected by remember { mutableStateOf(listOf<GroupExtended>()) }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         isLoading = true
         try {
             allGroups = api.groups()

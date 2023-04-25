@@ -50,6 +50,13 @@ class Person(
 ) : Model()
 
 @Serializable
+class Profile(
+    var person: String? = null,
+    var photo: String? = null,
+    var about: String? = null
+) : Model()
+
+@Serializable
 class Member(
     var seen: Instant? = null,
     var hide: Boolean? = null,

@@ -37,6 +37,7 @@ fun CardsList(
     value: String,
     valueChange: (String) -> Unit,
     navController: NavController,
+    useDistance: Boolean = false,
     action: (@Composable () -> Unit)? = null,
     onAction: (() -> Unit)? = null,
     aboveSearchFieldContent: @Composable () -> Unit = {},
@@ -91,12 +92,13 @@ fun CardsList(
                     )
                 }
 
-                val nearbyCards = cards.takeWhile {
+                val nearbyCards = if (useDistance) cards.takeWhile {
                     geo != null && it.geo != null && it.latLng!!.distance(geo) < farDistance
-                }
+                } else emptyList()
+
                 val remainingCards = cards.drop(nearbyCards.size)
 
-                if (nearbyCards.isNotEmpty() || remainingCards.isEmpty()) {
+                if (useDistance) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             if (nearbyCards.isNotEmpty())
@@ -115,8 +117,8 @@ fun CardsList(
                     basicCard(it)
                 }
                 if (remainingCards.isNotEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        if (geo != null) {
+                    if (geo != null && useDistance) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
                                 stringResource(R.string.friends_cards),
                                 textAlign = TextAlign.Center,
@@ -171,4 +173,4 @@ fun CardsList(
     }
 }
 
-val farDistance = 1000
+val farDistance = 100_000

@@ -18,15 +18,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.navigation.NavController
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.isFalse
 import com.queatz.ailaai.extensions.isTrue
@@ -35,6 +37,7 @@ import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 enum class Filter {
@@ -42,19 +45,61 @@ enum class Filter {
     NotActive
 }
 
+private val meParentTypeKey = stringPreferencesKey("me.parentType")
+private val meFiltersKey = stringSetPreferencesKey("me.filters")
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var addedCardId by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(myCards.isEmpty()) }
+    val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
     var searchText by rememberSaveable { mutableStateOf("") }
     var filters by rememberSaveable { mutableStateOf(emptySet<Filter>()) }
+    val context = LocalContext.current
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
+        context.dataStore.data.first().let {
+            it[meParentTypeKey]?.let { parentType ->
+                cardParentType = CardParentType.valueOf(parentType)
+            }
+            it[meFiltersKey]?.let { previousFilters ->
+                filters = previousFilters.map { Filter.valueOf(it) }.toSet()
+            }
+        }
+    }
+
+    fun setParentType(newCardParentType: CardParentType?) {
+        cardParentType = newCardParentType
+        scope.launch {
+            context.dataStore.edit {
+                if (newCardParentType == null) {
+                    it.remove(meParentTypeKey)
+                } else {
+                    it[meParentTypeKey] = newCardParentType.name
+                }
+            }
+        }
+    }
+
+    fun setFilters(newFilters: Set<Filter>) {
+        filters = newFilters
+        scope.launch {
+            context.dataStore.edit {
+                if (cardParentType == null) {
+                    it.remove(meFiltersKey)
+                } else {
+                    it[meFiltersKey] = newFilters.map { it.name }.toSet()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
         try {
             myCards = api.myCards()
         } catch (ex: Exception) {
@@ -78,7 +123,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     Filter.NotActive -> it.active != true
                 }
             } &&
-                    (searchText.isBlank() || it.name?.contains(searchText, true) ?: false)
+                    (searchText.isBlank() || (
+                            it.conversation?.contains(searchText, true) == true ||
+                            it.name?.contains(searchText, true) == true ||
+                            it.location?.contains(searchText, true) == true
+                    ))
         }
     }
 
@@ -90,11 +139,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         when (cardParentType) {
                             CardParentType.Map -> R.string.at_a_location
                             CardParentType.Card -> R.string.inside_another_card
-                            CardParentType.Person -> R.string.with_you
+                            CardParentType.Person -> R.string.on_profile
                             CardParentType.Offline -> R.string.offline
                             else -> R.string.all_your_cards
                         }
-                    ),
+                    ) + (if (isLoading) "" else " (${cards.size})"),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -106,7 +155,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         size = 40.dp,
                         modifier = Modifier
                             .clickable {
-                                navController.navigate("settings")
+                                navController.navigate("profile/${me()?.id}")
                             }
                     )
                 } else {
@@ -149,7 +198,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                 navController.navigate("card/${card.id!!}")
                             },
                             onChange = {
-                                coroutineScope.launch {
+                                scope.launch {
                                     isLoading = true
                                     try {
                                         myCards = api.myCards()
@@ -208,11 +257,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             .padding(bottom = PaddingDefault / 2),
                         showOffline = true
                     ) {
-                        cardParentType = if (it == cardParentType) null else it
+                        setParentType(if (it == cardParentType) null else it)
                     }
                     OutlinedButton(
                         {
-                            filters = filters.minus(Filter.NotActive).toggle(Filter.Active)
+                            setFilters(filters.minus(Filter.NotActive).toggle(Filter.Active))
                         },
                         border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, filters.contains(Filter.Active)),
                         colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
@@ -222,7 +271,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     }
                     OutlinedButton(
                         {
-                            filters = filters.minus(Filter.Active).toggle(Filter.NotActive)
+                            setFilters(filters.minus(Filter.Active).toggle(Filter.NotActive))
                         },
                         border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, filters.contains(Filter.NotActive)),
                         colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
@@ -245,10 +294,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     }
                     FloatingActionButton(
                         onClick = {
-                            coroutineScope.launch {
+                            scope.launch {
                                 try {
-                                    cardParentType = null
-                                    filters = emptySet()
+                                    setParentType(null)
+                                    setFilters(emptySet())
                                     searchText = ""
                                     addedCardId = api.newCard().id
                                     myCards = api.myCards()

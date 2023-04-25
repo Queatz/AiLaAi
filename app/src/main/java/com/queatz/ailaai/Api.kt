@@ -37,12 +37,6 @@ val json = Json {
 
 const val appDomain = "https://ailaai.app"
 
-@Serializable
-private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
-
-@Serializable
-private data class LeaveCollaborationBody(val card: String)
-
 class Api {
 
     private val _onUnauthorized = MutableSharedFlow<Unit>()
@@ -100,7 +94,7 @@ class Api {
         client: HttpClient = http,
     ): R = post(url, null as String?, client)
 
-        private suspend inline fun <reified R : Any, reified T : Any> post(
+    private suspend inline fun <reified R : Any, reified T : Any> post(
         url: String,
         body: T?,
         client: HttpClient = http,
@@ -163,6 +157,19 @@ class Api {
 
     suspend fun people(search: String): List<Person> = get("people", mapOf("search" to search))
 
+    suspend fun profile(personId: String): PersonProfile = get("people/$personId/profile")
+
+    suspend fun updateProfile(profile: Profile): HttpStatusCode = post("me/profile", profile)
+
+    suspend fun updateProfilePhoto(photo: Uri): HttpStatusCode = post("me/profile/photo", MultiPartFormDataContent(
+        formData {
+            append("photo", photo.asScaledJpeg(context), Headers.build {
+                append(HttpHeaders.ContentType, "image/jpg")
+                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+            })
+        }
+    ), client = httpData)
+
     suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
         "geo" to "${geo.latitude},${geo.longitude}"
     ) + (search?.let {
@@ -173,10 +180,13 @@ class Api {
 
     suspend fun cardsCards(id: String): List<Card> = get("cards/$id/cards")
 
+    suspend fun profileCards(personId: String): List<Card> = get("people/$personId/profile/cards")
+
     suspend fun myCards(): List<Card> = get("me/cards")
 
     suspend fun myCollaborations(): List<Card> = get("me/collaborations")
-    suspend fun leaveCollaboration(card: String): HttpStatusCode = post("me/collaborations/leave", LeaveCollaborationBody(card))
+    suspend fun leaveCollaboration(card: String): HttpStatusCode =
+        post("me/collaborations/leave", LeaveCollaborationBody(card))
 
     suspend fun savedCards(search: String? = null): List<SaveAndCard> = get("me/saved", search?.let {
         mapOf("search" to search)
@@ -217,7 +227,8 @@ class Api {
 
     suspend fun cardPeople(card: String): List<Person> = get("cards/$card/people")
 
-    suspend fun createGroup(people: List<String>, reuse: Boolean = false): Group = post("groups", CreateGroupBody(people.toSet().toList(), reuse))
+    suspend fun createGroup(people: List<String>, reuse: Boolean = false): Group =
+        post("groups", CreateGroupBody(people.toSet().toList(), reuse))
 
     suspend fun updateGroup(id: String, groupUpdate: Group): Group = post("groups/$id", groupUpdate)
 
@@ -235,16 +246,17 @@ class Api {
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 
-    suspend fun sendPhotos(group: String, photos: List<Uri>): HttpStatusCode = post("groups/$group/photos", MultiPartFormDataContent(
-        formData {
-            photos.forEachIndexed { index, photo ->
-                append("photo[$index]", photo.asScaledJpeg(context), Headers.build {
-                    append(HttpHeaders.ContentType, "image/jpg")
-                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                })
+    suspend fun sendPhotos(group: String, photos: List<Uri>): HttpStatusCode =
+        post("groups/$group/photos", MultiPartFormDataContent(
+            formData {
+                photos.forEachIndexed { index, photo ->
+                    append("photo[$index]", photo.asScaledJpeg(context), Headers.build {
+                        append(HttpHeaders.ContentType, "image/jpg")
+                        append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                    })
+                }
             }
-        }
-    ), client = httpData)
+        ), client = httpData)
 
     suspend fun deleteMessage(message: String): HttpStatusCode = post("messages/$message/delete")
 
@@ -280,6 +292,12 @@ class MemberAndPerson(
 )
 
 @Serializable
+data class PersonProfile(
+    val person: Person,
+    val profile: Profile
+)
+
+@Serializable
 class SaveAndCard(
     var save: Save? = null,
     var card: Card? = null,
@@ -290,21 +308,9 @@ class Device(
     val type: DeviceType,
     val token: String,
 )
-//
-//class InstantTypeConverter : JsonSerializer<Instant>, JsonDeserializer<Instant> {
-//    override fun serialize(
-//        src: Instant,
-//        srcType: Type,
-//        context: JsonSerializationContext,
-//    ) = JsonPrimitive(DateTimeFormatter.ISO_INSTANT.format(src.toJavaInstant()))
-//
-//    override fun deserialize(
-//        json: JsonElement,
-//        type: Type,
-//        context: JsonDeserializationContext,
-//    ) = try {
-//        json.asString.toInstant()
-//    } catch (e: ParseException) {
-//        null
-//    }
-//}
+
+@Serializable
+private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
+
+@Serializable
+private data class LeaveCollaborationBody(val card: String)

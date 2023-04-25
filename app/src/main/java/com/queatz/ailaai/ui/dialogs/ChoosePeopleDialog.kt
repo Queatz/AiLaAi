@@ -26,7 +26,7 @@ fun ChoosePeopleDialog(
     var people by remember { mutableStateOf(listOf<Person>()) }
     var selected by remember { mutableStateOf(listOf<Person>()) }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         isLoading = true
         try {
             allGroups = api.groups()

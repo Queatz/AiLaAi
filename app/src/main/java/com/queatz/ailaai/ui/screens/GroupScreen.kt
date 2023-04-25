@@ -1,17 +1,14 @@
 package com.queatz.ailaai.ui.screens
 
-import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
@@ -23,11 +20,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
@@ -36,13 +33,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.name
@@ -95,7 +88,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         isLoading = true
 
         try {
@@ -120,7 +113,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         try {
             messages = api.messages(groupId)
         } catch (ex: Exception) {
@@ -128,7 +121,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         push.latestMessage
             .filter { it != null }
             .conflate()
@@ -167,7 +160,19 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
             TopAppBar(
                 {
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null
+                            ) {
+                                if (otherMembers.size == 1) {
+                                    navController.navigate("profile/${otherMembers.first().person!!.id!!}")
+                                } else {
+                                    showGroupMembers = true
+                                }
+                            }
+                    ) {
                         val someone = stringResource(R.string.someone)
                         val emptyGroup = stringResource(R.string.empty_group_name)
                         Text(
@@ -175,7 +180,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 someone,
                                 emptyGroup,
                                 me()?.id?.let(::listOf) ?: emptyList()
-                            ), maxLines = 1, overflow = TextOverflow.Ellipsis
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
 
                         otherMembers.maxByOrNull {
@@ -331,7 +338,6 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             }
                         },
                         onShowPhoto = { showPhoto = it },
-                        navController.context as Activity,
                         navController
                     )
                 }
@@ -416,61 +422,21 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
 
             if (showPhoto != null) {
-                Dialog(
+                PhotoDialog(
                     {
                         showPhoto = null
-                    }, properties = DialogProperties(
-                        usePlatformDefaultWidth = false
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(
-                                interactionSource = MutableInteractionSource(),
-                                indication = null
-                            ) {
-                                showPhoto = null
-                            }
-                    ) {
-                        val photos = messages.photos()
-                        val photosListState = rememberLazyListState(photos.indexOf(showPhoto))
-                        LazyRow(
-                            state = photosListState,
-                            flingBehavior = rememberSnapFlingBehavior(photosListState),
-                            reverseLayout = true,
-                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(photos, key = { it }) { photo ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .align(Alignment.Center)
-                                ) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(api.url(photo))
-                                            .crossfade(true)
-                                            .build(),
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                        alignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .fillParentMaxSize()
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                    },
+                    showPhoto!!,
+                    messages.photos()
+                )
             }
 
             if (showGroupMembers) {
-                GroupMembersDialog({
-                    showGroupMembers = false
-                },
-                    otherMembers.map { it.person!! },
+                GroupMembersDialog(
+                    {
+                        showGroupMembers = false
+                    },
+                    people = otherMembers.map { it.person!! },
                     infoFormatter = { person ->
                         person.seen?.timeAgo()?.let { timeAgo ->
                             "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
@@ -487,11 +453,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 Text(stringResource(R.string.manage))
                             }
                         }
-                    }) {
-                    coroutineScope.launch {
-                        val group = api.createGroup(listOf(myMember!!.person!!.id!!, it.id!!), reuse = true)
-                        navController.navigate("group/${group.id!!}")
                     }
+                ) {
+                    navController.navigate("profile/${it.id!!}")
                 }
             }
 

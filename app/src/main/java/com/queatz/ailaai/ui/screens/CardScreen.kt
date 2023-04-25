@@ -76,7 +76,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val context = LocalContext.current
     val didntWork = stringResource(R.string.didnt_work)
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         if (card != null) {
             return@LaunchedEffect
         }
@@ -361,9 +361,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             Text(stringResource(R.string.copy_location))
                         }, {
                             card?.let { card ->
-                                ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                                    ClipData.newPlainText(card.name ?: cardString, card.location)
-                                )
+                                card.location?.copyToClipboard(context, card.name ?: cardString)
                                 Toast.makeText(context, textCopied, LENGTH_SHORT).show()
                             }
                             showMenu = false
@@ -378,9 +376,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
-                        ContextCompat.getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                            ClipData.newPlainText(card?.name ?: cardString, cardUrl(cardId))
-                        )
+                        cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
                         Toast.makeText(context, textCopied, LENGTH_SHORT).show()
                         showMenu = false
                     })
@@ -725,7 +721,7 @@ private fun LazyGridScope.cardHeaderItems(
     elevation: Int = 1,
 ) {
     card?.photo?.also {
-        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(api.url(it))
@@ -746,7 +742,7 @@ private fun LazyGridScope.cardHeaderItems(
         }
     }
     card?.let {
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             CardConversation(
                 it,
                 interactable = true,

@@ -6,15 +6,14 @@
     <string name="language">Language</string>
     <string name="sign_out_or_transfer">Sign out or transfer</string>
     <string name="sign_in">Sign in</string>
-    <string name="photo_and_name_description">Your name and photo are used for messaging. You can use a different name on each of your cards.</string>
     <string name="update_your_name">Update your name</string>
     <string name="your_name">Your name</string>
     <string name="your_photo">Your photo</string>
     <string name="close">Close</string>
     <string name="invite_code">Invite code</string>
     <string name="error">Error</string>
-    <string name="invite_code_description">This code will be usable for 48 hours.</string>
-    <string name="all_your_cards">All your cards</string>
+    <string name="invite_code_description">This single-use code will be usable for 48 hours.</string>
+    <string name="all_your_cards">Your cards</string>
     <string name="invite">Invite</string>
     <string name="invite_people">Invite people</string>
     <string name="invite_person">Invite %1$s</string>
@@ -81,7 +80,7 @@
     <string name="delete_message_description">The message will be removed for everyone in the group.</string>
     <string name="code_expired">Code expired or doesn\'t exist</string>
     <string name="you_x">You: %1$s</string>
-    <string name="at_a_location">At a specific location</string>
+    <string name="at_a_location">At a location</string>
     <string name="inside_another_card">In a card</string>
     <string name="search_cards">Search for a card</string>
     <string name="created_ago">Created %1$s</string>
@@ -90,8 +89,8 @@
         <item quantity="other">%1$s cards</item>
     </plurals>
     <string name="card_name">Card name</string>
-    <string name="with_you">With you</string>
-    <string name="with_you_description">The location of this card will be updated to your current location every time you open the app.</string>
+    <string name="on_profile">On profile</string>
+    <string name="on_profile_description">The location of this card will be updated to your current location every time you open the app.</string>
     <string name="set_photo">Choose photo</string>
     <string name="copy_link">Copy link</string>
     <string name="card">Card</string>
@@ -189,8 +188,11 @@
     <string name="invite_text">%1$s invited you to play together! Download Ai Là Ai from https://ailaai.app and use invite code %2$s.</string>
     <string name="group">Group</string>
     <string name="not_connected_yet">Not connected yet</string>
-    <string name="no_cards_nearby">No cards nearby. All cards within 1km of you will be shown here.</string>
+    <string name="no_cards_nearby">No cards nearby. All cards within 100km of you will be shown here.</string>
     <string name="scan">Scan</string>
+    <string name="add_about_you">Add something about you…</string>
+    <string name="add_your_name">Add your name…</string>
+    <string name="about_you">About you</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>

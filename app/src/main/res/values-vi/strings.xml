@@ -7,7 +7,6 @@
     <string name="language">Ngôn ngữ</string>
     <string name="sign_out_or_transfer">Đăng xuất hoặc chuyển khoản</string>
     <string name="sign_in">Đăng nhập</string>
-    <string name="photo_and_name_description">Tên và ảnh của bạn được sử dụng để nhắn tin. Bạn có thể sử dụng một tên khác trên mỗi thẻ của mình.</string>
     <string name="update_your_name">Cập nhật tên của bạn</string>
     <string name="your_name">Tên của bạn</string>
     <string name="card_name">Tên của thẻ</string>
@@ -15,8 +14,8 @@
     <string name="close">Đóng</string>
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
-    <string name="invite_code_description">Mã này xài được trong vòng 48 giờ.</string>
-    <string name="all_your_cards">Tất cả thẻ của bạn</string>
+    <string name="invite_code_description">Mã sử dụng một lần này sẽ xài được trong vòng 48 giờ.</string>
+    <string name="all_your_cards">Thẻ của bạn</string>
     <string name="invite">Mời ai đó</string>
     <string name="invite_person">Mời %1$s</string>
     <string name="invite_x_and_y">Mời %1$s và %2$s</string>
@@ -85,11 +84,11 @@
     <string name="search_cards">Tìm kiếm thẻ</string>
     <string name="created_ago">Tạo %1$s</string>
     <string name="no_cards">Không có thẻ đây.</string>
-    <string name="with_you">Với bạn</string>
+    <string name="on_profile">Trên trang cá nhân</string>
     <plurals name="number_of_cards">
         <item quantity="other">%1$s thẻ</item>
     </plurals>
-    <string name="with_you_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
+    <string name="on_profile_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
     <string name="set_photo">Chọn ảnh</string>
     <string name="card">Thẻ</string>
     <string name="copy_link">Sao chép liên kết</string>
@@ -189,7 +188,7 @@
     <plurals name="sent_photos">
         <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
-    <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Tất cả thẻ trong phạm vi 1km của bạn sẽ được hiển thị ở đây.</string>
+    <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Tất cả thẻ trong phạm vi 100km của bạn sẽ được hiển thị ở đây.</string>
     <string name="description">Mô tả</string>
     <string name="update">Cập nhật</string>
     <string name="send">Gửi</string>
@@ -203,4 +202,7 @@
     <string name="search_people_and_groups">Tìm kiếm người và nhóm</string>
     <string name="not_connected_yet">Chưa kết nối</string>
     <string name="scan">Quét</string>
+    <string name="add_about_you">Thêm điều gì đó về bạn…</string>
+    <string name="add_your_name">Thêm tên của bạn…</string>
+    <string name="about_you">Về bạn</string>
 </resources>

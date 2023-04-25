@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
@@ -68,7 +67,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     } else if (card.parent != null) {
         cardParentType = CardParentType.Card
 
-        LaunchedEffect(true) {
+        LaunchedEffect(Unit) {
             try {
                 parentCard = api.card(card.parent!!)
             } catch (ex: Exception) {
@@ -185,7 +184,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         when (cardParentType) {
                             CardParentType.Map -> stringResource(R.string.at_a_location)
                             CardParentType.Card -> stringResource(R.string.inside_another_card)
-                            CardParentType.Person -> stringResource(R.string.with_you)
+                            CardParentType.Person -> stringResource(R.string.on_profile)
                             else -> stringResource(R.string.offline)
                         },
                         modifier = Modifier
@@ -198,7 +197,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                     when (cardParentType) {
                         CardParentType.Person -> {
                             Text(
-                                stringResource(R.string.with_you_description),
+                                stringResource(R.string.on_profile_description),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -251,7 +250,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         }
                                     }
 
-                                    LaunchedEffect(true) {
+                                    LaunchedEffect(Unit) {
                                         try {
                                             myCards = api.myCollaborations().filter { it.id != card.id }
                                         } catch (ex: Exception) {

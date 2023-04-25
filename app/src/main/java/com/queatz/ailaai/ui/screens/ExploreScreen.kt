@@ -10,7 +10,9 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.QrCodeScanner
@@ -19,8 +21,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -40,7 +47,10 @@ import com.huawei.hms.ml.scan.HmsScanAnalyzerOptions
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.toggle
+import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardsList
+import com.queatz.ailaai.ui.components.horizontalFadingEdge
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
@@ -58,7 +68,8 @@ private val geoManualKey = booleanPreferencesKey("geo-manual")
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ExploreScreen(context: Context, navController: NavController, me: () -> Person?) {
+fun ExploreScreen(navController: NavController, me: () -> Person?) {
+    val context = LocalContext.current
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
         navController.context as Activity
     )
@@ -86,7 +97,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
         (navController.context as Activity).startActivity(intent)
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         geoManual = !locationPermissionState.status.isGranted || context.dataStore.data.first()[geoManualKey] == true
     }
 
@@ -159,7 +170,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             result.data
                 ?.getParcelableExtra<HmsScan?>(ScanUtil.RESULT)
                 ?.let {
-                    it.linkUrl?.linkValue?.split("/card/")?.last()
+                    it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.split("/card/")?.last()
                 }
                 ?.let { cardId ->
                     navController.navigate("card/$cardId")
@@ -238,7 +249,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             }
         }
     } else if (geo == null) {
-        LaunchedEffect(true) {
+        LaunchedEffect(Unit) {
             locationClient.observeLocation(LocationRequest.createDefault())
                 .filter { it is Outcome.Success && it.value.lastLocation != null }
                 .takeWhile { coroutineScope.isActive }
@@ -267,18 +278,19 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
         }
     } else {
         CardsList(
-            cards,
-            { it.person == me()?.id },
-            geo,
-            isLoading,
-            isError,
-            value,
-            { value = it },
-            navController,
-            {
+            cards = cards,
+            isMine = { it.person == me()?.id },
+            geo = geo,
+            isLoading = isLoading,
+            isError = isError,
+            value = value,
+            valueChange = { value = it },
+            navController = navController,
+            useDistance = true,
+            action = {
                 Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
             },
-            {
+            onAction = {
                 scan()
             }
         ) {
@@ -297,6 +309,43 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
                 ) {
                     Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
                     Icon(Icons.Outlined.Clear, "")
+                }
+            }
+            if ("show categories".isEmpty()) {
+                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                val scrollState = rememberScrollState()
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(scrollState)
+
+                        .onPlaced { viewport = it.boundsInParent().size }
+                        .horizontalFadingEdge(viewport, scrollState)
+                ) {
+                    listOf(
+                        "Classes",
+                        "Photography",
+                        "Food Delivery",
+                        "Arts & Crafts",
+                        "Pets",
+                        "Home Services",
+                        "Goods",
+                        "Secret Rooms",
+                        "Philosophy",
+                    ).forEachIndexed { index, category ->
+                        OutlinedButton(
+                            {
+                                // select category
+                            },
+                            border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, index == 1),
+                            colors = if (index != 1) ButtonDefaults.outlinedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.background,
+                                contentColor = MaterialTheme.colorScheme.onBackground
+                            ) else ButtonDefaults.buttonColors(),
+                            modifier = Modifier.padding(end = PaddingDefault)
+                        ) {
+                            Text(category)
+                        }
+                    }
                 }
             }
         }
@@ -318,6 +367,7 @@ fun ExploreScreen(context: Context, navController: NavController, me: () -> Pers
             confirmButton = {
                 TextButton(
                     {
+                        showCameraRationale = false
                         goToSettings()
                     }
                 ) {

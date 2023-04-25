@@ -13,7 +13,7 @@ import com.queatz.ailaai.ui.state.jsonSaver
 import io.ktor.utils.io.*
 
 @Composable
-fun SavedScreen(context: Context, navController: NavController, me: () -> Person?) {
+fun SavedScreen(navController: NavController, me: () -> Person?) {
     var value by rememberSaveable { mutableStateOf("") }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
@@ -48,5 +48,14 @@ fun SavedScreen(context: Context, navController: NavController, me: () -> Person
         }
     }
 
-    CardsList(cards, { it.person == me()?.id }, null, isLoading, isError, value, { value = it}, navController)
+    CardsList(
+        cards = cards,
+        isMine = { it.person == me()?.id },
+        geo = null,
+        isLoading = isLoading,
+        isError = isError,
+        value = value,
+        valueChange = { value = it },
+        navController = navController
+    )
 }

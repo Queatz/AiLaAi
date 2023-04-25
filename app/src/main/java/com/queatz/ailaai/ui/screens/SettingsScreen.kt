@@ -3,21 +3,20 @@ package com.queatz.ailaai.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -28,7 +27,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
@@ -43,8 +41,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
-    var myName by rememberSaveable { mutableStateOf(me()?.name ?: "") }
-    var myNameUnsaved by rememberSaveable { mutableStateOf(false) }
     var signOutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var inviteDialog by remember { mutableStateOf(false) }
@@ -195,76 +191,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             modifier = Modifier
                 .verticalScroll(scrollState)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(horizontal = PaddingDefault)
-            ) {
-                AsyncImage(
-                    model = me()?.photo?.let { api.url(it) } ?: "",
-                    contentDescription = stringResource(R.string.your_photo),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(PaddingDefault)
-                        .requiredSize(84.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                        .clickable {
-                            launcher.launch("image/*")
-                        }
-                )
-
-                Column {
-                    OutlinedTextField(
-                        myName,
-                        {
-                            myName = it
-                            myNameUnsaved = true
-                        },
-                        label = {
-                            Text(stringResource(R.string.your_name))
-                        },
-                        shape = MaterialTheme.shapes.large,
-                        modifier = Modifier
-                            .padding(horizontal = PaddingDefault)
-                    )
-
-                    AnimatedVisibility(myNameUnsaved) {
-                        var saving by remember { mutableStateOf(false) }
-                        Button(
-                            {
-                                coroutineScope.launch {
-                                    try {
-                                        saving = true
-                                        api.updateMe(Person(name = myName.trim()))
-                                        myNameUnsaved = false
-                                        updateMe()
-                                    } catch (ex: Exception) {
-                                        ex.printStackTrace()
-                                    } finally {
-                                        saving = false
-                                    }
-                                }
-                            },
-                            enabled = !saving,
-                            modifier = Modifier
-                                .padding(PaddingDefault)
-                        ) {
-                            Text(stringResource(R.string.update_your_name))
-                        }
-                    }
-                }
-            }
-
-            Text(
-                stringResource(R.string.photo_and_name_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
-            )
-
             var chooseLanguageDialog by remember { mutableStateOf(false) }
 
             if (chooseLanguageDialog) {

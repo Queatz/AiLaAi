@@ -28,10 +28,7 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.ifNotEmpty
-import com.queatz.ailaai.extensions.nullIfBlank
-import com.queatz.ailaai.extensions.share
-import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.item
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -45,7 +42,6 @@ fun MessageItem(
     isMe: Boolean,
     onDeleted: () -> Unit,
     onShowPhoto: (String) -> Unit,
-    activity: Activity,
     navController: NavController,
 ) {
     var showMessageDialog by remember { mutableStateOf(false) }
@@ -143,9 +139,7 @@ fun MessageItem(
 
             if (message.text?.isBlank() == false) {
                 item(stringResource(R.string.copy)) {
-                    getSystemService(context, ClipboardManager::class.java)?.setPrimaryClip(
-                        ClipData.newPlainText(messageString, message.text ?: "")
-                    )
+                    (message.text ?: "").copyToClipboard(context, messageString)
                     showMessageDialog = false
                 }
             }
@@ -167,10 +161,14 @@ fun MessageItem(
         ) {
             showTime = !showTime
         }) {
-        if (!isMe) ProfileImage(
-            getPerson(message.member!!),
-            PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault)
-        )
+        if (!isMe) {
+            ProfileImage(
+                getPerson(message.member!!),
+                PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault),
+            ) { person ->
+                navController.navigate("profile/${person.id!!}")
+            }
+        }
 
         Column(modifier = Modifier.weight(1f)) {
             attachedCardId?.let {
@@ -191,7 +189,7 @@ fun MessageItem(
                         {
                             navController.navigate("card/$it")
                         },
-                        activity = activity,
+                        activity = navController.context as Activity,
                         card = attachedCard,
                         isChoosing = true
                     )
@@ -274,7 +272,7 @@ fun MessageItem(
 }
 
 @Composable
-private fun ProfileImage(person: Person?, padding: PaddingValues) {
+private fun ProfileImage(person: Person?, padding: PaddingValues, onClick: (Person) -> Unit) {
     if (person?.photo?.nullIfBlank == null) {
         Box(
             contentAlignment = Alignment.Center,
@@ -300,6 +298,9 @@ private fun ProfileImage(person: Person?, padding: PaddingValues) {
                 .requiredSize(32.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
+                .clickable {
+                    onClick(person)
+                }
         )
     }
 }
