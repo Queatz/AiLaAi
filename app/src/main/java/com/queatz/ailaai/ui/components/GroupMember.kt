@@ -34,7 +34,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 }
 
 @Composable
-fun GroupMember(photos: List<ContactPhoto>, name: String, info: String?, selected: Boolean = false, onClick: () -> Unit) {
+fun GroupMember(photos: List<ContactPhoto>?, name: String, info: String?, selected: Boolean = false, onClick: () -> Unit) {
     val backgroundColor by animateColorAsState(
         if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.surface
@@ -51,10 +51,15 @@ fun GroupMember(photos: List<ContactPhoto>, name: String, info: String?, selecte
             .clickable {
                 onClick()
             }) {
-        GroupPhoto(photos, size = 32.dp)
+        if (photos != null) {
+            GroupPhoto(photos, size = 32.dp)
+        }
         Column(
             modifier = Modifier
-                .padding(PaddingDefault)
+                .padding(
+                    vertical = PaddingDefault,
+                    horizontal = if (photos == null) PaddingDefault * 2 else PaddingDefault
+                )
         ) {
             Text(
                 name,

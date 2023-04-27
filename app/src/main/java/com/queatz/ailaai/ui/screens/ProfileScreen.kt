@@ -25,16 +25,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.huawei.hms.analytics.db
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.copyToClipboard
-import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -46,7 +44,6 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
@@ -201,41 +198,46 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             }
                     )
                 }
-                val copiedString = stringResource(R.string.copied)
-                Text(
-                    person?.name ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
-                    color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .clickable(
-                            interactionSource = MutableInteractionSource(),
-                            indication = null
-                        ) {
-                            if (isMe) {
-                                showEditName = true
-                            } else {
-                                person?.name?.copyToClipboard(context)
-                                Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                )
-                if (isMe || profile?.about?.isBlank() == false) {
+                if (!isLoading && !isError) {
+                    val copiedString = stringResource(R.string.copied)
                     Text(
-                        profile?.about ?: (if (isMe) stringResource(R.string.add_about_you) else ""),
-                        color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyMedium,
+                        person?.name
+                            ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
+                        color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .clip(MaterialTheme.shapes.large)
-                            .clickable {
+                            .clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null
+                            ) {
                                 if (isMe) {
-                                    showEditAbout = true
+                                    showEditName = true
                                 } else {
-                                    profile?.about?.copyToClipboard(context)
+                                    person?.name?.copyToClipboard(context)
                                     Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
                                 }
                             }
-                            .padding(PaddingDefault)
                     )
+                    if (isMe || profile?.about?.isBlank() == false) {
+                        LinkifyText(
+                            profile?.about ?: (if (isMe) stringResource(R.string.add_about_you) else ""),
+                            color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.large)
+                                .clickable {
+                                    if (isMe) {
+                                        showEditAbout = true
+                                    } else {
+                                        profile?.about?.copyToClipboard(context)
+                                        Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                .padding(PaddingDefault)
+                        )
+                    }
                 }
             }
         }
@@ -244,6 +246,10 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             BasicCard(
                 {
                     navController.navigate("card/${card.id!!}")
+                },
+                onCategoryClick = {
+                    exploreInitialCategory = it
+                    navController.navigate("explore")
                 },
                 onReply = { conversation ->
                     scope.launch {

@@ -1,8 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -32,9 +30,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.Navigator
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
@@ -69,9 +67,10 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var openRemoveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var openCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
     var openLeaveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
+    var showSetCategory by remember { mutableStateOf(false) }
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
     val didntWork = stringResource(R.string.didnt_work)
@@ -97,6 +96,40 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val isMine = me()?.id == card?.person
     val isMineOrIAmACollaborator = isMine || card?.collaborators?.contains(me()?.id) == true
     val recomposeScope = currentRecomposeScope
+
+    fun reload() {
+        scope.launch {
+            try {
+                card = api.card(cardId)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+    }
+
+    if (showSetCategory) {
+        ChooseCategoryDialog(
+            {
+                showSetCategory = false
+            },
+            { category ->
+                scope.launch {
+                    try {
+                        api.updateCard(
+                            card!!.id!!,
+                            Card().apply {
+                                categories = if (category == null) emptyList() else listOf(category)
+                            }
+                        )
+                        reload()
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
+                }
+            }
+        )
+    }
+
 
     if (openLocationDialog) {
         EditCardLocationDialog(card!!, navController.context as Activity, {
@@ -142,7 +175,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             onPeopleSelected = {
                 if (it.size == 1) {
                     val newOwner = it.first().id
-                    coroutineScope.launch {
+                    scope.launch {
                         try {
                             card!!.person = newOwner
                             val updatedCard = api.updateCard(card!!.id!!, Card().apply {
@@ -168,7 +201,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             if (card?.photo != null) {
                 item(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
                     card?.let { card ->
-                        coroutineScope.launch {
+                        scope.launch {
                             try {
                                 val update = api.updateCard(
                                     card.id!!,
@@ -229,7 +262,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             actions = {
                 card?.let { card ->
                     IconButton({
-                        coroutineScope.launch {
+                        scope.launch {
                             when (saves.toggleSave(card)) {
                                 ToggleSaveResult.Saved -> {
                                     Toast.makeText(context, context.getString(R.string.card_saved), LENGTH_SHORT)
@@ -266,7 +299,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
                     if (it == null) return@rememberLauncherForActivityResult
 
-                    coroutineScope.launch {
+                    scope.launch {
                         try {
                             api.uploadCardPhoto(card!!.id!!, it)
                             card = api.card(cardId)
@@ -323,6 +356,12 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             showMenu = false
                         })
                     }
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.view_profile))
+                    }, {
+                        navController.navigate("profile/${card!!.person!!}")
+                        showMenu = false
+                    })
                     if (card?.parent != null) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.open_enclosing_card))
@@ -348,7 +387,11 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             Text(stringResource(R.string.show_on_map))
                         }, {
                             card?.let { card ->
-                                val uri = Uri.parse("geo:${card.geo!![0]},${card.geo!![1]}?q=${card.geo!![0]},${card.geo!![1]}(${Uri.encode(card.name ?: cardString)})")
+                                val uri = Uri.parse(
+                                    "geo:${card.geo!![0]},${card.geo!![1]}?q=${card.geo!![0]},${card.geo!![1]}(${
+                                        Uri.encode(card.name ?: cardString)
+                                    })"
+                                )
                                 val intent = Intent(Intent.ACTION_VIEW, uri)
                                 navController.context.startActivity(Intent.createChooser(intent, null))
                             }
@@ -430,8 +473,9 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             card,
                             isMine,
                             headerAspect,
-                            { verticalAspect = !verticalAspect },
-                            coroutineScope,
+                            onsetCategoryClick = { showSetCategory = true },
+                            toggleAspect = { verticalAspect = !verticalAspect },
+                            scope,
                             navController,
                             elevation = 2
                         )
@@ -451,8 +495,9 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             card,
                             isMine,
                             headerAspect,
-                            { verticalAspect = !verticalAspect },
-                            coroutineScope,
+                            onsetCategoryClick = { showSetCategory = true },
+                            toggleAspect = { verticalAspect = !verticalAspect },
+                            scope,
                             navController
                         )
                     }
@@ -472,14 +517,14 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                     navController.navigate("card/${it.id!!}")
                                 },
                                 onReply = { conversation ->
-                                    coroutineScope.launch {
+                                    scope.launch {
                                         it.reply(conversation) { groupId ->
                                             navController.navigate("group/${groupId}")
                                         }
                                     }
                                 },
                                 onChange = {
-                                    coroutineScope.launch {
+                                    scope.launch {
                                         isLoading = true
                                         try {
                                             cards = api.cardsCards(cardId)
@@ -493,6 +538,10 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 activity = navController.context as Activity,
                                 card = it,
                                 edit = if (it.id == addedCardId) EditCard.Conversation else null,
+                                onCategoryClick = {
+                                    exploreInitialCategory = it
+                                    navController.navigate("explore")
+                                },
                                 isMine = it.person == me()?.id
                             )
                             if (it.id == addedCardId) {
@@ -505,7 +554,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             Box(contentAlignment = Alignment.Center) {
                                 ElevatedButton(
                                     {
-                                        coroutineScope.launch {
+                                        scope.launch {
                                             try {
                                                 addedCardId = api.newCard(Card(parent = cardId, name = "")).id
                                                 cards = api.cardsCards(cardId)
@@ -545,7 +594,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             },
             confirmButton = {
                 TextButton({
-                    coroutineScope.launch {
+                    scope.launch {
                         try {
                             api.leaveCollaboration(cardId)
                             card = api.card(cardId)
@@ -660,7 +709,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 openLeaveCollaboratorsDialog = true
                 openCollaboratorsDialog = false
             } else {
-                coroutineScope.launch {
+                scope.launch {
                     val group = api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true)
                     navController.navigate("group/${group.id!!}")
                 }
@@ -715,50 +764,62 @@ private fun LazyGridScope.cardHeaderItems(
     card: Card?,
     isMine: Boolean,
     aspect: Float,
+    onsetCategoryClick: () -> Unit,
     toggleAspect: () -> Unit,
-    coroutineScope: CoroutineScope,
+    scope: CoroutineScope,
     navController: NavController,
     elevation: Int = 1,
 ) {
-    card?.photo?.also {
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(api.url(it))
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.large)
-                    .aspectRatio(aspect)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
-                    .clickable {
-                        toggleAspect()
-                    }
-            )
-        }
-    }
-    card?.let {
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            CardConversation(
-                it,
-                interactable = true,
-                showTitle = false,
-                isMine = isMine,
-                onReply = { conversation ->
-                    coroutineScope.launch {
-                        it.reply(conversation) { groupId ->
-                            navController.navigate("group/${groupId}")
+    item(span = { GridItemSpan(maxLineSpan) }) {
+        Column {
+            card?.photo?.also {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(api.url(it))
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.large)
+                        .aspectRatio(aspect)
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
+                        .clickable {
+                            toggleAspect()
                         }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PaddingDefault)
-            )
+                )
+            }
+            card?.let {
+                CardConversation(
+                    card,
+                    interactable = true,
+                    showTitle = false,
+                    isMine = isMine,
+                    onCategoryClick = {
+                        if (isMine) {
+                            onsetCategoryClick()
+                        } else {
+                            exploreInitialCategory = it
+                            navController.navigate("explore")
+                        }
+                    },
+                    onSetCategoryClick = {
+                        onsetCategoryClick()
+                    },
+                    onReply = { conversation ->
+                        scope.launch {
+                            it.reply(conversation) { groupId ->
+                                navController.navigate("group/${groupId}")
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingDefault)
+                )
+            }
         }
     }
 }

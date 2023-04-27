@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
@@ -47,7 +48,6 @@ enum class Filter {
 
 private val meParentTypeKey = stringPreferencesKey("me.parentType")
 private val meFiltersKey = stringSetPreferencesKey("me.filters")
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,40 +132,26 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TopAppBar(
-            {
-                Text(
-                    stringResource(
-                        when (cardParentType) {
-                            CardParentType.Map -> R.string.at_a_location
-                            CardParentType.Card -> R.string.inside_another_card
-                            CardParentType.Person -> R.string.on_profile
-                            CardParentType.Offline -> R.string.offline
-                            else -> R.string.all_your_cards
-                        }
-                    ) + (if (isLoading) "" else " (${cards.size})"),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            actions = {
-                if (me()?.name?.isNotBlank() == true || me()?.photo?.isNotBlank() == true) {
-                    GroupPhoto(
-                        listOf(ContactPhoto(me()?.name ?: "", me()?.photo)),
-                        size = 40.dp,
-                        modifier = Modifier
-                            .clickable {
-                                navController.navigate("profile/${me()?.id}")
-                            }
-                    )
-                } else {
-                    IconButton({
-                        navController.navigate("settings")
-                    }) {
-                        Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
-                    }
+        AppHeader(
+            navController,
+            stringResource(
+                when (cardParentType) {
+                    CardParentType.Map -> R.string.at_a_location
+                    CardParentType.Card -> R.string.inside_another_card
+                    CardParentType.Person -> R.string.on_profile
+                    CardParentType.Offline -> R.string.offline
+                    else -> R.string.all_your_cards
                 }
-            }
+            ) + (if (isLoading) "" else " (${cards.size})"),
+            {
+                scope.launch {
+                    if (state.firstVisibleItemIndex > 2) {
+                        state.scrollToItem(2)
+                    }
+                    state.animateScrollToItem(0)
+                }
+            },
+            me
         )
         Box(
             contentAlignment = Alignment.BottomCenter,
@@ -196,6 +182,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         BasicCard(
                             {
                                 navController.navigate("card/${card.id!!}")
+                            },
+                            onCategoryClick = {
+                                exploreInitialCategory = it
+                                navController.navigate("explore")
                             },
                             onChange = {
                                 scope.launch {

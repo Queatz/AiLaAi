@@ -3,7 +3,6 @@ package com.queatz.ailaai.ui.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -27,7 +26,6 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -43,12 +41,11 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.huawei.hms.hmsscankit.ScanKitActivity
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
-import com.huawei.hms.ml.scan.HmsScanAnalyzerOptions
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.toggle
-import com.queatz.ailaai.ui.components.CardParentSelector
+import com.queatz.ailaai.ui.components.AppHeader
+import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.components.horizontalFadingEdge
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
@@ -62,8 +59,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-private val geoKey = stringPreferencesKey("geo")
-private val geoManualKey = booleanPreferencesKey("geo-manual")
+val geoKey = stringPreferencesKey("geo")
+val geoManualKey = booleanPreferencesKey("geo-manual")
+
+var exploreInitialCategory: String? = null
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class)
@@ -74,6 +73,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         navController.context as Activity
     )
     var value by rememberSaveable { mutableStateOf("") }
+    var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
+    var categories by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
@@ -127,6 +128,14 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    fun updateCategories() {
+        selectedCategory = exploreInitialCategory
+        categories = ((exploreInitialCategory?.let(::listOf) ?: emptyList()) + cards
+            .flatMap { it.categories ?: emptyList() })
+            .distinct()
+        exploreInitialCategory = null
+    }
+
     LaunchedEffect(geo, value) {
         if (geo == null) {
             return@LaunchedEffect
@@ -149,7 +158,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             isLoading = true
             cards = api.cards(geo!!, value.takeIf { it.isNotBlank() })
                 .filter { it.equipped != true || it.person != me()?.id }
-
+            updateCategories()
             shownGeo = geo
             shownValue = value
             isError = false
@@ -262,88 +271,103 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 }
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(PaddingDefault)
-        ) {
-            Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
-            TextButton({
-                showSetMyLocation = true
-            }) {
-                Text(stringResource(R.string.set_my_location))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            AppHeader(
+                navController,
+                stringResource(R.string.app_name),
+                {},
+                me
+            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(PaddingDefault)
+            ) {
+                Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
+                TextButton({
+                    showSetMyLocation = true
+                }) {
+                    Text(stringResource(R.string.set_my_location))
+                }
             }
         }
     } else {
-        CardsList(
-            cards = cards,
-            isMine = { it.person == me()?.id },
-            geo = geo,
-            isLoading = isLoading,
-            isError = isError,
-            value = value,
-            valueChange = { value = it },
-            navController = navController,
-            useDistance = true,
-            action = {
-                Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
-            },
-            onAction = {
-                scan()
-            }
-        ) {
-            if (geoManual) {
-                ElevatedButton(
-                    elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-                    onClick = {
-                        coroutineScope.launch {
-                            context.dataStore.edit {
-                                it.remove(geoKey)
-                                it.remove(geoManualKey)
-                            }
-                            geo = null
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
-                    Icon(Icons.Outlined.Clear, "")
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            AppHeader(
+                navController,
+                stringResource(R.string.app_name),
+                {
+                    // todo scroll to top
+                },
+                me
+            )
+            CardsList(
+                cards = if (selectedCategory == null) cards else cards.filter { it.categories?.contains(selectedCategory) == true },
+                isMine = { it.person == me()?.id },
+                geo = geo,
+                isLoading = isLoading,
+                isError = isError,
+                value = value,
+                valueChange = { value = it },
+                navController = navController,
+                useDistance = true,
+                action = {
+                    Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
+                },
+                onAction = {
+                    scan()
                 }
-            }
-            if ("show categories".isEmpty()) {
-                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-                val scrollState = rememberScrollState()
-                Row(
-                    modifier = Modifier
-                        .horizontalScroll(scrollState)
+            ) {
+                if (geoManual) {
+                    ElevatedButton(
+                        elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
+                        onClick = {
+                            coroutineScope.launch {
+                                context.dataStore.edit {
+                                    it.remove(geoKey)
+                                    it.remove(geoManualKey)
+                                }
+                                geo = null
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
+                        Icon(Icons.Outlined.Clear, "")
+                    }
+                }
+                if (categories.isNotEmpty() && !isLoading) {
+                    var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                    val scrollState = rememberScrollState()
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(scrollState)
 
-                        .onPlaced { viewport = it.boundsInParent().size }
-                        .horizontalFadingEdge(viewport, scrollState)
-                ) {
-                    listOf(
-                        "Classes",
-                        "Photography",
-                        "Food Delivery",
-                        "Arts & Crafts",
-                        "Pets",
-                        "Home Services",
-                        "Goods",
-                        "Secret Rooms",
-                        "Philosophy",
-                    ).forEachIndexed { index, category ->
-                        OutlinedButton(
-                            {
-                                // select category
-                            },
-                            border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, index == 1),
-                            colors = if (index != 1) ButtonDefaults.outlinedButtonColors(
-                                containerColor = MaterialTheme.colorScheme.background,
-                                contentColor = MaterialTheme.colorScheme.onBackground
-                            ) else ButtonDefaults.buttonColors(),
-                            modifier = Modifier.padding(end = PaddingDefault)
-                        ) {
-                            Text(category)
+                            .onPlaced { viewport = it.boundsInParent().size }
+                            .horizontalFadingEdge(viewport, scrollState)
+                    ) {
+                        categories.forEachIndexed { index, category ->
+                            OutlinedButton(
+                                {
+                                    selectedCategory = if (selectedCategory == category) {
+                                        null
+                                    } else {
+                                        category
+                                    }
+                                },
+                                border = IconButtonDefaults.outlinedIconToggleButtonBorder(
+                                    true,
+                                    selectedCategory == category
+                                ),
+                                colors = if (selectedCategory != category) ButtonDefaults.outlinedButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.background,
+                                    contentColor = MaterialTheme.colorScheme.onBackground
+                                ) else ButtonDefaults.buttonColors(),
+                                modifier = Modifier.padding(end = PaddingDefault)
+                            ) {
+                                Text(category)
+                            }
                         }
                     }
                 }

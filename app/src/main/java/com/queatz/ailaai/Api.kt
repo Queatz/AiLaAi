@@ -26,14 +26,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
-val api = Api()
-
 val json = Json {
     encodeDefaults = true
     isLenient = true
     allowSpecialFloatingPointValues = true
     ignoreUnknownKeys = true
 }
+
+val api = Api()
 
 const val appDomain = "https://ailaai.app"
 
@@ -53,7 +53,7 @@ class Api {
         expectSuccess = true
 
         install(ContentNegotiation) {
-            json()
+            json(json)
         }
 
         install(HttpTimeout) {
@@ -175,6 +175,13 @@ class Api {
     ) + (search?.let {
         mapOf("search" to search)
     } ?: mapOf()))
+
+    suspend fun categories(geo: LatLng): List<String> = get(
+        "categories",
+        mapOf(
+            "geo" to "${geo.latitude},${geo.longitude}"
+        )
+    )
 
     suspend fun card(id: String): Card = get("cards/$id")
 

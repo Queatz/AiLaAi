@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,12 +23,14 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.LinkifyText
 import com.queatz.ailaai.R
 import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.serialization.decodeFromString
+import kotlin.random.Random
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -36,10 +40,14 @@ fun CardConversation(
     interactable: Boolean = true,
     onReply: (List<String>) -> Unit = {},
     isMine: Boolean = false,
+    isMineToolbar: Boolean = true,
     showTitle: Boolean = true,
     selectingText: ((Boolean) -> Unit)? = null,
-    conversationChange: ((List<ConversationItem>) -> Unit)? = null
+    conversationChange: ((List<ConversationItem>) -> Unit)? = null,
+    onCategoryClick: ((String) -> Unit)? = null,
+    onSetCategoryClick: (() -> Unit)? = null
 ) {
+    val categories = card.categories ?: emptyList()
     val conversation = remember(card.conversation) {
         json.decodeFromString<ConversationItem>(card.conversation ?: "{}")
     }
@@ -72,8 +80,39 @@ fun CardConversation(
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = PaddingDefault)
+                   .padding(bottom = if (categories.isEmpty() && !(isMine && isMineToolbar)) PaddingDefault / 2 else 0.dp)
             )
+        }
+
+        if (categories.isNotEmpty()) {
+            AnimatedVisibility(stack.isEmpty()) {
+                categories.forEach { category ->
+                    SuggestionChip(
+                        onClick = {
+                            onCategoryClick?.invoke(category)
+                        },
+                        shape = MaterialTheme.shapes.medium,
+                        label = {
+                            Text(category)
+                        }
+                    )
+                }
+            }
+        } else if (isMine && isMineToolbar) {
+            AnimatedVisibility(stack.isEmpty()) {
+                AssistChip(
+                    onClick = {
+                        onSetCategoryClick?.invoke()
+                    },
+                    shape = MaterialTheme.shapes.medium,
+                    leadingIcon = {
+                        Icon(Icons.Outlined.Edit, null)
+                    },
+                    label = {
+                        Text(stringResource(R.string.set_category))
+                    }
+                )
+            }
         }
 
         if (current.message.isNotBlank()) {

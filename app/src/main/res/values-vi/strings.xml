@@ -205,4 +205,9 @@
     <string name="add_about_you">Thêm điều gì đó về bạn…</string>
     <string name="add_your_name">Thêm tên của bạn…</string>
     <string name="about_you">Về bạn</string>
+    <string name="view_profile">Xem trang cá nhân</string>
+    <string name="set_category">Đặt danh mục</string>
+    <string name="choose_x">Đặt \"%1$s\"</string>
+    <string name="choose_none">Đặt không danh mục</string>
+    <string name="your_friend">Bạn của bạn</string>
 </resources>

@@ -1,13 +1,17 @@
 package com.queatz.ailaai.ui.screens
 
 import android.content.Context
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.Person
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.saves
+import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.state.jsonSaver
 import io.ktor.utils.io.*
@@ -48,14 +52,28 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    CardsList(
-        cards = cards,
-        isMine = { it.person == me()?.id },
-        geo = null,
-        isLoading = isLoading,
-        isError = isError,
-        value = value,
-        valueChange = { value = it },
-        navController = navController
-    )
+    Column {
+        AppHeader(
+            navController,
+            if (isLoading) {
+                stringResource(R.string.saved)
+            } else {
+                "${stringResource(R.string.saved)} (${cards.size})"
+            },
+            {
+                // todo scroll to top
+            },
+            me
+        )
+        CardsList(
+            cards = cards,
+            isMine = { it.person == me()?.id },
+            geo = null,
+            isLoading = isLoading,
+            isError = isError,
+            value = value,
+            valueChange = { value = it },
+            navController = navController
+        )
+    }
 }

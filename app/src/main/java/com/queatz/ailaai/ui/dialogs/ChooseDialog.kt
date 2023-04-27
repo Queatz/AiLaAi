@@ -49,7 +49,7 @@ fun <T> ChooseDialog(
     isLoading: Boolean,
     title: String,
     allowNone: Boolean,
-    photoFormatter: @Composable (T) -> List<ContactPhoto>,
+    photoFormatter: @Composable ((T) -> List<ContactPhoto>)?,
     nameFormatter: @Composable (T) -> String,
     confirmFormatter: @Composable (List<T>) -> String,
     textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,
@@ -129,7 +129,7 @@ fun <T> ChooseDialog(
                         items(items, key = key) {
                             val isSelected = selected.any { item -> key(item) == key(it) }
                             GroupMember(
-                                photoFormatter(it),
+                                photoFormatter?.invoke(it),
                                 nameFormatter(it),
                                 null,
                                 isSelected

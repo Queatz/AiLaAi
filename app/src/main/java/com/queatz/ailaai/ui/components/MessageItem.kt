@@ -31,6 +31,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.item
+import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -188,6 +189,10 @@ fun MessageItem(
                     BasicCard(
                         {
                             navController.navigate("card/$it")
+                        },
+                        onCategoryClick = {
+                            exploreInitialCategory = it
+                            navController.navigate("explore")
                         },
                         activity = navController.context as Activity,
                         card = attachedCard,

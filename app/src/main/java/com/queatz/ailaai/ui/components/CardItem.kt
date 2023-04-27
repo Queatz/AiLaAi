@@ -43,6 +43,7 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
@@ -58,6 +59,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun BasicCard(
     onClick: () -> Unit,
+    onCategoryClick: (String) -> Unit,
     onReply: (List<String>) -> Unit = {},
     onChange: () -> Unit = {},
     activity: Activity,
@@ -67,7 +69,7 @@ fun BasicCard(
     isMine: Boolean = false,
     isMineToolbar: Boolean = true,
     isChoosing: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
@@ -79,6 +81,7 @@ fun BasicCard(
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by remember { mutableStateOf(false) }
+        var showSetCategory by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
 
         LaunchedEffect(hideContent) {
@@ -197,20 +200,27 @@ fun BasicCard(
                     val hasCards = (card.cardCount ?: 0) > 0
                     val distanceText = showDistance?.let {
                         if (card.geo != null) {
-                            it.distance(card.latLng!!).takeIf { it < 1_000_000 }?.let { metersAway ->
+                            it.distance(card.latLng!!).takeIf { it < farDistance }?.let { metersAway ->
                                 when {
-                                    metersAway >= 1000f -> ceil(metersAway / 1000).toInt().let { km -> pluralStringResource(R.plurals.km_away, km, km) }
-                                    else -> metersAway.approximate(10).let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters) }
+                                    metersAway >= 1000f -> ceil(metersAway / 1000).toInt()
+                                        .let { km -> pluralStringResource(R.plurals.km_away, km, km) }
+
+                                    else -> metersAway.approximate(10)
+                                        .let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters) }
                                 } + (if (hasCards) " • " else "")
-                            }
+                            } ?: (stringResource(R.string.your_friend) + (if (hasCards) " • " else ""))
                         } else {
-                            null
+                            stringResource(R.string.your_friend) + (if (hasCards) " • " else "")
                         }
                     }
 
                     if (hasCards || distanceText != null) {
                         Text(
-                            (distanceText ?: "") + if (hasCards) pluralStringResource(R.plurals.number_of_cards, card.cardCount ?: 0, card.cardCount ?: 0) else "",
+                            (distanceText ?: "") + if (hasCards) pluralStringResource(
+                                R.plurals.number_of_cards,
+                                card.cardCount ?: 0,
+                                card.cardCount ?: 0
+                            ) else "",
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyMedium,
@@ -254,11 +264,22 @@ fun BasicCard(
                         interactable = !isChoosing,
                         onReply = onReply,
                         isMine = isMine,
+                        isMineToolbar = isMineToolbar,
                         selectingText = {
                             isSelectingText = it
                         },
                         conversationChange = {
                             conversation = it
+                        },
+                        onCategoryClick = {
+                            if (isMine && isMineToolbar) {
+                                showSetCategory = true
+                            } else {
+                                onCategoryClick(it)
+                            }
+                        },
+                        onSetCategoryClick = {
+                            showSetCategory = true
                         },
                         modifier = Modifier
                             .constrainAs(conversationRef) {
@@ -272,11 +293,40 @@ fun BasicCard(
                     )
 
                     if (isMine && isMineToolbar) {
-                        CardToolbar(activity, onChange, card, edit, modifier = Modifier.constrainAs(toolbarRef) {
-                            linkTo(conversationRef.bottom, parent.bottom, bias = 1f)
-                            height = Dimension.preferredWrapContent
-                        })
+                        CardToolbar(
+                            activity,
+                            onChange,
+                            card,
+                            edit,
+                            modifier = Modifier.constrainAs(toolbarRef) {
+                                linkTo(conversationRef.bottom, parent.bottom, bias = 1f)
+                                height = Dimension.preferredWrapContent
+                            }
+                        )
                     }
+                }
+
+                if (showSetCategory) {
+                    ChooseCategoryDialog(
+                        {
+                            showSetCategory = false
+                        },
+                        { category ->
+                            coroutineScope.launch {
+                                try {
+                                    api.updateCard(
+                                        card.id!!,
+                                        Card().apply {
+                                            categories = if (category == null) emptyList() else listOf(category)
+                                        }
+                                    )
+                                    onChange()
+                                } catch (ex: Exception) {
+                                    ex.printStackTrace()
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -326,8 +376,8 @@ fun Modifier.horizontalFadingEdge(viewport: Size, scrollState: ScrollState) = th
 
             val w = scrollState.value.toFloat().coerceAtMost(viewport.width / 6f)
             val w2 = (
-                scrollState.maxValue.toFloat() - scrollState.value.toFloat()
-            ).coerceAtMost(viewport.width / 6f)
+                    scrollState.maxValue.toFloat() - scrollState.value.toFloat()
+                    ).coerceAtMost(viewport.width / 6f)
 
             if (scrollState.value != 0) {
                 drawRect(
@@ -358,7 +408,7 @@ private fun Modifier.minAspectRatio(ratio: Float) = then(
 )
 
 class MaxAspectRatioModifier(
-    private val aspectRatio: Float
+    private val aspectRatio: Float,
 ) : LayoutModifier {
     init {
         require(aspectRatio > 0f) { "aspectRatio $aspectRatio must be > 0" }
@@ -383,7 +433,7 @@ private fun CardToolbar(
     onChange: () -> Unit,
     card: Card,
     edit: EditCard?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var openDeleteDialog by remember { mutableStateOf(false) }
     var openEditDialog by remember { mutableStateOf(edit == EditCard.Conversation) }
@@ -419,7 +469,9 @@ private fun CardToolbar(
             enabled = card.photo != null
         )
         Text(
-            if (activeCommitted) stringResource(R.string.published) else if (card.photo == null) stringResource(R.string.add_photo_to_publish) else stringResource(R.string.draft),
+            if (activeCommitted) stringResource(R.string.published) else if (card.photo == null) stringResource(R.string.add_photo_to_publish) else stringResource(
+                R.string.draft
+            ),
             style = MaterialTheme.typography.labelMedium,
             color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier
@@ -467,7 +519,7 @@ private fun CardToolbar(
 data class ConversationItem(
     var title: String = "",
     var message: String = "",
-    var items: MutableList<ConversationItem> = mutableListOf()
+    var items: MutableList<ConversationItem> = mutableListOf(),
 )
 
 fun LatLng.toList() = listOf(latitude, longitude)

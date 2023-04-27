@@ -193,6 +193,11 @@
     <string name="add_about_you">Add something about you…</string>
     <string name="add_your_name">Add your name…</string>
     <string name="about_you">About you</string>
+    <string name="view_profile">View profile</string>
+    <string name="set_category">Set category</string>
+    <string name="choose_x">Choose \"%1$s\"</string>
+    <string name="choose_none">Choose none</string>
+    <string name="your_friend">Your friend</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>

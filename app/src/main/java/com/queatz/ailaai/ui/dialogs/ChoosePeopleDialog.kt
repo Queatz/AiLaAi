@@ -19,7 +19,6 @@ fun ChoosePeopleDialog(
     extraButtons: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
 ) {
-
     var isLoading by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }

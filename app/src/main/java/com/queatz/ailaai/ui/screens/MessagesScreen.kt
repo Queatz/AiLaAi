@@ -27,6 +27,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.components.SearchResult
@@ -110,6 +111,14 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     }
 
     Column {
+        AppHeader(
+            navController,
+            stringResource(R.string.friends),
+            {
+                // todo scroll to top
+            },
+            me
+        )
         Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 contentPadding = PaddingValues(

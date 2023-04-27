@@ -39,6 +39,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -288,6 +289,9 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                                     parentCard = it
                                                     card.parent = it.id
                                                 },
+                                                onCategoryClick = {
+
+                                                },
                                                 activity = activity,
                                                 card = it,
                                                 isChoosing = true
@@ -301,6 +305,9 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         {
                                             parentCard = null
                                             card.parent = null
+                                        },
+                                        onCategoryClick = {
+
                                         },
                                         activity = activity,
                                         card = parentCard!!,
