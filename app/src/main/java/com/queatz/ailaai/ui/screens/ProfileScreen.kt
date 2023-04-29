@@ -63,6 +63,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var isError by remember { mutableStateOf(false) }
     var showEditName by remember { mutableStateOf(false) }
     var showEditAbout by remember { mutableStateOf(false) }
+    var showJoined by remember { mutableStateOf(false) }
 
     suspend fun reload() {
         listOf(
@@ -272,15 +273,15 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             )
                             IconButton(
                                 {
-                                scope.launch {
-                                    try {
-                                        val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
-                                        navController.navigate("group/${group.id!!}")
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
+                                    scope.launch {
+                                        try {
+                                            val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
+                                            navController.navigate("group/${group.id!!}")
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
                                     }
-                                }
-                            },
+                                },
                                 colors = IconButtonDefaults.outlinedIconButtonColors(
                                     contentColor = MaterialTheme.colorScheme.primary
                                 ),
@@ -339,7 +340,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     .clip(MaterialTheme.shapes.large)
 //                                .clickable {  }
                                     .weight(1f)
-                                    .padding(vertical = PaddingDefault * 2, horizontal = PaddingDefault * 2)
+                                    .padding(PaddingDefault * 2)
                             ) {
                                 Text(
                                     stats.friendsCount.toString(),
@@ -361,7 +362,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     .clip(MaterialTheme.shapes.large)
 //                                .clickable {  }
                                     .weight(1f)
-                                    .padding(vertical = PaddingDefault * 2, horizontal = PaddingDefault * 2)
+                                    .padding(PaddingDefault * 2)
                             ) {
                                 Text(
                                     stats.cardCount.toString(),
@@ -381,12 +382,14 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 modifier = Modifier
                                     .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                                     .clip(MaterialTheme.shapes.large)
-//                                .clickable {  }
+                                    .clickable {
+                                        showJoined = true
+                                    }
                                     .weight(1f)
-                                    .padding(vertical = PaddingDefault * 2, horizontal = PaddingDefault * 2)
+                                    .padding(PaddingDefault * 2)
                             ) {
                                 Text(
-                                    person?.createdAt?.monthYear() ?: "",
+                                    person?.createdAt?.monthYear() ?: "?",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     fontWeight = FontWeight.ExtraBold,
@@ -467,6 +470,29 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 isMineToolbar = false
             )
         }
+    }
+
+    if (showJoined) {
+        AlertDialog(
+            {
+                showJoined = false
+            },
+            title = {
+                    Text(stringResource(R.string.joined))
+            },
+            text = {
+               Text(person?.createdAt?.dayMonthYear() ?: "?")
+            },
+            confirmButton = {
+                TextButton(
+                    {
+                        showJoined = false
+                    }
+                ) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
     }
 
     if (showEditName) {

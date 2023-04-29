@@ -83,7 +83,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
                 ),
-                keyboardActions = KeyboardActions(onSearch = {
+                keyboardActions = KeyboardActions(onNext = {
                     keyboardController.hide()
                 }),
                 modifier = Modifier.fillMaxWidth()
@@ -127,9 +127,10 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         Text(stringResource(R.string.your_message))
                     },
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
                     ),
-                    keyboardActions = KeyboardActions(onSearch = {
+                    keyboardActions = KeyboardActions(onNext = {
                         keyboardController.hide()
                     }),
                     modifier = Modifier.fillMaxWidth()

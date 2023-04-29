@@ -199,6 +199,8 @@
     <string name="your_friend">Your friend</string>
     <string name="cards">Cards</string>
     <string name="joined">Joined</string>
+    <string name="reset_tutorial">Show tutorial</string>
+    <string name="hide_tutorial">Hide tutorial</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>

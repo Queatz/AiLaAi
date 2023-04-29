@@ -211,4 +211,6 @@
     <string name="your_friend">Bạn của bạn</string>
     <string name="cards">Thẻ</string>
     <string name="joined">Đã tham gia</string>
+    <string name="reset_tutorial">Hiển thị hướng dẫn</string>
+    <string name="hide_tutorial">"Ẩn hướng dẫn "</string>
 </resources>

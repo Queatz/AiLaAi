@@ -1,7 +1,5 @@
 package com.queatz.ailaai.ui.screens
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,24 +24,32 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
+import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
-import com.queatz.ailaai.appLanguage
 import com.queatz.ailaai.extensions.sendEmail
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     var signOutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var inviteDialog by remember { mutableStateOf(false) }
+    var showResetTutorialButton by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        context.dataStore.data.map { it[tutorialCompleteKey] == true }.collect {
+            showResetTutorialButton = it
+        }
+    }
 
     if (inviteDialog) {
         InviteDialog(
@@ -57,7 +63,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
         var confirmSignOutChecked by remember { mutableStateOf(false) }
 
         fun signOut() {
-            coroutineScope.launch {
+            scope.launch {
                 api.setToken(null)
                 updateMe()
                 signOutDialog = false
@@ -128,7 +134,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         Text(stringResource(R.string.sign_out_description))
                         Button(
                             {
-                                coroutineScope.launch {
+                                scope.launch {
                                     try {
                                         transferCode = api.transferCode().code!!
                                     } catch (ex: Exception) {
@@ -143,19 +149,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 }
             }
         )
-    }
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-        if (it == null) return@rememberLauncherForActivityResult
-
-        coroutineScope.launch {
-            try {
-                api.updateMyPhoto(it)
-                updateMe()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
     }
 
     Column {
@@ -195,7 +188,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
             if (chooseLanguageDialog) {
                 fun setLanguage(language: String) {
-                    coroutineScope.launch(Dispatchers.Main) {
+                    scope.launch(Dispatchers.Main) {
                         val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(language)
                         AppCompatDelegate.setApplicationLocales(appLocale)
                     }
@@ -238,6 +231,20 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 }
             }, {
                 chooseLanguageDialog = true
+            })
+
+            DropdownMenuItem({
+                Text(
+                    if (showResetTutorialButton) stringResource(R.string.reset_tutorial) else stringResource(R.string.hide_tutorial),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+                scope.launch {
+                    context.dataStore.edit {
+                        it[tutorialCompleteKey] = it[tutorialCompleteKey]?.not() ?: true
+                    }
+                }
             })
 
             DropdownMenuItem({

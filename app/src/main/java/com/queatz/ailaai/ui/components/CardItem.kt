@@ -82,7 +82,7 @@ fun BasicCard(
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by remember { mutableStateOf(false) }
         var showSetCategory by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
+        val scope = rememberCoroutineScope()
 
         LaunchedEffect(hideContent) {
             if (hideContent) {
@@ -139,7 +139,7 @@ fun BasicCard(
                         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
                             if (it == null) return@rememberLauncherForActivityResult
 
-                            coroutineScope.launch {
+                            scope.launch {
                                 try {
                                     api.uploadCardPhoto(card.id!!, it)
                                     onChange()
@@ -167,7 +167,7 @@ fun BasicCard(
                     } else if (!isMine) {
                         val context = LocalContext.current
                         IconButton({
-                            coroutineScope.launch {
+                            scope.launch {
                                 when (saves.toggleSave(card)) {
                                     ToggleSaveResult.Saved -> {
                                         Toast.makeText(
@@ -314,7 +314,7 @@ fun BasicCard(
                             showSetCategory = false
                         },
                         { category ->
-                            coroutineScope.launch {
+                            scope.launch {
                                 try {
                                     api.updateCard(
                                         card.id!!,
