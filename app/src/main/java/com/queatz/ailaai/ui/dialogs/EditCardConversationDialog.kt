@@ -65,7 +65,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 .verticalScroll(scrollState)
         ) {
             Text(
-                stringResource(R.string.card_conversation),
+                stringResource(R.string.edit_card),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )

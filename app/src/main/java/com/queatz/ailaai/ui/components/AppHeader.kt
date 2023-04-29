@@ -4,14 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -49,20 +51,40 @@ fun AppHeader(navController: NavController, title: String, onTitleClick: () -> U
                 )
             },
             actions = {
-                if (me()?.name?.isNotBlank() == true || me()?.photo?.isNotBlank() == true) {
-                    GroupPhoto(
-                        listOf(ContactPhoto(me()?.name ?: "", me()?.photo)),
-                        size = 40.dp,
-                        modifier = Modifier
-                            .clickable {
-                                navController.navigate("profile/${me()?.id}")
-                            }
-                    )
-                } else {
-                    IconButton({
-                        navController.navigate("profile/${me()?.id}")
-                    }) {
-                        Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault / 2),
+                    modifier = Modifier
+                        .padding(start = PaddingDefault / 2)
+                ) {
+                    Button(
+                        {
+
+                        },
+                    ) {
+                        Icon(
+                            Icons.Outlined.PlayCircle,
+                            null,
+                            modifier = Modifier
+                                .padding(end = PaddingDefault / 2)
+                        )
+                        Text("Start tutorial")
+                    }
+                    if (me()?.name?.isNotBlank() == true || me()?.photo?.isNotBlank() == true) {
+                        GroupPhoto(
+                            listOf(ContactPhoto(me()?.name ?: "", me()?.photo)),
+                            size = 40.dp,
+                            modifier = Modifier
+                                .clickable {
+                                    navController.navigate("profile/${me()?.id}")
+                                }
+                        )
+                    } else {
+                        IconButton({
+                            navController.navigate("profile/${me()?.id}")
+                        }) {
+                            Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
+                        }
                     }
                 }
             }

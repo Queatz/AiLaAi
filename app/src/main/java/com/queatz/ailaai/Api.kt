@@ -307,9 +307,16 @@ class MemberAndPerson(
 )
 
 @Serializable
+data class ProfileStats(
+    val friendsCount: Int,
+    val cardCount: Int
+)
+
+@Serializable
 data class PersonProfile(
     val person: Person,
-    val profile: Profile
+    val profile: Profile,
+    val stats: ProfileStats
 )
 
 @Serializable

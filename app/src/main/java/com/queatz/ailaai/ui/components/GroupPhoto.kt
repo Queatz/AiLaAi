@@ -24,9 +24,7 @@ import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: Dp = 64.dp, border: Boolean = false) {
-    val padding = PaddingDefault
-
+fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: Dp = 64.dp, padding: Dp = PaddingDefault, border: Boolean = false) {
     if (photos.isEmpty()) {
         Box(
             contentAlignment = Alignment.Center,

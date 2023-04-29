@@ -41,7 +41,7 @@ fun CardParentSelector(
             OutlinedIconToggleButton(value == CardParentType.Offline, {
                 onChange(CardParentType.Offline)
             }, colors = colors, modifier = Modifier.weight(1f)) {
-                Icon(Icons.Outlined.Forest, stringResource(R.string.offline))
+                Icon(Icons.Outlined.CloudOff, stringResource(R.string.offline))
             }
         } else {
             OutlinedIconToggleButton(value == CardParentType.Card, {

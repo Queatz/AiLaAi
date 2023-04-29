@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -25,9 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,9 +38,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.copyToClipboard
-import com.queatz.ailaai.extensions.reply
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.dialogs.EditProfileAboutDialog
@@ -56,6 +57,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var cards by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf(listOf<Card>()) }
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
+    var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(cards.isEmpty() || person == null || profile == null) }
     var isError by remember { mutableStateOf(false) }
@@ -71,6 +73,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 api.profile(personId).let {
                     person = it.person
                     profile = it.profile
+                    stats = it.stats
                 }
             }
         ).awaitAll()
@@ -133,7 +136,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(bottom = PaddingDefault * 2)
+                    .padding(bottom = PaddingDefault)
             ) {
                 Box {
                     val bottomPadding = 128.dp / 3
@@ -166,7 +169,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 .scale(.85f)
                                 .align(Alignment.BottomEnd)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
+                                .background(MaterialTheme.colorScheme.background)
                                 .padding(PaddingDefault)
                         )
                     }
@@ -183,7 +186,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             .padding(PaddingDefault)
                             .clip(CircleShape)
                     ) {
-                        Icon(Icons.Outlined.ArrowBack, stringResource(R.string.settings))
+                        Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
                     }
                     if (isMe) {
                         IconButton(
@@ -210,6 +213,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 )
                             ),
                             size = 128.dp,
+                            padding = 0.dp,
                             border = true,
                             modifier = Modifier
                                 .clickable {
@@ -226,10 +230,11 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
-                                    .align(Alignment.Center)
+                                    .align(Alignment.TopEnd)
+                                    .padding(PaddingDefault / 2)
                                     .scale(.85f)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
+                                    .background(MaterialTheme.colorScheme.background)
                                     .padding(PaddingDefault)
                             )
                         }
@@ -252,15 +257,38 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 }
                             }
                     ) {
-                        Text(
-                            person?.name
-                                ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
-                            color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.titleLarge,
-                            textAlign = TextAlign.Center,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
+                                .padding(horizontal = PaddingDefault)
                                 .align(Alignment.Center)
-                        )
+                        ) {
+                            Text(
+                                person?.name
+                                    ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
+                                color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.titleLarge,
+                                textAlign = TextAlign.Center
+                            )
+                            IconButton(
+                                {
+                                scope.launch {
+                                    try {
+                                        val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
+                                        navController.navigate("group/${group.id!!}")
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            },
+                                colors = IconButtonDefaults.outlinedIconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                ),
+                                enabled = !isMe
+                            ) {
+                                Icon(Icons.Outlined.Message, "")
+                            }
+                        }
                         if (isMe) {
                             Icon(
                                 Icons.Outlined.Edit,
@@ -274,6 +302,102 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                         horizontal = PaddingDefault * 2
                                     )
                             )
+                        }
+                    }
+//                    Button({
+//                        scope.launch {
+//                            try {
+//                                val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
+//                                navController.navigate("group/${group.id!!}")
+//                            } catch (e: Exception) {
+//                                e.printStackTrace()
+//                            }
+//                        }
+//                    }, enabled = !isMe, modifier = Modifier.padding(top = PaddingDefault)) {
+//                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
+//                        Text(
+//                            stringResource(R.string.message),
+//                            overflow = TextOverflow.Ellipsis,
+//                            maxLines = 1
+//                        )
+//                    }
+                    stats?.let { stats ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                PaddingDefault * 2,
+                                Alignment.CenterHorizontally
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .padding(PaddingDefault)
+                                .widthIn(max = 360.dp) // todo what size
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                    .clip(MaterialTheme.shapes.large)
+//                                .clickable {  }
+                                    .weight(1f)
+                                    .padding(vertical = PaddingDefault * 2, horizontal = PaddingDefault * 2)
+                            ) {
+                                Text(
+                                    stats.friendsCount.toString(),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    stringResource(R.string.friends),
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                    .clip(MaterialTheme.shapes.large)
+//                                .clickable {  }
+                                    .weight(1f)
+                                    .padding(vertical = PaddingDefault * 2, horizontal = PaddingDefault * 2)
+                            ) {
+                                Text(
+                                    stats.cardCount.toString(),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    stringResource(R.string.cards),
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                    .clip(MaterialTheme.shapes.large)
+//                                .clickable {  }
+                                    .weight(1f)
+                                    .padding(vertical = PaddingDefault * 2, horizontal = PaddingDefault * 2)
+                            ) {
+                                Text(
+                                    person?.createdAt?.monthYear() ?: "",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    stringResource(R.string.joined),
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                     Box(
@@ -316,23 +440,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 }
 
                 Box {
-                    Button({
-                        scope.launch {
-                            try {
-                                val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
-                                navController.navigate("group/${group.id!!}")
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-                    }, enabled = !isMe) {
-                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
-                        Text(
-                            stringResource(R.string.message),
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1
-                        )
-                    }
+
                 }
             }
         }

@@ -56,7 +56,6 @@
     <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lữu</string>
-    <string name="card_conversation">Cuộc trò chuyện của thẻ</string>
     <string name="your_message">Tin nhắn của bạn</string>
     <string name="your_reply">Câu trả lời của bạn</string>
     <string name="card_message_description">Tin nhắn này được hiển thị trên thẻ dưới tên</string>
@@ -96,7 +95,7 @@
     <string name="set_my_location">Đặt vị trí của tôi</string>
     <string name="reset_location">Đặt lại vị trí</string>
     <string name="no_groups_to_show">Không tìm được nhóm để cho bạn xem.</string>
-    <string name="your_groups">Nhóm của bạn</string>
+    <string name="your_groups">Nhóm</string>
     <string name="new_group">Tạo nhóm</string>
     <string name="new_group_with_person">Tạo nhóm vơi %1$s</string>
     <string name="new_group_with_people">Tạo nhóm vơi %1$s và %2$s</string>
@@ -210,4 +209,6 @@
     <string name="choose_x">Chọn \"%1$s\"</string>
     <string name="choose_none">Chọn không danh mục</string>
     <string name="your_friend">Bạn của bạn</string>
+    <string name="cards">Thẻ</string>
+    <string name="joined">Đã tham gia</string>
 </resources>

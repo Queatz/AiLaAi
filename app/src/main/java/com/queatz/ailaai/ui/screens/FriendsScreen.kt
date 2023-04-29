@@ -116,7 +116,7 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     Column {
         AppHeader(
             navController,
-            stringResource(R.string.friends),
+            if (allGroups.isEmpty()) stringResource(R.string.your_groups) else "${stringResource(R.string.your_groups)} (${allGroups.size})",
             {
                 scope.launch {
                     state.scrollToTop()

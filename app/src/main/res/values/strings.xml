@@ -57,7 +57,6 @@
     <string name="map_description">Tap on the map to set the location of this card.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-    <string name="card_conversation">Card conversation</string>
     <string name="your_message">Your message</string>
     <string name="your_reply">Your reply</string>
     <string name="card_message_description">This message is shown on the card below the name</string>
@@ -176,7 +175,7 @@
     <string name="empty_group_name">New group</string>
     <string name="manage">Manage</string>
     <string name="x_removed">%1$s removed</string>
-    <string name="your_groups">Your groups</string>
+    <string name="your_groups">Groups</string>
     <string name="description">Description</string>
     <string name="update">Update</string>
     <string name="send">Send</string>
@@ -198,6 +197,8 @@
     <string name="choose_x">Choose \"%1$s\"</string>
     <string name="choose_none">Choose none</string>
     <string name="your_friend">Your friend</string>
+    <string name="cards">Cards</string>
+    <string name="joined">Joined</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>

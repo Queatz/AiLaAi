@@ -10,13 +10,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,6 +36,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.item
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -226,8 +231,9 @@ fun MessageItem(
                             alignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 320.dp)
+                                .heightIn(min = PaddingDefault * 2, max = 320.dp)
                                 .clip(MaterialTheme.shapes.large)
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
                                 .combinedClickable(
                                     onClick = { onShowPhoto(photo) },
                                     onLongClick = {

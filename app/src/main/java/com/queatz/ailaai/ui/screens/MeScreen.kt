@@ -183,7 +183,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             },
                             onChange = {
                                 scope.launch {
-                                    isLoading = true
+                                    isLoading = myCards.isEmpty()
                                     try {
                                         myCards = api.myCards()
                                     } catch (ex: Exception) {
@@ -228,15 +228,15 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 val scrollState = rememberScrollState()
                 Row(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .horizontalScroll(scrollState)
-
                     .onPlaced { viewport = it.boundsInParent().size }
                     .horizontalFadingEdge(viewport, scrollState)
                 ) {
                     CardParentSelector(
                         cardParentType,
                         modifier = Modifier
-                            .width(320.dp)
+                            .width(240.dp)
                             .padding(horizontal = PaddingDefault)
                             .padding(bottom = PaddingDefault / 2),
                         showOffline = true
