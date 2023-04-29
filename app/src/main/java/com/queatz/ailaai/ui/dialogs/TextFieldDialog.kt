@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
+import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -28,7 +29,7 @@ fun TextFieldDialog(
     button: String,
     singleLine: Boolean = false,
     initialValue: String = "",
-    onSubmit: suspend (value: String) -> Unit
+    onSubmit: suspend (value: String) -> Unit,
 ) {
     var disableSubmit by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
@@ -39,64 +40,58 @@ fun TextFieldDialog(
         focusRequester.requestFocus()
     }
 
-    Dialog(onDismissRequest) {
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+    DialogBase(onDismissRequest, modifier = Modifier.wrapContentHeight()) {
+        val scrollState = rememberScrollState()
+        Column(
             modifier = Modifier
-                .padding(PaddingDefault * 2)
-                .wrapContentHeight()
+                .padding(PaddingDefault * 3)
+                .verticalScroll(scrollState)
         ) {
-            val scrollState = rememberScrollState()
-            Column(
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = PaddingDefault)
+            )
+            OutlinedTextField(
+                text,
+                onValueChange = {
+                    text = it
+                    disableSubmit = false
+                },
+                shape = MaterialTheme.shapes.large,
+                singleLine = singleLine,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences
+                ),
                 modifier = Modifier
-                    .padding(PaddingDefault * 3)
-                    .verticalScroll(scrollState)
+                    .fillMaxWidth()
+                    .padding(bottom = PaddingDefault)
+                    .focusRequester(focusRequester)
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = PaddingDefault)
-                )
-                OutlinedTextField(
-                    text,
-                    onValueChange = {
-                        text = it
-                        disableSubmit = false
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    singleLine = singleLine,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = PaddingDefault)
-                        .focusRequester(focusRequester)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
-                    verticalAlignment = Alignment.Bottom,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextButton(
-                        {
-                            disableSubmit = true
+                TextButton(
+                    {
+                        disableSubmit = true
 
-                            coroutineScope.launch {
-                                try {
-                                    onSubmit(text)
-                                } finally {
-                                    disableSubmit = false
-                                }
+                        coroutineScope.launch {
+                            try {
+                                onSubmit(text)
+                            } finally {
+                                disableSubmit = false
                             }
-                        },
-                        enabled = !disableSubmit,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    ) {
-                        Text(button, textAlign = TextAlign.End)
-                    }
+                        }
+                    },
+                    enabled = !disableSubmit,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Text(button, textAlign = TextAlign.End)
                 }
             }
         }
     }
 }
+

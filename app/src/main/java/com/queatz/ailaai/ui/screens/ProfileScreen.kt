@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,10 +24,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -132,6 +136,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     .padding(bottom = PaddingDefault * 2)
             ) {
                 Box {
+                    val bottomPadding = 128.dp / 3
                     AsyncImage(
                         model = profile?.photo?.let(api::url),
                         contentDescription = null,
@@ -140,7 +145,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             .aspectRatio(1.5f)
                             .fillMaxWidth()
                             .clip(MaterialTheme.shapes.large)
-                            .padding(bottom = 128.dp / 3)
+                            .padding(bottom = bottomPadding)
                             .background(MaterialTheme.colorScheme.secondaryContainer)
                             .clickable {
                                 if (isMe) {
@@ -150,6 +155,21 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 }
                             }
                     )
+                    if (isMe) {
+                        Icon(
+                            Icons.Outlined.Edit,
+                            null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(bottom = bottomPadding)
+                                .padding(PaddingDefault)
+                                .scale(.85f)
+                                .align(Alignment.BottomEnd)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
+                                .padding(PaddingDefault)
+                        )
+                    }
                     val colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
                     )
@@ -178,35 +198,48 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             Icon(Icons.Outlined.Settings, stringResource(R.string.settings))
                         }
                     }
-                    GroupPhoto(
-                        listOf(
-                            ContactPhoto(
-                                person?.name ?: "",
-                                person?.photo
-                            )
-                        ),
-                        size = 128.dp,
-                        border = true,
+                    Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .clickable {
-                                if (isMe) {
-                                    photoLauncher.launch("image/*")
-                                } else {
-                                    showPhoto = person?.photo
+                    ) {
+                        GroupPhoto(
+                            listOf(
+                                ContactPhoto(
+                                    person?.name ?: "",
+                                    person?.photo
+                                )
+                            ),
+                            size = 128.dp,
+                            border = true,
+                            modifier = Modifier
+                                .clickable {
+                                    if (isMe) {
+                                        photoLauncher.launch("image/*")
+                                    } else {
+                                        showPhoto = person?.photo
+                                    }
                                 }
-                            }
-                    )
+                        )
+                        if (isMe) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .scale(.85f)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
+                                    .padding(PaddingDefault)
+                            )
+                        }
+                    }
                 }
                 if (!isLoading && !isError) {
                     val copiedString = stringResource(R.string.copied)
-                    Text(
-                        person?.name
-                            ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
-                        color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
+                    Box(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .clickable(
                                 interactionSource = MutableInteractionSource(),
                                 indication = null
@@ -218,24 +251,86 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
                                 }
                             }
-                    )
-                    if (isMe || profile?.about?.isBlank() == false) {
-                        LinkifyText(
-                            profile?.about ?: (if (isMe) stringResource(R.string.add_about_you) else ""),
-                            color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyMedium,
+                    ) {
+                        Text(
+                            person?.name
+                                ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
+                            color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .clip(MaterialTheme.shapes.large)
-                                .clickable {
-                                    if (isMe) {
-                                        showEditAbout = true
-                                    } else {
-                                        profile?.about?.copyToClipboard(context)
-                                        Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
-                                    }
+                                .align(Alignment.Center)
+                        )
+                        if (isMe) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .scale(.85f)
+                                    .align(Alignment.CenterEnd)
+                                    .padding(
+                                        vertical = PaddingDefault,
+                                        horizontal = PaddingDefault * 2
+                                    )
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable {
+                                if (isMe) {
+                                    showEditAbout = true
+                                } else {
+                                    profile?.about?.copyToClipboard(context)
+                                    Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
                                 }
-                                .padding(PaddingDefault)
+                            }
+                            .padding(PaddingDefault)
+                    ) {
+                        if (isMe || profile?.about?.isBlank() == false) {
+                            LinkifyText(
+                                profile?.about ?: (if (isMe) stringResource(R.string.add_about_you) else ""),
+                                color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
+                        if (isMe) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .scale(.85f)
+                                    .padding(
+                                        horizontal = PaddingDefault
+                                    )
+                            )
+                        }
+                    }
+                }
+
+                Box {
+                    Button({
+                        scope.launch {
+                            try {
+                                val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
+                                navController.navigate("group/${group.id!!}")
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }, enabled = !isMe) {
+                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
+                        Text(
+                            stringResource(R.string.message),
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
                         )
                     }
                 }
@@ -260,7 +355,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 },
                 card = card,
                 activity = navController.context as Activity,
-                isMine = false,
+                isMine = card.person == me()?.id,
                 isMineToolbar = false
             )
         }

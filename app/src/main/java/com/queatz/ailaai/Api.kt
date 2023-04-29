@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
@@ -250,6 +251,13 @@ class Api {
     suspend fun removeMember(id: String): HttpStatusCode = post("members/$id/delete")
 
     suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
+
+    suspend fun messagesBefore(group: String, before: Instant): List<Message> = get(
+        "groups/$group/messages",
+        mapOf(
+            "before" to before.toString()
+        )
+    )
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 

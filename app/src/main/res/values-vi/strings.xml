@@ -116,7 +116,7 @@
     <string name="group_name">Tên của nhóm này</string>
     <string name="qr_code">Mã QR</string>
     <string name="group_not_found">Không được tìm thấy nhóm này</string>
-    <string name="group_hidden">hóm ẩn đến khi tin nhắn mới được gửi</string>
+    <string name="group_hidden">Nhóm ẩn đến khi tin nhắn mới được gửi</string>
     <string name="saved">Đã lưu</string>
     <string name="save_card">Lưu thẻ</string>
     <string name="card_saved">Thẻ được lưu</string>
@@ -206,8 +206,8 @@
     <string name="add_your_name">Thêm tên của bạn…</string>
     <string name="about_you">Về bạn</string>
     <string name="view_profile">Xem trang cá nhân</string>
-    <string name="set_category">Đặt danh mục</string>
-    <string name="choose_x">Đặt \"%1$s\"</string>
-    <string name="choose_none">Đặt không danh mục</string>
+    <string name="set_category">Chọn danh mục</string>
+    <string name="choose_x">Chọn \"%1$s\"</string>
+    <string name="choose_none">Chọn không danh mục</string>
     <string name="your_friend">Bạn của bạn</string>
 </resources>

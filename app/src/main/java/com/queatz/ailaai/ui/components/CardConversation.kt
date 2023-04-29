@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.*
@@ -30,7 +29,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.serialization.decodeFromString
-import kotlin.random.Random
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -59,7 +57,7 @@ fun CardConversation(
     }
 
     Column(modifier = modifier) {
-        if (showTitle) {
+        if (showTitle || stack.isNotEmpty()) {
             Text(
                 text = buildAnnotatedString {
                     withStyle(
@@ -80,7 +78,7 @@ fun CardConversation(
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                 modifier = Modifier
                     .fillMaxWidth()
-                   .padding(bottom = if (categories.isEmpty() && !(isMine && isMineToolbar)) PaddingDefault / 2 else 0.dp)
+                   .padding(bottom = if (stack.isNotEmpty() || (categories.isEmpty() && !(isMine && isMineToolbar))) PaddingDefault / 2 else 0.dp)
             )
         }
 

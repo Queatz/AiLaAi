@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
+import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.PersonMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -25,34 +27,36 @@ fun GroupMembersDialog(
     extraButtons: @Composable RowScope.() -> Unit = {},
     onClick: (Person) -> Unit,
 ) {
-    Dialog(onDismissRequest) {
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+    DialogBase(onDismissRequest) {
+        Column(
             modifier = Modifier
-                .padding(PaddingDefault * 2)
+                .padding(PaddingDefault * 3)
         ) {
-            Column(
+            Text(
+                "${stringResource(R.string.members)} (${people.size})",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = PaddingDefault)
+            )
+            LazyColumn(
                 modifier = Modifier
-                    .padding(PaddingDefault * 3)
+                    .weight(1f, fill = false)
             ) {
-                LazyColumn {
-                    items(people, key = { it.id!! }) {
-                        PersonMember(it, infoFormatter = infoFormatter) { onClick(it) }
-                    }
+                items(people, key = { it.id!! }) {
+                    PersonMember(it, infoFormatter = infoFormatter) { onClick(it) }
                 }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
-                    verticalAlignment = Alignment.Bottom,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    extraButtons()
-                    TextButton(
-                        {
-                            onDismissRequest()
-                        }
-                    ) {
-                        Text(stringResource(R.string.close))
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+            ) {
+                extraButtons()
+                TextButton(
+                    {
+                        onDismissRequest()
                     }
+                ) {
+                    Text(stringResource(R.string.close))
                 }
             }
         }

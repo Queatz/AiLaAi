@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
@@ -44,6 +45,7 @@ import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.components.CardsList
@@ -68,6 +70,8 @@ var exploreInitialCategory: String? = null
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
+    val state = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
         navController.context as Activity
@@ -85,7 +89,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
     var showCameraRationale by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
     var isError by remember { mutableStateOf(false) }
@@ -261,7 +264,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         LaunchedEffect(Unit) {
             locationClient.observeLocation(LocationRequest.createDefault())
                 .filter { it is Outcome.Success && it.value.lastLocation != null }
-                .takeWhile { coroutineScope.isActive }
+                .takeWhile { scope.isActive }
                 // todo dispose on close
                 .take(1)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -299,11 +302,14 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 navController,
                 stringResource(R.string.app_name),
                 {
-                    // todo scroll to top
+                    scope.launch {
+                        state.scrollToTop()
+                    }
                 },
                 me
             )
             CardsList(
+                state = state,
                 cards = if (selectedCategory == null) cards else cards.filter { it.categories?.contains(selectedCategory) == true },
                 isMine = { it.person == me()?.id },
                 geo = geo,
@@ -324,7 +330,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     ElevatedButton(
                         elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
                         onClick = {
-                            coroutineScope.launch {
+                            scope.launch {
                                 context.dataStore.edit {
                                     it.remove(geoKey)
                                     it.remove(geoManualKey)

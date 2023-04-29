@@ -27,6 +27,7 @@ import com.queatz.ailaai.Group
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -34,44 +35,40 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShareCardQrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
     val logo = bitmapResource(R.drawable.ic_notification)
-    val qrCode = remember { ScanUtil.buildBitmap(
-        url,
-        QRCODE_SCAN_TYPE,
-        500,
-        500,
-        HmsBuildBitmapOption.Creator().setQRLogoBitmap(logo?.tint(android.graphics.Color.BLACK)).create()
-    ) }
+    val qrCode = remember {
+        ScanUtil.buildBitmap(
+            url,
+            QRCODE_SCAN_TYPE,
+            500,
+            500,
+            HmsBuildBitmapOption.Creator().setQRLogoBitmap(logo?.tint(android.graphics.Color.BLACK)).create()
+        )
+    }
 
-    Dialog(onDismissRequest) {
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+    DialogBase(onDismissRequest) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(PaddingDefault * 2)
+                .padding(
+                    PaddingDefault * 3,
+                    PaddingDefault * 3,
+                    PaddingDefault * 3,
+                    PaddingDefault
+                )
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(
-                        PaddingDefault * 3,
-                        PaddingDefault * 3,
-                        PaddingDefault * 3,
-                        PaddingDefault
-                    )
+            Image(qrCode.asImageBitmap(), contentDescription = null, modifier = Modifier.background(Color.White))
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.Bottom
             ) {
-                Image(qrCode.asImageBitmap(), contentDescription = null, modifier = Modifier.background(Color.White))
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.Bottom
+                val context = LocalContext.current
+                TextButton(
+                    {
+                        qrCode.share(context, name)
+                    },
+                    modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    val context = LocalContext.current
-                    TextButton(
-                        {
-                            qrCode.share(context, name)
-                        },
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    ) {
-                        Text(stringResource(R.string.share), textAlign = TextAlign.End)
-                    }
+                    Text(stringResource(R.string.share), textAlign = TextAlign.End)
                 }
             }
         }

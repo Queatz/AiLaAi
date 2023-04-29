@@ -4,9 +4,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#FF006689</color>
     <color name="onPrimary">#FFFFFFFF</color>
-    <color name="primaryContainer">#FFC3E8FF</color>
+    <color name="primaryContainer">#2A818C</color>
     <color name="secondary">#FF4E616D</color>
     <color name="onSecondary">#FFFFFFFF</color>
-    <color name="secondaryContainer">#FFD1E5F4</color>
+    <color name="secondaryContainer">#B4E5EC</color>
     <color name="background">#FFFBFCFE</color>
 </resources>

@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.components
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +35,7 @@ fun ContactItem(
     me: Person?,
     onChange: () -> Unit,
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val someone = stringResource(R.string.someone)
     val notConnected = stringResource(R.string.not_connected_yet)
@@ -64,14 +67,13 @@ fun ContactItem(
             val myMember = groupExtended.members?.find { it.person?.id == me?.id }
             val isUnread = groupExtended.isUnread(myMember?.member)
             var showMenu by remember { mutableStateOf(false) }
-            val coroutineScope = rememberCoroutineScope()
 
             if (showMenu) {
                 Menu(
                     { showMenu = false }
                 ) {
                     item(stringResource(R.string.hide)) {
-                        coroutineScope.launch {
+                        scope.launch {
                             try {
                                 api.updateMember(myMember!!.member!!.id!!, Member(hide = true))
                                 Toast.makeText(
@@ -97,7 +99,7 @@ fun ContactItem(
                     showMenu = true
                 },
                 name = groupExtended.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()),
-                description = groupExtended.latestMessage?.text?.let {
+                description = groupExtended.latestMessage?.preview(context)?.let {
                     if (groupExtended.latestMessage!!.member == myMember?.member?.id) stringResource(
                         R.string.you_x,
                         it
@@ -170,6 +172,11 @@ fun ContactResult(
         )
     }
 }
+
+private fun Message.preview(context: Context): String? {
+    return text?.nullIfBlank ?: attachmentText(context)
+}
+
 
 @Serializable
 sealed class SearchResult {

@@ -2,9 +2,7 @@ package com.queatz.ailaai.ui.components
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +22,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -39,13 +38,13 @@ fun CardsList(
     value: String,
     valueChange: (String) -> Unit,
     navController: NavController,
+    state: LazyGridState = rememberLazyGridState(),
     useDistance: Boolean = false,
     action: (@Composable () -> Unit)? = null,
     onAction: (() -> Unit)? = null,
     aboveSearchFieldContent: @Composable () -> Unit = {},
 ) {
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-    val screenPixelDensity = LocalContext.current.resources.displayMetrics.density
     val scope = rememberCoroutineScope()
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
@@ -53,22 +52,23 @@ fun CardsList(
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + Dp(viewport.height / screenPixelDensity))
+                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + viewport.height.inDp())
             )
         } else if (isError || cards.isEmpty()) {
             Text(
                 stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
-                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + Dp(viewport.height / screenPixelDensity))
+                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + viewport.height.inDp())
             )
         } else {
             LazyVerticalGrid(
+                state = state,
                 contentPadding = PaddingValues(
                     PaddingDefault,
                     PaddingDefault,
                     PaddingDefault,
-                    PaddingDefault * 3.5f + Dp(viewport.height / screenPixelDensity)
+                    PaddingDefault * 3.5f + viewport.height.inDp()
                 ),
                 horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),

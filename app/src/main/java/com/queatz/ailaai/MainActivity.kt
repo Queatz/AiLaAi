@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                     ?.let { it.startsWith("group/") || it.startsWith("card/") } != true
 
                 var known by remember { mutableStateOf(api.hasToken()) }
+                var wasKnown by remember { mutableStateOf(known) }
 
                 if (!known) {
                     InitialScreen { known = true }
@@ -111,6 +112,11 @@ class MainActivity : AppCompatActivity() {
                         me = api.me()
                         push.setMe(me!!.id!!)
                         updateAppLanguage(me)
+
+                        if (!wasKnown) {
+                            navController.navigate("profile/${me!!.id!!}")
+                            wasKnown = true
+                        }
                     }
 
                     LaunchedEffect(me) {

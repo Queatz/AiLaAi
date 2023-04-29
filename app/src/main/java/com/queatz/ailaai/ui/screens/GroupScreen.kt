@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -71,6 +72,28 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
+    var hasOlderMessages by remember { mutableStateOf(true) }
+
+    suspend fun reloadMessages() {
+        messages = api.messages(groupId)
+    }
+
+    suspend fun loadMore() {
+        if (!hasOlderMessages || messages.isEmpty()) {
+            return
+        }
+
+        val oldest = messages.lastOrNull()?.createdAt ?: return
+        val older = api.messagesBefore(groupId, oldest)
+
+        val newMessages = (messages + older).distinctBy { it.id }
+
+        if (messages.size == newMessages.size) {
+            hasOlderMessages = false
+        } else {
+            messages = newMessages
+        }
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -79,7 +102,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             coroutineScope.launch {
                 try {
                     api.sendPhotos(groupId, uris)
-                    messages = api.messages(groupId)
+                    reloadMessages()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_LONG).show()
@@ -115,7 +138,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
     LaunchedEffect(Unit) {
         try {
-            messages = api.messages(groupId)
+            reloadMessages()
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
@@ -128,7 +151,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             .catch { it.printStackTrace() }
             .onEach {
                 try {
-                    messages = api.messages(groupId)
+                    reloadMessages()
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                 }
@@ -151,11 +174,17 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
         } else {
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
-            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id } ?: emptyList()
+            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id }?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) } ?: emptyList()
             val state = rememberLazyListState()
 
+            var latestMessage by remember { mutableStateOf<Instant?>(null) }
+
             LaunchedEffect(messages) {
-                state.animateScrollToItem(0)
+                val latest = messages.firstOrNull()?.createdAt
+                if (latestMessage == null || (latest != null && latestMessage!! < latest)) {
+                    state.animateScrollToItem(0)
+                }
+                latestMessage = latest
             }
 
             TopAppBar(
@@ -321,9 +350,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 }
             }
             LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
-                items(messages, { it.id!! }) {
+                itemsIndexed(messages, key = { _, it -> it.id!! }) { index, it ->
                     MessageItem(
                         it,
+                        index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
                         {
                             groupExtended?.members?.find { member -> member.member?.id == it }?.person
                         },
@@ -331,7 +361,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         {
                             coroutineScope.launch {
                                 try {
-                                    messages = api.messages(groupId)
+                                    reloadMessages()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
                                 }
@@ -341,6 +371,23 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         navController
                     )
                 }
+                item {
+                    AnimatedVisibility(hasOlderMessages && messages.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(PaddingDefault * 2)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                            LaunchedEffect(Unit) {
+                                loadMore()
+                            }
+                        }
+                    }
+                }
             }
 
             fun send() {
@@ -349,7 +396,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     coroutineScope.launch {
                         try {
                             api.sendMessage(groupId, Message(text = text))
-                            messages = api.messages(groupId)
+                            reloadMessages()
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                             if (sendMessage.isBlank()) {
@@ -455,6 +502,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         }
                     }
                 ) {
+                    showGroupMembers = false
                     navController.navigate("profile/${it.id!!}")
                 }
             }

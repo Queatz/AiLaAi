@@ -21,6 +21,7 @@ import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
 import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import com.queatz.ailaai.R
 import com.queatz.ailaai.databinding.LayoutMapBinding
+import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.MapWithMarker
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -33,45 +34,39 @@ import kotlinx.coroutines.launch
 fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit) {
     var position by remember { mutableStateOf(LatLng(0.0, 0.0)) }
 
-    Dialog(onDismissRequest) {
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
+    DialogBase(onDismissRequest) {
+        Column(
             modifier = Modifier
-                .padding(PaddingDefault * 2)
-                .fillMaxHeight(.9f)
+                .padding(PaddingDefault * 3)
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .padding(PaddingDefault * 3)
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(PaddingValues(vertical = PaddingDefault * 2))
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f)
-                        .padding(PaddingValues(vertical = PaddingDefault * 2))
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                ) {
-                    MapWithMarker(5f, position) {
-                        position = it
-                    }
+                MapWithMarker(5f, position) {
+                    position = it
                 }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
-                    verticalAlignment = Alignment.Bottom,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextButton(
-                        {
-                            onLocation(position)
-                            onDismissRequest()
-                        }
-                    ) {
-                        Text(stringResource(R.string.set_my_location))
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextButton(
+                    {
+                        onLocation(position)
+                        onDismissRequest()
                     }
+                ) {
+                    Text(stringResource(R.string.set_my_location))
                 }
             }
         }
     }
 }
+

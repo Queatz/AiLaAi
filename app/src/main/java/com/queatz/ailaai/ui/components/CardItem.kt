@@ -152,7 +152,9 @@ fun BasicCard(
                             {
                                 launcher.launch("image/*")
                             },
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                            colors = ButtonDefaults.textButtonColors(
+                                containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
+                            ),
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                         ) {

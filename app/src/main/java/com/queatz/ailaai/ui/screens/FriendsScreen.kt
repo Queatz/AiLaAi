@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.*
@@ -27,6 +28,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
@@ -41,6 +43,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MessagesScreen(navController: NavController, me: () -> Person?) {
+    val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by rememberSaveable(stateSaver = jsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
     var allPeople by rememberSaveable(stateSaver = jsonSaver<List<Person>>()) { mutableStateOf(listOf()) }
@@ -115,12 +118,15 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
             navController,
             stringResource(R.string.friends),
             {
-                // todo scroll to top
+                scope.launch {
+                    state.scrollToTop()
+                }
             },
             me
         )
         Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
             LazyColumn(
+                state = state,
                 contentPadding = PaddingValues(
                     PaddingDefault,
                     PaddingDefault,

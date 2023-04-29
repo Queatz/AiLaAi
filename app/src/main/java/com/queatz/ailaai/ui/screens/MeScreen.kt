@@ -30,10 +30,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.isFalse
-import com.queatz.ailaai.extensions.isTrue
-import com.queatz.ailaai.extensions.toggle
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -145,10 +142,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             ) + (if (isLoading) "" else " (${cards.size})"),
             {
                 scope.launch {
-                    if (state.firstVisibleItemIndex > 2) {
-                        state.scrollToItem(2)
-                    }
-                    state.animateScrollToItem(0)
+                    state.scrollToTop()
                 }
             },
             me

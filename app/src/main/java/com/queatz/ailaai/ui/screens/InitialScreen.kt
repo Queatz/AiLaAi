@@ -18,6 +18,7 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
 import io.ktor.http.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)

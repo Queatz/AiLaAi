@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MessageItem(
     message: Message,
+    previousMessage: Message?,
     getPerson: (String) -> Person?,
     isMe: Boolean,
     onDeleted: () -> Unit,
@@ -163,11 +164,15 @@ fun MessageItem(
             showTime = !showTime
         }) {
         if (!isMe) {
-            ProfileImage(
-                getPerson(message.member!!),
-                PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault),
-            ) { person ->
-                navController.navigate("profile/${person.id!!}")
+            if (previousMessage?.member != message.member) {
+                ProfileImage(
+                    getPerson(message.member!!),
+                    PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault),
+                ) { person ->
+                    navController.navigate("profile/${person.id!!}")
+                }
+            } else {
+                Box(Modifier.requiredSize(32.dp + PaddingDefault))
             }
         }
 
@@ -221,7 +226,7 @@ fun MessageItem(
                             alignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(320.dp)
+                                .heightIn(max = 320.dp)
                                 .clip(MaterialTheme.shapes.large)
                                 .combinedClickable(
                                     onClick = { onShowPhoto(photo) },
@@ -286,6 +291,9 @@ private fun ProfileImage(person: Person?, padding: PaddingValues, onClick: (Pers
                 .requiredSize(32.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
+                .clickable {
+                    person?.let(onClick)
+                }
         ) {
             Text(
                 person?.name?.take(1) ?: "",

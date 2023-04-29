@@ -1,23 +1,25 @@
 package com.queatz.ailaai.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
-import com.queatz.ailaai.saves
+import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.state.jsonSaver
 import io.ktor.utils.io.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun SavedScreen(navController: NavController, me: () -> Person?) {
+    val state = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
     var value by rememberSaveable { mutableStateOf("") }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
@@ -61,11 +63,14 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
                 "${stringResource(R.string.saved)} (${cards.size})"
             },
             {
-                // todo scroll to top
+                scope.launch {
+                    state.scrollToTop()
+                }
             },
             me
         )
         CardsList(
+            state = state,
             cards = cards,
             isMine = { it.person == me()?.id },
             geo = null,
