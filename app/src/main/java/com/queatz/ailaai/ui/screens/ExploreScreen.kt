@@ -135,7 +135,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     }
 
     fun updateCategories() {
-        selectedCategory = exploreInitialCategory
+        selectedCategory = selectedCategory ?: exploreInitialCategory
         categories = ((exploreInitialCategory?.let(::listOf) ?: emptyList()) + cards
             .flatMap { it.categories ?: emptyList() })
             .distinct()
@@ -154,8 +154,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         } else {
             (cards + page).distinctBy { it.id }
         }
-        offset = cards.size
         updateCategories()
+        offset = cards.size
         hasMore = cards.size > oldSize
     }
 

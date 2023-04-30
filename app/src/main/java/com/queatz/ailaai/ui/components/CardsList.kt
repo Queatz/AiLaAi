@@ -114,11 +114,18 @@ fun CardsList(
                 }
                 if (onLoadMore != null) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        var isLoadingMore by remember { mutableStateOf(false) }
+                        var isLoadingMore by remember { mutableStateOf(true) }
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            AnimatedVisibility(hasMore && cards.isNotEmpty()) {
+                            LaunchedEffect(Unit) {
+                                try {
+                                    onLoadMore()
+                                } finally {
+                                    isLoadingMore = false
+                                }
+                            }
+                            AnimatedVisibility(hasMore && cards.isNotEmpty() && isLoadingMore) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -128,16 +135,6 @@ fun CardsList(
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                     )
-                                    LaunchedEffect(Unit) {
-                                        if (!isLoadingMore) {
-                                            try {
-                                                isLoadingMore = true
-                                                onLoadMore()
-                                            } finally {
-                                                isLoadingMore = false
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }
