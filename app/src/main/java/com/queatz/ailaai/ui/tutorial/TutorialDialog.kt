@@ -63,6 +63,7 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
     var cardParent by rememberSaveable { mutableStateOf<CardParentType?>(null) }
     var cardPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
     var cardPublished by rememberSaveable { mutableStateOf(false) }
+    var cardCreated by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         if (it == null) return@rememberLauncherForActivityResult
         cardPhoto = it
@@ -78,19 +79,19 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
             "What's a card?",
             "Okay",
         ) {
-            Text("In Ai Là Ai, you introduce yourself by creating unique cards expressing what you're all about.")
+            Text("You introduce yourself by creating Ai Là Ai cards expressing what you're all about.")
         },
         TutorialStep(
             "How it works",
             "Great!",
         ) {
-            Text("Other people see your cards and reply, which initiates a conversation between you and them.")
+            Text("Other people then see your cards and are able to initiate a conversation with you.")
         },
         TutorialStep(
-            "Time to learn",
+            "Let's learn",
             "Let's start!",
         ) {
-            Text("In this tutorial, you will create your first card.")
+            Text("In this tutorial, you will create your first Ai Là Ai card.")
         },
         TutorialStep(
             "Your first card",
@@ -126,7 +127,7 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
             "Keep going",
             { cardMessage.isNotEmpty() }
         ) {
-            Text("Now tell people what you're all about in a little more detail.  Help them understand why they would reach out to you.")
+            Text("Now tell people what you're all about in a little more detail.  Help them understand why they might want to reach out to you.")
             OutlinedTextField(
                 cardMessage,
                 {
@@ -243,29 +244,33 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
             "Publish your card",
             if (cardPublished) "Publish it" else "Skip",
             onContinue = {
-                try {
-                    val card = api.newCard(
-                        com.queatz.ailaai.Card(
-                            name = cardName.trim(),
-                            conversation = json.encodeToString(
-                                ConversationItem(
-                                    message = cardMessage
-                                )
-                            ),
-                            equipped = true
-                        )
-                    )
-                    api.uploadCardPhoto(card.id!!, cardPhoto!!)
-
-                    if (cardPublished) {
-                        api.updateCard(
-                            card.id!!, com.queatz.ailaai.Card(
-                                active = true
+                if (!cardCreated) {
+                    try {
+                        val card = api.newCard(
+                            com.queatz.ailaai.Card(
+                                name = cardName.trim(),
+                                conversation = json.encodeToString(
+                                    ConversationItem(
+                                        message = cardMessage
+                                    )
+                                ),
+                                equipped = true
                             )
                         )
+                        api.uploadCardPhoto(card.id!!, cardPhoto!!)
+
+                        if (cardPublished) {
+                            api.updateCard(
+                                card.id!!, com.queatz.ailaai.Card(
+                                    active = true
+                                )
+                            )
+                        }
+
+                        cardCreated = true
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
             }
         ) {

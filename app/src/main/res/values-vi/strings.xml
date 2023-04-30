@@ -213,4 +213,14 @@
     <string name="joined">Đã tham gia</string>
     <string name="reset_tutorial">Hiển thị hướng dẫn</string>
     <string name="hide_tutorial">"Ẩn hướng dẫn "</string>
+    <string name="invite_to_group">Mời đến %1$s</string>
+    <string name="invite_to_groups">Mời đến %1$s và %2$s</string>
+    <string name="invite_to_x_groups">Mời đến %1$s nhóm</string>
+    <plurals name="friends_plural">
+        <item quantity="other">Bạn</item>
+    </plurals>
+    <plurals name="cards_plural">
+        <item quantity="other">Thẻ</item>
+    </plurals>
+    <string name="more_ideas">Ý tưởng thêm</string>
 </resources>

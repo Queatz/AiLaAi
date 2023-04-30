@@ -15,10 +15,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Message
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,6 +26,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,14 +39,14 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.GroupPhoto
-import com.queatz.ailaai.ui.dialogs.EditProfileAboutDialog
-import com.queatz.ailaai.ui.dialogs.EditProfileNameDialog
-import com.queatz.ailaai.ui.dialogs.PhotoDialog
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
@@ -64,6 +62,53 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var showEditName by remember { mutableStateOf(false) }
     var showEditAbout by remember { mutableStateOf(false) }
     var showJoined by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+    var showInviteDialog by remember { mutableStateOf(false) }
+
+    if (showInviteDialog) {
+        val inviteString = stringResource(R.string.invite)
+        val didntWork = stringResource(R.string.didnt_work)
+        val someone = stringResource(R.string.someone)
+        val emptyGroup = stringResource(R.string.empty_group_name)
+        ChooseGroupDialog(
+            {
+                showInviteDialog = false
+            },
+            title = inviteString,
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.invite,
+                R.string.invite_to_group,
+                R.string.invite_to_groups,
+                R.string.invite_to_x_groups
+            ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
+            me = me(),
+            filter = {
+                it.group?.name?.isNotBlank() == true && it.members?.none { it.person?.id == person?.id } == true
+            },
+            onGroupsSelected = { groups ->
+                try {
+                    coroutineScope {
+                        groups.map { group ->
+                            async {
+                                api.createMember(Member().apply {
+                                    from = person!!.id!!
+                                    to = group.id!!
+                                })
+                            }
+                        }.awaitAll()
+                    }
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.person_invited, person?.name ?: someone),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (ex: Exception) {
+                    Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
+                    ex.printStackTrace()
+                }
+            }
+        )
+    }
 
     suspend fun reload() {
         listOf(
@@ -200,6 +245,26 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 .padding(PaddingDefault)
                         ) {
                             Icon(Icons.Outlined.Settings, stringResource(R.string.settings))
+                        }
+                    } else {
+                        IconButton(
+                            {
+                                showMenu = true
+                            },
+                            colors = colors,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(PaddingDefault)
+                        ) {
+                            Icon(Icons.Outlined.MoreVert, null)
+                            DropdownMenu(showMenu, { showMenu = false }) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.invite))
+                                }, {
+                                    showInviteDialog = true
+                                    showMenu = false
+                                })
+                            }
                         }
                     }
                     Box(
@@ -350,7 +415,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    stringResource(R.string.friends),
+                                    pluralStringResource(R.plurals.friends_plural, stats.friendsCount),
                                     color = MaterialTheme.colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -372,7 +437,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    stringResource(R.string.cards),
+                                    pluralStringResource(R.plurals.cards_plural, stats.cardCount),
                                     color = MaterialTheme.colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -478,10 +543,10 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 showJoined = false
             },
             title = {
-                    Text(stringResource(R.string.joined))
+                Text(stringResource(R.string.joined))
             },
             text = {
-               Text(person?.createdAt?.dayMonthYear() ?: "?")
+                Text(person?.createdAt?.dayMonthYear() ?: "?")
             },
             confirmButton = {
                 TextButton(

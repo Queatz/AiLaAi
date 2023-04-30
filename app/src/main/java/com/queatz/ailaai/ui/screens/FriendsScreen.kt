@@ -57,10 +57,17 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
 
     fun update() {
         results = allPeople.map { SearchResult.Connect(it) } +
-                (if (searchText.isBlank()) allGroups else allGroups.filter {
-                    (it.group?.name?.contains(searchText, true) ?: false) ||
-                            it.members?.any { it.person?.name?.contains(searchText, true) ?: false } ?: false
-                }).map { SearchResult.Group(it) }
+                searchText.trim().let { text ->
+                    (if (text.isBlank()) allGroups else allGroups.filter {
+                        (it.group?.name?.contains(text, true) ?: false) ||
+                                it.members?.any {
+                                    it.person?.id != me()?.id && it.person?.name?.contains(
+                                        text,
+                                        true
+                                    ) ?: false
+                                } ?: false
+                    }).map { SearchResult.Group(it) }
+                }
     }
 
     suspend fun reload() {

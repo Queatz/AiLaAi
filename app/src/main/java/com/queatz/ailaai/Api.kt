@@ -171,8 +171,10 @@ class Api {
         }
     ), client = httpData)
 
-    suspend fun cards(geo: LatLng, search: String? = null): List<Card> = get("cards", mapOf(
-        "geo" to "${geo.latitude},${geo.longitude}"
+    suspend fun cards(geo: LatLng, offset: Int = 0, limit: Int = 20, search: String? = null): List<Card> = get("cards", mapOf(
+        "geo" to "${geo.latitude},${geo.longitude}",
+        "offset" to offset.toString(),
+        "limit" to limit.toString()
     ) + (search?.let {
         mapOf("search" to search)
     } ?: mapOf()))

@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -21,9 +22,14 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.ElevationDefault
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SearchField(value: String, onValueChange: (value: String) -> Unit, placeholder: String? = null, modifier: Modifier = Modifier) {
+fun SearchField(
+    value: String,
+    onValueChange: (value: String) -> Unit,
+    placeholder: String? = null,
+    modifier: Modifier = Modifier,
+) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
     Card(
         shape = MaterialTheme.shapes.large,
@@ -36,7 +42,9 @@ fun SearchField(value: String, onValueChange: (value: String) -> Unit, placehold
         OutlinedTextField(
             value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder ?: stringResource(R.string.search)) },
+            placeholder = {
+                Text(placeholder ?: stringResource(R.string.search), modifier = Modifier.alpha(.5f))
+            },
             shape = MaterialTheme.shapes.large,
             singleLine = true,
             keyboardOptions = KeyboardOptions(

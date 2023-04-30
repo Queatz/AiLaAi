@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,7 +48,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.CardParentType
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.components.horizontalFadingEdge
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
@@ -60,6 +60,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 
 val geoKey = stringPreferencesKey("geo")
 val geoManualKey = booleanPreferencesKey("geo-manual")
@@ -92,6 +93,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
     var isError by remember { mutableStateOf(false) }
+    var offset by rememberSaveable { mutableStateOf(0) }
+    var hasMore by remember { mutableStateOf(true) }
 
     fun goToSettings() {
         val intent = Intent(
@@ -139,6 +142,23 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         exploreInitialCategory = null
     }
 
+    suspend fun loadMore(clear: Boolean = false) {
+        if (clear) {
+            offset = 0
+            hasMore = true
+        }
+        val page = api.cards(geo!!, offset = offset, limit = 20, search = value.takeIf { it.isNotBlank() })
+        val oldSize = if (clear) 0 else cards.size
+        cards = if (clear) {
+            page
+        } else {
+            (cards + page).distinctBy { it.id }
+        }
+        offset = cards.size
+        updateCategories()
+        hasMore = cards.size > oldSize
+    }
+
     LaunchedEffect(geo, value) {
         if (geo == null) {
             return@LaunchedEffect
@@ -159,9 +179,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
 
         try {
             isLoading = true
-            cards = api.cards(geo!!, value.takeIf { it.isNotBlank() })
-                .filter { it.equipped != true || it.person != me()?.id }
-            updateCategories()
+            loadMore(clear = true)
             shownGeo = geo
             shownValue = value
             isError = false
@@ -319,6 +337,10 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 valueChange = { value = it },
                 navController = navController,
                 useDistance = true,
+                hasMore = hasMore,
+                onLoadMore = {
+                    loadMore()
+                },
                 action = {
                     Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
                 },

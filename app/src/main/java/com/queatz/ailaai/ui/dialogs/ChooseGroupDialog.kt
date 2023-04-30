@@ -16,6 +16,7 @@ fun ChooseGroupDialog(
     confirmFormatter: @Composable (List<GroupExtended>) -> String,
     me: Person?,
     omit: List<Group> = emptyList(),
+    filter: (GroupExtended) -> Boolean = { true },
     extraButtons: @Composable RowScope.() -> Unit = {},
     onGroupsSelected: suspend (List<Group>) -> Unit
 ) {
@@ -42,6 +43,7 @@ fun ChooseGroupDialog(
     LaunchedEffect(allGroups, selected, searchText) {
         val all = allGroups
             .filter { omit.none { group -> it.group?.id == group.id } }
+            .filter(filter)
         groups = (if (searchText.isBlank()) all else all.filter {
             it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()).contains(searchText, true)
         })

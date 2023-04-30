@@ -31,6 +31,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.sendEmail
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
 import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -242,6 +243,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }, {
                 scope.launch {
                     context.dataStore.edit {
+                        it[hideLearnMoreKey] = false
                         it[tutorialCompleteKey] = it[tutorialCompleteKey]?.not() ?: true
                     }
                 }
