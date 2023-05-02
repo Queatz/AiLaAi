@@ -2,9 +2,12 @@ package com.queatz.ailaai
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.arthenica.ffmpegkit.FFmpegKitConfig
+import com.arthenica.ffmpegkit.Statistics
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -15,6 +18,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.streams.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +29,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
 val json = Json {
@@ -78,6 +83,12 @@ class Api {
 
     fun init(context: Context) {
         this.context = context
+
+//        FFmpegKitConfig.enableStatisticsCallback { statistics ->
+//            Log.w("XXXXXX", "$statistics -- time = ${statistics.time}")
+//            videoProcessing[statistics.sessionId]?.invoke(statistics.time.toFloat())
+//
+//        }
 
         runBlocking {
             token = context.dataStore.data.first()[tokenKey]
@@ -162,14 +173,29 @@ class Api {
 
     suspend fun updateProfile(profile: Profile): HttpStatusCode = post("me/profile", profile)
 
-    suspend fun updateProfilePhoto(photo: Uri): HttpStatusCode = post("me/profile/photo", MultiPartFormDataContent(
-        formData {
-            append("photo", photo.asScaledJpeg(context), Headers.build {
-                append(HttpHeaders.ContentType, "image/jpg")
-                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-            })
-        }
-    ), client = httpData)
+    suspend fun updateProfilePhoto(photo: Uri): HttpStatusCode {
+        val scaledPhoto = photo.asScaledJpeg(context)
+        return post("me/profile/photo", MultiPartFormDataContent(
+            formData {
+                append("photo", scaledPhoto, Headers.build {
+                    append(HttpHeaders.ContentType, "image/jpg")
+                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                })
+            }
+        ), client = httpData)
+    }
+
+    suspend fun updateProfileVideo(video: Uri, contentType: String, filename: String, progressCallback: (Float) -> Unit): HttpStatusCode {
+        val scaledVideo = video.asScaledVideo(context, progressCallback)
+        return post("me/profile/video", MultiPartFormDataContent(
+            formData {
+                append("photo", InputProvider { scaledVideo.asInput() }, Headers.build {
+                    append(HttpHeaders.ContentType, contentType)
+                    append(HttpHeaders.ContentDisposition, "filename=${filename}")
+                })
+            }
+        ), client = httpData)
+    }
 
     suspend fun cards(geo: LatLng, offset: Int = 0, limit: Int = 20, search: String? = null): List<Card> = get("cards", mapOf(
         "geo" to "${geo.latitude},${geo.longitude}",
@@ -214,24 +240,40 @@ class Api {
 
     suspend fun invite(): Invite = get("invite")
 
-    suspend fun updateMyPhoto(photo: Uri): HttpStatusCode = post("me/photo", MultiPartFormDataContent(
-        formData {
-            append("photo", photo.asScaledJpeg(context), Headers.build {
+    suspend fun updateMyPhoto(photo: Uri): HttpStatusCode {
+        val scaledPhoto = photo . asScaledJpeg (context)
+        return post("me/photo", MultiPartFormDataContent(
+                formData {
+            append("photo", scaledPhoto, Headers.build {
                 append(HttpHeaders.ContentType, "image/jpg")
                 append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
             })
         }
-    ), client = httpData)
+        ), client = httpData)
+    }
 
-    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode =
-        post("cards/$id/photo", MultiPartFormDataContent(
+    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode {
+        val scaledPhoto = photo.asScaledJpeg(context)
+        return post("cards/$id/photo", MultiPartFormDataContent(
             formData {
-                append("photo", photo.asScaledJpeg(context), Headers.build {
+                append("photo", scaledPhoto, Headers.build {
                     append(HttpHeaders.ContentType, "image/jpg")
                     append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
                 })
             }
         ), client = httpData)
+    }
+    suspend fun uploadCardVideo(id: String, video: Uri, contentType: String, filename: String, progressCallback: (Float) -> Unit): HttpStatusCode {
+        val scaledVideo = video.asScaledVideo(context, progressCallback)
+        return post("cards/$id/video", MultiPartFormDataContent(
+            formData {
+                append("photo", InputProvider { scaledVideo.asInput() }, Headers.build {
+                    append(HttpHeaders.ContentType, contentType)
+                    append(HttpHeaders.ContentDisposition, "filename=${filename}")
+                })
+            }
+        ), client = httpData)
+    }
 
     suspend fun cardGroup(card: String): Group = get("cards/$card/group")
 
@@ -263,17 +305,21 @@ class Api {
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 
-    suspend fun sendPhotos(group: String, photos: List<Uri>): HttpStatusCode =
-        post("groups/$group/photos", MultiPartFormDataContent(
+    suspend fun sendMedia(group: String, photos: List<Uri>): HttpStatusCode {
+        val scaledPhotos = photos.map {
+            it.asScaledJpeg(context)
+        }
+        return post("groups/$group/photos", MultiPartFormDataContent(
             formData {
-                photos.forEachIndexed { index, photo ->
-                    append("photo[$index]", photo.asScaledJpeg(context), Headers.build {
+                scaledPhotos.forEachIndexed { index, photo ->
+                    append("photo[$index]", photo, Headers.build {
                         append(HttpHeaders.ContentType, "image/jpg")
                         append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
                     })
                 }
             }
         ), client = httpData)
+    }
 
     suspend fun deleteMessage(message: String): HttpStatusCode = post("messages/$message/delete")
 

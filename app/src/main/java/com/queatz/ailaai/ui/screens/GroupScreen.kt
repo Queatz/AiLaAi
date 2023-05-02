@@ -2,18 +2,21 @@ package com.queatz.ailaai.ui.screens
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.*
@@ -21,7 +24,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -95,13 +98,11 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
-    ) { uris ->
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) {
             coroutineScope.launch {
                 try {
-                    api.sendPhotos(groupId, uris)
+                    api.sendMedia(groupId, uris)
                     reloadMessages()
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -438,7 +439,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             }
                         },
                         placeholder = {
-                            Text(stringResource(R.string.message))
+                            Text(
+                                stringResource(R.string.message),
+                                modifier = Modifier.alpha(.5f)
+                            )
                         },
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.Sentences,
@@ -458,7 +462,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 AnimatedVisibility(sendMessage.isBlank()) {
                     IconButton(
                         onClick = {
-                            launcher.launch("image/*")
+                            // todo video, file, audio
+                            launcher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
                         },
                         modifier = Modifier
                             .padding(end = PaddingDefault)

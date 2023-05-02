@@ -124,7 +124,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation(platform("com.google.firebase:firebase-bom:31.0.2"))
-
+    implementation("com.google.android.exoplayer:exoplayer:2.18.6")
+    implementation("com.arthenica:ffmpeg-kit-full-gpl:5.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

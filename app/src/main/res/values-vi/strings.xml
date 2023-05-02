@@ -88,7 +88,7 @@
         <item quantity="other">%1$s thẻ</item>
     </plurals>
     <string name="on_profile_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
-    <string name="set_photo">Chọn ảnh</string>
+    <string name="set_photo">Chọn ảnh hoặc video</string>
     <string name="card">Thẻ</string>
     <string name="copy_link">Sao chép liên kết</string>
     <string name="clear">Bỏ</string>
@@ -161,6 +161,7 @@
     <string name="person_updated_card">%1$s đã cập nhật %2$s của %3$s</string>
     <string name="person_updated_details">%1$s đã cập nhật %2$s</string>
     <string name="inline_photo">ảnh</string>
+    <string name="inline_video">video</string>
     <string name="inline_group">nhóm</string>
     <string name="inline_name">tên</string>
     <string name="inline_location_name">tên của vị trí</string>

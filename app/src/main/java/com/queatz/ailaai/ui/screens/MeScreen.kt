@@ -58,6 +58,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     var searchText by rememberSaveable { mutableStateOf("") }
     var filters by rememberSaveable { mutableStateOf(emptySet<Filter>()) }
     val context = LocalContext.current
+    var playingVideo by remember { mutableStateOf<Card?>(null) }
 
     LaunchedEffect(Unit) {
         context.dataStore.data.first().let {
@@ -159,6 +160,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp + 58.dp)
                 )
             } else {
+                val autoplayIndex by state.rememberAutoplayIndex()
+                LaunchedEffect(autoplayIndex) {
+                    playingVideo = cards.getOrNull(autoplayIndex)
+                }
                 LazyVerticalGrid(
                     state = state,
                     contentPadding = PaddingValues(
@@ -196,7 +201,8 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             activity = navController.context as Activity,
                             card = card,
                             edit = if (card.id == addedCardId) EditCard.Conversation else null,
-                            isMine = true
+                            isMine = true,
+                            playVideo = playingVideo == card
                         )
 
                         if (card.id == addedCardId) {

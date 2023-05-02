@@ -32,7 +32,7 @@ class Application : android.app.Application() {
         push.init(this)
         ui.init(this)
 
-        val coroutineScope = CoroutineScope(Dispatchers.IO)
+        val scope = CoroutineScope(Dispatchers.IO)
 
         val deviceType = when (HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == ConnectionResult.SUCCESS) {
             true -> DeviceType.Hms
@@ -45,7 +45,7 @@ class Application : android.app.Application() {
                     return
                 }
 
-                coroutineScope.launch {
+                scope.launch {
                     try {
                         api.myDevice(deviceType, token)
                     } catch (ex: Exception) {

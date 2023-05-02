@@ -11,22 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.compose.ui.window.Dialog
-import androidx.core.view.doOnAttach
-import androidx.core.view.doOnDetach
 import at.bluesource.choicesdk.maps.common.*
-import at.bluesource.choicesdk.maps.common.Map
-import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
-import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import com.queatz.ailaai.R
-import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.MapWithMarker
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 
 
 @SuppressLint("MissingPermission")

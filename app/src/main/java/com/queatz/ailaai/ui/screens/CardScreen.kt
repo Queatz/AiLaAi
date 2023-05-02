@@ -3,9 +3,11 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -32,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.Navigator
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
@@ -41,6 +42,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.CardConversation
 import com.queatz.ailaai.ui.components.EditCard
+import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -72,8 +74,21 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
+    val stateLandscape = rememberLazyGridState()
     val context = LocalContext.current
     val didntWork = stringResource(R.string.didnt_work)
+    var uploadJob by remember { mutableStateOf<Job?>(null) }
+    var isUploadingVideo by remember { mutableStateOf(false) }
+    var videoUploadProgress by remember { mutableStateOf(0f) }
+
+
+    if (isUploadingVideo) {
+        ProcessingVideoDialog(
+            onDismissRequest = { isUploadingVideo = false },
+            onCancelRequest = { uploadJob?.cancel() },
+            progress = videoUploadProgress
+        )
+    }
 
     LaunchedEffect(Unit) {
         if (card != null) {
@@ -198,7 +213,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 showManageMenu = false
             }
         ) {
-            if (card?.photo != null) {
+            if (card?.photo != null || card?.video != null) {
                 item(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
                     card?.let { card ->
                         scope.launch {
@@ -296,15 +311,31 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 
                 val cardString = stringResource(R.string.card)
 
-                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
                     if (it == null) return@rememberLauncherForActivityResult
 
-                    scope.launch {
+                    uploadJob = scope.launch {
+                        videoUploadProgress = 0f
                         try {
-                            api.uploadCardPhoto(card!!.id!!, it)
+                            if (it.isVideo(context)) {
+                                isUploadingVideo = true
+                                api.uploadCardVideo(
+                                    card!!.id!!,
+                                    it,
+                                    context.contentResolver.getType(it) ?: "video/*",
+                                    it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}"
+                                ) {
+                                    videoUploadProgress = it
+                                }
+                            } else if (it.isPhoto(context)) {
+                                api.uploadCardPhoto(card!!.id!!, it)
+                            }
                             card = api.card(cardId)
                         } catch (ex: Exception) {
                             ex.printStackTrace()
+                        } finally {
+                            uploadJob = null
+                            isUploadingVideo = false
                         }
                     }
                 }
@@ -326,7 +357,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         DropdownMenuItem({
                             Text(stringResource(R.string.set_photo))
                         }, {
-                            launcher.launch("image/*")
+                            launcher.launch(PickVisualMediaRequest())
                             showMenu = false
                         })
                         DropdownMenuItem({
@@ -453,12 +484,20 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
             var verticalAspect by remember { mutableStateOf(false) }
             val headerAspect by animateFloatAsState(if (verticalAspect) .75f else 1.5f)
-
+            var playingVideo by remember { mutableStateOf<Card?>(null) }
+            val isAtTop by state.isAtTop()
+            val autoplayIndex by state.rememberAutoplayIndex()
+            LaunchedEffect(autoplayIndex, isLandscape) {
+                playingVideo = cards.getOrNull(
+                    (autoplayIndex - (if (isLandscape) 0 else 1)).coerceAtLeast(0)
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxSize()
             ) {
                 if (isLandscape) {
                     LazyVerticalGrid(
+                        state = stateLandscape,
                         contentPadding = PaddingValues(PaddingDefault),
                         horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
                         verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
@@ -469,7 +508,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             .shadow(ElevationDefault)
                             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
                     ) {
-                        cardHeaderItems(
+                        cardHeaderItem(
                             card,
                             isMine,
                             headerAspect,
@@ -477,7 +516,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             toggleAspect = { verticalAspect = !verticalAspect },
                             scope,
                             navController,
-                            elevation = 2
+                            elevation = 2,
+                            playVideo = isAtTop
                         )
                     }
                 }
@@ -491,14 +531,15 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     columns = GridCells.Adaptive(240.dp)
                 ) {
                     if (!isLandscape) {
-                        cardHeaderItems(
+                        cardHeaderItem(
                             card,
                             isMine,
                             headerAspect,
                             onsetCategoryClick = { showSetCategory = true },
                             toggleAspect = { verticalAspect = !verticalAspect },
                             scope,
-                            navController
+                            navController,
+                            playVideo = isAtTop
                         )
                     }
                     if (cards.isEmpty()) {
@@ -542,7 +583,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                     exploreInitialCategory = it
                                     navController.navigate("explore")
                                 },
-                                isMine = it.person == me()?.id
+                                isMine = it.person == me()?.id,
+                                playVideo = playingVideo == it && !isAtTop
                             )
                             if (it.id == addedCardId) {
                                 addedCardId = null
@@ -760,7 +802,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     }
 }
 
-private fun LazyGridScope.cardHeaderItems(
+private fun LazyGridScope.cardHeaderItem(
     card: Card?,
     isMine: Boolean,
     aspect: Float,
@@ -769,18 +811,14 @@ private fun LazyGridScope.cardHeaderItems(
     scope: CoroutineScope,
     navController: NavController,
     elevation: Int = 1,
+    playVideo: Boolean = false
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         Column {
-            card?.photo?.also {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(api.url(it))
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
+            val video = card?.video
+            if (video != null) {
+                Video(
+                    video.let(api::url),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.large)
@@ -788,8 +826,29 @@ private fun LazyGridScope.cardHeaderItems(
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
                         .clickable {
                             toggleAspect()
-                        }
+                        },
+                    isPlaying = playVideo
                 )
+            } else {
+                card?.photo?.also {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(api.url(it))
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.large)
+                            .aspectRatio(aspect)
+                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
+                            .clickable {
+                                toggleAspect()
+                            }
+                    )
+                }
             }
             card?.let {
                 CardConversation(

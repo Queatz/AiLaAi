@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.tutorial
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -64,7 +65,7 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
     var cardPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
     var cardPublished by rememberSaveable { mutableStateOf(false) }
     var cardCreated by rememberSaveable { mutableStateOf(false) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
         if (it == null) return@rememberLauncherForActivityResult
         cardPhoto = it
     }
@@ -210,7 +211,7 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
             ) {
                 TextButton(
                     {
-                        launcher.launch("image/*")
+                        launcher.launch(PickVisualMediaRequest())
                     },
                     colors = ButtonDefaults.textButtonColors(
                         containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)

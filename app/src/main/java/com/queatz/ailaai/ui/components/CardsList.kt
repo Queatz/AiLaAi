@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -19,6 +20,7 @@ import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -43,6 +45,7 @@ fun CardsList(
     aboveSearchFieldContent: @Composable () -> Unit = {},
 ) {
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+    var playingVideo by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
@@ -60,6 +63,10 @@ fun CardsList(
                     .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + viewport.height.inDp())
             )
         } else {
+            val autoplayIndex by state.rememberAutoplayIndex()
+            LaunchedEffect(autoplayIndex) {
+                playingVideo = cards.getOrNull(autoplayIndex)
+            }
             LazyVerticalGrid(
                 state = state,
                 contentPadding = PaddingValues(
@@ -94,7 +101,8 @@ fun CardsList(
                         card = it,
                         activity = navController.context as Activity,
                         isMine = isMine(it),
-                        isMineToolbar = false
+                        isMineToolbar = false,
+                        playVideo = playingVideo == it
                     )
                 }
 

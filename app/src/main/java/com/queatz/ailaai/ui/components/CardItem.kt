@@ -5,6 +5,7 @@ import android.app.Activity
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
@@ -43,11 +45,11 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
-import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
-import com.queatz.ailaai.ui.dialogs.EditCardDialog
-import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
+import com.queatz.ailaai.extensions.isPhoto
+import com.queatz.ailaai.extensions.isVideo
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -69,26 +71,39 @@ fun BasicCard(
     isMine: Boolean = false,
     isMineToolbar: Boolean = true,
     isChoosing: Boolean = false,
-    modifier: Modifier = Modifier,
+    playVideo: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(),
         elevation = CardDefaults.elevatedCardElevation(),
-        modifier = modifier
+        modifier = Modifier.clip(MaterialTheme.shapes.large).then(modifier)
     ) {
         var hideContent by remember { mutableStateOf(false) }
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by remember { mutableStateOf(false) }
         var showSetCategory by remember { mutableStateOf(false) }
+        var uploadJob by remember { mutableStateOf<Job?>(null) }
+        var isUploadingVideo by remember { mutableStateOf(false) }
+        var videoUploadProgress by remember { mutableStateOf(0f) }
         val scope = rememberCoroutineScope()
+        val context = LocalContext.current
 
         LaunchedEffect(hideContent) {
             if (hideContent) {
                 delay(2.seconds)
                 hideContent = false
             }
+        }
+
+        if (isUploadingVideo) {
+            ProcessingVideoDialog(
+                onDismissRequest = { isUploadingVideo = false },
+                onCancelRequest = { uploadJob?.cancel() },
+                progress = videoUploadProgress
+            )
         }
 
         Box(
@@ -111,22 +126,27 @@ fun BasicCard(
                 ),
             contentAlignment = Alignment.BottomCenter
         ) {
-            if (card == null) {
-                // Loading
-            } else {
-                card.photo?.also {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(api.url(it))
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                        modifier = Modifier.matchParentSize().scale(scale)
+            if (card != null) {
+                if (card.video != null) {
+                    Video(
+                        card.video!!.let(api::url),
+                        modifier = Modifier.matchParentSize().scale(scale).clip(MaterialTheme.shapes.large),
+                        isPlaying = playVideo
                     )
+                } else {
+                    card.photo?.also {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(api.url(it))
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center,
+                            modifier = Modifier.matchParentSize().scale(scale)
+                        )
+                    }
                 }
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
                     verticalAlignment = Alignment.CenterVertically,
@@ -136,21 +156,37 @@ fun BasicCard(
                         .align(Alignment.TopEnd)
                 ) {
                     if (isMine && isMineToolbar) {
-                        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+                        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
                             if (it == null) return@rememberLauncherForActivityResult
 
-                            scope.launch {
+                            uploadJob = scope.launch {
+                                videoUploadProgress = 0f
                                 try {
-                                    api.uploadCardPhoto(card.id!!, it)
+                                    if (it.isVideo(context)) {
+                                        isUploadingVideo = true
+                                        api.uploadCardVideo(
+                                            card.id!!,
+                                            it,
+                                            context.contentResolver.getType(it) ?: "video/*",
+                                            it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}"
+                                        ) {
+                                            videoUploadProgress = it
+                                        }
+                                    } else if (it.isPhoto(context)) {
+                                        api.uploadCardPhoto(card.id!!, it)
+                                    }
                                     onChange()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
+                                } finally {
+                                    isUploadingVideo = false
+                                    uploadJob = null
                                 }
                             }
                         }
                         TextButton(
                             {
-                                launcher.launch("image/*")
+                                launcher.launch(PickVisualMediaRequest())
                             },
                             colors = ButtonDefaults.textButtonColors(
                                 containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
@@ -165,7 +201,6 @@ fun BasicCard(
                             )
                         }
                     } else if (!isMine) {
-                        val context = LocalContext.current
                         IconButton({
                             scope.launch {
                                 when (saves.toggleSave(card)) {
@@ -468,10 +503,10 @@ private fun CardToolbar(
                     }
                 }
             },
-            enabled = card.photo != null
+            enabled = card.photo != null || card.video != null
         )
         Text(
-            if (activeCommitted) stringResource(R.string.published) else if (card.photo == null) stringResource(R.string.add_photo_to_publish) else stringResource(
+            if (activeCommitted) stringResource(R.string.published) else if (card.photo == null && card.video == null) stringResource(R.string.add_photo_to_publish) else stringResource(
                 R.string.draft
             ),
             style = MaterialTheme.typography.labelMedium,

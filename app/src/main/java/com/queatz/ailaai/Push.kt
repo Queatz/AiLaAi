@@ -113,6 +113,7 @@ class Push {
     private fun cardDetailName(detail: CollaborationEventDataDetails?): String {
         return when (detail) {
             CollaborationEventDataDetails.Photo -> context.getString(R.string.inline_photo)
+            CollaborationEventDataDetails.Video -> context.getString(R.string.inline_video)
             CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_group)
             CollaborationEventDataDetails.Name -> context.getString(R.string.inline_name)
             CollaborationEventDataDetails.Location -> context.getString(R.string.inline_location_name)
@@ -224,6 +225,7 @@ enum class CollaborationEvent {
 
 enum class CollaborationEventDataDetails {
     Photo,
+    Video,
     Conversation,
     Name,
     Location,

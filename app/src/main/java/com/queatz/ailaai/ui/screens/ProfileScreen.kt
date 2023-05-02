@@ -3,17 +3,17 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -39,13 +40,11 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BasicCard
 import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 
 @Composable
@@ -64,6 +63,18 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var showJoined by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
     var showInviteDialog by remember { mutableStateOf(false) }
+    var uploadJob by remember { mutableStateOf<Job?>(null) }
+    var isUploadingVideo by remember { mutableStateOf(false) }
+    var videoUploadProgress by remember { mutableStateOf(0f) }
+
+
+    if (isUploadingVideo) {
+        ProcessingVideoDialog(
+            onDismissRequest = { isUploadingVideo = false },
+            onCancelRequest = { uploadJob?.cancel() },
+            progress = videoUploadProgress
+        )
+    }
 
     if (showInviteDialog) {
         val inviteString = stringResource(R.string.invite)
@@ -125,7 +136,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         ).awaitAll()
     }
 
-    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
@@ -138,15 +149,32 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         }
     }
 
-    val profilePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+    val profilePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
         if (it == null) return@rememberLauncherForActivityResult
 
-        scope.launch {
+        uploadJob = scope.launch {
+            videoUploadProgress = 0f
             try {
-                api.updateProfilePhoto(it)
+                if (it.isVideo(context)) {
+                    isUploadingVideo = true
+                    api.updateProfileVideo(
+                        it,
+                        context.contentResolver.getType(it) ?: "video/*",
+                        it.lastPathSegment ?: "video.${
+                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                        }"
+                    ) {
+                        videoUploadProgress = it
+                    }
+                } else if (it.isPhoto(context)) {
+                    api.updateProfilePhoto(it)
+                }
                 reload()
             } catch (ex: Exception) {
                 ex.printStackTrace()
+            } finally {
+                isUploadingVideo = false
+                uploadJob = null
             }
         }
     }
@@ -167,7 +195,18 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         }
     }
 
+    val state = rememberLazyGridState()
+    val isAtTop by state.isAtTop()
+    var playingVideo by remember { mutableStateOf<Card?>(null) }
+    val autoplayIndex by state.rememberAutoplayIndex()
+    LaunchedEffect(autoplayIndex) {
+        playingVideo = cards.getOrNull(
+            (autoplayIndex - 1).coerceAtLeast(0)
+        )
+    }
+
     LazyVerticalGrid(
+        state = state,
         contentPadding = PaddingValues(
             bottom = PaddingDefault
         ),
@@ -179,6 +218,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         val isMe = me()?.id == personId
 
         item(span = { GridItemSpan(maxLineSpan) }) {
+            val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -186,24 +226,64 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             ) {
                 Box {
                     val bottomPadding = 128.dp / 3
-                    AsyncImage(
-                        model = profile?.photo?.let(api::url),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .aspectRatio(1.5f)
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.large)
-                            .padding(bottom = bottomPadding)
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .clickable {
-                                if (isMe) {
-                                    profilePhotoLauncher.launch("image/*")
-                                } else {
-                                    showPhoto = profile?.photo
+                    val video = profile?.video
+                    if (video != null) {
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(if (isLandscape) 2f else 1.5f)
+                                .fillMaxWidth()
+                                .padding(bottom = bottomPadding)
+                                .clip(
+                                    RoundedCornerShape(
+                                        MaterialTheme.shapes.large.topStart,
+                                        MaterialTheme.shapes.large.topEnd,
+                                        CornerSize(0.dp),
+                                        CornerSize(0.dp)
+                                    )
+                                )
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .clickable {
+                                    if (isMe) {
+                                        profilePhotoLauncher.launch(PickVisualMediaRequest())
+                                    } else {
+                                        showPhoto = profile?.photo
+                                    }
                                 }
-                            }
-                    )
+                        ) {
+                            Video(
+                                video.let(api::url),
+                                isPlaying = isAtTop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            )
+                        }
+                    } else {
+                        AsyncImage(
+                            model = profile?.photo?.let(api::url),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .aspectRatio(if (isLandscape) 2f else 1.5f)
+                                .fillMaxWidth()
+                                .padding(bottom = bottomPadding)
+                                .clip(
+                                    RoundedCornerShape(
+                                        MaterialTheme.shapes.large.topStart,
+                                        MaterialTheme.shapes.large.topEnd,
+                                        CornerSize(0.dp),
+                                        CornerSize(0.dp)
+                                    )
+                                )
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .clickable {
+                                    if (isMe) {
+                                        profilePhotoLauncher.launch(PickVisualMediaRequest())
+                                    } else {
+                                        showPhoto = profile?.photo
+                                    }
+                                }
+                        )
+                    }
                     if (isMe) {
                         Icon(
                             Icons.Outlined.Edit,
@@ -284,7 +364,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             modifier = Modifier
                                 .clickable {
                                     if (isMe) {
-                                        photoLauncher.launch("image/*")
+                                        photoLauncher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
                                     } else {
                                         showPhoto = person?.photo
                                     }
@@ -532,7 +612,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 card = card,
                 activity = navController.context as Activity,
                 isMine = card.person == me()?.id,
-                isMineToolbar = false
+                isMineToolbar = false,
+                playVideo = !isAtTop && card == playingVideo
             )
         }
     }

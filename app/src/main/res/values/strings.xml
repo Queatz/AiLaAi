@@ -93,7 +93,7 @@
     <string name="card_name">Card name</string>
     <string name="on_profile">On profile</string>
     <string name="on_profile_description">The location of this card will be updated to your current location every time you open the app.</string>
-    <string name="set_photo">Choose photo</string>
+    <string name="set_photo">Choose photo or video</string>
     <string name="copy_link">Copy link</string>
     <string name="card">Card</string>
     <string name="clear">Clear</string>
@@ -165,6 +165,7 @@
     <string name="person_updated_card">%1$s updated the %2$s of %3$s</string>
     <string name="person_updated_details">%1$s updated the %2$s</string>
     <string name="inline_photo">photo</string>
+    <string name="inline_video">video</string>
     <string name="inline_group">group</string>
     <string name="inline_name">name</string>
     <string name="inline_location_name">location name</string>
@@ -205,6 +206,8 @@
     <string name="reset_tutorial">Show tutorial</string>
     <string name="hide_tutorial">Hide tutorial</string>
     <string name="more_ideas">More ideas</string>
+    <string name="processing_video">Processing video</string>
+    <string name="please_wait">Please wait</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>
