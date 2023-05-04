@@ -416,38 +416,26 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 style = MaterialTheme.typography.titleLarge,
                                 textAlign = TextAlign.Center
                             )
-                            IconButton(
-                                {
-                                    scope.launch {
-                                        try {
-                                            val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
-                                            navController.navigate("group/${group.id!!}")
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
+                            if (!isMe) {
+                                IconButton(
+                                    {
+                                        scope.launch {
+                                            try {
+                                                val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
+                                                navController.navigate("group/${group.id!!}")
+                                            } catch (e: Exception) {
+                                                e.printStackTrace()
+                                            }
                                         }
-                                    }
-                                },
-                                colors = IconButtonDefaults.outlinedIconButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                ),
-                                enabled = !isMe
-                            ) {
-                                Icon(Icons.Outlined.Message, "")
+                                    },
+                                    colors = IconButtonDefaults.outlinedIconButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    enabled = !isMe
+                                ) {
+                                    Icon(Icons.Outlined.Message, "")
+                                }
                             }
-                        }
-                        if (isMe) {
-                            Icon(
-                                Icons.Outlined.Edit,
-                                null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .scale(.85f)
-                                    .align(Alignment.CenterEnd)
-                                    .padding(
-                                        vertical = PaddingDefault,
-                                        horizontal = PaddingDefault * 2
-                                    )
-                            )
                         }
                     }
 //                    Button({
@@ -496,6 +484,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 )
                                 Text(
                                     pluralStringResource(R.plurals.friends_plural, stats.friendsCount),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     color = MaterialTheme.colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -518,6 +508,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 )
                                 Text(
                                     pluralStringResource(R.plurals.cards_plural, stats.cardCount),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     color = MaterialTheme.colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -542,6 +534,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 )
                                 Text(
                                     stringResource(R.string.joined),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     color = MaterialTheme.colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -569,19 +563,6 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                            )
-                        }
-                        if (isMe) {
-                            Icon(
-                                Icons.Outlined.Edit,
-                                null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .scale(.85f)
-                                    .padding(
-                                        horizontal = PaddingDefault
-                                    )
                             )
                         }
                     }

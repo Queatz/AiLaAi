@@ -25,8 +25,9 @@ fun GroupExtended.photos(omit: List<Person> = emptyList()) = members
         ContactPhoto(it.person?.name ?: "", it.person?.photo)
     } ?: listOf(ContactPhoto())
 
-fun GroupExtended.isUnread(member: Member?) =
-    (member?.seen?.toEpochMilliseconds() ?: 0L) < (latestMessage?.createdAt?.toEpochMilliseconds() ?: 0L)
+fun GroupExtended.isUnread(member: Member?): Boolean {
+    return (member?.seen?.toEpochMilliseconds() ?: return false) < (latestMessage?.createdAt?.toEpochMilliseconds() ?: return false)
+}
 
 fun Message.attachmentText(context: Context): String? = when (val attachment = getAttachment()) {
     is CardAttachment -> {

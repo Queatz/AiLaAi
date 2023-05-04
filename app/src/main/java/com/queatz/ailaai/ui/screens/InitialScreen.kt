@@ -18,7 +18,6 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
 import io.ktor.http.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
@@ -27,13 +26,13 @@ fun InitialScreen(onKnown: () -> Unit) {
     var codeValue by remember { mutableStateOf("") }
     var codeExpired by remember { mutableStateOf(false) }
     var codeValueEnabled by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current!!
 
     var signInDialog by remember { mutableStateOf(false) }
 
     fun signIn(transferCode: String) {
-        coroutineScope.launch {
+        scope.launch {
             try {
                 val token = api.signIn(transferCode).token
                 api.setToken(token)
@@ -89,7 +88,7 @@ fun InitialScreen(onKnown: () -> Unit) {
     }
 
     fun signUp(code: String) {
-        coroutineScope.launch {
+        scope.launch {
             try {
                 val token = api.signUp(code).token
                 api.setToken(token)
@@ -98,7 +97,7 @@ fun InitialScreen(onKnown: () -> Unit) {
             } catch (ex: Exception) {
                 if (ex !is ResponseException) {
                     ex.printStackTrace()
-                } else if (ex.response.status == HttpStatusCode.Unauthorized) {
+                } else if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
                     codeExpired = true
                 }
             } finally {

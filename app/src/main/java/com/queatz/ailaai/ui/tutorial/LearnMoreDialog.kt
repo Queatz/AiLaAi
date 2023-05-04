@@ -250,7 +250,7 @@ fun LearnMoreDialog(
             }
             val context = LocalContext.current
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()
             ) {
@@ -273,7 +273,7 @@ fun LearnMoreDialog(
                             }
                         }
                     ) {
-                        Text(stringResource(R.string.hide))
+                        Text(stringResource(R.string.hide), color = MaterialTheme.colorScheme.secondary)
                     }
                     TextButton(
                         {

@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
@@ -72,7 +73,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showInviteMembers by remember { mutableStateOf(false) }
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     var hasOlderMessages by remember { mutableStateOf(true) }
@@ -100,7 +101,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) {
-            coroutineScope.launch {
+            scope.launch {
                 try {
                     api.sendMedia(groupId, uris)
                     reloadMessages()
@@ -137,11 +138,16 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         }
     }
 
-    LaunchedEffect(Unit) {
-        try {
-            reloadMessages()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
+    OnLifecycleEvent { event ->
+        when (event) {
+            Lifecycle.Event.ON_START -> {
+                try {
+                    reloadMessages()
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
+            }
+            else -> {}
         }
     }
 
@@ -157,7 +163,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     ex.printStackTrace()
                 }
             }
-            .launchIn(coroutineScope)
+            .launchIn(scope)
     }
 
     Column(
@@ -291,7 +297,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 )
                             )
                         }, {
-                            coroutineScope.launch {
+                            scope.launch {
                                 try {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
                                     Toast.makeText(
@@ -360,7 +366,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         },
                         myMember?.member?.id == it.member,
                         {
-                            coroutineScope.launch {
+                            scope.launch {
                                 try {
                                     reloadMessages()
                                 } catch (ex: Exception) {
@@ -394,7 +400,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             fun send() {
                 if (sendMessage.isNotBlank()) {
                     val text = sendMessage.trim()
-                    coroutineScope.launch {
+                    scope.launch {
                         try {
                             api.sendMessage(groupId, Message(text = text))
                             reloadMessages()
@@ -640,7 +646,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     },
                     confirmButton = {
                         TextButton({
-                            coroutineScope.launch {
+                            scope.launch {
                                 try {
                                     api.removeMember(myMember!!.member!!.id!!)
                                     showLeaveGroup = false

@@ -208,6 +208,7 @@
     <string name="more_ideas">More ideas</string>
     <string name="processing_video">Processing video</string>
     <string name="please_wait">Please wait</string>
+    <string name="app_crashed">App crashed</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>

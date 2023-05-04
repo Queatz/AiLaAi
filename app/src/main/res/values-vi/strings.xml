@@ -224,4 +224,7 @@
         <item quantity="other">Thẻ</item>
     </plurals>
     <string name="more_ideas">Ý tưởng thêm</string>
+    <string name="processing_video">Đang xử lý video</string>
+    <string name="please_wait">Xin chờ</string>
+    <string name="app_crashed">Ứng dụng bị lỗi</string>
 </resources>

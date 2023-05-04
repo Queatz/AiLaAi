@@ -54,7 +54,13 @@ suspend fun Uri.asScaledVideo(context: Context, progressCallback: (Float) -> Uni
                     progressCallback(statistics.time / (duration * 1_000f))
                 }
             )
-            deferred.await()
+            try {
+                deferred.await()
+            } finally {
+                if (!ReturnCode.isSuccess(session.returnCode)) {
+                    FFmpegKit.cancel(session.sessionId)
+                }
+            }
             if (!ReturnCode.isSuccess(session.returnCode)) {
                 throw RuntimeException("Process video didn't work")
             }
@@ -64,5 +70,6 @@ suspend fun Uri.asScaledVideo(context: Context, progressCallback: (Float) -> Uni
         }
     }
 }
+
 
 val Bitmap.aspect get() = width.toFloat() / height.toFloat()

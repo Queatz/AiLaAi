@@ -88,7 +88,6 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     }
 
     LaunchedEffect(Unit) {
-        // Reload, but only show loading indicator when there are no groups
         reload()
     }
 

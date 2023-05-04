@@ -297,7 +297,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 navController,
                 stringResource(R.string.app_name),
                 {},
-                me
+                me,
+                showAppIcon = true
             )
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -324,7 +325,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         state.scrollToTop()
                     }
                 },
-                me
+                me,
+                showAppIcon = true
             )
             CardsList(
                 state = state,

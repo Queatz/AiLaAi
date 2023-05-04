@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.serialization") version "1.8.10"
 //    id("com.huawei.agconnect") // todo IncrementalTaskInputs, try again after April, 2023
     id("com.google.gms.google-services")
+    kotlin("kapt")
 }
 
 val properties = Properties()
@@ -24,7 +25,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 37
+        versionCode = 40
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -125,10 +126,15 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation(platform("com.google.firebase:firebase-bom:31.0.2"))
     implementation("com.google.android.exoplayer:exoplayer:2.18.6")
-    implementation("com.arthenica:ffmpeg-kit-full-gpl:5.1")
+    implementation("com.arthenica:ffmpeg-kit-min-gpl:5.1")
+    implementation("ch.acra:acra-core:5.9.7")
+    implementation("ch.acra:acra-toast:5.9.7")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+
+    kapt("com.google.auto.service:auto-service:1.0.1")
+    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
 }

@@ -2,15 +2,19 @@ package com.queatz.ailaai
 
 import android.location.Location
 import android.os.Bundle
-import android.view.WindowManager.LayoutParams.*
+import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
@@ -40,11 +46,13 @@ import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalMaterial3Api::class)
-class MainActivity : AppCompatActivity() {
+private val appTabKey = stringPreferencesKey("app.tab")
+
+class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
 
@@ -73,6 +81,29 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                val context = LocalContext.current
+                var startDestination by remember { mutableStateOf<String?>(null) }
+                var startDestinationLoaded by remember { mutableStateOf(false) }
+
+                // Save last route
+                if (startDestinationLoaded) {
+                    LaunchedEffect(Unit) {
+                        navController.currentBackStackEntryFlow.collectLatest { entry ->
+                            val route = entry.destination.route
+                            if (route != null && menuItems.any { it.route == route }) {
+                                context.dataStore.edit {
+                                    it[appTabKey] = route
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    LaunchedEffect(Unit) {
+                        startDestination = context.dataStore.data.first()[appTabKey]
+                        startDestinationLoaded = true
+                    }
+                }
+
                 val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
                 val showNavigation = navController.currentBackStackEntryAsState()
                     .value
@@ -93,7 +124,6 @@ class MainActivity : AppCompatActivity() {
                     val cantConnectString = stringResource(R.string.cant_connect)
                     val updateAvailableString = stringResource(R.string.update_available)
                     val downloadString = stringResource(R.string.download)
-                    val context = LocalContext.current
 
                     window.setSoftInputMode(if (showNavigation || isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
 
@@ -175,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                                 showSignedOut = false
                             },
                             text = {
-                               Text(getString(R.string.youve_been_signed_out))
+                                Text(getString(R.string.youve_been_signed_out))
                             },
                             confirmButton = {
                                 TextButton(
@@ -230,8 +260,15 @@ class MainActivity : AppCompatActivity() {
                                                                     .padding(PaddingDefault, PaddingDefault / 4)
                                                             )
                                                     }
-                                               },
-                                                label = { Text(item.text, overflow = TextOverflow.Ellipsis, maxLines = 1, textAlign = TextAlign.Center) },
+                                                },
+                                                label = {
+                                                    Text(
+                                                        item.text,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        maxLines = 1,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                },
                                                 selected = navController.currentDestination?.route == item.route,
                                                 onClick = {
                                                     navController.popBackStack()
@@ -284,56 +321,58 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }, modifier = Modifier.fillMaxSize()
                         ) {
-                            NavHost(
-                                navController,
-                                "explore",
-                                modifier = Modifier
-                                    .padding(it)
-                                    .fillMaxSize()
-                            ) {
-                                composable("profile/{id}") {
-                                    ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                }
-                                composable("explore") {
-                                    ExploreScreen(navController) { me }
-                                }
-                                composable("saved") {
-                                    SavedScreen(navController) { me }
-                                }
-                                composable(
-                                    "card/{id}",
-                                    deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
+                            if (startDestinationLoaded) {
+                                NavHost(
+                                    navController,
+                                    startDestination ?: "explore",
+                                    modifier = Modifier
+                                        .padding(it)
+                                        .fillMaxSize()
                                 ) {
-                                    CardScreen(it, navController) { me }
-                                }
-                                composable("messages") {
-                                    MessagesScreen(navController) { me }
-                                }
-                                composable(
-                                    "group/{id}",
-                                    deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
-                                ) {
-                                    GroupScreen(it, navController) { me }
-                                }
-                                composable("me") {
-                                    MeScreen(navController) { me }
-                                }
-                                composable("settings") {
-                                    SettingsScreen(navController, { me }) {
-                                        if (api.hasToken()) {
-                                            scope.launch {
-                                                try {
-                                                    loadMe()
-                                                } catch (ex: Exception) {
-                                                    ex.printStackTrace()
-                                                    snackbarHostState.showSnackbar(
-                                                        getString(R.string.cant_connect),
-                                                        withDismissAction = true
-                                                    )
+                                    composable("profile/{id}") {
+                                        ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                    }
+                                    composable("explore") {
+                                        ExploreScreen(navController) { me }
+                                    }
+                                    composable("saved") {
+                                        SavedScreen(navController) { me }
+                                    }
+                                    composable(
+                                        "card/{id}",
+                                        deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
+                                    ) {
+                                        CardScreen(it, navController) { me }
+                                    }
+                                    composable("messages") {
+                                        MessagesScreen(navController) { me }
+                                    }
+                                    composable(
+                                        "group/{id}",
+                                        deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
+                                    ) {
+                                        GroupScreen(it, navController) { me }
+                                    }
+                                    composable("me") {
+                                        MeScreen(navController) { me }
+                                    }
+                                    composable("settings") {
+                                        SettingsScreen(navController, { me }) {
+                                            if (api.hasToken()) {
+                                                scope.launch {
+                                                    try {
+                                                        loadMe()
+                                                    } catch (ex: Exception) {
+                                                        ex.printStackTrace()
+                                                        snackbarHostState.showSnackbar(
+                                                            getString(R.string.cant_connect),
+                                                            withDismissAction = true
+                                                        )
+                                                    }
                                                 }
+                                            } else {
+                                                known = false
                                             }
-                                        } else {
-                                            known = false
                                         }
                                     }
                                 }
@@ -347,14 +386,17 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun OnLifecycleEvent(onEvent: (event: Lifecycle.Event) -> Unit) {
+fun OnLifecycleEvent(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
     val eventHandler = rememberUpdatedState(onEvent)
     val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
+    val scope = rememberCoroutineScope()
 
     DisposableEffect(lifecycleOwner.value) {
         val lifecycle = lifecycleOwner.value.lifecycle
         val observer = LifecycleEventObserver { owner, event ->
-            eventHandler.value(event)
+            scope.launch {
+                eventHandler.value(event)
+            }
         }
 
         lifecycle.addObserver(observer)

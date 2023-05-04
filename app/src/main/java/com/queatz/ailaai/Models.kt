@@ -41,6 +41,11 @@ class Group(
 ) : Model()
 
 @Serializable
+class Crash(
+    var details: String? = null,
+) : Model()
+
+@Serializable
 class Person(
     var name: String? = null,
     var photo: String? = null,

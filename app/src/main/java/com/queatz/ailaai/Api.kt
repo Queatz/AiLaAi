@@ -19,13 +19,10 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.streams.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -50,7 +47,7 @@ class Api {
 
     private lateinit var context: Context
 
-    private val baseUrl = "https://api.ailaai.app"
+    internal val baseUrl = "https://api.ailaai.app"
 //    private val baseUrl = "http://10.0.2.2:8080"
 
     private val tokenKey = stringPreferencesKey("token")
@@ -324,6 +321,8 @@ class Api {
     suspend fun deleteMessage(message: String): HttpStatusCode = post("messages/$message/delete")
 
     suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
+
+    suspend fun crash(report: String): HttpStatusCode = post("crash", Crash(report))
 }
 
 @Serializable

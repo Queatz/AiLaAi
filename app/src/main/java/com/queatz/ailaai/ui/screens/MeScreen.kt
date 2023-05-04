@@ -46,7 +46,6 @@ enum class Filter {
 private val meParentTypeKey = stringPreferencesKey("me.parentType")
 private val meFiltersKey = stringSetPreferencesKey("me.filters")
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
@@ -115,16 +114,17 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             CardParentType.Offline -> myCards.filter { it.offline == true }
             else -> myCards
         }.filter {
+            val searchTextTrimmed = searchText.trim()
             filters.all { filter ->
                 when(filter) {
                     Filter.Active -> it.active == true
                     Filter.NotActive -> it.active != true
                 }
             } &&
-                    (searchText.isBlank() || (
-                            it.conversation?.contains(searchText, true) == true ||
-                            it.name?.contains(searchText, true) == true ||
-                            it.location?.contains(searchText, true) == true
+                    (searchTextTrimmed.isBlank() || (
+                            it.conversation?.contains(searchTextTrimmed, true) == true ||
+                            it.name?.contains(searchTextTrimmed, true) == true ||
+                            it.location?.contains(searchTextTrimmed, true) == true
                     ))
         }
     }

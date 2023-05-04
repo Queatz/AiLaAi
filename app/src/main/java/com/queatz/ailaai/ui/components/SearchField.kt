@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -43,7 +44,12 @@ fun SearchField(
             value,
             onValueChange = onValueChange,
             placeholder = {
-                Text(placeholder ?: stringResource(R.string.search), modifier = Modifier.alpha(.5f))
+                Text(
+                    placeholder ?: stringResource(R.string.search),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.alpha(.5f)
+                )
             },
             shape = MaterialTheme.shapes.large,
             singleLine = true,
