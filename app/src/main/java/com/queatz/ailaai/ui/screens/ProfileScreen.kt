@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +44,6 @@ import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.*
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
@@ -65,6 +63,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var showInviteDialog by remember { mutableStateOf(false) }
     var uploadJob by remember { mutableStateOf<Job?>(null) }
     var isUploadingVideo by remember { mutableStateOf(false) }
+    var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
 
 
@@ -72,6 +71,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         ProcessingVideoDialog(
             onDismissRequest = { isUploadingVideo = false },
             onCancelRequest = { uploadJob?.cancel() },
+            stage = videoUploadStage,
             progress = videoUploadProgress
         )
     }
@@ -162,10 +162,16 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                         context.contentResolver.getType(it) ?: "video/*",
                         it.lastPathSegment ?: "video.${
                             context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                        }"
-                    ) {
-                        videoUploadProgress = it
-                    }
+                        }",
+                        processingCallback = {
+                            videoUploadStage = ProcessingVideoStage.Processing
+                            videoUploadProgress = it
+                        },
+                        uploadCallback = {
+                            videoUploadStage = ProcessingVideoStage.Uploading
+                            videoUploadProgress = it
+                        }
+                    )
                 } else if (it.isPhoto(context)) {
                     api.updateProfilePhoto(it)
                 }

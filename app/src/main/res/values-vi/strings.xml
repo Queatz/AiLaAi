@@ -189,7 +189,7 @@
         <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
     <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Tất cả thẻ trong phạm vi 100km của bạn sẽ được hiển thị ở đây.</string>
-    <string name="description">Mô tả</string>
+    <string name="introduction">Giới thiệu</string>
     <string name="update">Cập nhật</string>
     <string name="send">Gửi</string>
     <string name="change_owner">Đổi chủ</string>
@@ -227,4 +227,5 @@
     <string name="processing_video">Đang xử lý video</string>
     <string name="please_wait">Xin chờ</string>
     <string name="app_crashed">Ứng dụng bị lỗi</string>
+    <string name="uploading_video">Đang tải video lên</string>
 </resources>

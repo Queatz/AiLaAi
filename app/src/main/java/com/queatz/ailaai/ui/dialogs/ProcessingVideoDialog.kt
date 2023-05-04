@@ -14,10 +14,16 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
+enum class ProcessingVideoStage {
+    Processing,
+    Uploading
+}
+
 @Composable
 fun ProcessingVideoDialog(
     onDismissRequest: () -> Unit,
     onCancelRequest: () -> Unit,
+    stage: ProcessingVideoStage,
     progress: Float
 ) {
     AlertDialog(
@@ -25,7 +31,14 @@ fun ProcessingVideoDialog(
             // Non-dismissable
         },
         title = {
-            Text(stringResource(R.string.processing_video))
+            Text(
+                stringResource(
+                    when (stage) {
+                        ProcessingVideoStage.Processing -> R.string.processing_video
+                        ProcessingVideoStage.Uploading -> R.string.uploading_video
+                    }
+                )
+            )
         },
         text = {
             Row(

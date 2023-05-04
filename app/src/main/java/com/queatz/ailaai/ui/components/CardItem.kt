@@ -88,6 +88,7 @@ fun BasicCard(
         var uploadJob by remember { mutableStateOf<Job?>(null) }
         var isUploadingVideo by remember { mutableStateOf(false) }
         var videoUploadProgress by remember { mutableStateOf(0f) }
+        var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
 
@@ -102,6 +103,7 @@ fun BasicCard(
             ProcessingVideoDialog(
                 onDismissRequest = { isUploadingVideo = false },
                 onCancelRequest = { uploadJob?.cancel() },
+                stage = videoUploadStage,
                 progress = videoUploadProgress
             )
         }
@@ -168,10 +170,16 @@ fun BasicCard(
                                             card.id!!,
                                             it,
                                             context.contentResolver.getType(it) ?: "video/*",
-                                            it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}"
-                                        ) {
-                                            videoUploadProgress = it
-                                        }
+                                            it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}",
+                                            processingCallback = {
+                                                videoUploadStage = ProcessingVideoStage.Processing
+                                                videoUploadProgress = it
+                                            },
+                                            uploadCallback = {
+                                                videoUploadStage = ProcessingVideoStage.Uploading
+                                                videoUploadProgress = it
+                                            }
+                                        )
                                     } else if (it.isPhoto(context)) {
                                         api.uploadCardPhoto(card.id!!, it)
                                     }

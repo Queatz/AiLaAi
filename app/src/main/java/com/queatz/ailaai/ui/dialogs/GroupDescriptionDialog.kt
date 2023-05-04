@@ -16,7 +16,7 @@ fun GroupDescriptionDialog(onDismissRequest: () -> Unit, group: Group, onGroupUp
 
     TextFieldDialog(
         onDismissRequest,
-        stringResource(R.string.description),
+        stringResource(R.string.introduction),
         stringResource(R.string.update),
         false,
         group.description ?: "",

@@ -247,7 +247,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             showDescription = !showDescription
                             ui.setShowDescription(groupId, showDescription)
                         }) {
-                            Icon(Icons.Outlined.Info, stringResource(R.string.description))
+                            Icon(Icons.Outlined.Info, stringResource(R.string.introduction))
                         }
                     }
 
@@ -279,7 +279,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             showRenameGroup = true
                         })
                         DropdownMenuItem({
-                            Text(stringResource(R.string.description))
+                            Text(stringResource(R.string.introduction))
                         }, {
                             showMenu = false
                             showDescriptionDialog = true

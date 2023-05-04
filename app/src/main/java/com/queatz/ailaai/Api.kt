@@ -2,12 +2,10 @@ package com.queatz.ailaai
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.arthenica.ffmpegkit.FFmpegKitConfig
-import com.arthenica.ffmpegkit.Statistics
+import com.queatz.ailaai.extensions.asInputProvider
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -18,15 +16,16 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.utils.io.streams.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
 val json = Json {
@@ -81,12 +80,6 @@ class Api {
     fun init(context: Context) {
         this.context = context
 
-//        FFmpegKitConfig.enableStatisticsCallback { statistics ->
-//            Log.w("XXXXXX", "$statistics -- time = ${statistics.time}")
-//            videoProcessing[statistics.sessionId]?.invoke(statistics.time.toFloat())
-//
-//        }
-
         runBlocking {
             token = context.dataStore.data.first()[tokenKey]
         }
@@ -100,14 +93,21 @@ class Api {
 
     private suspend inline fun <reified R : Any> post(
         url: String,
+        noinline progressCallback: ((Float) -> Unit)? = null,
         client: HttpClient = http,
-    ): R = post(url, null as String?, client)
+    ): R = post(url, null as String?, progressCallback, client)
 
     private suspend inline fun <reified R : Any, reified T : Any> post(
         url: String,
         body: T?,
+        noinline progressCallback: ((Float) -> Unit)? = null,
         client: HttpClient = http,
     ): R = client.post("$baseUrl/${url}") {
+        onUpload { bytesSentTotal, contentLength ->
+            val progress = if (contentLength > 0) (bytesSentTotal.toDouble() / contentLength.toDouble()).toFloat() else 0f
+            progressCallback?.invoke(progress)
+        }
+
         if (token != null) {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
@@ -182,16 +182,31 @@ class Api {
         ), client = httpData)
     }
 
-    suspend fun updateProfileVideo(video: Uri, contentType: String, filename: String, progressCallback: (Float) -> Unit): HttpStatusCode {
-        val scaledVideo = video.asScaledVideo(context, progressCallback)
-        return post("me/profile/video", MultiPartFormDataContent(
-            formData {
-                append("photo", InputProvider { scaledVideo.asInput() }, Headers.build {
-                    append(HttpHeaders.ContentType, contentType)
-                    append(HttpHeaders.ContentDisposition, "filename=${filename}")
-                })
-            }
-        ), client = httpData)
+    suspend fun updateProfileVideo(
+        video: Uri,
+        contentType: String,
+        filename: String,
+        processingCallback: (Float) -> Unit,
+        uploadCallback: (Float) -> Unit,
+    ): HttpStatusCode {
+        val scaledVideo = video.asScaledVideo(context, progressCallback = processingCallback)
+        return post(
+            "me/profile/video",
+            MultiPartFormDataContent(
+                formData {
+                    append(
+                        "photo",
+                        scaledVideo.asInputProvider(),
+                        Headers.build {
+                            append(HttpHeaders.ContentType, contentType)
+                            append(HttpHeaders.ContentDisposition, "filename=${filename}")
+                        }
+                    )
+                }
+            ),
+            progressCallback = uploadCallback,
+            client = httpData
+        )
     }
 
     suspend fun cards(geo: LatLng, offset: Int = 0, limit: Int = 20, search: String? = null): List<Card> = get("cards", mapOf(
@@ -260,16 +275,33 @@ class Api {
             }
         ), client = httpData)
     }
-    suspend fun uploadCardVideo(id: String, video: Uri, contentType: String, filename: String, progressCallback: (Float) -> Unit): HttpStatusCode {
-        val scaledVideo = video.asScaledVideo(context, progressCallback)
-        return post("cards/$id/video", MultiPartFormDataContent(
-            formData {
-                append("photo", InputProvider { scaledVideo.asInput() }, Headers.build {
-                    append(HttpHeaders.ContentType, contentType)
-                    append(HttpHeaders.ContentDisposition, "filename=${filename}")
-                })
-            }
-        ), client = httpData)
+
+    suspend fun uploadCardVideo(
+        id: String,
+        video: Uri,
+        contentType: String,
+        filename: String,
+        processingCallback: (Float) -> Unit,
+        uploadCallback: (Float) -> Unit,
+    ): HttpStatusCode {
+        val scaledVideo = video.asScaledVideo(context, progressCallback = processingCallback)
+        return post(
+            "cards/$id/video",
+            MultiPartFormDataContent(
+                formData {
+                    append(
+                        "photo",
+                        scaledVideo.asInputProvider(),
+                        Headers.build {
+                            append(HttpHeaders.ContentType, contentType)
+                            append(HttpHeaders.ContentDisposition, "filename=${filename}")
+                        }
+                    )
+                }
+            ),
+            progressCallback = uploadCallback,
+            client = httpData
+        )
     }
 
     suspend fun cardGroup(card: String): Group = get("cards/$card/group")
