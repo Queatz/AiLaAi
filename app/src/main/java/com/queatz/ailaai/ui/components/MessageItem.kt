@@ -17,7 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -220,20 +222,33 @@ fun MessageItem(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(photos, key = { it }) { photo ->
+                        var isLoaded by remember { mutableStateOf(false) }
                         val data = api.url(photo)
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(data)
                                 .crossfade(true)
                                 .build(),
+                            alpha = if (isLoaded) 1f else .125f,
+                            placeholder = rememberVectorPainter(Icons.Outlined.Photo),
+                            onSuccess = {
+                                isLoaded = true
+                            },
                             contentDescription = "",
-                            contentScale = ContentScale.Fit,
+                            contentScale = if (isLoaded) ContentScale.Fit else ContentScale.Inside,
                             alignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = PaddingDefault * 2, max = 320.dp)
+                                .let {
+                                    if (isLoaded) {
+                                        it.heightIn(min = PaddingDefault * 2, max = 320.dp)
+                                    } else {
+                                        it.height(160.dp)
+                                            .aspectRatio(.75f)
+                                    }
+                                }
                                 .clip(MaterialTheme.shapes.large)
-                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
                                 .combinedClickable(
                                     onClick = { onShowPhoto(photo) },
                                     onLongClick = {

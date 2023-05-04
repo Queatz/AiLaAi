@@ -43,7 +43,7 @@ suspend fun Uri.asScaledVideo(context: Context, progressCallback: (Float) -> Uni
             val duration = mediaInformation.mediaInformation.duration.toFloat()
             val inputVideoPath = FFmpegKitConfig.getSafParameterForRead(context, this@asScaledVideo)
             val session = FFmpegKit.executeAsync(
-                "-i $inputVideoPath -c:v libx265 -vtag hvc1 -vf scale=720:-2 ${outputFile.path}",
+                "-i $inputVideoPath -c:v libx265 -vtag hvc1 -vf scale=720:-2 -crf 42 ${outputFile.path}",
                 {
                     deferred.complete(Unit)
                 },

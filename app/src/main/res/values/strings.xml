@@ -192,7 +192,7 @@
     <string name="group">Group</string>
     <string name="not_connected_yet">Not connected yet</string>
     <string name="no_cards_nearby">No cards nearby. All cards within 100km of you will be shown here.</string>
-    <string name="scan">Scan</string>
+    <string name="scan">Scan QR code</string>
     <string name="add_about_you">Add something about you…</string>
     <string name="add_your_name">Add your name…</string>
     <string name="about_you">About you</string>
@@ -210,6 +210,7 @@
     <string name="uploading_video">Uploading video</string>
     <string name="please_wait">Please wait</string>
     <string name="app_crashed">App crashed</string>
+    <string name="scan_a_qr_code_description">The QR code of a card can be viewed from the card\'s menu.</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s card nearby</item>
         <item quantity="other">%1$s cards nearby</item>
@@ -234,4 +235,5 @@
         <item quantity="one">Card</item>
         <item quantity="other">Cards</item>
     </plurals>
+    <string name="scan_now">Scan now</string>
 </resources>

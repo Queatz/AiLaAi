@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,10 +59,10 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 
 val geoKey = stringPreferencesKey("geo")
 val geoManualKey = booleanPreferencesKey("geo-manual")
+val qrCodeExplainedKey = booleanPreferencesKey("tutorial.qrCode.explained")
 
 var exploreInitialCategory: String? = null
 
@@ -90,6 +89,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
     var showCameraRationale by remember { mutableStateOf(false) }
+    var showQrCodeExplanationDialog by remember { mutableStateOf(false) }
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
     var isLoading by remember { mutableStateOf(cards.isEmpty()) }
     var isError by remember { mutableStateOf(false) }
@@ -214,7 +214,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    fun scan() {
+    fun scanQrCode() {
         if (cameraPermissionState.status.isGranted) {
             scanQrLauncher.launch(
                 // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
@@ -233,10 +233,20 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    fun launchScanQrCode() {
+        scope.launch {
+            if (context.dataStore.data.first()[qrCodeExplainedKey] == true) {
+                scanQrCode()
+            } else {
+                showQrCodeExplanationDialog = true
+            }
+        }
+    }
+
     if (!initialCameraPermissionState) {
         LaunchedEffect(cameraPermissionState.status.isGranted) {
             if (cameraPermissionState.status.isGranted) {
-                scan()
+                scanQrCode()
             }
         }
     }
@@ -347,7 +357,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
                 },
                 onAction = {
-                    scan()
+                    launchScanQrCode()
                 }
             ) {
                 if (geoManual) {
@@ -367,13 +377,12 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         Icon(Icons.Outlined.Clear, "")
                     }
                 }
-                if (categories.isNotEmpty() && !isLoading) {
+                if (categories.size > 2 && !isLoading) {
                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                     val scrollState = rememberScrollState()
                     Row(
                         modifier = Modifier
                             .horizontalScroll(scrollState)
-
                             .onPlaced { viewport = it.boundsInParent().size }
                             .horizontalFadingEdge(viewport, scrollState)
                     ) {
@@ -403,6 +412,44 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 }
             }
         }
+    }
+
+    if (showQrCodeExplanationDialog) {
+        AlertDialog(
+            {
+                showQrCodeExplanationDialog = false
+            },
+            title = {
+               Text(stringResource(R.string.scan))
+            },
+            text = {
+               Text(stringResource(R.string.scan_a_qr_code_description))
+            },
+            confirmButton = {
+                TextButton(
+                    {
+                        scope.launch {
+                            context.dataStore.edit {
+                                it[qrCodeExplainedKey] = true
+                            }
+                            showQrCodeExplanationDialog = false
+                            scanQrCode()
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.scan_now))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    {
+                        showQrCodeExplanationDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
     }
 
     if (showSetMyLocation) {

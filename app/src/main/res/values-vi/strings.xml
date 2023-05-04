@@ -201,7 +201,7 @@
     <string name="group">Nhóm</string>
     <string name="search_people_and_groups">Tìm kiếm người và nhóm</string>
     <string name="not_connected_yet">Chưa kết nối</string>
-    <string name="scan">Quét</string>
+    <string name="scan">Quét mã QR</string>
     <string name="add_about_you">Thêm điều gì đó về bạn…</string>
     <string name="add_your_name">Thêm tên của bạn…</string>
     <string name="about_you">Về bạn</string>
@@ -228,4 +228,6 @@
     <string name="please_wait">Xin chờ</string>
     <string name="app_crashed">Ứng dụng bị lỗi</string>
     <string name="uploading_video">Đang tải video lên</string>
+    <string name="scan_a_qr_code_description">Bạn có thể xem mã QR thẻ từ menu của thẻ.</string>
+    <string name="scan_now">Quét luôn</string>
 </resources>

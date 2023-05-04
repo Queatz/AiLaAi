@@ -41,8 +41,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
     val scope = rememberCoroutineScope()
-    var signOutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    var signOutDialog by remember { mutableStateOf(false) }
     var inviteDialog by remember { mutableStateOf(false) }
     var showResetTutorialButton by remember { mutableStateOf(false) }
 
@@ -155,7 +155,11 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     Column {
         TopAppBar(
             {
-                Text(stringResource(R.string.settings), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    stringResource(R.string.settings),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             },
             actions = {
                 ElevatedButton(
@@ -179,6 +183,14 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }
         )
 
+        fun setLanguage(language: String) {
+            scope.launch(Dispatchers.Main) {
+                AppCompatDelegate.setApplicationLocales(
+                    LocaleListCompat.forLanguageTags(language)
+                )
+            }
+        }
+
         val scrollState = rememberScrollState()
 
         Column(
@@ -188,13 +200,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             var chooseLanguageDialog by remember { mutableStateOf(false) }
 
             if (chooseLanguageDialog) {
-                fun setLanguage(language: String) {
-                    scope.launch(Dispatchers.Main) {
-                        val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(language)
-                        AppCompatDelegate.setApplicationLocales(appLocale)
-                    }
-                }
-
                 Dialog({
                     chooseLanguageDialog = false
                 }) {
@@ -203,12 +208,12 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     ) {
                         Column {
                             DropdownMenuItem({ Text("Tiếng Việt") }, {
-                                chooseLanguageDialog = false
                                 setLanguage("vi,en")
+                                chooseLanguageDialog = false
                             })
                             DropdownMenuItem({ Text("English") }, {
-                                chooseLanguageDialog = false
                                 setLanguage("en,vi")
+                                chooseLanguageDialog = false
                             })
                         }
                     }
@@ -222,8 +227,8 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
                     )
                     Text(
-                        when (appLanguage) {
-                            "vi" -> stringResource(R.string.language_vietnamese)
+                        when {
+                            appLanguage?.startsWith("vi") == true -> stringResource(R.string.language_vietnamese)
                             else -> stringResource(R.string.language_english)
                         },
                         style = MaterialTheme.typography.labelMedium,

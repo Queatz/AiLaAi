@@ -4,10 +4,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 
@@ -63,9 +67,17 @@ fun SavedIcon(card: Card) {
     }
 
     if (saves.isSaved(card)) {
-        Icon(Icons.Outlined.Favorite, contentDescription = stringResource(id = R.string.unsave_card))
+        Icon(
+            Icons.Outlined.Favorite,
+            tint = MaterialTheme.colorScheme.primary,
+            contentDescription = stringResource(id = R.string.unsave_card),
+        )
     } else {
-        Icon(Icons.Outlined.FavoriteBorder, contentDescription = stringResource(id = R.string.save_card))
+        Icon(
+            Icons.Outlined.FavoriteBorder,
+            tint = MaterialTheme.colorScheme.primary,
+            contentDescription = stringResource(id = R.string.save_card),
+        )
     }
 }
 

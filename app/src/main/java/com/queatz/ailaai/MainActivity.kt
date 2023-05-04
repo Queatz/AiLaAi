@@ -4,8 +4,8 @@ import android.location.Location
 import android.os.Bundle
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -52,7 +52,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private val appTabKey = stringPreferencesKey("app.tab")
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavHostController
 

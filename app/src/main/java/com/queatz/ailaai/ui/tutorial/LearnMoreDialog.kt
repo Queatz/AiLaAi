@@ -17,10 +17,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import androidx.core.text.bold
-import androidx.core.text.buildSpannedString
-import androidx.core.text.toSpannable
-import androidx.core.text.toSpanned
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
@@ -254,6 +250,18 @@ fun LearnMoreDialog(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()
             ) {
+                TextButton(
+                    {
+                        scope.launch {
+                            context.dataStore.edit {
+                                it[hideLearnMoreKey] = true
+                            }
+                            onDismissRequest()
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.hide), color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f))
+                }
                 if (present != null) {
                     TextButton(
                         {
@@ -263,18 +271,6 @@ fun LearnMoreDialog(
                         Text(stringResource(R.string.go_back))
                     }
                 } else {
-                    TextButton(
-                        {
-                            scope.launch {
-                                context.dataStore.edit {
-                                    it[hideLearnMoreKey] = true
-                                }
-                                onDismissRequest()
-                            }
-                        }
-                    ) {
-                        Text(stringResource(R.string.hide), color = MaterialTheme.colorScheme.secondary)
-                    }
                     TextButton(
                         {
                             onDismissRequest()

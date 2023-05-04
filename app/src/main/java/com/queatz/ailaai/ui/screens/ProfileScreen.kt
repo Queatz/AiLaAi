@@ -47,13 +47,13 @@ import kotlinx.coroutines.*
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var cards by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf(listOf<Card>()) }
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
-    var showPhoto by remember { mutableStateOf<String?>(null) }
+    var showMedia by remember { mutableStateOf<Media?>(null) }
     var isLoading by remember { mutableStateOf(cards.isEmpty() || person == null || profile == null) }
     var isError by remember { mutableStateOf(false) }
     var showEditName by remember { mutableStateOf(false) }
@@ -252,7 +252,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     if (isMe) {
                                         profilePhotoLauncher.launch(PickVisualMediaRequest())
                                     } else {
-                                        showPhoto = profile?.photo
+                                        showMedia = Media.Video(video)
                                     }
                                 }
                         ) {
@@ -285,7 +285,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     if (isMe) {
                                         profilePhotoLauncher.launch(PickVisualMediaRequest())
                                     } else {
-                                        showPhoto = profile?.photo
+                                        showMedia = profile?.photo?.let { Media.Photo(it) }
                                     }
                                 }
                         )
@@ -294,7 +294,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                         Icon(
                             Icons.Outlined.Edit,
                             null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
                                 .padding(bottom = bottomPadding)
                                 .padding(PaddingDefault)
@@ -318,7 +318,11 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             .padding(PaddingDefault)
                             .clip(CircleShape)
                     ) {
-                        Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
+                        Icon(
+                            Icons.Outlined.ArrowBack,
+                            stringResource(R.string.go_back),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     if (isMe) {
                         IconButton(
@@ -330,7 +334,11 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 .align(Alignment.TopEnd)
                                 .padding(PaddingDefault)
                         ) {
-                            Icon(Icons.Outlined.Settings, stringResource(R.string.settings))
+                            Icon(
+                                Icons.Outlined.Settings,
+                                stringResource(R.string.settings),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     } else {
                         IconButton(
@@ -372,7 +380,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     if (isMe) {
                                         photoLauncher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
                                     } else {
-                                        showPhoto = person?.photo
+                                        showMedia = person?.photo?.let { Media.Photo(it) }
                                     }
                                 }
                         )
@@ -380,7 +388,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             Icon(
                                 Icons.Outlined.Edit,
                                 null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .padding(PaddingDefault / 2)
@@ -656,13 +664,13 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         )
     }
 
-    if (showPhoto != null) {
+    if (showMedia != null) {
         PhotoDialog(
             {
-                showPhoto = null
+                showMedia = null
             },
-            showPhoto!!,
-            listOf(showPhoto!!)
+            showMedia!!,
+            listOf(showMedia!!)
         )
     }
 }

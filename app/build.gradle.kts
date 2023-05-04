@@ -6,7 +6,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     kotlin("plugin.serialization") version "1.8.10"
-//    id("com.huawei.agconnect") // todo IncrementalTaskInputs, try again after April, 2023
+//    id("com.huawei.agconnect") // todo IncrementalTaskInputs, try again after June, 2023
     id("com.google.gms.google-services")
     kotlin("kapt")
 }
@@ -32,7 +32,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-//        resConfigs = "en", "vn"
+        resourceConfigurations.addAll(setOf("en", "vi"))
     }
     buildFeatures {
         viewBinding = true

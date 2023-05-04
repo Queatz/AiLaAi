@@ -484,8 +484,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     {
                         showPhoto = null
                     },
-                    showPhoto!!,
-                    messages.photos()
+                    Media.Photo(showPhoto!!),
+                    messages.photos().map { Media.Photo(it) }
                 )
             }
 
