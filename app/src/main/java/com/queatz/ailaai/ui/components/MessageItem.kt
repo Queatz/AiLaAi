@@ -1,8 +1,6 @@
 package com.queatz.ailaai.ui.components
 
 import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,16 +15,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -38,7 +32,6 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.item
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -61,10 +54,12 @@ fun MessageItem(
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
     var attachedCard by remember { mutableStateOf<Card?>(null) }
+    var attachedAudio by remember { mutableStateOf<String?>(null) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
 
     attachedCardId = (message.getAttachment() as? CardAttachment)?.card
     attachedPhotos = (message.getAttachment() as? PhotosAttachment)?.photos
+    attachedAudio = (message.getAttachment() as? AudioAttachment)?.audio
 
     LaunchedEffect(Unit) {
         attachedCardId?.let { cardId ->
@@ -164,12 +159,16 @@ fun MessageItem(
 
     Row(modifier = Modifier
         .fillMaxWidth()
-        .clickable(
+        .combinedClickable(
             interactionSource = MutableInteractionSource(),
-            indication = null
-        ) {
-            showTime = !showTime
-        }) {
+            indication = null,
+            onClick = {
+                showTime = !showTime
+            },
+            onLongClick = {
+                showMessageDialog = true
+            }
+        )) {
         if (!isMe) {
             if (previousMessage?.member != message.member) {
                 ProfileImage(
@@ -239,14 +238,6 @@ fun MessageItem(
                             alignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .let {
-                                    if (isLoaded) {
-                                        it.heightIn(min = PaddingDefault * 2, max = 320.dp)
-                                    } else {
-                                        it.height(160.dp)
-                                            .aspectRatio(.75f)
-                                    }
-                                }
                                 .clip(MaterialTheme.shapes.large)
                                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
                                 .combinedClickable(
@@ -256,8 +247,39 @@ fun MessageItem(
                                         showMessageDialog = true
                                     }
                                 )
+                                .let {
+                                    if (isLoaded) {
+                                        it.heightIn(min = PaddingDefault * 2, max = 320.dp)
+                                    } else {
+                                        it.padding(
+                                            horizontal = 40.dp,
+                                            vertical = 80.dp
+                                        )
+                                    }
+                                }
                         )
                     }
+                }
+            }
+            attachedAudio?.let { audioUrl ->
+                Card(
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier
+                        .padding(PaddingDefault)
+                        .let {
+                            if (isMe) {
+                                it.padding(start = PaddingDefault * 8)
+                            } else {
+                                it.padding(end = PaddingDefault * 8)
+                            }
+                        }
+                        .clip(MaterialTheme.shapes.large)
+                ) {
+                    Audio(
+                        api.url(audioUrl),
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
                 }
             }
             if (message.text != null) {

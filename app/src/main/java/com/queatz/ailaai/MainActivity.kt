@@ -345,7 +345,7 @@ class MainActivity : AppCompatActivity() {
                                         CardScreen(it, navController) { me }
                                     }
                                     composable("messages") {
-                                        MessagesScreen(navController) { me }
+                                        FriendsScreen(navController) { me }
                                     }
                                     composable(
                                         "group/{id}",
@@ -393,7 +393,7 @@ fun OnLifecycleEvent(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
 
     DisposableEffect(lifecycleOwner.value) {
         val lifecycle = lifecycleOwner.value.lifecycle
-        val observer = LifecycleEventObserver { owner, event ->
+        val observer = LifecycleEventObserver { _, event ->
             scope.launch {
                 eventHandler.value(event)
             }

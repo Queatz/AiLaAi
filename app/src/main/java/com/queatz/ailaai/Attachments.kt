@@ -12,6 +12,20 @@ class PhotosAttachment(
 }
 
 @Serializable
+class AudioAttachment(
+    var audio: String? = null
+) : MessageAttachment() {
+    override val type = "audio"
+}
+
+@Serializable
+class VideoAttachment(
+    var video: String? = null
+) : MessageAttachment() {
+    override val type = "video"
+}
+
+@Serializable
 class CardAttachment(
     var card: String? = null
 ) : MessageAttachment() {
@@ -29,6 +43,8 @@ fun Message.getAttachment() = attachment?.let {
     when (jsonElement.jsonObject["type"]?.jsonPrimitive?.contentOrNull) {
         "card" -> json.decodeFromJsonElement<CardAttachment>(jsonElement)
         "photos" -> json.decodeFromJsonElement<PhotosAttachment>(jsonElement)
+        "audio" -> json.decodeFromJsonElement<AudioAttachment>(jsonElement)
+        "video" -> json.decodeFromJsonElement<VideoAttachment>(jsonElement)
         else -> null
     }
 }

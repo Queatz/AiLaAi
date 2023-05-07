@@ -8,11 +8,11 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.showDidntWork
 
 @Composable
 fun EditProfileNameDialog(onDismissRequest: () -> Unit, initialValue: String, onUpdated: () -> Unit) {
     val context = LocalContext.current
-    val didntWork = stringResource(R.string.didnt_work)
 
     TextFieldDialog(
         onDismissRequest,
@@ -26,8 +26,8 @@ fun EditProfileNameDialog(onDismissRequest: () -> Unit, initialValue: String, on
             onUpdated()
             onDismissRequest()
         } catch (ex: Exception) {
-            Toast.makeText(context, didntWork, LENGTH_SHORT).show()
             ex.printStackTrace()
+            context.showDidntWork()
         }
     }
 }

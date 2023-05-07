@@ -1,5 +1,10 @@
 package com.queatz.ailaai.ui.screens
 
+import android.Manifest
+import android.media.EncoderProfiles
+import android.media.MediaRecorder
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -35,17 +40,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.nullIfBlank
-import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.components.fadingEdge
 import com.queatz.ailaai.ui.dialogs.*
@@ -55,8 +62,10 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import java.io.File
+import java.io.IOException
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val groupId = navBackStackEntry.arguments!!.getString("id")!!
@@ -77,9 +86,110 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     var hasOlderMessages by remember { mutableStateOf(true) }
+    val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val initialRecordAudioPermissionState by remember { mutableStateOf(recordAudioPermissionState.status.isGranted) }
+    var audioOutputFile by remember { mutableStateOf<File?>(null) }
+    var audioRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
+    var isRecordingAudio by remember { mutableStateOf(false) }
+    var maxInputAreaHeight by remember { mutableStateOf(0f) }
 
     suspend fun reloadMessages() {
         messages = api.messages(groupId)
+    }
+
+    fun ensureAudioRecorder(): MediaRecorder {
+        if (audioRecorder == null) {
+            audioRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                MediaRecorder(context)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaRecorder()
+            }
+        }
+
+        return audioRecorder!!
+    }
+
+    fun prepareRecorder(): MediaRecorder {
+        return ensureAudioRecorder().apply {
+            reset()
+            audioOutputFile = File.createTempFile("audio", ".aac", context.cacheDir).apply {
+                if (exists()) {
+                    delete()
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setPreferredMicrophoneDirection(MediaRecorder.MIC_DIRECTION_TOWARDS_USER)
+            }
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC)
+            setAudioSamplingRate(96000)
+            setAudioEncodingBitRate(16 * 96000)
+            setOutputFile(audioOutputFile)
+
+            setOnErrorListener { mr, what, extra ->
+                Log.w("MediaRecorder", "error: $what, extra = $extra")
+            }
+            try {
+                prepare()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun recordTheAudio() {
+        isRecordingAudio = true
+        prepareRecorder().start()
+    }
+
+    fun recordAudio() {
+        if (recordAudioPermissionState.status.isGranted.not()) {
+            recordAudioPermissionState.launchPermissionRequest()
+        } else {
+            recordTheAudio()
+        }
+    }
+
+    fun stopRecording() {
+        isRecordingAudio = false
+        audioRecorder?.stop()
+    }
+
+    fun cancelRecording() {
+        stopRecording()
+        audioOutputFile?.delete()
+        audioOutputFile = null
+    }
+
+    fun sendActiveRecording() {
+        stopRecording()
+        scope.launch {
+            try {
+                api.sendAudio(groupId, audioOutputFile!!)
+                audioOutputFile?.delete()
+                audioOutputFile = null
+                reloadMessages()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                context.showDidntWork()
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            audioRecorder?.release()
+        }
+    }
+
+    if (!initialRecordAudioPermissionState) {
+        LaunchedEffect(recordAudioPermissionState.status.isGranted) {
+            if (recordAudioPermissionState.status.isGranted) {
+                recordTheAudio()
+            }
+        }
     }
 
     suspend fun loadMore() {
@@ -107,7 +217,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     reloadMessages()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_LONG).show()
+                    context.showDidntWork()
                 }
             }
         }
@@ -147,6 +257,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     ex.printStackTrace()
                 }
             }
+
             else -> {}
         }
     }
@@ -181,7 +292,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
         } else {
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
-            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id }?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) } ?: emptyList()
+            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id }
+                ?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) } ?: emptyList()
             val state = rememberLazyListState()
 
             var latestMessage by remember { mutableStateOf<Instant?>(null) }
@@ -261,7 +373,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         val hidden = myMember!!.member?.hide == true
 
                         DropdownMenuItem({
-                            Text(stringResource(R.string.invite))
+                            Text(stringResource(R.string.invite_someone))
                         }, {
                             showMenu = false
                             showInviteMembers = true
@@ -409,7 +521,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             if (sendMessage.isBlank()) {
                                 sendMessage = text
                             }
-                            Toast.makeText(context, context.getString(R.string.didnt_work), Toast.LENGTH_SHORT).show()
+                            context.showDidntWork()
                         }
                     }
                 }
@@ -421,60 +533,129 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onPlaced {
+                        maxInputAreaHeight = maxInputAreaHeight.coerceAtLeast(it.boundsInParent().size.height)
+                    }
             ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    OutlinedTextField(
-                        value = sendMessage,
-                        onValueChange = {
-                            sendMessage = it
-                        },
-                        trailingIcon = {
-                            Crossfade(targetState = sendMessage.isNotBlank()) { show ->
-                                when (show) {
-                                    true -> IconButton({ send() }) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    Crossfade(isRecordingAudio) { show ->
+                        when(show) {
+                            true -> {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .heightIn(min = maxInputAreaHeight.inDp())
+                                ) {
+                                    IconButton(
+                                        {
+                                            cancelRecording()
+                                        }
+                                    ) {
                                         Icon(
-                                            Icons.Default.Send,
-                                            Icons.Default.Send.name,
-                                            tint = MaterialTheme.colorScheme.primary
+                                            Icons.Outlined.Delete,
+                                            stringResource(R.string.discard_recording),
+                                            tint = MaterialTheme.colorScheme.error
                                         )
                                     }
-
-                                    false -> {}
+                                    Text(
+                                        stringResource(R.string.recording_audio),
+                                        overflow = TextOverflow.Ellipsis,
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .padding(PaddingDefault)
+                                            .fillMaxWidth()
+                                    )
                                 }
                             }
-                        },
-                        placeholder = {
-                            Text(
-                                stringResource(R.string.message),
-                                modifier = Modifier.alpha(.5f)
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Send
-                        ),
-                        keyboardActions = KeyboardActions(onSend = {
-                            send()
-                        }),
-                        shape = MaterialTheme.shapes.large,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 128.dp)
-                            .padding(PaddingDefault)
-                            .focusRequester(focusRequester)
-                    )
+
+                            else -> {
+                                OutlinedTextField(
+                                    value = sendMessage,
+                                    onValueChange = {
+                                        sendMessage = it
+                                    },
+                                    trailingIcon = {
+                                        Crossfade(targetState = sendMessage.isNotBlank()) { show ->
+                                            when (show) {
+                                                true -> IconButton({ send() }) {
+                                                    Icon(
+                                                        Icons.Default.Send,
+                                                        Icons.Default.Send.name,
+                                                        tint = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+
+                                                false -> {}
+                                            }
+                                        }
+                                    },
+                                    placeholder = {
+                                        Text(
+                                            stringResource(R.string.message),
+                                            modifier = Modifier.alpha(.5f)
+                                        )
+                                    },
+                                    keyboardOptions = KeyboardOptions(
+                                        capitalization = KeyboardCapitalization.Sentences,
+                                        imeAction = ImeAction.Send
+                                    ),
+                                    keyboardActions = KeyboardActions(
+                                        onSend = {
+                                            send()
+                                        }
+                                    ),
+                                    shape = MaterialTheme.shapes.large,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 128.dp)
+                                        .padding(PaddingDefault)
+                                        .focusRequester(focusRequester)
+                                )
+                            }
+                        }
+                    }
                 }
                 AnimatedVisibility(sendMessage.isBlank()) {
-                    IconButton(
-                        onClick = {
-                            // todo video, file, audio
-                            launcher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        },
-                        modifier = Modifier
-                            .padding(end = PaddingDefault)
-                    ) {
-                        Icon(Icons.Outlined.AddPhotoAlternate, stringResource(R.string.add))
+                    Row {
+                        IconButton(
+                            onClick = {
+                                if (isRecordingAudio) {
+                                    sendActiveRecording()
+                                } else {
+                                    recordAudio()
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(end = PaddingDefault)
+                        ) {
+                            Icon(
+                                if (isRecordingAudio) Icons.Outlined.Send else Icons.Outlined.Mic,
+                                stringResource(R.string.record_audio),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        AnimatedVisibility(!isRecordingAudio) {
+                            IconButton(
+                                onClick = {
+                                    // todo video, file, audio
+                                    launcher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                },
+                                modifier = Modifier
+                                    .padding(end = PaddingDefault)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.AddPhotoAlternate,
+                                    stringResource(R.string.add),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -519,8 +700,6 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
 
             if (showRemoveGroupMembers) {
-                val context = LocalContext.current
-                val didntWork = stringResource(R.string.didnt_work)
                 val someone = stringResource(R.string.someone)
                 val members = groupExtended!!.members!!
                     .mapNotNull { it.person?.id }
@@ -560,7 +739,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             reload()
                         }
                         if (anyFailed) {
-                            Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
+                            context.showDidntWork()
                         }
                     },
                     omit = { it.id!! !in members }
@@ -568,17 +747,15 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
 
             if (showInviteMembers) {
-                val context = LocalContext.current
-                val didntWork = stringResource(R.string.didnt_work)
                 val someone = stringResource(R.string.someone)
                 val omit = groupExtended!!.members!!.mapNotNull { it.person?.id }
                 ChoosePeopleDialog(
                     {
                         showInviteMembers = false
                     },
-                    title = stringResource(R.string.invite),
+                    title = stringResource(R.string.invite_someone),
                     confirmFormatter = defaultConfirmFormatter(
-                        R.string.invite,
+                        R.string.invite_someone,
                         R.string.invite_person,
                         R.string.invite_x_and_y,
                         R.string.invite_x_people
@@ -607,7 +784,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             reload()
                         }
                         if (anyFailed) {
-                            Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
+                            context.showDidntWork()
                         }
                     },
                     omit = { it.id!! in omit }

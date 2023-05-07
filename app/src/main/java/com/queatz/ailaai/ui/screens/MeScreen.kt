@@ -48,9 +48,9 @@ private val meFiltersKey = stringSetPreferencesKey("me.filters")
 
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
-    var myCards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var myCards by remember { mutableStateOf(emptyList<Card>()) }
     var addedCardId by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(myCards.isEmpty()) }
+    var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }

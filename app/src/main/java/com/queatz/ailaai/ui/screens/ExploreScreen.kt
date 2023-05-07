@@ -46,6 +46,7 @@ import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.components.horizontalFadingEdge
@@ -77,23 +78,23 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         navController.context as Activity
     )
     var value by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
-    var categories by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
+    var selectedCategory by remember { mutableStateOf(exploreInitialCategory) }
+    var categories by remember { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
     var geoManual by remember { mutableStateOf(false) }
     var showSetMyLocation by remember { mutableStateOf(false) }
-    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
+    var cards by remember { mutableStateOf(emptyList<Card>()) }
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
     var showCameraRationale by remember { mutableStateOf(false) }
     var showQrCodeExplanationDialog by remember { mutableStateOf(false) }
-    var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
-    var isLoading by remember { mutableStateOf(cards.isEmpty()) }
+    var hasInitialCards by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
     var isError by remember { mutableStateOf(false) }
-    var offset by rememberSaveable { mutableStateOf(0) }
+    var offset by remember { mutableStateOf(0) }
     var hasMore by remember { mutableStateOf(true) }
 
     fun goToSettings() {
@@ -205,11 +206,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 ?.let { cardId ->
                     navController.navigate("card/$cardId")
                 } ?: run {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.didnt_work),
-                    Toast.LENGTH_SHORT
-                ).show()
+                context.showDidntWork()
             }
         }
     }
@@ -420,10 +417,10 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 showQrCodeExplanationDialog = false
             },
             title = {
-               Text(stringResource(R.string.scan))
+                Text(stringResource(R.string.scan))
             },
             text = {
-               Text(stringResource(R.string.scan_a_qr_code_description))
+                Text(stringResource(R.string.scan_a_qr_code_description))
             },
             confirmButton = {
                 TextButton(

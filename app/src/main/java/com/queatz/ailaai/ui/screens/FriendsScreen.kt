@@ -29,26 +29,26 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
-import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MessagesScreen(navController: NavController, me: () -> Person?) {
+fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
-    var allGroups by rememberSaveable(stateSaver = jsonSaver<List<GroupExtended>>()) { mutableStateOf(listOf()) }
-    var allPeople by rememberSaveable(stateSaver = jsonSaver<List<Person>>()) { mutableStateOf(listOf()) }
-    var results by rememberSaveable(stateSaver = jsonSaver<List<SearchResult>>()) { mutableStateOf(listOf()) }
-    var isLoading by remember { mutableStateOf(results.isEmpty()) }
+    var allGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
+    var allPeople by remember { mutableStateOf(emptyList<Person>()) }
+    var results by remember { mutableStateOf(emptyList<SearchResult>()) }
+    var isLoading by remember { mutableStateOf(true) }
     var showCreateGroup by remember { mutableStateOf(false) }
     var showPushPermissionDialog by remember { mutableStateOf(false) }
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -233,7 +233,6 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
     }
 
     if (showCreateGroup) {
-        val didntWork = stringResource(R.string.didnt_work)
         val someone = stringResource(R.string.someone)
         ChoosePeopleDialog(
             {
@@ -252,8 +251,8 @@ fun MessagesScreen(navController: NavController, me: () -> Person?) {
                     val group = api.createGroup(people.map { it.id!! })
                     navController.navigate("group/${group.id!!}")
                 } catch (ex: Exception) {
-                    Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
                     ex.printStackTrace()
+                    context.showDidntWork()
                 }
             },
             omit = { it.id == me()?.id }

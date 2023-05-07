@@ -3,7 +3,6 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -76,7 +75,6 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val state = rememberLazyGridState()
     val stateLandscape = rememberLazyGridState()
     val context = LocalContext.current
-    val didntWork = stringResource(R.string.didnt_work)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
     var isUploadingVideo by remember { mutableStateOf(false) }
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
@@ -200,8 +198,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             })
                             card = updatedCard
                         } catch (ex: Exception) {
-                            Toast.makeText(context, didntWork, LENGTH_SHORT).show()
                             ex.printStackTrace()
+                            context.showDidntWork()
                         }
                     }
                 }
@@ -295,8 +293,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 }
 
                                 else -> {
-                                    Toast.makeText(context, context.getString(R.string.didnt_work), LENGTH_SHORT)
-                                        .show()
+                                    context.showDidntWork()
                                 }
                             }
                         }
@@ -395,19 +392,21 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             showMenu = false
                         })
                     }
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.view_profile))
-                    }, {
-                        navController.navigate("profile/${card!!.person!!}")
-                        showMenu = false
-                    })
-                    if (card?.parent != null) {
+                    card?.let { card ->
                         DropdownMenuItem({
-                            Text(stringResource(R.string.open_enclosing_card))
+                            Text(stringResource(R.string.view_profile))
                         }, {
-                            navController.navigate("card/${card!!.parent!!}")
+                            navController.navigate("profile/${card.person!!}")
                             showMenu = false
                         })
+                        if (card.parent != null) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.open_enclosing_card))
+                            }, {
+                                navController.navigate("card/${card.parent!!}")
+                                showMenu = false
+                            })
+                        }
                     }
                     DropdownMenuItem({
                         Text(stringResource(R.string.send_card))
@@ -444,7 +443,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         }, {
                             card?.let { card ->
                                 card.location?.copyToClipboard(context, card.name ?: cardString)
-                                Toast.makeText(context, textCopied, LENGTH_SHORT).show()
+                                context.showDidntWork()
                             }
                             showMenu = false
                         })
@@ -651,8 +650,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                             cards = api.cardsCards(cardId)
                             openLeaveCollaboratorsDialog = false
                         } catch (ex: Exception) {
-                            Toast.makeText(context, didntWork, LENGTH_SHORT).show()
                             ex.printStackTrace()
+                            context.showDidntWork()
                         }
                     }
                 }) {
@@ -689,8 +688,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     })
                     card = updatedCard
                 } catch (ex: Exception) {
-                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
                     ex.printStackTrace()
+                    context.showDidntWork()
                 }
             },
             omit = { it.id == me()?.id || card!!.collaborators?.contains(it.id) == true }
@@ -727,8 +726,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     })
                     card = updatedCard
                 } catch (ex: Exception) {
-                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
                     ex.printStackTrace()
+                    context.showDidntWork()
                 }
             },
             omit = { it.id !in (card!!.collaborators ?: emptyList()) }
@@ -796,8 +795,8 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     }
                     Toast.makeText(context, sent, LENGTH_SHORT).show()
                 } catch (ex: Exception) {
-                    Toast.makeText(context, didntWork, LENGTH_SHORT).show()
                     ex.printStackTrace()
+                    context.showDidntWork()
                 }
             }
         )

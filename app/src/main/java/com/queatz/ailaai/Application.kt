@@ -123,7 +123,7 @@ class YourOwnSender : ReportSender {
     val scope = CoroutineScope(Dispatchers.IO)
 
     override fun send(context: Context, errorContent: CrashReportData) {
-        scope.launch {
+        if (BuildConfig.DEBUG.not()) scope.launch {
             api.crash(errorContent.toJSON())
         }
     }

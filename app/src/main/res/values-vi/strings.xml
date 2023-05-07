@@ -16,7 +16,8 @@
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Mã sử dụng một lần này sẽ xài được trong vòng 48 giờ.</string>
     <string name="all_your_cards">Thẻ của bạn</string>
-    <string name="invite">Mời ai đó</string>
+    <string name="invite_into_group">Mời vào nhóm</string>
+    <string name="invite_someone">Mời ai đó</string>
     <string name="invite_person">Mời %1$s</string>
     <string name="invite_x_and_y">Mời %1$s và %2$s</string>
     <string name="invite_x_people">Mời %1$s người</string>
@@ -188,6 +189,7 @@
     <plurals name="sent_photos">
         <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
+    <string name="sent_audio">Đã gửi tin nhắn âm thanh</string>
     <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Tất cả thẻ trong phạm vi 100km của bạn sẽ được hiển thị ở đây.</string>
     <string name="introduction">Giới thiệu</string>
     <string name="update">Cập nhật</string>
@@ -230,4 +232,8 @@
     <string name="uploading_video">Đang tải video lên</string>
     <string name="scan_a_qr_code_description">Bạn có thể xem mã QR thẻ từ menu của thẻ.</string>
     <string name="scan_now">Quét luôn</string>
+    <string name="record_audio">Ghi âm</string>
+    <string name="recording_audio">Đang ghi âm…</string>
+    <string name="discard_recording">Hủy ghi âm</string>
+    <string name="sent_video">Đã gửi video</string>
 </resources>

@@ -14,7 +14,8 @@
     <string name="error">Error</string>
     <string name="invite_code_description">This single-use code will be usable for 48 hours.</string>
     <string name="all_your_cards">Your cards</string>
-    <string name="invite">Invite</string>
+    <string name="invite_into_group">Invite to group</string>
+    <string name="invite_someone">Invite</string>
     <string name="invite_people">Invite people</string>
     <string name="invite_person">Invite %1$s</string>
     <string name="invite_x_and_y">Invite %1$s and %2$s</string>
@@ -236,4 +237,9 @@
         <item quantity="other">Cards</item>
     </plurals>
     <string name="scan_now">Scan now</string>
+    <string name="record_audio">Record audio</string>
+    <string name="recording_audio">Recording audio…</string>
+    <string name="discard_recording">Discard recording</string>
+    <string name="sent_audio">Sent an audio message</string>
+    <string name="sent_video">Sent a video</string>
 </resources>

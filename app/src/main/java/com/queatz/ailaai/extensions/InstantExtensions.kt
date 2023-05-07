@@ -25,10 +25,10 @@ fun Instant.timeAgo() = Duration.between(
 ).toKotlinDuration().let {
     val formatter = RelativeDateTimeFormatter.getInstance(AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault())
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         when {
             it < 1.minutes -> formatter.format(
-                RelativeDateTimeFormatter.Direction.LAST,
+                RelativeDateTimeFormatter.Direction.PLAIN,
                 RelativeDateTimeFormatter.AbsoluteUnit.NOW
             )
 
@@ -59,37 +59,37 @@ fun Instant.timeAgo() = Duration.between(
         }
     } else {
         when {
-            it < 1.minutes -> formatter.format(
-                RelativeDateTimeFormatter.Direction.LAST,
+            it <1.minutes -> formatter.format(
+                RelativeDateTimeFormatter.Direction.PLAIN,
                 RelativeDateTimeFormatter.AbsoluteUnit.NOW
             )
 
             it < 1.hours -> formatter.format(
-                -it.inWholeMinutes.toDouble(),
+                it.inWholeMinutes.toDouble(),
                 RelativeDateTimeFormatter.Direction.LAST,
                 RelativeDateTimeFormatter.RelativeUnit.MINUTES
             )
 
             it < 1.days -> formatter.format(
-                -it.inWholeHours.toDouble(),
+                it.inWholeHours.toDouble(),
                 RelativeDateTimeFormatter.Direction.LAST,
                 RelativeDateTimeFormatter.RelativeUnit.HOURS
             )
 
             it < 30.days -> formatter.format(
-                -it.inWholeDays.toDouble(),
+                it.inWholeDays.toDouble(),
                 RelativeDateTimeFormatter.Direction.LAST,
                 RelativeDateTimeFormatter.RelativeUnit.DAYS
             )
 
             it < 365.days -> formatter.format(
-                -(it.inWholeDays / 30).toDouble(),
+                (it.inWholeDays / 30).toDouble(),
                 RelativeDateTimeFormatter.Direction.LAST,
                 RelativeDateTimeFormatter.RelativeUnit.MONTHS
             )
 
             else -> formatter.format(
-                -(it.inWholeDays / 365).toDouble(),
+                (it.inWholeDays / 365).toDouble(),
                 RelativeDateTimeFormatter.Direction.LAST,
                 RelativeDateTimeFormatter.RelativeUnit.YEARS
             )

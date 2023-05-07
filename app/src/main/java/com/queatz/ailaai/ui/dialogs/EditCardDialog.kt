@@ -23,8 +23,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
@@ -37,7 +35,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
@@ -51,7 +49,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
     var cardName by remember { mutableStateOf(card.name ?: "") }
     val backstack = remember { mutableListOf<ConversationItem>() }
     var cardConversation by remember { mutableStateOf(conversation) }
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     DialogBase(onDismissRequest, dismissable = false, modifier = Modifier.wrapContentHeight()) {
         val scrollState = rememberScrollState()
@@ -61,7 +59,8 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
         }
 
         Column(
-            modifier = Modifier.padding(PaddingDefault * 3)
+            modifier = Modifier
+                .padding(PaddingDefault * 3)
                 .verticalScroll(scrollState)
         ) {
             Text(
@@ -83,9 +82,11 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Next
                 ),
-                keyboardActions = KeyboardActions(onNext = {
-                    keyboardController.hide()
-                }),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        keyboardController.hide()
+                    }
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             Column(
@@ -128,19 +129,22 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Default
                     ),
-                    keyboardActions = KeyboardActions(onNext = {
-                        keyboardController.hide()
-                    }),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            keyboardController.hide()
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Text(
-                    if (backstack.isEmpty()) stringResource(R.string.card_message_description) else stringResource(
-                        R.string.card_reply_description,
-                        cardConversation.title
-                    ),
+                    if (backstack.isEmpty()) {
+                        stringResource(R.string.card_message_description)
+                    } else {
+                        stringResource(R.string.card_reply_description, cardConversation.title)
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
@@ -239,7 +243,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
 
                         trim(conversation)
 
-                        coroutineScope.launch {
+                        scope.launch {
                             try {
                                 val update = api.updateCard(
                                     card.id!!,

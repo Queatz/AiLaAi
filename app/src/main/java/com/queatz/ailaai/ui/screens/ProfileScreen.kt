@@ -47,14 +47,13 @@ import kotlinx.coroutines.*
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var cards by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf(listOf<Card>()) }
+    var cards by remember { mutableStateOf(emptyList<Card>()) }
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
     var showMedia by remember { mutableStateOf<Media?>(null) }
-    var isLoading by remember { mutableStateOf(cards.isEmpty() || person == null || profile == null) }
+    var isLoading by remember { mutableStateOf(true) }
     var isError by remember { mutableStateOf(false) }
     var showEditName by remember { mutableStateOf(false) }
     var showEditAbout by remember { mutableStateOf(false) }
@@ -66,6 +65,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
 
+    val context = LocalContext.current
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -77,8 +77,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     }
 
     if (showInviteDialog) {
-        val inviteString = stringResource(R.string.invite)
-        val didntWork = stringResource(R.string.didnt_work)
+        val inviteString = stringResource(R.string.invite_someone)
         val someone = stringResource(R.string.someone)
         val emptyGroup = stringResource(R.string.empty_group_name)
         ChooseGroupDialog(
@@ -87,7 +86,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             },
             title = inviteString,
             confirmFormatter = defaultConfirmFormatter(
-                R.string.invite,
+                R.string.invite_someone,
                 R.string.invite_to_group,
                 R.string.invite_to_groups,
                 R.string.invite_to_x_groups
@@ -114,8 +113,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                         Toast.LENGTH_SHORT
                     ).show()
                 } catch (ex: Exception) {
-                    Toast.makeText(context, didntWork, Toast.LENGTH_SHORT).show()
                     ex.printStackTrace()
+                    context.showDidntWork()
                 }
             }
         )
@@ -353,7 +352,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             Icon(Icons.Outlined.MoreVert, null)
                             DropdownMenu(showMenu, { showMenu = false }) {
                                 DropdownMenuItem({
-                                    Text(stringResource(R.string.invite))
+                                    Text(stringResource(R.string.invite_into_group))
                                 }, {
                                     showInviteDialog = true
                                     showMenu = false

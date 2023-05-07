@@ -26,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 val json = Json {
@@ -341,11 +342,30 @@ class Api {
         return post("groups/$group/photos", MultiPartFormDataContent(
             formData {
                 scaledPhotos.forEachIndexed { index, photo ->
-                    append("photo[$index]", photo, Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpg")
-                        append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                    })
+                    append(
+                        "photo[$index]",
+                        photo,
+                        Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpg")
+                            append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                        }
+                    )
                 }
+            }
+        ), client = httpData)
+    }
+
+    suspend fun sendAudio(group: String, audio: File): HttpStatusCode {
+        return post("groups/$group/audio", MultiPartFormDataContent(
+            formData {
+                append(
+                    "audio",
+                    audio.asInputProvider(),
+                    Headers.build {
+                        append(HttpHeaders.ContentType, "audio/mp4")
+                        append(HttpHeaders.ContentDisposition, "filename=audio.m4a")
+                    }
+                )
             }
         ), client = httpData)
     }

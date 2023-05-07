@@ -40,5 +40,11 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     is PhotosAttachment -> {
         context.resources.getQuantityString(R.plurals.sent_photos, attachment.photos?.size ?: 0, attachment.photos?.size ?: 0)
     }
+    is AudioAttachment -> {
+        context.resources.getString(R.string.sent_audio)
+    }
+    is VideoAttachment -> {
+        context.resources.getString(R.string.sent_video)
+    }
     else -> null
 }

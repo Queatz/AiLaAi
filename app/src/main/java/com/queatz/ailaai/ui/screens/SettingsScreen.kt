@@ -170,8 +170,8 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     modifier = Modifier
                         .padding(horizontal = PaddingDefault * 2)
                 ) {
-                    Icon(Icons.Outlined.PersonAdd, stringResource(R.string.invite), modifier = Modifier.padding(end = PaddingDefault))
-                    Text(stringResource(R.string.invite))
+                    Icon(Icons.Outlined.PersonAdd, stringResource(R.string.invite_someone), modifier = Modifier.padding(end = PaddingDefault))
+                    Text(stringResource(R.string.invite_someone))
                 }
             },
             navigationIcon = {

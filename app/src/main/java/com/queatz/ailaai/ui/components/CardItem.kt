@@ -47,6 +47,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.isPhoto
 import com.queatz.ailaai.extensions.isVideo
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.Job
@@ -229,11 +230,7 @@ fun BasicCard(
                                     }
 
                                     else -> {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.didnt_work),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        context.showDidntWork()
                                     }
                                 }
                             }

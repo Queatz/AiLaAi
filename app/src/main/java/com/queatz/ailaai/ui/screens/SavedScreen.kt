@@ -21,8 +21,8 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     var value by rememberSaveable { mutableStateOf("") }
-    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(listOf()) }
-    var isLoading by remember { mutableStateOf(cards.isEmpty()) }
+    var cards by remember { mutableStateOf(emptyList<Card>()) }
+    var isLoading by remember { mutableStateOf(true) }
     var isError by remember { mutableStateOf(false) }
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
 

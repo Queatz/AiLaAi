@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
             android:name=".Application"
@@ -20,6 +21,7 @@
                 android:name=".MainActivity"
                 android:exported="true"
                 android:windowSoftInputMode="adjustResize"
+                android:configChanges="orientation"
                 android:theme="@style/Theme.AiLaAi.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
