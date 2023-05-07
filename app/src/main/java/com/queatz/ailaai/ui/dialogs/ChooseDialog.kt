@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.dialogs
 
-import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,17 +13,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.*
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.GroupMember
@@ -47,7 +42,7 @@ fun <T> defaultConfirmFormatter(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun <T> ChooseDialog(
     onDismissRequest: () -> Unit,

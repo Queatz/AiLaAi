@@ -20,7 +20,7 @@ import io.ktor.client.plugins.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InitialScreen(onKnown: () -> Unit) {
     var codeValue by remember { mutableStateOf("") }

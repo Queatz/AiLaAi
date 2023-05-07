@@ -42,7 +42,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () -> Unit, onChange: () -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current!!

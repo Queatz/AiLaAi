@@ -50,7 +50,7 @@ fun MessageItem(
     var showDeleteMessageDialog by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
     var attachedCard by remember { mutableStateOf<Card?>(null) }
@@ -87,7 +87,7 @@ fun MessageItem(
             confirmButton = {
                 TextButton(
                     {
-                        coroutineScope.launch {
+                        scope.launch {
                             try {
                                 disableSubmit = true
                                 api.deleteMessage(message.id!!)
@@ -117,6 +117,18 @@ fun MessageItem(
     }
 
     if (showMessageDialog) {
+        // Hide menu if no options available
+        if (
+            !(
+                    attachedPhotos?.isNotEmpty() == true && selectedBitmap != null ||
+                    attachedAudio != null ||
+                            message.text?.isBlank() == false ||
+                            isMe
+                    )
+        ) {
+            showMessageDialog = false
+        }
+
         val messageString = stringResource(R.string.message)
         Menu(
             {
@@ -128,15 +140,30 @@ fun MessageItem(
 //                    showSendPhoto = true
 //                }
                 item(stringResource(R.string.share)) {
-                    coroutineScope.launch {
+                    showMessageDialog = false
+                    scope.launch {
                         context.imageLoader.execute(
                             ImageRequest.Builder(context)
                                 .data(selectedBitmap!!)
                                 .target { drawable ->
-                                    drawable.toBitmapOrNull()?.share(context, null)
+                                    scope.launch {
+                                        drawable.toBitmapOrNull()?.share(context, null)
+                                    }
                                 }
                                 .build()
                         )
+                    }
+                }
+            }
+
+            if (attachedAudio != null) {
+//                item(stringResource(R.string.send)) {
+//                    showSendPhoto = true
+//                }
+                item(stringResource(R.string.share)) {
+                    showMessageDialog = false
+                    scope.launch {
+                        api.url(attachedAudio!!).shareAudio(context, null)
                     }
                 }
             }

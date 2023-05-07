@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ShareCardQrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
+    val scope = rememberCoroutineScope()
     val logo = bitmapResource(R.drawable.ic_notification)
     val qrCode = remember {
         ScanUtil.buildBitmap(
@@ -64,7 +66,9 @@ fun ShareCardQrCodeDialog(onDismissRequest: () -> Unit, url: String, name: Strin
                 val context = LocalContext.current
                 TextButton(
                     {
-                        qrCode.share(context, name)
+                        scope.launch {
+                            qrCode.share(context, name)
+                        }
                     },
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {

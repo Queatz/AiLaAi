@@ -8,7 +8,10 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.queatz.ailaai.api
 import io.ktor.http.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -57,35 +60,52 @@ fun String.copyToClipboard(context: Context, label: String? = null) {
     )
 }
 
-// Returns true if everything went well
-fun Bitmap.share(context: Context, name: String?): Boolean {
-    val uri = uri(context) ?: return false
+private fun shareFile(uri: Uri, context: Context, name: String?, contentType: ContentType) {
     val intent = Intent(Intent.ACTION_SEND)
     intent.putExtra(Intent.EXTRA_STREAM, uri)
-    intent.type = ContentType.Image.PNG.toString()
+    intent.type = contentType.toString()
     if (name != null) {
         intent.putExtra(Intent.EXTRA_TITLE, name)
     }
     intent.setDataAndType(uri, context.contentResolver.getType(uri))
     intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
     context.startActivity(Intent.createChooser(intent, null))
+}
+
+// Returns true if everything went well
+suspend fun Bitmap.share(context: Context, name: String?): Boolean {
+    shareFile(uri(context) ?: return false, context, name, ContentType.Image.JPEG)
     return true
 }
 
-fun Bitmap.uri(context: Context): Uri? {
-    try {
-        val cachePath = File(context.cacheDir, "share")
-        cachePath.mkdirs()
-        val stream = FileOutputStream("$cachePath/share.png")
-        compress(Bitmap.CompressFormat.PNG, 100, stream)
-        stream.close()
-    } catch (e: IOException) {
-        e.printStackTrace()
-        return null
+suspend fun Bitmap.uri(context: Context): Uri? {
+    val path = File(context.cacheDir, "share")
+    withContext(Dispatchers.IO) {
+        try {
+            path.mkdirs()
+            val stream = FileOutputStream("$path/share.jpg")
+            compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
-    val imagePath = File(context.cacheDir, "share")
-    val newFile = File(imagePath, "share.png")
+    val newFile = File(path, "share.jpg")
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
+}
 
+suspend fun String.downloadAudio(context: Context): Uri? {
+    val path = File(context.cacheDir, "share")
+    val stream = FileOutputStream("$path/audio.mp4")
+    api.downloadFile(this, stream)
+    stream.close()
+    val newFile = File(path, "audio.mp4")
+    return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
+}
+
+suspend fun String.shareAudio(context: Context, name: String?): Boolean {
+    shareFile(downloadAudio(context) ?: return false, context, name, ContentType.Audio.MP4)
+    return true
 }

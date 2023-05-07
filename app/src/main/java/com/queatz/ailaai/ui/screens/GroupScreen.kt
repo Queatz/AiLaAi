@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.Manifest
-import android.media.EncoderProfiles
 import android.media.MediaRecorder
 import android.os.Build
 import android.util.Log
@@ -11,7 +10,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -65,7 +63,7 @@ import kotlinx.datetime.Instant
 import java.io.File
 import java.io.IOException
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
     val groupId = navBackStackEntry.arguments!!.getString("id")!!
@@ -83,8 +81,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
     val scope = rememberCoroutineScope()
-    val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
     var hasOlderMessages by remember { mutableStateOf(true) }
     val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     val initialRecordAudioPermissionState by remember { mutableStateOf(recordAudioPermissionState.status.isGranted) }
@@ -113,7 +111,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     fun prepareRecorder(): MediaRecorder {
         return ensureAudioRecorder().apply {
             reset()
-            audioOutputFile = File.createTempFile("audio", ".aac", context.cacheDir).apply {
+            audioOutputFile = File.createTempFile("audio", ".mp4", context.cacheDir).apply {
                 if (exists()) {
                     delete()
                 }
@@ -314,10 +312,16 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 interactionSource = MutableInteractionSource(),
                                 indication = null
                             ) {
-                                if (otherMembers.size == 1) {
-                                    navController.navigate("profile/${otherMembers.first().person!!.id!!}")
+                                if (state.firstVisibleItemIndex > 2) {
+                                    scope.launch {
+                                        state.scrollToTop()
+                                    }
                                 } else {
-                                    showGroupMembers = true
+                                    if (otherMembers.size == 1) {
+                                        navController.navigate("profile/${otherMembers.first().person!!.id!!}")
+                                    } else {
+                                        showGroupMembers = true
+                                    }
                                 }
                             }
                     ) {

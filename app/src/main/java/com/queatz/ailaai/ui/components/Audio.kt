@@ -145,6 +145,7 @@ fun Audio(
                 }
             ) { change, dragAmount ->
                 dragFactor = change.position.x / viewport.width
+                timeRemaining = (exoPlayer.duration * (1f - dragFactor!!)).toLong()
             }
         }
     ) {

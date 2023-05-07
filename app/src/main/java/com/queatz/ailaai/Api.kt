@@ -16,6 +16,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,6 +28,8 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
 val json = Json {
@@ -375,6 +378,10 @@ class Api {
     suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
 
     suspend fun crash(report: String): HttpStatusCode = post("crash", Crash(report))
+
+    suspend fun downloadFile(url: String, outputStream: FileOutputStream): Unit {
+        httpData.get(url).bodyAsChannel().copyTo(outputStream)
+    }
 }
 
 @Serializable
