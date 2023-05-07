@@ -1,9 +1,5 @@
 package com.queatz.ailaai.ui.screens
 
-import android.Manifest
-import android.media.MediaRecorder
-import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -45,12 +41,10 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.components.fadingEdge
 import com.queatz.ailaai.ui.dialogs.*
@@ -60,12 +54,12 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import java.io.File
-import java.io.IOException
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val groupId = navBackStackEntry.arguments!!.getString("id")!!
     var sendMessage by remember { mutableStateOf("") }
     var groupExtended by remember { mutableStateOf<GroupExtended?>(null) }
@@ -80,14 +74,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     var showInviteMembers by remember { mutableStateOf(false) }
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
     var hasOlderMessages by remember { mutableStateOf(true) }
-    val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
-    val initialRecordAudioPermissionState by remember { mutableStateOf(recordAudioPermissionState.status.isGranted) }
-    var audioOutputFile by remember { mutableStateOf<File?>(null) }
-    var audioRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
     var isRecordingAudio by remember { mutableStateOf(false) }
     var maxInputAreaHeight by remember { mutableStateOf(0f) }
 
@@ -95,98 +83,15 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         messages = api.messages(groupId)
     }
 
-    fun ensureAudioRecorder(): MediaRecorder {
-        if (audioRecorder == null) {
-            audioRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                MediaRecorder(context)
-            } else {
-                @Suppress("DEPRECATION")
-                MediaRecorder()
-            }
-        }
-
-        return audioRecorder!!
-    }
-
-    fun prepareRecorder(): MediaRecorder {
-        return ensureAudioRecorder().apply {
-            reset()
-            audioOutputFile = File.createTempFile("audio", ".mp4", context.cacheDir).apply {
-                if (exists()) {
-                    delete()
-                }
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                setPreferredMicrophoneDirection(MediaRecorder.MIC_DIRECTION_TOWARDS_USER)
-            }
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC)
-            setAudioSamplingRate(96000)
-            setAudioEncodingBitRate(16 * 96000)
-            setOutputFile(audioOutputFile)
-
-            setOnErrorListener { mr, what, extra ->
-                Log.w("MediaRecorder", "error: $what, extra = $extra")
-            }
-            try {
-                prepare()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun recordTheAudio() {
-        isRecordingAudio = true
-        prepareRecorder().start()
-    }
-
-    fun recordAudio() {
-        if (recordAudioPermissionState.status.isGranted.not()) {
-            recordAudioPermissionState.launchPermissionRequest()
-        } else {
-            recordTheAudio()
-        }
-    }
-
-    fun stopRecording() {
-        isRecordingAudio = false
-        audioRecorder?.stop()
-    }
-
-    fun cancelRecording() {
-        stopRecording()
-        audioOutputFile?.delete()
-        audioOutputFile = null
-    }
-
-    fun sendActiveRecording() {
-        stopRecording()
-        scope.launch {
-            try {
-                api.sendAudio(groupId, audioOutputFile!!)
-                audioOutputFile?.delete()
-                audioOutputFile = null
-                reloadMessages()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                context.showDidntWork()
-            }
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            audioRecorder?.release()
-        }
-    }
-
-    if (!initialRecordAudioPermissionState) {
-        LaunchedEffect(recordAudioPermissionState.status.isGranted) {
-            if (recordAudioPermissionState.status.isGranted) {
-                recordTheAudio()
-            }
+    val audioRecorder = audioRecorder(
+        { isRecordingAudio = it }
+    ) { file ->
+        try {
+            api.sendAudio(groupId, file)
+            reloadMessages()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            context.showDidntWork()
         }
     }
 
@@ -548,7 +453,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         .weight(1f)
                 ) {
                     Crossfade(isRecordingAudio) { show ->
-                        when(show) {
+                        when (show) {
                             true -> {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -557,7 +462,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 ) {
                                     IconButton(
                                         {
-                                            cancelRecording()
+                                            audioRecorder.cancelRecording()
                                         }
                                     ) {
                                         Icon(
@@ -630,9 +535,9 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         IconButton(
                             onClick = {
                                 if (isRecordingAudio) {
-                                    sendActiveRecording()
+                                    audioRecorder.sendActiveRecording()
                                 } else {
-                                    recordAudio()
+                                    audioRecorder.recordAudio()
                                 }
                             },
                             modifier = Modifier
@@ -795,23 +700,23 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 )
             }
 
+            val recomposeScope = currentRecomposeScope
+
             if (showRenameGroup) {
-                val scope = currentRecomposeScope
                 RenameGroupDialog({
                     showRenameGroup = false
                 }, groupExtended!!.group!!, {
                     groupExtended!!.group = it
-                    scope.invalidate()
+                    recomposeScope.invalidate()
                 })
             }
 
             if (showDescriptionDialog) {
-                val scope = currentRecomposeScope
                 GroupDescriptionDialog({
                     showDescriptionDialog = false
                 }, groupExtended!!.group!!, {
                     groupExtended!!.group = it
-                    scope.invalidate()
+                    recomposeScope.invalidate()
                 })
             }
 
