@@ -11,6 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -26,9 +27,11 @@ fun TextFieldDialog(
     button: String,
     singleLine: Boolean = false,
     initialValue: String = "",
+    placeholder: String = "",
+    required: Boolean = true,
     onSubmit: suspend (value: String) -> Unit,
 ) {
-    var disableSubmit by remember { mutableStateOf(true) }
+    var disableSubmit by remember { mutableStateOf(required) }
     val coroutineScope = rememberCoroutineScope()
     var text by remember { mutableStateOf(initialValue) }
     val focusRequester = remember { FocusRequester() }
@@ -53,13 +56,16 @@ fun TextFieldDialog(
                 text,
                 onValueChange = {
                     text = it
-                    disableSubmit = false
+                    if (required) {
+                        disableSubmit = false
+                    }
                 },
                 shape = MaterialTheme.shapes.large,
                 singleLine = singleLine,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences
                 ),
+                placeholder = { Text(placeholder, modifier = Modifier.alpha(0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = PaddingDefault)

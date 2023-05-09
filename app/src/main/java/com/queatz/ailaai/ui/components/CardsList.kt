@@ -37,6 +37,7 @@ fun CardsList(
     valueChange: (String) -> Unit,
     navController: NavController,
     state: LazyGridState = rememberLazyGridState(),
+    placeholder: String? = null,
     useDistance: Boolean = false,
     hasMore: Boolean = false,
     onLoadMore: (suspend () -> Unit)? = null,
@@ -163,7 +164,11 @@ fun CardsList(
         ) {
             aboveSearchFieldContent()
             if (action == null) {
-                SearchField(value, valueChange)
+                SearchField(
+                    value,
+                    valueChange,
+                    placeholder
+                )
             } else {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -174,7 +179,11 @@ fun CardsList(
                             .weight(1f)
                             .wrapContentWidth()
                     ) {
-                        SearchField(value, valueChange)
+                        SearchField(
+                            value,
+                            valueChange,
+                            placeholder
+                        )
                     }
                     FloatingActionButton(
                         onClick = {

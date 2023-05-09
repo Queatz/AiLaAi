@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.Shader
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,13 +25,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,15 +40,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.graphics.drawable.toDrawable
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.isPhoto
-import com.queatz.ailaai.extensions.isVideo
-import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.Job
@@ -73,7 +72,7 @@ fun BasicCard(
     isMineToolbar: Boolean = true,
     isChoosing: Boolean = false,
     playVideo: Boolean = true,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
@@ -136,7 +135,7 @@ fun BasicCard(
                         modifier = Modifier.matchParentSize().scale(scale).clip(MaterialTheme.shapes.large),
                         isPlaying = playVideo
                     )
-                } else {
+                } else if (card.photo != null) {
                     card.photo?.also {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
@@ -149,6 +148,21 @@ fun BasicCard(
                             modifier = Modifier.matchParentSize().scale(scale)
                         )
                     }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                ShaderBrush(
+                                    ImageShader(
+                                        ImageBitmap.imageResource(R.drawable.bkg),
+                                        tileModeX = TileMode.Repeated,
+                                        tileModeY = TileMode.Repeated
+                                    )
+                                ),
+                                alpha = .5f
+                            )
+                    )
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
@@ -171,7 +185,9 @@ fun BasicCard(
                                             card.id!!,
                                             it,
                                             context.contentResolver.getType(it) ?: "video/*",
-                                            it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}",
+                                            it.lastPathSegment ?: "video.${
+                                                context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                                            }",
                                             processingCallback = {
                                                 videoUploadStage = ProcessingVideoStage.Processing
                                                 videoUploadProgress = it
@@ -507,13 +523,10 @@ private fun CardToolbar(
                         ex.printStackTrace()
                     }
                 }
-            },
-            enabled = card.photo != null || card.video != null
+            }
         )
         Text(
-            if (activeCommitted) stringResource(R.string.published) else if (card.photo == null && card.video == null) stringResource(R.string.add_photo_to_publish) else stringResource(
-                R.string.draft
-            ),
+            if (activeCommitted) stringResource(R.string.published) else stringResource(R.string.draft),
             style = MaterialTheme.typography.labelMedium,
             color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier

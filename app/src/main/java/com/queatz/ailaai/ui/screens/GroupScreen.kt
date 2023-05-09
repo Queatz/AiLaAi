@@ -77,6 +77,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     val focusRequester = remember { FocusRequester() }
     var hasOlderMessages by remember { mutableStateOf(true) }
     var isRecordingAudio by remember { mutableStateOf(false) }
+    var recordingAudioDuration by remember { mutableStateOf(0L) }
     var maxInputAreaHeight by remember { mutableStateOf(0f) }
 
     suspend fun reloadMessages() {
@@ -84,7 +85,8 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
     }
 
     val audioRecorder = audioRecorder(
-        { isRecordingAudio = it }
+        { isRecordingAudio = it },
+        { recordingAudioDuration = it },
     ) { file ->
         try {
             api.sendAudio(groupId, file)
@@ -472,7 +474,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                         )
                                     }
                                     Text(
-                                        stringResource(R.string.recording_audio),
+                                        stringResource(R.string.recording_audio, recordingAudioDuration.formatTime()),
                                         overflow = TextOverflow.Ellipsis,
                                         textAlign = TextAlign.Center,
                                         color = MaterialTheme.colorScheme.primary,
@@ -512,7 +514,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     },
                                     keyboardOptions = KeyboardOptions(
                                         capitalization = KeyboardCapitalization.Sentences,
-                                        imeAction = ImeAction.Send
+                                        imeAction = ImeAction.Default
                                     ),
                                     keyboardActions = KeyboardActions(
                                         onSend = {

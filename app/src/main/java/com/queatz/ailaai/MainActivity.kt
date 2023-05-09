@@ -11,10 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -59,9 +56,9 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("explore", getString(R.string.explore), Icons.Outlined.Place),
-            NavButton("messages", getString(R.string.friends), Icons.Outlined.Person),
-            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-            NavButton("me", getString(R.string.me), Icons.Outlined.AccountCircle)
+            NavButton("messages", getString(R.string.chat), Icons.Outlined.ChatBubbleOutline),
+            NavButton("me", getString(R.string.create), Icons.Outlined.Create),
+            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder)
         )
     }
 

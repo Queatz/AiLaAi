@@ -28,6 +28,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.EVENT_TIMELINE_CHANGED
 import androidx.media3.exoplayer.ExoPlayer
+import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.android.awaitFrame
 import kotlin.time.Duration.Companion.hours
@@ -214,11 +215,4 @@ fun Audio(
             }
         }
     }
-}
-
-fun Long.formatTime() = when {
-    this < 1.seconds.inWholeMilliseconds -> "0s"
-    this < 1.minutes.inWholeMilliseconds -> "${this.milliseconds.inWholeSeconds}s"
-    this < 1.hours.inWholeMilliseconds -> "${this.milliseconds.inWholeMinutes}s ${this.milliseconds.inWholeSeconds}s"
-    else -> "${this.milliseconds.inWholeHours}s ${this.milliseconds.inWholeMinutes}s"
 }

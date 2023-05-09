@@ -10,8 +10,11 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import java.io.File
 import java.io.IOException
 
@@ -41,13 +44,18 @@ class AudioRecorderControl internal constructor(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun audioRecorder(onIsRecordingAudio: (Boolean) -> Unit, onAudio: suspend (File) -> Unit): AudioRecorderControl {
+fun audioRecorder(
+    onIsRecordingAudio: (Boolean) -> Unit,
+    onRecordingAudioDuration: (Long) -> Unit,
+    onAudio: suspend (File) -> Unit,
+): AudioRecorderControl {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     val initialRecordAudioPermissionState by remember { mutableStateOf(recordAudioPermissionState.status.isGranted) }
     var audioOutputFile by remember { mutableStateOf<File?>(null) }
     var audioRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
+    var trackDurationJob by remember { mutableStateOf<Job?>(null) }
     val events = remember {
         MutableSharedFlow<AudioRecorderControlEvent>()
     }
@@ -97,6 +105,13 @@ fun audioRecorder(onIsRecordingAudio: (Boolean) -> Unit, onAudio: suspend (File)
     fun recordTheAudio() {
         onIsRecordingAudio(true)
         prepareRecorder().start()
+        trackDurationJob = scope.launch {
+            val start = Clock.System.now().toEpochMilliseconds()
+            while (true) {
+                delay(100)
+                onRecordingAudioDuration(Clock.System.now().toEpochMilliseconds() - start)
+            }
+        }
     }
 
     fun recordAudio() {
@@ -108,6 +123,7 @@ fun audioRecorder(onIsRecordingAudio: (Boolean) -> Unit, onAudio: suspend (File)
     }
 
     fun stopRecording() {
+        trackDurationJob?.cancel()
         onIsRecordingAudio(false)
         audioRecorder?.stop()
     }

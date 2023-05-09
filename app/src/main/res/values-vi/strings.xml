@@ -135,7 +135,6 @@
     <string name="publish">Xuất bản</string>
     <string name="published">Được xuất bản</string>
     <string name="draft">Bản nháp</string>
-    <string name="add_photo_to_publish">Thêm ảnh để xuất bản</string>
     <string name="change_location">Đổi vị trí</string>
     <string name="edit_card">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
@@ -233,7 +232,11 @@
     <string name="scan_a_qr_code_description">Bạn có thể xem mã QR thẻ từ menu của thẻ.</string>
     <string name="scan_now">Quét luôn</string>
     <string name="record_audio">Ghi âm</string>
-    <string name="recording_audio">Đang ghi âm…</string>
+    <string name="recording_audio">Đang ghi âm… %1$s</string>
     <string name="discard_recording">Hủy ghi âm</string>
     <string name="sent_video">Đã gửi video</string>
+    <string name="next">Tiếp</string>
+    <string name="explore_search_placeholder">Hôm nay bạn đang tìm kiếm gì vậy?</string>
+    <string name="chat">Chat</string>
+    <string name="create">Tạo</string>
 </resources>

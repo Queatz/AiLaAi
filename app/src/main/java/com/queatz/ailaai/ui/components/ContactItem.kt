@@ -73,6 +73,7 @@ fun ContactItem(
                     { showMenu = false }
                 ) {
                     item(stringResource(R.string.hide)) {
+                        showMenu = false
                         scope.launch {
                             try {
                                 api.updateMember(myMember!!.member!!.id!!, Member(hide = true))

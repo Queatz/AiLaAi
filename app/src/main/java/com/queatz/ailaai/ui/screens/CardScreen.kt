@@ -213,28 +213,26 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 showManageMenu = false
             }
         ) {
-            if (card?.photo != null || card?.video != null) {
-                item(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
-                    card?.let { card ->
-                        scope.launch {
-                            try {
-                                val update = api.updateCard(
-                                    card.id!!,
-                                    Card(active = card.active?.not() ?: true)
-                                )
-                                card.active = update.active
-                                Toast.makeText(
-                                    context,
-                                    context.getString(if (card.active == true) R.string.published else R.string.draft),
-                                    LENGTH_SHORT
-                                ).show()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+            item(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
+                card?.let { card ->
+                    scope.launch {
+                        try {
+                            val update = api.updateCard(
+                                card.id!!,
+                                Card(active = card.active?.not() ?: true)
+                            )
+                            card.active = update.active
+                            Toast.makeText(
+                                context,
+                                context.getString(if (card.active == true) R.string.published else R.string.draft),
+                                LENGTH_SHORT
+                            ).show()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
                     }
-                    showManageMenu = false
                 }
+                showManageMenu = false
             }
             item(stringResource(R.string.change_owner)) {
                 openChangeOwner = true

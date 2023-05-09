@@ -346,6 +346,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 valueChange = { value = it },
                 navController = navController,
                 useDistance = true,
+                placeholder = stringResource(R.string.explore_search_placeholder),
                 hasMore = hasMore,
                 onLoadMore = {
                     loadMore()

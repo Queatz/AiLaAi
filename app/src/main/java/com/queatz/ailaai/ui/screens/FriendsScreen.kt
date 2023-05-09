@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +34,7 @@ import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
@@ -49,7 +49,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     var allPeople by remember { mutableStateOf(emptyList<Person>()) }
     var results by remember { mutableStateOf(emptyList<SearchResult>()) }
     var isLoading by remember { mutableStateOf(true) }
-    var showCreateGroup by remember { mutableStateOf(false) }
+    var createGroupName by remember { mutableStateOf("") }
+    var showCreateGroupName by remember { mutableStateOf(false) }
+    var showCreateGroupMembers by remember { mutableStateOf(false) }
     var showPushPermissionDialog by remember { mutableStateOf(false) }
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
@@ -196,7 +198,8 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
                 FloatingActionButton(
                     onClick = {
-                        showCreateGroup = true
+                        createGroupName = ""
+                        showCreateGroupName = true
                     },
                     modifier = Modifier
                         .padding(start = PaddingDefault * 2)
@@ -232,13 +235,29 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         )
     }
 
-    if (showCreateGroup) {
+    if (showCreateGroupName) {
+        TextFieldDialog(
+            onDismissRequest = { showCreateGroupName = false },
+            title = stringResource(R.string.group_name),
+            button = stringResource(R.string.next),
+            singleLine = true,
+            initialValue = createGroupName,
+            placeholder = stringResource(R.string.empty_group_name),
+            required = false
+        ) { value ->
+            createGroupName = value
+            showCreateGroupName = false
+            showCreateGroupMembers = true
+        }
+    }
+
+    if (showCreateGroupMembers) {
         val someone = stringResource(R.string.someone)
         ChoosePeopleDialog(
             {
-                showCreateGroup = false
+                showCreateGroupMembers = false
             },
-            title = stringResource(R.string.new_group),
+            title = stringResource(R.string.invite_people),
             confirmFormatter = defaultConfirmFormatter(
                 R.string.new_group,
                 R.string.new_group_with_person,
@@ -249,6 +268,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             onPeopleSelected = { people ->
                 try {
                     val group = api.createGroup(people.map { it.id!! })
+                    if (createGroupName.isNotBlank()) {
+                        api.updateGroup(group.id!!, Group(name = createGroupName))
+                    }
                     navController.navigate("group/${group.id!!}")
                 } catch (ex: Exception) {
                     ex.printStackTrace()

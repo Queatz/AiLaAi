@@ -139,7 +139,6 @@
     <string name="publish">Publish</string>
     <string name="published">Published</string>
     <string name="draft">Draft</string>
-    <string name="add_photo_to_publish">Add a photo to publish</string>
     <string name="change_location">Change location</string>
     <string name="edit_card">Edit card</string>
     <string name="no_people_to_show">No people to show.</string>
@@ -238,8 +237,12 @@
     </plurals>
     <string name="scan_now">Scan now</string>
     <string name="record_audio">Record audio</string>
-    <string name="recording_audio">Recording audio…</string>
+    <string name="recording_audio">Recording audio… %1$s</string>
     <string name="discard_recording">Discard recording</string>
     <string name="sent_audio">Sent an audio message</string>
     <string name="sent_video">Sent a video</string>
+    <string name="next">Next</string>
+    <string name="explore_search_placeholder">What are you looking for today?</string>
+    <string name="chat">Chat</string>
+    <string name="create">Create</string>
 </resources>
