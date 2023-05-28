@@ -29,7 +29,7 @@ fun SearchField(
     value: String,
     onValueChange: (value: String) -> Unit,
     placeholder: String? = null,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
     Card(
@@ -47,6 +47,7 @@ fun SearchField(
                 Text(
                     placeholder ?: stringResource(R.string.search),
                     maxLines = 1,
+                    style = MaterialTheme.typography.bodyMedium,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.alpha(.5f)
                 )

@@ -1,5 +1,6 @@
 package com.queatz.ailaai
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 
+@SuppressLint("StaticFieldLeak")
 val push = Push()
 
 class Push {
@@ -38,6 +40,10 @@ class Push {
 
     private val latestMessageFlow = MutableSharedFlow<String?>()
     val latestMessage: Flow<String?> = latestMessageFlow
+
+    private val notificationManager by lazy {
+        context.getSystemService(NotificationManager::class.java)
+    }
 
     suspend fun setMe(id: String) {
         meId = id
@@ -141,13 +147,14 @@ class Push {
         )
 
         send(
-            deeplinkIntent,
-            Notifications.Messages,
-            groupKey = "group/${data.group.id}",
+            intent = deeplinkIntent,
+            channel = Notifications.Messages,
+            groupKey = makeGroupKey(data.group.id!!),
             title = data.person.name ?: context.getString(R.string.someone),
             text = data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: ""
         )
     }
+
     private fun send(
         intent: Intent,
         channel: Notifications,
@@ -155,8 +162,6 @@ class Push {
         title: String,
         text: String
     ) {
-        val notificationManager = context.getSystemService(NotificationManager::class.java)
-
         if (!notificationManager.areNotificationsEnabled()) {
             return
         }
@@ -175,6 +180,12 @@ class Push {
             )
 
         notificationManager.notify(groupKey, 1, builder.build())
+    }
+
+    private fun makeGroupKey(groupId: String) = "group/$groupId"
+
+    fun clear(groupId: String) {
+        notificationManager.cancel(makeGroupKey(groupId), 1)
     }
 
     fun init(context: Context) {

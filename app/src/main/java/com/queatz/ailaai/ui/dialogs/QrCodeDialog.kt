@@ -1,12 +1,12 @@
 package com.queatz.ailaai.ui.dialogs
 
 import android.graphics.*
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,22 +19,19 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.window.Dialog
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsBuildBitmapOption
 import com.huawei.hms.ml.scan.HmsScanBase.QRCODE_SCAN_TYPE
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.Group
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.bitmapResource
+import com.queatz.ailaai.extensions.share
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun ShareCardQrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
+fun QrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
     val scope = rememberCoroutineScope()
     val logo = bitmapResource(R.drawable.ic_notification)
     val qrCode = remember {

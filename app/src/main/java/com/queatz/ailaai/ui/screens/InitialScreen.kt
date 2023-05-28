@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
 import io.ktor.http.*
@@ -24,12 +25,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun InitialScreen(onKnown: () -> Unit) {
     var codeValue by remember { mutableStateOf("") }
-    var codeExpired by remember { mutableStateOf(false) }
-    var codeValueEnabled by remember { mutableStateOf(true) }
+    var codeExpired by rememberStateOf(false)
+    var codeValueEnabled by rememberStateOf(true)
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current!!
 
-    var signInDialog by remember { mutableStateOf(false) }
+    var signInDialog by rememberStateOf(false)
 
     fun signIn(transferCode: String) {
         scope.launch {

@@ -11,6 +11,7 @@ import at.bluesource.choicesdk.maps.common.Map
 import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
 import at.bluesource.choicesdk.maps.common.options.MarkerOptions
 import com.queatz.ailaai.databinding.LayoutMapBinding
+import com.queatz.ailaai.extensions.rememberStateOf
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -26,7 +27,7 @@ fun MapWithMarker(zoomLevel: Float, position: LatLng, modifier: Modifier = Modif
         }
     }
 
-    var composed by remember { mutableStateOf(false) }
+    var composed by rememberStateOf(false)
     var marker: Marker? by remember { mutableStateOf(null) }
     var map: Map? by remember { mutableStateOf(null) }
     val recenter = remember { MutableSharedFlow<LatLng>() }

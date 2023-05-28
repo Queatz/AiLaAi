@@ -1,11 +1,11 @@
 package com.queatz.ailaai.ui.screens
 
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -24,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -39,46 +40,60 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.audioRecorder
+import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.components.fadingEdge
 import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.stickers.StickerPacks
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
+fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val groupId = navBackStackEntry.arguments!!.getString("id")!!
     var sendMessage by remember { mutableStateOf("") }
     var groupExtended by remember { mutableStateOf<GroupExtended?>(null) }
     var messages by remember { mutableStateOf<List<Message>>(listOf()) }
-    var isLoading by remember { mutableStateOf(false) }
-    var showGroupNotFound by remember { mutableStateOf(false) }
-    var showLeaveGroup by remember { mutableStateOf(false) }
-    var showDescriptionDialog by remember { mutableStateOf(false) }
-    var showRenameGroup by remember { mutableStateOf(false) }
-    var showGroupMembers by remember { mutableStateOf(false) }
-    var showRemoveGroupMembers by remember { mutableStateOf(false) }
-    var showInviteMembers by remember { mutableStateOf(false) }
+    var isLoading by rememberStateOf(false)
+    var showGroupNotFound by rememberStateOf(false)
+    var showLeaveGroup by rememberStateOf(false)
+    var showDescriptionDialog by rememberStateOf(false)
+    var showRenameGroup by rememberStateOf(false)
+    var showGroupMembers by rememberStateOf(false)
+    var showRemoveGroupMembers by rememberStateOf(false)
+    var showInviteMembers by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
+    var stageReply by remember { mutableStateOf<Message?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
     val focusRequester = remember { FocusRequester() }
-    var hasOlderMessages by remember { mutableStateOf(true) }
-    var isRecordingAudio by remember { mutableStateOf(false) }
-    var recordingAudioDuration by remember { mutableStateOf(0L) }
-    var maxInputAreaHeight by remember { mutableStateOf(0f) }
+    var hasOlderMessages by rememberStateOf(true)
+    var isRecordingAudio by rememberStateOf(false)
+    var showMore by rememberStateOf(false)
+    var recordingAudioDuration by rememberStateOf(0L)
+    var maxInputAreaHeight by rememberStateOf(0f)
+    val stickerPacks by stickers.rememberStickerPacks()
+
+    LaunchedEffect(Unit) {
+        push.clear(groupId)
+    }
+
+    LaunchedEffect(Unit) {
+        if (stickerPacks.isNullOrEmpty()) {
+            stickers.reload()
+        }
+    }
 
     suspend fun reloadMessages() {
         messages = api.messages(groupId)
@@ -89,7 +104,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         { recordingAudioDuration = it },
     ) { file ->
         try {
-            api.sendAudio(groupId, file)
+            api.sendAudio(groupId, file, stageReply?.id?.let {
+                Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+            })
+            stageReply = null
             reloadMessages()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -118,7 +136,14 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
         if (uris.isNotEmpty()) {
             scope.launch {
                 try {
-                    api.sendMedia(groupId, uris)
+                    api.sendMedia(
+                        groupId,
+                        uris,
+                        stageReply?.id?.let {
+                            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+                        }
+                    )
+                    stageReply = null
                     reloadMessages()
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -211,6 +236,12 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                 latestMessage = latest
             }
 
+            LaunchedEffect(sendMessage) {
+                if (showMore && sendMessage.isNotBlank()) {
+                    showMore = false
+                }
+            }
+
             TopAppBar(
                 {
                     Column(
@@ -256,14 +287,10 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                     }
                 },
                 navigationIcon = {
-                    IconButton({
-                        navController.popBackStack()
-                    }) {
-                        Icon(Icons.Outlined.ArrowBack, Icons.Outlined.ArrowBack.name)
-                    }
+                    BackButton(navController)
                 },
                 actions = {
-                    var showMenu by remember { mutableStateOf(false) }
+                    var showMenu by rememberStateOf(false)
 
                     if (!showDescription && groupExtended?.group?.description?.isBlank() == false) {
                         IconButton({
@@ -323,11 +350,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                             scope.launch {
                                 try {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
-                                    Toast.makeText(
-                                        navController.context,
-                                        navController.context.getString(R.string.group_hidden),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    context.toast(R.string.group_hidden)
                                     navController.popBackStack()
                                 } catch (ex: Exception) {
                                     ex.printStackTrace()
@@ -387,7 +410,15 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                         {
                             groupExtended?.members?.find { member -> member.member?.id == it }?.person
                         },
-                        myMember?.member?.id == it.member,
+                        { messageId ->
+                            messages.find { it.id == messageId } ?: try {
+                                api.message(messageId)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                null
+                            }
+                        },
+                        myMember?.member?.id,
                         {
                             scope.launch {
                                 try {
@@ -397,6 +428,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 }
                             }
                         },
+                        onReply = { stageReply = it },
                         onShowPhoto = { showPhoto = it },
                         navController
                     )
@@ -423,22 +455,93 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             fun send() {
                 if (sendMessage.isNotBlank()) {
                     val text = sendMessage.trim()
+                    val stagedReply = stageReply
                     scope.launch {
                         try {
-                            api.sendMessage(groupId, Message(text = text))
+                            api.sendMessage(groupId, Message(text = text).also {
+                                it.attachments = stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
+                            })
                             reloadMessages()
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                             if (sendMessage.isBlank()) {
                                 sendMessage = text
+                            }
+                            if (stageReply == null) {
+                                stageReply = stagedReply
                             }
                             context.showDidntWork()
                         }
                     }
                 }
 
+                stageReply = null
                 sendMessage = ""
                 focusRequester.requestFocus()
+            }
+
+            fun sendSticker(sticker: Sticker) {
+                val stagedReply = stageReply
+                scope.launch {
+                    try {
+                        api.sendMessage(groupId, Message(
+                            attachment = json.encodeToString(StickerAttachment(photo = sticker.photo, sticker = sticker.id, message = sticker.message))
+                        ).also {
+                            it.attachments = stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
+                        })
+                        reloadMessages()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        context.showDidntWork()
+                    }
+                }
+            }
+
+            AnimatedVisibility(stageReply != null) {
+                var stagedReply by remember { mutableStateOf(stageReply) }
+                stagedReply = stageReply ?: stagedReply
+                stagedReply?.let { message ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(
+                                top = PaddingDefault,
+                                start = PaddingDefault,
+                                end = PaddingDefault
+                            )
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                    ) {
+                        Icon(
+                            Icons.Outlined.Reply,
+                            null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .5f),
+                            modifier = Modifier
+                                .padding(start = PaddingDefault * 2, end = PaddingDefault)
+                                .requiredSize(16.dp)
+                        )
+                        Text(
+                            message.text ?: message.attachmentText(context) ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(PaddingDefault / 2)
+                                .heightIn(max = 64.dp)
+                        )
+                        IconButton(
+                            onClick = {
+                                stageReply = null
+                            }
+                        ) {
+                            Icon(
+                                Icons.Outlined.Close,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
 
             Row(
@@ -541,32 +644,78 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                 } else {
                                     audioRecorder.recordAudio()
                                 }
-                            },
-                            modifier = Modifier
-                                .padding(end = PaddingDefault)
+                            }
                         ) {
                             Icon(
-                                if (isRecordingAudio) Icons.Outlined.Send else Icons.Outlined.Mic,
+                                if (isRecordingAudio) Icons.Default.Send else Icons.Outlined.Mic,
                                 stringResource(R.string.record_audio),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         AnimatedVisibility(!isRecordingAudio) {
-                            IconButton(
-                                onClick = {
-                                    // todo video, file, audio
-                                    launcher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
-                                },
-                                modifier = Modifier
-                                    .padding(end = PaddingDefault)
-                            ) {
-                                Icon(
-                                    Icons.Outlined.AddPhotoAlternate,
-                                    stringResource(R.string.add),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            Row {
+                                IconButton(
+                                    onClick = {
+                                        // todo video, file
+                                        launcher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.AddPhotoAlternate,
+                                        stringResource(R.string.add),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        showMore = !showMore
+                                    },
+                                    modifier = Modifier
+                                        .padding(end = PaddingDefault)
+                                ) {
+                                    Icon(
+                                        if (showMore) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
+                    }
+                }
+            }
+            AnimatedVisibility(showMore) {
+                Box(
+                    modifier = Modifier.height(240.dp)
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                        .shadow(0.25.dp)
+                ) {
+                    StickerPacks(
+                        stickerPacks ?: emptyList(),
+                        onStickerLongClick = {
+                            scope.launch {
+                                say.say(it.message)
+                            }
+                        },
+                        onStickerPack = {
+                            navController.navigate("sticker-pack/${it.id!!}")
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) { sticker ->
+                        showMore = false
+                        focusRequester.requestFocus()
+                        sendSticker(sticker)
+                    }
+                    FloatingActionButton(
+                        onClick = {
+                            navController.navigate("sticker-packs")
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(bottom = PaddingDefault * 2, end = PaddingDefault * 2)
+                            .size(32.dp + PaddingDefault)
+                    ) {
+                        Icon(Icons.Outlined.Add, null, modifier = Modifier.size(16.dp))
                     }
                 }
             }
@@ -582,15 +731,14 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
             }
 
             if (showGroupMembers) {
-                GroupMembersDialog(
+                PeopleDialog(
+                    stringResource(R.string.members),
                     {
                         showGroupMembers = false
                     },
                     people = otherMembers.map { it.person!! },
                     infoFormatter = { person ->
-                        person.seen?.timeAgo()?.let { timeAgo ->
-                            "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
-                        }
+                        person.seenText(context.getString(R.string.active))
                     },
                     extraButtons = {
                         if (myMember?.member?.host == true) {
@@ -635,11 +783,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     otherMembers.find { member -> member.person?.id == person.id }?.member?.id
                                         ?: return@forEach
                                 )
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.x_removed, person.name?.nullIfBlank ?: someone),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                context.toast(context.getString(R.string.x_removed, person.name?.nullIfBlank ?: someone))
                                 anySucceeded = true
                             } catch (ex: Exception) {
                                 anyFailed = true
@@ -680,11 +824,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
                                     from = person.id!!
                                     to = groupId
                                 })
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.person_invited, person.name?.nullIfBlank ?: someone),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                context.toast(context.getString(R.string.person_invited, person.name?.nullIfBlank ?: someone))
                                 anySucceeded = true
                             } catch (ex: Exception) {
                                 anyFailed = true
@@ -783,3 +923,7 @@ fun GroupScreen(navBackStackEntry: NavBackStackEntry, navController: NavControll
 
 private fun List<Message>.photos() =
     flatMap { message -> (message.getAttachment() as? PhotosAttachment)?.photos?.asReversed() ?: emptyList() }
+
+fun Person.seenText(active: String) = seen?.timeAgo()?.let { timeAgo ->
+    "$active ${timeAgo.lowercase()}"
+}

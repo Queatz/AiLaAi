@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -9,10 +8,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardsList
-import com.queatz.ailaai.ui.state.jsonSaver
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 
@@ -22,8 +21,8 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
     val scope = rememberCoroutineScope()
     var value by rememberSaveable { mutableStateOf("") }
     var cards by remember { mutableStateOf(emptyList<Card>()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isError by remember { mutableStateOf(false) }
+    var isLoading by rememberStateOf(true)
+    var isError by rememberStateOf(false)
     var hasInitialCards by remember { mutableStateOf(cards.isNotEmpty()) }
 
     LaunchedEffect(Unit) {

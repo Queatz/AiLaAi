@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -20,10 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
-import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
-import com.queatz.ailaai.ui.dialogs.item
+import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -66,22 +68,18 @@ fun ContactItem(
             val people = groupExtended.members?.filter { it.person?.id != me?.id }?.map { it.person!! } ?: emptyList()
             val myMember = groupExtended.members?.find { it.person?.id == me?.id }
             val isUnread = groupExtended.isUnread(myMember?.member)
-            var showMenu by remember { mutableStateOf(false) }
+            var showMenu by rememberStateOf(false)
 
             if (showMenu) {
                 Menu(
                     { showMenu = false }
                 ) {
-                    item(stringResource(R.string.hide)) {
+                    menuItem(stringResource(R.string.hide)) {
                         showMenu = false
                         scope.launch {
                             try {
                                 api.updateMember(myMember!!.member!!.id!!, Member(hide = true))
-                                Toast.makeText(
-                                    navController.context,
-                                    navController.context.getString(R.string.group_hidden),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                context.toast(R.string.group_hidden)
                                 onChange()
                             } catch (ex: Exception) {
                                 ex.printStackTrace()
@@ -109,7 +107,7 @@ fun ContactItem(
                     if (people.size == 1) R.string.connected_ago else R.string.created_ago,
                     groupExtended.group!!.createdAt!!.timeAgo().lowercase()
                 ),
-                photos = groupExtended.photos(me?.let(::listOf) ?: emptyList()),
+                photos = groupExtended.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)),
                 lastActive = groupExtended.latestMessage?.createdAt?.timeAgo(),
                 isUnread = isUnread
             )

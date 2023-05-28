@@ -25,7 +25,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 43
+        versionCode = 44
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -86,18 +86,18 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
-
-    implementation("androidx.core:core-ktx:1.10.0")
+    implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha02")
     implementation("androidx.appcompat:appcompat-resources:1.7.0-alpha02")
-    implementation("com.google.android.material:material:1.8.0") // todo is this needed?
+    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation("androidx.compose.material3:material3:1.1.0-rc01")
-    implementation("androidx.compose.material3:material3-window-size-class:1.1.0-rc01")
+    implementation("androidx.compose.material3:material3:1.1.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.0")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
     implementation("androidx.navigation:navigation-compose:2.5.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
@@ -109,24 +109,21 @@ dependencies {
     implementation("com.huawei.hms:base:$hmsVersion")
     implementation("com.huawei.hms:maps:$hmsVersion")
     implementation("com.huawei.hms:push:$hmsVersion")
-    implementation("com.huawei.hms:scan:2.9.0.300")
+    implementation("com.huawei.hms:scan:2.10.0.301")
     implementation("com.huawei.hms:hianalytics:$hmsVersion")
     implementation("com.huawei.hms:hianalytics:$hmsVersion")
     implementation("com.huawei.hms:hwid:$hmsVersion")
     implementation("com.huawei.hms:location:$hmsVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.7")
-    implementation("androidx.compose.ui:ui-viewbinding:1.4.2")
-    implementation("com.android.volley:volley:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("androidx.compose.ui:ui-viewbinding:1.4.3")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("com.google.accompanist:accompanist-permissions:0.27.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation(platform("com.google.firebase:firebase-bom:31.0.2"))
-    implementation("androidx.media3:media3-exoplayer:1.0.1")
-    implementation("androidx.media3:media3-ui:1.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("androidx.media3:media3-exoplayer:1.0.2")
+    implementation("androidx.media3:media3-ui:1.0.2")
     implementation("com.arthenica:ffmpeg-kit-min-gpl:5.1")
     implementation("ch.acra:acra-core:5.9.7")
     implementation("ch.acra:acra-toast:5.9.7")

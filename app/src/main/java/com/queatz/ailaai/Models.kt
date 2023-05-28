@@ -77,13 +77,57 @@ class Message(
     var group: String? = null,
     var member: String? = null,
     var text: String? = null,
-    var attachment: String? = null
+    var attachment: String? = null,
+    var attachments: List<String>? = null
+) : Model()
+
+@Serializable
+class Sticker(
+    var photo: String? = null,
+    var pack: String? = null,
+    var name: String? = null,
+    var message: String? = null,
+) : Model()
+
+@Serializable
+class StickerPack(
+    var name: String? = null,
+    var description: String? = null,
+    var person: String? = null,
+    var active: Boolean? = null,
+    var stickers: List<Sticker>? = null
+) : Model()
+
+@Serializable
+class Presence(
+    var person: String? = null,
+    var readStoriesUntil: Instant? = null,
+    var unreadStoriesCount: Int? = null
 ) : Model()
 
 @Serializable
 class Transfer(
     var code: String? = null,
     var person: String? = null
+) : Model()
+
+@Serializable
+class Story(
+    var person: String? = null,
+    var title: String? = null,
+    var url: String? = null,
+    var geo: List<Double>? = null,
+    var publishDate: Instant? = null,
+    var published: Boolean? = null,
+    var content: String? = null,
+    var authors: List<Person>? = null
+) : Model()
+
+@Serializable
+class StoryDraft(
+    var story: String? = null,
+    var groups: List<String>? = null,
+    var groupDetails: List<Group>? = null
 ) : Model()
 
 @Serializable

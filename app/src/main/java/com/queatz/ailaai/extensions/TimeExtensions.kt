@@ -7,7 +7,7 @@ import kotlin.time.Duration.Companion.seconds
 
 fun Long.formatTime() = when {
     this < 1.seconds.inWholeMilliseconds -> "0s"
-    this < 1.minutes.inWholeMilliseconds -> "${this.milliseconds.inWholeSeconds}s"
-    this < 1.hours.inWholeMilliseconds -> "${this.milliseconds.inWholeMinutes}s ${this.milliseconds.inWholeSeconds}s"
-    else -> "${this.milliseconds.inWholeHours}s ${this.milliseconds.inWholeMinutes}s"
+    this < 1.minutes.inWholeMilliseconds -> "${milliseconds.inWholeSeconds}s"
+    this < 1.hours.inWholeMilliseconds -> "${milliseconds.inWholeMinutes}m ${milliseconds.inWholeSeconds - milliseconds.inWholeMinutes.minutes.inWholeSeconds}s"
+    else -> "${milliseconds.inWholeHours}h ${milliseconds.inWholeMinutes - milliseconds.inWholeHours.hours.inWholeMinutes}m"
 }

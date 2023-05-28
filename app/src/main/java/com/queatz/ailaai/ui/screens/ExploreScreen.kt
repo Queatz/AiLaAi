@@ -1,16 +1,14 @@
 package com.queatz.ailaai.ui.screens
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -26,14 +24,9 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
-import at.bluesource.choicesdk.core.Outcome
-import at.bluesource.choicesdk.location.common.LocationRequest
-import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -44,96 +37,50 @@ import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardsList
+import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.horizontalFadingEdge
-import com.queatz.ailaai.ui.dialogs.SetLocationDialog
-import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-val geoKey = stringPreferencesKey("geo")
-val geoManualKey = booleanPreferencesKey("geo-manual")
 val qrCodeExplainedKey = booleanPreferencesKey("tutorial.qrCode.explained")
 
 var exploreInitialCategory: String? = null
 
-@SuppressLint("MissingPermission")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(
-        navController.context as Activity
-    )
     var value by rememberSaveable { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(exploreInitialCategory) }
     var categories by remember { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
-    var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
-    var geoManual by remember { mutableStateOf(false) }
-    var showSetMyLocation by remember { mutableStateOf(false) }
     var cards by remember { mutableStateOf(emptyList<Card>()) }
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
-    var showCameraRationale by remember { mutableStateOf(false) }
-    var showQrCodeExplanationDialog by remember { mutableStateOf(false) }
-    var hasInitialCards by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isError by remember { mutableStateOf(false) }
+    var showCameraRationale by rememberStateOf(false)
+    var showQrCodeExplanationDialog by rememberStateOf(false)
+    var hasInitialCards by rememberStateOf(false)
+    var isLoading by rememberStateOf(true)
+    var isError by rememberStateOf(false)
     var offset by remember { mutableStateOf(0) }
-    var hasMore by remember { mutableStateOf(true) }
-
-    fun goToSettings() {
-        val intent = Intent(
-            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            Uri.parse("package:${navController.context.packageName}")
-        )
-        (navController.context as Activity).startActivity(intent)
-    }
-
-    LaunchedEffect(Unit) {
-        geoManual = !locationPermissionState.status.isGranted || context.dataStore.data.first()[geoManualKey] == true
-    }
-
-    LaunchedEffect(geoManual) {
-        context.dataStore.edit {
-            if (geoManual) {
-                it[geoManualKey] = true
-            } else {
-                it.remove(geoManualKey)
-            }
-        }
-    }
-
-    LaunchedEffect(geo) {
-        if (geo == null) {
-            val savedGeo = context.dataStore.data.first()[geoKey]?.split(",")?.map { it.toDouble() }
-            if (savedGeo != null)
-                geo = LatLng.getFactory().create(savedGeo[0], savedGeo[1])
-        } else {
-            context.dataStore.edit {
-                if (geo == null) {
-                    it.remove(geoKey)
-                } else {
-                    it[geoKey] = "${geo!!.latitude},${geo!!.longitude}"
-                }
-            }
-        }
-    }
+    var hasMore by rememberStateOf(true)
+    var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    val locationSelector = locationSelector(
+        geo,
+        { geo = it },
+        navController.context as Activity
+    )
 
     fun updateCategories() {
         selectedCategory = selectedCategory ?: exploreInitialCategory
@@ -248,85 +195,27 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    if (geo == null && !locationPermissionState.status.isGranted) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2, Alignment.CenterVertically),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(PaddingDefault)
-        ) {
-            val showOpenSettings = locationPermissionState.status.shouldShowRationale
-
-            Button(
-                {
-                    if (showOpenSettings) {
-                        goToSettings()
-                    } else {
-                        locationPermissionState.launchPermissionRequest()
-                    }
-                }
-            ) {
-                Text(if (showOpenSettings) stringResource(R.string.open_settings) else stringResource(R.string.find_my_location))
-            }
-
-            if (showOpenSettings) {
-                Text(
-                    stringResource(R.string.location_disabled_description),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
-            TextButton({
-                showSetMyLocation = true
-            }) {
-                Text(stringResource(R.string.set_my_location))
-            }
-        }
-    } else if (geo == null) {
-        LaunchedEffect(Unit) {
-            locationClient.observeLocation(LocationRequest.createDefault())
-                .filter { it is Outcome.Success && it.value.lastLocation != null }
-                .takeWhile { scope.isActive }
-                // todo dispose on close
-                .take(1)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    geoManual = false
-                    geo = (it as Outcome.Success).value.lastLocation!!.toLatLng()
-                }
-        }
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    LocationScaffold(
+        geo,
+        locationSelector,
+        navController,
+        appHeader = {
             AppHeader(
                 navController,
-                stringResource(R.string.app_name),
+                stringResource(R.string.explore),
                 {},
                 me,
                 showAppIcon = true
             )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(PaddingDefault)
-            ) {
-                Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
-                TextButton({
-                    showSetMyLocation = true
-                }) {
-                    Text(stringResource(R.string.set_my_location))
-                }
-            }
         }
-    } else {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+            ) {
             AppHeader(
                 navController,
-                stringResource(R.string.app_name),
+                stringResource(R.string.explore),
                 {
                     scope.launch {
                         state.scrollToTop()
@@ -358,21 +247,15 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     launchScanQrCode()
                 }
             ) {
-                if (geoManual) {
+                if (locationSelector.isManual) {
                     ElevatedButton(
                         elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
                         onClick = {
-                            scope.launch {
-                                context.dataStore.edit {
-                                    it.remove(geoKey)
-                                    it.remove(geoManualKey)
-                                }
-                                geo = null
-                            }
+                            locationSelector.reset()
                         }
                     ) {
                         Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
-                        Icon(Icons.Outlined.Clear, "")
+                        Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
                     }
                 }
                 if (categories.size > 2 && !isLoading) {
@@ -450,13 +333,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         )
     }
 
-    if (showSetMyLocation) {
-        SetLocationDialog({ showSetMyLocation = false }) {
-            geoManual = true
-            geo = it
-        }
-    }
-
     if (showCameraRationale) {
         AlertDialog(
             { showCameraRationale = false },
@@ -467,7 +343,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 TextButton(
                     {
                         showCameraRationale = false
-                        goToSettings()
+                        navController.goToSettings()
                     }
                 ) {
                     Text(stringResource(R.string.open_settings))

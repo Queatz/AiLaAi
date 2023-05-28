@@ -20,8 +20,14 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @SuppressLint("MissingPermission")
 @Composable
-fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit) {
-    var position by remember { mutableStateOf(LatLng(0.0, 0.0)) }
+fun SetLocationDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: String = stringResource(R.string.choose_location),
+    initialLocation: LatLng = LatLng(0.0, 0.0),
+    initialZoom: Float = 5f,
+    onLocation: (LatLng) -> Unit,
+) {
+    var position by remember { mutableStateOf(initialLocation) }
 
     DialogBase(onDismissRequest) {
         Column(
@@ -37,7 +43,7 @@ fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
             ) {
-                MapWithMarker(5f, position) {
+                MapWithMarker(initialZoom, position) {
                     position = it
                 }
             }
@@ -48,11 +54,18 @@ fun SetLocationDialog(onDismissRequest: () -> Unit, onLocation: (LatLng) -> Unit
             ) {
                 TextButton(
                     {
+                        onDismissRequest()
+                    }
+                ) {
+                    Text(stringResource(R.string.close))
+                }
+                TextButton(
+                    {
                         onLocation(position)
                         onDismissRequest()
                     }
                 ) {
-                    Text(stringResource(R.string.set_my_location))
+                    Text(confirmButton)
                 }
             }
         }

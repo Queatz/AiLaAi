@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -37,9 +39,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.extensions.launchUrl
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.screens.*
+import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
+import com.queatz.ailaai.ui.stickers.StickerPackScreen
+import com.queatz.ailaai.ui.stickers.StickerPacksScreen
+import com.queatz.ailaai.ui.story.MyStoriesScreen
+import com.queatz.ailaai.ui.story.StoriesScreen
+import com.queatz.ailaai.ui.story.StoryCreatorScreen
+import com.queatz.ailaai.ui.story.StoryScreen
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -55,10 +65,11 @@ class MainActivity : AppCompatActivity() {
 
     private val menuItems by lazy {
         listOf(
-            NavButton("explore", getString(R.string.explore), Icons.Outlined.Place),
-            NavButton("messages", getString(R.string.chat), Icons.Outlined.ChatBubbleOutline),
-            NavButton("me", getString(R.string.create), Icons.Outlined.Create),
-            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder)
+            NavButton("explore", getString(R.string.explore), Icons.Outlined.PinDrop),
+            NavButton("messages", getString(R.string.talk), Icons.Outlined.Forum),
+            NavButton("stories", getString(R.string.stories), Icons.Outlined.Flare),
+            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
+            NavButton("me", getString(R.string.create), Icons.Outlined.Add)
         )
     }
 
@@ -80,7 +91,7 @@ class MainActivity : AppCompatActivity() {
 
                 val context = LocalContext.current
                 var startDestination by remember { mutableStateOf<String?>(null) }
-                var startDestinationLoaded by remember { mutableStateOf(false) }
+                var startDestinationLoaded by rememberStateOf(false)
 
                 // Save last route
                 if (startDestinationLoaded) {
@@ -106,7 +117,9 @@ class MainActivity : AppCompatActivity() {
                     .value
                     ?.destination
                     ?.route
-                    ?.let { it.startsWith("group/") || it.startsWith("card/") } != true
+                    ?.let {
+                        it.startsWith("group/") || it.startsWith("card/") || it.startsWith("write/") || it.startsWith("sticker-pack/") || it == "sticker-packs"
+                    } != true
 
                 var known by remember { mutableStateOf(api.hasToken()) }
                 var wasKnown by remember { mutableStateOf(known) }
@@ -115,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                     InitialScreen { known = true }
                 } else {
                     var me by remember { mutableStateOf<Person?>(null) }
-                    var showSignedOut by remember { mutableStateOf(false) }
+                    var showSignedOut by rememberStateOf(false)
                     val snackbarHostState = remember { SnackbarHostState() }
                     val scope = rememberCoroutineScope()
                     val cantConnectString = stringResource(R.string.cant_connect)
@@ -150,11 +163,20 @@ class MainActivity : AppCompatActivity() {
                         if (me == null) {
                             messages.clear()
                         } else {
-                            messages.refresh(me!!, api.groups())
+                            messages.refresh(me!!, try {
+                                api.groups()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                emptyList()
+                            })
                             messages.new.collectLatest {
                                 newMessages = it
                             }
                         }
+                    }
+
+                    LaunchedEffect(me) {
+                        mePresence.reload()
                     }
 
                     LaunchedEffect(Unit) {
@@ -242,8 +264,9 @@ class MainActivity : AppCompatActivity() {
                                                     Box(
                                                         modifier = Modifier
                                                     ) {
+                                                        val presence by mePresence.rememberPresence()
                                                         Icon(item.icon, contentDescription = null)
-                                                        if (item.route == "messages" && newMessages > 0)
+                                                        if (item.route == "messages" && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
                                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -256,8 +279,25 @@ class MainActivity : AppCompatActivity() {
                                                                     .background(MaterialTheme.colorScheme.surfaceVariant)
                                                                     .padding(PaddingDefault, PaddingDefault / 4)
                                                             )
+                                                        }
+                                                        if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0) {
+                                                            // todo reusable icon
+                                                            Text(
+                                                                (presence?.unreadStoriesCount ?: 0).toString(),
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                fontWeight = FontWeight.Bold,
+                                                                modifier = Modifier
+                                                                    .offset(PaddingDefault * 2, -PaddingDefault / 2)
+                                                                    .align(Alignment.TopEnd)
+                                                                    .clip(CircleShape)
+                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                                    .padding(PaddingDefault, PaddingDefault / 4)
+                                                            )
+                                                        }
                                                     }
                                                 },
+                                                alwaysShowLabel = false,
                                                 label = {
                                                     Text(
                                                         item.text,
@@ -304,6 +344,12 @@ class MainActivity : AppCompatActivity() {
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
+                                                        if (item.route == "stories") {
+                                                            Text(
+                                                                12.toString(),
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
                                                     }
                                                 },
                                                 selected = navController.currentDestination?.route == item.route,
@@ -316,60 +362,124 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     }
                                 }
-                            }, modifier = Modifier.fillMaxSize()
+                            },
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            if (startDestinationLoaded) {
-                                NavHost(
-                                    navController,
-                                    startDestination ?: "explore",
-                                    modifier = Modifier
-                                        .padding(it)
-                                        .fillMaxSize()
-                                ) {
-                                    composable("profile/{id}") {
-                                        ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                    }
-                                    composable("explore") {
-                                        ExploreScreen(navController) { me }
-                                    }
-                                    composable("saved") {
-                                        SavedScreen(navController) { me }
-                                    }
-                                    composable(
-                                        "card/{id}",
-                                        deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                if (startDestinationLoaded) {
+                                    NavHost(
+                                        navController,
+                                        startDestination ?: "explore",
+                                        modifier = Modifier
+                                            .padding(it)
+                                            .fillMaxSize()
                                     ) {
-                                        CardScreen(it, navController) { me }
-                                    }
-                                    composable("messages") {
-                                        FriendsScreen(navController) { me }
-                                    }
-                                    composable(
-                                        "group/{id}",
-                                        deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
-                                    ) {
-                                        GroupScreen(it, navController) { me }
-                                    }
-                                    composable("me") {
-                                        MeScreen(navController) { me }
-                                    }
-                                    composable("settings") {
-                                        SettingsScreen(navController, { me }) {
-                                            if (api.hasToken()) {
-                                                scope.launch {
-                                                    try {
-                                                        loadMe()
-                                                    } catch (ex: Exception) {
-                                                        ex.printStackTrace()
-                                                        snackbarHostState.showSnackbar(
-                                                            getString(R.string.cant_connect),
-                                                            withDismissAction = true
-                                                        )
+                                        composable("profile/{id}") {
+                                            ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                        }
+                                        composable("explore") {
+                                            ExploreScreen(navController) { me }
+                                        }
+                                        composable("stories") {
+                                            StoriesScreen(navController) { me }
+                                        }
+                                        composable("story/{id}") {
+                                            StoryScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                        }
+                                        composable("write") {
+                                            MyStoriesScreen(navController) { me }
+                                        }
+                                        composable("write/{id}") {
+                                            StoryCreatorScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                        }
+                                        composable("saved") {
+                                            SavedScreen(navController) { me }
+                                        }
+                                        composable(
+                                            "card/{id}",
+                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
+                                        ) {
+                                            CardScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                        }
+                                        composable("messages") {
+                                            FriendsScreen(navController) { me }
+                                        }
+                                        composable(
+                                            "group/{id}",
+                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
+                                        ) {
+                                            GroupScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                        }
+                                        composable("me") {
+                                            MeScreen(navController) { me }
+                                        }
+                                        composable("sticker-packs") {
+                                            StickerPacksScreen(navController) { me }
+                                        }
+                                        composable("sticker-pack/{id}") {
+                                            StickerPackScreen(navController, it.arguments!!.getString("id")!!) { me }
+                                        }
+                                        composable("sticker-pack/{id}/edit") {
+                                            StickerPackEditorScreen(navController, it.arguments!!.getString("id")!!) { me }
+                                        }
+                                        composable("settings") {
+                                            SettingsScreen(navController, { me }) {
+                                                if (api.hasToken()) {
+                                                    scope.launch {
+                                                        try {
+                                                            loadMe()
+                                                        } catch (ex: Exception) {
+                                                            ex.printStackTrace()
+                                                            snackbarHostState.showSnackbar(
+                                                                getString(R.string.cant_connect),
+                                                                withDismissAction = true
+                                                            )
+                                                        }
                                                     }
+                                                } else {
+                                                    known = false
                                                 }
-                                            } else {
-                                                known = false
                                             }
+                                        }
+                                    }
+                                }
+                                val say by say.rememberSays()
+                                Crossfade(
+                                    say != null,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                ) {
+                                    var lastSay by rememberStateOf(say)
+                                    LaunchedEffect(say) {
+                                        if (say != null) {
+                                            lastSay = say
+                                        }
+                                    }
+                                    when (it) {
+                                        true -> {
+                                            Text(
+                                                lastSay ?: "",
+                                                modifier = Modifier
+                                                    .padding(
+                                                        horizontal = PaddingDefault * 3,
+                                                        vertical = PaddingDefault * (isLandscape { 6 } ?: 12)
+                                                    )
+                                                    .shadow(ElevationDefault, MaterialTheme.shapes.large)
+                                                    .clip(MaterialTheme.shapes.large)
+                                                    .background(MaterialTheme.colorScheme.surface)
+                                                    .clickable {
+                                                        (lastSay ?: "").copyToClipboard(context)
+                                                        context.toast(R.string.copied)
+                                                    }
+                                                    .padding(
+                                                        horizontal = PaddingDefault * 2,
+                                                        vertical = PaddingDefault
+                                                    )
+                                            )
+                                        }
+                                        false -> {
                                         }
                                     }
                                 }

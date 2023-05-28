@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.components
 
 import android.app.Activity
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -18,10 +17,7 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.inDp
-import com.queatz.ailaai.extensions.rememberAutoplayIndex
-import com.queatz.ailaai.extensions.reply
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -83,7 +79,7 @@ fun CardsList(
             ) {
                 @Composable
                 fun basicCard(it: Card) {
-                    BasicCard(
+                    CardItem(
                         {
                             navController.navigate("card/${it.id!!}")
                         },
@@ -123,7 +119,7 @@ fun CardsList(
                 }
                 if (onLoadMore != null) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        var isLoadingMore by remember { mutableStateOf(true) }
+                        var isLoadingMore by rememberStateOf(true)
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -158,7 +154,6 @@ fun CardsList(
                 .align(Alignment.BottomCenter)
                 .padding(PaddingDefault * 2)
                 .widthIn(max = 480.dp)
-
                 .onPlaced { viewport = it.boundsInParent().size }
                 .fillMaxWidth()
         ) {

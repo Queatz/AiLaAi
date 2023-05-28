@@ -20,9 +20,11 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.GroupMember
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -54,6 +56,7 @@ fun <T> ChooseDialog(
     confirmFormatter: @Composable (List<T>) -> String,
     textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,
     extraButtons: @Composable RowScope.() -> Unit = {},
+    maxSelectedCount: Int = 50,
     searchText: String,
     searchTextChange: (String) -> Unit,
     items: List<T>,
@@ -64,10 +67,10 @@ fun <T> ChooseDialog(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
     val coroutineScope = rememberCoroutineScope()
-    var disableSubmit by remember { mutableStateOf(true) }
+    var disableSubmit by rememberStateOf(true)
 
     LaunchedEffect(selected) {
-        disableSubmit = (selected.isEmpty() && !allowNone) || selected.size >= 50
+        disableSubmit = (selected.isEmpty() && !allowNone) || selected.size > maxSelectedCount
     }
 
     DialogBase(onDismissRequest) {
@@ -104,12 +107,7 @@ fun <T> ChooseDialog(
             ) {
                 if (isLoading) {
                     item {
-                        LinearProgressIndicator(
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = PaddingDefault)
-                        )
+                        Loading()
                     }
                 } else if (items.isEmpty()) {
                     item {
@@ -156,7 +154,7 @@ fun <T> ChooseDialog(
                             }
                         }
                     },
-                    enabled = !disableSubmit,
+                    enabled = !disableSubmit && !isLoading,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     Text(confirmFormatter(selected), textAlign = TextAlign.End, modifier = Modifier.weight(0.5f, false))

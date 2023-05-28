@@ -55,7 +55,7 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                     onDismissRequest()
                 }
         ) {
-            val state = rememberLazyListState(medias.indexOf(initialMedia))
+            val state = rememberLazyListState(medias.indexOf(initialMedia).coerceAtLeast(0))
             val current by remember {
                 derivedStateOf {
                     state.firstVisibleItemIndex

@@ -8,6 +8,8 @@ data class ContactPhoto(
     val photo: String? = null
 )
 
+fun GroupExtended.isGroupLike(omitGroupsWith: Person? = null) = group?.name?.isNotBlank() == true && members?.none { it.person?.id == omitGroupsWith?.id } == true
+
 fun GroupExtended.name(someone: String, emptyGroup: String, omit: List<String>) =
     group?.name?.nullIfBlank
         ?: members
@@ -17,13 +19,17 @@ fun GroupExtended.name(someone: String, emptyGroup: String, omit: List<String>) 
             ?.nullIfBlank
         ?: emptyGroup
 
-fun GroupExtended.photos(omit: List<Person> = emptyList()) = members
+fun GroupExtended.photos(omit: List<Person> = emptyList(), ifEmpty: List<Person>? = null) = members
     ?.filter {
         omit.none { person -> it.person?.id == person.id }
     }
     ?.map {
         ContactPhoto(it.person?.name ?: "", it.person?.photo)
-    } ?: listOf(ContactPhoto())
+    }?.takeIf { it.isNotEmpty() }
+    ?: ifEmpty?.map {
+        ContactPhoto(it.name ?: "", it.photo)
+    }
+    ?: listOf(ContactPhoto())
 
 fun GroupExtended.isUnread(member: Member?): Boolean {
     return (member?.seen?.toEpochMilliseconds() ?: return false) < (latestMessage?.createdAt?.toEpochMilliseconds() ?: return false)
@@ -45,6 +51,12 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     }
     is VideoAttachment -> {
         context.resources.getString(R.string.sent_video)
+    }
+    is StoryAttachment -> {
+        context.resources.getString(R.string.sent_a_story)
+    }
+    is StickerAttachment -> {
+        context.resources.getString(R.string.sent_a_sticker)
     }
     else -> null
 }

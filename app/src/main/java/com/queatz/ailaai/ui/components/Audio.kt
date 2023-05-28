@@ -31,10 +31,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.android.awaitFrame
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 enum class PlaybackSpeed(val factor: Float) {
     Slow(0.75f),

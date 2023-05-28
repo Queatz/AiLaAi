@@ -2,9 +2,7 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.Shader
 import android.view.MotionEvent
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +11,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -26,12 +25,10 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +37,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.core.graphics.drawable.toDrawable
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -59,13 +55,13 @@ import kotlin.time.Duration.Companion.seconds
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun BasicCard(
-    onClick: () -> Unit,
-    onCategoryClick: (String) -> Unit,
+fun CardItem(
+    onClick: (() -> Unit)?,
+    onCategoryClick: (String) -> Unit = {},
     onReply: (List<String>) -> Unit = {},
     onChange: () -> Unit = {},
-    activity: Activity,
     card: Card?,
+    activity: Activity? = null,
     showDistance: LatLng? = null,
     edit: EditCard? = null,
     isMine: Boolean = false,
@@ -80,13 +76,13 @@ fun BasicCard(
         elevation = CardDefaults.elevatedCardElevation(),
         modifier = Modifier.clip(MaterialTheme.shapes.large).then(modifier)
     ) {
-        var hideContent by remember { mutableStateOf(false) }
+        var hideContent by rememberStateOf(false)
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
-        var isSelectingText by remember { mutableStateOf(false) }
-        var showSetCategory by remember { mutableStateOf(false) }
+        var isSelectingText by rememberStateOf(false)
+        var showSetCategory by rememberStateOf(false)
         var uploadJob by remember { mutableStateOf<Job?>(null) }
-        var isUploadingVideo by remember { mutableStateOf(false) }
+        var isUploadingVideo by rememberStateOf(false)
         var videoUploadProgress by remember { mutableStateOf(0f) }
         var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
         val scope = rememberCoroutineScope()
@@ -117,15 +113,19 @@ fun BasicCard(
                         isSelectingText = false
                     }
                 }
-                .combinedClickable(
-                    enabled = !isSelectingText,
-                    onClick = {
-                        onClick()
-                    },
-                    onLongClick = {
-                        hideContent = true
-                    }
-                ),
+                .let {
+                     if (onClick != null) {
+                         it.combinedClickable(
+                             enabled = !isSelectingText,
+                             onClick = onClick,
+                             onLongClick = {
+                                 hideContent = true
+                             }
+                         )
+                     } else {
+                         it
+                     }
+                },
             contentAlignment = Alignment.BottomCenter
         ) {
             if (card != null) {
@@ -230,19 +230,11 @@ fun BasicCard(
                             scope.launch {
                                 when (saves.toggleSave(card)) {
                                     ToggleSaveResult.Saved -> {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.card_saved),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        context.toast(R.string.card_saved)
                                     }
 
                                     ToggleSaveResult.Unsaved -> {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.card_unsaved),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        context.toast(R.string.card_unsaved)
                                     }
 
                                     else -> {
@@ -343,14 +335,13 @@ fun BasicCard(
                             .constrainAs(conversationRef) {
                                 linkTo(parent.top, toolbarRef.top, bias = 1f)
                                 height = Dimension.preferredWrapContent
-
                             }
                             .verticalScroll(conversationScrollState)
                             .onPlaced { viewport = it.boundsInParent().size }
                             .fadingEdge(viewport, conversationScrollState)
                     )
 
-                    if (isMine && isMineToolbar) {
+                    if (isMine && isMineToolbar && activity != null) {
                         CardToolbar(
                             activity,
                             onChange,
@@ -417,11 +408,58 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
                 drawRect(
                     Brush.verticalGradient(
                         colors = listOf(Color.Black, Color.Transparent),
-                        startY = viewport.height - h2 + scrollState.value,
+                        startY = viewport.height + scrollState.value - h2,
                         endY = viewport.height + scrollState.value
                     ),
                     blendMode = BlendMode.DstIn
                 )
+            }
+        }
+)
+
+fun Modifier.fadingEdge(viewport: Size, scrollState: LazyListState, factor: Float = 3f) = then(
+    Modifier
+        .graphicsLayer(alpha = 0.99f)
+        .drawWithContent {
+            drawContent()
+
+            val fadeSize = viewport.height / factor
+            val value = scrollState.firstVisibleItemScrollOffset
+            if (scrollState.firstVisibleItemIndex != 0 || value != 0) {
+                val h = when (scrollState.firstVisibleItemIndex == 0) {
+                    true -> value.toFloat().coerceAtMost(fadeSize).coerceAtLeast(0f)
+                    false -> fadeSize
+                }
+
+                drawRect(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startY = h,
+                        endY = 0.0f
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+            scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.let { lastVisibleItemInfo ->
+                val scrollFromEnd = (lastVisibleItemInfo.offset + lastVisibleItemInfo.size) - viewport.height
+                val isLastItemVisible = lastVisibleItemInfo.index == scrollState.layoutInfo.totalItemsCount - 1
+                val h = when (isLastItemVisible) {
+                    true -> scrollFromEnd.coerceAtMost(fadeSize).coerceAtLeast(0f)
+                    false -> fadeSize
+                }
+
+                if (h <= 0) return@let
+
+                if (!isLastItemVisible || scrollFromEnd != 0f) {
+                    drawRect(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Black, Color.Transparent),
+                            startY = viewport.height - h,
+                            endY = viewport.height
+                        ),
+                        blendMode = BlendMode.DstIn
+                    )
+                }
             }
         }
 )
@@ -493,7 +531,7 @@ private fun CardToolbar(
     edit: EditCard?,
     modifier: Modifier = Modifier,
 ) {
-    var openDeleteDialog by remember { mutableStateOf(false) }
+    var openDeleteDialog by rememberStateOf(false)
     var openEditDialog by remember { mutableStateOf(edit == EditCard.Conversation) }
     var openLocationDialog by remember { mutableStateOf(edit == EditCard.Location) }
     val scrollState = rememberScrollState()
@@ -576,9 +614,6 @@ data class ConversationItem(
     var message: String = "",
     var items: MutableList<ConversationItem> = mutableListOf(),
 )
-
-fun LatLng.toList() = listOf(latitude, longitude)
-val Card.latLng get() = geo?.let { LatLng(it[0], it[1]) }
 
 enum class CardParentType {
     Map,

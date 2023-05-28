@@ -28,7 +28,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.sendEmail
+import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
@@ -42,9 +44,9 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    var signOutDialog by remember { mutableStateOf(false) }
-    var inviteDialog by remember { mutableStateOf(false) }
-    var showResetTutorialButton by remember { mutableStateOf(false) }
+    var signOutDialog by rememberStateOf(false)
+    var inviteDialog by rememberStateOf(false)
+    var showResetTutorialButton by rememberStateOf(false)
 
     LaunchedEffect(Unit) {
         context.dataStore.data.map { it[tutorialCompleteKey] == true }.collect {
@@ -60,8 +62,8 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
     if (signOutDialog) {
         var transferCode by remember { mutableStateOf("") }
-        var confirmSignOut by remember { mutableStateOf(false) }
-        var confirmSignOutChecked by remember { mutableStateOf(false) }
+        var confirmSignOut by rememberStateOf(false)
+        var confirmSignOutChecked by rememberStateOf(false)
 
         fun signOut() {
             scope.launch {
@@ -175,11 +177,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 }
             },
             navigationIcon = {
-                IconButton({
-                    navController.popBackStack()
-                }) {
-                    Icon(Icons.Outlined.ArrowBack, Icons.Outlined.ArrowBack.name)
-                }
+                BackButton(navController)
             }
         )
 
@@ -197,7 +195,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             modifier = Modifier
                 .verticalScroll(scrollState)
         ) {
-            var chooseLanguageDialog by remember { mutableStateOf(false) }
+            var chooseLanguageDialog by rememberStateOf(false)
 
             if (chooseLanguageDialog) {
                 Dialog({

@@ -1,16 +1,12 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,7 +18,6 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -32,7 +27,6 @@ import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -50,7 +44,7 @@ private val meFiltersKey = stringSetPreferencesKey("me.filters")
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by remember { mutableStateOf(emptyList<Card>()) }
     var addedCardId by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by rememberStateOf(true)
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     var cardParentType by rememberSaveable { mutableStateOf<CardParentType?>(null) }
@@ -150,7 +144,9 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         )
         Box(
             contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier.fillMaxWidth().weight(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         ) {
             if (isLoading) {
                 LinearProgressIndicator(
@@ -178,7 +174,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     columns = GridCells.Adaptive(240.dp)
                 ) {
                     items(cards, key = { it.id!! }) { card ->
-                        BasicCard(
+                        CardItem(
                             {
                                 navController.navigate("card/${card.id!!}")
                             },

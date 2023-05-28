@@ -50,7 +50,11 @@ fun ProcessingVideoDialog(
                     modifier = Modifier.size(24.dp),
                     progress = animatedProgress
                 )
-                Text(stringResource(R.string.please_wait), modifier = Modifier.padding(start = PaddingDefault * 2)) // todo extract string
+                Text(
+                    stringResource(R.string.please_wait),
+                    modifier = Modifier
+                        .padding(start = PaddingDefault * 2)
+                )
             }
         },
         confirmButton = {

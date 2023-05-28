@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.components.ConversationItem
 import com.queatz.ailaai.ui.components.DialogBase
@@ -222,7 +223,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                var disableSaveButton by remember { mutableStateOf(false) }
+                var disableSaveButton by rememberStateOf(false)
 
                 TextButton(
                     {

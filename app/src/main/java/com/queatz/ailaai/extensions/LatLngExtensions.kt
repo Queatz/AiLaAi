@@ -14,3 +14,9 @@ fun LatLng.distance(to: LatLng): Float {
         )
     }[0]
 }
+
+fun List<Double>.toLatLng() = takeIf { it.size == 2 }?.let {
+    LatLng(get(0), get(1))
+}
+
+fun LatLng.toList() = listOf(latitude, longitude)

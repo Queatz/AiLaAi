@@ -25,13 +25,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.rememberSavableStateOf
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.components.CardParentSelector
 import com.queatz.ailaai.ui.components.CardParentType
@@ -57,14 +58,14 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var isInProgress by remember { mutableStateOf(false) }
+    var isInProgress by rememberStateOf(false)
     var tutorialStep by rememberSaveable { mutableStateOf(0) }
     var cardName by rememberSaveable { mutableStateOf("") }
     var cardMessage by rememberSaveable { mutableStateOf("") }
     var cardParent by rememberSaveable { mutableStateOf<CardParentType?>(null) }
     var cardPhoto by rememberSaveable { mutableStateOf<Uri?>(null) }
-    var cardPublished by rememberSaveable { mutableStateOf(false) }
-    var cardCreated by rememberSaveable { mutableStateOf(false) }
+    var cardPublished by rememberSavableStateOf(false)
+    var cardCreated by rememberSavableStateOf(false)
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
         if (it == null) return@rememberLauncherForActivityResult
         cardPhoto = it

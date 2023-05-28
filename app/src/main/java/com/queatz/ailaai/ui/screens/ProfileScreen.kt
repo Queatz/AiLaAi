@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,7 +36,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.components.BasicCard
+import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.dialogs.*
@@ -53,15 +52,15 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
     var showMedia by remember { mutableStateOf<Media?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isError by remember { mutableStateOf(false) }
-    var showEditName by remember { mutableStateOf(false) }
-    var showEditAbout by remember { mutableStateOf(false) }
-    var showJoined by remember { mutableStateOf(false) }
-    var showMenu by remember { mutableStateOf(false) }
-    var showInviteDialog by remember { mutableStateOf(false) }
+    var isLoading by rememberStateOf(true)
+    var isError by rememberStateOf(false)
+    var showEditName by rememberStateOf(false)
+    var showEditAbout by rememberStateOf(false)
+    var showJoined by rememberStateOf(false)
+    var showMenu by rememberStateOf(false)
+    var showInviteDialog by rememberStateOf(false)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
-    var isUploadingVideo by remember { mutableStateOf(false) }
+    var isUploadingVideo by rememberStateOf(false)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
 
@@ -93,31 +92,26 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
             me = me(),
             filter = {
-                it.group?.name?.isNotBlank() == true && it.members?.none { it.person?.id == person?.id } == true
-            },
-            onGroupsSelected = { groups ->
-                try {
-                    coroutineScope {
-                        groups.map { group ->
-                            async {
-                                api.createMember(Member().apply {
-                                    from = person!!.id!!
-                                    to = group.id!!
-                                })
-                            }
-                        }.awaitAll()
-                    }
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.person_invited, person?.name ?: someone),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    context.showDidntWork()
-                }
+                it.isGroupLike(person)
             }
-        )
+        ) { groups ->
+            try {
+                coroutineScope {
+                    groups.map { group ->
+                        async {
+                            api.createMember(Member().apply {
+                                from = person!!.id!!
+                                to = group.id!!
+                            })
+                        }
+                    }.awaitAll()
+                }
+                context.toast(context.getString(R.string.person_invited, person?.name ?: someone))
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                context.showDidntWork()
+            }
+        }
     }
 
     suspend fun reload() {
@@ -412,7 +406,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     showEditName = true
                                 } else {
                                     person?.name?.copyToClipboard(context)
-                                    Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
+                                    context.toast(copiedString)
                                 }
                             }
                     ) {
@@ -496,7 +490,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    pluralStringResource(R.plurals.friends_plural, stats.friendsCount),
+                                    pluralStringResource(R.plurals.friends_plural, stats.friendsCount, stats.friendsCount),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     color = MaterialTheme.colorScheme.secondary,
@@ -520,7 +514,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    pluralStringResource(R.plurals.cards_plural, stats.cardCount),
+                                    pluralStringResource(R.plurals.cards_plural, stats.cardCount, stats.cardCount),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     color = MaterialTheme.colorScheme.secondary,
@@ -563,14 +557,14 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     showEditAbout = true
                                 } else {
                                     profile?.about?.copyToClipboard(context)
-                                    Toast.makeText(context, copiedString, Toast.LENGTH_SHORT).show()
+                                    context.toast(copiedString)
                                 }
                             }
                             .padding(PaddingDefault)
                     ) {
                         if (isMe || profile?.about?.isBlank() == false) {
                             LinkifyText(
-                                profile?.about ?: (if (isMe) stringResource(R.string.add_about_you) else ""),
+                                profile?.about ?: (if (isMe) stringResource(R.string.indroduce_yourself) else ""),
                                 color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
@@ -588,7 +582,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         }
 
         items(cards, key = { it.id!! }) { card ->
-            BasicCard(
+            CardItem(
                 {
                     navController.navigate("card/${card.id!!}")
                 },

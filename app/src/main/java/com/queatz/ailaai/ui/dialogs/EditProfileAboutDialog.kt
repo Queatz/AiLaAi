@@ -1,7 +1,5 @@
 package com.queatz.ailaai.ui.dialogs
 
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -16,7 +14,7 @@ fun EditProfileAboutDialog(onDismissRequest: () -> Unit, initialValue: String, o
 
     TextFieldDialog(
         onDismissRequest,
-        stringResource(R.string.about_you),
+        stringResource(R.string.introduction),
         stringResource(R.string.update),
         false,
         initialValue,

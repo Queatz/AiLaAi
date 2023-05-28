@@ -3,8 +3,6 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,7 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,17 +28,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.components.BasicCard
-import com.queatz.ailaai.ui.components.CardConversation
-import com.queatz.ailaai.ui.components.EditCard
-import com.queatz.ailaai.ui.components.Video
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -51,24 +44,23 @@ import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavController, me: () -> Person?) {
-    val cardId = navBackStackEntry.arguments!!.getString("id")!!
+fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) {
     var addedCardId by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var notFound by remember { mutableStateOf(false) }
-    var showMenu by remember { mutableStateOf(false) }
-    var showManageMenu by remember { mutableStateOf(false) }
-    var openDeleteCard by remember { mutableStateOf(false) }
-    var openLocationDialog by remember { mutableStateOf(false) }
-    var openEditDialog by remember { mutableStateOf(false) }
-    var openChangeOwner by remember { mutableStateOf(false) }
-    var showQrCode by rememberSaveable { mutableStateOf(false) }
-    var showSendDialog by rememberSaveable { mutableStateOf(false) }
-    var openAddCollaboratorDialog by rememberSaveable { mutableStateOf(false) }
-    var openRemoveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
-    var openCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
-    var openLeaveCollaboratorsDialog by rememberSaveable { mutableStateOf(false) }
-    var showSetCategory by remember { mutableStateOf(false) }
+    var isLoading by rememberStateOf(false)
+    var notFound by rememberStateOf(false)
+    var showMenu by rememberStateOf(false)
+    var showManageMenu by rememberStateOf(false)
+    var openDeleteCard by rememberStateOf(false)
+    var openLocationDialog by rememberStateOf(false)
+    var openEditDialog by rememberStateOf(false)
+    var openChangeOwner by rememberStateOf(false)
+    var showQrCode by rememberSavableStateOf(false)
+    var showSendDialog by rememberSavableStateOf(false)
+    var openAddCollaboratorDialog by rememberSavableStateOf(false)
+    var openRemoveCollaboratorsDialog by rememberSavableStateOf(false)
+    var openCollaboratorsDialog by rememberSavableStateOf(false)
+    var openLeaveCollaboratorsDialog by rememberSavableStateOf(false)
+    var showSetCategory by rememberStateOf(false)
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
@@ -76,7 +68,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     val stateLandscape = rememberLazyGridState()
     val context = LocalContext.current
     var uploadJob by remember { mutableStateOf<Job?>(null) }
-    var isUploadingVideo by remember { mutableStateOf(false) }
+    var isUploadingVideo by rememberStateOf(false)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
 
@@ -213,7 +205,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 showManageMenu = false
             }
         ) {
-            item(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
+            menuItem(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
                 card?.let { card ->
                     scope.launch {
                         try {
@@ -222,11 +214,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                                 Card(active = card.active?.not() ?: true)
                             )
                             card.active = update.active
-                            Toast.makeText(
-                                context,
-                                context.getString(if (card.active == true) R.string.published else R.string.draft),
-                                LENGTH_SHORT
-                            ).show()
+                            context.toast(if (card.active == true) R.string.published else R.string.draft)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -234,11 +222,11 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
                 showManageMenu = false
             }
-            item(stringResource(R.string.change_owner)) {
+            menuItem(stringResource(R.string.change_owner)) {
                 openChangeOwner = true
                 showManageMenu = false
             }
-            item(stringResource(R.string.delete_card)) {
+            menuItem(stringResource(R.string.delete_card)) {
                 openDeleteCard = true
                 showManageMenu = false
             }
@@ -266,11 +254,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 }
             },
             navigationIcon = {
-                IconButton({
-                    navController.popBackStackOrFinish()
-                }) {
-                    Icon(Icons.Outlined.ArrowBack, Icons.Outlined.ArrowBack.name)
-                }
+                BackButton(navController)
             },
             actions = {
                 card?.let { card ->
@@ -278,18 +262,11 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                         scope.launch {
                             when (saves.toggleSave(card)) {
                                 ToggleSaveResult.Saved -> {
-                                    Toast.makeText(context, context.getString(R.string.card_saved), LENGTH_SHORT)
-                                        .show()
+                                    context.toast(R.string.card_saved)
                                 }
-
                                 ToggleSaveResult.Unsaved -> {
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.card_unsaved),
-                                        LENGTH_SHORT
-                                    ).show()
+                                    context.toast(R.string.card_unsaved)
                                 }
-
                                 else -> {
                                     context.showDidntWork()
                                 }
@@ -449,14 +426,14 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                     DropdownMenuItem({
                         Text(stringResource(R.string.share))
                     }, {
-                        cardUrl(cardId).shareAsUrl(context, card?.name)
+                        cardUrl(cardId).shareAsUrl(context, card?.name ?: cardString)
                         showMenu = false
                     })
                     DropdownMenuItem({
                         Text(stringResource(R.string.copy_link))
                     }, {
                         cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
-                        Toast.makeText(context, textCopied, LENGTH_SHORT).show()
+                        context.toast(textCopied)
                         showMenu = false
                     })
                 }
@@ -487,7 +464,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
             )
         } else {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
-            var verticalAspect by remember { mutableStateOf(false) }
+            var verticalAspect by rememberStateOf(false)
             val headerAspect by animateFloatAsState(if (verticalAspect) .75f else 1.5f)
             var playingVideo by remember { mutableStateOf<Card?>(null) }
             val isAtTop by state.isAtTop()
@@ -558,7 +535,7 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
 //                        }
                     } else {
                         items(cards, { it.id!! }) {
-                            BasicCard(
+                            CardItem(
                                 {
                                     navController.navigate("card/${it.id!!}")
                                 },
@@ -741,17 +718,19 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
     }
 
     if (openCollaboratorsDialog && collaborators.isNotEmpty()) {
-        GroupMembersDialog({
-            openCollaboratorsDialog = false
-        }, collaborators, infoFormatter = { person ->
-            if (person.id == me()?.id) {
-                context.getString(R.string.leave)
-            } else {
-                person.seen?.timeAgo()?.let { timeAgo ->
-                    "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+        PeopleDialog(
+            stringResource(R.string.collaborators),
+            {
+                openCollaboratorsDialog = false
+            }, collaborators, infoFormatter = { person ->
+                if (person.id == me()?.id) {
+                    context.getString(R.string.leave)
+                } else {
+                    person.seen?.timeAgo()?.let { timeAgo ->
+                        "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                    }
                 }
-            }
-        }) { person ->
+            }) { person ->
             if (person.id == me()?.id) {
                 openLeaveCollaboratorsDialog = true
                 openCollaboratorsDialog = false
@@ -778,32 +757,35 @@ fun CardScreen(navBackStackEntry: NavBackStackEntry, navController: NavControlle
                 R.string.send_card_to_groups,
                 R.string.send_card_to_x_groups
             ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
-            me = me(),
-            onGroupsSelected = { groups ->
-                try {
-                    coroutineScope {
-                        groups.map { group ->
-                            async {
-                                api.sendMessage(
-                                    group.id!!,
-                                    Message(attachment = json.encodeToString(CardAttachment(cardId)))
-                                )
-                            }
-                        }.awaitAll()
-                    }
-                    Toast.makeText(context, sent, LENGTH_SHORT).show()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    context.showDidntWork()
+            me = me()
+        ) { groups ->
+            try {
+                coroutineScope {
+                    groups.map { group ->
+                        async {
+                            api.sendMessage(
+                                group.id!!,
+                                Message(attachment = json.encodeToString(CardAttachment(cardId)))
+                            )
+                        }
+                    }.awaitAll()
                 }
+                context.toast(sent)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                context.showDidntWork()
             }
-        )
+        }
     }
 
     if (showQrCode) {
-        ShareCardQrCodeDialog({
-            showQrCode = false
-        }, cardUrl(cardId), card?.name)
+        QrCodeDialog(
+            {
+                showQrCode = false
+            },
+            cardUrl(cardId),
+            card?.name
+        )
     }
 }
 

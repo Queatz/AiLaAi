@@ -1,9 +1,7 @@
 package com.queatz.ailaai.extensions
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable

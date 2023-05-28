@@ -6,6 +6,7 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.rememberStateOf
 
 
 @Composable
@@ -19,7 +20,7 @@ fun ChoosePeopleDialog(
     extraButtons: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
 ) {
-    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by rememberStateOf(false)
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var people by remember { mutableStateOf(listOf<Person>()) }
@@ -62,10 +63,10 @@ fun ChoosePeopleDialog(
         key = { it.id!! },
         selected = selected,
         onSelectedChange = {
-            if (multiple) {
-                selected = it
+            selected = if (multiple) {
+                it
             } else {
-                selected = it - selected
+                it - selected
             }
         },
         onConfirm = onPeopleSelected

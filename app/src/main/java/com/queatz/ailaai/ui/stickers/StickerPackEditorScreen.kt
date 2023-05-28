@@ -1,0 +1,324 @@
+package com.queatz.ailaai.ui.stickers
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import com.queatz.ailaai.*
+import com.queatz.ailaai.R
+import com.queatz.ailaai.api.*
+import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.dialogs.Alert
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.ailaai.ui.theme.ElevationDefault
+import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StickerPackEditorScreen(navController: NavController, stickerPackId: String, me: () -> Person?) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var stickerPack by rememberStateOf<StickerPack?>(null)
+    var showDeleteDialog by rememberStateOf(false)
+    var showRenameDialog by rememberStateOf(false)
+    var showDescriptionDialog by rememberStateOf(false)
+    var showStickerMenu by rememberStateOf<Sticker?>(null)
+    var showRenameStickerDialog by rememberStateOf<Sticker?>(null)
+    var showStickerMessageDialog by rememberStateOf<Sticker?>(null)
+    var showDeleteStickerDialog by rememberStateOf<Sticker?>(null)
+    val recomposeScope = currentRecomposeScope
+
+    suspend fun reload() {
+        try {
+            stickerPack = api.stickerPack(stickerPackId)
+            stickers.reload()
+            recomposeScope.invalidate() // because stickers.has() may have changed
+        } catch (e: Exception) {
+            e.printStackTrace()
+            context.showDidntWork()
+        }
+    }
+
+    showStickerMenu?.let { sticker ->
+        Menu(
+            {
+                showStickerMenu = null
+            }
+        ) {
+            menuItem(if (sticker.name.isNullOrBlank()) stringResource(R.string.add_name) else stringResource(R.string.rename)) {
+                showStickerMenu = null
+                showRenameStickerDialog = sticker
+            }
+            menuItem(stringResource(R.string.message_noun)) {
+                showStickerMenu = null
+                showStickerMessageDialog = sticker
+            }
+            menuItem(stringResource(R.string.delete)) {
+                showStickerMenu = null
+                showDeleteStickerDialog = sticker
+            }
+        }
+    }
+
+    showRenameStickerDialog?.let { sticker ->
+        TextFieldDialog(
+            {
+                showRenameStickerDialog = null
+            },
+            title = stringResource(R.string.sticker_name),
+            button = stringResource(R.string.rename),
+            placeholder = stringResource(R.string.name),
+            initialValue = sticker.name ?: "",
+            singleLine = true
+        ) { value ->
+            try {
+                api.updateSticker(sticker.id!!, Sticker(name = value))
+                reload()
+                showRenameStickerDialog = null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                context.showDidntWork()
+            }
+        }
+    }
+
+    showStickerMessageDialog?.let { sticker ->
+        TextFieldDialog(
+            {
+                showStickerMessageDialog = null
+            },
+            title = stringResource(R.string.message_noun),
+            button = stringResource(R.string.update),
+            initialValue = sticker.message ?: "",
+            singleLine = true
+        ) { value ->
+            try {
+                api.updateSticker(sticker.id!!, Sticker(message = value))
+                reload()
+                showStickerMessageDialog = null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                context.showDidntWork()
+            }
+        }
+    }
+
+    showDeleteStickerDialog?.let { sticker ->
+        Alert(
+            { showDeleteStickerDialog = null },
+            title = stringResource(R.string.delete_sticker),
+            text = stringResource(R.string.you_cannot_undo_this_sticker),
+            dismissButton = stringResource(R.string.cancel),
+            confirmButton = stringResource(R.string.delete),
+            confirmColor = MaterialTheme.colorScheme.error
+        ) {
+            scope.launch {
+                try {
+                    api.deleteSticker(sticker.id!!)
+                    reload()
+                    showDeleteStickerDialog = null
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    context.showDidntWork()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(stickerPackId) {
+        try {
+            stickerPack = api.stickerPack(stickerPackId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            context.showDidntWork()
+        }
+    }
+
+    if (showRenameDialog) {
+        TextFieldDialog(
+            {
+                showRenameDialog = false
+            },
+            title = stringResource(R.string.rename_sticker_pack),
+            button = stringResource(R.string.rename),
+            placeholder = stringResource(R.string.name),
+            initialValue = stickerPack?.name ?: "",
+            singleLine = true
+        ) { value ->
+            try {
+                stickerPack = api.updateStickerPack(stickerPackId, StickerPack(name = value))
+                showRenameDialog = false
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                context.showDidntWork()
+            }
+        }
+    }
+
+    if (showDescriptionDialog) {
+        TextFieldDialog(
+            {
+                showDescriptionDialog = false
+            },
+            title = stringResource(R.string.introduction),
+            button = stringResource(R.string.update),
+            initialValue = stickerPack?.description ?: ""
+        ) { value ->
+            try {
+                stickerPack = api.updateStickerPack(stickerPackId, StickerPack(description = value))
+                showDescriptionDialog = false
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                context.showDidntWork()
+            }
+        }
+    }
+
+    if (showDeleteDialog) {
+        Alert(
+            { showDeleteDialog = false },
+            title = stringResource(R.string.delete_sticker_pack),
+            text = stringResource(R.string.you_cannot_undo_this_sticker_pack),
+            dismissButton = stringResource(R.string.cancel),
+            confirmButton = stringResource(R.string.delete),
+            confirmColor = MaterialTheme.colorScheme.error
+        ) {
+            scope.launch {
+                try {
+                    api.deleteStickerPack(stickerPackId)
+                    stickers.reload()
+                    showDeleteDialog = false
+                    navController.popBackStack()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    context.showDidntWork()
+                }
+            }
+        }
+    }
+
+    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) {
+        if (it.isEmpty()) return@rememberLauncherForActivityResult
+
+        scope.launch {
+            try {
+                it.forEach {
+                    api.createSticker(stickerPackId, it, context)
+                }
+                reload()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                if (ex is FileSizeException) {
+                    context.toast(R.string.max_sticker_size)
+                } else {
+                    context.showDidntWork()
+                }
+            }
+        }
+    }
+
+    Column(
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        TopAppBar(
+            title = {
+                Text(
+                    stickerPack?.name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.sticker_pack),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            navigationIcon = {
+                BackButton(navController)
+            },
+            actions = {
+                var showMenu by rememberStateOf(false)
+                stickerPack?.let { stickerPack ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+                    ) {
+                        UseStickerPackButton(stickerPack) {
+                            scope.launch {
+                                reload()
+                            }
+                        }
+                        IconButton(
+                            {
+                                showMenu = true
+                            }
+                        ) {
+                            Icon(Icons.Outlined.MoreVert, null)
+                            DropdownMenu(showMenu, { showMenu = false }) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.rename))
+                                }, {
+                                    showMenu = false
+                                    showRenameDialog = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.introduction))
+                                }, {
+                                    showMenu = false
+                                    showDescriptionDialog = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.delete))
+                                }, {
+                                    showMenu = false
+                                    showDeleteDialog = true
+                                })
+                            }
+                        }
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            val stickerPack = stickerPack
+            if (stickerPack == null) {
+                Loading()
+            } else {
+                StickerPackContents(
+                    stickerPack,
+                    showAddStickerButton = true,
+                    onAddStickerClick = {
+                        photoLauncher.launch("image/png")
+                    },
+                    onStickerLongClick = {
+                        scope.launch {
+                            say.say(it.message)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    showStickerMenu = it
+                }
+            }
+        }
+    }
+}

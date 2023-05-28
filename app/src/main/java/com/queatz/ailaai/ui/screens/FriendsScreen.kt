@@ -11,7 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,6 +27,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.AppHeader
@@ -48,11 +49,11 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     var allGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
     var allPeople by remember { mutableStateOf(emptyList<Person>()) }
     var results by remember { mutableStateOf(emptyList<SearchResult>()) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by rememberStateOf(true)
     var createGroupName by remember { mutableStateOf("") }
-    var showCreateGroupName by remember { mutableStateOf(false) }
-    var showCreateGroupMembers by remember { mutableStateOf(false) }
-    var showPushPermissionDialog by remember { mutableStateOf(false) }
+    var showCreateGroupName by rememberStateOf(false)
+    var showCreateGroupMembers by rememberStateOf(false)
+    var showPushPermissionDialog by rememberStateOf(false)
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -204,7 +205,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     modifier = Modifier
                         .padding(start = PaddingDefault * 2)
                 ) {
-                    Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                    Icon(Icons.Outlined.GroupAdd, stringResource(R.string.new_group))
                 }
             }
         }

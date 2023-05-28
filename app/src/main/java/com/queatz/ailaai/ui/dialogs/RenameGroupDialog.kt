@@ -1,7 +1,5 @@
 package com.queatz.ailaai.ui.dialogs
 
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource

@@ -26,10 +26,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
 val json = Json {
@@ -48,7 +48,7 @@ class Api {
     private val _onUnauthorized = MutableSharedFlow<Unit>()
     val onUnauthorized = _onUnauthorized.asSharedFlow()
 
-    private lateinit var context: Context
+    internal lateinit var context: Context
 
     internal val baseUrl = "https://api.ailaai.app"
 //    private val baseUrl = "http://10.0.2.2:8080"
@@ -77,6 +77,10 @@ class Api {
 
     private val httpData = HttpClient {
         expectSuccess = true
+
+        install(ContentNegotiation) {
+            json(json)
+        }
     }
 
     private var token: String? = null
@@ -89,26 +93,30 @@ class Api {
         }
     }
 
+    fun client() = http
+    fun dataClient() = httpData
+
     fun signout() {
         setToken(null)
     }
 
     fun url(it: String) = "$baseUrl$it"
 
-    private suspend inline fun <reified R : Any> post(
+    internal suspend inline fun <reified R : Any> post(
         url: String,
         noinline progressCallback: ((Float) -> Unit)? = null,
         client: HttpClient = http,
     ): R = post(url, null as String?, progressCallback, client)
 
-    private suspend inline fun <reified R : Any, reified T : Any> post(
+    internal suspend inline fun <reified R : Any, reified T : Any> post(
         url: String,
         body: T?,
         noinline progressCallback: ((Float) -> Unit)? = null,
         client: HttpClient = http,
     ): R = client.post("$baseUrl/${url}") {
         onUpload { bytesSentTotal, contentLength ->
-            val progress = if (contentLength > 0) (bytesSentTotal.toDouble() / contentLength.toDouble()).toFloat() else 0f
+            val progress =
+                if (contentLength > 0) (bytesSentTotal.toDouble() / contentLength.toDouble()).toFloat() else 0f
             progressCallback?.invoke(progress)
         }
 
@@ -123,7 +131,7 @@ class Api {
         setBody(body)
     }.body()
 
-    private suspend inline fun <reified T : Any> get(
+    internal suspend inline fun <reified T : Any> get(
         url: String,
         parameters: Map<String, String>? = null,
         client: HttpClient = http,
@@ -213,13 +221,14 @@ class Api {
         )
     }
 
-    suspend fun cards(geo: LatLng, offset: Int = 0, limit: Int = 20, search: String? = null): List<Card> = get("cards", mapOf(
-        "geo" to "${geo.latitude},${geo.longitude}",
-        "offset" to offset.toString(),
-        "limit" to limit.toString()
-    ) + (search?.let {
-        mapOf("search" to search)
-    } ?: mapOf()))
+    suspend fun cards(geo: LatLng, offset: Int = 0, limit: Int = 20, search: String? = null): List<Card> =
+        get("cards", mapOf(
+            "geo" to "${geo.latitude},${geo.longitude}",
+            "offset" to offset.toString(),
+            "limit" to limit.toString()
+        ) + (search?.let {
+            mapOf("search" to search)
+        } ?: mapOf()))
 
     suspend fun categories(geo: LatLng): List<String> = get(
         "categories",
@@ -257,14 +266,14 @@ class Api {
     suspend fun invite(): Invite = get("invite")
 
     suspend fun updateMyPhoto(photo: Uri): HttpStatusCode {
-        val scaledPhoto = photo . asScaledJpeg (context)
+        val scaledPhoto = photo.asScaledJpeg(context)
         return post("me/photo", MultiPartFormDataContent(
-                formData {
-            append("photo", scaledPhoto, Headers.build {
-                append(HttpHeaders.ContentType, "image/jpg")
-                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-            })
-        }
+            formData {
+                append("photo", scaledPhoto, Headers.build {
+                    append(HttpHeaders.ContentType, "image/jpg")
+                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                })
+            }
         ), client = httpData)
     }
 
@@ -329,6 +338,8 @@ class Api {
 
     suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
 
+    suspend fun message(message: String): Message = get("messages/$message")
+
     suspend fun messagesBefore(group: String, before: Instant): List<Message> = get(
         "groups/$group/messages",
         mapOf(
@@ -338,12 +349,15 @@ class Api {
 
     suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
 
-    suspend fun sendMedia(group: String, photos: List<Uri>): HttpStatusCode {
+    suspend fun sendMedia(group: String, photos: List<Uri>, message: Message? = null): HttpStatusCode {
         val scaledPhotos = photos.map {
             it.asScaledJpeg(context)
         }
         return post("groups/$group/photos", MultiPartFormDataContent(
             formData {
+                if (message != null) {
+                    append("message", json.encodeToString(message))
+                }
                 scaledPhotos.forEachIndexed { index, photo ->
                     append(
                         "photo[$index]",
@@ -358,9 +372,12 @@ class Api {
         ), client = httpData)
     }
 
-    suspend fun sendAudio(group: String, audio: File): HttpStatusCode {
+    suspend fun sendAudio(group: String, audio: File, message: Message? = null): HttpStatusCode {
         return post("groups/$group/audio", MultiPartFormDataContent(
             formData {
+                if (message != null) {
+                    append("message", json.encodeToString(message))
+                }
                 append(
                     "audio",
                     audio.asInputProvider(),
@@ -415,14 +432,14 @@ class MemberAndPerson(
 @Serializable
 data class ProfileStats(
     val friendsCount: Int,
-    val cardCount: Int
+    val cardCount: Int,
 )
 
 @Serializable
 data class PersonProfile(
     val person: Person,
     val profile: Profile,
-    val stats: ProfileStats
+    val stats: ProfileStats,
 )
 
 @Serializable

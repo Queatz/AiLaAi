@@ -1,19 +1,24 @@
 package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.rememberStateOf
 import kotlinx.coroutines.launch
 
 @Composable
 fun DeleteCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Unit) {
-    var disableSubmit by remember { mutableStateOf(false) }
+    var disableSubmit by rememberStateOf(false)
     val coroutineScope = rememberCoroutineScope()
 
-    AlertDialog(onDismissRequest,
+    AlertDialog(
+        onDismissRequest,
         confirmButton = {
             TextButton(
                 {
@@ -48,6 +53,6 @@ fun DeleteCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> U
             Text(stringResource(R.string.delete_this_card_q))
         },
         text = {
-            Text(stringResource(R.string.you_cannot_undo_this))
+            Text(stringResource(R.string.you_cannot_undo_this_card))
         })
 }

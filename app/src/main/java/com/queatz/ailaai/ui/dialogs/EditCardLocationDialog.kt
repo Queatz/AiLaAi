@@ -37,6 +37,8 @@ import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.extensions.isTrue
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -55,7 +57,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
     val coroutineScope = rememberCoroutineScope()
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val scrollState = rememberScrollState()
-    var scrollEnabled by remember { mutableStateOf(true) }
+    var scrollEnabled by rememberStateOf(true)
 
     var cardParentType by remember { mutableStateOf<CardParentType?>(null) }
 
@@ -281,7 +283,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         .aspectRatio(.75f)
                                 ) {
                                     items(shownCards, { it.id!! }) {
-                                        BasicCard(
+                                        CardItem(
                                             {
                                                 parentCard = it
                                                 card.parent = it.id
@@ -298,7 +300,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                             }
 
                             else -> {
-                                BasicCard(
+                                CardItem(
                                     {
                                         parentCard = null
                                         card.parent = null
@@ -332,7 +334,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                var disableSaveButton by remember { mutableStateOf(false) }
+                var disableSaveButton by rememberStateOf(false)
 
                 TextButton(
                     {

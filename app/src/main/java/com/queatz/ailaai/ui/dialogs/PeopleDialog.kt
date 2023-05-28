@@ -4,15 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
@@ -20,9 +17,11 @@ import com.queatz.ailaai.ui.components.PersonMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupMembersDialog(
+fun PeopleDialog(
+    title: String,
     onDismissRequest: () -> Unit,
     people: List<Person>,
+    showCountInTitle: Boolean = true,
     infoFormatter: (Person) -> String? = { null },
     extraButtons: @Composable RowScope.() -> Unit = {},
     onClick: (Person) -> Unit,
@@ -33,7 +32,7 @@ fun GroupMembersDialog(
                 .padding(PaddingDefault * 3)
         ) {
             Text(
-                "${stringResource(R.string.members)} (${people.size})",
+                if (showCountInTitle) "$title (${people.size})" else title,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )

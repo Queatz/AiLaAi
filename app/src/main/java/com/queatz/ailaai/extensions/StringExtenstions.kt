@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.queatz.ailaai.api
@@ -15,6 +19,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+
+fun String.wordCount() = if (isBlank()) 0 else trim().split("\\s+".toRegex()).size
 
 fun String.launchUrl(context: Context) {
     context.startActivity(
@@ -80,16 +86,21 @@ suspend fun Bitmap.share(context: Context, name: String?): Boolean {
 
 suspend fun Bitmap.uri(context: Context): Uri? {
     val path = File(context.cacheDir, "share")
-    withContext(Dispatchers.IO) {
+    path.mkdirs()
+    val result = withContext(Dispatchers.IO) {
+        val stream = FileOutputStream("$path/share.jpg")
         try {
-            path.mkdirs()
-            val stream = FileOutputStream("$path/share.jpg")
             compress(Bitmap.CompressFormat.JPEG, 100, stream)
-            stream.close()
         } catch (e: IOException) {
             e.printStackTrace()
             null
+        } finally {
+            stream.close()
         }
+    }
+
+    if (result == null) {
+        return null
     }
 
     val newFile = File(path, "share.jpg")
@@ -98,9 +109,23 @@ suspend fun Bitmap.uri(context: Context): Uri? {
 
 suspend fun String.downloadAudio(context: Context): Uri? {
     val path = File(context.cacheDir, "share")
-    val stream = FileOutputStream("$path/audio.mp4")
-    api.downloadFile(this, stream)
-    stream.close()
+    path.mkdirs()
+    val result = withContext(Dispatchers.IO) {
+        val stream = FileOutputStream("$path/audio.mp4")
+        try {
+            api.downloadFile(this@downloadAudio, stream)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        } finally {
+            stream.close()
+        }
+    }
+
+    if (result == null) {
+        return null
+    }
+
     val newFile = File(path, "audio.mp4")
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
 }
@@ -109,3 +134,6 @@ suspend fun String.shareAudio(context: Context, name: String?): Boolean {
     shareFile(downloadAudio(context) ?: return false, context, name, ContentType.Audio.MP4)
     return true
 }
+
+fun <R : Any> AnnotatedString.Builder.bold(block: AnnotatedString.Builder.() -> R) =
+    withStyle(SpanStyle(fontWeight = FontWeight.Bold), block)
