@@ -116,6 +116,7 @@
     <string name="update_available">Update available</string>
     <string name="download">Download</string>
     <string name="card_not_found">Card not found</string>
+    <string name="story_not_found">Story not found</string>
     <string name="leave">Leave</string>
     <string name="leave_group">Leave group?</string>
     <string name="members">Members</string>

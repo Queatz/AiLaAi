@@ -112,6 +112,7 @@
     <string name="update_available">Có cập nhật mới nè</string>
     <string name="download">Tải xuống ngay</string>
     <string name="card_not_found">Không tìm được thẻ này</string>
+    <string name="story_not_found">Không tìm được bản tin này</string>
     <string name="leave">Rời khỏi</string>
     <string name="leave_group">Rời khỏi nhóm này không?</string>
     <string name="members">Thành viên</string>

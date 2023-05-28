@@ -74,6 +74,7 @@ fun ColumnScope.MessageContent(
     var attachedCard by remember { mutableStateOf<Card?>(null) }
     var attachedReply by remember { mutableStateOf<Message?>(null) }
     var attachedStory by remember { mutableStateOf<Story?>(null) }
+    var attachedStoryNotFound by remember { mutableStateOf(false) }
     var attachedAudio by remember { mutableStateOf<String?>(null) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
 
@@ -234,7 +235,15 @@ fun ColumnScope.MessageContent(
 
     LaunchedEffect(Unit) {
         attachedStoryId?.let { storyId ->
-            attachedStory = api.story(storyId)
+            try {
+                attachedStory = api.story(storyId)
+            } catch (e: Exception) {
+                if (e.status == HttpStatusCode.NotFound) {
+                    attachedStoryNotFound = true
+                } else {
+                    e.printStackTrace()
+                }
+            }
         }
     }
 
@@ -516,7 +525,7 @@ fun ColumnScope.MessageContent(
                     )
                 } ?: run {
                     Text(
-                        stringResource(R.string.please_wait),
+                        if (attachedStoryNotFound) stringResource(R.string.story_not_found) else stringResource(R.string.please_wait),
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.alpha(0.5f)
                     )
