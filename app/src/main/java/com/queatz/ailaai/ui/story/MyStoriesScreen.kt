@@ -122,7 +122,6 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                     scope.launch {
                         try {
                             val story = api.createStory(Story(title = null))
-                            reload() // ideally, this shouldn't slow down navigation, todo scope.launch is cancelled on navigation
                             navController.navigate("write/${story.id}")
                         } catch (e: Exception) {
                             e.printStackTrace()

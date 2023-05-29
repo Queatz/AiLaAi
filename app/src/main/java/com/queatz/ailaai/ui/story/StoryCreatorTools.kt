@@ -99,6 +99,9 @@ fun StoryCreatorTools(storyId: String, addPart: (part: StoryContent) -> Unit) {
                     addPart(
                         StoryContent.Section("")
                     )
+                    addPart(
+                        StoryContent.Text("")
+                    )
                 },
                 Icons.Outlined.Notes to {
                     addPart(

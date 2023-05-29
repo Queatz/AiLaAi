@@ -31,17 +31,22 @@ fun ReorderStoryContentsDialog(
     storyContents: List<StoryContent>,
     onStoryContents: (List<StoryContent>) -> Unit
 ) {
+    // todo, why can't just use storyContents?
+    var currentStoryContents by remember { mutableStateOf(storyContents) }
+
     ReorderDialog(
         {
             onDismissRequest()
         },
         list = true,
-        items = storyContents,
-        key = { it.hashCode() }, // todo better key? section id?
+        items = currentStoryContents,
+        key = { it.key },
         onMove = { from, to ->
             onStoryContents(
-                storyContents.toMutableList().apply {
+                currentStoryContents.toMutableList().apply {
                     add(to.index, removeAt(from.index))
+                }.also {
+                    currentStoryContents = it
                 }
             )
         },

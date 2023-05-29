@@ -4,14 +4,13 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.Story
 import com.queatz.ailaai.extensions.wordCount
 import com.queatz.ailaai.json
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
+import kotlin.random.Random
 
 @Serializable
-sealed class StoryContent {
+sealed class StoryContent(val key: Long = Random.nextLong()) {
     object Divider : StoryContent()
     class Title(var title: String, val id: String) : StoryContent()
     class Authors(var publishDate: Instant?, var authors: List<Person>) : StoryContent()

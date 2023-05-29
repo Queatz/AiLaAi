@@ -87,7 +87,7 @@ suspend fun Bitmap.share(context: Context, name: String?): Boolean {
 suspend fun Bitmap.uri(context: Context): Uri? {
     val path = File(context.cacheDir, "share")
     path.mkdirs()
-    val result = withContext(Dispatchers.IO) {
+    withContext(Dispatchers.IO) {
         val stream = FileOutputStream("$path/share.jpg")
         try {
             compress(Bitmap.CompressFormat.JPEG, 100, stream)
@@ -97,11 +97,7 @@ suspend fun Bitmap.uri(context: Context): Uri? {
         } finally {
             stream.close()
         }
-    }
-
-    if (result == null) {
-        return null
-    }
+    } ?: return null
 
     val newFile = File(path, "share.jpg")
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
@@ -110,7 +106,7 @@ suspend fun Bitmap.uri(context: Context): Uri? {
 suspend fun String.downloadAudio(context: Context): Uri? {
     val path = File(context.cacheDir, "share")
     path.mkdirs()
-    val result = withContext(Dispatchers.IO) {
+    withContext(Dispatchers.IO) {
         val stream = FileOutputStream("$path/audio.mp4")
         try {
             api.downloadFile(this@downloadAudio, stream)
@@ -120,11 +116,7 @@ suspend fun String.downloadAudio(context: Context): Uri? {
         } finally {
             stream.close()
         }
-    }
-
-    if (result == null) {
-        return null
-    }
+    } ?: return null
 
     val newFile = File(path, "audio.mp4")
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)

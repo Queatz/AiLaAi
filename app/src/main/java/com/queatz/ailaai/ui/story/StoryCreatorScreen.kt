@@ -306,7 +306,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
             storyContents.forEachIndexed { partIndex, part ->
                 when (part) {
                     is StoryContent.Title -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
                             val focusRequester = remember { FocusRequester() }
                             LaunchedEffect(currentFocus) {
                                 if (currentFocus == partIndex) {
@@ -333,7 +333,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     }
 
                     is StoryContent.Section -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
                             val focusRequester = remember { FocusRequester() }
                             LaunchedEffect(currentFocus) {
                                 if (currentFocus == partIndex) {
@@ -363,7 +363,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     }
 
                     is StoryContent.Text -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
                             val focusRequester = remember { FocusRequester() }
                             LaunchedEffect(currentFocus) {
                                 if (currentFocus == partIndex) {
@@ -391,7 +391,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     }
 
                     is StoryContent.Audio -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
                             Card(
                                 shape = MaterialTheme.shapes.large,
                                 modifier = Modifier
@@ -420,7 +420,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     }
 
                     is StoryContent.Cards -> {
-                        itemsIndexed(part.cards) { index, cardId ->
+                        itemsIndexed(part.cards, key = { index, it -> "${part.key}.$it" }) { index, cardId ->
                             var showCardMenu by rememberStateOf(false)
                             var showAddCardDialog by rememberStateOf(false)
                             var showReorderDialog by rememberStateOf(false)
@@ -531,7 +531,8 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                             part.photos,
                             span = { index, item ->
                                 GridItemSpan(if (index == 0) maxLineSpan else if (index % 3 == 1) 1 else maxCurrentLineSpan)
-                            }
+                            },
+                            key = { index, it -> "${part.key}.$it" }
                         ) { index, it ->
                             var showPhotoMenu by rememberStateOf(false)
                             var showPhotoAspectMenu by rememberStateOf(false)

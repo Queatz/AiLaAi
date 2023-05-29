@@ -348,7 +348,7 @@ class MainActivity : AppCompatActivity() {
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
-                                                        if (item.route == "stories") {
+                                                        if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0) {
                                                             Text(
                                                                 (presence?.unreadStoriesCount ?: 0).toString(),
                                                                 fontWeight = FontWeight.Bold

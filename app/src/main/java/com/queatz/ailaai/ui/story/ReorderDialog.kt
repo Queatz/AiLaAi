@@ -51,7 +51,7 @@ fun <T> ReorderDialog(
             ) {
                 items(items, key = key) {
                     if (draggable(it)) {
-                        ReorderableItem(reorderState, key = it) { isDragging ->
+                        ReorderableItem(reorderState, key = key(it)) { isDragging ->
                             val elevation by animateDpAsState(if (isDragging) ElevationDefault * 2 else 0.dp)
                             item(it, elevation)
                         }
@@ -75,7 +75,7 @@ fun <T> ReorderDialog(
             ) {
                 items(items, key = key) {
                     if (draggable(it)) {
-                        ReorderableItem(reorderState, key = it) { isDragging ->
+                        ReorderableItem(reorderState, key(it)) { isDragging ->
                             val elevation by animateDpAsState(if (isDragging) ElevationDefault * 2 else 0.dp)
                             item(it, elevation)
                         }
