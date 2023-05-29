@@ -101,7 +101,7 @@ fun StoryMenu(
             onDismissRequest()
         }
     ) {
-        if (!edited) {
+        if (!edited && editing) {
             DropdownMenuItem({ Text(stringResource(R.string.preview)) }, {
                 navController.navigate("story/$storyId")
             })
@@ -139,7 +139,7 @@ fun StoryMenu(
             })
         }
         DropdownMenuItem({ Text(stringResource(R.string.share)) }, {
-            storyUrl(storyId).shareAsUrl(context, story?.title ?: storyString)
+            storyUrl(story?.url ?: storyId).shareAsUrl(context, story?.title ?: storyString)
             onDismissRequest()
         })
         DropdownMenuItem({ Text(stringResource(R.string.copy_link)) }, {

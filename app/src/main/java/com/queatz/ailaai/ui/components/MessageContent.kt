@@ -491,7 +491,9 @@ fun ColumnScope.MessageContent(
     attachedStoryId?.also { storyId ->
         Card(
             onClick = {
-                navController.navigate("story/$storyId")
+                if (!attachedStoryNotFound) {
+                    navController.navigate("story/$storyId")
+                }
             },
             shape = MaterialTheme.shapes.large,
             modifier = Modifier.padding(PaddingDefault).let {

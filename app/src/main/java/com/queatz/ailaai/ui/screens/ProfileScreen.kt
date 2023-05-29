@@ -59,12 +59,23 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var showJoined by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
+    var showQrCodeDialog by rememberStateOf(false)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
     var isUploadingVideo by rememberStateOf(false)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
 
     val context = LocalContext.current
+
+    if (showQrCodeDialog) {
+        QrCodeDialog(
+            {
+                showQrCodeDialog = false
+            },
+            profileUrl(personId),
+            person?.name
+        )
+    }
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -298,8 +309,9 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 .padding(PaddingDefault)
                         )
                     }
+                    val containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
                     val colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
+                        containerColor = containerColor
                     )
                     IconButton(
                         {
@@ -318,20 +330,40 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                         )
                     }
                     if (isMe) {
-                        IconButton(
-                            {
-                                navController.navigate("settings")
-                            },
-                            colors = colors,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(PaddingDefault)
+                                .padding(PaddingDefault + 2.dp)
+                                .clip(MaterialTheme.shapes.extraLarge)
+                                .background(containerColor)
                         ) {
-                            Icon(
-                                Icons.Outlined.Settings,
-                                stringResource(R.string.settings),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            IconButton(
+                                {
+                                    showQrCodeDialog = true
+                                },
+                                Modifier
+                                    .size(42.dp)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.QrCode2,
+                                    stringResource(R.string.qr_code),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(
+                                {
+                                    navController.navigate("settings")
+                                },
+                                Modifier
+                                    .size(42.dp)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Settings,
+                                    stringResource(R.string.settings),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     } else {
                         IconButton(
@@ -350,6 +382,12 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 }, {
                                     showInviteDialog = true
                                     showMenu = false
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.qr_code))
+                                }, {
+                                    showMenu = false
+                                    showQrCodeDialog = true
                                 })
                             }
                         }
@@ -490,7 +528,11 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 Text(
-                                    pluralStringResource(R.plurals.friends_plural, stats.friendsCount, stats.friendsCount),
+                                    pluralStringResource(
+                                        R.plurals.friends_plural,
+                                        stats.friendsCount,
+                                        stats.friendsCount
+                                    ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     color = MaterialTheme.colorScheme.secondary,

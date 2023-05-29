@@ -148,10 +148,26 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             result.data
                 ?.getParcelableExtra<HmsScan?>(ScanUtil.RESULT)
                 ?.let {
-                    it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.split("/card/")?.last()
-                }
-                ?.let { cardId ->
-                    navController.navigate("card/$cardId")
+                    it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
+                        when {
+                            it.startsWith("/card/") -> {
+                                val cardId = it.split("/").getOrNull(2)
+                                navController.navigate("card/$cardId")
+                                true
+                            }
+                            it.startsWith("/story/") -> {
+                                val cardId = it.split("/").getOrNull(2)
+                                navController.navigate("story/$cardId")
+                                true
+                            }
+                            it.startsWith("/profile/") -> {
+                                val cardId = it.split("/").getOrNull(2)
+                                navController.navigate("profile/$cardId")
+                                true
+                            }
+                            else -> null
+                        }
+                    }
                 } ?: run {
                 context.showDidntWork()
             }

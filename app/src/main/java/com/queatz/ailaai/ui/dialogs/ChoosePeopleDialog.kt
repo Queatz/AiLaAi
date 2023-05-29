@@ -14,6 +14,7 @@ fun ChoosePeopleDialog(
     onDismissRequest: () -> Unit,
     title: String,
     confirmFormatter: @Composable (List<Person>) -> String,
+    people: List<Person>? = null,
     allowNone: Boolean = false,
     multiple: Boolean = true,
     onPeopleSelected: suspend (List<Person>) -> Unit,
@@ -23,28 +24,34 @@ fun ChoosePeopleDialog(
     var isLoading by rememberStateOf(false)
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
-    var people by remember { mutableStateOf(listOf<Person>()) }
+    var shownPeople by remember { mutableStateOf(listOf<Person>()) }
     var selected by remember { mutableStateOf(listOf<Person>()) }
 
-    LaunchedEffect(Unit) {
-        isLoading = true
-        try {
-            allGroups = api.groups()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
+    if (people != null) {
+        LaunchedEffect(Unit) {
+            shownPeople = people
         }
-        isLoading = false
-    }
+    } else {
+        LaunchedEffect(Unit) {
+            isLoading = true
+            try {
+                allGroups = api.groups()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+            isLoading = false
+        }
 
-    LaunchedEffect(allGroups, selected, searchText) {
-        val allPeople = allGroups
-            .flatMap { it.members!!.map { it.person!! } }
-            .distinctBy { it.id!! }
-            .filter { it.source != PersonSource.Web }
-            .filter { !omit(it) }
-        people = (if (searchText.isBlank()) allPeople else allPeople.filter {
-            it.name?.contains(searchText, true) ?: false
-        })
+        LaunchedEffect(allGroups, selected, searchText) {
+            val allPeople = allGroups
+                .flatMap { it.members!!.map { it.person!! } }
+                .distinctBy { it.id!! }
+                .filter { it.source != PersonSource.Web }
+                .filter { !omit(it) }
+            shownPeople = (if (searchText.isBlank()) allPeople else allPeople.filter {
+                it.name?.contains(searchText, true) ?: false
+            })
+        }
     }
 
     ChooseDialog(
@@ -59,7 +66,7 @@ fun ChoosePeopleDialog(
         textWhenEmpty = { stringResource(R.string.no_people_to_show) },
         searchText = searchText,
         searchTextChange = { searchText = it },
-        items = people,
+        items = shownPeople,
         key = { it.id!! },
         selected = selected,
         onSelectedChange = {

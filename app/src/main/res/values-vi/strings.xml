@@ -101,6 +101,10 @@
     <string name="new_group_with_person">Tạo nhóm vơi %1$s</string>
     <string name="new_group_with_people">Tạo nhóm vơi %1$s và %2$s</string>
     <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người</string>
+    <string name="send_message">Nhắn tin</string>
+    <string name="send_message_to_person">Nhắn tin cho %1$s</string>
+    <string name="send_message_to_people">Nhắn tin cho %1$s và %2$s</string>
+    <string name="send_message_to_x_people">Nhắn tin cho %1$s người</string>
     <string name="choose_group">Chọn nhóm</string>
     <string name="choose_x">Chọn %1$s</string>
     <string name="choose_x_and_x">Chọn %1$s và %2$s</string>
@@ -268,7 +272,7 @@
     <string name="square">Vuông</string>
     <string name="message_noun">Tin nhắn</string>
     <string name="preview">Xem trước</string>
-    <string name="view_creator">Xem người tạo</string>
+    <string name="view_creator">Xem người sáng tạo</string>
     <string name="open_sticker_pack">Mở gói hình dán</string>
     <string name="no_sticker_packs">Chạm và giữ hình dán để tìm gói hình dán.</string>
     <string name="name">Tên</string>

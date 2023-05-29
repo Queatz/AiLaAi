@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity() {
                 push.navController = navController
 
                 var newMessages by remember { mutableStateOf(0) }
+                val presence by mePresence.rememberPresence()
 
                 OnLifecycleEvent {
                     if (push.navController == navController) {
@@ -118,7 +119,11 @@ class MainActivity : AppCompatActivity() {
                     ?.destination
                     ?.route
                     ?.let {
-                        it.startsWith("group/") || it.startsWith("card/") || it.startsWith("write/") || it.startsWith("sticker-pack/") || it == "sticker-packs"
+                        it.startsWith("group/")
+                                || it.startsWith("card/")
+                                || it.startsWith("write/")
+                                || it.startsWith("sticker-pack/")
+                                || it == "sticker-packs"
                     } != true
 
                 var known by remember { mutableStateOf(api.hasToken()) }
@@ -264,7 +269,6 @@ class MainActivity : AppCompatActivity() {
                                                     Box(
                                                         modifier = Modifier
                                                     ) {
-                                                        val presence by mePresence.rememberPresence()
                                                         Icon(item.icon, contentDescription = null)
                                                         if (item.route == "messages" && newMessages > 0) {
                                                             Text(
@@ -346,7 +350,7 @@ class MainActivity : AppCompatActivity() {
                                                         }
                                                         if (item.route == "stories") {
                                                             Text(
-                                                                12.toString(),
+                                                                (presence?.unreadStoriesCount ?: 0).toString(),
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
@@ -376,7 +380,10 @@ class MainActivity : AppCompatActivity() {
                                             .padding(it)
                                             .fillMaxSize()
                                     ) {
-                                        composable("profile/{id}") {
+                                        composable(
+                                            "profile/{id}",
+                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/profile/{id}" })
+                                        ) {
                                             ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }
                                         composable("explore") {
@@ -385,7 +392,10 @@ class MainActivity : AppCompatActivity() {
                                         composable("stories") {
                                             StoriesScreen(navController) { me }
                                         }
-                                        composable("story/{id}") {
+                                        composable(
+                                            "story/{id}",
+                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/story/{id}" })
+                                        ) {
                                             StoryScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }
                                         composable("write") {

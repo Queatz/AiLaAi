@@ -21,15 +21,14 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.dialogs.Alert
-import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.dialogs.PeopleDialog
-import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import kotlinx.coroutines.launch
 
 @Composable
 fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?) {
+    // todo storyId could be a url from a deeplink
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
@@ -96,23 +95,33 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
     }
 
     if (showMessageDialog) {
-        PeopleDialog(
-            stringResource(R.string.authors),
-            {
+        val someone = stringResource(R.string.someone)
+        ChoosePeopleDialog(
+            title = stringResource(R.string.authors),
+            onDismissRequest = {
                 showMessageDialog = false
-            }, story?.authors ?: emptyList(),
-            showCountInTitle = false,
-            infoFormatter = { person ->
-                person.seen?.timeAgo()?.let { timeAgo ->
-                    "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+            },
+            // Todo, show last active, it could be useful to know if the author has been inactive for 1 year
+//            infoFormatter = { person ->
+//                person.seen?.timeAgo()?.let { timeAgo ->
+//                    "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+//                }
+//            },
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.send_message,
+                R.string.send_message_to_person,
+                R.string.send_message_to_people,
+                R.string.send_message_to_x_people
+            ) { it.name ?: someone },
+            people = story?.authors ?: emptyList(),
+            onPeopleSelected = { authors ->
+                scope.launch {
+                    val group = api.createGroup(authors.map { it.id!! } + me()!!.id!!, reuse = true)
+                    navController.navigate("group/${group.id!!}")
                 }
-            }) { person ->
-            scope.launch {
-                val group = api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true)
-                navController.navigate("group/${group.id!!}")
+                showMessageDialog = false
             }
-            showMessageDialog = false
-        }
+        )
     }
 
     StoryScaffold(

@@ -83,27 +83,29 @@ fun <T> ChooseDialog(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
-            OutlinedTextField(
-                searchText,
-                onValueChange = searchTextChange,
-                label = { Text(stringResource(R.string.search)) },
-                shape = MaterialTheme.shapes.large,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(onSearch = {
-                    keyboardController.hide()
-                }),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = PaddingDefault)
-            )
+            if (items.size > 5) {
+                OutlinedTextField(
+                    searchText,
+                    onValueChange = searchTextChange,
+                    label = { Text(stringResource(R.string.search)) },
+                    shape = MaterialTheme.shapes.large,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        keyboardController.hide()
+                    }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = PaddingDefault)
+                )
+            }
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1f, fill = items.size > 5)
             ) {
                 if (isLoading) {
                     item {

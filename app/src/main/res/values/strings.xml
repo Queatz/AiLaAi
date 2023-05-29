@@ -109,6 +109,10 @@
     <string name="new_group_with_person">Create group with %1$s</string>
     <string name="new_group_with_people">Create group with %1$s and %2$s</string>
     <string name="new_group_with_x_people">Create group with %1$s people</string>
+    <string name="send_message">Message</string>
+    <string name="send_message_to_person">Message %1$s</string>
+    <string name="send_message_to_people">Message %1$s and %2$s</string>
+    <string name="send_message_to_x_people">Message %1$s people</string>
     <string name="didnt_work">That didn\'t work</string>
     <string name="connected_ago">Connected %1$s</string>
     <string name="open_enclosing_card">Open enclosing card</string>
