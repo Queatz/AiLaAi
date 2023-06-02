@@ -195,14 +195,13 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
         if (it.isEmpty()) return@rememberLauncherForActivityResult
 
         scope.launch {
-            it.forEach {
+            it.forEach { file ->
                 api.createSticker(
                     stickerPackId,
-                    it,
+                    file,
                     context,
-                    onError = { ex ->
-                        ex.printStackTrace()
-                        if (ex is FileSizeException) {
+                    onError = {
+                        if (it is FileSizeException) {
                             context.toast(R.string.max_sticker_size)
                         } else {
                             context.showDidntWork()

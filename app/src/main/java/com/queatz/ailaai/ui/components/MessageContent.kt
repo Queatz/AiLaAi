@@ -235,14 +235,15 @@ fun ColumnScope.MessageContent(
 
     LaunchedEffect(Unit) {
         attachedStoryId?.let { storyId ->
-            try {
-                attachedStory = api.story(storyId)
-            } catch (e: Exception) {
-                if (e.status == HttpStatusCode.NotFound) {
-                    attachedStoryNotFound = true
-                } else {
-                    e.printStackTrace()
+            api.story(
+                storyId,
+                onError = {
+                    if (it.status == HttpStatusCode.NotFound) {
+                        attachedStoryNotFound = true
+                    }
                 }
+            ) {
+                attachedStory = it
             }
         }
     }

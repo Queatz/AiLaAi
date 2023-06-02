@@ -74,18 +74,17 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
 
             LaunchedEffect(geo) {
                 if (geo != null) {
-                    try {
-                        // todo paging
-                        stories = api.stories(geo!!).flatMapIndexed { index, story ->
-                            (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
-                                    story.asContents()
-                        }
-                    } catch (e: Exception) {
-                        if (e is CancellationException) {
+                    // todo paging
+                    api.stories(geo!!, onError = {
+                        if (it is CancellationException) {
                             // Ignored, geo probably changes
                         } else {
-                            e.printStackTrace()
                             context.showDidntWork()
+                        }
+                    }) {
+                        it.flatMapIndexed { index, story ->
+                            (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
+                                    story.asContents()
                         }
                     }
                     isLoading = false

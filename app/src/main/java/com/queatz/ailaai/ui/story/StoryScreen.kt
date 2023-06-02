@@ -5,7 +5,9 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -18,7 +20,6 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.story.editor.StoryMenu
@@ -40,12 +41,7 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
 
     LaunchedEffect(Unit) {
         isLoading = true
-        try {
-            story = api.story(storyId)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
-        }
+        api.story(storyId) { story = it }
         isLoading = false
     }
 
@@ -80,13 +76,9 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
             confirmColor = MaterialTheme.colorScheme.error
         ) {
             scope.launch {
-                try {
-                    api.deleteStory(story!!.id!!)
+                api.deleteStory(story!!.id!!) {
                     showDeleteDialog = false
                     navController.popBackStack()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    context.showDidntWork()
                 }
             }
         }

@@ -68,15 +68,12 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
 
     LaunchedEffect(Unit) {
         isLoading = true
-        try {
-            story = api.story(storyId)
+        api.story(storyId) {
+            story = it
             storyContents = listOf(
                 StoryContent.Title(story?.title ?: "", storyId)
             ) + story!!.contents()
             recompose.invalidate()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
         }
         isLoading = false
     }
@@ -109,7 +106,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
     suspend fun save(): Boolean {
         return try {
             // todo only send title if it was edited
-            story = api.updateStory(
+            api.updateStory(
                 storyId,
                 Story(
                     title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title,
@@ -119,7 +116,9 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                         }
                     })
                 )
-            )
+            ) {
+                story = it
+            }
             edited = false
             true
         } catch (e: Exception) {
@@ -138,17 +137,13 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
     suspend fun publish() {
         if (edited) return context.showDidntWork()
 
-        try {
-            if (storyContents.any(::isBlankText)) {
-                storyContents = storyContents.toMutableList().filterNot(::isBlankText)
-                save()
-            }
-            api.updateStory(storyId, Story(published = true))
+        if (storyContents.any(::isBlankText)) {
+            storyContents = storyContents.toMutableList().filterNot(::isBlankText)
+            save()
+        }
+        api.updateStory(storyId, Story(published = true)) {
             context.toast(R.string.published)
             navController.popBackStackOrFinish()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
         }
     }
 
@@ -173,22 +168,14 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
             me,
             onLocationChanged = {
                 scope.launch {
-                    try {
-                        story?.geo = api.updateStory(storyId, Story(geo = it?.toList() ?: emptyList())).geo
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        context.showDidntWork()
+                    api.updateStory(storyId, Story(geo = it?.toList() ?: emptyList())) {
+                        story?.geo = it.geo
                     }
                 }
             },
             onGroupsChanged = { groups ->
                 scope.launch {
-                    try {
-                        api.updateStoryDraft(storyId, StoryDraft(groups = groups.map { it.id!! }))
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        context.showDidntWork()
-                    }
+                    api.updateStoryDraft(storyId, StoryDraft(groups = groups.map { it.id!! })) {}
                 }
             }
         ) {
@@ -543,14 +530,10 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     if (it.isEmpty()) return@rememberLauncherForActivityResult
 
                                     scope.launch {
-                                        try {
-                                            val photoUrls = api.uploadStoryPhotos(storyId, it)
+                                        api.uploadStoryPhotos(storyId, it) { photoUrls ->
                                             part.edit {
                                                 photos += photoUrls
                                             }
-                                        } catch (ex: Exception) {
-                                            ex.printStackTrace()
-                                            context.showDidntWork()
                                         }
                                     }
                                 }

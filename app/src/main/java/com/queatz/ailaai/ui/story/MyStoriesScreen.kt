@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.Person
@@ -24,7 +23,6 @@ import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -40,11 +38,8 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
     var stories by remember { mutableStateOf(emptyList<Story>()) }
 
     suspend fun reload() {
-        try {
-            stories = api.myStories().sortedBy { it.published ?: false }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
+        api.myStories {
+            stories = it.sortedBy { it.published ?: false }
         }
     }
 
@@ -120,12 +115,8 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
             FloatingActionButton(
                 onClick = {
                     scope.launch {
-                        try {
-                            val story = api.createStory(Story(title = null))
-                            navController.navigate("write/${story.id}")
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            context.showDidntWork()
+                        api.createStory(Story(title = null)) {
+                            navController.navigate("write/${it.id}")
                         }
                     }
                 },

@@ -22,7 +22,6 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.api.uploadStoryAudio
 import com.queatz.ailaai.api.uploadStoryPhotos
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.horizontalFadingEdge
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -38,15 +37,11 @@ fun StoryCreatorTools(storyId: String, addPart: (part: StoryContent) -> Unit) {
         if (it.isEmpty()) return@rememberLauncherForActivityResult
 
         scope.launch {
-            try {
-                val photoUrls = api.uploadStoryPhotos(storyId, it)
+            api.uploadStoryPhotos(storyId, it) { photoUrls ->
                 addPart(StoryContent.Photos(photoUrls))
                 addPart(
                     StoryContent.Text("")
                 )
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
             }
         }
     }
@@ -55,15 +50,11 @@ fun StoryCreatorTools(storyId: String, addPart: (part: StoryContent) -> Unit) {
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            try {
-                val audioUrl = api.uploadStoryAudio(storyId, it)
+            api.uploadStoryAudio(storyId, it) { audioUrl ->
                 addPart(StoryContent.Audio(audioUrl))
                 addPart(
                     StoryContent.Text("")
                 )
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
             }
         }
     }

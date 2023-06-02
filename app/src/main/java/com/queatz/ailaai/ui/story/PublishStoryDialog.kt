@@ -41,7 +41,7 @@ fun PublishStoryDialog(
     me: () -> Person?,
     onLocationChanged: (LatLng?) -> Unit,
     onGroupsChanged: (List<Group>) -> Unit,
-    onPublish: () -> Unit
+    onPublish: () -> Unit,
 ) {
     val context = LocalContext.current
     var publishEnabled by rememberStateOf(false)
@@ -65,8 +65,20 @@ fun PublishStoryDialog(
     }
 
     LaunchedEffect(Unit) {
+        api.storyDraft(story.id!!, onError = {
+            shareToGroups = emptyList()
+            if (it.status == HttpStatusCode.NotFound) {
+                // Ignored
+            } else {
+                context.showDidntWork()
+            }
+        }) {
+            storyDraft = it
+            shareToGroups = it.groupDetails ?: emptyList()
+        }
         try {
-            storyDraft = api.storyDraft(story.id!!).also {
+            api.storyDraft(story.id!!) {
+                storyDraft = it
                 shareToGroups = it.groupDetails ?: emptyList()
             }
         } catch (e: Exception) {
@@ -138,7 +150,11 @@ fun PublishStoryDialog(
                                 .fillMaxWidth()
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .border(1.dp, MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f), MaterialTheme.shapes.medium)
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
+                                    MaterialTheme.shapes.medium
+                                )
                                 .padding(PaddingDefault)
                         )
                     }
@@ -161,7 +177,11 @@ fun PublishStoryDialog(
                                         .fillMaxWidth()
                                         .clip(MaterialTheme.shapes.medium)
                                         .background(MaterialTheme.colorScheme.secondaryContainer)
-                                        .border(1.dp, MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f), MaterialTheme.shapes.medium)
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
+                                            MaterialTheme.shapes.medium
+                                        )
                                         .padding(PaddingDefault)
                                 )
                             }
@@ -217,8 +237,7 @@ fun PublishStoryDialog(
                         Icon(
                             Icons.Outlined.Close,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.
-                            primary,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(horizontal = PaddingDefault / 2)
                                 .size(16.dp)
@@ -259,8 +278,7 @@ fun PublishStoryDialog(
                         Icon(
                             Icons.Outlined.Edit,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                            ,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(horizontal = PaddingDefault / 2)
                                 .size(16.dp)
