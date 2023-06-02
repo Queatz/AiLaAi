@@ -17,12 +17,7 @@ class MePresence {
     fun rememberPresence(): State<Presence?> = value.collectAsState()
 
     suspend fun reload() {
-        try {
-            value.value = api.presence()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // todo retry
-        }
+        api.presence { value.value = it }
     }
 
     suspend fun readStoriesUntilNow() {
