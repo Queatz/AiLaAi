@@ -186,9 +186,9 @@ fun StoryContents(
                                     alignment = Alignment.Center,
                                     modifier = Modifier
                                         .clip(MaterialTheme.shapes.large)
-                                        .heightIn(min = 240.dp.coerceAtMost(viewHeight.inDp()), max = viewHeight.inDp())
                                         .fillMaxWidth()
                                         .aspectRatio(content.aspect)
+                                        .heightIn(min = 240.dp.coerceAtMost(viewHeight.inDp()), max = viewHeight.inDp())
                                         .background(MaterialTheme.colorScheme.secondaryContainer)
                                 )
                             }

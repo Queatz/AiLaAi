@@ -1,6 +1,9 @@
 package com.queatz.ailaai.ui.stickers
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
@@ -16,7 +19,6 @@ import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.stickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import kotlinx.coroutines.launch
@@ -29,11 +31,8 @@ fun StickerPackScreen(navController: NavController, stickerPackId: String, me: (
     var stickerPack by rememberStateOf<StickerPack?>(null)
 
     LaunchedEffect(stickerPackId) {
-        try {
-            stickerPack = api.stickerPack(stickerPackId)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
+        api.stickerPack(stickerPackId) {
+            stickerPack = it
         }
     }
 

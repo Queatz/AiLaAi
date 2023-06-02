@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.extensions.asInputProvider
+import com.queatz.ailaai.extensions.showDidntWork
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -42,6 +43,9 @@ val json = Json {
 val api = Api()
 
 const val appDomain = "https://ailaai.app"
+
+typealias ErrorBlock = (suspend (Exception) -> Unit)?
+typealias SuccessBlock<T> = suspend (T) -> Unit
 
 class Api {
 
@@ -102,6 +106,32 @@ class Api {
 
     fun url(it: String) = "$baseUrl$it"
 
+    internal suspend inline fun <reified T : Any> post(
+        url: String,
+        noinline progressCallback: ((Float) -> Unit)? = null,
+        client: HttpClient = http,
+        noinline onError: ErrorBlock,
+        noinline onSuccess: SuccessBlock<T>
+    ) {
+        post(url, null as String?, progressCallback, client, onError, onSuccess)
+    }
+
+    internal suspend inline fun <reified Body : Any, reified T : Any> post(
+        url: String,
+        body: Body?,
+        noinline progressCallback: ((Float) -> Unit)? = null,
+        client: HttpClient = http,
+        noinline onError: ErrorBlock,
+        noinline onSuccess: SuccessBlock<T>
+    ) {
+        try {
+            onSuccess(post(url, body, progressCallback, client))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            onError?.invoke(e) ?: context.showDidntWork()
+        }
+    }
+
     internal suspend inline fun <reified R : Any> post(
         url: String,
         noinline progressCallback: ((Float) -> Unit)? = null,
@@ -130,6 +160,21 @@ class Api {
 
         setBody(body)
     }.body()
+
+    internal suspend inline fun <reified T: Any> get(
+        url: String,
+        parameters: Map<String, String>? = null,
+        client: HttpClient = http,
+        noinline onError: ErrorBlock,
+        noinline onSuccess: SuccessBlock<T>
+    ) {
+        try {
+            onSuccess(get(url, parameters, client))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            onError?.invoke(e) ?: context.showDidntWork()
+        }
+    }
 
     internal suspend inline fun <reified T : Any> get(
         url: String,

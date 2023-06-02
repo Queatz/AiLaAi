@@ -465,20 +465,23 @@ fun ColumnScope.MessageContent(
             },
             onLongClick = {
                 scope.launch {
-                    try {
-                        val id = api.sticker(attachedSticker?.id ?: return@launch context.showDidntWork()).pack!!
-                        navController.navigate("sticker-pack/$id")
-                    } catch (e: Exception) {
-                        when (e.status) {
-                            HttpStatusCode.NotFound -> {
-                                context.toast(R.string.sticker_pack_not_found)
-                            }
+                    api.sticker(
+                        id = attachedSticker?.id ?: return@launch context.showDidntWork(),
+                        onError = {
+                            when (it.status) {
+                                HttpStatusCode.NotFound -> {
+                                    context.toast(R.string.sticker_pack_not_found)
+                                }
 
-                            else -> {
-                                e.printStackTrace()
-                                context.showDidntWork()
+                                else -> {
+                                    it.printStackTrace()
+                                    context.showDidntWork()
+                                }
                             }
                         }
+                    ) {
+                        val id = it.pack!!
+                        navController.navigate("sticker-pack/$id")
                     }
                 }
             }

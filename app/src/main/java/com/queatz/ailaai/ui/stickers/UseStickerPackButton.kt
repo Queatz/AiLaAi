@@ -4,7 +4,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -15,7 +14,6 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.api.saveStickerPack
 import com.queatz.ailaai.api.unsaveStickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.stickers
 import kotlinx.coroutines.launch
 
@@ -28,12 +26,8 @@ fun UseStickerPackButton(stickerPack: StickerPack, onChange: (saved: Boolean) ->
         OutlinedButton(
             {
                 scope.launch {
-                    try {
-                        api.unsaveStickerPack(stickerPack.id!!)
+                    api.unsaveStickerPack(stickerPack.id!!) {
                         onChange(false)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        context.showDidntWork()
                     }
                 }
             },
@@ -45,12 +39,8 @@ fun UseStickerPackButton(stickerPack: StickerPack, onChange: (saved: Boolean) ->
         Button(
             {
                 scope.launch {
-                    try {
-                        api.saveStickerPack(stickerPack.id!!)
+                    api.saveStickerPack(stickerPack.id!!) {
                         onChange(true)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        context.showDidntWork()
                     }
                 }
             },

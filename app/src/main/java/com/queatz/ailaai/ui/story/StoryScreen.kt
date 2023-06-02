@@ -19,10 +19,8 @@ import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
-import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.*
-import com.queatz.ailaai.ui.dialogs.PeopleDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import kotlinx.coroutines.launch
 

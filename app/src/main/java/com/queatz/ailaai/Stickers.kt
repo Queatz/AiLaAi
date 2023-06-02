@@ -16,11 +16,8 @@ class Stickers {
     fun rememberStickerPacks(): State<List<StickerPack>?> = stickerPacks.collectAsState()
 
     suspend fun reload() {
-        try {
-            stickerPacks.value = api.stickerPacks()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // todo retry
+        api.stickerPacks {
+            stickerPacks.value = it
         }
     }
 

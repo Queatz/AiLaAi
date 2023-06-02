@@ -2,7 +2,10 @@ package com.queatz.ailaai.ui.stickers
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
@@ -17,7 +20,10 @@ import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.FileSizeException
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
@@ -44,13 +50,10 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
     val recomposeScope = currentRecomposeScope
 
     suspend fun reload() {
-        try {
-            stickerPack = api.stickerPack(stickerPackId)
+        api.stickerPack(stickerPackId) {
+            stickerPack = it
             stickers.reload()
             recomposeScope.invalidate() // because stickers.has() may have changed
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
         }
     }
 
@@ -86,13 +89,9 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
             initialValue = sticker.name ?: "",
             singleLine = true
         ) { value ->
-            try {
-                api.updateSticker(sticker.id!!, Sticker(name = value))
+            api.updateSticker(sticker.id!!, Sticker(name = value)) {
                 reload()
                 showRenameStickerDialog = null
-            } catch (e: Exception) {
-                e.printStackTrace()
-                context.showDidntWork()
             }
         }
     }
@@ -107,13 +106,9 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
             initialValue = sticker.message ?: "",
             singleLine = true
         ) { value ->
-            try {
-                api.updateSticker(sticker.id!!, Sticker(message = value))
+            api.updateSticker(sticker.id!!, Sticker(message = value)) {
                 reload()
                 showStickerMessageDialog = null
-            } catch (e: Exception) {
-                e.printStackTrace()
-                context.showDidntWork()
             }
         }
     }
@@ -128,24 +123,17 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
             confirmColor = MaterialTheme.colorScheme.error
         ) {
             scope.launch {
-                try {
-                    api.deleteSticker(sticker.id!!)
+                api.deleteSticker(sticker.id!!) {
                     reload()
                     showDeleteStickerDialog = null
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    context.showDidntWork()
                 }
             }
         }
     }
 
     LaunchedEffect(stickerPackId) {
-        try {
-            stickerPack = api.stickerPack(stickerPackId)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
+        api.stickerPack(stickerPackId) {
+            stickerPack = it
         }
     }
 
@@ -160,12 +148,10 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
             initialValue = stickerPack?.name ?: "",
             singleLine = true
         ) { value ->
-            try {
-                stickerPack = api.updateStickerPack(stickerPackId, StickerPack(name = value))
+            api.updateStickerPack(stickerPackId, StickerPack(name = value)) {
+
+                stickerPack = it
                 showRenameDialog = false
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
             }
         }
     }
@@ -179,12 +165,9 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
             button = stringResource(R.string.update),
             initialValue = stickerPack?.description ?: ""
         ) { value ->
-            try {
-                stickerPack = api.updateStickerPack(stickerPackId, StickerPack(description = value))
+            api.updateStickerPack(stickerPackId, StickerPack(description = value)) {
+                stickerPack = it
                 showDescriptionDialog = false
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
             }
         }
     }
@@ -199,14 +182,10 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
             confirmColor = MaterialTheme.colorScheme.error
         ) {
             scope.launch {
-                try {
-                    api.deleteStickerPack(stickerPackId)
+                api.deleteStickerPack(stickerPackId) {
                     stickers.reload()
                     showDeleteDialog = false
                     navController.popBackStack()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    context.showDidntWork()
                 }
             }
         }
@@ -216,19 +195,22 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
         if (it.isEmpty()) return@rememberLauncherForActivityResult
 
         scope.launch {
-            try {
-                it.forEach {
-                    api.createSticker(stickerPackId, it, context)
-                }
-                reload()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                if (ex is FileSizeException) {
-                    context.toast(R.string.max_sticker_size)
-                } else {
-                    context.showDidntWork()
-                }
+            it.forEach {
+                api.createSticker(
+                    stickerPackId,
+                    it,
+                    context,
+                    onError = { ex ->
+                        ex.printStackTrace()
+                        if (ex is FileSizeException) {
+                            context.toast(R.string.max_sticker_size)
+                        } else {
+                            context.showDidntWork()
+                        }
+                    }
+                ) {}
             }
+            reload()
         }
     }
 

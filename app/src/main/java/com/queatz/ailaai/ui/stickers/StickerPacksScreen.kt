@@ -3,7 +3,6 @@ package com.queatz.ailaai.ui.stickers
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,13 +17,10 @@ import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStickerPack
 import com.queatz.ailaai.api.myStickerPacks
-import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
-import com.queatz.ailaai.ui.stickers.StickerPacks
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -39,11 +35,8 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
     var isLoading by rememberStateOf(true)
 
     LaunchedEffect(Unit) {
-        try {
-            stickerPacks = api.myStickerPacks()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
+        api.myStickerPacks {
+            stickerPacks = it
         }
         isLoading = false
     }
@@ -58,14 +51,10 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
             placeholder = stringResource(R.string.name),
             singleLine = true
         ) { value ->
-            try {
-                val stickerPack = api.createStickerPack(StickerPack(name = value))
+            api.createStickerPack(StickerPack(name = value)) {
                 stickers.reload()
                 showCreateStickerPackDialog = false
-                navController.navigate("sticker-pack/${stickerPack.id}/edit")
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
+                navController.navigate("sticker-pack/${it.id}/edit")
             }
         }
     }
