@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.Group
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
-import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.api.updateGroup
 
 @Composable
 fun RenameGroupDialog(onDismissRequest: () -> Unit, group: Group, onGroupUpdated: (Group) -> Unit) {
@@ -19,13 +19,9 @@ fun RenameGroupDialog(onDismissRequest: () -> Unit, group: Group, onGroupUpdated
         true,
         group.name ?: "",
     ) { value ->
-        try {
-            val group = api.updateGroup(group.id!!, Group().apply { name = value })
+        api.updateGroup(group.id!!, Group().apply { name = value }) { group ->
             onGroupUpdated(group)
             onDismissRequest()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            context.showDidntWork()
         }
     }
 }

@@ -1,11 +1,8 @@
 package com.queatz.ailaai
 
 import android.content.Context
-import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.showDidntWork
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -13,7 +10,6 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.observer.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -25,11 +21,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.File
 import java.io.FileOutputStream
 import kotlin.time.Duration.Companion.seconds
 
@@ -97,10 +90,10 @@ class Api {
         }
     }
 
-    fun client() = http
-    fun dataClient() = httpData
+    internal fun client() = http
+    internal fun dataClient() = httpData
 
-    fun signout() {
+    fun signOut() {
         setToken(null)
     }
 
@@ -208,240 +201,9 @@ class Api {
 
     fun hasToken() = token != null
 
-    suspend fun signUp(inviteCode: String): TokenResponse = post("sign/up", SignUpRequest(inviteCode))
-
-    suspend fun signIn(transferCode: String): TokenResponse = post("sign/in", SignInRequest(transferCode))
-
-    suspend fun me(): Person = get("me")
-
-    suspend fun transferCode(): Transfer = get("me/transfer")
-
-    suspend fun myDevice(deviceType: DeviceType, deviceToken: String): HttpStatusCode =
-        post("me/device", Device(deviceType, deviceToken))
-
-    suspend fun updateMe(person: Person): Person = post("me", person)
-
-    suspend fun people(search: String): List<Person> = get("people", mapOf("search" to search))
-
-    suspend fun profile(personId: String): PersonProfile = get("people/$personId/profile")
-
-    suspend fun updateProfile(profile: Profile): HttpStatusCode = post("me/profile", profile)
-
-    suspend fun updateProfilePhoto(photo: Uri): HttpStatusCode {
-        val scaledPhoto = photo.asScaledJpeg(context)
-        return post("me/profile/photo", MultiPartFormDataContent(
-            formData {
-                append("photo", scaledPhoto, Headers.build {
-                    append(HttpHeaders.ContentType, "image/jpg")
-                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                })
-            }
-        ), client = httpData)
-    }
-
-    suspend fun updateProfileVideo(
-        video: Uri,
-        contentType: String,
-        filename: String,
-        processingCallback: (Float) -> Unit,
-        uploadCallback: (Float) -> Unit,
-    ): HttpStatusCode {
-        val scaledVideo = video.asScaledVideo(context, progressCallback = processingCallback)
-        return post(
-            "me/profile/video",
-            MultiPartFormDataContent(
-                formData {
-                    append(
-                        "photo",
-                        scaledVideo.asInputProvider(),
-                        Headers.build {
-                            append(HttpHeaders.ContentType, contentType)
-                            append(HttpHeaders.ContentDisposition, "filename=${filename}")
-                        }
-                    )
-                }
-            ),
-            progressCallback = uploadCallback,
-            client = httpData
-        )
-    }
-
-    suspend fun cards(geo: LatLng, offset: Int = 0, limit: Int = 20, search: String? = null): List<Card> =
-        get("cards", mapOf(
-            "geo" to "${geo.latitude},${geo.longitude}",
-            "offset" to offset.toString(),
-            "limit" to limit.toString()
-        ) + (search?.let {
-            mapOf("search" to search)
-        } ?: mapOf()))
-
-    suspend fun categories(geo: LatLng): List<String> = get(
-        "categories",
-        mapOf(
-            "geo" to "${geo.latitude},${geo.longitude}"
-        )
-    )
-
-    suspend fun card(id: String): Card = get("cards/$id")
-
-    suspend fun cardsCards(id: String): List<Card> = get("cards/$id/cards")
-
-    suspend fun profileCards(personId: String): List<Card> = get("people/$personId/profile/cards")
-
-    suspend fun myCards(): List<Card> = get("me/cards")
-
-    suspend fun myCollaborations(): List<Card> = get("me/collaborations")
-    suspend fun leaveCollaboration(card: String): HttpStatusCode =
-        post("me/collaborations/leave", LeaveCollaborationBody(card))
-
-    suspend fun savedCards(search: String? = null): List<SaveAndCard> = get("me/saved", search?.let {
-        mapOf("search" to search)
-    } ?: mapOf())
-
-    suspend fun newCard(card: Card? = Card(offline = true)): Card = post("cards", card)
-
-    suspend fun updateCard(id: String, card: Card): Card = post("cards/$id", card)
-
-    suspend fun deleteCard(id: String): HttpStatusCode = post("cards/$id/delete")
-
-    suspend fun saveCard(id: String): HttpStatusCode = post("cards/$id/save")
-
-    suspend fun unsaveCard(id: String): HttpStatusCode = post("cards/$id/unsave")
-
-    suspend fun invite(): Invite = get("invite")
-
-    suspend fun updateMyPhoto(photo: Uri): HttpStatusCode {
-        val scaledPhoto = photo.asScaledJpeg(context)
-        return post("me/photo", MultiPartFormDataContent(
-            formData {
-                append("photo", scaledPhoto, Headers.build {
-                    append(HttpHeaders.ContentType, "image/jpg")
-                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                })
-            }
-        ), client = httpData)
-    }
-
-    suspend fun uploadCardPhoto(id: String, photo: Uri): HttpStatusCode {
-        val scaledPhoto = photo.asScaledJpeg(context)
-        return post("cards/$id/photo", MultiPartFormDataContent(
-            formData {
-                append("photo", scaledPhoto, Headers.build {
-                    append(HttpHeaders.ContentType, "image/jpg")
-                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                })
-            }
-        ), client = httpData)
-    }
-
-    suspend fun uploadCardVideo(
-        id: String,
-        video: Uri,
-        contentType: String,
-        filename: String,
-        processingCallback: (Float) -> Unit,
-        uploadCallback: (Float) -> Unit,
-    ): HttpStatusCode {
-        val scaledVideo = video.asScaledVideo(context, progressCallback = processingCallback)
-        return post(
-            "cards/$id/video",
-            MultiPartFormDataContent(
-                formData {
-                    append(
-                        "photo",
-                        scaledVideo.asInputProvider(),
-                        Headers.build {
-                            append(HttpHeaders.ContentType, contentType)
-                            append(HttpHeaders.ContentDisposition, "filename=${filename}")
-                        }
-                    )
-                }
-            ),
-            progressCallback = uploadCallback,
-            client = httpData
-        )
-    }
-
-    suspend fun cardGroup(card: String): Group = get("cards/$card/group")
-
-    suspend fun cardPeople(card: String): List<Person> = get("cards/$card/people")
-
-    suspend fun createGroup(people: List<String>, reuse: Boolean = false): Group =
-        post("groups", CreateGroupBody(people.toSet().toList(), reuse))
-
-    suspend fun updateGroup(id: String, groupUpdate: Group): Group = post("groups/$id", groupUpdate)
-
-    suspend fun groups(): List<GroupExtended> = get("groups")
-
-    suspend fun group(id: String): GroupExtended = get("groups/$id")
-
-    suspend fun createMember(member: Member): Member = post("members", member)
-
-    suspend fun updateMember(id: String, member: Member): HttpStatusCode = post("members/$id", member)
-
-    suspend fun removeMember(id: String): HttpStatusCode = post("members/$id/delete")
-
-    suspend fun messages(group: String): List<Message> = get("groups/$group/messages")
-
-    suspend fun message(message: String): Message = get("messages/$message")
-
-    suspend fun messagesBefore(group: String, before: Instant): List<Message> = get(
-        "groups/$group/messages",
-        mapOf(
-            "before" to before.toString()
-        )
-    )
-
-    suspend fun sendMessage(group: String, message: Message): HttpStatusCode = post("groups/$group/messages", message)
-
-    suspend fun sendMedia(group: String, photos: List<Uri>, message: Message? = null): HttpStatusCode {
-        val scaledPhotos = photos.map {
-            it.asScaledJpeg(context)
-        }
-        return post("groups/$group/photos", MultiPartFormDataContent(
-            formData {
-                if (message != null) {
-                    append("message", json.encodeToString(message))
-                }
-                scaledPhotos.forEachIndexed { index, photo ->
-                    append(
-                        "photo[$index]",
-                        photo,
-                        Headers.build {
-                            append(HttpHeaders.ContentType, "image/jpg")
-                            append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                        }
-                    )
-                }
-            }
-        ), client = httpData)
-    }
-
-    suspend fun sendAudio(group: String, audio: File, message: Message? = null): HttpStatusCode {
-        return post("groups/$group/audio", MultiPartFormDataContent(
-            formData {
-                if (message != null) {
-                    append("message", json.encodeToString(message))
-                }
-                append(
-                    "audio",
-                    audio.asInputProvider(),
-                    Headers.build {
-                        append(HttpHeaders.ContentType, "audio/mp4")
-                        append(HttpHeaders.ContentDisposition, "filename=audio.m4a")
-                    }
-                )
-            }
-        ), client = httpData)
-    }
-
-    suspend fun deleteMessage(message: String): HttpStatusCode = post("messages/$message/delete")
-
     suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
 
-    suspend fun crash(report: String): HttpStatusCode = post("crash", Crash(report))
-
-    suspend fun downloadFile(url: String, outputStream: FileOutputStream): Unit {
+    suspend fun downloadFile(url: String, outputStream: FileOutputStream) {
         httpData.get(url).bodyAsChannel().copyTo(outputStream)
     }
 }
@@ -498,9 +260,3 @@ class Device(
     val type: DeviceType,
     val token: String,
 )
-
-@Serializable
-private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
-
-@Serializable
-private data class LeaveCollaborationBody(val card: String)

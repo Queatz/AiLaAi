@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.groups
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.rememberStateOf
 
@@ -34,10 +35,8 @@ fun ChoosePeopleDialog(
     } else {
         LaunchedEffect(Unit) {
             isLoading = true
-            try {
-                allGroups = api.groups()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+            api.groups {
+                allGroups = it
             }
             isLoading = false
         }

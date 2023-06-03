@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.savedCards
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
@@ -37,19 +38,18 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
                 return@LaunchedEffect
             }
         }
-        try {
-            isLoading = true
-            cards = api.savedCards(value.takeIf { it.isNotBlank() }).mapNotNull { it.card }
-            isError = false
-            isLoading = false
-        } catch (ex: Exception) {
+        isLoading = true
+        api.savedCards(value.takeIf { it.isNotBlank() }, onError = { ex ->
             if (ex is CancellationException || ex is InterruptedException) {
                 // Ignore, probably geo or search value changed
             } else {
                 isLoading = true
                 isError = true
-                ex.printStackTrace()
             }
+        }) {
+            cards = it.mapNotNull { it.card }
+            isError = false
+            isLoading = false
         }
     }
 

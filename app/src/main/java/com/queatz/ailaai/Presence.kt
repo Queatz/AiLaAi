@@ -17,6 +17,7 @@ class MePresence {
     fun rememberPresence(): State<Presence?> = value.collectAsState()
 
     suspend fun reload() {
+        // Todo retry on error
         api.presence { value.value = it }
     }
 

@@ -9,6 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.api.saveCard
+import com.queatz.ailaai.api.savedCards
+import com.queatz.ailaai.api.unsaveCard
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 val saves = Saves()
@@ -22,33 +25,32 @@ class Saves {
     fun isSaved(card: Card) = savedIds.contains(card.id!!)
 
     suspend fun reload() {
-        try {
-            val saves = api.savedCards().mapNotNull { it.card?.id }
+        api.savedCards {
             savedIds.clear()
-            savedIds.addAll(saves)
+            savedIds.addAll(it.mapNotNull { it.card?.id })
             changes.emit(Unit)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
         }
     }
 
     suspend fun toggleSave(card: Card): ToggleSaveResult {
-        return try {
-            if (!isSaved(card)) {
-                api.saveCard(card.id!!)
-                savedIds.add(card.id!!)
-                changes.emit(Unit)
+        var hasError = false
+        if (!isSaved(card)) {
+            api.saveCard(card.id!!, onError = { hasError = true })
+            savedIds.add(card.id!!)
+            changes.emit(Unit)
+            if (!hasError) {
                 ToggleSaveResult.Saved
-            } else {
-                api.unsaveCard(card.id!!)
-                savedIds.remove(card.id!!)
-                changes.emit(Unit)
-                ToggleSaveResult.Unsaved
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ToggleSaveResult.Error
+        } else {
+            api.unsaveCard(card.id!!, onError = { hasError = true })
+            savedIds.remove(card.id!!)
+            changes.emit(Unit)
+            if (!hasError) {
+                return ToggleSaveResult.Unsaved
+            }
         }
+
+        return ToggleSaveResult.Error
     }
 }
 

@@ -26,13 +26,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.components.ConversationItem
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 @SuppressLint("UnrememberedMutableState")
@@ -245,22 +245,17 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         trim(conversation)
 
                         scope.launch {
-                            try {
-                                val update = api.updateCard(
-                                    card.id!!,
-                                    Card(name = cardName.trim(), conversation = json.encodeToString(conversation))
-                                )
-
+                            api.updateCard(
+                                card.id!!,
+                                Card(name = cardName.trim(), conversation = json.encodeToString(conversation))
+                            ) { update ->
                                 card.name = update.name
                                 card.conversation = update.conversation
 
                                 onDismissRequest()
                                 onChange()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            } finally {
-                                disableSaveButton = false
                             }
+                            disableSaveButton = false
                         }
                     },
                     enabled = !disableSaveButton

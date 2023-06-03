@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.invite
 import com.queatz.ailaai.extensions.shareAsText
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -21,12 +22,12 @@ fun InviteDialog(meName: String, onDismissRequest: () -> Unit) {
 
     LaunchedEffect(Unit) {
         inviteCode = ""
-
-        inviteCode = try {
-            api.invite().code ?: ""
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            errorString
+        api.invite(
+            onError = {
+                inviteCode = errorString
+            }
+        ) {
+            inviteCode = it.code ?: ""
         }
     }
 

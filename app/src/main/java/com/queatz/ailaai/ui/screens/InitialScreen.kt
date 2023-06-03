@@ -15,6 +15,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.signIn
+import com.queatz.ailaai.api.signUp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
@@ -34,13 +36,10 @@ fun InitialScreen(onKnown: () -> Unit) {
 
     fun signIn(transferCode: String) {
         scope.launch {
-            try {
-                val token = api.signIn(transferCode).token
-                api.setToken(token)
+            api.signIn(transferCode) {
+                api.setToken(it.token)
                 onKnown()
                 keyboardController.hide()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
             }
         }
     }
@@ -90,20 +89,18 @@ fun InitialScreen(onKnown: () -> Unit) {
 
     fun signUp(code: String) {
         scope.launch {
-            try {
-                val token = api.signUp(code).token
-                api.setToken(token)
+            api.signUp(code, onError = { ex ->
+                if (ex is ResponseException) {
+                    if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
+                        codeExpired = true
+                    }
+                }
+            }) {
+                api.setToken(it.token)
                 onKnown()
                 keyboardController.hide()
-            } catch (ex: Exception) {
-                if (ex !is ResponseException) {
-                    ex.printStackTrace()
-                } else if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
-                    codeExpired = true
-                }
-            } finally {
-                codeValueEnabled = true
             }
+            codeValueEnabled = true
         }
     }
 

@@ -17,6 +17,7 @@ import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.Story
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.createGroup
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -106,8 +107,9 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
             people = story?.authors ?: emptyList(),
             onPeopleSelected = { authors ->
                 scope.launch {
-                    val group = api.createGroup(authors.map { it.id!! } + me()!!.id!!, reuse = true)
-                    navController.navigate("group/${group.id!!}")
+                    api.createGroup(authors.map { it.id!! } + me()!!.id!!, reuse = true) {
+                        navController.navigate("group/${it.id!!}")
+                    }
                 }
                 showMessageDialog = false
             }

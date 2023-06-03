@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.components
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -23,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
+import com.queatz.ailaai.api.createGroup
+import com.queatz.ailaai.api.updateMember
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
@@ -47,11 +48,8 @@ fun ContactItem(
             ContactResult(
                 onClick = {
                     scope.launch {
-                        try {
-                            val group = api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true)
+                        api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true) { group ->
                             navController.navigate("group/${group.id!!}")
-                        } catch (e: Exception) {
-                            e.printStackTrace()
                         }
                     }
                 },
@@ -77,12 +75,9 @@ fun ContactItem(
                     menuItem(stringResource(R.string.hide)) {
                         showMenu = false
                         scope.launch {
-                            try {
-                                api.updateMember(myMember!!.member!!.id!!, Member(hide = true))
+                            api.updateMember(myMember!!.member!!.id!!, Member(hide = true)) {
                                 context.toast(R.string.group_hidden)
                                 onChange()
-                            } catch (ex: Exception) {
-                                ex.printStackTrace()
                             }
                         }
                     }

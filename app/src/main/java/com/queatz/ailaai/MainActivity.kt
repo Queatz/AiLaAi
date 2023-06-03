@@ -39,6 +39,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.api.groups
+import com.queatz.ailaai.api.me
+import com.queatz.ailaai.api.updateMe
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
@@ -146,21 +149,20 @@ class MainActivity : AppCompatActivity() {
                         val language = appLanguage
                         if (me != null && language != null && me.language != language) {
                             scope.launch {
-                                api.updateMe(Person().also {
-                                    it.language = language
-                                })
+                                api.updateMe(Person(language = language))
                             }
                         }
                     }
 
-                    suspend fun loadMe() {
-                        me = api.me()
-                        push.setMe(me!!.id!!)
-                        updateAppLanguage(me)
-
-                        if (!wasKnown) {
-                            navController.navigate("profile/${me!!.id!!}")
-                            wasKnown = true
+                    suspend fun loadMe(onError: ErrorBlock) {
+                        api.me(onError = onError) {
+                            me = it
+                            push.setMe(me!!.id!!)
+                            updateAppLanguage(me)
+                            if (!wasKnown) {
+                                navController.navigate("profile/${me!!.id!!}")
+                                wasKnown = true
+                            }
                         }
                     }
 
@@ -168,12 +170,13 @@ class MainActivity : AppCompatActivity() {
                         if (me == null) {
                             messages.clear()
                         } else {
-                            messages.refresh(me!!, try {
-                                api.groups()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                emptyList()
-                            })
+                            api.groups(
+                                onError = {
+                                    messages.refresh(me, emptyList())
+                                }
+                            ) {
+                                messages.refresh(me, it)
+                            }
                             messages.new.collectLatest {
                                 newMessages = it
                             }
@@ -186,9 +189,10 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(Unit) {
                         while (me == null) try {
-                            loadMe()
+                            loadMe(onError = {
+                                throw Exception("Error loading me")
+                            })
                         } catch (ex: Exception) {
-                            ex.printStackTrace()
                             snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
                             delay(5.seconds)
                         }
@@ -284,7 +288,9 @@ class MainActivity : AppCompatActivity() {
                                                                     .padding(PaddingDefault, PaddingDefault / 4)
                                                             )
                                                         }
-                                                        if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0) {
+                                                        if (item.route == "stories" && (presence?.unreadStoriesCount
+                                                                ?: 0) > 0
+                                                        ) {
                                                             // todo reusable icon
                                                             Text(
                                                                 (presence?.unreadStoriesCount ?: 0).toString(),
@@ -348,7 +354,9 @@ class MainActivity : AppCompatActivity() {
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
-                                                        if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0) {
+                                                        if (item.route == "stories" && (presence?.unreadStoriesCount
+                                                                ?: 0) > 0
+                                                        ) {
                                                             Text(
                                                                 (presence?.unreadStoriesCount ?: 0).toString(),
                                                                 fontWeight = FontWeight.Bold
@@ -432,21 +440,21 @@ class MainActivity : AppCompatActivity() {
                                             StickerPackScreen(navController, it.arguments!!.getString("id")!!) { me }
                                         }
                                         composable("sticker-pack/{id}/edit") {
-                                            StickerPackEditorScreen(navController, it.arguments!!.getString("id")!!) { me }
+                                            StickerPackEditorScreen(
+                                                navController,
+                                                it.arguments!!.getString("id")!!
+                                            ) { me }
                                         }
                                         composable("settings") {
                                             SettingsScreen(navController, { me }) {
                                                 if (api.hasToken()) {
                                                     scope.launch {
-                                                        try {
-                                                            loadMe()
-                                                        } catch (ex: Exception) {
-                                                            ex.printStackTrace()
+                                                        loadMe(onError = {
                                                             snackbarHostState.showSnackbar(
                                                                 getString(R.string.cant_connect),
                                                                 withDismissAction = true
                                                             )
-                                                        }
+                                                        })
                                                     }
                                                 } else {
                                                     known = false
@@ -489,6 +497,7 @@ class MainActivity : AppCompatActivity() {
                                                     )
                                             )
                                         }
+
                                         false -> {
                                         }
                                     }
@@ -529,5 +538,5 @@ fun Location.toLatLng() = LatLng(latitude, longitude)
 data class NavButton(
     val route: String,
     val text: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )

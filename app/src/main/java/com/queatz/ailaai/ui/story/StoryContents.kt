@@ -26,6 +26,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.LinkifyText
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.card
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Audio
@@ -153,7 +154,7 @@ fun StoryContents(
                             DisableSelection {
                                 var card by remember { mutableStateOf<Card?>(null) }
                                 LaunchedEffect(Unit) {
-                                    card = api.card(it)
+                                    api.card(it) { card = it }
                                 }
                                 CardItem(
                                     {

@@ -12,6 +12,8 @@ import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
 import com.google.auto.service.AutoService
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
+import com.queatz.ailaai.api.crash
+import com.queatz.ailaai.api.myDevice
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.DisposableObserver
@@ -54,11 +56,7 @@ class Application : android.app.Application() {
                 }
 
                 scope.launch {
-                    try {
-                        api.myDevice(deviceType, token)
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
+                    api.myDevice(deviceType, token)
                 }
             }
             override fun onError(throwable: Throwable) {
@@ -123,8 +121,10 @@ class YourOwnSender : ReportSender {
     val scope = CoroutineScope(Dispatchers.IO)
 
     override fun send(context: Context, errorContent: CrashReportData) {
-        if (BuildConfig.DEBUG.not()) scope.launch {
-            api.crash(errorContent.toJSON())
+        if (!BuildConfig.DEBUG) {
+            scope.launch {
+                api.crash(errorContent.toJSON())
+            }
         }
     }
 }

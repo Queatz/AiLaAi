@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.*
+import com.queatz.ailaai.api.sendMessage
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.toast
@@ -37,21 +38,24 @@ fun SendStoryDialog(
         ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
         me = me
     ) { groups ->
-        try {
-            coroutineScope {
-                groups.map { group ->
-                    async {
-                        api.sendMessage(
-                            group.id!!,
-                            Message(attachment = json.encodeToString(StoryAttachment(storyId)))
-                        )
-                    }
-                }.awaitAll()
+        coroutineScope {
+            var hasError = false
+            groups.map { group ->
+                async {
+                    api.sendMessage(
+                        group.id!!,
+                        Message(attachment = json.encodeToString(StoryAttachment(storyId))),
+                        onError = {
+                            hasError = true
+                        }
+                    )
+                }
+            }.awaitAll()
+            if (hasError) {
+                context.showDidntWork()
+            } else {
+                context.toast(sent)
             }
-            context.toast(sent)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            context.showDidntWork()
         }
     }
 }

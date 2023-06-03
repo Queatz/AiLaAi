@@ -43,6 +43,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.ui.components.BackButton
@@ -96,22 +97,20 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     }
 
     suspend fun reloadMessages() {
-        messages = api.messages(groupId)
+        api.messages(groupId) {
+            messages = it
+        }
     }
 
     val audioRecorder = audioRecorder(
         { isRecordingAudio = it },
         { recordingAudioDuration = it },
     ) { file ->
-        try {
-            api.sendAudio(groupId, file, stageReply?.id?.let {
-                Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
-            })
+        api.sendAudio(groupId, file, stageReply?.id?.let {
+            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+        }) {
             stageReply = null
             reloadMessages()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
         }
     }
 
@@ -121,33 +120,29 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
         }
 
         val oldest = messages.lastOrNull()?.createdAt ?: return
-        val older = api.messagesBefore(groupId, oldest)
+        api.messagesBefore(groupId, oldest) { older ->
+            val newMessages = (messages + older).distinctBy { it.id }
 
-        val newMessages = (messages + older).distinctBy { it.id }
-
-        if (messages.size == newMessages.size) {
-            hasOlderMessages = false
-        } else {
-            messages = newMessages
+            if (messages.size == newMessages.size) {
+                hasOlderMessages = false
+            } else {
+                messages = newMessages
+            }
         }
     }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) {
             scope.launch {
-                try {
-                    api.sendMedia(
-                        groupId,
-                        uris,
-                        stageReply?.id?.let {
-                            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
-                        }
-                    )
+                api.sendMedia(
+                    groupId,
+                    uris,
+                    stageReply?.id?.let {
+                        Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+                    }
+                ) {
                     stageReply = null
                     reloadMessages()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    context.showDidntWork()
                 }
             }
         }
@@ -155,37 +150,30 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
 
     LaunchedEffect(Unit) {
         isLoading = true
-
-        try {
-            groupExtended = api.group(groupId)
-            isLoading = false
-        } catch (ex: Exception) {
-            if (ex is CancellationException || ex is InterruptedException) {
-                // Ignore
-            } else {
-                ex.printStackTrace()
-                showGroupNotFound = true
-                isLoading = false
-            }
+        api.group(
+            groupId,
+            onError = { ex ->
+                if (ex is CancellationException || ex is InterruptedException) {
+                    // Ignore
+                } else {
+                    showGroupNotFound = true
+                }
+            }) {
+            groupExtended = it
         }
+        isLoading = false
     }
 
     suspend fun reload() {
-        try {
-            groupExtended = api.group(groupId)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
+            api.group(groupId) {
+                groupExtended = it
+            }
     }
 
     OnLifecycleEvent { event ->
         when (event) {
             Lifecycle.Event.ON_START -> {
-                try {
-                    reloadMessages()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
+                reloadMessages()
             }
 
             else -> {}
@@ -198,11 +186,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             .conflate()
             .catch { it.printStackTrace() }
             .onEach {
-                try {
-                    reloadMessages()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
+                reloadMessages()
             }
             .launchIn(scope)
     }
@@ -348,12 +332,9 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             )
                         }, {
                             scope.launch {
-                                try {
-                                    api.updateMember(myMember.member!!.id!!, Member(hide = !hidden))
+                                api.updateMember(myMember.member!!.id!!, Member(hide = !hidden)) {
                                     context.toast(R.string.group_hidden)
                                     navController.popBackStack()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
                                 }
                             }
                             showMenu = false
@@ -411,21 +392,16 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             groupExtended?.members?.find { member -> member.member?.id == it }?.person
                         },
                         { messageId ->
-                            messages.find { it.id == messageId } ?: try {
-                                api.message(messageId)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                null
+                            var message: Message? = messages.find { it.id == messageId }
+                            api.message(messageId) {
+                                message = it
                             }
+                            message
                         },
                         myMember?.member?.id,
                         {
                             scope.launch {
-                                try {
-                                    reloadMessages()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                }
+                                reloadMessages()
                             }
                         },
                         onReply = { stageReply = it },
@@ -457,13 +433,9 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     val text = sendMessage.trim()
                     val stagedReply = stageReply
                     scope.launch {
-                        try {
-                            api.sendMessage(groupId, Message(text = text).also {
-                                it.attachments = stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
-                            })
-                            reloadMessages()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                        api.sendMessage(groupId, Message(text = text).also {
+                            it.attachments = stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
+                        }, onError = {
                             if (sendMessage.isBlank()) {
                                 sendMessage = text
                             }
@@ -471,6 +443,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 stageReply = stagedReply
                             }
                             context.showDidntWork()
+                        }) {
+                            reloadMessages()
                         }
                     }
                 }
@@ -483,17 +457,22 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             fun sendSticker(sticker: Sticker) {
                 val stagedReply = stageReply
                 scope.launch {
-                    try {
-                        api.sendMessage(groupId, Message(
-                            attachment = json.encodeToString(StickerAttachment(photo = sticker.photo, sticker = sticker.id, message = sticker.message))
+                    api.sendMessage(
+                        groupId,
+                        Message(
+                            attachment = json.encodeToString(
+                                StickerAttachment(
+                                    photo = sticker.photo,
+                                    sticker = sticker.id,
+                                    message = sticker.message
+                                )
+                            )
                         ).also {
-                            it.attachments = stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
-                        })
-                        reloadMessages()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        context.showDidntWork()
-                    }
+                            it.attachments =
+                                stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
+                        }
+                    )
+                    reloadMessages()
                 }
             }
 
@@ -778,16 +757,20 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                         var anySucceeded = false
                         var anyFailed = false
                         people.forEach { person ->
-                            try {
-                                api.removeMember(
-                                    otherMembers.find { member -> member.person?.id == person.id }?.member?.id
-                                        ?: return@forEach
+                            api.removeMember(
+                                otherMembers.find { member -> member.person?.id == person.id }?.member?.id
+                                    ?: return@forEach,
+                                onError = {
+                                    anyFailed = true
+                                }
+                            ) {
+                                context.toast(
+                                    context.getString(
+                                        R.string.x_removed,
+                                        person.name?.nullIfBlank ?: someone
+                                    )
                                 )
-                                context.toast(context.getString(R.string.x_removed, person.name?.nullIfBlank ?: someone))
                                 anySucceeded = true
-                            } catch (ex: Exception) {
-                                anyFailed = true
-                                ex.printStackTrace()
                             }
                         }
                         if (anySucceeded) {
@@ -819,16 +802,17 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                         var anySucceeded = false
                         var anyFailed = false
                         people.forEach { person ->
-                            try {
-                                api.createMember(Member().apply {
-                                    from = person.id!!
-                                    to = groupId
-                                })
-                                context.toast(context.getString(R.string.person_invited, person.name?.nullIfBlank ?: someone))
+                            api.createMember(Member().apply {
+                                from = person.id!!
+                                to = groupId
+                            }, onError = { anyFailed = true }) {
+                                context.toast(
+                                    context.getString(
+                                        R.string.person_invited,
+                                        person.name?.nullIfBlank ?: someone
+                                    )
+                                )
                                 anySucceeded = true
-                            } catch (ex: Exception) {
-                                anyFailed = true
-                                ex.printStackTrace()
                             }
                         }
                         if (anySucceeded) {
@@ -875,12 +859,9 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     confirmButton = {
                         TextButton({
                             scope.launch {
-                                try {
-                                    api.removeMember(myMember!!.member!!.id!!)
+                                api.removeMember(myMember!!.member!!.id!!) {
                                     showLeaveGroup = false
                                     navController.popBackStack()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
                                 }
                             }
                         }) {

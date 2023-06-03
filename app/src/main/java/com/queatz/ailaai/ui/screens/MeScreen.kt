@@ -25,6 +25,8 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.myCards
+import com.queatz.ailaai.api.newCard
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -91,13 +93,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     }
 
     LaunchedEffect(Unit) {
-        try {
-            myCards = api.myCards()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        } finally {
-            isLoading = false
+        api.myCards {
+            myCards = it
         }
+        isLoading = false
     }
 
     val cards = remember(myCards, cardParentType, filters, searchText) {
@@ -110,16 +109,16 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }.filter {
             val searchTextTrimmed = searchText.trim()
             filters.all { filter ->
-                when(filter) {
+                when (filter) {
                     Filter.Active -> it.active == true
                     Filter.NotActive -> it.active != true
                 }
             } &&
                     (searchTextTrimmed.isBlank() || (
                             it.conversation?.contains(searchTextTrimmed, true) == true ||
-                            it.name?.contains(searchTextTrimmed, true) == true ||
-                            it.location?.contains(searchTextTrimmed, true) == true
-                    ))
+                                    it.name?.contains(searchTextTrimmed, true) == true ||
+                                    it.location?.contains(searchTextTrimmed, true) == true
+                            ))
         }
     }
 
@@ -185,13 +184,8 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             onChange = {
                                 scope.launch {
                                     isLoading = myCards.isEmpty()
-                                    try {
-                                        myCards = api.myCards()
-                                    } catch (ex: Exception) {
-                                        ex.printStackTrace()
-                                    } finally {
-                                        isLoading = false
-                                    }
+                                    api.myCards { myCards = it }
+                                    isLoading = false
                                 }
                             },
                             activity = navController.context as Activity,
@@ -222,9 +216,9 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                 modifier = Modifier
-                .padding(PaddingDefault * 2)
-                .widthIn(max = 480.dp)
-                .fillMaxWidth()
+                    .padding(PaddingDefault * 2)
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth()
             ) {
                 var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                 val scrollState = rememberScrollState()
@@ -232,8 +226,8 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(scrollState)
-                    .onPlaced { viewport = it.boundsInParent().size }
-                    .horizontalFadingEdge(viewport, scrollState)
+                        .onPlaced { viewport = it.boundsInParent().size }
+                        .horizontalFadingEdge(viewport, scrollState)
                 ) {
                     CardParentSelector(
                         cardParentType,
@@ -249,8 +243,14 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         {
                             setFilters(filters.minus(Filter.NotActive).toggle(Filter.Active))
                         },
-                        border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, filters.contains(Filter.Active)),
-                        colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
+                        border = IconButtonDefaults.outlinedIconToggleButtonBorder(
+                            true,
+                            filters.contains(Filter.Active)
+                        ),
+                        colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.onBackground
+                        ) else ButtonDefaults.buttonColors(),
                         modifier = Modifier.padding(end = PaddingDefault)
                     ) {
                         Text(stringResource(R.string.published))
@@ -259,8 +259,14 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         {
                             setFilters(filters.minus(Filter.Active).toggle(Filter.NotActive))
                         },
-                        border = IconButtonDefaults.outlinedIconToggleButtonBorder(true, filters.contains(Filter.NotActive)),
-                        colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) else ButtonDefaults.buttonColors(),
+                        border = IconButtonDefaults.outlinedIconToggleButtonBorder(
+                            true,
+                            filters.contains(Filter.NotActive)
+                        ),
+                        colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.onBackground
+                        ) else ButtonDefaults.buttonColors(),
                         modifier = Modifier.padding(end = PaddingDefault)
                     ) {
                         Text(stringResource(R.string.draft))
@@ -269,9 +275,10 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier
-                        .weight(1f)
-                        .wrapContentWidth()
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth()
                     ) {
                         SearchField(
                             searchText,
@@ -281,22 +288,18 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     FloatingActionButton(
                         onClick = {
                             scope.launch {
-                                try {
-                                    setParentType(null)
-                                    setFilters(emptySet())
-                                    searchText = ""
-                                    addedCardId = api.newCard().id
-                                    myCards = api.myCards()
-                                    delay(100)
+                                setParentType(null)
+                                setFilters(emptySet())
+                                searchText = ""
+                                api.newCard { addedCardId = it.id }
+                                api.myCards { myCards = it }
+                                delay(100)
 
-                                    if (state.firstVisibleItemIndex > 2) {
-                                        state.scrollToItem(2)
-                                    }
-
-                                    state.animateScrollToItem(0)
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
+                                if (state.firstVisibleItemIndex > 2) {
+                                    state.scrollToItem(2)
                                 }
+
+                                state.animateScrollToItem(0)
                             }
                         },
                         modifier = Modifier

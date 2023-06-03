@@ -9,6 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.deleteCard
 import com.queatz.ailaai.extensions.rememberStateOf
 import kotlinx.coroutines.launch
 
@@ -25,15 +26,11 @@ fun DeleteCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> U
                     disableSubmit = true
 
                     coroutineScope.launch {
-                        try {
-                            api.deleteCard(card.id!!)
+                        api.deleteCard(card.id!!) {
                             onChange()
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                        } finally {
-                            disableSubmit = false
                             onDismissRequest()
                         }
+                        disableSubmit = false
                     }
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),

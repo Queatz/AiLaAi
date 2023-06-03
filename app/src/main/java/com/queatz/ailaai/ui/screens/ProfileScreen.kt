@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -106,32 +107,29 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 it.isGroupLike(person)
             }
         ) { groups ->
-            try {
-                coroutineScope {
-                    groups.map { group ->
-                        async {
-                            api.createMember(Member().apply {
-                                from = person!!.id!!
-                                to = group.id!!
-                            })
-                        }
-                    }.awaitAll()
-                }
-                context.toast(context.getString(R.string.person_invited, person?.name ?: someone))
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
+            coroutineScope {
+                groups.map { group ->
+                    async {
+                        api.createMember(Member().apply {
+                            from = person!!.id!!
+                            to = group.id!!
+                        })
+                    }
+                }.awaitAll()
             }
+            context.toast(context.getString(R.string.person_invited, person?.name ?: someone))
         }
     }
 
     suspend fun reload() {
         listOf(
             scope.async {
-                cards = api.profileCards(personId)
+                api.profileCards(personId) {
+                    cards = it
+                }
             },
             scope.async {
-                api.profile(personId).let {
+                api.profile(personId, onError = { isError = true }) {
                     person = it.person
                     profile = it.profile
                     stats = it.stats
@@ -144,12 +142,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            try {
-                api.updateMyPhoto(it)
-                reload()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
+            api.updateMyPhoto(it) { reload() }
         }
     }
 
@@ -158,51 +151,39 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
 
         uploadJob = scope.launch {
             videoUploadProgress = 0f
-            try {
-                if (it.isVideo(context)) {
-                    isUploadingVideo = true
-                    api.updateProfileVideo(
-                        it,
-                        context.contentResolver.getType(it) ?: "video/*",
-                        it.lastPathSegment ?: "video.${
-                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                        }",
-                        processingCallback = {
-                            videoUploadStage = ProcessingVideoStage.Processing
-                            videoUploadProgress = it
-                        },
-                        uploadCallback = {
-                            videoUploadStage = ProcessingVideoStage.Uploading
-                            videoUploadProgress = it
-                        }
-                    )
-                } else if (it.isPhoto(context)) {
-                    api.updateProfilePhoto(it)
-                }
-                reload()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            } finally {
-                isUploadingVideo = false
-                uploadJob = null
+            if (it.isVideo(context)) {
+                isUploadingVideo = true
+                api.updateProfileVideo(
+                    it,
+                    context.contentResolver.getType(it) ?: "video/*",
+                    it.lastPathSegment ?: "video.${
+                        context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                    }",
+                    processingCallback = {
+                        videoUploadStage = ProcessingVideoStage.Processing
+                        videoUploadProgress = it
+                    },
+                    uploadCallback = {
+                        videoUploadStage = ProcessingVideoStage.Uploading
+                        videoUploadProgress = it
+                    }
+                )
+            } else if (it.isPhoto(context)) {
+                api.updateProfilePhoto(it)
             }
+            reload()
+            isUploadingVideo = false
+            uploadJob = null
         }
     }
 
     LaunchedEffect(Unit) {
-        try {
-            if (cards.isEmpty() || person == null || profile == null) {
-                isLoading = true
-            }
-
-            reload()
-            isError = false
-        } catch (ex: Exception) {
-            isError = true
-            ex.printStackTrace()
-        } finally {
-            isLoading = false
+        if (cards.isEmpty() || person == null || profile == null) {
+            isLoading = true
         }
+
+        reload()
+        isLoading = false
     }
 
     val state = rememberLazyGridState()
@@ -465,18 +446,15 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 IconButton(
                                     {
                                         scope.launch {
-                                            try {
-                                                val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
+                                            api.createGroup(listOf(me()!!.id!!, personId), reuse = true) { group ->
                                                 navController.navigate("group/${group.id!!}")
-                                            } catch (e: Exception) {
-                                                e.printStackTrace()
                                             }
                                         }
                                     },
                                     colors = IconButtonDefaults.outlinedIconButtonColors(
                                         contentColor = MaterialTheme.colorScheme.primary
                                     ),
-                                    enabled = !isMe
+                                    enabled = false
                                 ) {
                                     Icon(Icons.Outlined.Message, "")
                                 }
@@ -485,12 +463,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     }
 //                    Button({
 //                        scope.launch {
-//                            try {
-//                                val group = api.createGroup(listOf(me()!!.id!!, personId), reuse = true)
-//                                navController.navigate("group/${group.id!!}")
-//                            } catch (e: Exception) {
-//                                e.printStackTrace()
-//                            }
+//                                api.createGroup(listOf(me()!!.id!!, personId), reuse = true) {
+//                                    navController.navigate("group/${group.id!!}") }
 //                        }
 //                    }, enabled = !isMe, modifier = Modifier.padding(top = PaddingDefault)) {
 //                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))

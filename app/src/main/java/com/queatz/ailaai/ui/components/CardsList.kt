@@ -124,11 +124,8 @@ fun CardsList(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             LaunchedEffect(Unit) {
-                                try {
-                                    onLoadMore()
-                                } finally {
-                                    isLoadingMore = false
-                                }
+                                onLoadMore()
+                                isLoadingMore = false
                             }
                             AnimatedVisibility(hasMore && cards.isNotEmpty() && isLoadingMore) {
                                 Box(

@@ -20,6 +20,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.card
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.StoryContent
@@ -61,7 +62,7 @@ fun ReorderStoryContentsDialog(
                         var card by remember { mutableStateOf<Card?>(null) }
 
                         LaunchedEffect(cardId) {
-                            card = api.card(cardId)
+                            api.card(cardId) { card = it }
                         }
 
                         CardItem(

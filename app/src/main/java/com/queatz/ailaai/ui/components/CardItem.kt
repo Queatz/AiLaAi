@@ -42,6 +42,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.updateCard
+import com.queatz.ailaai.api.uploadCardPhoto
+import com.queatz.ailaai.api.uploadCardVideo
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -114,17 +117,17 @@ fun CardItem(
                     }
                 }
                 .let {
-                     if (onClick != null) {
-                         it.combinedClickable(
-                             enabled = !isSelectingText,
-                             onClick = onClick,
-                             onLongClick = {
-                                 hideContent = true
-                             }
-                         )
-                     } else {
-                         it
-                     }
+                    if (onClick != null) {
+                        it.combinedClickable(
+                            enabled = !isSelectingText,
+                            onClick = onClick,
+                            onLongClick = {
+                                hideContent = true
+                            }
+                        )
+                    } else {
+                        it
+                    }
                 },
             contentAlignment = Alignment.BottomCenter
         ) {
@@ -178,35 +181,30 @@ fun CardItem(
 
                             uploadJob = scope.launch {
                                 videoUploadProgress = 0f
-                                try {
-                                    if (it.isVideo(context)) {
-                                        isUploadingVideo = true
-                                        api.uploadCardVideo(
-                                            card.id!!,
-                                            it,
-                                            context.contentResolver.getType(it) ?: "video/*",
-                                            it.lastPathSegment ?: "video.${
-                                                context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                                            }",
-                                            processingCallback = {
-                                                videoUploadStage = ProcessingVideoStage.Processing
-                                                videoUploadProgress = it
-                                            },
-                                            uploadCallback = {
-                                                videoUploadStage = ProcessingVideoStage.Uploading
-                                                videoUploadProgress = it
-                                            }
-                                        )
-                                    } else if (it.isPhoto(context)) {
-                                        api.uploadCardPhoto(card.id!!, it)
-                                    }
-                                    onChange()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                } finally {
-                                    isUploadingVideo = false
-                                    uploadJob = null
+                                if (it.isVideo(context)) {
+                                    isUploadingVideo = true
+                                    api.uploadCardVideo(
+                                        card.id!!,
+                                        it,
+                                        context.contentResolver.getType(it) ?: "video/*",
+                                        it.lastPathSegment ?: "video.${
+                                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                                        }",
+                                        processingCallback = {
+                                            videoUploadStage = ProcessingVideoStage.Processing
+                                            videoUploadProgress = it
+                                        },
+                                        uploadCallback = {
+                                            videoUploadStage = ProcessingVideoStage.Uploading
+                                            videoUploadProgress = it
+                                        }
+                                    )
+                                } else if (it.isPhoto(context)) {
+                                    api.uploadCardPhoto(card.id!!, it)
                                 }
+                                onChange()
+                                isUploadingVideo = false
+                                uploadJob = null
                             }
                         }
                         TextButton(
@@ -362,16 +360,13 @@ fun CardItem(
                         },
                         { category ->
                             scope.launch {
-                                try {
-                                    api.updateCard(
-                                        card.id!!,
-                                        Card().apply {
-                                            categories = if (category == null) emptyList() else listOf(category)
-                                        }
-                                    )
+                                api.updateCard(
+                                    card.id!!,
+                                    Card().apply {
+                                        categories = if (category == null) emptyList() else listOf(category)
+                                    }
+                                ) {
                                     onChange()
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
                                 }
                             }
                         }
@@ -552,13 +547,10 @@ private fun CardToolbar(
             {
                 active = it
                 coroutineScope.launch {
-                    try {
-                        val update = api.updateCard(card.id!!, Card(active = active))
-                        card.active = update.active
-                        activeCommitted = update.active ?: false
+                    api.updateCard(card.id!!, Card(active = active)) {
+                        card.active = it.active
+                        activeCommitted = it.active ?: false
                         active = activeCommitted
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
                     }
                 }
             }

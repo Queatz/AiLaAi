@@ -30,6 +30,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.newCard
+import com.queatz.ailaai.api.updateCard
+import com.queatz.ailaai.api.uploadCardPhoto
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -247,18 +250,17 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
             if (cardPublished) "Publish it" else "Skip",
             onContinue = {
                 if (!cardCreated) {
-                    try {
-                        val card = api.newCard(
-                            com.queatz.ailaai.Card(
-                                name = cardName.trim(),
-                                conversation = json.encodeToString(
-                                    ConversationItem(
-                                        message = cardMessage
-                                    )
-                                ),
-                                equipped = true
-                            )
+                    api.newCard(
+                        com.queatz.ailaai.Card(
+                            name = cardName.trim(),
+                            conversation = json.encodeToString(
+                                ConversationItem(
+                                    message = cardMessage
+                                )
+                            ),
+                            equipped = true
                         )
+                    ) { card ->
                         api.uploadCardPhoto(card.id!!, cardPhoto!!)
 
                         if (cardPublished) {
@@ -270,8 +272,6 @@ fun TutorialDialog(onDismissRequest: () -> Unit, navController: NavController) {
                         }
 
                         cardCreated = true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
             }

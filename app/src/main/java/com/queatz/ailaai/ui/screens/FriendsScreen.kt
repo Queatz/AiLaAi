@@ -27,6 +27,10 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.createGroup
+import com.queatz.ailaai.api.groups
+import com.queatz.ailaai.api.people
+import com.queatz.ailaai.api.updateGroup
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
@@ -75,19 +79,12 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
 
     suspend fun reload() {
         isLoading = results.isEmpty()
-        try {
-            allGroups = api.groups().filter { it.group != null }
+            api.groups {
+                allGroups = it.filter { it.group != null }
+            }
             update()
             messages.refresh(me(), allGroups)
             isLoading = false
-        } catch (ex: Exception) {
-            if (ex is CancellationException || ex is InterruptedException) {
-                // Ignore
-            } else {
-                ex.printStackTrace()
-                isLoading = false
-            }
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -112,11 +109,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         if (searchText.isBlank()) {
             allPeople = emptyList()
         } else {
-            try {
-                allPeople = api.people(searchText)
+            api.people(searchText) {
+                allPeople = it
                 update()
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
         update()
@@ -267,15 +262,11 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             ) { it.name ?: someone },
             allowNone = true,
             onPeopleSelected = { people ->
-                try {
-                    val group = api.createGroup(people.map { it.id!! })
+                api.createGroup(people.map { it.id!! }) { group ->
                     if (createGroupName.isNotBlank()) {
                         api.updateGroup(group.id!!, Group(name = createGroupName))
                     }
                     navController.navigate("group/${group.id!!}")
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    context.showDidntWork()
                 }
             },
             omit = { it.id == me()?.id }

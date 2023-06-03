@@ -37,6 +37,7 @@ import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.cards
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.AppHeader
@@ -95,16 +96,22 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             offset = 0
             hasMore = true
         }
-        val page = api.cards(geo!!, offset = offset, limit = 20, search = value.takeIf { it.isNotBlank() })
-        val oldSize = if (clear) 0 else cards.size
-        cards = if (clear) {
-            page
-        } else {
-            (cards + page).distinctBy { it.id }
+        api.cards(
+            geo!!,
+            offset = offset,
+            limit = 20,
+            search = value.takeIf { it.isNotBlank() }
+        ) { page ->
+            val oldSize = if (clear) 0 else cards.size
+            cards = if (clear) {
+                page
+            } else {
+                (cards + page).distinctBy { it.id }
+            }
+            updateCategories()
+            offset = cards.size
+            hasMore = cards.size > oldSize
         }
-        updateCategories()
-        offset = cards.size
-        hasMore = cards.size > oldSize
     }
 
     LaunchedEffect(geo, value) {

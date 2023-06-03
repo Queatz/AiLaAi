@@ -28,6 +28,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.transferCode
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.sendEmail
 import com.queatz.ailaai.ui.components.BackButton
@@ -138,10 +139,8 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         Button(
                             {
                                 scope.launch {
-                                    try {
-                                        transferCode = api.transferCode().code!!
-                                    } catch (ex: Exception) {
-                                        ex.printStackTrace()
+                                    api.transferCode {
+                                        transferCode = it.code!!
                                     }
                                 }
                             }

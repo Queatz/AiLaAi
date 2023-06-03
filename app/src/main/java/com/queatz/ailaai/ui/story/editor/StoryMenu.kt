@@ -52,13 +52,9 @@ fun StoryMenu(
             }
         ) {
             scope.launch {
-                try {
-                    api.deleteStory(storyId)
+                api.deleteStory(storyId) {
                     showDeleteDialog = false
                     navController.popBackStack()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    context.showDidntWork()
                 }
             }
         }

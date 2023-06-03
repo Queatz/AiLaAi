@@ -82,7 +82,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                             context.showDidntWork()
                         }
                     }) {
-                        it.flatMapIndexed { index, story ->
+                        stories = it.flatMapIndexed { index, story ->
                             (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
                                     story.asContents()
                         }

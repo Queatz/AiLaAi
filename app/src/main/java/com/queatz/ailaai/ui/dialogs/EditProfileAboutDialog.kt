@@ -6,12 +6,11 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.Profile
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.updateProfile
 import com.queatz.ailaai.extensions.showDidntWork
 
 @Composable
 fun EditProfileAboutDialog(onDismissRequest: () -> Unit, initialValue: String, onUpdated: () -> Unit) {
-    val context = LocalContext.current
-
     TextFieldDialog(
         onDismissRequest,
         stringResource(R.string.introduction),
@@ -19,13 +18,9 @@ fun EditProfileAboutDialog(onDismissRequest: () -> Unit, initialValue: String, o
         false,
         initialValue,
     ) { value ->
-        try {
-            api.updateProfile(Profile(about = value.trim()))
+        api.updateProfile(Profile(about = value.trim())) {
             onUpdated()
             onDismissRequest()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            context.showDidntWork()
         }
     }
 }

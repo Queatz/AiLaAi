@@ -33,12 +33,14 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
 
@@ -89,15 +91,13 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
         isLoading = true
         notFound = false
 
-        try {
-            card = api.card(cardId)
-            cards = api.cardsCards(cardId)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            notFound = true
-        } finally {
-            isLoading = false
-        }
+        api.card(cardId, onError = {
+            if (it.status == HttpStatusCode.NotFound) {
+                notFound = true
+            }
+        }) { card = it }
+        api.cardsCards(cardId) { cards = it }
+        isLoading = false
     }
 
     val isMine = me()?.id == card?.person
@@ -106,11 +106,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
 
     fun reload() {
         scope.launch {
-            try {
-                card = api.card(cardId)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
+            api.card(cardId) { card = it }
         }
     }
 
@@ -121,16 +117,13 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             },
             { category ->
                 scope.launch {
-                    try {
-                        api.updateCard(
-                            card!!.id!!,
-                            Card().apply {
-                                categories = if (category == null) emptyList() else listOf(category)
-                            }
-                        )
+                    api.updateCard(
+                        card!!.id!!,
+                        Card().apply {
+                            categories = if (category == null) emptyList() else listOf(category)
+                        }
+                    ) {
                         reload()
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
                     }
                 }
             }
@@ -183,15 +176,11 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 if (it.size == 1) {
                     val newOwner = it.first().id
                     scope.launch {
-                        try {
-                            card!!.person = newOwner
-                            val updatedCard = api.updateCard(card!!.id!!, Card().apply {
-                                person = card!!.person
-                            })
-                            card = updatedCard
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                            context.showDidntWork()
+                        card!!.person = newOwner
+                        api.updateCard(card!!.id!!, Card().apply {
+                            person = card!!.person
+                        }) {
+                            card = it
                         }
                     }
                 }
@@ -208,15 +197,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             menuItem(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
                 card?.let { card ->
                     scope.launch {
-                        try {
-                            val update = api.updateCard(
-                                card.id!!,
-                                Card(active = card.active?.not() ?: true)
-                            )
-                            card.active = update.active
+                        api.updateCard(
+                            card.id!!,
+                            Card(active = card.active?.not() ?: true)
+                        ) {
+                            card.active = it.active
                             context.toast(if (card.active == true) R.string.published else R.string.draft)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
                         }
                     }
                 }
@@ -290,33 +276,28 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
 
                     uploadJob = scope.launch {
                         videoUploadProgress = 0f
-                        try {
-                            if (it.isVideo(context)) {
-                                isUploadingVideo = true
-                                api.uploadCardVideo(
-                                    card!!.id!!,
-                                    it,
-                                    context.contentResolver.getType(it) ?: "video/*",
-                                    it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}",
-                                    processingCallback = {
-                                        videoUploadStage = ProcessingVideoStage.Processing
-                                        videoUploadProgress = it
-                                    },
-                                    uploadCallback = {
-                                        videoUploadStage = ProcessingVideoStage.Uploading
-                                        videoUploadProgress = it
-                                    }
-                                )
-                            } else if (it.isPhoto(context)) {
-                                api.uploadCardPhoto(card!!.id!!, it)
-                            }
-                            card = api.card(cardId)
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                        } finally {
-                            uploadJob = null
-                            isUploadingVideo = false
+                        if (it.isVideo(context)) {
+                            isUploadingVideo = true
+                            api.uploadCardVideo(
+                                card!!.id!!,
+                                it,
+                                context.contentResolver.getType(it) ?: "video/*",
+                                it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}",
+                                processingCallback = {
+                                    videoUploadStage = ProcessingVideoStage.Processing
+                                    videoUploadProgress = it
+                                },
+                                uploadCallback = {
+                                    videoUploadStage = ProcessingVideoStage.Uploading
+                                    videoUploadProgress = it
+                                }
+                            )
+                        } else if (it.isPhoto(context)) {
+                            api.uploadCardPhoto(card!!.id!!, it)
                         }
+                        api.card(cardId) { card = it }
+                        uploadJob = null
+                        isUploadingVideo = false
                     }
                 }
 
@@ -549,13 +530,8 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 onChange = {
                                     scope.launch {
                                         isLoading = true
-                                        try {
-                                            cards = api.cardsCards(cardId)
-                                        } catch (ex: Exception) {
-                                            ex.printStackTrace()
-                                        } finally {
-                                            isLoading = false
-                                        }
+                                        api.cardsCards(cardId) { cards = it }
+                                        isLoading = false
                                     }
                                 },
                                 activity = navController.context as Activity,
@@ -579,19 +555,15 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 ElevatedButton(
                                     {
                                         scope.launch {
-                                            try {
-                                                addedCardId = api.newCard(Card(parent = cardId, name = "")).id
-                                                cards = api.cardsCards(cardId)
-                                                delay(100)
+                                            api.newCard(Card(parent = cardId, name = ""), onError = { } ) { addedCardId = it.id }
+                                            api.cardsCards(cardId, onError = { } ) { cards = it }
+                                            delay(100)
 
-                                                if (state.firstVisibleItemIndex > 2) {
-                                                    state.scrollToItem(2)
-                                                }
-
-                                                state.animateScrollToItem(0)
-                                            } catch (ex: Exception) {
-                                                ex.printStackTrace()
+                                            if (state.firstVisibleItemIndex > 2) {
+                                                state.scrollToItem(2)
                                             }
+
+                                            state.animateScrollToItem(0)
                                         }
                                     }
                                 ) {
@@ -619,15 +591,10 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             confirmButton = {
                 TextButton({
                     scope.launch {
-                        try {
-                            api.leaveCollaboration(cardId)
-                            card = api.card(cardId)
-                            cards = api.cardsCards(cardId)
-                            openLeaveCollaboratorsDialog = false
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                            context.showDidntWork()
-                        }
+                        api.leaveCollaboration(cardId)
+                        api.card(cardId) { card = it }
+                        api.cardsCards(cardId) { cards = it }
+                        openLeaveCollaboratorsDialog = false
                     }
                 }) {
                     Text(stringResource(R.string.leave))
@@ -656,15 +623,11 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 R.string.add_x_people
             ) { it.name ?: someone },
             onPeopleSelected = { people ->
-                try {
-                    card!!.collaborators = (card?.collaborators ?: emptyList()) + people.map { it.id!! }
-                    val updatedCard = api.updateCard(card!!.id!!, Card().apply {
-                        collaborators = card!!.collaborators
-                    })
-                    card = updatedCard
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    context.showDidntWork()
+                card!!.collaborators = (card?.collaborators ?: emptyList()) + people.map { it.id!! }
+                api.updateCard(card!!.id!!, Card().apply {
+                    collaborators = card!!.collaborators
+                }) {
+                    card = it
                 }
             },
             omit = { it.id == me()?.id || card!!.collaborators?.contains(it.id) == true }
@@ -694,15 +657,11 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 }
             },
             onPeopleSelected = { people ->
-                try {
-                    card!!.collaborators = (card?.collaborators ?: emptyList()) - people.map { it.id!! }.toSet()
-                    val updatedCard = api.updateCard(card!!.id!!, Card().apply {
-                        collaborators = card!!.collaborators
-                    })
-                    card = updatedCard
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    context.showDidntWork()
+                card!!.collaborators = (card?.collaborators ?: emptyList()) - people.map { it.id!! }.toSet()
+                api.updateCard(card!!.id!!, Card().apply {
+                    collaborators = card!!.collaborators
+                }) {
+                    card = it
                 }
             },
             omit = { it.id !in (card!!.collaborators ?: emptyList()) }
@@ -713,7 +672,9 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
 
     LaunchedEffect(openCollaboratorsDialog) {
         if (openCollaboratorsDialog) {
-            collaborators = api.cardPeople(cardId)
+            api.cardPeople(cardId) {
+                collaborators = it
+            }
         }
     }
 
@@ -736,10 +697,11 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 openCollaboratorsDialog = false
             } else {
                 scope.launch {
-                    val group = api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true)
-                    navController.navigate("group/${group.id!!}")
+                    api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true) {
+                        navController.navigate("group/${it.id!!}")
+                        openCollaboratorsDialog = false
+                    }
                 }
-                openCollaboratorsDialog = false
             }
         }
     }
@@ -759,21 +721,21 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
             me = me()
         ) { groups ->
-            try {
-                coroutineScope {
-                    groups.map { group ->
-                        async {
-                            api.sendMessage(
-                                group.id!!,
-                                Message(attachment = json.encodeToString(CardAttachment(cardId)))
-                            )
+            coroutineScope {
+                var sendSuccess = false
+                groups.map { group ->
+                    async {
+                        api.sendMessage(
+                            group.id!!,
+                            Message(attachment = json.encodeToString(CardAttachment(cardId)))
+                        ) {
+                            sendSuccess = true
                         }
-                    }.awaitAll()
+                    }
+                }.awaitAll()
+                if (sendSuccess) {
+                    context.toast(sent)
                 }
-                context.toast(sent)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                context.showDidntWork()
             }
         }
     }

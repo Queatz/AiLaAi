@@ -23,6 +23,8 @@ import androidx.compose.ui.window.DialogProperties
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.card
+import com.queatz.ailaai.api.profile
 import com.queatz.ailaai.api.storyDraft
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
@@ -76,39 +78,42 @@ fun PublishStoryDialog(
             storyDraft = it
             shareToGroups = it.groupDetails ?: emptyList()
         }
-        try {
-            api.storyDraft(story.id!!) {
-                storyDraft = it
-                shareToGroups = it.groupDetails ?: emptyList()
-            }
-        } catch (e: Exception) {
+        api.storyDraft(story.id!!, onError = {
             shareToGroups = emptyList()
-            if (e.status == HttpStatusCode.NotFound) {
+            if (it.status == HttpStatusCode.NotFound) {
                 // Ignored
             } else {
-                e.printStackTrace()
+                context.showDidntWork()
             }
+        }) {
+            storyDraft = it
+            shareToGroups = it.groupDetails ?: emptyList()
         }
     }
 
     LaunchedEffect(me()) {
         me()?.id?.let { me ->
-            friendCount = api.profile(me).stats.friendsCount
+            api.profile(me) {
+                friendCount = it.stats.friendsCount
+            }
         }
     }
 
     LaunchedEffect(Unit) {
-        try {
-            allCardsArePublished = storyContents
-                .mapNotNull { it as? StoryContent.Cards }
-                .flatMap { it.cards.map { api.card(it) } }.also {
-                    containsCards = it.isNotEmpty()
+        allCardsArePublished = storyContents
+            .mapNotNull { it as? StoryContent.Cards }
+            .flatMap {
+                it.cards.map {
+                    var card: Card? = null
+                    api.card(it) {
+                        card = it
+                    }
+                    card
                 }
-                .all { it.active == true }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
-        }
+            }.also {
+                containsCards = it.isNotEmpty()
+            }
+            .all { it?.active == true }
     }
 
     LaunchedEffect(story, storyContents, allCardsArePublished) {

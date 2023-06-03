@@ -108,7 +108,7 @@ suspend fun Api.uploadStoryAudio(
 suspend fun Api.deleteStory(
     id: String,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode>
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("stories/$id/delete", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyDraft(

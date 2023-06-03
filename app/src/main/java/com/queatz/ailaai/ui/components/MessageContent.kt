@@ -2,7 +2,10 @@ package com.queatz.ailaai.ui.components
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -32,13 +35,15 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.card
+import com.queatz.ailaai.api.deleteMessage
 import com.queatz.ailaai.api.sticker
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
-import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
+import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryAuthors
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.http.*
@@ -188,16 +193,12 @@ fun ColumnScope.MessageContent(
                 TextButton(
                     {
                         scope.launch {
-                            try {
-                                disableSubmit = true
-                                api.deleteMessage(message.id!!)
+                            disableSubmit = true
+                            api.deleteMessage(message.id!!) {
                                 onDeleted()
                                 showDeleteMessageDialog = false
-                            } catch (ex: Exception) {
-                                ex.printStackTrace()
-                            } finally {
-                                disableSubmit = false
                             }
+                            disableSubmit = false
                         }
                     },
                     enabled = !disableSubmit,
@@ -218,12 +219,9 @@ fun ColumnScope.MessageContent(
 
     LaunchedEffect(Unit) {
         attachedCardId?.let { cardId ->
-            try {
-                attachedCard = api.card(cardId)
-            } catch (e: Exception) {
-                e.printStackTrace()
+            api.card(cardId, onError = {
                 // todo show failed to load
-            }
+            }) { attachedCard = it }
         }
     }
 

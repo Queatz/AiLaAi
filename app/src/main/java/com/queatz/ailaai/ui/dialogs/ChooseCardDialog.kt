@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.myCollaborations
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -80,12 +80,9 @@ fun ChooseCardSelector(modifier: Modifier = Modifier, onCard: (String) -> Unit) 
     }
 
     LaunchedEffect(Unit) {
-        try {
-            // todo, also allow choosing someone else's card?
-            myCards = api.myCollaborations()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            context.showDidntWork()
+        // todo, also allow choosing someone else's card?
+        api.myCollaborations {
+            myCards = it
         }
     }
 

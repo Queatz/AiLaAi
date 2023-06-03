@@ -27,10 +27,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.story
-import com.queatz.ailaai.api.updateStory
-import com.queatz.ailaai.api.updateStoryDraft
-import com.queatz.ailaai.api.uploadStoryPhotos
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
@@ -104,28 +101,26 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
     }
 
     suspend fun save(): Boolean {
-        return try {
-            // todo only send title if it was edited
-            api.updateStory(
-                storyId,
-                Story(
-                    title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title,
-                    content = json.encodeToString(buildJsonArray {
-                        storyContents.filter { it.isPart() }.forEach { part ->
-                            add(part.toJsonStoryPart())
-                        }
-                    })
-                )
-            ) {
-                story = it
+        var hasError = false
+        api.updateStory(
+            storyId,
+            Story(
+                // todo only send title if it was edited
+                title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title,
+                content = json.encodeToString(buildJsonArray {
+                    storyContents.filter { it.isPart() }.forEach { part ->
+                        add(part.toJsonStoryPart())
+                    }
+                })
+            ),
+            onError = {
+                hasError = true
             }
+        ) {
+            story = it
             edited = false
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            context.showDidntWork()
-            false
         }
+        return !hasError
     }
 
     fun isBlankText(storyContent: StoryContent) = when (storyContent) {
@@ -441,7 +436,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     var card by remember { mutableStateOf<Card?>(null) }
 
                                     LaunchedEffect(cardId) {
-                                        card = api.card(cardId)
+                                        api.card(cardId) { card = it }
                                     }
 
                                     CardItem(
@@ -455,7 +450,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                             }
 
                             LaunchedEffect(cardId) {
-                                card = api.card(cardId)
+                                api.card(cardId) { card = it }
                             }
 
                             if (showCardMenu) {

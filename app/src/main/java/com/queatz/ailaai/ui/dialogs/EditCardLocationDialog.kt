@@ -36,6 +36,9 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api
+import com.queatz.ailaai.api.card
+import com.queatz.ailaai.api.myCollaborations
+import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toList
@@ -69,11 +72,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
         cardParentType = CardParentType.Card
 
         LaunchedEffect(Unit) {
-            try {
-                parentCard = api.card(card.parent!!)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
+            api.card(card.parent!!) { parentCard = it }
         }
     } else if (card.geo != null) {
         cardParentType = CardParentType.Map
@@ -251,10 +250,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                 }
 
                                 LaunchedEffect(Unit) {
-                                    try {
-                                        myCards = api.myCollaborations().filter { it.id != card.id }
-                                    } catch (ex: Exception) {
-                                        ex.printStackTrace()
+                                    api.myCollaborations {
+                                        myCards = it.filter { it.id != card.id }
                                     }
                                 }
 
@@ -348,18 +345,16 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                         disableSaveButton = true
 
                         coroutineScope.launch {
-                            try {
-                                val update = api.updateCard(
-                                    card.id!!,
-                                    Card(
-                                        location = locationName.trim(),
-                                        geo = position.toList(),
-                                        parent = card.parent,
-                                        equipped = card.equipped,
-                                        offline = card.offline
-                                    )
+                            api.updateCard(
+                                card.id!!,
+                                Card(
+                                    location = locationName.trim(),
+                                    geo = position.toList(),
+                                    parent = card.parent,
+                                    equipped = card.equipped,
+                                    offline = card.offline
                                 )
-
+                            ) { update ->
                                 card.location = update.location
                                 card.equipped = update.equipped
                                 card.offline = update.offline
@@ -368,12 +363,8 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
 
                                 onDismissRequest()
                                 onChange()
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            } finally {
-                                disableSaveButton = false
                             }
-
+                            disableSaveButton = false
                         }
                     },
                     enabled = !disableSaveButton && !(cardParentType == CardParentType.Card && card.parent == null)
