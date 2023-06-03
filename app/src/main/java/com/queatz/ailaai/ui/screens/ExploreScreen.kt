@@ -100,7 +100,16 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             geo!!,
             offset = offset,
             limit = 20,
-            search = value.takeIf { it.isNotBlank() }
+            search = value.takeIf { it.isNotBlank() },
+            onError = { ex ->
+                if (ex is CancellationException || ex is InterruptedException) {
+                    // Ignore, probably geo or search value changed
+                } else {
+                    isError = true
+                    isLoading = false
+                    ex.printStackTrace()
+                }
+            }
         ) { page ->
             val oldSize = if (clear) 0 else cards.size
             cards = if (clear) {
@@ -111,6 +120,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             updateCategories()
             offset = cards.size
             hasMore = cards.size > oldSize
+            isError = false
+            isLoading = false
         }
     }
 
@@ -132,23 +143,11 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             return@LaunchedEffect
         }
 
-        try {
-            isLoading = true
-            loadMore(clear = true)
-            shownGeo = geo
-            shownValue = value
-            isError = false
-            isLoading = false
-        } catch (ex: Exception) {
-            if (ex is CancellationException || ex is InterruptedException) {
-                // Ignore, probably geo or search value changed
-            } else {
-                isError = true
-                isLoading = false
-                ex.printStackTrace()
-            }
-        }
-    }
+        isLoading = true
+        loadMore(clear = true)
+        shownGeo = geo
+        shownValue = value
+}
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
