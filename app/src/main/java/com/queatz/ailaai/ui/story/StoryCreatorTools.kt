@@ -22,7 +22,7 @@ import com.queatz.ailaai.api
 import com.queatz.ailaai.api.uploadStoryAudio
 import com.queatz.ailaai.api.uploadStoryPhotos
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.components.horizontalFadingEdge
+import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch

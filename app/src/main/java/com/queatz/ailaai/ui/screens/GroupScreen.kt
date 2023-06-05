@@ -48,7 +48,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.MessageItem
-import com.queatz.ailaai.ui.components.fadingEdge
+import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -205,6 +205,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 )
             }
         } else {
+            val allMembers = groupExtended!!.members ?: emptyList()
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
             val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id }
                 ?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) } ?: emptyList()
@@ -715,7 +716,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     {
                         showGroupMembers = false
                     },
-                    people = otherMembers.map { it.person!! },
+                    people = allMembers.map { it.person!! },
                     infoFormatter = { person ->
                         person.seenText(context.getString(R.string.active))
                     },

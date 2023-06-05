@@ -41,9 +41,9 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
         isLoading = true
         api.savedCards(value.takeIf { it.isNotBlank() }, onError = { ex ->
             if (ex is CancellationException || ex is InterruptedException) {
-                // Ignore, probably geo or search value changed
+                // Ignore, probably geo or search value changed, keep isLoading = true
             } else {
-                isLoading = true
+                isLoading = false
                 isError = true
             }
         }) {

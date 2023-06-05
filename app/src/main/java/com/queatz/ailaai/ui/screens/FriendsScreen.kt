@@ -33,7 +33,6 @@ import com.queatz.ailaai.api.people
 import com.queatz.ailaai.api.updateGroup
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
@@ -42,7 +41,6 @@ import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)

@@ -11,7 +11,6 @@ import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -21,7 +20,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -32,8 +30,6 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -377,146 +373,6 @@ fun CardItem(
     }
 }
 
-fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
-    Modifier
-        .graphicsLayer(alpha = 0.99f)
-        .drawWithContent {
-            drawContent()
-
-            val h = scrollState.value.toFloat().coerceAtMost(viewport.height / 3f)
-            val h2 = (
-                    scrollState.maxValue.toFloat() - scrollState.value.toFloat()
-                    ).coerceAtMost(viewport.height / 3f)
-
-            if (scrollState.value != 0) {
-                drawRect(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Black, Color.Transparent),
-                        startY = h + scrollState.value,
-                        endY = 0.0f + scrollState.value
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
-            }
-
-            if (scrollState.value != scrollState.maxValue) {
-                drawRect(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Black, Color.Transparent),
-                        startY = viewport.height + scrollState.value - h2,
-                        endY = viewport.height + scrollState.value
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
-            }
-        }
-)
-
-fun Modifier.fadingEdge(viewport: Size, scrollState: LazyListState, factor: Float = 3f) = then(
-    Modifier
-        .graphicsLayer(alpha = 0.99f)
-        .drawWithContent {
-            drawContent()
-
-            val fadeSize = viewport.height / factor
-            val value = scrollState.firstVisibleItemScrollOffset
-            if (scrollState.firstVisibleItemIndex != 0 || value != 0) {
-                val h = when (scrollState.firstVisibleItemIndex == 0) {
-                    true -> value.toFloat().coerceAtMost(fadeSize).coerceAtLeast(0f)
-                    false -> fadeSize
-                }
-
-                drawRect(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Black, Color.Transparent),
-                        startY = h,
-                        endY = 0.0f
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
-            }
-            scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.let { lastVisibleItemInfo ->
-                val scrollFromEnd = (lastVisibleItemInfo.offset + lastVisibleItemInfo.size) - viewport.height
-                val isLastItemVisible = lastVisibleItemInfo.index == scrollState.layoutInfo.totalItemsCount - 1
-                val h = when (isLastItemVisible) {
-                    true -> scrollFromEnd.coerceAtMost(fadeSize).coerceAtLeast(0f)
-                    false -> fadeSize
-                }
-
-                if (h <= 0) return@let
-
-                if (!isLastItemVisible || scrollFromEnd != 0f) {
-                    drawRect(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Black, Color.Transparent),
-                            startY = viewport.height - h,
-                            endY = viewport.height
-                        ),
-                        blendMode = BlendMode.DstIn
-                    )
-                }
-            }
-        }
-)
-
-fun Modifier.horizontalFadingEdge(viewport: Size, scrollState: ScrollState) = then(
-    Modifier
-        .graphicsLayer(alpha = 0.99f)
-        .drawWithContent {
-            drawContent()
-
-            val w = scrollState.value.toFloat().coerceAtMost(viewport.width / 6f)
-            val w2 = (
-                    scrollState.maxValue.toFloat() - scrollState.value.toFloat()
-                    ).coerceAtMost(viewport.width / 6f)
-
-            if (scrollState.value != 0) {
-                drawRect(
-                    Brush.horizontalGradient(
-                        colors = listOf(Color.Black, Color.Transparent),
-                        startX = w + scrollState.value,
-                        endX = 0.0f + scrollState.value
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
-            }
-
-            if (scrollState.value != scrollState.maxValue) {
-                drawRect(
-                    Brush.horizontalGradient(
-                        colors = listOf(Color.Black, Color.Transparent),
-                        startX = viewport.width - w2 + scrollState.value,
-                        endX = viewport.width + scrollState.value
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
-            }
-        }
-)
-
-private fun Modifier.minAspectRatio(ratio: Float) = then(
-    MaxAspectRatioModifier(ratio)
-)
-
-class MaxAspectRatioModifier(
-    private val aspectRatio: Float,
-) : LayoutModifier {
-    init {
-        require(aspectRatio > 0f) { "aspectRatio $aspectRatio must be > 0" }
-    }
-
-    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
-        val placeable = measurable.measure(
-            constraints.copy(
-                maxHeight = (constraints.maxWidth.toFloat() / aspectRatio).toInt()
-            )
-        )
-        return layout(placeable.width, placeable.height) {
-            placeable.placeRelative(IntOffset.Zero)
-        }
-    }
-}
-
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @Composable
 private fun CardToolbar(
@@ -619,4 +475,3 @@ enum class EditCard {
     Location
 }
 
-fun Float.approximate(unit: Int) = ceil(this / unit).times(unit).toInt()

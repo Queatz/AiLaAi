@@ -23,7 +23,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.Sticker
 import com.queatz.ailaai.StickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.components.fadingEdge
+import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable

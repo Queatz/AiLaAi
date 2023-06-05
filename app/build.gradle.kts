@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.8.10"
+    kotlin("plugin.serialization") version "1.8.21"
 //    id("com.huawei.agconnect") // todo IncrementalTaskInputs, try again after June, 2023
     id("com.google.gms.google-services")
     kotlin("kapt")
@@ -25,7 +25,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 46
+        versionCode = 47
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -65,7 +65,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
@@ -81,7 +81,7 @@ dependencies {
     val ktorVersion = "2.3.0"
     val choiceSdkVersion = "0.3.0"
     val hmsVersion = "6.9.0.300"
-    val composeVersion = "1.4.0"
+    val composeVersion = "1.4.3"
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -102,7 +102,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.5.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-messaging:$choiceSdkVersion")
@@ -110,7 +110,6 @@ dependencies {
     implementation("com.huawei.hms:maps:$hmsVersion")
     implementation("com.huawei.hms:push:$hmsVersion")
     implementation("com.huawei.hms:scan:2.10.0.301")
-    implementation("com.huawei.hms:hianalytics:$hmsVersion")
     implementation("com.huawei.hms:hianalytics:$hmsVersion")
     implementation("com.huawei.hms:hwid:$hmsVersion")
     implementation("com.huawei.hms:location:$hmsVersion")

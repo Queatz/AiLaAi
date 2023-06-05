@@ -20,6 +20,7 @@ import com.queatz.ailaai.api.myStickerPacks
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.EmptyText
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -79,7 +80,11 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            if (stickerPacks.isEmpty()) {
+            if (isLoading) {
+                Loading(
+                    modifier = Modifier.padding(top = PaddingDefault)
+                )
+            } else if (stickerPacks.isEmpty()) {
                 EmptyText(stringResource(R.string.create_and_share_sticker_packs))
             } else {
                 StickerPacks(

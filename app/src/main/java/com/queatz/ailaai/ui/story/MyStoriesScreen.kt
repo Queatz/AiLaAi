@@ -25,6 +25,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.EmptyText
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
@@ -37,15 +38,10 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
     var isLoading by rememberStateOf(true)
     var stories by remember { mutableStateOf(emptyList<Story>()) }
 
-    suspend fun reload() {
+    LaunchedEffect(Unit) {
         api.myStories {
             stories = it.sortedBy { it.published ?: false }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        isLoading = true
-        reload()
         isLoading = false
     }
 
@@ -62,7 +58,9 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
         )
 
         Box(modifier = Modifier.fillMaxSize()) {
-            if (stories.isEmpty()) {
+            if (isLoading) {
+                Loading()
+            } else if (stories.isEmpty()) {
                 EmptyText(stringResource(R.string.you_havent_written))
             } else {
                 LazyColumn(

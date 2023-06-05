@@ -13,6 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -121,7 +122,12 @@ class Api {
             onSuccess(post(url, body, progressCallback, client))
         } catch (e: Exception) {
             e.printStackTrace()
-            onError?.invoke(e) ?: context.showDidntWork()
+            if (onError?.invoke(e) == null ) {
+                // Usually cancellations are from the user leaving the page
+                if (e !is CancellationException && e !is InterruptedException) {
+                    context.showDidntWork()
+                }
+            }
         }
     }
 
@@ -165,7 +171,12 @@ class Api {
             onSuccess(get(url, parameters, client))
         } catch (e: Exception) {
             e.printStackTrace()
-            onError?.invoke(e) ?: context.showDidntWork()
+            // Usually cancellations are from the user leaving the page
+            if (onError?.invoke(e) == null ) {
+                if (e !is CancellationException && e !is InterruptedException) {
+                    context.showDidntWork()
+                }
+            }
         }
     }
 

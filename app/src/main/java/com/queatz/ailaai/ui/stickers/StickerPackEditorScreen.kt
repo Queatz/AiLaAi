@@ -2,10 +2,7 @@ package com.queatz.ailaai.ui.stickers
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
@@ -281,7 +278,9 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
         ) {
             val stickerPack = stickerPack
             if (stickerPack == null) {
-                Loading()
+                Loading(
+                    modifier = Modifier.padding(top = PaddingDefault)
+                )
             } else {
                 StickerPackContents(
                     stickerPack,

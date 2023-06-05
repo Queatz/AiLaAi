@@ -9,6 +9,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Photo
@@ -366,7 +367,11 @@ fun ColumnScope.MessageContent(
         }
     }
     attachedPhotos?.ifNotEmpty?.let { photos ->
+        val state = rememberLazyListState()
+        var viewport by rememberStateOf(Size(0f, 0f))
+
         LazyRow(
+            state = state,
             horizontalArrangement = Arrangement.spacedBy(
                 PaddingDefault,
                 if (isMe) Alignment.End else Alignment.Start
@@ -378,6 +383,8 @@ fun ColumnScope.MessageContent(
                 } else {
                     it.fillMaxWidth()
                 }
+                    .onPlaced { viewport = it.boundsInParent().size }
+                    .horizontalFadingEdge(viewport, state, 12f)
             }
         ) {
             items(photos, key = { it }) { photo ->
@@ -468,14 +475,8 @@ fun ColumnScope.MessageContent(
                         id = attachedSticker?.id ?: return@launch context.showDidntWork(),
                         onError = {
                             when (it.status) {
-                                HttpStatusCode.NotFound -> {
-                                    context.toast(R.string.sticker_pack_not_found)
-                                }
-
-                                else -> {
-                                    it.printStackTrace()
-                                    context.showDidntWork()
-                                }
+                                HttpStatusCode.NotFound -> context.toast(R.string.sticker_pack_not_found)
+                                else -> context.showDidntWork()
                             }
                         }
                     ) {

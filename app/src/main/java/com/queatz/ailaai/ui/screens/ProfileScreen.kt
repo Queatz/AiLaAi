@@ -454,7 +454,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     colors = IconButtonDefaults.outlinedIconButtonColors(
                                         contentColor = MaterialTheme.colorScheme.primary
                                     ),
-                                    enabled = false
+                                    enabled = true
                                 ) {
                                     Icon(Icons.Outlined.Message, "")
                                 }
