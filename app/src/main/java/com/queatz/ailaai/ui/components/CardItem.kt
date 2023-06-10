@@ -460,8 +460,13 @@ private fun CardToolbar(
 data class ConversationItem(
     var title: String = "",
     var message: String = "",
+    var action: ConversationAction? = null,
     var items: MutableList<ConversationItem> = mutableListOf(),
 )
+
+enum class ConversationAction {
+    Message
+}
 
 enum class CardParentType {
     Map,

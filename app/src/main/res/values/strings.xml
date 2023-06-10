@@ -328,4 +328,5 @@
     <string name="create_and_share_sticker_packs">Create a sticker pack and share it with friends.</string>
     <string name="authors">Authors</string>
     <string name="inline_by">by</string>
+    <string name="changed_to_message_button">Changed to message button</string>
 </resources>

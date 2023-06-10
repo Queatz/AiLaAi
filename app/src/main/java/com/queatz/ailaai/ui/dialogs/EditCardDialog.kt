@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.dialogs
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -28,7 +31,9 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api
 import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.json
+import com.queatz.ailaai.ui.components.ConversationAction
 import com.queatz.ailaai.ui.components.ConversationItem
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -39,6 +44,7 @@ import kotlinx.serialization.encodeToString
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Unit) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current!!
 
     val conversation = remember {
@@ -157,6 +163,30 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        IconButton(
+                            {
+                                it.action = when (it.action) {
+                                    ConversationAction.Message -> null
+                                    else -> ConversationAction.Message
+                                }
+                                if (it.action == ConversationAction.Message) {
+                                    context.toast(R.string.changed_to_message_button)
+                                }
+                                invalidate()
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = if (it.action == ConversationAction.Message) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    LocalContentColor.current.copy(alpha = .5f)
+                                }
+                            )
+                        ) {
+                            Icon(
+                                Icons.Outlined.Message,
+                                null
+                            )
+                        }
                         OutlinedTextField(
                             titleState,
                             { value ->
@@ -185,7 +215,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                                     } else false
                                 }
                         )
-                        if (titleState.isNotBlank()) {
+                        AnimatedVisibility(titleState.isNotBlank() && it.action == null) {
                             IconButton(
                                 {
                                     backstack.add(cardConversation)

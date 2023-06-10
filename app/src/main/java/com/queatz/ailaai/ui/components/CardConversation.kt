@@ -28,7 +28,6 @@ import com.queatz.ailaai.LinkifyText
 import com.queatz.ailaai.R
 import com.queatz.ailaai.json
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.serialization.decodeFromString
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -143,9 +142,19 @@ fun CardConversation(
         if (interactable) {
             current.items.forEach {
                 Button({
-                    stack = stack + current
-                    current = it
-                }) {
+                    when (it.action) {
+                        ConversationAction.Message -> {
+                            onReply(stack.map { it.title } + current.title)
+                        }
+                        else -> {
+                            stack = stack + current
+                            current = it
+                        }
+                    }
+                }) {//, enabled = it.action == null || !isMine
+                    if (it.action == ConversationAction.Message) {
+                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
+                    }
                     Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                 }
             }
