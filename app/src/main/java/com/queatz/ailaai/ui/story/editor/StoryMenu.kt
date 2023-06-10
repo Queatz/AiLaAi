@@ -32,6 +32,7 @@ fun StoryMenu(
     story: Story?,
     me: Person?,
     isMine: Boolean,
+    showOpen: Boolean = false,
     edited: Boolean = false,
     editing: Boolean = false,
     onReorder: (() -> Unit)? = null
@@ -97,8 +98,14 @@ fun StoryMenu(
             onDismissRequest()
         }
     ) {
-        if (!edited && editing) {
+        if (showOpen) {
+            DropdownMenuItem({ Text(stringResource(R.string.open_story)) }, {
+                onDismissRequest()
+                navController.navigate("story/$storyId")
+            })
+        } else if (!edited && editing) {
             DropdownMenuItem({ Text(stringResource(R.string.preview)) }, {
+                onDismissRequest()
                 navController.navigate("story/$storyId")
             })
         }

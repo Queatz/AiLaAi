@@ -1,10 +1,7 @@
 package com.queatz.ailaai.ui.story
 
 import android.app.Activity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
@@ -18,19 +15,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.helpers.locationSelector
-import com.queatz.ailaai.mePresence
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.LocationScaffold
+import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.CancellationException
@@ -69,7 +65,8 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
         }
     ) {
         Column {
-            var stories by remember { mutableStateOf(emptyList<StoryContent>()) }
+            var stories by remember { mutableStateOf(emptyList<Story>()) }
+            var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
             var isLoading by rememberStateOf(true)
 
             LaunchedEffect(geo) {
@@ -82,7 +79,8 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                             context.showDidntWork()
                         }
                     }) {
-                        stories = it.flatMapIndexed { index, story ->
+                        stories = it
+                        storyContents = it.flatMapIndexed { index, story ->
                             (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
                                     story.asContents()
                         }
@@ -108,17 +106,25 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
             } else {
                 Box(modifier = Modifier.fillMaxSize()) {
 
-                    if (stories.isEmpty()) {
+                    if (storyContents.isEmpty()) {
                         EmptyText(stringResource(R.string.no_stories_to_read))
                     } else {
                         StoryContents(
-                            stories,
+                            storyContents,
                             state,
                             navController,
                             Modifier.fillMaxSize(),
                             bottomContentPadding = 80.dp
-                        ) {
-                            navController.navigate("story/$it")
+                        ) { storyId ->
+                            Row {
+                                StoryActions(
+                                    navController,
+                                    storyId,
+                                    stories.find { it.id == storyId },
+                                    me,
+                                    showOpen = true
+                                )
+                            }
                         }
                     }
                     FloatingActionButton(

@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowOutward
 import androidx.compose.material.icons.outlined.Flare
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +42,7 @@ fun StoryContents(
     navController: NavController,
     modifier: Modifier = Modifier,
     bottomContentPadding: Dp = 0.dp,
-    onExpand: ((storyId: String) -> Unit)? = null,
+    actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
 
@@ -87,7 +89,7 @@ fun StoryContents(
                                         .weight(1f)
                                         .fillMaxWidth()
                                         .let {
-                                            if (onExpand == null) {
+                                            if (actions == null) {
                                                 it
                                             } else {
                                                 it.padding(top = PaddingDefault)
@@ -95,24 +97,12 @@ fun StoryContents(
                                                         remember { MutableInteractionSource() },
                                                         indication = null
                                                     ) {
-                                                        onExpand(content.id)
+                                                        navController.navigate("story/${content.id}")
                                                     }
                                             }
                                         }
                                 )
-                                if (onExpand != null) {
-                                    IconButton(
-                                        onClick = {
-                                            onExpand(content.id)
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Outlined.ArrowOutward,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
+                                actions?.invoke(content.id)
                             }
                         }
                     }

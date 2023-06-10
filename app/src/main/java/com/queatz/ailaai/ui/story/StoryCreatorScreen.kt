@@ -246,7 +246,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     isMine = story?.person == me()?.id,
                     edited = edited,
                     editing = true,
-                    {
+                    onReorder = {
                         showReorderContentDialog = true
                     }
                 )

@@ -144,14 +144,14 @@ fun CardConversation(
                 Button({
                     when (it.action) {
                         ConversationAction.Message -> {
-                            onReply(stack.map { it.title } + current.title)
+                            onReply(stack.map { it.title } + current.title + it.title)
                         }
                         else -> {
                             stack = stack + current
                             current = it
                         }
                     }
-                }) {//, enabled = it.action == null || !isMine
+                }, enabled = it.action == null || !isMine) {
                     if (it.action == ConversationAction.Message) {
                         Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
                     }

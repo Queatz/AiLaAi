@@ -163,6 +163,7 @@
     <string name="remove_x_people">Bỏ %1$s người</string>
     <string name="collaboration">Cộng tác</string>
     <string name="open_card">Mở thẻ</string>
+    <string name="open_story">Mở bản tin</string>
     <string name="add_card">Thêm thẻ</string>
     <string name="person_added_person">%1$s đã thêm %2$s làm cộng tác</string>
     <string name="person_removed_person">%1$s đã xóa %2$s khỏi cộng tác</string>

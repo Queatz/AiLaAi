@@ -167,6 +167,7 @@
     <string name="remove_x_people">Remove %1$s people</string>
     <string name="collaboration">Collaboration</string>
     <string name="open_card">Open card</string>
+    <string name="open_story">Open story</string>
     <string name="person_added_person">%1$s added %2$s as a collaborator</string>
     <string name="person_removed_person">%1$s removed %2$s as a collaborator</string>
     <string name="person_added_card">%1$s added %2$s</string>
