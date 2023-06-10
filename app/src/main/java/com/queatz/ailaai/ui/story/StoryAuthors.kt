@@ -17,7 +17,7 @@ import kotlinx.datetime.Instant
 fun StoryAuthors(navController: NavController, publishDate: Instant?, authors: List<Person>) {
     val someone = stringResource(R.string.someone)
     val authorsText = buildAnnotatedString {
-        append("${publishDate?.timeAgo() ?: stringResource(R.string.draft)} ${"by"} ")
+        append("${publishDate?.timeAgo() ?: stringResource(R.string.draft)} ${stringResource(R.string.inline_by)} ")
         authors
             .forEachIndexed { index, person ->
                 if (index != 0) {

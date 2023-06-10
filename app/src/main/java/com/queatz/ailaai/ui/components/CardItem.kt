@@ -244,7 +244,7 @@ fun CardItem(
                     val hasCards = (card.cardCount ?: 0) > 0
                     val distanceText = showDistance?.let {
                         if (card.geo != null) {
-                            it.distance(card.latLng!!).takeIf { it < farDistance }?.let { metersAway ->
+                            it.distance(card.latLng!!).takeIf { it < nearbyMaxDistanceKm }?.let { metersAway ->
                                 when {
                                     metersAway >= 1000f -> ceil(metersAway / 1000).toInt()
                                         .let { km -> pluralStringResource(R.plurals.km_away, km, km) }

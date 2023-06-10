@@ -205,10 +205,11 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 )
             }
         } else {
-            val allMembers = groupExtended!!.members ?: emptyList()
+            val allMembers = groupExtended!!.members
+                ?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) }
+                ?: emptyList()
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
-            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id }
-                ?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) } ?: emptyList()
+            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id } ?: emptyList()
             val state = rememberLazyListState()
 
             var latestMessage by remember { mutableStateOf<Instant?>(null) }
@@ -343,10 +344,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
 //                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)
+                modifier = Modifier.zIndex(1f)
             )
             AnimatedVisibility(showDescription && groupExtended?.group?.description?.isBlank() == false) {
                 OutlinedCard(

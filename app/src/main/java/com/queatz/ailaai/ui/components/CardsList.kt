@@ -104,7 +104,7 @@ fun CardsList(
                 }
 
                 val nearbyCards = if (useDistance && geo != null) cards.takeWhile {
-                    it.geo != null && it.latLng!!.distance(geo) < farDistance
+                    it.geo != null && it.latLng!!.distance(geo) < nearbyMaxDistanceKm
                 } else emptyList()
 
                 val remainingCards = cards.drop(nearbyCards.size)
@@ -192,4 +192,4 @@ fun CardsList(
     }
 }
 
-const val farDistance = 500_000
+const val nearbyMaxDistanceKm = 100_000

@@ -327,4 +327,5 @@
     <string name="you_havent_written">You haven\'t written anything as of yet.</string>
     <string name="create_and_share_sticker_packs">Create a sticker pack and share it with friends.</string>
     <string name="authors">Authors</string>
+    <string name="inline_by">by</string>
 </resources>

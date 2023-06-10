@@ -419,11 +419,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     })
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
             modifier = Modifier
-                .shadow(ElevationDefault / 2)
                 .zIndex(1f)
         )
 

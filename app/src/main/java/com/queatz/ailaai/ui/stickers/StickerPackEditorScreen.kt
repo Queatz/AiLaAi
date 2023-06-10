@@ -266,10 +266,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
                     }
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            modifier = Modifier.shadow(ElevationDefault / 2).zIndex(1f)
+            modifier = Modifier.zIndex(1f)
         )
 
         Column(

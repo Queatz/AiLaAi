@@ -56,7 +56,7 @@ class Application : android.app.Application() {
                 }
 
                 scope.launch {
-                    api.myDevice(deviceType, token)
+                    api.myDevice(deviceType, token, onError = {})
                 }
             }
             override fun onError(throwable: Throwable) {

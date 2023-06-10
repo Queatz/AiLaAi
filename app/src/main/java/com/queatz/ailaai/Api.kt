@@ -13,15 +13,12 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.utils.io.*
+import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.jvm.javaio.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.FileOutputStream
@@ -125,7 +122,9 @@ class Api {
             if (onError?.invoke(e) == null ) {
                 // Usually cancellations are from the user leaving the page
                 if (e !is CancellationException && e !is InterruptedException) {
-                    context.showDidntWork()
+                    withContext(Dispatchers.Main) {
+                        context.showDidntWork()
+                    }
                 }
             }
         }
@@ -174,7 +173,9 @@ class Api {
             // Usually cancellations are from the user leaving the page
             if (onError?.invoke(e) == null ) {
                 if (e !is CancellationException && e !is InterruptedException) {
-                    context.showDidntWork()
+                    withContext(Dispatchers.Main) {
+                        context.showDidntWork()
+                    }
                 }
             }
         }
