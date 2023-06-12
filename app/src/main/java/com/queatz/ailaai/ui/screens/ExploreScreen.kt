@@ -64,7 +64,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var value by rememberSaveable { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(exploreInitialCategory) }
     var categories by remember { mutableStateOf(emptyList<String>()) }
-    var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var geo: LatLng? by remember { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
     var cards by remember { mutableStateOf(emptyList<Card>()) }
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
@@ -76,7 +76,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var isError by rememberStateOf(false)
     var offset by remember { mutableStateOf(0) }
     var hasMore by rememberStateOf(true)
-    var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var shownGeo: LatLng? by remember { mutableStateOf(null) }
     val locationSelector = locationSelector(
         geo,
         { geo = it },
@@ -96,6 +96,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             offset = 0
             hasMore = true
             isLoading = true
+            cards = emptyList()
         }
         api.cards(
             geo!!,
@@ -132,10 +133,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
 
         if (hasInitialCards) {
             hasInitialCards = false
-
-            if (cards.isNotEmpty()) {
-                return@LaunchedEffect
-            }
+            return@LaunchedEffect
         }
 
         // Don't reload if moving < 100m
@@ -144,9 +142,10 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
 
         loadMore(clear = true)
+
         shownGeo = geo
         shownValue = value
-}
+    }
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {

@@ -141,21 +141,24 @@ fun CardConversation(
 
         if (interactable) {
             current.items.forEach {
-                Button({
-                    when (it.action) {
-                        ConversationAction.Message -> {
+                when (it.action) {
+                    ConversationAction.Message -> {
+                        Button({
                             onReply(stack.map { it.title } + current.title + it.title)
+                        }, enabled = !isMine) {
+                            Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
+                            Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                         }
-                        else -> {
+                    }
+
+                    else -> {
+                        OutlinedButton({
                             stack = stack + current
                             current = it
+                        }) {
+                            Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                         }
                     }
-                }, enabled = it.action == null || !isMine) {
-                    if (it.action == ConversationAction.Message) {
-                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
-                    }
-                    Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                 }
             }
 

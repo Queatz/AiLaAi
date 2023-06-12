@@ -117,7 +117,7 @@ fun CardsList(
                         basicCard(it)
                     }
                 }
-                if (onLoadMore != null) {
+                if (onLoadMore != null && cards.isNotEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         var isLoadingMore by rememberStateOf(true)
                         Column(

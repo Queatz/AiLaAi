@@ -11,6 +11,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import at.bluesource.choicesdk.maps.common.LatLng
@@ -70,10 +72,12 @@ fun CardItem(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(),
         elevation = CardDefaults.elevatedCardElevation(),
-        modifier = Modifier.clip(MaterialTheme.shapes.large).then(modifier)
+        modifier = Modifier
+            .clip(RoundedCornerShape(24.dp))
+            .then(modifier)
     ) {
         var hideContent by rememberStateOf(false)
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
@@ -289,7 +293,9 @@ fun CardItem(
                 ConstraintLayout(
                     modifier = Modifier
                         .alpha(alpha)
-                        .background(MaterialTheme.colorScheme.background.copy(alpha = .8f))
+                        .padding(PaddingDefault)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = .96f))
                         .animateContentSize(
                             spring(
                                 stiffness = Spring.StiffnessMediumLow,

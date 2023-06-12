@@ -39,7 +39,7 @@ class Saves {
             savedIds.add(card.id!!)
             changes.emit(Unit)
             if (!hasError) {
-                ToggleSaveResult.Saved
+                return ToggleSaveResult.Saved
             }
         } else {
             api.unsaveCard(card.id!!, onError = { hasError = true })

@@ -63,6 +63,7 @@ fun <T> ChooseDialog(
     key: (item: T) -> String,
     selected: List<T>,
     onSelectedChange: (List<T>) -> Unit,
+    showSearch: (List<T>) -> Boolean = { it.size > 5 },
     onConfirm: suspend (List<T>) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
@@ -83,7 +84,7 @@ fun <T> ChooseDialog(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
-            if (items.size > 5) {
+            if (showSearch(items)) {
                 OutlinedTextField(
                     searchText,
                     onValueChange = searchTextChange,

@@ -73,6 +73,7 @@ fun ChooseCategoryDialog(
         onSelectedChange = {
             selected = it - selected
         },
+        showSearch = { true },
         onConfirm = {
             onCategory(it.firstOrNull() ?: searchText.takeIf { it.isNotBlank() })
         }

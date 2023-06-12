@@ -16,11 +16,11 @@
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Mã sử dụng một lần này sẽ xài được trong vòng 48 giờ.</string>
     <string name="all_your_cards">Thẻ của bạn</string>
-    <string name="invite_into_group">Mời vào nhóm</string>
+    <string name="invite_into_group">Thêm vào nhóm</string>
     <string name="invite_someone">Mời ai đó</string>
-    <string name="invite_person">Mời %1$s</string>
-    <string name="invite_x_and_y">Mời %1$s và %2$s</string>
-    <string name="invite_x_people">Mời %1$s người</string>
+    <string name="invite_person">Thêm %1$s</string>
+    <string name="invite_x_and_y">Thêm %1$s và %2$s</string>
+    <string name="invite_x_people">Thêm %1$s người</string>
     <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
     <string name="add_a_card">Tạo thẻ mới</string>
     <string name="you_have_no_groups">Bạn hiện không có nhóm nào.</string>
@@ -42,7 +42,7 @@
     <string name="more">Nhiều hơn</string>
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
-    <string name="active">Hoạt động</string>
+    <string name="active">Truy cập</string>
     <string name="messages_notification_channel_description">Tin nhắn từ người.</string>
     <string name="collaboration_notification_channel_description">Thông báo cộng tác.</string>
     <string name="copy">Sao chép</string>
@@ -147,7 +147,7 @@
     <string name="change_location">Đổi vị trí</string>
     <string name="edit_card">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
-    <string name="person_invited">%1$s được mời</string>
+    <string name="person_invited">%1$s được thêm vào nhóm</string>
     <string name="copy_location">Sao chép vị trí</string>
     <string name="show_on_map">Mở trên bản đồ</string>
     <string name="youve_been_signed_out">Có vẻ như bạn đã bị đăng xuất.</string>
@@ -192,7 +192,7 @@
     </plurals>
     <string name="friends_cards">Thẻ của bạn bè</string>
     <string name="friends">Bạn bè</string>
-    <string name="invite_people">Mời ai vào</string>
+    <string name="invite_people">Thêm ai vào nhóm</string>
     <string name="empty_group_name">Nhóm mới</string>
     <string name="empty_story_name">Bản tin mới</string>
     <string name="manage">Quản lý</string>
@@ -226,9 +226,9 @@
     <string name="joined">Đã tham gia</string>
     <string name="reset_tutorial">Hiển thị hướng dẫn</string>
     <string name="hide_tutorial">"Ẩn hướng dẫn "</string>
-    <string name="invite_to_group">Mời đến %1$s</string>
-    <string name="invite_to_groups">Mời đến %1$s và %2$s</string>
-    <string name="invite_to_x_groups">Mời đến %1$s nhóm</string>
+    <string name="invite_to_group">Thêm đến %1$s</string>
+    <string name="invite_to_groups">Thêm đến %1$s và %2$s</string>
+    <string name="invite_to_x_groups">Thêm đến %1$s nhóm</string>
     <plurals name="friends_plural">
         <item quantity="other">Bạn</item>
     </plurals>
@@ -237,6 +237,9 @@
     </plurals>
     <plurals name="cards_plural">
         <item quantity="other">Thẻ</item>
+    </plurals>
+    <plurals name="x_words">
+        <item quantity="other">%1$s từ</item>
     </plurals>
     <string name="more_ideas">Ý tưởng thêm</string>
     <string name="processing_video">Đang xử lý video</string>
