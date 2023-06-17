@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.screens
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
@@ -123,6 +124,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             hasMore = cards.size > oldSize
             isError = false
             isLoading = false
+            shownGeo = geo
+            shownValue = value
         }
     }
 
@@ -142,9 +145,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
 
         loadMore(clear = true)
-
-        shownGeo = geo
-        shownValue = value
     }
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

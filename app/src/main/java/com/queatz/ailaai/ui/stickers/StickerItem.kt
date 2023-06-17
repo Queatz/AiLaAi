@@ -57,8 +57,8 @@ fun StickerPhoto(photo: String?, modifier: Modifier = Modifier, onLongClick: (()
         contentScale = ContentScale.Fit,
         alignment = Alignment.Center,
         modifier = modifier
-            .height(80.dp)
-            .widthIn(min = 80.dp)
+            .height(96.dp)
+            .widthIn(min = 96.dp)
             .clip(MaterialTheme.shapes.large)
             .combinedClickable(
                 onClick = onClick,

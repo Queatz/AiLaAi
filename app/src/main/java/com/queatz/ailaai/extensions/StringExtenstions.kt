@@ -20,7 +20,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-fun String.wordCount() = if (isBlank()) 0 else trim().split("\\s+".toRegex()).size
+fun String.wordCount() = if (isBlank()) 0 else trim().split("\\W+".toRegex()).size
 
 fun String.launchUrl(context: Context) {
     context.startActivity(

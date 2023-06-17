@@ -70,7 +70,7 @@ suspend fun Api.createSticker(
     formData {
         append("photo", photo.asInputProvider(context, maxSize = 500_000)!!, Headers.build {
             append(HttpHeaders.ContentType, context.contentResolver.getType(photo) ?: "image/png")
-            append(HttpHeaders.ContentDisposition, "filename=sticker.png")
+            append(HttpHeaders.ContentDisposition, "filename=sticker.${context.contentResolver.getType(photo)?.split("/")?.lastOrNull() ?: "png"}")
         })
     }
 ), client = dataClient(), onError = onError, onSuccess = onSuccess)

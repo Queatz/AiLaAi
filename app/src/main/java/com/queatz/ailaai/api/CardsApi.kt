@@ -144,7 +144,13 @@ suspend fun Api.uploadCardVideo(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
-    val scaledVideo = video.asScaledVideo(context, progressCallback = processingCallback)
+    val scaledVideo = try {
+        video.asScaledVideo(context, progressCallback = processingCallback)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        onError?.invoke(e)
+        return
+    }
     return post(
         "cards/$id/video",
         MultiPartFormDataContent(

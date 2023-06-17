@@ -254,7 +254,7 @@
     <string name="discard_changes">Bỏ thay đổi</string>
     <string name="sent_video">Đã gửi một video</string>
     <string name="next">Tiếp</string>
-    <string name="explore_search_placeholder">Hôm nay bạn đang tìm ai vậy?</string>
+    <string name="explore_search_placeholder">Hôm nay bạn đang tìm kiếm ai vậy?</string>
     <string name="talk">Nói chuyện</string>
     <string name="create">Tạo</string>
     <string name="stories">Bản tin</string>
@@ -309,7 +309,7 @@
     <string name="share_to_groups_description">Chia sẻ bản tin của bạn tại thời điểm xuất bản (tùy chọn)</string>
     <string name="all_cards_are_published">Tất cả thẻ đã được xuất bản</string>
     <string name="story_contains_draft_cards">Bản tin chứa thẻ nháp</string>
-    <string name="minimum_words_count">Số từ tối thiểu là 150 (hiện có %1$s)</string>
+    <string name="minimum_words_count">Số từ tối thiểu là 25 (hiện có %1$s)</string>
     <string name="audio">Âm thanh</string>
     <string name="no_stories_to_read">" Không có gì để đọc hiện tại.\n\nCó lẽ bạn sẽ viết một điều gì đó?"</string>
     <string name="send_story">Gửi bản tin</string>

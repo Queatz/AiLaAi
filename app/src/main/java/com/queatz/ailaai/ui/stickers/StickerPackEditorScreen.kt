@@ -283,7 +283,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
                     stickerPack,
                     showAddStickerButton = true,
                     onAddStickerClick = {
-                        photoLauncher.launch("image/png")
+                        photoLauncher.launch("image/*")
                     },
                     onStickerLongClick = {
                         scope.launch {

@@ -370,6 +370,15 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                     showMenu = false
                                     showQrCodeDialog = true
                                 })
+                                person?.let { person ->
+                                    val someoneString = stringResource(R.string.someone)
+                                    DropdownMenuItem({
+                                        Text(stringResource(R.string.share))
+                                    }, {
+                                        profileUrl(person.id!!).shareAsUrl(context, person.name ?: someoneString)
+                                        showMenu = false
+                                    })
+                                }
                             }
                         }
                     }

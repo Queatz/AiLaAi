@@ -25,7 +25,7 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 33
-        versionCode = 49
+        versionCode = 50
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -123,7 +123,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("androidx.media3:media3-exoplayer:1.0.2")
     implementation("androidx.media3:media3-ui:1.0.2")
-    implementation("com.arthenica:ffmpeg-kit-min-gpl:5.1")
+    implementation("com.arthenica:ffmpeg-kit-video:5.1")
     implementation("ch.acra:acra-core:5.9.7")
     implementation("ch.acra:acra-toast:5.9.7")
     testImplementation("junit:junit:4.13.2")

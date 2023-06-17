@@ -410,4 +410,4 @@ fun PublishStoryDialog(
     }
 }
 
-const val storyMinimumWordCount = 150
+const val storyMinimumWordCount = 25

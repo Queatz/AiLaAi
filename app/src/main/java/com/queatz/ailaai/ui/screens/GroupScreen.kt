@@ -639,7 +639,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                     }
                                 ) {
                                     Icon(
-                                        Icons.Outlined.AddPhotoAlternate,
+                                        Icons.Outlined.Photo,
                                         stringResource(R.string.add),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
