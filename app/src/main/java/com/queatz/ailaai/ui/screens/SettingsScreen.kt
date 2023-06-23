@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,15 +29,20 @@ import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.profile
 import com.queatz.ailaai.api.transferCode
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.sendEmail
+import com.queatz.ailaai.api.updateMe
+import com.queatz.ailaai.api.updateProfile
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.dialogs.InviteDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
 import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -47,7 +53,9 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     val context = LocalContext.current
     var signOutDialog by rememberStateOf(false)
     var inviteDialog by rememberStateOf(false)
+    var urlDialog by rememberStateOf(false)
     var showResetTutorialButton by rememberStateOf(false)
+    var profile by remember { mutableStateOf<PersonProfile?>(null) }
 
     LaunchedEffect(Unit) {
         context.dataStore.data.map { it[tutorialCompleteKey] == true }.collect {
@@ -55,10 +63,46 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
         }
     }
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            api.profile(me()?.id ?: continue) {
+                profile = it
+            }
+            delay(1_000)
+            break
+        }
+    }
+
     if (inviteDialog) {
         InviteDialog(
             me()?.name ?: context.getString(R.string.someone)
         ) { inviteDialog = false }
+    }
+
+    if (urlDialog) {
+        TextFieldDialog(
+            { urlDialog = false },
+            stringResource(R.string.your_profile_url),
+            stringResource(R.string.update),
+            true,
+            profile?.profile?.url ?: "",
+        ) { value ->
+            api.updateProfile(
+                Profile(url = value.trim()),
+                onError = {
+                    if (it.status == HttpStatusCode.Conflict) {
+                        context.toast(R.string.url_already_in_use)
+                    }
+                }
+            ) {
+                urlDialog = false
+                scope.launch {
+                    api.profile(profile!!.profile.person!!) {
+                        profile = it
+                    }
+                }
+            }
+        }
     }
 
     if (signOutDialog) {
@@ -213,6 +257,34 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                                 chooseLanguageDialog = false
                             })
                         }
+                    }
+                }
+            }
+
+            Row {
+                DropdownMenuItem({
+                    Column(modifier = Modifier.padding(PaddingDefault)) {
+                        Text(
+                            stringResource(R.string.your_profile_url),
+                            style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+                        )
+                        Text(
+                            profile?.profile?.url ?: stringResource(R.string.none),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }, {
+                    if (me() != null) {
+                        urlDialog = true
+                    }
+                }, modifier = Modifier.weight(1f))
+                if (profile?.profile?.url?.isNotBlank() == true) {
+                    IconButton({
+                        "$appDomain/${profile!!.profile.url!!}".copyToClipboard(context)
+                        context.toast(R.string.copied)
+                    }, modifier = Modifier.padding(PaddingDefault)) {
+                        Icon(Icons.Outlined.ContentCopy, null)
                     }
                 }
             }

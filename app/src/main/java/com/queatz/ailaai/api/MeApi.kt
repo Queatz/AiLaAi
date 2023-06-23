@@ -33,7 +33,7 @@ suspend fun Api.updateMe(
 suspend fun Api.updateProfile(
     profile: Profile,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode> = {},
+    onSuccess: SuccessBlock<Profile> = {},
 ) = post("me/profile", profile, onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateProfilePhoto(

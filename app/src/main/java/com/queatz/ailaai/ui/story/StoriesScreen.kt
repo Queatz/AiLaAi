@@ -76,6 +76,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         if (it is CancellationException) {
                             // Ignored, geo probably changes
                         } else {
+                            isLoading = false
                             context.showDidntWork()
                         }
                     }) {
@@ -84,8 +85,8 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                             (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
                                     story.asContents()
                         }
+                        isLoading = false
                     }
-                    isLoading = false
                 }
             }
 

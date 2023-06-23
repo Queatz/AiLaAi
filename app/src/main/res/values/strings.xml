@@ -330,4 +330,7 @@
     <string name="authors">Authors</string>
     <string name="inline_by">by</string>
     <string name="changed_to_message_button">Changed to message button</string>
+    <string name="your_profile_url">Your profile URL</string>
+    <string name="url_already_in_use">That URL is already in use</string>
+    <string name="none">None</string>
 </resources>

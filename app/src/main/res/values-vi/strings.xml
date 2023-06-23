@@ -322,4 +322,7 @@
     <string name="authors">Tác giả</string>
     <string name="inline_by">bởi</string>
     <string name="changed_to_message_button">Đã thay đổi thành nút tin nhắn</string>
+    <string name="your_profile_url">URL trang cá nhân của bạn</string>
+    <string name="url_already_in_use">URL đó có người sử dụng rồi</string>
+    <string name="none">Chưa có</string>
 </resources>
