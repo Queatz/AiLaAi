@@ -213,12 +213,27 @@ class Api {
 
     fun hasToken() = token != null
 
-    suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
+//    suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
+
+    suspend fun latestAppVersionInfo() = httpData.get("$appDomain/version-info").bodyAsText().trim().split(",").let {
+        VersionInfo(
+            versionCode = it.first().toInt(),
+            versionName = it[1]
+        )
+    }
+
+    suspend fun appReleaseNotes() = httpData.get("$appDomain/release-notes").bodyAsText()
 
     suspend fun downloadFile(url: String, outputStream: FileOutputStream) {
         httpData.get(url).bodyAsChannel().copyTo(outputStream)
     }
 }
+
+@Serializable
+data class VersionInfo(
+    val versionCode: Int,
+    val versionName: String
+)
 
 @Serializable
 data class SignUpRequest(

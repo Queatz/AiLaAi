@@ -36,6 +36,7 @@ import com.queatz.ailaai.api.updateProfile
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.dialogs.InviteDialog
+import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
@@ -55,6 +56,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     var inviteDialog by rememberStateOf(false)
     var urlDialog by rememberStateOf(false)
     var showResetTutorialButton by rememberStateOf(false)
+    var showReleaseNotes by rememberStateOf(false)
     var profile by remember { mutableStateOf<PersonProfile?>(null) }
 
     LaunchedEffect(Unit) {
@@ -65,10 +67,16 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
     LaunchedEffect(Unit) {
         while (true) {
-            api.profile(me()?.id ?: continue) {
+            val meId = me()?.id
+
+            if (meId == null) {
+                delay(1_000)
+                continue
+            }
+
+            api.profile(meId) {
                 profile = it
             }
-            delay(1_000)
             break
         }
     }
@@ -195,6 +203,12 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 }
             }
         )
+    }
+
+    if (showReleaseNotes) {
+        ReleaseNotesDialog {
+            showReleaseNotes = false
+        }
     }
 
     Column {
@@ -331,6 +345,24 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 )
             }, {
                 "Jacob<jacobaferrero@gmail.com>".sendEmail(context, "Ai Là Ai feedback")
+            })
+
+            DropdownMenuItem({
+                Column(
+                    modifier = Modifier.padding(PaddingDefault)
+                ) {
+                    Text(
+                        stringResource(R.string.release_history),
+                        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+                    )
+                    Text(
+                        stringResource(R.string.app_version_x, BuildConfig.VERSION_NAME),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }, onClick =  {
+                showReleaseNotes = true
             })
 
             DropdownMenuItem({

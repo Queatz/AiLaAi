@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -43,6 +44,7 @@ import com.queatz.ailaai.api.groups
 import com.queatz.ailaai.api.me
 import com.queatz.ailaai.api.updateMe
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
 import com.queatz.ailaai.ui.stickers.StickerPackScreen
@@ -61,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 private val appTabKey = stringPreferencesKey("app.tab")
+private val appVersionCode = intPreferencesKey("app.versionCode")
 
 class MainActivity : AppCompatActivity() {
 
@@ -131,6 +134,13 @@ class MainActivity : AppCompatActivity() {
 
                 var known by remember { mutableStateOf(api.hasToken()) }
                 var wasKnown by remember { mutableStateOf(known) }
+                var showReleaseNotes by rememberStateOf(false)
+
+                if (showReleaseNotes) {
+                    ReleaseNotesDialog {
+                        showReleaseNotes = false
+                    }
+                }
 
                 if (!known) {
                     InitialScreen { known = true }
@@ -140,8 +150,8 @@ class MainActivity : AppCompatActivity() {
                     val snackbarHostState = remember { SnackbarHostState() }
                     val scope = rememberCoroutineScope()
                     val cantConnectString = stringResource(R.string.cant_connect)
-                    val updateAvailableString = stringResource(R.string.update_available)
                     val downloadString = stringResource(R.string.download)
+                    val seeWhatsNewString = stringResource(R.string.see_whats_new)
 
                     window.setSoftInputMode(if (showNavigation || isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
 
@@ -206,16 +216,36 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(Unit) {
                         try {
-                            val version = api.latestAppVersion() ?: -1
+                            val versionInfo = api.latestAppVersionInfo()
 
-                            if (version > BuildConfig.VERSION_CODE) {
+                            if (versionInfo.versionCode > BuildConfig.VERSION_CODE) {
                                 if (snackbarHostState.showSnackbar(
-                                        updateAvailableString,
+                                        context.getString(R.string.version_x_available, versionInfo.versionName, BuildConfig.VERSION_NAME),
                                         actionLabel = downloadString,
                                         withDismissAction = true
                                     ) == SnackbarResult.ActionPerformed
                                 ) {
-                                    appDomain.launchUrl(context)
+                                    "$appDomain/ailaai-${versionInfo.versionName}.apk".launchUrl(context)
+                                }
+                            }
+                        } catch (ex: Exception) {
+                            ex.printStackTrace()
+                        }
+                    }
+
+                    LaunchedEffect(Unit) {
+                        try {
+                            if (context.dataStore.data.first()[appVersionCode] != BuildConfig.VERSION_CODE) {
+                                context.dataStore.edit {
+                                    it[appVersionCode] = BuildConfig.VERSION_CODE
+                                }
+                                if (snackbarHostState.showSnackbar(
+                                        context.getString(R.string.updated_to_x, BuildConfig.VERSION_NAME),
+                                        actionLabel = seeWhatsNewString,
+                                        withDismissAction = true
+                                    ) == SnackbarResult.ActionPerformed
+                                ) {
+                                    showReleaseNotes = true
                                 }
                             }
                         } catch (ex: Exception) {
@@ -288,8 +318,7 @@ class MainActivity : AppCompatActivity() {
                                                                     .padding(PaddingDefault, PaddingDefault / 4)
                                                             )
                                                         }
-                                                        if (item.route == "stories" && (presence?.unreadStoriesCount
-                                                                ?: 0) > 0
+                                                        if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0
                                                         ) {
                                                             // todo reusable icon
                                                             Text(

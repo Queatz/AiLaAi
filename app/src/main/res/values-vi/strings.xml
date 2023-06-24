@@ -113,7 +113,6 @@
     <string name="connected_ago">Đã kết nối %1$s</string>
     <string name="open_enclosing_card">Mở thẻ có thẻ này</string>
     <string name="copied">Đã sao chép!</string>
-    <string name="update_available">Có cập nhật mới nè</string>
     <string name="download">Tải xuống ngay</string>
     <string name="card_not_found">Không tìm được thẻ này</string>
     <string name="story_not_found">Không tìm được bản tin này</string>
@@ -325,4 +324,9 @@
     <string name="your_profile_url">URL trang cá nhân của bạn</string>
     <string name="url_already_in_use">URL đó có người sử dụng rồi</string>
     <string name="none">Chưa có</string>
+    <string name="app_version_x">Version %1$s</string>
+    <string name="version_x_available">Có phiên bản %1$s nè\nBạn đang xài phiên bản %2$s</string>
+    <string name="see_whats_new">Xem điểm mới</string>
+    <string name="release_history">Lịch sử phát hành</string>
+    <string name="updated_to_x">Updated to %1$s</string>
 </resources>

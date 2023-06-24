@@ -117,7 +117,6 @@
     <string name="connected_ago">Connected %1$s</string>
     <string name="open_enclosing_card">Open enclosing card</string>
     <string name="copied">Copied!</string>
-    <string name="update_available">Update available</string>
     <string name="download">Download</string>
     <string name="card_not_found">Card not found</string>
     <string name="story_not_found">Story not found</string>
@@ -333,4 +332,9 @@
     <string name="your_profile_url">Your profile URL</string>
     <string name="url_already_in_use">That URL is already in use</string>
     <string name="none">None</string>
+    <string name="app_version_x">Version %1$s</string>
+    <string name="version_x_available">Version %1$s available\nCurrently you have %2$s</string>
+    <string name="see_whats_new">See what\'s new</string>
+    <string name="release_history">Release history</string>
+    <string name="updated_to_x">Updated to %1$s</string>
 </resources>
