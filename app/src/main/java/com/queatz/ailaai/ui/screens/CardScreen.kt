@@ -464,8 +464,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                         modifier = Modifier
                             .width(240.dp)
                             .fillMaxHeight()
-                            .shadow(ElevationDefault)
-                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault))
                     ) {
                         cardHeaderItem(
                             card,
@@ -502,14 +500,14 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                         )
                     }
                     if (cards.isEmpty()) {
-//                        item(span = { GridItemSpan(maxLineSpan) }) {
-//                            Text(
-//                                stringResource(R.string.no_cards),
-//                                textAlign = TextAlign.Center,
-//                                color = MaterialTheme.colorScheme.secondary,
-//                                modifier = Modifier.padding(PaddingDefault * 2)
-//                            )
-//                        }
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Text(
+                                stringResource(R.string.no_cards),
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(PaddingDefault * 2)
+                            )
+                        }
                     } else {
                         items(cards, { it.id!! }) {
                             CardItem(

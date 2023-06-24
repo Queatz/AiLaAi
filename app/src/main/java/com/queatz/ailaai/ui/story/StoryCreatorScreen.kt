@@ -281,6 +281,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
             horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
             verticalArrangement = Arrangement.spacedBy(PaddingDefault),
             modifier = Modifier
+                .widthIn(max = 640.dp)
                 .fillMaxWidth()
                 .padding(bottom = PaddingDefault)
                 .weight(1f)

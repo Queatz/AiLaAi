@@ -106,7 +106,6 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                 Loading()
             } else {
                 Box(modifier = Modifier.fillMaxSize()) {
-
                     if (storyContents.isEmpty()) {
                         EmptyText(stringResource(R.string.no_stories_to_read))
                     } else {
@@ -114,7 +113,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                             storyContents,
                             state,
                             navController,
-                            Modifier.fillMaxSize(),
+                            Modifier.align(Alignment.TopCenter).widthIn(max = 640.dp).fillMaxSize(),
                             bottomContentPadding = 80.dp
                         ) { storyId ->
                             Row {

@@ -103,7 +103,7 @@ fun StoryActions(
         Icon(
             Icons.Outlined.Message,
             stringResource(R.string.message),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.primary
         )
     }
     IconButton(

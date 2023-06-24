@@ -7,20 +7,21 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -36,9 +37,16 @@ fun EditorTextField(
     onNext: (() -> Unit)? = null,
     textStyle: Typography.() -> TextStyle = { bodyMedium },
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(value))
+    }
+
     BasicEditorTextField(
-        value,
-        onValueChange,
+        textFieldValue,
+        {
+            textFieldValue = it
+            onValueChange(it.text)
+        },
         placeholder = {
             Text(
                 placeholder,
@@ -69,10 +77,27 @@ fun EditorTextField(
                     onFocus?.invoke()
                 }
             }
-            .onKeyEvent {
-                if (value.isEmpty() && it.key == Key.Backspace) {
-                    onDelete?.invoke()
-                    true
+            .focusProperties {
+                val atStart = textFieldValue.selection.length == 0 && textFieldValue.selection.start == 0
+                val atEnd = textFieldValue.selection.length == 0 && textFieldValue.selection.start == textFieldValue.text.length
+                up = if (atStart) FocusRequester.Default else FocusRequester.Cancel
+                down = if (atEnd) FocusRequester.Default else FocusRequester.Cancel
+                left = if (atStart) FocusRequester.Default else FocusRequester.Cancel
+                right = if (atEnd) FocusRequester.Default else FocusRequester.Cancel
+            }
+            .onPreviewKeyEvent {
+                if (it.type == KeyEventType.KeyDown) {
+                    when (it.key) {
+                        Key.Backspace -> {
+                            if (value.isEmpty()) {
+                                onDelete?.invoke()
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        else -> false
+                    }
                 } else {
                     false
                 }

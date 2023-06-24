@@ -1,9 +1,12 @@
 package com.queatz.ailaai.ui.story
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.Story
@@ -52,7 +55,7 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
             contents,
             state,
             navController,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.widthIn(max = 640.dp).fillMaxSize(),
         )
     }
 }

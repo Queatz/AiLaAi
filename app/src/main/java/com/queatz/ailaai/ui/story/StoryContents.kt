@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
@@ -33,6 +34,7 @@ import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
@@ -46,7 +48,7 @@ fun StoryContents(
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
 
-    SelectionContainer {
+    SelectionContainer(modifier = modifier) {
         LazyVerticalGrid(
             state = state,
             columns = GridCells.Fixed(2),
@@ -58,7 +60,7 @@ fun StoryContents(
             ),
             horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
             verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
-            modifier = modifier
+            modifier = Modifier
                 .onPlaced {
                     viewHeight = it.boundsInParent().height
                 }
