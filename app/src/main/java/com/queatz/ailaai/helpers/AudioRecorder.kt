@@ -137,7 +137,7 @@ fun audioRecorder(
     fun sendActiveRecording() {
         stopRecording()
         scope.launch {
-            onAudio(audioOutputFile!!)
+            onAudio(audioOutputFile ?: return@launch)
             audioOutputFile?.delete()
             audioOutputFile = null
         }

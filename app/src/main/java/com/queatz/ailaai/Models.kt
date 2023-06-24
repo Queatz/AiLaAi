@@ -132,6 +132,13 @@ class StoryDraft(
 ) : Model()
 
 @Serializable
+class AppFeedback(
+    var feedback: String? = null,
+    var person: String? = null,
+    var type: AppFeedbackType? = null
+) : Model()
+
+@Serializable
 open class Edge : Model() {
     var from: String? = null
     var to: String? = null
@@ -145,4 +152,10 @@ open class Model {
 
 enum class PersonSource {
     Web
+}
+
+enum class AppFeedbackType {
+    Suggestion,
+    Issue,
+    Other
 }

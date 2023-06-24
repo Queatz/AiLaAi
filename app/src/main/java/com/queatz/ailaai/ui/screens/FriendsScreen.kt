@@ -237,7 +237,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             singleLine = true,
             initialValue = createGroupName,
             placeholder = stringResource(R.string.empty_group_name),
-            required = false
+            requireModification = false
         ) { value ->
             createGroupName = value
             showCreateGroupName = false

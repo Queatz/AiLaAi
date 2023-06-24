@@ -1,12 +1,12 @@
 package com.queatz.ailaai.ui.screens
 
+import android.util.Log
+import android.util.Patterns
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -16,8 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,19 +27,18 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
+import androidx.core.util.PatternsCompat.AUTOLINK_WEB_URL
 import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.profile
-import com.queatz.ailaai.api.transferCode
-import com.queatz.ailaai.api.updateMe
-import com.queatz.ailaai.api.updateProfile
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
 import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
@@ -46,6 +47,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.intellij.lang.annotations.Language
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -229,7 +231,11 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     modifier = Modifier
                         .padding(horizontal = PaddingDefault * 2)
                 ) {
-                    Icon(Icons.Outlined.PersonAdd, stringResource(R.string.invite_someone), modifier = Modifier.padding(end = PaddingDefault))
+                    Icon(
+                        Icons.Outlined.PersonAdd,
+                        stringResource(R.string.invite_someone),
+                        modifier = Modifier.padding(end = PaddingDefault)
+                    )
                     Text(stringResource(R.string.invite_someone))
                 }
             },
@@ -246,36 +252,61 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }
         }
 
+        var sendAppFeedback by rememberStateOf<AppFeedbackType?>(null)
+
+        if (sendAppFeedback != null) {
+            TextFieldDialog(
+                {
+                    sendAppFeedback = null
+                },
+                title = when (sendAppFeedback) {
+                    AppFeedbackType.Suggestion -> stringResource(R.string.request_a_new_feature)
+                    AppFeedbackType.Issue -> stringResource(R.string.report_a_bug)
+                    AppFeedbackType.Other -> stringResource(R.string.app_feedback)
+                    else -> ""
+                },
+                button = stringResource(R.string.send),
+                requireNotBlank = true
+            ) {
+                api.sendAppFeedback(AppFeedback(feedback = it, type = sendAppFeedback!!)) {
+                    sendAppFeedback = null
+                    context.toast(R.string.thank_you)
+                }
+            }
+        }
+
+        var chooseLanguageDialog by rememberStateOf(false)
+
+        if (chooseLanguageDialog) {
+            Dialog({
+                chooseLanguageDialog = false
+            }) {
+                Surface(
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Column {
+                        DropdownMenuItem({ Text(stringResource(R.string.language_vietnamese)) }, {
+                            setLanguage("vi,en")
+                            chooseLanguageDialog = false
+                        })
+                        DropdownMenuItem({ Text(stringResource(R.string.language_english)) }, {
+                            setLanguage("en,vi")
+                            chooseLanguageDialog = false
+                        })
+                    }
+                }
+            }
+        }
+
         val scrollState = rememberScrollState()
 
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
         ) {
-            var chooseLanguageDialog by rememberStateOf(false)
-
-            if (chooseLanguageDialog) {
-                Dialog({
-                    chooseLanguageDialog = false
-                }) {
-                    Surface(
-                        shape = MaterialTheme.shapes.large
-                    ) {
-                        Column {
-                            DropdownMenuItem({ Text("Tiếng Việt") }, {
-                                setLanguage("vi,en")
-                                chooseLanguageDialog = false
-                            })
-                            DropdownMenuItem({ Text("English") }, {
-                                setLanguage("en,vi")
-                                chooseLanguageDialog = false
-                            })
-                        }
-                    }
-                }
-            }
-
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 DropdownMenuItem({
                     Column(modifier = Modifier.padding(PaddingDefault)) {
                         Text(
@@ -283,7 +314,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                             style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
                         )
                         Text(
-                            profile?.profile?.url ?: stringResource(R.string.none),
+                            profile?.profile?.url?.let { "$appDomain/$it" } ?: stringResource(R.string.none),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -293,12 +324,18 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         urlDialog = true
                     }
                 }, modifier = Modifier.weight(1f))
-                if (profile?.profile?.url?.isNotBlank() == true) {
-                    IconButton({
-                        "$appDomain/${profile!!.profile.url!!}".copyToClipboard(context)
-                        context.toast(R.string.copied)
-                    }, modifier = Modifier.padding(PaddingDefault)) {
-                        Icon(Icons.Outlined.ContentCopy, null)
+                AnimatedVisibility(profile?.profile?.url?.isNotBlank() == true) {
+                    IconButton(
+                        {
+                            "$appDomain/${profile!!.profile.url!!}".copyToClipboard(context)
+                            context.toast(R.string.copied)
+                        },
+                        modifier = Modifier.padding(PaddingDefault)
+                    ) {
+                        Icon(
+                            Icons.Outlined.ContentCopy,
+                            null
+                        )
                     }
                 }
             }
@@ -312,6 +349,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     Text(
                         when {
                             appLanguage?.startsWith("vi") == true -> stringResource(R.string.language_vietnamese)
+                            appLanguage?.startsWith("zh") == true -> stringResource(R.string.language_chinese)
                             else -> stringResource(R.string.language_english)
                         },
                         style = MaterialTheme.typography.labelMedium,
@@ -321,6 +359,50 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             }, {
                 chooseLanguageDialog = true
             })
+
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
+                    .shadow(1.dp, MaterialTheme.shapes.large)
+                    .clip(MaterialTheme.shapes.large)
+//                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+            ) {
+                Text(
+                    stringResource(R.string.improve_the_app),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = PaddingDefault, start = PaddingDefault * 1.5f, end = PaddingDefault * 1.5f)
+                )
+
+                DropdownMenuItem({
+                    Text(
+                        stringResource(R.string.request_a_new_feature),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }, {
+                    sendAppFeedback = AppFeedbackType.Suggestion
+                })
+
+                DropdownMenuItem({
+                    Text(
+                        stringResource(R.string.report_a_bug),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }, {
+                    sendAppFeedback = AppFeedbackType.Issue
+                })
+
+                DropdownMenuItem({
+                    Text(
+                        stringResource(R.string.app_feedback),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }, {
+                    sendAppFeedback = AppFeedbackType.Other
+                })
+            }
 
             DropdownMenuItem({
                 Text(
@@ -338,16 +420,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
             })
 
             DropdownMenuItem({
-                Text(
-                    stringResource(R.string.app_feedback),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
-                )
-            }, {
-                "Jacob<jacobaferrero@gmail.com>".sendEmail(context, "Ai Là Ai feedback")
-            })
-
-            DropdownMenuItem({
                 Column(
                     modifier = Modifier.padding(PaddingDefault)
                 ) {
@@ -361,7 +433,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
-            }, onClick =  {
+            }, onClick = {
                 showReleaseNotes = true
             })
 
@@ -369,12 +441,21 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 Text(
                     stringResource(R.string.sign_out_or_transfer),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(PaddingDefault)
                 )
             }, {
                 signOutDialog = true
             })
+
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.made_with_love),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+            }, enabled = false)
         }
     }
 }

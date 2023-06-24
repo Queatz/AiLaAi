@@ -137,7 +137,7 @@
     <string name="send_card_to_groups">Giử thẻ đến %1$s và %2$s</string>
     <string name="send_card_to_x_groups">Giử thẻ đến %1$s nhóm</string>
     <string name="sent">Đã gửi!</string>
-    <string name="app_feedback">Gửi phản hồi về ứng dụng</string>
+    <string name="app_feedback">❔ Gửi phản hồi</string>
     <string name="sent_a_card">đã gửi thẻ</string>
     <string name="unpublish">Hủy xuất bản</string>
     <string name="publish">Xuất bản</string>
@@ -330,4 +330,11 @@
     <string name="release_history">Lịch sử phát hành</string>
     <string name="updated_to_x">Đã cập nhật thành %1$s</string>
     <string name="you_are_using_the_latest_version">Bạn đang xài phiên bản mới nhất</string>
+    <string name="made_with_love">Tạo với ♥ ở TP.HCM</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_russian">Русский</string>
+    <string name="request_a_new_feature">💎 Yêu cầu tính năng mới</string>
+    <string name="report_a_bug">🐞 Báo cáo lỗi</string>
+    <string name="thank_you">Xin cảm ơn!</string>
+    <string name="improve_the_app">Giúp phát triển Ai là ai!</string>
 </resources>

@@ -28,10 +28,11 @@ fun TextFieldDialog(
     singleLine: Boolean = false,
     initialValue: String = "",
     placeholder: String = "",
-    required: Boolean = true,
+    requireModification: Boolean = true,
+    requireNotBlank: Boolean = false,
     onSubmit: suspend (value: String) -> Unit,
 ) {
-    var disableSubmit by remember { mutableStateOf(required) }
+    var disableSubmit by remember { mutableStateOf(requireModification) }
     val coroutineScope = rememberCoroutineScope()
     var text by remember { mutableStateOf(initialValue) }
     val focusRequester = remember { FocusRequester() }
@@ -56,8 +57,8 @@ fun TextFieldDialog(
                 text,
                 onValueChange = {
                     text = it
-                    if (required) {
-                        disableSubmit = false
+                    if (requireModification || requireNotBlank) {
+                        disableSubmit = if (requireNotBlank) it.isBlank() else false
                     }
                 },
                 shape = MaterialTheme.shapes.large,

@@ -141,7 +141,7 @@
     <string name="send_card_to_groups">Send card to %1$s and %2$s</string>
     <string name="send_card_to_x_groups">Send card to %1$s groups</string>
     <string name="sent">Sent!</string>
-    <string name="app_feedback">Send app feedback</string>
+    <string name="app_feedback">❔ Send feedback</string>
     <string name="sent_a_card">Sent a card</string>
     <string name="unpublish">Unpublish</string>
     <string name="publish">Publish</string>
@@ -338,4 +338,11 @@
     <string name="release_history">Release history</string>
     <string name="updated_to_x">Updated to %1$s</string>
     <string name="you_are_using_the_latest_version">You are using the latest version</string>
+    <string name="made_with_love">Made with ♥ in HCMC</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_russian">Русский</string>
+    <string name="request_a_new_feature">💎 Request a new feature</string>
+    <string name="report_a_bug">🐞 Report a bug</string>
+    <string name="thank_you">Thank you!</string>
+    <string name="improve_the_app">Help improve Ai Là Ai!</string>
 </resources>
