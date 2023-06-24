@@ -337,4 +337,5 @@
     <string name="see_whats_new">See what\'s new</string>
     <string name="release_history">Release history</string>
     <string name="updated_to_x">Updated to %1$s</string>
+    <string name="you_are_using_the_latest_version">You are using the latest version</string>
 </resources>

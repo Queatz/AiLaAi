@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.dialogs
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,8 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
+import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -23,6 +25,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 @Composable
 fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
     var releaseNotes by rememberStateOf("")
+    var versionInfo by rememberStateOf<VersionInfo?>(null)
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -34,6 +37,16 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
         }
     }
 
+    LaunchedEffect(Unit) {
+        try {
+            versionInfo = api.latestAppVersionInfo()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    val updateAvailable = versionInfo?.let { it.versionCode > BuildConfig.VERSION_CODE } == true
+
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
@@ -44,6 +57,20 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
+            AnimatedVisibility(versionInfo != null) {
+                versionInfo?.let { versionInfo ->
+                    Text(
+                        if (updateAvailable) {
+                            stringResource(R.string.version_x_available, BuildConfig.VERSION_NAME, versionInfo.versionName)
+                        } else {
+                            stringResource(R.string.you_are_using_the_latest_version)
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = PaddingDefault)
+                    )
+                }
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -62,6 +89,15 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                     }
                 ) {
                     Text(stringResource(R.string.close))
+                }
+                AnimatedVisibility(updateAvailable) {
+                    TextButton(
+                        {
+                            "$appDomain/ailaai-${versionInfo!!.versionName}.apk".launchUrl(context)
+                        }
+                    ) {
+                        Text(stringResource(R.string.download))
+                    }
                 }
             }
         }
