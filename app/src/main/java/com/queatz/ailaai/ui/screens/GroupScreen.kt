@@ -57,6 +57,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -206,7 +207,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             }
         } else {
             val allMembers = groupExtended!!.members
-                ?.sortedByDescending { it.person?.seen ?: Instant.fromEpochMilliseconds(0) }
+                ?.sortedByDescending { it.person?.seen ?: fromEpochMilliseconds(0) }
                 ?: emptyList()
             val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
             val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id } ?: emptyList()
@@ -262,7 +263,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                         )
 
                         otherMembers.maxByOrNull {
-                            it.person?.seen ?: Instant.fromEpochMilliseconds(0)
+                            it.person?.seen ?: fromEpochMilliseconds(0)
                         }?.person?.seen?.let {
                             Text(
                                 "${stringResource(R.string.active)} ${it.timeAgo().lowercase()}",

@@ -345,4 +345,6 @@
     <string name="report_a_bug">🐞 Report a bug</string>
     <string name="thank_you">Thank you!</string>
     <string name="improve_the_app">Help improve Ai Là Ai!</string>
+    <string name="hidden_groups">Hidden groups</string>
+    <string name="notifications_disabled_message">Notifications are currently disabled</string>
 </resources>

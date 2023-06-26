@@ -36,6 +36,11 @@ suspend fun Api.updateProfile(
     onSuccess: SuccessBlock<Profile> = {},
 ) = post("me/profile", profile, onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.hiddenGroups(
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<GroupExtended>> = {},
+) = get("me/groups/hidden", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.updateProfilePhoto(
     photo: Uri,
     onError: ErrorBlock = null,

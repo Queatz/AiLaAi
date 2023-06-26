@@ -16,11 +16,11 @@ suspend fun Api.updateMember(
     id: String,
     member: Member,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode>
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("members/$id", member, onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.removeMember(
     id: String,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode>
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("members/$id/delete", onError = onError, onSuccess = onSuccess)

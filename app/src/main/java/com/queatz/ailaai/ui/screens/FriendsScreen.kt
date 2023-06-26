@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.GroupAdd
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,20 +28,22 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.createGroup
-import com.queatz.ailaai.api.groups
-import com.queatz.ailaai.api.people
-import com.queatz.ailaai.api.updateGroup
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.components.SearchResult
+import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -56,6 +59,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     var showCreateGroupName by rememberStateOf(false)
     var showCreateGroupMembers by rememberStateOf(false)
     var showPushPermissionDialog by rememberStateOf(false)
+    var showHiddenGroupsDialog by rememberStateOf(false)
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -125,7 +129,24 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
             },
             me
-        )
+        ) {
+            var showMenu by rememberStateOf(false)
+            IconButton(
+                {
+                    showMenu = true
+                }
+            ) {
+                Icon(Icons.Outlined.MoreVert, null)
+                DropdownMenu(showMenu, { showMenu = false }) {
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.hidden_groups))
+                    }, {
+                        showMenu = false
+                        showHiddenGroupsDialog = true
+                    })
+                }
+            }
+        }
         Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = state,
@@ -204,6 +225,43 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    if (showHiddenGroupsDialog) {
+        var groups by rememberStateOf(listOf<GroupExtended>())
+        ChooseGroupDialog(
+            {
+                showHiddenGroupsDialog = false
+            },
+            title = stringResource(R.string.hidden_groups),
+            confirmFormatter = { stringResource(R.string.show) },
+            infoFormatter = { it.seenText(context.getString(R.string.active)) },
+            me = me(),
+            groups = {
+                api.hiddenGroups {
+                    groups = it
+                }
+                groups
+            }
+        ) { selected ->
+            coroutineScope {
+                groups
+                    .filter { group -> selected.any { it.id == group.group?.id } }
+                    .mapNotNull { groupExtended ->
+                        val member = groupExtended.members?.firstOrNull { it.person?.id == me()?.id }?.member
+                            ?: return@mapNotNull null
+
+                        async {
+                            api.updateMember(
+                                member.id!!,
+                                Member(
+                                    hide = false
+                                )
+                            )
+                        }
+                    }.awaitAll()
+            }
+        }
+    }
+
     if (showPushPermissionDialog) {
         AlertDialog(
             {
@@ -224,7 +282,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
             },
             text = {
-                Text("Message notifications are disabled")
+                Text(stringResource(R.string.notifications_disabled_message))
             }
         )
     }
@@ -270,4 +328,8 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             omit = { it.id == me()?.id }
         )
     }
+}
+
+fun GroupExtended.seenText(active: String) = group?.seen?.timeAgo()?.let { timeAgo ->
+    "$active ${timeAgo.lowercase()}"
 }

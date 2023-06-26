@@ -19,7 +19,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +41,7 @@ import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.http.*
 import kotlinx.coroutines.*
+import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -500,13 +500,15 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                         )
                     }
                     if (cards.isEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Text(
-                                stringResource(R.string.no_cards),
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(PaddingDefault * 2)
-                            )
+                        if (isLandscape && !isMine) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Text(
+                                    stringResource(R.string.no_cards),
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(PaddingDefault * 2)
+                                )
+                            }
                         }
                     } else {
                         items(cards, { it.id!! }) {
@@ -667,7 +669,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     LaunchedEffect(openCollaboratorsDialog) {
         if (openCollaboratorsDialog) {
             api.cardPeople(cardId) {
-                collaborators = it
+                collaborators = it.sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
             }
         }
     }

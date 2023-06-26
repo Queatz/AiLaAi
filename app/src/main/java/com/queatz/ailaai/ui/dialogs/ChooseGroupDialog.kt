@@ -17,6 +17,8 @@ fun ChooseGroupDialog(
     title: String,
     confirmFormatter: @Composable (List<GroupExtended>) -> String,
     me: Person?,
+    infoFormatter: (@Composable (GroupExtended) -> String?)? = null,
+    groups: (suspend () -> List<GroupExtended>)? = null,
     omit: List<Group> = emptyList(),
     filter: (GroupExtended) -> Boolean = { true },
     extraButtons: @Composable RowScope.() -> Unit = {},
@@ -24,19 +26,25 @@ fun ChooseGroupDialog(
     preselect: List<Group>? = null,
     onGroupsSelected: suspend (List<Group>) -> Unit
 ) {
-    var isLoading by rememberStateOf(false)
+    var isLoading by rememberStateOf(true)
     var hasPreselected by rememberStateOf(false)
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
-    var groups by remember { mutableStateOf(listOf<GroupExtended>()) }
+    var shownGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var selected by remember { mutableStateOf(listOf<GroupExtended>()) }
 
-    LaunchedEffect(Unit) {
-        isLoading = true
-        api.groups {
-            allGroups = it
+    if (groups == null) {
+        LaunchedEffect(Unit) {
+            api.groups {
+                allGroups = it
+            }
+            isLoading = false
         }
-        isLoading = false
+    } else {
+        LaunchedEffect(Unit) {
+            allGroups = groups()
+            isLoading = false
+        }
     }
 
     val someone = stringResource(R.string.someone)
@@ -46,12 +54,12 @@ fun ChooseGroupDialog(
         val all = allGroups
             .filter { omit.none { group -> it.group?.id == group.id } }
             .filter(filter)
-        groups = (if (searchText.isBlank()) all else all.filter {
+        shownGroups = (if (searchText.isBlank()) all else all.filter {
             it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()).contains(searchText, true)
         })
-        if (!hasPreselected && groups.isNotEmpty()) {
+        if (!hasPreselected && shownGroups.isNotEmpty()) {
             if (!preselect.isNullOrEmpty() && selected.isEmpty()) {
-                selected = groups.filter { group -> preselect.any { it.id == group.group?.id } }
+                selected = shownGroups.filter { group -> preselect.any { it.id == group.group?.id } }
             }
             hasPreselected = true
         }
@@ -66,10 +74,11 @@ fun ChooseGroupDialog(
         photoFormatter = { it.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)) },
         nameFormatter = { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
         confirmFormatter = confirmFormatter,
+        infoFormatter = infoFormatter,
         textWhenEmpty = { isBlank -> stringResource(if (isBlank) R.string.you_have_no_groups else R.string.no_groups_to_show) },
         searchText = searchText,
         searchTextChange = { searchText = it },
-        items = groups,
+        items = shownGroups,
         key = { it.group!!.id!! },
         selected = selected,
         onSelectedChange = { selected = it },

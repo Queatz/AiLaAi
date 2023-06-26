@@ -3,10 +3,7 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Lightbulb
@@ -44,7 +41,8 @@ fun AppHeader(
     title: String,
     onTitleClick: () -> Unit,
     me: () -> Person?,
-    showAppIcon: Boolean = false
+    showAppIcon: Boolean = false,
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     val context = LocalContext.current
     var showTutorial by rememberSavableStateOf(false)
@@ -114,10 +112,10 @@ fun AppHeader(
             actions = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault / 2),
                     modifier = Modifier
                         .padding(start = PaddingDefault / 2)
                 ) {
+                    actions()
                     if (showTutorialButton) {
                         Button(
                             {

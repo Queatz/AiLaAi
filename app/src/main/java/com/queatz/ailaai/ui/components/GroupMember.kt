@@ -40,6 +40,9 @@ fun GroupMember(photos: List<ContactPhoto>?, name: String, info: String?, select
     val contentColor by animateColorAsState(
         if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     )
+    val secondaryColor by animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = .8f) else MaterialTheme.colorScheme.secondary
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -67,7 +70,7 @@ fun GroupMember(photos: List<ContactPhoto>?, name: String, info: String?, select
                 Text(
                     info,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = secondaryColor
                 )
             }
         }

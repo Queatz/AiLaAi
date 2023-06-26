@@ -15,7 +15,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
 
-suspend fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 1200): ByteArray {
+suspend fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 1600): ByteArray {
     return withContext(Dispatchers.IO) {
         val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(this@asScaledJpeg))
         val w = if (bitmap.width > bitmap.height) longestEdge else (longestEdge * bitmap.aspect).toInt()
@@ -23,7 +23,7 @@ suspend fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 1200): ByteArr
         val scaled =
             if (w < bitmap.width || h < bitmap.height) Bitmap.createScaledBitmap(bitmap, w, h, true) else bitmap
         ByteArrayOutputStream(scaled.byteCount / 8).let {
-            scaled.compress(Bitmap.CompressFormat.JPEG, 90, it)
+            scaled.compress(Bitmap.CompressFormat.JPEG, 92, it)
             it.toByteArray()
         }
     }

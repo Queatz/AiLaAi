@@ -56,6 +56,7 @@ fun <T> ChooseDialog(
     confirmFormatter: @Composable (List<T>) -> String,
     textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,
     extraButtons: @Composable RowScope.() -> Unit = {},
+    infoFormatter: (@Composable (T) -> String?)? = null,
     maxSelectedCount: Int = 50,
     searchText: String,
     searchTextChange: (String) -> Unit,
@@ -126,7 +127,7 @@ fun <T> ChooseDialog(
                         GroupMember(
                             photoFormatter?.invoke(it),
                             nameFormatter(it),
-                            null,
+                            infoFormatter?.invoke(it),
                             isSelected
                         ) {
                             onSelectedChange(
