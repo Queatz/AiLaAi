@@ -4,10 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.FFmpegKitConfig
-import com.arthenica.ffmpegkit.FFprobeKit
-import com.arthenica.ffmpegkit.ReturnCode
+import com.otaliastudios.transcoder.Transcoder
+import com.otaliastudios.transcoder.TranscoderListener
+import com.otaliastudios.transcoder.strategy.DefaultAudioStrategy
+import com.otaliastudios.transcoder.strategy.DefaultVideoStrategy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -35,40 +35,31 @@ suspend fun Uri.asScaledVideo(context: Context, progressCallback: (Float) -> Uni
         if (outputFile.exists()) {
             outputFile.delete()
         }
-        val mediaInformation =
-            FFprobeKit.getMediaInformation(FFmpegKitConfig.getSafParameterForRead(context, this@asScaledVideo))
-        if (ReturnCode.isSuccess(mediaInformation.returnCode)) {
-            val deferred = CompletableDeferred<Unit>()
-            val duration = mediaInformation.mediaInformation.duration.toFloat()
-            val inputVideoPath = FFmpegKitConfig.getSafParameterForRead(context, this@asScaledVideo)
-            val session = FFmpegKit.executeAsync(
-                "-i $inputVideoPath -c:v vp9 -c:a libvorbis -vtag hvc1 -vf scale=720:-2 ${outputFile.path}",
-                {
+        val deferred = CompletableDeferred<Unit>()
+        Transcoder.into(outputFile.path)
+            .addDataSource(context, this@asScaledVideo)
+            .setVideoTrackStrategy(DefaultVideoStrategy.atMost(1280).frameRate(30).build())
+            .setAudioTrackStrategy(DefaultAudioStrategy.builder().channels(2).build())
+            .setListener(object : TranscoderListener {
+                override fun onTranscodeProgress(progress: Double) {
+                    progressCallback(progress.toFloat())
+                }
+
+                override fun onTranscodeCompleted(successCode: Int) {
                     deferred.complete(Unit)
-                },
-                {
-                    println(it.message)
-                },
-                { statistics ->
-                    progressCallback(statistics.time / (duration * 1_000f))
                 }
-            )
-            try {
-                deferred.await()
-            } finally {
-                if (!ReturnCode.isSuccess(session.returnCode)) {
-                    FFmpegKit.cancel(session.sessionId)
+
+                override fun onTranscodeCanceled() {
+                    deferred.complete(Unit)
                 }
-            }
-            if (!ReturnCode.isSuccess(session.returnCode)) {
-                throw RuntimeException("Process video didn't work")
-            }
-            outputFile.inputStream()
-        } else {
-            throw RuntimeException("Read media info didn't work")
-        }
+
+                override fun onTranscodeFailed(exception: Throwable) {
+                    deferred.completeExceptionally(exception)
+                }
+            }).transcode()
+        deferred.await()
+        outputFile.inputStream()
     }
 }
-
 
 val Bitmap.aspect get() = width.toFloat() / height.toFloat()

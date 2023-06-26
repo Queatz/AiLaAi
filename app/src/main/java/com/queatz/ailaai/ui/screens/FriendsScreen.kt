@@ -258,6 +258,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                             )
                         }
                     }.awaitAll()
+                reload()
             }
         }
     }
