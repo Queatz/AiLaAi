@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -81,16 +82,21 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
 
     suspend fun reload() {
         isLoading = results.isEmpty()
-            api.groups {
-                allGroups = it.filter { it.group != null }
-            }
-            update()
-            messages.refresh(me(), allGroups)
-            isLoading = false
+        api.groups {
+            allGroups = it.filter { it.group != null }
+        }
+        update()
+        messages.refresh(me(), allGroups)
+        isLoading = false
     }
 
-    LaunchedEffect(Unit) {
-        reload()
+    OnLifecycleEvent { event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
+                reload()
+            }
+            else -> {}
+        }
     }
 
     LaunchedEffect(Unit) {

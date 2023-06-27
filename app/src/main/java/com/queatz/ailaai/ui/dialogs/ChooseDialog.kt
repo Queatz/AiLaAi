@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.dialogs
 
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -41,6 +43,23 @@ fun <T> defaultConfirmFormatter(
         item.size == 1 -> stringResource(one, *item.map { nameFormatter(it) }.toTypedArray())
         item.size == 2 -> stringResource(two, *item.map { nameFormatter(it) }.toTypedArray())
         else -> stringResource(many, item.size)
+    }
+}
+
+@Composable
+fun <T> defaultConfirmPluralFormatter(
+    count: Int,
+    @PluralsRes none: Int,
+    @PluralsRes one: Int,
+    @PluralsRes two: Int,
+    @PluralsRes many: Int,
+    nameFormatter: (T) -> String,
+): @Composable (List<T>) -> String = { item ->
+    when {
+        item.isEmpty() -> pluralStringResource(none, count, count)
+        item.size == 1 -> pluralStringResource(one, count, count, *item.map { nameFormatter(it) }.toTypedArray())
+        item.size == 2 -> pluralStringResource(two, count, count, *item.map { nameFormatter(it) }.toTypedArray())
+        else -> pluralStringResource(many, count, count, item.size)
     }
 }
 

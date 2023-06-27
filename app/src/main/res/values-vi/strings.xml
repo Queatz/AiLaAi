@@ -315,6 +315,10 @@
     <string name="send_story_to_group">Gửi bài viết đến %1$s</string>
     <string name="send_story_to_groups">Gửi bài viết đến %1$s và %2$s</string>
     <string name="send_story_to_x_groups">Gửi bài viết đến %1$s nhóm</string>
+    <string name="send_text">Send text</string>
+    <string name="send_text_to_group">Gửi văn bản đến %1$s</string>
+    <string name="send_text_to_groups">Gửi văn bản đến %1$s and %2$s</string>
+    <string name="send_text_to_x_groups">Gửi văn bản đến %1$s groups</string>
     <string name="story">Bài viết</string>
     <string name="you_havent_written">Bạn chưa viết bất cứ điều gì cho đến nay.</string>
     <string name="create_and_share_sticker_packs">Tạo một gói hình dán và chia sẻ nó với bạn bè.</string>
@@ -339,4 +343,16 @@
     <string name="improve_the_app">Giúp phát triển Ai là ai!</string>
     <string name="hidden_groups">Nhóm đã ẩn</string>
     <string name="notifications_disabled_message">Thông báo hiện đang bị tắt</string>
+    <plurals name="send_photos">
+        <item quantity="other">Gửi ảnh</item>
+    </plurals>
+    <plurals name="send_photos_to_group">
+        <item quantity="other">Gửi %1$s ảnh đến %2$s</item>
+    </plurals>
+    <plurals name="send_photos_to_groups">
+        <item quantity="other">Gửi %1$s ảnh đến %2$s và %3$s</item>
+    </plurals>
+    <plurals name="send_photos_to_x_groups">
+        <item quantity="other">Gửi %1$s ảnh đến %2$s nhóm</item>
+    </plurals>
 </resources>

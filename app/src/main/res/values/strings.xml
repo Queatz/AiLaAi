@@ -322,6 +322,10 @@
     <string name="send_story_to_group">Send story to %1$s</string>
     <string name="send_story_to_groups">Send story to %1$s and %2$s</string>
     <string name="send_story_to_x_groups">Send story to %1$s groups</string>
+    <string name="send_text">Send text</string>
+    <string name="send_text_to_group">Send text to %1$s</string>
+    <string name="send_text_to_groups">Send text to %1$s and %2$s</string>
+    <string name="send_text_to_x_groups">Send text to %1$s groups</string>
     <string name="story">Story</string>
     <string name="no_stories_to_read">There\'s nothing to read.\n\nMaybe write something?</string>
     <string name="you_havent_written">You haven\'t written anything as of yet.</string>
@@ -347,4 +351,20 @@
     <string name="improve_the_app">Help improve Ai Là Ai!</string>
     <string name="hidden_groups">Hidden groups</string>
     <string name="notifications_disabled_message">Notifications are currently disabled</string>
+    <plurals name="send_photos">
+        <item quantity="one">Send photo</item>
+        <item quantity="other">Send %1$s photos</item>
+    </plurals>
+    <plurals name="send_photos_to_group">
+        <item quantity="one">Send photo to %2$s</item>
+        <item quantity="other">Send %1$s photos to %2$s</item>
+    </plurals>
+    <plurals name="send_photos_to_groups">
+        <item quantity="one">Send photo to %2$s and %3$s</item>
+        <item quantity="other">Send %1$s photos to %2$s and %3$s</item>
+    </plurals>
+    <plurals name="send_photos_to_x_groups">
+        <item quantity="one">Send photo to %2$s groups</item>
+        <item quantity="other">Send %1$s photos to %2$s groups</item>
+    </plurals>
 </resources>

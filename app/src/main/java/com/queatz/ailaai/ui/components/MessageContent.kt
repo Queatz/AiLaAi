@@ -376,6 +376,7 @@ fun ColumnScope.MessageContent(
                 PaddingDefault,
                 if (isMe) Alignment.End else Alignment.Start
             ),
+            verticalAlignment = Alignment.Bottom,
             contentPadding = PaddingValues(PaddingDefault),
             modifier = Modifier.let {
                 if (isReply) {
