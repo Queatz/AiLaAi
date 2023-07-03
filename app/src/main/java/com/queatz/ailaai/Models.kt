@@ -24,7 +24,12 @@ class Card(
 @Serializable
 class Invite(
     var person: String? = null,
-    var code: String? = null
+    var group: String? = null,
+    var about: String? = null,
+    var code: String? = null,
+    var expiry: Instant? = null,
+    var remaining: Int? = null,
+    var total: Int? = null
 ) : Model()
 
 @Serializable

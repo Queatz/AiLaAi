@@ -15,7 +15,7 @@ val properties = Properties()
 properties.load(file("../local.properties").inputStream())
 
 android {
-    compileSdk = 33
+    compileSdk = 34
     namespace = "com.queatz.ailaai"
 
     defaultConfig {
@@ -24,9 +24,9 @@ android {
 
         applicationId = "com.ailaai.app"
         minSdk = 26
-        targetSdk = 33
-        versionCode = 52
-        versionName = "0.9.52"
+        targetSdk = 34
+        versionCode = 53
+        versionName = "0.9.53"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -61,14 +61,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.7"
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     packagingOptions {
         resources {
