@@ -1,14 +1,11 @@
 package com.queatz.ailaai.ui.screens
 
-import android.util.Log
-import android.util.Patterns
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.*
@@ -27,7 +24,6 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
-import androidx.core.util.PatternsCompat.AUTOLINK_WEB_URL
 import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
@@ -38,7 +34,6 @@ import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
 import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
@@ -47,7 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.intellij.lang.annotations.Language
+import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +50,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var signOutDialog by rememberStateOf(false)
+    var exportDataDialog by rememberStateOf(false)
     var inviteDialog by rememberStateOf(false)
     var urlDialog by rememberStateOf(false)
     var showResetTutorialButton by rememberStateOf(false)
@@ -113,6 +109,38 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 }
             }
         }
+    }
+
+    var isExportingData by rememberStateOf(false)
+
+    fun exportData() {
+        isExportingData = true
+        scope.launch {
+            api.exportData {
+                json.encodeToString(it).shareAsTextFile(context, "data.json", ContentType.Text.Plain)
+            }
+            isExportingData = false
+            exportDataDialog = false
+        }
+    }
+
+    if (exportDataDialog) {
+        AlertDialog({
+            exportDataDialog = false
+        },
+            text = {
+                Text(stringResource(R.string.data_export_description))
+            },
+            confirmButton = {
+                Button(
+                    {
+                    exportData()
+                },
+                    enabled = !isExportingData
+                ) {
+                    Text(stringResource(R.string.export_data))
+                }
+        })
     }
 
     if (signOutDialog) {
@@ -455,6 +483,26 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 )
             }, {
                 "$appDomain/terms".launchUrl(context)
+            })
+
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.export_data),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+                exportDataDialog = true
+            })
+
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.sign_out_or_transfer),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+                signOutDialog = true
             })
 
             DropdownMenuItem({

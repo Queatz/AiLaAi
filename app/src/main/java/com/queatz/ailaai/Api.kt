@@ -287,3 +287,10 @@ class Device(
     val type: DeviceType,
     val token: String,
 )
+
+@Serializable
+data class ExportDataResponse(
+    val profile: Profile? = null,
+    val cards: List<Card>? = null,
+    val stories: List<Story>? = null
+)

@@ -121,6 +121,26 @@ suspend fun String.downloadAudio(context: Context): Uri? {
     val newFile = File(path, "audio.mp4")
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
 }
+suspend fun String.shareAsTextFile(context: Context, filename: String, contentType: ContentType): Boolean {
+    val path = File(context.cacheDir, "share")
+    path.mkdirs()
+    withContext(Dispatchers.IO) {
+        val stream = FileOutputStream("$path/$filename")
+        try {
+            stream.writer().write(this@shareAsTextFile)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        } finally {
+            stream.close()
+        }
+    } ?: return false
+
+    val newFile = File(path, filename)
+    val uri = FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
+    shareFile(uri, context, filename, contentType)
+    return true
+}
 
 suspend fun String.shareAudio(context: Context, name: String?): Boolean {
     shareFile(downloadAudio(context) ?: return false, context, name, ContentType.Audio.MP4)

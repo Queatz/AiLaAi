@@ -369,4 +369,6 @@
     <string name="spam_or_fake_description">Cái này giống như thư rác hoặc là giả</string>
     <string name="report_type_other_description">Hãy cho chúng tôi biết về bất cứ điều gì khác</string>
     <string name="this_is_urgent">Điều này là gấp</string>
+    <string name="export_data">Xuất dữ liệu</string>
+    <string name="data_export_description">Xuất dữ liệu bao gồm trang cá nhân, thẻ và bài viết của bạn.</string>
 </resources>

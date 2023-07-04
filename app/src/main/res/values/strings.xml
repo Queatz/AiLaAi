@@ -381,4 +381,6 @@
     <string name="spam_or_fake_description">This looks like spam or is fake</string>
     <string name="report_type_other_description">Tell us about anything else</string>
     <string name="this_is_urgent">This is urgent</string>
+    <string name="export_data">Export data</string>
+    <string name="data_export_description">Data export includes your profile, cards, and stories.</string>
 </resources>
