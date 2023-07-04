@@ -20,6 +20,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.stickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import kotlinx.coroutines.launch
 
@@ -29,10 +30,17 @@ fun StickerPackScreen(navController: NavController, stickerPackId: String, me: (
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var stickerPack by rememberStateOf<StickerPack?>(null)
+    var showReportDialog by rememberStateOf(false)
 
     LaunchedEffect(stickerPackId) {
         api.stickerPack(stickerPackId) {
             stickerPack = it
+        }
+    }
+
+    if (showReportDialog) {
+        ReportDialog("stickerpack/$stickerPackId") {
+            showReportDialog = false
         }
     }
 
@@ -71,6 +79,12 @@ fun StickerPackScreen(navController: NavController, stickerPackId: String, me: (
                             }, {
                                 showMenu = false
                                 navController.navigate("profile/${stickerPack.person!!}")
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.report))
+                            }, {
+                                showMenu = false
+                                showReportDialog = true
                             })
                         }
                     }

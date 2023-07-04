@@ -439,12 +439,22 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
             DropdownMenuItem({
                 Text(
-                    stringResource(R.string.sign_out_or_transfer),
+                    stringResource(R.string.privacy_policy),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(PaddingDefault)
                 )
             }, {
-                signOutDialog = true
+                "$appDomain/privacy".launchUrl(context)
+            })
+
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.terms_of_use),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
+                "$appDomain/terms".launchUrl(context)
             })
 
             DropdownMenuItem({

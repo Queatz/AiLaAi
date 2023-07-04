@@ -143,6 +143,16 @@ class AppFeedback(
     var type: AppFeedbackType? = null
 ) : Model()
 
+
+@Serializable
+class Report(
+    var reporter: String? = null,
+    var reporterMessage: String? = null,
+    var urgent: Boolean? = null,
+    var entity: String? = null,
+    var type: ReportType? = null
+) : Model()
+
 @Serializable
 open class Edge : Model() {
     var from: String? = null
@@ -164,3 +174,11 @@ enum class AppFeedbackType {
     Issue,
     Other
 }
+
+enum class ReportType {
+    Safety,
+    Content,
+    Spam,
+    Other
+}
+

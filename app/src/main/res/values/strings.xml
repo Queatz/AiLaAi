@@ -367,4 +367,18 @@
         <item quantity="one">Send photo to %2$s groups</item>
         <item quantity="other">Send %1$s photos to %2$s groups</item>
     </plurals>
+    <string name="report">Report</string>
+    <string name="send_report">Send report</string>
+    <string name="add_details">Add details</string>
+    <string name="terms_of_use">Terms of Use</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="personal_safety">Personal safety</string>
+    <string name="content_issue">Content issue</string>
+    <string name="spam_or_fake">Spam or fake</string>
+    <string name="other">Other</string>
+    <string name="personal_safety_description">I have a concern for someone\'s safety</string>
+    <string name="content_issue_description">This should not be here</string>
+    <string name="spam_or_fake_description">This looks like spam or is fake</string>
+    <string name="report_type_other_description">Tell us about anything else</string>
+    <string name="this_is_urgent">This is urgent</string>
 </resources>

@@ -214,22 +214,28 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    LaunchedEffect(Unit) {
-                        try {
-                            val versionInfo = api.latestAppVersionInfo()
+                    if (!isInstalledFromPlayStore) {
+                        LaunchedEffect(Unit) {
+                            try {
+                                val versionInfo = api.latestAppVersionInfo()
 
-                            if (versionInfo.versionCode > BuildConfig.VERSION_CODE) {
-                                if (snackbarHostState.showSnackbar(
-                                        context.getString(R.string.version_x_available, versionInfo.versionName, BuildConfig.VERSION_NAME),
-                                        actionLabel = downloadString,
-                                        withDismissAction = true
-                                    ) == SnackbarResult.ActionPerformed
-                                ) {
-                                    "$appDomain/ailaai-${versionInfo.versionName}.apk".launchUrl(context)
+                                if (versionInfo.versionCode > BuildConfig.VERSION_CODE) {
+                                    if (snackbarHostState.showSnackbar(
+                                            context.getString(
+                                                R.string.version_x_available,
+                                                versionInfo.versionName,
+                                                BuildConfig.VERSION_NAME
+                                            ),
+                                            actionLabel = downloadString,
+                                            withDismissAction = true
+                                        ) == SnackbarResult.ActionPerformed
+                                    ) {
+                                        "$appDomain/ailaai-${versionInfo.versionName}.apk".launchUrl(context)
+                                    }
                                 }
+                            } catch (ex: Exception) {
+                                ex.printStackTrace()
                             }
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
                         }
                     }
 

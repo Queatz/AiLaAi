@@ -71,6 +71,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var isLoading by rememberStateOf(false)
     var showGroupNotFound by rememberStateOf(false)
     var showLeaveGroup by rememberStateOf(false)
+    var showReportDialog by rememberStateOf(false)
     var showDescriptionDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
     var showGroupMembers by rememberStateOf(false)
@@ -342,7 +343,10 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             }
                             showMenu = false
                         })
-//                        DropdownMenuItem({ Text("Get help") }, { showMenu = false })
+                        DropdownMenuItem({ Text(stringResource(R.string.report)) }, {
+                            showMenu = false
+                            showReportDialog = true
+                        })
                     }
                 },
                 modifier = Modifier.zIndex(1f)
@@ -782,6 +786,12 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     },
                     omit = { it.id!! !in members }
                 )
+            }
+
+            if (showReportDialog) {
+                ReportDialog("group/$groupId") {
+                    showReportDialog = false
+                }
             }
 
             if (showInviteMembers) {

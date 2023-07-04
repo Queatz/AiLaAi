@@ -30,6 +30,7 @@ fun TextFieldDialog(
     placeholder: String = "",
     requireModification: Boolean = true,
     requireNotBlank: Boolean = false,
+    extraContent: (@Composable ColumnScope.() -> Unit)? = null,
     onSubmit: suspend (value: String) -> Unit,
 ) {
     var disableSubmit by remember { mutableStateOf(requireModification) }
@@ -53,6 +54,7 @@ fun TextFieldDialog(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
+            extraContent?.invoke(this)
             OutlinedTextField(
                 text,
                 onValueChange = {

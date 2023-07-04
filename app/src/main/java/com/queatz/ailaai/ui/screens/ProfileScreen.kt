@@ -59,6 +59,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var showEditAbout by rememberStateOf(false)
     var showJoined by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
+    var showReportDialog by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
@@ -118,6 +119,12 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 }.awaitAll()
             }
             context.toast(context.getString(R.string.person_invited, person?.name ?: someone))
+        }
+    }
+
+    if (showReportDialog) {
+        ReportDialog("person/$personId") {
+            showReportDialog = false
         }
     }
 
@@ -379,6 +386,12 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                         showMenu = false
                                     })
                                 }
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.report))
+                                }, {
+                                    showMenu = false
+                                    showReportDialog = true
+                                })
                             }
                         }
                     }
@@ -470,19 +483,6 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             }
                         }
                     }
-//                    Button({
-//                        scope.launch {
-//                                api.createGroup(listOf(me()!!.id!!, personId), reuse = true) {
-//                                    navController.navigate("group/${group.id!!}") }
-//                        }
-//                    }, enabled = !isMe, modifier = Modifier.padding(top = PaddingDefault)) {
-//                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
-//                        Text(
-//                            stringResource(R.string.message),
-//                            overflow = TextOverflow.Ellipsis,
-//                            maxLines = 1
-//                        )
-//                    }
                     stats?.let { stats ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(

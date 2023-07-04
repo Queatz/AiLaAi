@@ -54,6 +54,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var showManageMenu by rememberStateOf(false)
     var openDeleteCard by rememberStateOf(false)
     var openLocationDialog by rememberStateOf(false)
+    var showReportDialog by rememberStateOf(false)
     var openEditDialog by rememberStateOf(false)
     var openChangeOwner by rememberStateOf(false)
     var showQrCode by rememberSavableStateOf(false)
@@ -73,7 +74,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var isUploadingVideo by rememberStateOf(false)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
-
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -130,6 +130,11 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
         )
     }
 
+    if (showReportDialog) {
+        ReportDialog("card/$cardId") {
+            showReportDialog = false
+        }
+    }
 
     if (openLocationDialog) {
         EditCardLocationDialog(card!!, navController.context as Activity, {
@@ -415,6 +420,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     }, {
                         cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
                         context.toast(textCopied)
+                        showMenu = false
+                    })
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.report))
+                    }, {
+                        showReportDialog = true
                         showMenu = false
                     })
                 }
