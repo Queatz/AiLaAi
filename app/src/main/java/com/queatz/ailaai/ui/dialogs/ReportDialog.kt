@@ -32,6 +32,7 @@ fun ReportDialog(entity: String, onDismissRequest: () -> Unit) {
         onDismissRequest,
         title = stringResource(R.string.report),
         button = stringResource(R.string.send_report),
+        showDismiss = true,
         placeholder = stringResource(R.string.add_details),
         requireModification = false,
         extraContent = {

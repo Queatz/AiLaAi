@@ -35,7 +35,7 @@
     <string name="messages">Tin nhắn</string>
     <string name="me">Mình</string>
     <string name="cant_connect">Không thể kết nối với mạng</string>
-    <string name="hello">Xin chào, bạn!</string>
+    <string name="hello">Chào! 👋</string>
     <string name="enter_invite_code">Nhập mã mời</string>
     <string name="hide">Ẩn</string>
     <string name="show">Bỏ ẩn</string>
@@ -223,8 +223,6 @@
     <string name="your_friend">Bạn của bạn</string>
     <string name="cards">Thẻ</string>
     <string name="joined">Đã tham gia</string>
-    <string name="reset_tutorial">Hiển thị hướng dẫn</string>
-    <string name="hide_tutorial">"Ẩn hướng dẫn "</string>
     <string name="invite_to_group">Thêm đến %1$s</string>
     <string name="invite_to_groups">Thêm đến %1$s và %2$s</string>
     <string name="invite_to_x_groups">Thêm đến %1$s nhóm</string>
@@ -365,10 +363,11 @@
     <string name="spam_or_fake">Thư rác hoặc giả</string>
     <string name="other">Khác</string>
     <string name="personal_safety_description">Tôi lo lắng cho sự an toàn của ai đó</string>
-    <string name="content_issue_description">Cái này không nên ở đây</string>
+    <string name="content_issue_description">Cái này không nên ở đây, làm tôi buồn, phiền hay không vui.</string>
     <string name="spam_or_fake_description">Cái này giống như thư rác hoặc là giả</string>
     <string name="report_type_other_description">Hãy cho chúng tôi biết về bất cứ điều gì khác</string>
     <string name="this_is_urgent">Điều này là gấp</string>
     <string name="export_data">Xuất dữ liệu</string>
     <string name="data_export_description">Xuất dữ liệu bao gồm trang cá nhân, thẻ và bài viết của bạn.</string>
+    <string name="skip">Bỏ qua</string>
 </resources>

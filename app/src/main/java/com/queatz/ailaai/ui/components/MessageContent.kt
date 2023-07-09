@@ -166,6 +166,7 @@ fun ColumnScope.MessageContent(
             if (message.text?.isBlank() == false) {
                 menuItem(stringResource(R.string.copy)) {
                     (message.text ?: "").copyToClipboard(context, messageString)
+                    context.toast(R.string.copied)
                     onShowMessageDialog(false)
                 }
             }
@@ -178,6 +179,7 @@ fun ColumnScope.MessageContent(
             }
         }
     }
+
     if (showDeleteMessageDialog) {
         var disableSubmit by rememberStateOf(false)
         AlertDialog(

@@ -17,6 +17,11 @@ suspend fun Api.transferCode(
     onSuccess: SuccessBlock<Transfer>,
 ) = get("me/transfer", onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.refreshTransferCode(
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<Transfer>,
+) = post("me/transfer/refresh", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.myDevice(
     deviceType: DeviceType,
     deviceToken: String,

@@ -14,8 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -28,6 +30,7 @@ fun TextFieldDialog(
     singleLine: Boolean = false,
     initialValue: String = "",
     placeholder: String = "",
+    showDismiss: Boolean = false,
     requireModification: Boolean = true,
     requireNotBlank: Boolean = false,
     extraContent: (@Composable ColumnScope.() -> Unit)? = null,
@@ -79,6 +82,13 @@ fun TextFieldDialog(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                if (showDismiss) {
+                    TextButton({
+                        onDismissRequest()
+                    }) {
+                        Text(stringResource(R.string.close), color = MaterialTheme.colorScheme.secondary)
+                    }
+                }
                 TextButton(
                     {
                         disableSubmit = true
@@ -91,10 +101,9 @@ fun TextFieldDialog(
                             }
                         }
                     },
-                    enabled = !disableSubmit,
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    enabled = !disableSubmit
                 ) {
-                    Text(button, textAlign = TextAlign.End)
+                    Text(button)
                 }
             }
         }

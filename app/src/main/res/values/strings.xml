@@ -44,7 +44,7 @@
     <string name="me">Me</string>
     <string name="cant_connect">Can\'t connect to the internet</string>
     <string name="enter_invite_code">Enter invite code</string>
-    <string name="hello">Xin chào, bạn!</string>
+    <string name="hello">Chào! 👋</string>
     <string name="show">Unhide</string>
     <string name="hide">Hide</string>
     <string name="more">More</string>
@@ -212,8 +212,6 @@
     <string name="your_friend">Your friend</string>
     <string name="cards">Cards</string>
     <string name="joined">Joined</string>
-    <string name="reset_tutorial">Show tutorial</string>
-    <string name="hide_tutorial">Hide tutorial</string>
     <string name="more_ideas">More ideas</string>
     <string name="processing_video">Processing video</string>
     <string name="uploading_video">Uploading video</string>
@@ -377,10 +375,11 @@
     <string name="spam_or_fake">Spam or fake</string>
     <string name="other">Other</string>
     <string name="personal_safety_description">I have a concern for someone\'s safety</string>
-    <string name="content_issue_description">This should not be here</string>
+    <string name="content_issue_description">This should not be here, brings me down, or otherwise makes me unhappy</string>
     <string name="spam_or_fake_description">This looks like spam or is fake</string>
     <string name="report_type_other_description">Tell us about anything else</string>
     <string name="this_is_urgent">This is urgent</string>
     <string name="export_data">Export data</string>
     <string name="data_export_description">Data export includes your profile, cards, and stories.</string>
+    <string name="skip">Skip</string>
 </resources>

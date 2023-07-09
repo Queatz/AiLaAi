@@ -32,6 +32,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
@@ -80,9 +81,15 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
     }
 
-    suspend fun reload() {
+    suspend fun reload(passive: Boolean) {
         isLoading = results.isEmpty()
-        api.groups {
+        api.groups(
+            onError = {
+                if (!passive) {
+                    context.showDidntWork()
+                }
+            }
+        ) {
             allGroups = it.filter { it.group != null }
         }
         update()
@@ -93,7 +100,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     OnLifecycleEvent { event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                reload()
+                reload(passive = true)
             }
             else -> {}
         }
@@ -193,7 +200,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     }) {
                         ContactItem(navController, it, me()) {
                             scope.launch {
-                                reload()
+                                reload(true)
                             }
                         }
                     }
@@ -264,7 +271,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                             )
                         }
                     }.awaitAll()
-                reload()
+                reload(true)
             }
         }
     }
@@ -318,7 +325,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             },
             title = stringResource(R.string.invite_people),
             confirmFormatter = defaultConfirmFormatter(
-                R.string.new_group,
+                R.string.skip,
                 R.string.new_group_with_person,
                 R.string.new_group_with_people,
                 R.string.new_group_with_x_people

@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
-import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
@@ -35,12 +35,9 @@ import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
-import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 
@@ -53,15 +50,8 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     var exportDataDialog by rememberStateOf(false)
     var inviteDialog by rememberStateOf(false)
     var urlDialog by rememberStateOf(false)
-    var showResetTutorialButton by rememberStateOf(false)
     var showReleaseNotes by rememberStateOf(false)
     var profile by remember { mutableStateOf<PersonProfile?>(null) }
-
-    LaunchedEffect(Unit) {
-        context.dataStore.data.map { it[tutorialCompleteKey] == true }.collect {
-            showResetTutorialButton = it
-        }
-    }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -203,17 +193,38 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         }
                     } else if (transferCode.isNotBlank()) {
                         Text(stringResource(R.string.your_transfer_code_is))
-                        SelectionContainer {
-                            Text(
-                                transferCode,
-                                style = MaterialTheme.typography.titleLarge,
-                                textAlign = TextAlign.Center,
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(
+                            PaddingDefault)) {
+                            SelectionContainer(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = PaddingDefault)
-                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
-                            )
+                                    .weight(1f)
+                            ) {
+                                Text(
+                                    transferCode,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = PaddingDefault)
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
+                                )
+                            }
+                            var isRefreshing by rememberStateOf(false)
+                            IconButton(
+                                onClick = {
+                                    isRefreshing = true
+                                    scope.launch {
+                                        api.refreshTransferCode {
+                                            transferCode = it.code!!
+                                        }
+                                        isRefreshing = false
+                                    }
+                                },
+                                enabled = !isRefreshing
+                            ) {
+                                Icon(Icons.Outlined.Refresh, null)
+                            }
                         }
                         Text(stringResource(R.string.sign_out_warning))
                     } else {
@@ -431,21 +442,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     sendAppFeedback = AppFeedbackType.Other
                 })
             }
-
-            DropdownMenuItem({
-                Text(
-                    if (showResetTutorialButton) stringResource(R.string.reset_tutorial) else stringResource(R.string.hide_tutorial),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
-                )
-            }, {
-                scope.launch {
-                    context.dataStore.edit {
-                        it[hideLearnMoreKey] = false
-                        it[tutorialCompleteKey] = it[tutorialCompleteKey]?.not() ?: true
-                    }
-                }
-            })
 
             DropdownMenuItem({
                 Column(

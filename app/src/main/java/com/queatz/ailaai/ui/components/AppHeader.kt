@@ -6,33 +6,20 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.rememberSavableStateOf
-import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.ailaai.ui.tutorial.LearnMoreDialog
-import com.queatz.ailaai.ui.tutorial.TutorialDialog
-import com.queatz.ailaai.ui.tutorial.hideLearnMoreKey
-import com.queatz.ailaai.ui.tutorial.tutorialCompleteKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,34 +32,6 @@ fun AppHeader(
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     val context = LocalContext.current
-    var showTutorial by rememberSavableStateOf(false)
-    var showTutorialButton by rememberStateOf(false)
-    var showLearnMore by rememberStateOf(false)
-    var showLearnMoreButton by rememberStateOf(false)
-
-    LaunchedEffect(Unit) {
-        context.dataStore.data.collect {
-            showTutorialButton = it[tutorialCompleteKey] != true
-            showLearnMoreButton = it[hideLearnMoreKey] != true
-        }
-    }
-
-    if (showTutorial) {
-        TutorialDialog(
-            {
-                showTutorial = false
-            },
-            navController
-        )
-    }
-    if (showLearnMore) {
-        LearnMoreDialog(
-            {
-                showLearnMore = false
-            },
-            navController
-        )
-    }
 
     Card(
         shape = MaterialTheme.shapes.large,
@@ -116,35 +75,6 @@ fun AppHeader(
                         .padding(start = PaddingDefault / 2)
                 ) {
                     actions()
-                    if (showTutorialButton) {
-                        Button(
-                            {
-                                showTutorial = true
-                            },
-                        ) {
-                            Icon(
-                                Icons.Outlined.PlayCircle,
-                                null,
-                                modifier = Modifier
-                                    .padding(end = PaddingDefault / 2)
-                            )
-                            Text("Start tutorial")
-                        }
-                    } else if (showLearnMoreButton) {
-                        Button(
-                            {
-                                showLearnMore = true
-                            },
-                        ) {
-                            Icon(
-                                Icons.Outlined.Lightbulb,
-                                null,
-                                modifier = Modifier
-                                    .padding(end = PaddingDefault / 2)
-                            )
-                            Text(stringResource(R.string.more_ideas))
-                        }
-                    }
                     me()?.let { me ->
                         if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
                             GroupPhoto(
