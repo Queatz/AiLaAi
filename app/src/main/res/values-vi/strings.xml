@@ -9,7 +9,6 @@
     <string name="sign_in">Đăng nhập</string>
     <string name="update_your_name">Cập nhật tên của bạn</string>
     <string name="your_name">Tên của bạn</string>
-    <string name="card_name">Tên của thẻ</string>
     <string name="your_photo">Ảnh của bạn</string>
     <string name="close">Đóng</string>
     <string name="invite_code">Mã mời</string>
@@ -251,7 +250,7 @@
     <string name="discard_changes">Bỏ thay đổi</string>
     <string name="sent_video">Đã gửi một video</string>
     <string name="next">Tiếp</string>
-    <string name="explore_search_placeholder">Hôm nay bạn đang tìm kiếm ai vậy?</string>
+    <string name="explore_search_placeholder">Tìm kiếm trong thành phố</string>
     <string name="talk">Nói chuyện</string>
     <string name="create">Tạo</string>
     <string name="stories">Bài viết</string>
@@ -370,4 +369,6 @@
     <string name="export_data">Xuất dữ liệu</string>
     <string name="data_export_description">Xuất dữ liệu bao gồm trang cá nhân, thẻ và bài viết của bạn.</string>
     <string name="skip">Bỏ qua</string>
+    <string name="people">Con người</string>
+    <string name="your_stories">Bài viết của bạn</string>
 </resources>

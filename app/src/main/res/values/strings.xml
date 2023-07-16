@@ -95,7 +95,6 @@
         <item quantity="one">%1$s card</item>
         <item quantity="other">%1$s cards</item>
     </plurals>
-    <string name="card_name">Card name</string>
     <string name="on_profile">On profile</string>
     <string name="on_profile_description">The location of this card will be updated to your current location every time you open the app.</string>
     <string name="set_photo">Choose photo or video</string>
@@ -258,7 +257,7 @@
     <string name="sent_audio">Sent an audio message</string>
     <string name="sent_video">Sent a video</string>
     <string name="next">Next</string>
-    <string name="explore_search_placeholder">Who are you looking for today?</string>
+    <string name="explore_search_placeholder">Search your city</string>
     <string name="talk">Talk</string>
     <string name="create">Create</string>
     <string name="stories">Stories</string>
@@ -382,4 +381,6 @@
     <string name="export_data">Export data</string>
     <string name="data_export_description">Data export includes your profile, cards, and stories.</string>
     <string name="skip">Skip</string>
+    <string name="people">People</string>
+    <string name="your_stories">Your stories</string>
 </resources>

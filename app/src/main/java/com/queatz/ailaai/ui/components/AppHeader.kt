@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import com.queatz.ailaai.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,22 +32,14 @@ fun AppHeader(
     showAppIcon: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    val context = LocalContext.current
-
-    Card(
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.elevatedCardColors(),
-        elevation = CardDefaults.elevatedCardElevation(),
-        modifier = Modifier
-            .padding(PaddingDefault)
-    ) {
+    Column {
         TopAppBar(
             {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
                 ) {
-                    if (showAppIcon) {
+                    if (false && showAppIcon) {
                         Image(
                             painterResource(R.mipmap.ic_app),
                             null,

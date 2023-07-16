@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -139,7 +141,16 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     state.scrollToTop()
                 }
             },
-            me
+            me,
+            actions = {
+                IconButton(
+                    {
+                        navController.navigate("saved")
+                    }
+                ) {
+                    Icon(Icons.Outlined.FavoriteBorder, null)
+                }
+            }
         )
         Box(
             contentAlignment = Alignment.BottomCenter,
@@ -188,6 +199,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                     isLoading = false
                                 }
                             },
+                            navController = navController,
                             activity = navController.context as Activity,
                             card = card,
                             edit = if (card.id == addedCardId) EditCard.Conversation else null,

@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.story
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -11,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.PaddingDefault
 

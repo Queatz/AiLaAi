@@ -96,6 +96,7 @@ fun CardsList(
                         },
                         showDistance = geo,
                         card = it,
+                        navController = navController,
                         activity = navController.context as Activity,
                         isMine = isMine(it),
                         isMineToolbar = false,

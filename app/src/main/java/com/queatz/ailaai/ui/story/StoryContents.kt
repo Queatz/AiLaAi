@@ -34,6 +34,7 @@ import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
+import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -113,7 +114,7 @@ fun StoryContents(
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
                                 content.section,
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )
@@ -152,7 +153,11 @@ fun StoryContents(
                                     {
                                         navController.navigate("card/$it")
                                     },
-                                    onCategoryClick = {},
+                                    onCategoryClick = {
+                                        exploreInitialCategory = it
+                                        navController.navigate("explore")
+                                    },
+                                    navController = navController,
                                     activity = navController.context as Activity,
                                     card = card,
                                     isChoosing = true,

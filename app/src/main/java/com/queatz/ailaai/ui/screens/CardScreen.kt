@@ -6,13 +6,16 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -137,7 +140,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     }
 
     if (openLocationDialog) {
-        EditCardLocationDialog(card!!, navController.context as Activity, {
+        EditCardLocationDialog(card!!, navController = navController, navController.context as Activity, {
             openLocationDialog = false
         }, {
             recomposeScope.invalidate()
@@ -484,6 +487,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             toggleAspect = { verticalAspect = !verticalAspect },
                             scope,
                             navController,
+                            me,
                             elevation = 2,
                             playVideo = isAtTop
                         )
@@ -507,6 +511,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             toggleAspect = { verticalAspect = !verticalAspect },
                             scope,
                             navController,
+                            me,
                             playVideo = isAtTop
                         )
                     }
@@ -543,6 +548,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 },
                                 activity = navController.context as Activity,
                                 card = it,
+                                navController = navController,
                                 edit = if (it.id == addedCardId) EditCard.Conversation else null,
                                 onCategoryClick = {
                                     exploreInitialCategory = it
@@ -766,6 +772,7 @@ private fun LazyGridScope.cardHeaderItem(
     toggleAspect: () -> Unit,
     scope: CoroutineScope,
     navController: NavController,
+    me: () -> Person?,
     elevation: Int = 1,
     playVideo: Boolean = false
 ) {
@@ -807,6 +814,20 @@ private fun LazyGridScope.cardHeaderItem(
                 }
             }
             card?.let {
+                var person by rememberStateOf<Person?>(null)
+
+                LaunchedEffect(Unit) {
+                    api.profile(card.person!!) {
+                        person = it.person
+                    }
+                }
+
+                AnimatedVisibility(person != null) {
+                    person?.let { person ->
+                        CardAuthor(person, navController, modifier = Modifier.padding(start = 8.dp, top = 8.dp))
+                    }
+                }
+
                 CardConversation(
                     card,
                     interactable = true,
@@ -832,7 +853,7 @@ private fun LazyGridScope.cardHeaderItem(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(PaddingDefault)
+                        .padding(vertical = PaddingDefault / 2f, horizontal = PaddingDefault)
                 )
             }
         }

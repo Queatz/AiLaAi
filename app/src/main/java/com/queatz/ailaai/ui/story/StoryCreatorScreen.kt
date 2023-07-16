@@ -200,6 +200,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
 
     if (showReorderContentDialog) {
         ReorderStoryContentsDialog(
+            navController = navController,
             {
                 showReorderContentDialog = false
             },
@@ -340,7 +341,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     currentFocus = partIndex
                                 },
                                 onNext = { addPart(position = partIndex + 1, part = StoryContent.Text("")) },
-                                textStyle = { titleMedium }
+                                textStyle = { titleLarge }
                             )
                         }
                     }
@@ -413,7 +414,8 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                 ChooseCardDialog(
                                     {
                                         showAddCardDialog = false
-                                    }
+                                    },
+                                    navController = navController,
                                 ) {
                                     part.edit {
                                         cards = cards + it
@@ -444,6 +446,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                         onClick = null,
                                         activity = navController.context as Activity,
                                         card = card,
+                                        navController = navController,
                                         isChoosing = true,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -503,6 +506,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                 onCategoryClick = {},
                                 activity = navController.context as Activity,
                                 card = card,
+                                navController = navController,
                                 isChoosing = true,
                                 modifier = Modifier.fillMaxWidth(.75f)
                             )
@@ -655,7 +659,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                 }
             }
         }
-        StoryCreatorTools(storyId, ::addPart)
+        StoryCreatorTools(storyId, navController = navController, ::addPart)
     }
 }
 

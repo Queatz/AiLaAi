@@ -54,6 +54,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
     }
 
     var cardName by remember { mutableStateOf(card.name ?: "") }
+    var locationName by remember { mutableStateOf(card.location ?: "") }
     val backstack = remember { mutableListOf<ConversationItem>() }
     var cardConversation by remember { mutableStateOf(conversation) }
     val scope = rememberCoroutineScope()
@@ -81,7 +82,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     cardName = it
                 },
                 label = {
-                    Text(stringResource(R.string.card_name))
+                    Text(stringResource(R.string.title))
                 },
                 shape = MaterialTheme.shapes.large,
                 singleLine = true,
@@ -96,6 +97,32 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
+            OutlinedTextField(
+                locationName,
+                onValueChange = {
+                    locationName = it
+                },
+                label = {
+                    Text(stringResource(R.string.location_name))
+                },
+                shape = MaterialTheme.shapes.large,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(onSearch = {
+                    keyboardController.hide()
+                }),
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            Text(
+                stringResource(R.string.location_name_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(PaddingValues(top = PaddingDefault, bottom = PaddingDefault * 2))
+            )
             Column(
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                 modifier = Modifier
@@ -105,8 +132,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         {
                             cardConversation = backstack.removeLast()
                             invalidate()
-                        },
-                        modifier = Modifier.padding(PaddingValues(top = PaddingDefault * 2))
+                        }
                     ) {
                         Icon(
                             Icons.Outlined.ArrowBack,
@@ -277,7 +303,11 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         scope.launch {
                             api.updateCard(
                                 card.id!!,
-                                Card(name = cardName.trim(), conversation = json.encodeToString(conversation))
+                                Card(
+                                    name = cardName.trim(),
+                                    location = locationName.trim(),
+                                    conversation = json.encodeToString(conversation)
+                                )
                             ) { update ->
                                 card.name = update.name
                                 card.conversation = update.conversation

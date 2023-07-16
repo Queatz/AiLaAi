@@ -362,6 +362,7 @@ fun ColumnScope.MessageContent(
                     exploreInitialCategory = it
                     navController.navigate("explore")
                 },
+                navController = navController,
                 activity = navController.context as Activity,
                 card = attachedCard,
                 isChoosing = true

@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
@@ -33,13 +34,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.profile
 import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.api.uploadCardPhoto
 import com.queatz.ailaai.api.uploadCardVideo
@@ -62,6 +63,7 @@ fun CardItem(
     onReply: (List<String>) -> Unit = {},
     onChange: () -> Unit = {},
     card: Card?,
+    navController: NavController,
     activity: Activity? = null,
     showDistance: LatLng? = null,
     edit: EditCard? = null,
@@ -69,7 +71,7 @@ fun CardItem(
     isMineToolbar: Boolean = true,
     isChoosing: Boolean = false,
     playVideo: Boolean = true,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Card(
         shape = RoundedCornerShape(24.dp),
@@ -290,7 +292,7 @@ fun CardItem(
                     recomposeScope.invalidate()
                 }
 
-                ConstraintLayout(
+                Column(
                     modifier = Modifier
                         .alpha(alpha)
                         .padding(PaddingDefault)
@@ -303,11 +305,29 @@ fun CardItem(
                                 visibilityThreshold = IntSize.VisibilityThreshold
                             )
                         )
-                        .minAspectRatio(if (conversation.isNotEmpty()) .75f else 1.5f)
-                        .padding(PaddingDefault * 2)
+                        .let {
+                            if (isChoosing) {
+                                it.minAspectRatio(1f)
+                            } else {
+                                it.minAspectRatio(if (conversation.isNotEmpty()) .75f else 1.5f)
+                            }
+                        }
+                        .padding(PaddingDefault * 1.5f)
                 ) {
-                    val (conversationRef, toolbarRef) = createRefs()
                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                    var person by rememberStateOf<Person?>(null)
+
+                    LaunchedEffect(Unit) {
+                        api.profile(card.person!!) {
+                            person = it.person
+                        }
+                    }
+
+                    AnimatedVisibility(person != null) {
+                        person?.let { person ->
+                            CardAuthor(person, navController, modifier = Modifier.padding(bottom = 8.dp))
+                        }
+                    }
 
                     CardConversation(
                         card,
@@ -332,10 +352,8 @@ fun CardItem(
                             showSetCategory = true
                         },
                         modifier = Modifier
-                            .constrainAs(conversationRef) {
-                                linkTo(parent.top, toolbarRef.top, bias = 1f)
-                                height = Dimension.preferredWrapContent
-                            }
+                            .wrapContentHeight()
+                            .weight(1f, fill = false)
                             .verticalScroll(conversationScrollState)
                             .onPlaced { viewport = it.boundsInParent().size }
                             .fadingEdge(viewport, conversationScrollState)
@@ -343,14 +361,11 @@ fun CardItem(
 
                     if (isMine && isMineToolbar && activity != null) {
                         CardToolbar(
+                            navController = navController,
                             activity,
                             onChange,
                             card,
-                            edit,
-                            modifier = Modifier.constrainAs(toolbarRef) {
-                                linkTo(conversationRef.bottom, parent.bottom, bias = 1f)
-                                height = Dimension.preferredWrapContent
-                            }
+                            edit
                         )
                     }
                 }
@@ -382,6 +397,7 @@ fun CardItem(
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @Composable
 private fun CardToolbar(
+    navController: NavController,
     activity: Activity,
     onChange: () -> Unit,
     card: Card,
@@ -426,10 +442,18 @@ private fun CardToolbar(
                 .padding(start = PaddingDefault)
         )
         Box(modifier = Modifier.weight(1f))
-        IconButton({
+        TextButton({
             openLocationDialog = true
         }) {
-            Icon(Icons.Outlined.Place, "")
+            Icon(Icons.Outlined.Place, "", modifier = Modifier.padding(end = 8.dp))
+            Text(
+                when {
+                    card.parent != null -> stringResource(R.string.inside_another_card)
+                    card.equipped == true -> stringResource(R.string.on_profile)
+                    card.offline != true -> stringResource(R.string.at_a_location)
+                    else -> stringResource(R.string.offline)
+                }
+            )
         }
         IconButton({
             openEditDialog = true
@@ -444,7 +468,7 @@ private fun CardToolbar(
     }
 
     if (openLocationDialog) {
-        EditCardLocationDialog(card, activity, {
+        EditCardLocationDialog(card, navController = navController, activity, {
             openLocationDialog = false
         }, onChange)
     }

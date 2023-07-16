@@ -623,6 +623,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     }
                 },
                 card = card,
+                navController = navController,
                 activity = navController.context as Activity,
                 isMine = card.person == me()?.id,
                 isMineToolbar = false,

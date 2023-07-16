@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.*
@@ -242,6 +243,13 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     }
                 },
                 me,
+                actions = {
+                    IconButton({
+                        launchScanQrCode()
+                    }) {
+                        Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
+                    }
+                },
                 showAppIcon = true
             )
             CardsList(
@@ -261,10 +269,10 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     loadMore()
                 },
                 action = {
-                    Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
+                    Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
                 },
                 onAction = {
-                    launchScanQrCode()
+                    navController.navigate("me")
                 }
             ) {
                 if (locationSelector.isManual) {

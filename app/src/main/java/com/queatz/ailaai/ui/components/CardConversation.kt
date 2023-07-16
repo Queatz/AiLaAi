@@ -90,7 +90,7 @@ fun CardConversation(
                         },
                         shape = MaterialTheme.shapes.medium,
                         label = {
-                            Text(category)
+                            Text(category, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     )
                 }

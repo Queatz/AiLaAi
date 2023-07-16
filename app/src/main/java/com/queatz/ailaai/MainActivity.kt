@@ -25,8 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -71,11 +69,11 @@ class MainActivity : AppCompatActivity() {
 
     private val menuItems by lazy {
         listOf(
-            NavButton("explore", getString(R.string.explore), Icons.Outlined.PinDrop),
-            NavButton("messages", getString(R.string.talk), Icons.Outlined.Forum),
-            NavButton("stories", getString(R.string.stories), Icons.Outlined.Flare),
-            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-            NavButton("me", getString(R.string.create), Icons.Outlined.Add)
+            NavButton("messages", getString(R.string.talk), Icons.Outlined.People),
+            NavButton("explore", getString(R.string.explore), Icons.Outlined.Style),
+            NavButton("stories", getString(R.string.stories), Icons.Outlined.EventNote),
+//            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
+//            NavButton("me", getString(R.string.create), Icons.Outlined.Edit)
         )
     }
 
@@ -302,13 +300,13 @@ class MainActivity : AppCompatActivity() {
                                 verticalArrangement = Arrangement.Bottom
                             ) {
                                 AnimatedVisibility(showNavigation && !isLandscape) {
-                                    NavigationBar {
+                                    NavigationBar(
+                                        modifier = Modifier.height(54.dp)
+                                    ) {
                                         menuItems.forEach { item ->
                                             NavigationBarItem(
                                                 icon = {
-                                                    Box(
-                                                        modifier = Modifier
-                                                    ) {
+                                                    Box {
                                                         Icon(item.icon, contentDescription = null)
                                                         if (item.route == "messages" && newMessages > 0) {
                                                             Text(
@@ -343,14 +341,7 @@ class MainActivity : AppCompatActivity() {
                                                     }
                                                 },
                                                 alwaysShowLabel = false,
-                                                label = {
-                                                    Text(
-                                                        item.text,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        maxLines = 1,
-                                                        textAlign = TextAlign.Center
-                                                    )
-                                                },
+                                                label = null,
                                                 selected = navController.currentDestination?.route == item.route,
                                                 onClick = {
                                                     navController.popBackStack()

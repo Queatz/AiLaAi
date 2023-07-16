@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.Card
 import com.queatz.ailaai.R
@@ -28,6 +29,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
 fun ReorderStoryContentsDialog(
+    navController: NavController,
     onDismissRequest: () -> Unit,
     storyContents: List<StoryContent>,
     onStoryContents: (List<StoryContent>) -> Unit
@@ -69,6 +71,7 @@ fun ReorderStoryContentsDialog(
                             onClick = null,
                             card = card,
                             isChoosing = true,
+                            navController = navController,
                             modifier = Modifier.width(80.dp)
                         )
                     }

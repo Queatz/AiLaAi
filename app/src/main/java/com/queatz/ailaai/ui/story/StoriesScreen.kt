@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material3.*
@@ -101,61 +102,58 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                 me,
                 showAppIcon = true
             )
-
-            if (isLoading) {
-                Loading()
-            } else {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (storyContents.isEmpty()) {
-                        EmptyText(stringResource(R.string.no_stories_to_read))
-                    } else {
-                        StoryContents(
-                            storyContents,
-                            state,
-                            navController,
-                            Modifier.align(Alignment.TopCenter).widthIn(max = 640.dp).fillMaxSize(),
-                            bottomContentPadding = 80.dp
-                        ) { storyId ->
-                            Row {
-                                StoryActions(
-                                    navController,
-                                    storyId,
-                                    stories.find { it.id == storyId },
-                                    me,
-                                    showOpen = true
-                                )
-                            }
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isLoading) {
+                    Loading()
+                } else if (storyContents.isEmpty()) {
+                    EmptyText(stringResource(R.string.no_stories_to_read))
+                } else {
+                    StoryContents(
+                        storyContents,
+                        state,
+                        navController,
+                        Modifier.align(Alignment.TopCenter).widthIn(max = 640.dp).fillMaxSize(),
+                        bottomContentPadding = 80.dp
+                    ) { storyId ->
+                        Row {
+                            StoryActions(
+                                navController,
+                                storyId,
+                                stories.find { it.id == storyId },
+                                me,
+                                showOpen = true
+                            )
                         }
                     }
-                    FloatingActionButton(
+                }
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("write")
+                    },
+                    modifier = Modifier
+                        .padding(
+                            end = PaddingDefault * 2,
+                            bottom = PaddingDefault * 2
+                        )
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Icon(Icons.Outlined.Add, stringResource(R.string.your_stories))
+                }
+                if (locationSelector.isManual) {
+                    ElevatedButton(
+                        elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
                         onClick = {
-                            navController.navigate("write")
+                            locationSelector.reset()
                         },
                         modifier = Modifier
-                            .padding(
-                                end = PaddingDefault * 2,
-                                bottom = PaddingDefault * 2
-                            )
-                            .align(Alignment.BottomEnd)
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = PaddingDefault * 2)
                     ) {
-                        Icon(Icons.Outlined.HistoryEdu, stringResource(R.string.write_a_story))
-                    }
-                    if (locationSelector.isManual) {
-                        ElevatedButton(
-                            elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-                            onClick = {
-                                locationSelector.reset()
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = PaddingDefault * 2)
-                        ) {
-                            Text(
-                                stringResource(R.string.reset_location),
-                                modifier = Modifier.padding(end = PaddingDefault)
-                            )
-                            Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
-                        }
+                        Text(
+                            stringResource(R.string.reset_location),
+                            modifier = Modifier.padding(end = PaddingDefault)
+                        )
+                        Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
                     }
                 }
             }

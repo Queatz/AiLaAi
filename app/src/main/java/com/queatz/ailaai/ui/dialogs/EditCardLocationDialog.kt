@@ -8,6 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -27,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -49,11 +53,16 @@ import kotlinx.coroutines.launch
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
 @Composable
-fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () -> Unit, onChange: () -> Unit) {
+fun EditCardLocationDialog(
+    card: Card,
+    navController: NavController,
+    activity: Activity,
+    onDismissRequest: () -> Unit,
+    onChange: () -> Unit
+) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(activity)
 
-    var locationName by remember { mutableStateOf(card.location ?: "") }
     var parentCard by remember { mutableStateOf<Card?>(null) }
     var searchCardsValue by remember { mutableStateOf("") }
     var position by remember { mutableStateOf(LatLng(card.geo?.get(0) ?: 0.0, card.geo?.get(1) ?: 0.0)) }
@@ -112,32 +121,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                 stringResource(R.string.card_location),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
-            )
-            OutlinedTextField(
-                locationName,
-                onValueChange = {
-                    locationName = it
-                },
-                label = {
-                    Text(stringResource(R.string.location_name))
-                },
-                shape = MaterialTheme.shapes.large,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(onSearch = {
-                    keyboardController.hide()
-                }),
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-            Text(
-                stringResource(R.string.location_name_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(PaddingValues(vertical = PaddingDefault * 2))
             )
             CardParentSelector(cardParentType) {
                 cardParentType = if (cardParentType == it) {
@@ -272,9 +255,10 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                         .fillMaxWidth()
                                         .padding(bottom = PaddingDefault)
                                 )
-                                LazyColumn(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                LazyVerticalGrid(
+                                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
                                     verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
+                                    columns = GridCells.Adaptive(120.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .aspectRatio(.75f)
@@ -290,6 +274,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                             },
                                             activity = activity,
                                             card = it,
+                                            navController = navController,
                                             isChoosing = true
                                         )
                                     }
@@ -308,6 +293,7 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                                     activity = activity,
                                     card = parentCard!!,
                                     isChoosing = true,
+                                    navController = navController,
                                     modifier = Modifier
                                         .padding(top = PaddingDefault)
                                 )
@@ -348,7 +334,6 @@ fun EditCardLocationDialog(card: Card, activity: Activity, onDismissRequest: () 
                             api.updateCard(
                                 card.id!!,
                                 Card(
-                                    location = locationName.trim(),
                                     geo = position.toList(),
                                     parent = card.parent,
                                     equipped = card.equipped,

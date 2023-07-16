@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import com.queatz.ailaai.api
 import com.queatz.ailaai.api.uploadStoryAudio
 import com.queatz.ailaai.api.uploadStoryPhotos
@@ -28,7 +29,11 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
 @Composable
-fun StoryCreatorTools(storyId: String, addPart: (part: StoryContent) -> Unit) {
+fun StoryCreatorTools(
+    storyId: String,
+    navController: NavController,
+    addPart: (part: StoryContent) -> Unit
+) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showCardSelectorDialog by rememberStateOf(false)
@@ -63,7 +68,8 @@ fun StoryCreatorTools(storyId: String, addPart: (part: StoryContent) -> Unit) {
         ChooseCardDialog(
             {
                 showCardSelectorDialog = false
-            }
+            },
+            navController = navController
         ) { cardId ->
             addPart(
                 StoryContent.Cards(listOf(cardId))
@@ -99,7 +105,7 @@ fun StoryCreatorTools(storyId: String, addPart: (part: StoryContent) -> Unit) {
                         StoryContent.Text("")
                     )
                 },
-                Icons.Outlined.AccountBox to {
+                Icons.Outlined.Style to {
                     showCardSelectorDialog = true
                 },
                 Icons.Outlined.Photo to {
