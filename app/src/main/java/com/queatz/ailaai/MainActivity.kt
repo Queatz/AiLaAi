@@ -70,6 +70,8 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.People),
+//            NavButton("schedule", getString(R.string.explore), Icons.Outlined.Event),
+            NavButton("map", getString(R.string.explore), Icons.Outlined.Map),
             NavButton("explore", getString(R.string.explore), Icons.Outlined.Style),
             NavButton("stories", getString(R.string.stories), Icons.Outlined.EventNote),
 //            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
@@ -124,7 +126,6 @@ class MainActivity : AppCompatActivity() {
                     ?.route
                     ?.let {
                         it.startsWith("group/")
-                                || it.startsWith("card/")
                                 || it.startsWith("write/")
                                 || it.startsWith("sticker-pack/")
                                 || it == "sticker-packs"
@@ -422,6 +423,12 @@ class MainActivity : AppCompatActivity() {
                                         }
                                         composable("explore") {
                                             ExploreScreen(navController) { me }
+                                        }
+                                        composable("schedule") {
+                                            MapScreen(navController) { me }
+                                        }
+                                        composable("map") {
+                                            MapScreen(navController) { me }
                                         }
                                         composable("stories") {
                                             StoriesScreen(navController) { me }

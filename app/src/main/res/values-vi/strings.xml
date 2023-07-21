@@ -6,6 +6,7 @@
     <string name="language_english">English</string>
     <string name="language">Ngôn ngữ</string>
     <string name="sign_out_or_transfer">Đăng xuất hoặc chuyển khoản</string>
+    <string name="sign_up">Đăng ký</string>
     <string name="sign_in">Đăng nhập</string>
     <string name="update_your_name">Cập nhật tên của bạn</string>
     <string name="your_name">Tên của bạn</string>
@@ -51,8 +52,8 @@
     <string name="reply">Trả lời</string>
     <string name="go_back">Quay lại</string>
     <string name="card_location">Vị trí của thẻ</string>
-    <string name="location_name">Tên của vị trí</string>
-    <string name="location_name_description">Tên của vị trí được hiển thị trên thẻ để giúp mọi người biết vị trí của thẻ.</string>
+    <string name="hint">Lời gợi ý</string>
+    <string name="hint_description">Vị trí, thời gian, hoặc giá</string>
     <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lưu</string>
@@ -143,7 +144,7 @@
     <string name="published">Được xuất bản</string>
     <string name="draft">Bản nháp</string>
     <string name="change_location">Đổi vị trí</string>
-    <string name="edit_card">Chỉnh sửa</string>
+    <string name="edit">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
     <string name="person_invited">%1$s được thêm vào nhóm</string>
     <string name="copy_location">Sao chép vị trí</string>
@@ -173,7 +174,7 @@
     <string name="inline_video">video</string>
     <string name="inline_group">nhóm</string>
     <string name="inline_name">tên</string>
-    <string name="inline_location_name">tên của vị trí</string>
+    <string name="inline_hint">lời gợi ý</string>
     <string name="inline_you">bạn</string>
     <string name="inline_someone">một người ai đó</string>
     <string name="inline_a_card">một thẻ nào đó</string>

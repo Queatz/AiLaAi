@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 
 @SuppressLint("StaticFieldLeak")
 val push = Push()
@@ -122,7 +121,7 @@ class Push {
             CollaborationEventDataDetails.Video -> context.getString(R.string.inline_video)
             CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_group)
             CollaborationEventDataDetails.Name -> context.getString(R.string.inline_name)
-            CollaborationEventDataDetails.Location -> context.getString(R.string.inline_location_name)
+            CollaborationEventDataDetails.Location -> context.getString(R.string.inline_hint)
             else -> ""
         }
     }

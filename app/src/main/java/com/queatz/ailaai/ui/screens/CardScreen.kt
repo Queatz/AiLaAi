@@ -6,16 +6,13 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -312,7 +309,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 DropdownMenu(showMenu, { showMenu = false }) {
                     if (isMine) {
                         DropdownMenuItem({
-                            Text(stringResource(R.string.edit_card))
+                            Text(stringResource(R.string.edit))
                         }, {
                             openEditDialog = true
                             showMenu = false
@@ -814,25 +811,12 @@ private fun LazyGridScope.cardHeaderItem(
                 }
             }
             card?.let {
-                var person by rememberStateOf<Person?>(null)
-
-                LaunchedEffect(Unit) {
-                    api.profile(card.person!!) {
-                        person = it.person
-                    }
-                }
-
-                AnimatedVisibility(person != null) {
-                    person?.let { person ->
-                        CardAuthor(person, navController, modifier = Modifier.padding(start = 8.dp, top = 8.dp))
-                    }
-                }
-
                 CardConversation(
                     card,
                     interactable = true,
                     showTitle = false,
                     isMine = isMine,
+                    navController = navController,
                     onCategoryClick = {
                         if (isMine) {
                             onsetCategoryClick()

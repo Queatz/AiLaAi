@@ -3,7 +3,7 @@ package com.queatz.ailaai.api
 import com.queatz.ailaai.*
 
 suspend fun Api.signUp(
-    inviteCode: String,
+    inviteCode: String?,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<TokenResponse> = {},
 ) = post("sign/up", SignUpRequest(inviteCode), onError = onError, onSuccess = onSuccess)

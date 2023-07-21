@@ -194,7 +194,7 @@ class Api {
             contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
         }
 
-        parameters?.forEach { (key, value) -> parameter(key, value) }
+        parameters?.forEach { (key: String, value) -> parameter(key, value) }
     }.body()
 
     fun setToken(token: String?) {
@@ -237,7 +237,7 @@ data class VersionInfo(
 
 @Serializable
 data class SignUpRequest(
-    val code: String,
+    val code: String?
 )
 
 @Serializable

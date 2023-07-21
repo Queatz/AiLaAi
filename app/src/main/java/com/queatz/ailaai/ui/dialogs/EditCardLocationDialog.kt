@@ -257,7 +257,7 @@ fun EditCardLocationDialog(
                                 )
                                 LazyVerticalGrid(
                                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
+                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                                     columns = GridCells.Adaptive(120.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()

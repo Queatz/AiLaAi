@@ -87,7 +87,7 @@ fun InitialScreen(onKnown: () -> Unit) {
         )
     }
 
-    fun signUp(code: String) {
+    fun signUp(code: String? = null) {
         scope.launch {
             api.signUp(code, onError = { ex ->
                 if (ex is ResponseException) {
@@ -160,13 +160,23 @@ fun InitialScreen(onKnown: () -> Unit) {
             )
         }
 
-        TextButton(
-            {
-                signInDialog = true
-            },
-            modifier = Modifier.padding(vertical = PaddingDefault * 3)
-        ) {
-            Text(stringResource(R.string.sign_in))
+        Row(horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2)) {
+            TextButton(
+                {
+                    signUp()
+                },
+                modifier = Modifier.padding(vertical = PaddingDefault * 3)
+            ) {
+                Text(stringResource(R.string.sign_up))
+            }
+            TextButton(
+                {
+                    signInDialog = true
+                },
+                modifier = Modifier.padding(vertical = PaddingDefault * 3)
+            ) {
+                Text(stringResource(R.string.sign_in))
+            }
         }
     }
 }

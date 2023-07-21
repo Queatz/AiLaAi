@@ -72,7 +72,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 .verticalScroll(scrollState)
         ) {
             Text(
-                stringResource(R.string.edit_card),
+                stringResource(R.string.edit),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
@@ -103,7 +103,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     locationName = it
                 },
                 label = {
-                    Text(stringResource(R.string.location_name))
+                    Text(stringResource(R.string.hint))
                 },
                 shape = MaterialTheme.shapes.large,
                 singleLine = true,
@@ -118,7 +118,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     .fillMaxWidth()
             )
             Text(
-                stringResource(R.string.location_name_description),
+                stringResource(R.string.hint_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.padding(PaddingValues(top = PaddingDefault, bottom = PaddingDefault * 2))

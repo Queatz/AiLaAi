@@ -23,16 +23,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.LinkifyText
+import androidx.navigation.NavController
+import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.json
+import com.queatz.ailaai.api.profile
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CardConversation(
     card: Card,
+    navController: NavController,
     modifier: Modifier = Modifier,
     interactable: Boolean = true,
     onReply: (List<String>) -> Unit = {},
@@ -53,6 +55,18 @@ fun CardConversation(
 
     LaunchedEffect(stack) {
         conversationChange?.invoke(stack)
+    }
+
+    var authors by rememberStateOf<List<Person>?>(null)
+
+    LaunchedEffect(Unit) {
+        val people = mutableListOf<Person>()
+        (listOf(card.person!!) + (card.collaborators ?: emptyList())).forEach {
+            api.profile(it) {
+                people.add(it.person)
+            }
+        }
+        authors = people
     }
 
     Column(modifier = modifier) {
@@ -79,6 +93,12 @@ fun CardConversation(
                     .fillMaxWidth()
                    .padding(bottom = if (stack.isNotEmpty() || (categories.isEmpty() && !(isMine && isMineToolbar))) PaddingDefault / 2 else 0.dp)
             )
+        }
+
+        AnimatedVisibility(authors != null && stack.isEmpty()) {
+            authors?.let { authors ->
+                CardAuthor(authors, interactable = interactable, navController, modifier = Modifier.padding(vertical = PaddingDefault))
+            }
         }
 
         if (categories.isNotEmpty()) {

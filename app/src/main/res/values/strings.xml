@@ -5,6 +5,7 @@
     <string name="language_english">English</string>
     <string name="language">Language</string>
     <string name="sign_out_or_transfer">Sign out or transfer</string>
+    <string name="sign_up">Sign up</string>
     <string name="sign_in">Sign in</string>
     <string name="update_your_name">Update your name</string>
     <string name="your_name">Your name</string>
@@ -60,8 +61,8 @@
     <string name="reply">Reply</string>
     <string name="go_back">Go back</string>
     <string name="card_location">Card location</string>
-    <string name="location_name">Location name</string>
-    <string name="location_name_description">The location name is shown on the card to help others know where it is located.</string>
+    <string name="hint">Hint</string>
+    <string name="hint_description">Location, time, or price</string>
     <string name="map_description">Tap on the map to set the location of this card.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -147,7 +148,7 @@
     <string name="published">Published</string>
     <string name="draft">Draft</string>
     <string name="change_location">Change location</string>
-    <string name="edit_card">Edit card</string>
+    <string name="edit">Edit</string>
     <string name="no_people_to_show">No people to show.</string>
     <string name="person_invited">%1$s added</string>
     <string name="copy_location">Copy location</string>
@@ -176,7 +177,7 @@
     <string name="inline_video">video</string>
     <string name="inline_group">group</string>
     <string name="inline_name">name</string>
-    <string name="inline_location_name">location name</string>
+    <string name="inline_hint">hint</string>
     <string name="inline_you">you</string>
     <string name="inline_someone">someone</string>
     <string name="inline_a_card">some card</string>

@@ -2,11 +2,12 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.net.Uri
 import android.view.MotionEvent
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
@@ -40,7 +41,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.profile
 import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.api.uploadCardPhoto
 import com.queatz.ailaai.api.uploadCardVideo
@@ -77,9 +77,8 @@ fun CardItem(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(),
         elevation = CardDefaults.elevatedCardElevation(),
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(24.dp))
-            .then(modifier)
     ) {
         var hideContent by rememberStateOf(false)
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
@@ -92,7 +91,37 @@ fun CardItem(
         var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
+        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
+            if (it == null) return@rememberLauncherForActivityResult
 
+            uploadJob = scope.launch {
+                videoUploadProgress = 0f
+                if (it.isVideo(context)) {
+                    isUploadingVideo = true
+                    api.uploadCardVideo(
+                        card!!.id!!,
+                        it,
+                        context.contentResolver.getType(it) ?: "video/*",
+                        it.lastPathSegment ?: "video.${
+                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                        }",
+                        processingCallback = {
+                            videoUploadStage = ProcessingVideoStage.Processing
+                            videoUploadProgress = it
+                        },
+                        uploadCallback = {
+                            videoUploadStage = ProcessingVideoStage.Uploading
+                            videoUploadProgress = it
+                        }
+                    )
+                } else if (it.isPhoto(context)) {
+                    api.uploadCardPhoto(card!!.id!!, it)
+                }
+                onChange()
+                isUploadingVideo = false
+                uploadJob = null
+            }
+        }
         LaunchedEffect(hideContent) {
             if (hideContent) {
                 delay(2.seconds)
@@ -177,74 +206,24 @@ fun CardItem(
                         .padding(PaddingDefault)
                         .align(Alignment.TopEnd)
                 ) {
-                    if (isMine && isMineToolbar) {
-                        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-                            if (it == null) return@rememberLauncherForActivityResult
-
-                            uploadJob = scope.launch {
-                                videoUploadProgress = 0f
-                                if (it.isVideo(context)) {
-                                    isUploadingVideo = true
-                                    api.uploadCardVideo(
-                                        card.id!!,
-                                        it,
-                                        context.contentResolver.getType(it) ?: "video/*",
-                                        it.lastPathSegment ?: "video.${
-                                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                                        }",
-                                        processingCallback = {
-                                            videoUploadStage = ProcessingVideoStage.Processing
-                                            videoUploadProgress = it
-                                        },
-                                        uploadCallback = {
-                                            videoUploadStage = ProcessingVideoStage.Uploading
-                                            videoUploadProgress = it
-                                        }
-                                    )
-                                } else if (it.isPhoto(context)) {
-                                    api.uploadCardPhoto(card.id!!, it)
+                    IconButton({
+                        scope.launch {
+                            when (saves.toggleSave(card)) {
+                                ToggleSaveResult.Saved -> {
+                                    context.toast(R.string.card_saved)
                                 }
-                                onChange()
-                                isUploadingVideo = false
-                                uploadJob = null
-                            }
-                        }
-                        TextButton(
-                            {
-                                launcher.launch(PickVisualMediaRequest())
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
-                            ),
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                        ) {
-                            Icon(Icons.Outlined.Edit, "")
-                            Text(
-                                stringResource(R.string.set_photo),
-                                modifier = Modifier.padding(start = PaddingDefault)
-                            )
-                        }
-                    } else if (!isMine) {
-                        IconButton({
-                            scope.launch {
-                                when (saves.toggleSave(card)) {
-                                    ToggleSaveResult.Saved -> {
-                                        context.toast(R.string.card_saved)
-                                    }
 
-                                    ToggleSaveResult.Unsaved -> {
-                                        context.toast(R.string.card_unsaved)
-                                    }
+                                ToggleSaveResult.Unsaved -> {
+                                    context.toast(R.string.card_unsaved)
+                                }
 
-                                    else -> {
-                                        context.showDidntWork()
-                                    }
+                                else -> {
+                                    context.showDidntWork()
                                 }
                             }
-                        }) {
-                            SavedIcon(card)
                         }
+                    }) {
+                        SavedIcon(card)
                     }
 
                     val hasCards = (card.cardCount ?: 0) > 0
@@ -315,24 +294,11 @@ fun CardItem(
                         .padding(PaddingDefault * 1.5f)
                 ) {
                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-                    var person by rememberStateOf<Person?>(null)
-
-                    LaunchedEffect(Unit) {
-                        api.profile(card.person!!) {
-                            person = it.person
-                        }
-                    }
-
-                    AnimatedVisibility(person != null) {
-                        person?.let { person ->
-                            CardAuthor(person, navController, modifier = Modifier.padding(bottom = 8.dp))
-                        }
-                    }
-
                     CardConversation(
                         card,
                         interactable = !isChoosing,
                         onReply = onReply,
+                        navController = navController,
                         isMine = isMine,
                         isMineToolbar = isMineToolbar,
                         selectingText = {
@@ -362,6 +328,7 @@ fun CardItem(
                     if (isMine && isMineToolbar && activity != null) {
                         CardToolbar(
                             navController = navController,
+                            launcher,
                             activity,
                             onChange,
                             card,
@@ -398,6 +365,7 @@ fun CardItem(
 @Composable
 private fun CardToolbar(
     navController: NavController,
+    launcher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
     activity: Activity,
     onChange: () -> Unit,
     card: Card,
@@ -408,13 +376,15 @@ private fun CardToolbar(
     var openEditDialog by remember { mutableStateOf(edit == EditCard.Conversation) }
     var openLocationDialog by remember { mutableStateOf(edit == EditCard.Location) }
     val scrollState = rememberScrollState()
+    var viewport by rememberStateOf(Size(0f, 0f))
 
     Row(
-        horizontalArrangement = Arrangement.End,
         modifier = modifier
             .fillMaxWidth()
             .padding(PaddingValues(top = PaddingDefault))
-            .horizontalScroll(scrollState, reverseScrolling = true)
+            .horizontalScroll(scrollState)
+            .onPlaced { viewport = it.boundsInParent().size }
+            .horizontalFadingEdge(viewport, scrollState)
     ) {
         var active by remember { mutableStateOf(card.active ?: false) }
         var activeCommitted by remember { mutableStateOf(active) }
@@ -458,7 +428,12 @@ private fun CardToolbar(
         IconButton({
             openEditDialog = true
         }) {
-            Icon(Icons.Outlined.Edit, "")
+            Icon(Icons.Outlined.Edit, stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        IconButton({
+            launcher.launch(PickVisualMediaRequest())
+        }) {
+            Icon(Icons.Outlined.Photo, stringResource(R.string.set_photo), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         IconButton({
             openDeleteDialog = true

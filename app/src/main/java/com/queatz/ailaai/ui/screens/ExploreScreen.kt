@@ -46,7 +46,6 @@ import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardsList
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.extensions.horizontalFadingEdge
-import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
