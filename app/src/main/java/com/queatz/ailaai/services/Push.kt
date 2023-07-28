@@ -1,6 +1,5 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.services
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -15,6 +14,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import com.queatz.ailaai.MainActivity
+import com.queatz.ailaai.R
+import com.queatz.ailaai.data.*
+import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.attachmentText
 import com.queatz.ailaai.extensions.nullIfBlank
 import kotlinx.coroutines.CoroutineScope
@@ -25,8 +28,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
-@SuppressLint("StaticFieldLeak")
-val push = Push()
+val push by lazy {
+    Push()
+}
 
 class Push {
 
@@ -76,7 +80,7 @@ class Push {
     private fun receive(data: CollaborationPushData) {
         val deeplinkIntent = Intent(
             Intent.ACTION_VIEW,
-            "${appDomain}/card/${data.card.id}".toUri(),
+            "$appDomain/card/${data.card.id}".toUri(),
             context,
             MainActivity::class.java
         )
@@ -95,13 +99,22 @@ class Push {
         return when (data.event) {
             CollaborationEvent.AddedPerson -> context.getString(R.string.person_added_person, person, personNameOrYou(data.data.person))
             CollaborationEvent.RemovedPerson -> context.getString(R.string.person_removed_person, person, personNameOrYou(data.data.person))
-            CollaborationEvent.AddedCard -> context.getString(R.string.person_added_card, person, data.data.card?.name ?: context.getString(R.string.inline_a_card))
-            CollaborationEvent.RemovedCard -> context.getString(R.string.person_removed_card, person, data.data.card?.name ?: context.getString(R.string.inline_a_card))
+            CollaborationEvent.AddedCard -> context.getString(
+                R.string.person_added_card, person, data.data.card?.name ?: context.getString(
+                    R.string.inline_a_card
+                ))
+            CollaborationEvent.RemovedCard -> context.getString(
+                R.string.person_removed_card, person, data.data.card?.name ?: context.getString(
+                    R.string.inline_a_card
+                ))
             CollaborationEvent.UpdatedCard -> {
                 if (data.data.card == null) {
                     context.getString(R.string.person_updated_details, person, cardDetailName(data.data.details))
                 } else {
-                    context.getString(R.string.person_updated_card, person, cardDetailName(data.data.details), data.data.card.name ?: context.getString(R.string.inline_a_card))
+                    context.getString(
+                        R.string.person_updated_card, person, cardDetailName(data.data.details), data.data.card.name ?: context.getString(
+                            R.string.inline_a_card
+                        ))
                 }
             }
         }
@@ -140,7 +153,7 @@ class Push {
 
         val deeplinkIntent = Intent(
             Intent.ACTION_VIEW,
-            "${appDomain}/group/${data.group.id}".toUri(),
+            "$appDomain/group/${data.group.id}".toUri(),
             context,
             MainActivity::class.java
         )

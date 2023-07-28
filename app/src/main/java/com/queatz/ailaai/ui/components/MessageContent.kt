@@ -34,13 +34,14 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.card
 import com.queatz.ailaai.api.deleteMessage
 import com.queatz.ailaai.api.sticker
 import com.queatz.ailaai.api.story
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.services.say
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.screens.exploreInitialCategory

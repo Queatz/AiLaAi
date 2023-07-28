@@ -20,8 +20,8 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
-import com.queatz.ailaai.Sticker
-import com.queatz.ailaai.StickerPack
+import com.queatz.ailaai.data.Sticker
+import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.ui.theme.PaddingDefault

@@ -21,11 +21,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.card
 import com.queatz.ailaai.api.profile
 import com.queatz.ailaai.api.storyDraft
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog

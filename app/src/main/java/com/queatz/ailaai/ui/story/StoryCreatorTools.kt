@@ -19,7 +19,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.uploadStoryAudio
 import com.queatz.ailaai.api.uploadStoryPhotos
 import com.queatz.ailaai.extensions.rememberStateOf

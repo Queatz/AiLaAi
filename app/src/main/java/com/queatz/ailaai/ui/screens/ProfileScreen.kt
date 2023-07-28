@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.screens
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,9 +35,10 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
@@ -607,27 +607,23 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         }
 
         items(cards, key = { it.id!! }) { card ->
-            CardItem(
-                {
+            CardLayout(
+                card = card,
+                isMine = card.person == me()?.id,
+                showTitle = true,
+                onSetCategoryClick = {},
+                onClick = {
                     navController.navigate("card/${card.id!!}")
                 },
-                onCategoryClick = {
-                    exploreInitialCategory = it
-                    navController.navigate("explore")
-                },
-                onReply = { conversation ->
+                onChange = {
                     scope.launch {
-                        card.reply(conversation) { groupId ->
-                            navController.navigate("group/${groupId}")
-                        }
+                        reload()
                     }
                 },
-                card = card,
+                scope = scope,
                 navController = navController,
-                activity = navController.context as Activity,
-                isMine = card.person == me()?.id,
-                isMineToolbar = false,
-                playVideo = !isAtTop && card == playingVideo
+                playVideo = card == playingVideo && !isAtTop,
+                modifier = Modifier.padding(horizontal = PaddingDefault)
             )
         }
     }

@@ -1,8 +1,10 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.queatz.ailaai.DeviceType
+import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.showDidntWork
 import io.ktor.client.*
 import io.ktor.client.call.*

@@ -2,9 +2,9 @@ package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.updateMe
 
 @Composable

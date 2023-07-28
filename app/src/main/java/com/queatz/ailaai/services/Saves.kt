@@ -1,4 +1,4 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.services
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
@@ -9,12 +9,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api.saveCard
 import com.queatz.ailaai.api.savedCards
 import com.queatz.ailaai.api.unsaveCard
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.api
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-val saves = Saves()
+val saves by lazy {
+    Saves()
+}
 
 class Saves {
 

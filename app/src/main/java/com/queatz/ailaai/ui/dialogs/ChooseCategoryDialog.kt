@@ -5,7 +5,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.categories
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.rememberStateOf

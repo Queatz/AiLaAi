@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,13 +15,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.stories
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.Story
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading

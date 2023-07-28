@@ -1,12 +1,10 @@
 package com.queatz.ailaai.ui.screens
 
-import android.app.Activity
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -29,10 +27,12 @@ import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.myCards
 import com.queatz.ailaai.api.newCard
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -47,7 +47,6 @@ private val meFiltersKey = stringSetPreferencesKey("me.filters")
 @Composable
 fun MeScreen(navController: NavController, me: () -> Person?) {
     var myCards by remember { mutableStateOf(emptyList<Card>()) }
-    var addedCardId by remember { mutableStateOf<String?>(null) }
     var isLoading by rememberStateOf(true)
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
@@ -94,10 +93,14 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    LaunchedEffect(Unit) {
+    suspend fun reload() {
         api.myCards {
             myCards = it
         }
+    }
+
+    LaunchedEffect(Unit) {
+        reload()
         isLoading = false
     }
 
@@ -184,32 +187,22 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     columns = GridCells.Adaptive(240.dp)
                 ) {
                     items(cards, key = { it.id!! }) { card ->
-                        CardItem(
-                            {
+                        CardLayout(
+                            card = card,
+                            isMine = true,
+                            showTitle = true,
+                            onClick = {
                                 navController.navigate("card/${card.id!!}")
-                            },
-                            onCategoryClick = {
-                                exploreInitialCategory = it
-                                navController.navigate("explore")
                             },
                             onChange = {
                                 scope.launch {
-                                    isLoading = myCards.isEmpty()
-                                    api.myCards { myCards = it }
-                                    isLoading = false
+                                    reload()
                                 }
                             },
+                            scope = scope,
                             navController = navController,
-                            activity = navController.context as Activity,
-                            card = card,
-                            edit = if (card.id == addedCardId) EditCard.Conversation else null,
-                            isMine = true,
                             playVideo = playingVideo == card
                         )
-
-                        if (card.id == addedCardId) {
-                            addedCardId = null
-                        }
                     }
 
                     if (cards.isEmpty()) {
@@ -300,24 +293,15 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     FloatingActionButton(
                         onClick = {
                             scope.launch {
-                                setParentType(null)
-                                setFilters(emptySet())
-                                searchText = ""
-                                api.newCard { addedCardId = it.id }
-                                api.myCards { myCards = it }
-                                delay(100)
-
-                                if (state.firstVisibleItemIndex > 2) {
-                                    state.scrollToItem(2)
+                                api.newCard {
+                                    navController.navigate("card/${it.id}")
                                 }
-
-                                state.animateScrollToItem(0)
                             }
                         },
                         modifier = Modifier
                             .padding(start = PaddingDefault * 2)
                     ) {
-                        Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                        Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
                     }
                 }
             }

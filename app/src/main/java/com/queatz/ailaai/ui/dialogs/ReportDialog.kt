@@ -19,6 +19,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.*
 import com.queatz.ailaai.api.sendReport
+import com.queatz.ailaai.data.Report
+import com.queatz.ailaai.data.ReportType
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -112,12 +115,14 @@ fun ReportDialog(entity: String, onDismissRequest: () -> Unit) {
             Box(modifier = Modifier.height(PaddingDefault * 2))
         }
     ) { value ->
-        api.sendReport(Report(
+        api.sendReport(
+            Report(
             entity = entity,
             reporterMessage = value,
             urgent = urgent,
             type = reportType ?: ReportType.Other
-        )) {
+        )
+        ) {
             context.toast(context.getString(R.string.thank_you))
             onDismissRequest()
         }

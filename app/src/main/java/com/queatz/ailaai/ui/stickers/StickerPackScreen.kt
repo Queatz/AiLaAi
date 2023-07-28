@@ -9,19 +9,21 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.stickerPack
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.StickerPack
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.services.say
+import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.dialogs.ReportDialog
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

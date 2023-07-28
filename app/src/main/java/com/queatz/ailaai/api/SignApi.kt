@@ -1,6 +1,6 @@
 package com.queatz.ailaai.api
 
-import com.queatz.ailaai.*
+import com.queatz.ailaai.data.*
 
 suspend fun Api.signUp(
     inviteCode: String?,

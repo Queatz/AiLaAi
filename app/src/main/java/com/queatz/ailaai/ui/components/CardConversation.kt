@@ -2,6 +2,8 @@ package com.queatz.ailaai.ui.components
 
 import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,10 +26,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.profile
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -38,6 +44,7 @@ fun CardConversation(
     modifier: Modifier = Modifier,
     interactable: Boolean = true,
     onReply: (List<String>) -> Unit = {},
+    onTitleClick: () -> Unit = {},
     isMine: Boolean = false,
     isMineToolbar: Boolean = true,
     showTitle: Boolean = true,
@@ -57,16 +64,14 @@ fun CardConversation(
         conversationChange?.invoke(stack)
     }
 
-    var authors by rememberStateOf<List<Person>?>(null)
+    var cardAuthors by rememberStateOf<List<Person>?>(null)
 
     LaunchedEffect(Unit) {
         val people = mutableListOf<Person>()
         (listOf(card.person!!) + (card.collaborators ?: emptyList())).forEach {
-            api.profile(it) {
-                people.add(it.person)
-            }
+            authors.person(it)?.let(people::add)
         }
-        authors = people
+        cardAuthors = people
     }
 
     Column(modifier = modifier) {
@@ -91,12 +96,15 @@ fun CardConversation(
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                 modifier = Modifier
                     .fillMaxWidth()
-                   .padding(bottom = if (stack.isNotEmpty() || (categories.isEmpty() && !(isMine && isMineToolbar))) PaddingDefault / 2 else 0.dp)
+                    .clickable(MutableInteractionSource(), null) {
+                        onTitleClick()
+                    }
+                    .padding(bottom = if (stack.isNotEmpty() || (categories.isEmpty() && !(isMine && isMineToolbar))) PaddingDefault / 2 else 0.dp)
             )
         }
 
-        AnimatedVisibility(authors != null && stack.isEmpty()) {
-            authors?.let { authors ->
+        AnimatedVisibility(cardAuthors != null && stack.isEmpty()) {
+            cardAuthors?.let { authors ->
                 CardAuthor(authors, interactable = interactable, navController, modifier = Modifier.padding(vertical = PaddingDefault))
             }
         }

@@ -9,12 +9,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
-import com.queatz.ailaai.StickerPack
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.StickerPack
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.saveStickerPack
 import com.queatz.ailaai.api.unsaveStickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.stickers
+import com.queatz.ailaai.services.stickers
 import kotlinx.coroutines.launch
 
 @Composable

@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

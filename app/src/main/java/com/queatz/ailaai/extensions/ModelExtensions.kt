@@ -2,6 +2,7 @@ package com.queatz.ailaai.extensions
 
 import android.content.Context
 import com.queatz.ailaai.*
+import com.queatz.ailaai.data.*
 
 data class ContactPhoto(
     val name: String = "",

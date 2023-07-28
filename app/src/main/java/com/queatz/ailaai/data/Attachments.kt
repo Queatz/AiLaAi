@@ -1,8 +1,7 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.data
 
 import com.queatz.ailaai.extensions.inList
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 
 @Serializable

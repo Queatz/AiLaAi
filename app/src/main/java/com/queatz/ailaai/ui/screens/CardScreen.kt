@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,10 +31,13 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.services.SavedIcon
+import com.queatz.ailaai.services.ToggleSaveResult
+import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
@@ -47,7 +51,6 @@ import kotlinx.serialization.encodeToString
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) {
-    var addedCardId by remember { mutableStateOf<String?>(null) }
     var isLoading by rememberStateOf(false)
     var notFound by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
@@ -107,6 +110,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     fun reload() {
         scope.launch {
             api.card(cardId) { card = it }
+        }
+    }
+
+    fun reloadCards() {
+        scope.launch {
+            api.cardsCards(cardId) { cards = it }
         }
     }
 
@@ -255,9 +264,11 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 ToggleSaveResult.Saved -> {
                                     context.toast(R.string.card_saved)
                                 }
+
                                 ToggleSaveResult.Unsaved -> {
                                     context.toast(R.string.card_unsaved)
                                 }
+
                                 else -> {
                                     context.showDidntWork()
                                 }
@@ -287,7 +298,9 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 card!!.id!!,
                                 it,
                                 context.contentResolver.getType(it) ?: "video/*",
-                                it.lastPathSegment ?: "video.${context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""}",
+                                it.lastPathSegment ?: "video.${
+                                    context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                                }",
                                 processingCallback = {
                                     videoUploadStage = ProcessingVideoStage.Processing
                                     videoUploadProgress = it
@@ -462,125 +475,114 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     (autoplayIndex - (if (isLandscape) 0 else 1)).coerceAtLeast(0)
                 )
             }
-            Row(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (isLandscape) {
+            Box {
+                Row(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (isLandscape) {
+                        LazyVerticalGrid(
+                            state = stateLandscape,
+                            contentPadding = PaddingValues(PaddingDefault),
+                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
+                            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                            columns = GridCells.Fixed(1),
+                            modifier = Modifier
+                                .width(240.dp)
+                                .fillMaxHeight()
+                        ) {
+                            cardHeaderItem(
+                                card,
+                                isMine,
+                                headerAspect,
+                                onsetCategoryClick = { showSetCategory = true },
+                                onClick = { verticalAspect = !verticalAspect },
+                                onChange = {
+                                    if (card?.id == cardId) {
+                                        reload()
+                                    } else {
+                                        reloadCards()
+                                    }
+                                },
+                                scope,
+                                navController,
+                                elevation = 2,
+                                playVideo = isAtTop
+                            )
+                        }
+                    }
+
                     LazyVerticalGrid(
-                        state = stateLandscape,
+                        state = state,
                         contentPadding = PaddingValues(PaddingDefault),
                         horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
                         verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
-                        columns = GridCells.Fixed(1),
-                        modifier = Modifier
-                            .width(240.dp)
-                            .fillMaxHeight()
+                        modifier = Modifier.fillMaxSize(),
+                        columns = GridCells.Adaptive(240.dp)
                     ) {
-                        cardHeaderItem(
-                            card,
-                            isMine,
-                            headerAspect,
-                            onsetCategoryClick = { showSetCategory = true },
-                            toggleAspect = { verticalAspect = !verticalAspect },
-                            scope,
-                            navController,
-                            me,
-                            elevation = 2,
-                            playVideo = isAtTop
-                        )
-                    }
-                }
-
-                LazyVerticalGrid(
-                    state = state,
-                    contentPadding = PaddingValues(PaddingDefault),
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
-                    modifier = Modifier.fillMaxSize(),
-                    columns = GridCells.Adaptive(240.dp)
-                ) {
-                    if (!isLandscape) {
-                        cardHeaderItem(
-                            card,
-                            isMine,
-                            headerAspect,
-                            onsetCategoryClick = { showSetCategory = true },
-                            toggleAspect = { verticalAspect = !verticalAspect },
-                            scope,
-                            navController,
-                            me,
-                            playVideo = isAtTop
-                        )
-                    }
-                    if (cards.isEmpty()) {
-                        if (isLandscape && !isMine) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                Text(
-                                    stringResource(R.string.no_cards),
-                                    textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.padding(PaddingDefault * 2)
+                        if (!isLandscape) {
+                            cardHeaderItem(
+                                card,
+                                isMine,
+                                headerAspect,
+                                onsetCategoryClick = { showSetCategory = true },
+                                onClick = { verticalAspect = !verticalAspect },
+                                onChange = {
+                                    if (card?.id == cardId) {
+                                        reload()
+                                    } else {
+                                        reloadCards()
+                                    }
+                                },
+                                scope,
+                                navController,
+                                playVideo = isAtTop
+                            )
+                        }
+                        if (cards.isEmpty()) {
+                            if (isLandscape && !isMine) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    Text(
+                                        stringResource(R.string.no_cards),
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.padding(PaddingDefault * 2)
+                                    )
+                                }
+                            }
+                        } else {
+                            items(cards, { it.id!! }) {
+                                CardLayout(
+                                    card = it,
+                                    isMine = it.person == me()?.id,
+                                    showTitle = true,
+                                    onSetCategoryClick = {},
+                                    onClick = {
+                                        navController.navigate("card/${it.id!!}")
+                                    },
+                                    onChange = { reloadCards() },
+                                    scope = scope,
+                                    navController = navController,
+                                    playVideo = playingVideo == it && !isAtTop,
                                 )
                             }
                         }
-                    } else {
-                        items(cards, { it.id!! }) {
-                            CardItem(
-                                {
-                                    navController.navigate("card/${it.id!!}")
-                                },
-                                onReply = { conversation ->
-                                    scope.launch {
-                                        it.reply(conversation) { groupId ->
-                                            navController.navigate("group/${groupId}")
-                                        }
-                                    }
-                                },
-                                onChange = {
-                                    scope.launch {
-                                        isLoading = true
-                                        api.cardsCards(cardId) { cards = it }
-                                        isLoading = false
-                                    }
-                                },
-                                activity = navController.context as Activity,
-                                card = it,
-                                navController = navController,
-                                edit = if (it.id == addedCardId) EditCard.Conversation else null,
-                                onCategoryClick = {
-                                    exploreInitialCategory = it
-                                    navController.navigate("explore")
-                                },
-                                isMine = it.person == me()?.id,
-                                playVideo = playingVideo == it && !isAtTop
-                            )
-                            if (it.id == addedCardId) {
-                                addedCardId = null
-                            }
-                        }
                     }
-                    if (isMineOrIAmACollaborator) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Box(contentAlignment = Alignment.Center) {
-                                ElevatedButton(
-                                    {
-                                        scope.launch {
-                                            api.newCard(Card(parent = cardId, name = ""), onError = { } ) { addedCardId = it.id }
-                                            api.cardsCards(cardId, onError = { } ) { cards = it }
-                                            delay(100)
-
-                                            if (state.firstVisibleItemIndex > 2) {
-                                                state.scrollToItem(2)
-                                            }
-
-                                            state.animateScrollToItem(0)
-                                        }
-                                    }
-                                ) {
-                                    Text(stringResource(R.string.add_a_card))
+                }
+                if (isMineOrIAmACollaborator) {
+                    FloatingActionButton(
+                        onClick = {
+                            scope.launch {
+                                api.newCard(Card(parent = cardId, name = "")) {
+                                    reloadCards()
+                                    navController.navigate("card/${it.id}")
                                 }
                             }
-                        }
+                        },
+                        modifier = Modifier
+                            .padding(PaddingDefault * 2)
+                            .align(Alignment.BottomEnd)
+                    ) {
+                        Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
                     }
                 }
             }
@@ -766,78 +768,119 @@ private fun LazyGridScope.cardHeaderItem(
     isMine: Boolean,
     aspect: Float,
     onsetCategoryClick: () -> Unit,
-    toggleAspect: () -> Unit,
+    onClick: () -> Unit,
+    onChange: () -> Unit,
     scope: CoroutineScope,
     navController: NavController,
-    me: () -> Person?,
     elevation: Int = 1,
     playVideo: Boolean = false
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
-        Column {
-            val video = card?.video
-            if (video != null) {
-                Video(
-                    video.let(api::url),
+        CardLayout(
+            card = card,
+            isMine = isMine,
+            showTitle = false,
+            aspect = aspect,
+            onSetCategoryClick = onsetCategoryClick,
+            onClick = onClick,
+            onChange = onChange,
+            scope = scope,
+            navController = navController,
+            elevation = elevation,
+            playVideo = playVideo,
+        )
+    }
+}
+
+@Composable
+fun CardLayout(
+    card: Card?,
+    isMine: Boolean,
+    showTitle: Boolean,
+    modifier: Modifier = Modifier,
+    aspect: Float = 1.5f,
+    onSetCategoryClick: () -> Unit = {},
+    onClick: () -> Unit,
+    onChange: () -> Unit,
+    scope: CoroutineScope,
+    navController: NavController,
+    elevation: Int = 1,
+    playVideo: Boolean = false
+) {
+    Column(modifier = modifier) {
+        val video = card?.video
+        if (video != null) {
+            Video(
+                video.let(api::url),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.large)
+                    .aspectRatio(aspect)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
+                    .clickable {
+                        onClick()
+                    },
+                isPlaying = playVideo
+            )
+        } else {
+            card?.photo?.also {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(api.url(it))
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.large)
                         .aspectRatio(aspect)
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
                         .clickable {
-                            toggleAspect()
-                        },
-                    isPlaying = playVideo
+                            onClick()
+                        }
                 )
-            } else {
-                card?.photo?.also {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(api.url(it))
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.large)
-                            .aspectRatio(aspect)
-                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
-                            .clickable {
-                                toggleAspect()
-                            }
-                    )
-                }
             }
-            card?.let {
-                CardConversation(
-                    card,
-                    interactable = true,
-                    showTitle = false,
-                    isMine = isMine,
+        }
+        card?.let {
+            CardConversation(
+                card,
+                interactable = true,
+                showTitle = showTitle,
+                isMine = isMine,
+                navController = navController,
+                onCategoryClick = {
+                    if (isMine) {
+                        onSetCategoryClick()
+                    } else {
+                        exploreInitialCategory = it
+                        navController.navigate("explore")
+                    }
+                },
+                onSetCategoryClick = {
+                    onSetCategoryClick()
+                },
+                onReply = { conversation ->
+                    scope.launch {
+                        it.reply(conversation) { groupId ->
+                            navController.navigate("group/${groupId}")
+                        }
+                    }
+                },
+                onTitleClick = {
+                   onClick()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = PaddingDefault / 2f, horizontal = PaddingDefault)
+            )
+            if (isMine) {
+                CardToolbar(
                     navController = navController,
-                    onCategoryClick = {
-                        if (isMine) {
-                            onsetCategoryClick()
-                        } else {
-                            exploreInitialCategory = it
-                            navController.navigate("explore")
-                        }
-                    },
-                    onSetCategoryClick = {
-                        onsetCategoryClick()
-                    },
-                    onReply = { conversation ->
-                        scope.launch {
-                            it.reply(conversation) { groupId ->
-                                navController.navigate("group/${groupId}")
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = PaddingDefault / 2f, horizontal = PaddingDefault)
+                    navController.context as Activity,
+                    onChange,
+                    it
                 )
             }
         }

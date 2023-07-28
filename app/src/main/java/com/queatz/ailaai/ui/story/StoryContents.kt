@@ -18,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
@@ -26,16 +25,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.LinkifyText
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.card
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable

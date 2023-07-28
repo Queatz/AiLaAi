@@ -1,9 +1,9 @@
 package com.queatz.ailaai.ui.story
 
-import com.queatz.ailaai.Person
-import com.queatz.ailaai.Story
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.Story
 import com.queatz.ailaai.extensions.wordCount
-import com.queatz.ailaai.json
+import com.queatz.ailaai.data.json
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*

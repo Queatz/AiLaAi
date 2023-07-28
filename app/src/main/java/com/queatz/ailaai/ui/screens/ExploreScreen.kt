@@ -3,7 +3,6 @@ package com.queatz.ailaai.ui.screens
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
@@ -15,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,6 +40,10 @@ import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.cards
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.AppHeader
@@ -243,6 +247,11 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 },
                 me,
                 actions = {
+                    IconButton({
+                        navController.navigate("map")
+                    }) {
+                        Icon(Icons.Outlined.Map, stringResource(R.string.show_on_map))
+                    }
                     IconButton({
                         launchScanQrCode()
                     }) {

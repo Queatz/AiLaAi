@@ -12,10 +12,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.Story
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.Story
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.dialogs.Menu

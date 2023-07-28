@@ -18,13 +18,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun GroupPhoto(photos: List<ContactPhoto>, modifier: Modifier = Modifier, size: Dp = 64.dp, padding: Dp = PaddingDefault, border: Boolean = false) {
+fun GroupPhoto(
+    photos: List<ContactPhoto>,
+    modifier: Modifier = Modifier,
+    size: Dp = 48.dp,
+    padding: Dp = PaddingDefault,
+    border: Boolean = false
+) {
     if (photos.isEmpty()) {
         Box(
             contentAlignment = Alignment.Center,

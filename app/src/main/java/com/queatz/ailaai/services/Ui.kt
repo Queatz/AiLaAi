@@ -1,14 +1,17 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.services
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.queatz.ailaai.dataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-val ui = Ui()
+val ui by lazy {
+    Ui()
+}
 
 private val hiddenDescriptionsKey = stringSetPreferencesKey("hiddenDescriptions")
 

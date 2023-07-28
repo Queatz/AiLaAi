@@ -2,20 +2,13 @@ package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.net.Uri
 import android.view.MotionEvent
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,9 +18,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.layout.*
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.pluralStringResource
@@ -39,15 +37,16 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateCard
-import com.queatz.ailaai.api.uploadCardPhoto
-import com.queatz.ailaai.api.uploadCardVideo
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.services.SavedIcon
+import com.queatz.ailaai.services.ToggleSaveResult
+import com.queatz.ailaai.services.saves
+import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -66,7 +65,6 @@ fun CardItem(
     navController: NavController,
     activity: Activity? = null,
     showDistance: LatLng? = null,
-    edit: EditCard? = null,
     isMine: Boolean = false,
     isMineToolbar: Boolean = true,
     isChoosing: Boolean = false,
@@ -85,57 +83,13 @@ fun CardItem(
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by rememberStateOf(false)
         var showSetCategory by rememberStateOf(false)
-        var uploadJob by remember { mutableStateOf<Job?>(null) }
-        var isUploadingVideo by rememberStateOf(false)
-        var videoUploadProgress by remember { mutableStateOf(0f) }
-        var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
-        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-            if (it == null) return@rememberLauncherForActivityResult
-
-            uploadJob = scope.launch {
-                videoUploadProgress = 0f
-                if (it.isVideo(context)) {
-                    isUploadingVideo = true
-                    api.uploadCardVideo(
-                        card!!.id!!,
-                        it,
-                        context.contentResolver.getType(it) ?: "video/*",
-                        it.lastPathSegment ?: "video.${
-                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                        }",
-                        processingCallback = {
-                            videoUploadStage = ProcessingVideoStage.Processing
-                            videoUploadProgress = it
-                        },
-                        uploadCallback = {
-                            videoUploadStage = ProcessingVideoStage.Uploading
-                            videoUploadProgress = it
-                        }
-                    )
-                } else if (it.isPhoto(context)) {
-                    api.uploadCardPhoto(card!!.id!!, it)
-                }
-                onChange()
-                isUploadingVideo = false
-                uploadJob = null
-            }
-        }
         LaunchedEffect(hideContent) {
             if (hideContent) {
                 delay(2.seconds)
                 hideContent = false
             }
-        }
-
-        if (isUploadingVideo) {
-            ProcessingVideoDialog(
-                onDismissRequest = { isUploadingVideo = false },
-                onCancelRequest = { uploadJob?.cancel() },
-                stage = videoUploadStage,
-                progress = videoUploadProgress
-            )
         }
 
         Box(
@@ -328,11 +282,9 @@ fun CardItem(
                     if (isMine && isMineToolbar && activity != null) {
                         CardToolbar(
                             navController = navController,
-                            launcher,
                             activity,
                             onChange,
                             card,
-                            edit
                         )
                     }
                 }
@@ -361,106 +313,6 @@ fun CardItem(
     }
 }
 
-@SuppressLint("MissingPermission", "UnrememberedMutableState")
-@Composable
-private fun CardToolbar(
-    navController: NavController,
-    launcher: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
-    activity: Activity,
-    onChange: () -> Unit,
-    card: Card,
-    edit: EditCard?,
-    modifier: Modifier = Modifier,
-) {
-    var openDeleteDialog by rememberStateOf(false)
-    var openEditDialog by remember { mutableStateOf(edit == EditCard.Conversation) }
-    var openLocationDialog by remember { mutableStateOf(edit == EditCard.Location) }
-    val scrollState = rememberScrollState()
-    var viewport by rememberStateOf(Size(0f, 0f))
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(PaddingValues(top = PaddingDefault))
-            .horizontalScroll(scrollState)
-            .onPlaced { viewport = it.boundsInParent().size }
-            .horizontalFadingEdge(viewport, scrollState)
-    ) {
-        var active by remember { mutableStateOf(card.active ?: false) }
-        var activeCommitted by remember { mutableStateOf(active) }
-        val coroutineScope = rememberCoroutineScope()
-
-        Switch(
-            active,
-            {
-                active = it
-                coroutineScope.launch {
-                    api.updateCard(card.id!!, Card(active = active)) {
-                        card.active = it.active
-                        activeCommitted = it.active ?: false
-                        active = activeCommitted
-                    }
-                }
-            }
-        )
-        Text(
-            if (activeCommitted) stringResource(R.string.published) else stringResource(R.string.draft),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(start = PaddingDefault)
-        )
-        Box(modifier = Modifier.weight(1f))
-        TextButton({
-            openLocationDialog = true
-        }) {
-            Icon(Icons.Outlined.Place, "", modifier = Modifier.padding(end = 8.dp))
-            Text(
-                when {
-                    card.parent != null -> stringResource(R.string.inside_another_card)
-                    card.equipped == true -> stringResource(R.string.on_profile)
-                    card.offline != true -> stringResource(R.string.at_a_location)
-                    else -> stringResource(R.string.offline)
-                }
-            )
-        }
-        IconButton({
-            openEditDialog = true
-        }) {
-            Icon(Icons.Outlined.Edit, stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        IconButton({
-            launcher.launch(PickVisualMediaRequest())
-        }) {
-            Icon(Icons.Outlined.Photo, stringResource(R.string.set_photo), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        IconButton({
-            openDeleteDialog = true
-        }) {
-            Icon(Icons.Outlined.Delete, "", tint = MaterialTheme.colorScheme.error)
-        }
-    }
-
-    if (openLocationDialog) {
-        EditCardLocationDialog(card, navController = navController, activity, {
-            openLocationDialog = false
-        }, onChange)
-    }
-
-    if (openEditDialog) {
-        EditCardDialog(card, {
-            openEditDialog = false
-        }, onChange)
-    }
-
-    if (openDeleteDialog) {
-        DeleteCardDialog(card, {
-            openDeleteDialog = false
-        }, onChange)
-    }
-}
-
 @Serializable
 data class ConversationItem(
     var title: String = "",
@@ -479,9 +331,3 @@ enum class CardParentType {
     Person,
     Offline
 }
-
-enum class EditCard {
-    Conversation,
-    Location
-}
-

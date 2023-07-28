@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,10 +30,12 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.SearchField

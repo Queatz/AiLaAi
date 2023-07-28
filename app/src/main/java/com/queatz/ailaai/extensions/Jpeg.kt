@@ -1,4 +1,4 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.extensions
 
 import android.content.Context
 import android.graphics.Bitmap

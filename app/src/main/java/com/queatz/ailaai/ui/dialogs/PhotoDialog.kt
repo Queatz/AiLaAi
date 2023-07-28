@@ -22,7 +22,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.serialization.Serializable

@@ -2,8 +2,10 @@ package com.queatz.ailaai.api
 
 import android.net.Uri
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.*
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.asInputProvider
+import com.queatz.ailaai.extensions.asScaledJpeg
+import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 

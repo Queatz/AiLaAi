@@ -1,9 +1,9 @@
 package com.queatz.ailaai.api
 
-import com.queatz.ailaai.Api
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.ErrorBlock
-import com.queatz.ailaai.SuccessBlock
+import com.queatz.ailaai.data.Api
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.ErrorBlock
+import com.queatz.ailaai.data.SuccessBlock
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 

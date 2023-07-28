@@ -1,6 +1,6 @@
 // https://github.com/firefinchdev/linkify-text/blob/master/linkifytext/src/main/java/com/linkifytext/LinkifyText.kt
 
-package com.queatz.ailaai
+package com.queatz.ailaai.ui.components
 
 
 import android.os.Build

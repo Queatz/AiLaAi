@@ -7,7 +7,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.timeAgo
 import kotlinx.datetime.Instant

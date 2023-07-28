@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.ui.theme.PaddingDefault

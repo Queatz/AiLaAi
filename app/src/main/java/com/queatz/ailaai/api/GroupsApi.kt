@@ -1,8 +1,9 @@
 package com.queatz.ailaai.api
 
 import android.net.Uri
-import com.queatz.ailaai.*
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.asInputProvider
+import com.queatz.ailaai.extensions.asScaledJpeg
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant

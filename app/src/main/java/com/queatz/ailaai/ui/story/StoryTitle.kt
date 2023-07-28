@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.R
-import com.queatz.ailaai.Story
+import com.queatz.ailaai.data.Story
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch

@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.Card
+import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.deleteCard
 import com.queatz.ailaai.extensions.rememberStateOf
 import kotlinx.coroutines.launch

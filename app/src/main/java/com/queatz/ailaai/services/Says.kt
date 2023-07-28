@@ -1,4 +1,4 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.services
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -7,7 +7,9 @@ import com.queatz.ailaai.extensions.nullIfBlank
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 
-val say = Say()
+val say by lazy {
+    Say()
+}
 
 class Say {
     private val says = MutableStateFlow<String?>(null)

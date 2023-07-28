@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.components
 
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -15,12 +14,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.Card
+import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.screens.exploreInitialCategory
+import com.queatz.ailaai.ui.screens.CardLayout
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.launch
 
 @Composable
 fun CardsList(
@@ -79,28 +77,18 @@ fun CardsList(
             ) {
                 @Composable
                 fun basicCard(it: Card) {
-                    CardItem(
-                        {
+                    CardLayout(
+                        card = it,
+                        isMine = isMine(it),
+                        showTitle = true,
+                        onSetCategoryClick = {},
+                        onClick = {
                             navController.navigate("card/${it.id!!}")
                         },
-                        onCategoryClick = {
-                            exploreInitialCategory = it
-                            navController.navigate("explore")
-                        },
-                        onReply = { conversation ->
-                            scope.launch {
-                                it.reply(conversation) { groupId ->
-                                    navController.navigate("group/${groupId}")
-                                }
-                            }
-                        },
-                        showDistance = geo,
-                        card = it,
+                        onChange = { },
+                        scope = scope,
                         navController = navController,
-                        activity = navController.context as Activity,
-                        isMine = isMine(it),
-                        isMineToolbar = false,
-                        playVideo = playingVideo == it
+                        playVideo = playingVideo == it,
                     )
                 }
 

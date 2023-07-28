@@ -1,9 +1,9 @@
 package com.queatz.ailaai.api
 
-import com.queatz.ailaai.Api
-import com.queatz.ailaai.ErrorBlock
-import com.queatz.ailaai.Presence
-import com.queatz.ailaai.SuccessBlock
+import com.queatz.ailaai.data.Api
+import com.queatz.ailaai.data.ErrorBlock
+import com.queatz.ailaai.data.Presence
+import com.queatz.ailaai.data.SuccessBlock
 import io.ktor.http.*
 
 suspend fun Api.presence(

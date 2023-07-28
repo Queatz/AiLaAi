@@ -1,13 +1,17 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.services
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import com.queatz.ailaai.api.presence
 import com.queatz.ailaai.api.readStoriesUntilNow
+import com.queatz.ailaai.data.Presence
+import com.queatz.ailaai.data.api
 import kotlinx.coroutines.flow.MutableStateFlow
 
-val mePresence = MePresence()
+val mePresence by lazy {
+    MePresence()
+}
 
 class MePresence {
 

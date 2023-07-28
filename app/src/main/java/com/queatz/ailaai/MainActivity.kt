@@ -41,7 +41,12 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.api.groups
 import com.queatz.ailaai.api.me
 import com.queatz.ailaai.api.updateMe
+import com.queatz.ailaai.data.ErrorBlock
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
@@ -71,11 +76,8 @@ class MainActivity : AppCompatActivity() {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.People),
 //            NavButton("schedule", getString(R.string.explore), Icons.Outlined.Event),
-            NavButton("map", getString(R.string.explore), Icons.Outlined.Map),
             NavButton("explore", getString(R.string.explore), Icons.Outlined.Style),
             NavButton("stories", getString(R.string.stories), Icons.Outlined.EventNote),
-//            NavButton("saved", getString(R.string.saved), Icons.Outlined.FavoriteBorder),
-//            NavButton("me", getString(R.string.create), Icons.Outlined.Edit)
         )
     }
 
@@ -417,7 +419,7 @@ class MainActivity : AppCompatActivity() {
                                     ) {
                                         composable(
                                             "profile/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/profile/{id}" })
+                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/profile/{id}" })
                                         ) {
                                             ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }
@@ -435,7 +437,7 @@ class MainActivity : AppCompatActivity() {
                                         }
                                         composable(
                                             "story/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/story/{id}" })
+                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/story/{id}" })
                                         ) {
                                             StoryScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }
@@ -450,7 +452,7 @@ class MainActivity : AppCompatActivity() {
                                         }
                                         composable(
                                             "card/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/card/{id}" })
+                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/card/{id}" })
                                         ) {
                                             CardScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }
@@ -459,7 +461,7 @@ class MainActivity : AppCompatActivity() {
                                         }
                                         composable(
                                             "group/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "${appDomain}/group/{id}" })
+                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/group/{id}" })
                                         ) {
                                             GroupScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }

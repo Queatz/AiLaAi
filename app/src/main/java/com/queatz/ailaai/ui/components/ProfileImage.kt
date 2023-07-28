@@ -16,8 +16,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.queatz.ailaai.Person
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.nullIfBlank
 
 @Composable

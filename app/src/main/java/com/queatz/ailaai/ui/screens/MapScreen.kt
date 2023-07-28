@@ -26,7 +26,6 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
@@ -39,9 +38,9 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
-import com.queatz.ailaai.Card
-import com.queatz.ailaai.Person
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.Person
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.cards
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
@@ -280,7 +279,6 @@ fun MapScreen(navController: NavController, me: () -> Person?) {
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .padding(bottom = PaddingDefault)
-                                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.shapes.medium)
                                 .clickable(
                                     MutableInteractionSource(),
                                     null

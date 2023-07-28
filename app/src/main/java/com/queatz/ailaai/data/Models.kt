@@ -1,4 +1,4 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.data
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable

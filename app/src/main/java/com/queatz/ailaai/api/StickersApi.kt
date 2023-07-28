@@ -2,7 +2,7 @@ package com.queatz.ailaai.api
 
 import android.content.Context
 import android.net.Uri
-import com.queatz.ailaai.*
+import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.asInputProvider
 import io.ktor.client.request.forms.*
 import io.ktor.http.*

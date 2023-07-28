@@ -15,10 +15,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.Person
+import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.Story
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.Story
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.extensions.rememberStateOf

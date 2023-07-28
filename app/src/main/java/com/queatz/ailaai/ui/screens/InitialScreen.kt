@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.signIn
 import com.queatz.ailaai.api.signUp
 import com.queatz.ailaai.extensions.rememberStateOf

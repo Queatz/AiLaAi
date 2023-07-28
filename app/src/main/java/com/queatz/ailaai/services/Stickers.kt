@@ -1,12 +1,16 @@
-package com.queatz.ailaai
+package com.queatz.ailaai.services
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import com.queatz.ailaai.api.stickerPacks
+import com.queatz.ailaai.data.StickerPack
+import com.queatz.ailaai.data.api
 import kotlinx.coroutines.flow.MutableStateFlow
 
-val stickers = Stickers()
+val stickers by lazy {
+    Stickers()
+}
 
 class Stickers {
 

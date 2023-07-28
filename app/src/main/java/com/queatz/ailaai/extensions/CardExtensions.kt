@@ -1,9 +1,9 @@
 package com.queatz.ailaai.extensions
 
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.*
 import com.queatz.ailaai.api.cardGroup
 import com.queatz.ailaai.api.sendMessage
+import com.queatz.ailaai.data.*
 import kotlinx.serialization.encodeToString
 
 val Card.url get() = "$appDomain/card/$id"
