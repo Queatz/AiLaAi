@@ -15,7 +15,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.CardsList
+import com.queatz.ailaai.ui.components.CardList
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 
@@ -33,6 +33,23 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
         saves.reload()
     }
 
+    suspend fun reload() {
+        isError = false
+        api.savedCards(
+            value.takeIf { it.isNotBlank() },
+            onError = { ex ->
+                if (ex is CancellationException || ex is InterruptedException) {
+                    // Ignore, probably geo or search value changed, keep isLoading = true
+                } else {
+                    isLoading = false
+                    isError = true
+                }
+            }) {
+            cards = it.mapNotNull { it.card }
+        }
+        isLoading = false
+    }
+
     LaunchedEffect(value) {
         if (hasInitialCards) {
             hasInitialCards = false
@@ -42,18 +59,7 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
             }
         }
         isLoading = true
-        api.savedCards(value.takeIf { it.isNotBlank() }, onError = { ex ->
-            if (ex is CancellationException || ex is InterruptedException) {
-                // Ignore, probably geo or search value changed, keep isLoading = true
-            } else {
-                isLoading = false
-                isError = true
-            }
-        }) {
-            cards = it.mapNotNull { it.card }
-            isError = false
-            isLoading = false
-        }
+        reload()
     }
 
     Column {
@@ -71,10 +77,11 @@ fun SavedScreen(navController: NavController, me: () -> Person?) {
             },
             me
         )
-        CardsList(
+        CardList(
             state = state,
             cards = cards,
             isMine = { it.person == me()?.id },
+            onChanged = { scope.launch { reload() } },
             geo = null,
             isLoading = isLoading,
             isError = isError,

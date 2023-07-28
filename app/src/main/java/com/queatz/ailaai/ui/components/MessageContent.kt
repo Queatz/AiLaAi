@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.components
 
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -364,7 +363,6 @@ fun ColumnScope.MessageContent(
                     navController.navigate("explore")
                 },
                 navController = navController,
-                activity = navController.context as Activity,
                 card = attachedCard,
                 isChoosing = true
             )

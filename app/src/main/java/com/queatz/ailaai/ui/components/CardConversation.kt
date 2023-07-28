@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.components
 
 import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -19,22 +20,29 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.profile
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.approximate
+import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.latLng
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlin.math.ceil
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -46,7 +54,7 @@ fun CardConversation(
     onReply: (List<String>) -> Unit = {},
     onTitleClick: () -> Unit = {},
     isMine: Boolean = false,
-    isMineToolbar: Boolean = true,
+    showDistance: LatLng? = null,
     showTitle: Boolean = true,
     selectingText: ((Boolean) -> Unit)? = null,
     conversationChange: ((List<ConversationItem>) -> Unit)? = null,
@@ -90,7 +98,8 @@ fun CardConversation(
                         MaterialTheme.typography.titleSmall.toSpanStyle()
                             .copy(color = MaterialTheme.colorScheme.secondary)
                     ) {
-                        append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.location ?: "")
+                        append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.location
+                        ?: "")
                     }
                 },
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
@@ -99,13 +108,37 @@ fun CardConversation(
                     .clickable(MutableInteractionSource(), null) {
                         onTitleClick()
                     }
-                    .padding(bottom = if (stack.isNotEmpty() || (categories.isEmpty() && !(isMine && isMineToolbar))) PaddingDefault / 2 else 0.dp)
             )
-        }
 
-        AnimatedVisibility(cardAuthors != null && stack.isEmpty()) {
-            cardAuthors?.let { authors ->
-                CardAuthor(authors, interactable = interactable, navController, modifier = Modifier.padding(vertical = PaddingDefault))
+            if (stack.isEmpty()) {
+                val hasCards = (card.cardCount ?: 0) > 0
+                val distanceText = showDistance?.let {
+                    if (card.geo != null) {
+                        it.distance(card.latLng!!).takeIf { it < nearbyMaxDistanceKm }?.let { metersAway ->
+                            when {
+                                metersAway >= 1000f -> ceil(metersAway / 1000).toInt()
+                                    .let { km -> pluralStringResource(R.plurals.km_away, km, km) }
+
+                                else -> metersAway.approximate(10)
+                                    .let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters) }
+                            } + (if (hasCards) ", " else "")
+                        } ?: (stringResource(R.string.your_friend) + (if (hasCards) ", " else ""))
+                    } else {
+                        stringResource(R.string.your_friend) + (if (hasCards) ", " else "")
+                    }
+                }
+
+                if (hasCards || distanceText != null) {
+                    Text(
+                        (distanceText ?: "") + if (hasCards) pluralStringResource(
+                            R.plurals.number_of_cards,
+                            card.cardCount ?: 0,
+                            card.cardCount ?: 0
+                        ) else "",
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
 
@@ -123,7 +156,7 @@ fun CardConversation(
                     )
                 }
             }
-        } else if (isMine && isMineToolbar) {
+        } else if (isMine) {
             AnimatedVisibility(stack.isEmpty()) {
                 AssistChip(
                     onClick = {
@@ -136,6 +169,15 @@ fun CardConversation(
                     label = {
                         Text(stringResource(R.string.set_category))
                     }
+                )
+            }
+        }
+
+        AnimatedVisibility(cardAuthors != null && stack.isEmpty()) {
+            cardAuthors?.let { authors ->
+                CardAuthor(authors, interactable = interactable, navController, modifier = Modifier.padding(
+                    top = if ((categories.isNotEmpty() || isMine) && stack.isEmpty()) 0.dp else PaddingDefault,
+                    bottom = PaddingDefault)
                 )
             }
         }

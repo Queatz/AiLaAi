@@ -7,8 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
@@ -19,8 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,8 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
@@ -41,7 +35,6 @@ import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.http.*
 import kotlinx.coroutines.*
@@ -66,7 +59,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var openRemoveCollaboratorsDialog by rememberSavableStateOf(false)
     var openCollaboratorsDialog by rememberSavableStateOf(false)
     var openLeaveCollaboratorsDialog by rememberSavableStateOf(false)
-    var showSetCategory by rememberStateOf(false)
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
@@ -77,6 +69,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var isUploadingVideo by rememberStateOf(false)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
+    var showSetCategory by rememberStateOf(false)
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -334,6 +327,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             showMenu = false
                         })
                         DropdownMenuItem({
+                            Text(stringResource(R.string.set_category))
+                        }, {
+                            showSetCategory = true
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
                             Text(stringResource(R.string.set_photo))
                         }, {
                             launcher.launch(PickVisualMediaRequest())
@@ -494,7 +493,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 card,
                                 isMine,
                                 headerAspect,
-                                onsetCategoryClick = { showSetCategory = true },
                                 onClick = { verticalAspect = !verticalAspect },
                                 onChange = {
                                     if (card?.id == cardId) {
@@ -524,7 +522,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 card,
                                 isMine,
                                 headerAspect,
-                                onsetCategoryClick = { showSetCategory = true },
                                 onClick = { verticalAspect = !verticalAspect },
                                 onChange = {
                                     if (card?.id == cardId) {
@@ -555,7 +552,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                     card = it,
                                     isMine = it.person == me()?.id,
                                     showTitle = true,
-                                    onSetCategoryClick = {},
                                     onClick = {
                                         navController.navigate("card/${it.id!!}")
                                     },
@@ -767,7 +763,6 @@ private fun LazyGridScope.cardHeaderItem(
     card: Card?,
     isMine: Boolean,
     aspect: Float,
-    onsetCategoryClick: () -> Unit,
     onClick: () -> Unit,
     onChange: () -> Unit,
     scope: CoroutineScope,
@@ -781,108 +776,13 @@ private fun LazyGridScope.cardHeaderItem(
             isMine = isMine,
             showTitle = false,
             aspect = aspect,
-            onSetCategoryClick = onsetCategoryClick,
             onClick = onClick,
             onChange = onChange,
             scope = scope,
             navController = navController,
             elevation = elevation,
-            playVideo = playVideo,
+            playVideo = playVideo
         )
     }
 }
 
-@Composable
-fun CardLayout(
-    card: Card?,
-    isMine: Boolean,
-    showTitle: Boolean,
-    modifier: Modifier = Modifier,
-    aspect: Float = 1.5f,
-    onSetCategoryClick: () -> Unit = {},
-    onClick: () -> Unit,
-    onChange: () -> Unit,
-    scope: CoroutineScope,
-    navController: NavController,
-    elevation: Int = 1,
-    playVideo: Boolean = false
-) {
-    Column(modifier = modifier) {
-        val video = card?.video
-        if (video != null) {
-            Video(
-                video.let(api::url),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.large)
-                    .aspectRatio(aspect)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
-                    .clickable {
-                        onClick()
-                    },
-                isPlaying = playVideo
-            )
-        } else {
-            card?.photo?.also {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(api.url(it))
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large)
-                        .aspectRatio(aspect)
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
-                        .clickable {
-                            onClick()
-                        }
-                )
-            }
-        }
-        card?.let {
-            CardConversation(
-                card,
-                interactable = true,
-                showTitle = showTitle,
-                isMine = isMine,
-                navController = navController,
-                onCategoryClick = {
-                    if (isMine) {
-                        onSetCategoryClick()
-                    } else {
-                        exploreInitialCategory = it
-                        navController.navigate("explore")
-                    }
-                },
-                onSetCategoryClick = {
-                    onSetCategoryClick()
-                },
-                onReply = { conversation ->
-                    scope.launch {
-                        it.reply(conversation) { groupId ->
-                            navController.navigate("group/${groupId}")
-                        }
-                    }
-                },
-                onTitleClick = {
-                   onClick()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = PaddingDefault / 2f, horizontal = PaddingDefault)
-            )
-            if (isMine) {
-                CardToolbar(
-                    navController = navController,
-                    navController.context as Activity,
-                    onChange,
-                    it
-                )
-            }
-        }
-    }
-}

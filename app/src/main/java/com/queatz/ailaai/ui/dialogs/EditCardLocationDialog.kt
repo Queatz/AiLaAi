@@ -14,7 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -30,17 +33,17 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
-import at.bluesource.choicesdk.maps.common.*
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.card
 import com.queatz.ailaai.api.myCollaborations
 import com.queatz.ailaai.api.updateCard
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toList
@@ -267,10 +270,7 @@ fun EditCardLocationDialog(
                                                 parentCard = it
                                                 card.parent = it.id
                                             },
-                                            onCategoryClick = {
-
-                                            },
-                                            activity = activity,
+                                            onCategoryClick = {},
                                             card = it,
                                             navController = navController,
                                             isChoosing = true
@@ -288,7 +288,6 @@ fun EditCardLocationDialog(
                                     onCategoryClick = {
 
                                     },
-                                    activity = activity,
                                     card = parentCard!!,
                                     isChoosing = true,
                                     navController = navController,

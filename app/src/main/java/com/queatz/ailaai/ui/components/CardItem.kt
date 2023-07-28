@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.components
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.view.MotionEvent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
@@ -9,7 +8,10 @@ import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -28,29 +30,22 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
-import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlin.math.ceil
 import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
@@ -60,16 +55,12 @@ fun CardItem(
     onClick: (() -> Unit)?,
     onCategoryClick: (String) -> Unit = {},
     onReply: (List<String>) -> Unit = {},
-    onChange: () -> Unit = {},
     card: Card?,
     navController: NavController,
-    activity: Activity? = null,
-    showDistance: LatLng? = null,
+    modifier: Modifier = Modifier,
     isMine: Boolean = false,
-    isMineToolbar: Boolean = true,
     isChoosing: Boolean = false,
-    playVideo: Boolean = true,
-    modifier: Modifier = Modifier
+    playVideo: Boolean = true
 ) {
     Card(
         shape = RoundedCornerShape(24.dp),
@@ -82,7 +73,6 @@ fun CardItem(
         val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
         val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by rememberStateOf(false)
-        var showSetCategory by rememberStateOf(false)
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         LaunchedEffect(hideContent) {
@@ -179,42 +169,6 @@ fun CardItem(
                     }) {
                         SavedIcon(card)
                     }
-
-                    val hasCards = (card.cardCount ?: 0) > 0
-                    val distanceText = showDistance?.let {
-                        if (card.geo != null) {
-                            it.distance(card.latLng!!).takeIf { it < nearbyMaxDistanceKm }?.let { metersAway ->
-                                when {
-                                    metersAway >= 1000f -> ceil(metersAway / 1000).toInt()
-                                        .let { km -> pluralStringResource(R.plurals.km_away, km, km) }
-
-                                    else -> metersAway.approximate(10)
-                                        .let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters) }
-                                } + (if (hasCards) " • " else "")
-                            } ?: (stringResource(R.string.your_friend) + (if (hasCards) " • " else ""))
-                        } else {
-                            stringResource(R.string.your_friend) + (if (hasCards) " • " else "")
-                        }
-                    }
-
-                    if (hasCards || distanceText != null) {
-                        Text(
-                            (distanceText ?: "") + if (hasCards) pluralStringResource(
-                                R.plurals.number_of_cards,
-                                card.cardCount ?: 0,
-                                card.cardCount ?: 0
-                            ) else "",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                    MaterialTheme.shapes.extraLarge
-                                )
-                                .padding(vertical = PaddingDefault, horizontal = PaddingDefault * 2)
-                        )
-                    }
                 }
 
                 val conversationScrollState = rememberScrollState()
@@ -254,7 +208,6 @@ fun CardItem(
                         onReply = onReply,
                         navController = navController,
                         isMine = isMine,
-                        isMineToolbar = isMineToolbar,
                         selectingText = {
                             isSelectingText = it
                         },
@@ -262,14 +215,7 @@ fun CardItem(
                             conversation = it
                         },
                         onCategoryClick = {
-                            if (isMine && isMineToolbar) {
-                                showSetCategory = true
-                            } else {
-                                onCategoryClick(it)
-                            }
-                        },
-                        onSetCategoryClick = {
-                            showSetCategory = true
+                            onCategoryClick(it)
                         },
                         modifier = Modifier
                             .wrapContentHeight()
@@ -277,35 +223,6 @@ fun CardItem(
                             .verticalScroll(conversationScrollState)
                             .onPlaced { viewport = it.boundsInParent().size }
                             .fadingEdge(viewport, conversationScrollState)
-                    )
-
-                    if (isMine && isMineToolbar && activity != null) {
-                        CardToolbar(
-                            navController = navController,
-                            activity,
-                            onChange,
-                            card,
-                        )
-                    }
-                }
-
-                if (showSetCategory) {
-                    ChooseCategoryDialog(
-                        {
-                            showSetCategory = false
-                        },
-                        { category ->
-                            scope.launch {
-                                api.updateCard(
-                                    card.id!!,
-                                    Card().apply {
-                                        categories = if (category == null) emptyList() else listOf(category)
-                                    }
-                                ) {
-                                    onChange()
-                                }
-                            }
-                        }
                     )
                 }
             }

@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.story
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,14 +24,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.queatz.ailaai.data.Card
-import com.queatz.ailaai.ui.components.LinkifyText
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.card
+import com.queatz.ailaai.data.Card
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
+import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -156,7 +155,6 @@ fun StoryContents(
                                         navController.navigate("explore")
                                     },
                                     navController = navController,
-                                    activity = navController.context as Activity,
                                     card = card,
                                     isChoosing = true,
                                     modifier = Modifier

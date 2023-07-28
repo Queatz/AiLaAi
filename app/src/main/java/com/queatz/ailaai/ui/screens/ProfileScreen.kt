@@ -32,11 +32,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.ui.components.CardLayout
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.Video
@@ -611,7 +611,6 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 card = card,
                 isMine = card.person == me()?.id,
                 showTitle = true,
-                onSetCategoryClick = {},
                 onClick = {
                     navController.navigate("card/${card.id!!}")
                 },

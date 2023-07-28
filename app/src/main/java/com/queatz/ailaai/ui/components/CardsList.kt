@@ -14,14 +14,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.screens.CardLayout
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
-fun CardsList(
+fun CardList(
     cards: List<Card>,
     isMine: (Card) -> Boolean,
     geo: LatLng?,
@@ -30,9 +29,10 @@ fun CardsList(
     value: String,
     valueChange: (String) -> Unit,
     navController: NavController,
+    onChanged: () -> Unit = {},
     state: LazyGridState = rememberLazyGridState(),
     placeholder: String? = null,
-    useDistance: Boolean = false,
+    showDistance: Boolean = false,
     hasMore: Boolean = false,
     onLoadMore: (suspend () -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
@@ -81,18 +81,20 @@ fun CardsList(
                         card = it,
                         isMine = isMine(it),
                         showTitle = true,
-                        onSetCategoryClick = {},
+                        showDistance = geo.takeIf { showDistance },
                         onClick = {
                             navController.navigate("card/${it.id!!}")
                         },
-                        onChange = { },
+                        onChange = {
+                           onChanged()
+                        },
                         scope = scope,
                         navController = navController,
                         playVideo = playingVideo == it,
                     )
                 }
 
-                val nearbyCards = if (useDistance && geo != null) cards.takeWhile {
+                val nearbyCards = if (showDistance && geo != null) cards.takeWhile {
                     it.geo != null && it.latLng!!.distance(geo) < nearbyMaxDistanceKm
                 } else emptyList()
 

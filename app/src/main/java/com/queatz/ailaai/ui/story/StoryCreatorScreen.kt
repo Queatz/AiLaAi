@@ -444,7 +444,6 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
 
                                     CardItem(
                                         onClick = null,
-                                        activity = navController.context as Activity,
                                         card = card,
                                         navController = navController,
                                         isChoosing = true,
@@ -504,7 +503,6 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     showCardMenu = true
                                 },
                                 onCategoryClick = {},
-                                activity = navController.context as Activity,
                                 card = card,
                                 navController = navController,
                                 isChoosing = true,

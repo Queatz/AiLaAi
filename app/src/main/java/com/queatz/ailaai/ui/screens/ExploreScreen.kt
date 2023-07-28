@@ -47,7 +47,7 @@ import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.CardsList
+import com.queatz.ailaai.ui.components.CardList
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -260,17 +260,22 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 },
                 showAppIcon = true
             )
-            CardsList(
+            CardList(
                 state = state,
                 cards = if (selectedCategory == null) cards else cards.filter { it.categories?.contains(selectedCategory) == true },
                 isMine = { it.person == me()?.id },
                 geo = geo,
+                onChanged = {
+                    scope.launch {
+                        loadMore(clear = true)
+                    }
+                },
                 isLoading = isLoading,
                 isError = isError,
                 value = value,
                 valueChange = { value = it },
                 navController = navController,
-                useDistance = true,
+                showDistance = true,
                 placeholder = stringResource(R.string.explore_search_placeholder),
                 hasMore = hasMore,
                 onLoadMore = {
