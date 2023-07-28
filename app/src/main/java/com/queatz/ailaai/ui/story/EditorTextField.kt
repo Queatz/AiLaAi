@@ -44,8 +44,10 @@ fun EditorTextField(
     BasicEditorTextField(
         textFieldValue,
         {
+            if (it.text != value) {
+                onValueChange(it.text)
+            }
             textFieldValue = it
-            onValueChange(it.text)
         },
         placeholder = {
             Text(

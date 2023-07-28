@@ -71,6 +71,15 @@ fun Story.contents(): List<StoryContent> = json
         it.jsonObject.toStoryContent()
     }
 
+fun Story.textContent(): String = contents().mapNotNull {
+    when (it) {
+        is StoryContent.Title -> it.title.takeIf { it.isNotBlank() }
+        is StoryContent.Section -> it.section.takeIf { it.isNotBlank() }
+        is StoryContent.Text -> it.text.takeIf { it.isNotBlank() }
+        else -> null
+    }
+}.joinToString("\n")
+
 fun StoryContent.wordCount() = when (this) {
     is StoryContent.Title -> title.wordCount()
     is StoryContent.Section -> section.wordCount()

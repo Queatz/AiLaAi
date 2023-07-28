@@ -40,6 +40,7 @@ import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.cards
+import com.queatz.ailaai.api.myGeo
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
@@ -87,6 +88,12 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         { geo = it },
         navController.context as Activity
     )
+
+    LaunchedEffect(geo) {
+        geo?.let {
+            api.myGeo(it)
+        }
+    }
 
     fun updateCategories() {
         selectedCategory = selectedCategory ?: exploreInitialCategory

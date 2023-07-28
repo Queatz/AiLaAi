@@ -78,8 +78,9 @@ fun locationSelector(
     LaunchedEffect(geo) {
         if (geo == null) {
             val savedGeo = context.dataStore.data.first()[geoKey]?.split(",")?.map { it.toDouble() }
-            if (savedGeo != null)
+            if (savedGeo != null) {
                 onGeoChange(LatLng.getFactory().create(savedGeo[0], savedGeo[1]))
+            }
         } else {
             context.dataStore.edit {
                 it[geoKey] = "${geo.latitude},${geo.longitude}"

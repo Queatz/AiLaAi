@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.myGeo
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.Story
@@ -47,6 +48,12 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
         { geo = it },
         navController.context as Activity
     )
+
+    LaunchedEffect(geo) {
+        geo?.let {
+            api.myGeo(it)
+        }
+    }
 
     LaunchedEffect(Unit) {
         delay(7_000)

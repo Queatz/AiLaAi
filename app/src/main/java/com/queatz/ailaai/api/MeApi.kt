@@ -1,11 +1,13 @@
 package com.queatz.ailaai.api
 
 import android.net.Uri
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
+import com.queatz.ailaai.extensions.toList
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 
@@ -23,6 +25,12 @@ suspend fun Api.refreshTransferCode(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Transfer>,
 ) = post("me/transfer/refresh", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.myGeo(
+    geo: LatLng,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post("me/geo", geo.toList(), onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.myDevice(
     deviceType: DeviceType,

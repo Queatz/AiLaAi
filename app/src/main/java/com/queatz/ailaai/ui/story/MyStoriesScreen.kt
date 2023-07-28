@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.data.Person
@@ -103,6 +104,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = if (story.published == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                                     )
+                                    Text(story.textContent(), maxLines = 3, overflow = TextOverflow.Ellipsis)
                                 }
                                 Icon(Icons.Outlined.ArrowForward, null)
                             }
@@ -113,7 +115,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
             FloatingActionButton(
                 onClick = {
                     scope.launch {
-                        api.createStory(Story(title = null)) {
+                        api.createStory(Story()) {
                             navController.navigate("write/${it.id}")
                         }
                     }

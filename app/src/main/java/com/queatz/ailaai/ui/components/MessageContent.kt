@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.navigation.NavController
@@ -46,6 +47,7 @@ import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryAuthors
+import com.queatz.ailaai.ui.story.textContent
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.http.*
 import kotlinx.coroutines.launch
@@ -531,6 +533,7 @@ fun ColumnScope.MessageContent(
                         story.publishDate,
                         story.authors ?: emptyList()
                     )
+                    Text(story.textContent(), maxLines = 3, overflow = TextOverflow.Ellipsis)
                 } ?: run {
                     Text(
                         if (attachedStoryNotFound) stringResource(R.string.story_not_found) else stringResource(R.string.please_wait),
