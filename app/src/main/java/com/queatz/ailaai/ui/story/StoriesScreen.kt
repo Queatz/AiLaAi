@@ -4,8 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -146,7 +145,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         )
                         .align(Alignment.BottomEnd)
                 ) {
-                    Icon(Icons.Outlined.Add, stringResource(R.string.your_stories))
+                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
                 }
                 if (locationSelector.isManual) {
                     ElevatedButton(

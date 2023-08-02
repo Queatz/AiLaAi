@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -56,6 +57,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
+    var allHiddenGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
     var allPeople by remember { mutableStateOf(emptyList<Person>()) }
     var results by remember { mutableStateOf(emptyList<SearchResult>()) }
     var isLoading by rememberStateOf(true)
@@ -67,6 +69,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var selectedHiddenGroups by rememberStateOf(listOf<Group>())
 
     fun update() {
         results = allPeople.map { SearchResult.Connect(it) } +
@@ -132,6 +135,80 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             }
         }
         update()
+    }
+
+    if (selectedHiddenGroups.isNotEmpty()) {
+        AlertDialog(
+            {
+                selectedHiddenGroups = emptyList()
+            },
+            title = {
+                Text(pluralStringResource(R.plurals.x_groups, selectedHiddenGroups.size, selectedHiddenGroups.size))
+            },
+            dismissButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(PaddingDefault)) {
+                    TextButton(
+                        {
+                            selectedHiddenGroups = emptyList()
+                        }
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                    TextButton(
+                        {
+                            scope.launch {
+                                coroutineScope {
+                                    allHiddenGroups
+                                        .filter { group -> selectedHiddenGroups.any { it.id == group.group?.id } }
+                                        .mapNotNull { groupExtended ->
+                                            val member =
+                                                groupExtended.members?.firstOrNull { it.person?.id == me()?.id }?.member
+                                                    ?: return@mapNotNull null
+
+                                            async {
+                                                api.removeMember(member.id!!)
+                                            }
+                                        }.awaitAll()
+                                    reload(true)
+                                    selectedHiddenGroups = emptyList()
+                                }
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.leave), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    {
+                        scope.launch {
+                            coroutineScope {
+                                allHiddenGroups
+                                    .filter { group -> selectedHiddenGroups.any { it.id == group.group?.id } }
+                                    .mapNotNull { groupExtended ->
+                                        val member =
+                                            groupExtended.members?.firstOrNull { it.person?.id == me()?.id }?.member
+                                                ?: return@mapNotNull null
+
+                                        async {
+                                            api.updateMember(
+                                                member.id!!,
+                                                Member(
+                                                    hide = false
+                                                )
+                                            )
+                                        }
+                                    }.awaitAll()
+                                reload(true)
+                                selectedHiddenGroups = emptyList()
+                            }
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.show))
+                }
+            })
     }
 
     Column {
@@ -248,34 +325,18 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 showHiddenGroupsDialog = false
             },
             title = stringResource(R.string.hidden_groups),
-            confirmFormatter = { stringResource(R.string.show) },
+            confirmFormatter = { stringResource(R.string.next) },
             infoFormatter = { it.seenText(context.getString(R.string.active)) },
             me = me(),
             groups = {
                 api.hiddenGroups {
                     groups = it
                 }
+                allHiddenGroups = groups
                 groups
             }
         ) { selected ->
-            coroutineScope {
-                groups
-                    .filter { group -> selected.any { it.id == group.group?.id } }
-                    .mapNotNull { groupExtended ->
-                        val member = groupExtended.members?.firstOrNull { it.person?.id == me()?.id }?.member
-                            ?: return@mapNotNull null
-
-                        async {
-                            api.updateMember(
-                                member.id!!,
-                                Member(
-                                    hide = false
-                                )
-                            )
-                        }
-                    }.awaitAll()
-                reload(true)
-            }
+            selectedHiddenGroups = selected
         }
     }
 

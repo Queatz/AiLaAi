@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -264,6 +261,11 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     }) {
                         Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
                     }
+                    IconButton({
+                        navController.navigate("saved")
+                    }) {
+                        Icon(Icons.Outlined.FavoriteBorder, null)
+                    }
                 },
                 showAppIcon = true
             )
@@ -289,7 +291,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     loadMore()
                 },
                 action = {
-                    Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
+                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                 },
                 onAction = {
                     navController.navigate("me")

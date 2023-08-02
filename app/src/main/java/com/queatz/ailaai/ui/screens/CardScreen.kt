@@ -24,7 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
@@ -109,6 +111,16 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     fun reloadCards() {
         scope.launch {
             api.cardsCards(cardId) { cards = it }
+        }
+    }
+
+    OnLifecycleEvent { event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
+                reload()
+                reloadCards()
+            }
+            else -> {}
         }
     }
 
@@ -781,7 +793,8 @@ private fun LazyGridScope.cardHeaderItem(
             scope = scope,
             navController = navController,
             elevation = elevation,
-            playVideo = playVideo
+            playVideo = playVideo,
+            showToolbar = true
         )
     }
 }

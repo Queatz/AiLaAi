@@ -136,7 +136,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     CardParentType.Card -> R.string.inside_another_card
                     CardParentType.Person -> R.string.on_profile
                     CardParentType.Offline -> R.string.offline
-                    else -> R.string.all_your_cards
+                    else -> R.string.your_cards
                 }
             ) + (if (isLoading) "" else " (${cards.size})"),
             {
@@ -144,16 +144,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     state.scrollToTop()
                 }
             },
-            me,
-            actions = {
-                IconButton(
-                    {
-                        navController.navigate("saved")
-                    }
-                ) {
-                    Icon(Icons.Outlined.FavoriteBorder, null)
-                }
-            }
+            me
         )
         Box(
             contentAlignment = Alignment.BottomCenter,

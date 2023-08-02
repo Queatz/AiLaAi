@@ -17,6 +17,7 @@ class Card(
     var offline: Boolean? = null,
     var geo: List<Double>? = null,
     var conversation: String? = null,
+    var options: String? = null,
     var active: Boolean? = null,
     var cardCount: Int? = null
 ) : Model()

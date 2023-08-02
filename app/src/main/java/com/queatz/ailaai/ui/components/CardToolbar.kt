@@ -123,14 +123,16 @@ fun CardToolbar(
                 }
             }
         )
-        Text(
-            if (activeCommitted) stringResource(R.string.published) else stringResource(R.string.draft),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (activeCommitted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(start = PaddingDefault)
-        )
+        if (activeCommitted) {
+            Text(
+                stringResource(R.string.published),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = PaddingDefault)
+            )
+        }
         Box(modifier = Modifier.weight(1f))
         TextButton({
             openLocationDialog = true

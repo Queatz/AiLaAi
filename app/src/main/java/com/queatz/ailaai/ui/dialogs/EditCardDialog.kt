@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.dialogs
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -33,6 +35,7 @@ import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.ui.components.CardOptions
 import com.queatz.ailaai.ui.components.ConversationAction
 import com.queatz.ailaai.ui.components.ConversationItem
 import com.queatz.ailaai.ui.components.DialogBase
@@ -53,11 +56,24 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
         } ?: ConversationItem()
     }
 
+    val options = remember {
+        card.options?.let {
+            json.decodeFromString<CardOptions>(it)
+        } ?: CardOptions()
+    }
+
     var cardName by remember { mutableStateOf(card.name ?: "") }
     var locationName by remember { mutableStateOf(card.location ?: "") }
     val backstack = remember { mutableListOf<ConversationItem>() }
     var cardConversation by remember { mutableStateOf(conversation) }
+    var enableWebReplies by rememberStateOf(options.enableReplies != false)
+    var enableReplies by rememberStateOf(options.enableAnonymousReplies != false)
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(enableReplies, enableWebReplies) {
+        options.enableReplies = enableReplies
+        options.enableAnonymousReplies = enableReplies && enableWebReplies
+    }
 
     DialogBase(onDismissRequest, dismissable = false, modifier = Modifier.wrapContentHeight()) {
         val scrollState = rememberScrollState()
@@ -158,7 +174,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     },
                     shape = MaterialTheme.shapes.large,
                     label = {
-                        Text(stringResource(R.string.your_message))
+                        Text(stringResource(R.string.details))
                     },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
@@ -172,16 +188,14 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Text(
-                    if (backstack.isEmpty()) {
-                        stringResource(R.string.card_message_description)
-                    } else {
-                        stringResource(R.string.card_reply_description, cardConversation.title)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
-                )
+                if (backstack.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.card_reply_description, cardConversation.title),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
+                    )
+                }
 
                 cardConversation.items.forEach {
                     var titleState by mutableStateOf(it.title)
@@ -220,7 +234,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                                 it.title = value
                             },
                             placeholder = {
-                                Text(stringResource(R.string.option))
+                                Text(stringResource(R.string.message))
                             },
                             shape = MaterialTheme.shapes.large,
                             singleLine = true,
@@ -273,6 +287,44 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         Text(stringResource(R.string.add_an_option))
                     }
                 }
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable {
+                                enableReplies = !enableReplies
+                            }
+                            .padding(end = PaddingDefault * 2)) {
+                        Checkbox(enableReplies, {
+                            enableReplies = it
+                        })
+                        Text(
+                            stringResource(R.string.enable_replies),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    AnimatedVisibility(enableReplies) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.large)
+                                .clickable {
+                                    enableWebReplies = !enableWebReplies
+                                }
+                                .padding(end = PaddingDefault * 2)) {
+                            Checkbox(enableWebReplies, {
+                                enableWebReplies = it
+                            })
+                            Text(
+                                stringResource(R.string.enable_anonymous_replies),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+                }
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
@@ -306,11 +358,14 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                                 Card(
                                     name = cardName.trim(),
                                     location = locationName.trim(),
-                                    conversation = json.encodeToString(conversation)
+                                    conversation = json.encodeToString(conversation),
+                                    options = json.encodeToString(options)
                                 )
                             ) { update ->
                                 card.name = update.name
+                                card.location = update.location
                                 card.conversation = update.conversation
+                                card.options = update.options
 
                                 onDismissRequest()
                                 onChange()
@@ -326,4 +381,3 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
         }
     }
 }
-

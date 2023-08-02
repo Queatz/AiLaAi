@@ -24,9 +24,11 @@ class Authors {
     private val authors = mutableMapOf<String, Author>()
     private val loading = mutableMapOf<String, CompletableDeferred<Unit>>()
 
+    fun cached(id: String): Person? = get(id)?.person?.person
+
     suspend fun person(id: String): Person? {
         loading[id]?.await()
-        var author = authors[id]?.takeIf { it.updated > Clock.System.now() - 5.minutes }
+        var author = get(id)
 
         if (author == null) {
             val deferred = CompletableDeferred<Unit>()
@@ -41,5 +43,9 @@ class Authors {
         }
 
         return author?.person?.person
+    }
+
+    private fun get(id: String): Author? {
+        return authors[id]?.takeIf { it.updated > Clock.System.now() - 5.minutes }
     }
 }

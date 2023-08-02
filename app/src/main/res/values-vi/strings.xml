@@ -15,7 +15,7 @@
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Mã sử dụng một lần này sẽ xài được trong vòng 48 giờ.</string>
-    <string name="all_your_cards">Thẻ của bạn</string>
+    <string name="your_cards">Thẻ của bạn</string>
     <string name="invite_into_group">Thêm vào nhóm</string>
     <string name="invite_someone">Mời ai đó</string>
     <string name="invite_person">Thêm %1$s</string>
@@ -57,7 +57,6 @@
     <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lưu</string>
-    <string name="your_message">Tin nhắn của bạn</string>
     <string name="your_reply">Câu trả lời của bạn</string>
     <string name="card_message_description">Tin nhắn này được hiển thị trên thẻ dưới tên</string>
     <string name="card_reply_description">Tin nhắn này được hiển thị khi ai đó chọn \"%1$s\"</string>
@@ -356,6 +355,7 @@
     <string name="report">Báo cáo</string>
     <string name="send_report">Gửi báo cáo</string>
     <string name="add_details">Thêm chi tiết</string>
+    <string name="details">Chi tiết</string>
     <string name="terms_of_use">Điều khoản sử dụng</string>
     <string name="privacy_policy">Chính sách bảo mật</string>
     <string name="personal_safety">Sự an toàn của ai đó</string>
@@ -372,4 +372,9 @@
     <string name="skip">Bỏ qua</string>
     <string name="people">Con người</string>
     <string name="your_stories">Bài viết của bạn</string>
+    <string name="enable_replies">Bật trả lời</string>
+    <string name="enable_anonymous_replies">Bật trả lời ẩn danh từ web</string>
+    <plurals name="x_groups">
+        <item quantity="other">%1$s nhóm</item>
+    </plurals>
 </resources>

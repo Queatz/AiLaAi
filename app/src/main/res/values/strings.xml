@@ -14,7 +14,7 @@
     <string name="invite_code">Invite code</string>
     <string name="error">Error</string>
     <string name="invite_code_description">This single-use code will be usable for 48 hours.</string>
-    <string name="all_your_cards">Your cards</string>
+    <string name="your_cards">Your cards</string>
     <string name="invite_into_group">Add to group</string>
     <string name="invite_someone">Invite</string>
     <string name="invite_people">Add people</string>
@@ -66,7 +66,6 @@
     <string name="map_description">Tap on the map to set the location of this card.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-    <string name="your_message">Your message</string>
     <string name="your_reply">Your reply</string>
     <string name="card_message_description">This message is shown on the card below the name</string>
     <string name="card_reply_description">This message is shown when someone chooses \"%1$s\"</string>
@@ -368,6 +367,7 @@
     <string name="report">Report</string>
     <string name="send_report">Send report</string>
     <string name="add_details">Add details</string>
+    <string name="details">Details</string>
     <string name="terms_of_use">Terms of Use</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="personal_safety">Personal safety</string>
@@ -384,4 +384,10 @@
     <string name="skip">Skip</string>
     <string name="people">People</string>
     <string name="your_stories">Your stories</string>
+    <string name="enable_replies">Enable replies</string>
+    <string name="enable_anonymous_replies">Enable anonymous replies from the web</string>
+    <plurals name="x_groups">
+        <item quantity="one">%1$s group</item>
+        <item quantity="other">%1$s groups</item>
+    </plurals>
 </resources>

@@ -207,7 +207,6 @@ fun CardItem(
                         interactable = !isChoosing,
                         onReply = onReply,
                         navController = navController,
-                        isMine = isMine,
                         selectingText = {
                             isSelectingText = it
                         },
@@ -236,6 +235,12 @@ data class ConversationItem(
     var message: String = "",
     var action: ConversationAction? = null,
     var items: MutableList<ConversationItem> = mutableListOf(),
+)
+
+@Serializable
+data class CardOptions(
+    var enableReplies: Boolean? = null,
+    var enableAnonymousReplies: Boolean? = null
 )
 
 enum class ConversationAction {

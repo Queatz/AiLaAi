@@ -83,7 +83,7 @@ fun <T> ChooseDialog(
     key: (item: T) -> String,
     selected: List<T>,
     onSelectedChange: (List<T>) -> Unit,
-    showSearch: (List<T>) -> Boolean = { it.size > 5 },
+    showSearch: (List<T>) -> Boolean = { searchText.isNotEmpty() || it.size > 5 },
     onConfirm: suspend (List<T>) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
