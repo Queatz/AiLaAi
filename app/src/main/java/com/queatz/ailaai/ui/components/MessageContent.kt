@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +70,8 @@ fun ColumnScope.MessageContent(
     onShowPhoto: (String) -> Unit,
     navController: NavController,
     isReply: Boolean = false,
+    selected: Boolean = false,
+    onSelectedChange: ((Boolean) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -169,6 +172,10 @@ fun ColumnScope.MessageContent(
                 menuItem(stringResource(R.string.copy)) {
                     (message.text ?: "").copyToClipboard(context, messageString)
                     context.toast(R.string.copied)
+                    onShowMessageDialog(false)
+                }
+                menuItem(stringResource(R.string.select_multiple)) {
+                    onSelectedChange?.invoke(true)
                     onShowMessageDialog(false)
                 }
             }
@@ -544,7 +551,7 @@ fun ColumnScope.MessageContent(
             }
         }
     }
-    if (message.text != null) {
+    if (!message.text.isNullOrBlank()) {
         LinkifyText(
             message.text ?: "",
             color = if (isMeActual) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
@@ -568,6 +575,14 @@ fun ColumnScope.MessageContent(
                     MaterialTheme.colorScheme.secondaryContainer,
                     MaterialTheme.shapes.large
                 )
+                .let {
+                    val selectedBorderDp by animateDpAsState(if (selected) 2.dp else 0.dp)
+                    if (selectedBorderDp != 0.dp) {
+                        it.border(selectedBorderDp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.large)
+                    } else {
+                        it
+                    }
+                }
                 .combinedClickable(
                     onClick = { onShowTime(!showTime) },
                     onLongClick = { onShowMessageDialog(true) }

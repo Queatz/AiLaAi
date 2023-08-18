@@ -389,8 +389,14 @@
     <string name="schedule">Schedule</string>
     <string name="nothing_scheduled">Nothing scheduled</string>
     <string name="add_reminder">Add reminder</string>
+    <string name="select_multiple">Select multiple</string>
+    <string name="open_source">Open Source</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
+    </plurals>
+    <plurals name="x_selected">
+        <item quantity="one">%1$s selected</item>
+        <item quantity="other">%1$s selected</item>
     </plurals>
 </resources>

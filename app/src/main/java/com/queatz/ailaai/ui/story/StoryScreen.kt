@@ -18,7 +18,6 @@ import com.queatz.ailaai.ui.story.editor.StoryActions
 @Composable
 fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?) {
     // todo storyId could be a url from a deeplink
-    val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     var isLoading by rememberStateOf(true)
     var story by remember { mutableStateOf<Story?>(null) }

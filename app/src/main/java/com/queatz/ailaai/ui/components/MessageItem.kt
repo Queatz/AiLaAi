@@ -20,6 +20,8 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 fun MessageItem(
     message: Message,
     previousMessage: Message?,
+    selectedMessages: Set<Message>,
+    onSelectedChange: (Message, Boolean) -> Unit,
     getPerson: (String) -> Person?,
     getMessage: suspend (String) -> Message?,
     me: String?,
@@ -63,7 +65,13 @@ fun MessageItem(
                 isMe,
                 me,
                 showTime,
-                { showTime = it },
+                {
+                    if (selectedMessages.isEmpty()) {
+                        showTime = it
+                    } else {
+                        onSelectedChange(message, message !in selectedMessages)
+                    }
+                },
                 showMessageDialog,
                 { showMessageDialog = it },
                 getPerson,
@@ -71,7 +79,11 @@ fun MessageItem(
                 onReply,
                 onDeleted,
                 onShowPhoto,
-                navController
+                navController,
+                selected = message in selectedMessages,
+                onSelectedChange = {
+                    onSelectedChange(message, it)
+                }
             )
         }
     }

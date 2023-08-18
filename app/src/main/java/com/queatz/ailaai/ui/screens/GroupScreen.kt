@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -93,6 +94,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var recordingAudioDuration by rememberStateOf(0L)
     var maxInputAreaHeight by rememberStateOf(0f)
     val stickerPacks by stickers.rememberStickerPacks()
+    var selectedMessages by rememberStateOf(emptySet<Message>())
 
     LaunchedEffect(Unit) {
         push.clear(groupId)
@@ -398,25 +400,33 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     MessageItem(
                         it,
                         index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
-                        {
+                        selectedMessages = selectedMessages,
+                        onSelectedChange = { message, selected ->
+                            selectedMessages = if (selected) {
+                                selectedMessages + message
+                            } else {
+                                selectedMessages - message
+                            }
+                        },
+                        getPerson = {
                             groupExtended?.members?.find { member -> member.member?.id == it }?.person
                         },
-                        { messageId ->
+                        getMessage = { messageId ->
                             var message: Message? = messages.find { it.id == messageId }
                             api.message(messageId) {
                                 message = it
                             }
                             message
                         },
-                        myMember?.member?.id,
-                        {
+                        me = myMember?.member?.id,
+                        onDeleted = {
                             scope.launch {
                                 reloadMessages()
                             }
                         },
                         onReply = { stageReply = it },
                         onShowPhoto = { showPhoto = it },
-                        navController
+                        navController = navController,
                     )
                 }
                 item {
@@ -533,6 +543,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 }
             }
 
+            val showTools = isRecordingAudio || selectedMessages.isNotEmpty()
+
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
@@ -546,37 +558,61 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Crossfade(isRecordingAudio) { show ->
+                    Crossfade(showTools, label = "") { show ->
                         when (show) {
                             true -> {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .heightIn(min = maxInputAreaHeight.inDp())
-                                ) {
-                                    IconButton(
-                                        {
-                                            audioRecorder.cancelRecording()
-                                        }
+                                if (selectedMessages.isNotEmpty()) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .heightIn(min = maxInputAreaHeight.inDp())
                                     ) {
-                                        Icon(
-                                            Icons.Outlined.Delete,
-                                            stringResource(R.string.discard_recording),
-                                            tint = MaterialTheme.colorScheme.error
+                                        Text(
+                                            pluralStringResource(
+                                                R.plurals.x_selected,
+                                                selectedMessages.size,
+                                                selectedMessages.size
+                                            ),
+                                            overflow = TextOverflow.Ellipsis,
+                                            textAlign = TextAlign.Center,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier
+                                                .padding(PaddingDefault)
+                                                .fillMaxWidth()
                                         )
                                     }
-                                    Text(
-                                        stringResource(R.string.recording_audio, recordingAudioDuration.formatTime()),
-                                        overflow = TextOverflow.Ellipsis,
-                                        textAlign = TextAlign.Center,
-                                        color = MaterialTheme.colorScheme.primary,
+                                } else if (isRecordingAudio) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier
-                                            .padding(PaddingDefault)
-                                            .fillMaxWidth()
-                                    )
+                                            .heightIn(min = maxInputAreaHeight.inDp())
+                                    ) {
+                                        IconButton(
+                                            {
+                                                audioRecorder.cancelRecording()
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.Delete,
+                                                stringResource(R.string.discard_recording),
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                        Text(
+                                            stringResource(
+                                                R.string.recording_audio,
+                                                recordingAudioDuration.formatTime()
+                                            ),
+                                            overflow = TextOverflow.Ellipsis,
+                                            textAlign = TextAlign.Center,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier
+                                                .padding(PaddingDefault)
+                                                .fillMaxWidth()
+                                        )
+                                    }
                                 }
                             }
-
                             else -> {
                                 OutlinedTextField(
                                     value = sendMessage,
@@ -626,22 +662,50 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 }
                 AnimatedVisibility(sendMessage.isBlank()) {
                     Row {
-                        IconButton(
-                            onClick = {
-                                if (isRecordingAudio) {
-                                    audioRecorder.sendActiveRecording()
-                                } else {
-                                    audioRecorder.recordAudio()
+                        if (selectedMessages.isNotEmpty()) {
+                            IconButton(
+                                {
+                                    selectedMessages.sortedBy {
+                                        it.createdAt
+                                    }.joinToString("\n") { it.text ?: "" }
+                                        .copyToClipboard(context)
+                                    context.toast(R.string.copied)
+                                    selectedMessages = emptySet()
                                 }
+                            ) {
+                                Icon(
+                                    Icons.Outlined.ContentCopy,
+                                    null
+                                )
                             }
-                        ) {
-                            Icon(
-                                if (isRecordingAudio) Icons.Default.Send else Icons.Outlined.Mic,
-                                stringResource(R.string.record_audio),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            IconButton(
+                                {
+                                    selectedMessages = emptySet()
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Close,
+                                    null
+                                )
+                            }
+                        } else {
+                            IconButton(
+                                onClick = {
+                                    if (isRecordingAudio) {
+                                        audioRecorder.sendActiveRecording()
+                                    } else {
+                                        audioRecorder.recordAudio()
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    if (isRecordingAudio) Icons.Default.Send else Icons.Outlined.Mic,
+                                    stringResource(R.string.record_audio),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                        AnimatedVisibility(!isRecordingAudio) {
+                        AnimatedVisibility(!showTools) {
                             Row {
                                 IconButton(
                                     onClick = {

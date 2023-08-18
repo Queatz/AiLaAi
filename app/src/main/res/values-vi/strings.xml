@@ -44,7 +44,7 @@
     <string name="someone">Một người ai đó</string>
     <string name="active">Truy cập</string>
     <string name="messages_notification_channel_description">Tin nhắn từ người.</string>
-    <string name="collaboration_notification_channel_description">Thông báo cộng tác.</string>
+    <string name="collaboration_notification_channel_description">Thông báo hợp tác.</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa</string>
     <string name="connected">Đã kết nối</string>
@@ -149,8 +149,8 @@
     <string name="copy_location">Sao chép vị trí</string>
     <string name="show_on_map">Mở trên bản đồ</string>
     <string name="youve_been_signed_out">Có vẻ như bạn đã bị đăng xuất.</string>
-    <string name="add_collaborators">Thêm cộng tác viên</string>
-    <string name="collaborators">Cộng tác viên</string>
+    <string name="add_collaborators">Thêm hợp tác viên</string>
+    <string name="collaborators">Hợp tác viên</string>
     <string name="add">Thêm</string>
     <string name="add_person">Thêm %1$s</string>
     <string name="add_people">Thêm %1$s và %2$s</string>
@@ -159,12 +159,12 @@
     <string name="remove_person">Bỏ %1$s</string>
     <string name="remove_people">Bỏ %1$s và %2$s</string>
     <string name="remove_x_people">Bỏ %1$s người</string>
-    <string name="collaboration">Cộng tác</string>
+    <string name="collaboration">Hợp tác</string>
     <string name="open_card">Mở thẻ</string>
     <string name="open_story">Mở bài viết</string>
     <string name="add_card">Thêm thẻ</string>
-    <string name="person_added_person">%1$s đã thêm %2$s làm cộng tác</string>
-    <string name="person_removed_person">%1$s đã xóa %2$s khỏi cộng tác</string>
+    <string name="person_added_person">%1$s đã thêm %2$s làm hợp tác</string>
+    <string name="person_removed_person">%1$s đã xóa %2$s khỏi hợp tác</string>
     <string name="person_added_card">%1$s đã thêm %2$s</string>
     <string name="person_removed_card">%1$s đã xóa %2$s</string>
     <string name="person_updated_card">%1$s đã cập nhật %2$s của %3$s</string>
@@ -375,7 +375,12 @@
     <string name="enable_replies">Bật trả lời</string>
     <string name="enable_anonymous_replies">Bật trả lời ẩn danh từ web</string>
     <string name="schedule">Lịch trình</string>
+    <string name="select_multiple">Chọn nhiều</string>
+    <string name="open_source">Mã nguồn mở</string>
     <plurals name="x_groups">
         <item quantity="other">%1$s nhóm</item>
+    </plurals>
+    <plurals name="x_selected">
+        <item quantity="other">%1$s đẫ chọn</item>
     </plurals>
 </resources>

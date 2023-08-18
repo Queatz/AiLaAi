@@ -479,6 +479,16 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     modifier = Modifier.padding(PaddingDefault)
                 )
             }, {
+                "$appDomain/page/open-source".launchUrl(context)
+            })
+
+            DropdownMenuItem({
+                Text(
+                    stringResource(R.string.open_source),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(PaddingDefault)
+                )
+            }, {
                 "$appDomain/terms".launchUrl(context)
             })
 

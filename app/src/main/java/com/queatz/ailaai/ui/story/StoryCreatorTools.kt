@@ -35,7 +35,6 @@ fun StoryCreatorTools(
     addPart: (part: StoryContent) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     var showCardSelectorDialog by rememberStateOf(false)
 
     val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) {

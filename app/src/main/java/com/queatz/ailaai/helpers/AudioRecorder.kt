@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import java.io.File
 import java.io.IOException
+import java.lang.IllegalStateException
 
 internal enum class AudioRecorderControlEvent {
     Record,
@@ -125,7 +126,12 @@ fun audioRecorder(
     fun stopRecording() {
         trackDurationJob?.cancel()
         onIsRecordingAudio(false)
-        audioRecorder?.stop()
+
+        try {
+            audioRecorder?.stop()
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+        }
     }
 
     fun cancelRecording() {
