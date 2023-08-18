@@ -166,7 +166,7 @@ fun EditCardLocationDialog(
                         CardParentType.Map -> stringResource(R.string.at_a_location)
                         CardParentType.Card -> stringResource(R.string.inside_another_card)
                         CardParentType.Person -> stringResource(R.string.on_profile)
-                        else -> stringResource(R.string.offline)
+                        else -> stringResource(R.string.none)
                     },
                     modifier = Modifier
                         .fillMaxWidth()

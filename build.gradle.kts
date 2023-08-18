@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.0.0")
+        classpath("com.android.tools.build:gradle:8.0.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21")
         classpath("com.huawei.agconnect:agcp:1.8.1.300")
         classpath("com.google.gms:google-services:4.3.15")

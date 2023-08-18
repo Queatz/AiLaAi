@@ -143,7 +143,7 @@ fun CardToolbar(
                     card.parent != null -> stringResource(R.string.inside_another_card)
                     card.equipped == true -> stringResource(R.string.on_profile)
                     card.offline != true -> stringResource(R.string.at_a_location)
-                    else -> stringResource(R.string.offline)
+                    else -> stringResource(R.string.none)
                 }
             )
         }

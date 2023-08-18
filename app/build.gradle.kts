@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 55
-        versionName = "0.9.55"
+        versionCode = 57
+        versionName = "0.9.57"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -70,7 +70,7 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    packagingOptions {
+    packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -87,8 +87,8 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.appcompat:appcompat:1.7.0-alpha02")
-    implementation("androidx.appcompat:appcompat-resources:1.7.0-alpha02")
+    implementation("androidx.appcompat:appcompat:1.7.0-alpha03")
+    implementation("androidx.appcompat:appcompat-resources:1.7.0-alpha03")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -120,11 +120,12 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.27.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
-    implementation("androidx.media3:media3-exoplayer:1.0.2")
-    implementation("androidx.media3:media3-ui:1.0.2")
+    implementation("androidx.media3:media3-exoplayer:1.1.0")
+    implementation("androidx.media3:media3-ui:1.1.0")
     implementation("com.otaliastudios:transcoder:0.10.5")
     implementation("ch.acra:acra-core:5.9.7")
     implementation("ch.acra:acra-toast:5.9.7")
+    implementation("com.ibm.icu:icu4j:73.2")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

@@ -374,6 +374,7 @@
     <string name="your_stories">Bài viết của bạn</string>
     <string name="enable_replies">Bật trả lời</string>
     <string name="enable_anonymous_replies">Bật trả lời ẩn danh từ web</string>
+    <string name="schedule">Lịch trình</string>
     <plurals name="x_groups">
         <item quantity="other">%1$s nhóm</item>
     </plurals>

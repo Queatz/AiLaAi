@@ -135,7 +135,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     CardParentType.Map -> R.string.at_a_location
                     CardParentType.Card -> R.string.inside_another_card
                     CardParentType.Person -> R.string.on_profile
-                    CardParentType.Offline -> R.string.offline
+                    CardParentType.Offline -> R.string.none
                     else -> R.string.your_cards
                 }
             ) + (if (isLoading) "" else " (${cards.size})"),

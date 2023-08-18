@@ -1,5 +1,6 @@
 package com.queatz.ailaai.extensions
 
+import android.icu.text.MessageFormat
 import android.icu.text.RelativeDateTimeFormatter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
@@ -19,13 +20,18 @@ fun Instant.monthYear() = DateTimeFormatter.ofPattern("MMM yyyy")
 fun Instant.dayMonthYear() = DateTimeFormatter.ofPattern("MMMM d, yyyy")
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
 
+fun Instant.dayOfMonth() = MessageFormat.format("{0,ordinal}", toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth)!!
+fun Instant.day() = toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth
+fun Instant.nameOfDayOfWeek() = DateTimeFormatter.ofPattern("EEE")
+    .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
+
 fun Instant.timeAgo() = Duration.between(
     toJavaInstant(),
     Clock.System.now().toJavaInstant()
 ).toKotlinDuration().let {
     val formatter = RelativeDateTimeFormatter.getInstance(AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault())
 
-    if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         when {
             it < 1.minutes -> formatter.format(
                 RelativeDateTimeFormatter.Direction.PLAIN,

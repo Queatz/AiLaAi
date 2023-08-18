@@ -386,6 +386,9 @@
     <string name="your_stories">Your stories</string>
     <string name="enable_replies">Enable replies</string>
     <string name="enable_anonymous_replies">Enable anonymous replies from the web</string>
+    <string name="schedule">Schedule</string>
+    <string name="nothing_scheduled">Nothing scheduled</string>
+    <string name="add_reminder">Add reminder</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
