@@ -12,6 +12,7 @@ import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
 import com.google.auto.service.AutoService
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
+import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.api.crash
 import com.queatz.ailaai.api.myDevice
 import com.queatz.ailaai.data.api
@@ -74,6 +75,11 @@ class Application : android.app.Application() {
             .let(disposable::add)
 
         MessagingRepositoryFactory.getMessagingService().requestToken(this)
+
+        // todo this should be in a new version of ChoiceSDK
+        if (HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == ConnectionResult.SUCCESS) {
+            MapsInitializer.initialize(this)
+        }
 
         val messageObserver: DisposableObserver<RemoteMessage> = object : DisposableObserver<RemoteMessage>() {
             override fun onNext(remoteMessage: RemoteMessage) {

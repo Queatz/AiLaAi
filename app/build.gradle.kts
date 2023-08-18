@@ -80,7 +80,6 @@ android {
 dependencies {
     val ktorVersion = "2.3.0"
     val choiceSdkVersion = "0.3.0"
-    val hmsVersion = "6.11.0.304"
     val composeVersion = "1.4.3"
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
@@ -105,13 +104,13 @@ dependencies {
     implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-messaging:$choiceSdkVersion")
-    implementation("com.huawei.hms:base:$hmsVersion")
-    implementation("com.huawei.hms:maps:$hmsVersion")
-    implementation("com.huawei.hms:push:$hmsVersion")
-    implementation("com.huawei.hms:scan:2.10.0.301")
-    implementation("com.huawei.hms:hianalytics:$hmsVersion")
-    implementation("com.huawei.hms:hwid:$hmsVersion")
-    implementation("com.huawei.hms:location:$hmsVersion")
+    implementation("com.huawei.hms:base:6.11.0.301")
+    implementation("com.huawei.hms:maps:6.11.0.304")
+    implementation("com.huawei.hms:push:6.11.0.300")
+    implementation("com.huawei.hms:scan:2.11.0.300")
+    implementation("com.huawei.hms:hianalytics:6.10.0.303")
+    implementation("com.huawei.hms:hwid:6.11.0.300")
+    implementation("com.huawei.hms:location:6.11.0.301")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")

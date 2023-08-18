@@ -26,7 +26,8 @@ fun RowScope.StoryTitle(state: LazyGridState, story: Story?) {
         isScrolled,
         modifier = Modifier
             .weight(1f)
-            .padding(horizontal = PaddingDefault)
+            .padding(horizontal = PaddingDefault),
+        label = ""
     ) {
         when (it) {
             true -> {
