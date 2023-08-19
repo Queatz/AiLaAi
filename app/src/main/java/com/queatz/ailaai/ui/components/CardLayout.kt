@@ -23,6 +23,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -120,6 +121,7 @@ fun CardLayout(
                     navController = navController,
                     navController.context as Activity,
                     onChange,
+                    { navController.popBackStackOrFinish() },
                     it,
                     modifier = Modifier.padding(horizontal = PaddingDefault * 1.5f)
                 )

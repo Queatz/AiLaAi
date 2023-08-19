@@ -45,6 +45,7 @@ fun CardToolbar(
     navController: NavController,
     activity: Activity,
     onChange: () -> Unit,
+    onDelete: () -> Unit,
     card: Card,
     modifier: Modifier = Modifier,
 ) {
@@ -183,6 +184,6 @@ fun CardToolbar(
     if (openDeleteDialog) {
         DeleteCardDialog(card, {
             openDeleteDialog = false
-        }, onChange)
+        }, onDelete)
     }
 }

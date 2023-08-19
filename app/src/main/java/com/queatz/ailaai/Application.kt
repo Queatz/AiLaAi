@@ -1,6 +1,7 @@
 package com.queatz.ailaai
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
@@ -53,6 +54,11 @@ class Application : android.app.Application() {
             else -> DeviceType.Gms
         }
 
+        // todo this should be in a new version of ChoiceSDK
+        if (deviceType == DeviceType.Hms) {
+            MapsInitializer.initialize(this)
+        }
+
         val tokenObserver = object : DisposableObserver<String>() {
             override fun onNext(token: String) {
                 if (token.isBlank()) {
@@ -75,11 +81,6 @@ class Application : android.app.Application() {
             .let(disposable::add)
 
         MessagingRepositoryFactory.getMessagingService().requestToken(this)
-
-        // todo this should be in a new version of ChoiceSDK
-        if (HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(this) == ConnectionResult.SUCCESS) {
-            MapsInitializer.initialize(this)
-        }
 
         val messageObserver: DisposableObserver<RemoteMessage> = object : DisposableObserver<RemoteMessage>() {
             override fun onNext(remoteMessage: RemoteMessage) {

@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,7 +26,9 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.day
 import com.queatz.ailaai.extensions.nameOfDayOfWeek
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.schedule.ScheduleItemActions
 import com.queatz.ailaai.ui.components.AppHeader
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -46,11 +47,13 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
     var myCards by remember { mutableStateOf(emptyList<Card>()) }
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
+    var isLoading by rememberStateOf(true)
 
     LaunchedEffect(Unit) {
         api.myCards {
             myCards = it
         }
+        isLoading = false
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -63,143 +66,130 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                 },
                 me
             )
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(PaddingDefault)
-            ) {
-                items(
-                    listOf(
-                        "August",
-                        "September",
-                        "October",
-                        "November",
-                        "December",
-                        "January, 2023",
-                        "February"
-                    ).map { MonthSchedule(it) }
+            if (isLoading) {
+                Loading()
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(PaddingDefault)
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(PaddingDefault),
-                        modifier = Modifier.fillMaxWidth()
+                    items(
+                        listOf(
+                            "August",
+                            "September",
+                            "October",
+                            "November",
+                            "December",
+                            "January, 2023",
+                            "February"
+                        ).map { MonthSchedule(it) }
                     ) {
-                        Text(
-                            it.name,
-                            color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = PaddingDefault
-                                )
-                        )
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(1.dp, MaterialTheme.shapes.large)
-                                .clip(MaterialTheme.shapes.large)
-                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                                .padding(PaddingDefault / 2f)
+                            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            if (it.count == 0) {
-                                Row {
-                                    Text(
-                                        "", modifier = Modifier.width(60.dp)
-                                            .padding(
-                                                start = PaddingDefault,
-                                                top = PaddingDefault,
-                                                bottom = PaddingDefault
-                                            ),
-                                        color = MaterialTheme.colorScheme.primary
+                            Text(
+                                it.name,
+                                color = MaterialTheme.colorScheme.secondary,
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = PaddingDefault
                                     )
-                                    Text(
-                                        stringResource(R.string.nothing_scheduled),
-                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                                        modifier = Modifier
-                                            .padding(PaddingDefault)
-                                            .weight(1f)
-                                    )
-                                }
-                            } else {
-                                val r = Random(it.name.hashCode())
-                                val days = (0 until it.count).mapNotNull { item ->
-                                    myCards.shuffled(r).getOrNull(item)
-                                }.map { it to r.nextInt(4) }
-                                days.forEachIndexed { index, (it, day) ->
-                                    Row(
-                                        verticalAlignment = Alignment.Top
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier.width(60.dp)
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(1.dp, MaterialTheme.shapes.large)
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                                    .padding(PaddingDefault / 2f)
+                            ) {
+                                if (it.count == 0) {
+                                    // Month is empty
+                                    Row {
+                                        Text(
+                                            "", modifier = Modifier.width(60.dp)
                                                 .padding(
-                                                    vertical = PaddingDefault,
-                                                )
-                                        ) {
-                                            if (index == 0 || days[index - 1].second != day) {
-                                                Text(
-                                                    "${Clock.System.now().plus(day.days).day()}",
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    style = MaterialTheme.typography.titleMedium
-                                                )
-                                                Text(
-                                                    Clock.System.now().plus(day.days).nameOfDayOfWeek(),
-                                                    color = MaterialTheme.colorScheme.secondary,
-                                                    style = MaterialTheme.typography.labelSmall
-                                                )
-                                            }
-                                        }
-                                        var expanded by rememberStateOf(false)
-                                        var done by rememberStateOf(it.location.isNullOrBlank().not())
-
-                                        LaunchedEffect(Unit) {
-                                            onExpand.collect {
-                                                expanded = false
-                                            }
-                                        }
-
-                                        Column(
-                                            verticalArrangement = Arrangement.Top,
+                                                    start = PaddingDefault,
+                                                    top = PaddingDefault,
+                                                    bottom = PaddingDefault
+                                                ),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            stringResource(R.string.nothing_scheduled),
+                                            color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
                                             modifier = Modifier
-                                                .clip(MaterialTheme.shapes.large)
-                                                .clickable {
-                                                    scope.launch {
-                                                        if (!expanded) {
-                                                            onExpand.emit(Unit)
-                                                        }
-                                                        expanded = !expanded
-                                                    }
-                                                }
                                                 .padding(PaddingDefault)
                                                 .weight(1f)
+                                        )
+                                    }
+                                } else {
+                                    // Month has reminders
+                                    val r = Random(it.name.hashCode())
+                                    val days = (0 until it.count).mapNotNull { item ->
+                                        myCards.shuffled(r).getOrNull(item)
+                                    }.map { it to r.nextInt(4) }
+                                    days.forEachIndexed { index, (it, day) ->
+                                        Row(
+                                            verticalAlignment = Alignment.Top
                                         ) {
-                                            Text(
-                                                it.name ?: "",
-                                                style = MaterialTheme.typography.bodyMedium.let {
-                                                    if (done) {
-                                                        it.copy(textDecoration = TextDecoration.LineThrough)
-                                                    } else {
-                                                        it
-                                                    }
-                                                },
-                                                color = MaterialTheme.colorScheme.onSurface.let {
-                                                    if (done) {
-                                                        it.copy(alpha = .5f)
-                                                    } else {
-                                                        it
-                                                    }
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.width(60.dp)
+                                                    .padding(
+                                                        vertical = PaddingDefault,
+                                                    )
+                                            ) {
+                                                if (index == 0 || days[index - 1].second != day) {
+                                                    Text(
+                                                        "${Clock.System.now().plus(day.days).day()}",
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        style = MaterialTheme.typography.titleMedium
+                                                    )
+                                                    Text(
+                                                        Clock.System.now().plus(day.days).nameOfDayOfWeek(),
+                                                        color = MaterialTheme.colorScheme.secondary,
+                                                        style = MaterialTheme.typography.labelSmall
+                                                    )
                                                 }
-                                            )
-                                            if (r.nextBoolean()) {
+                                            }
+                                            var expanded by rememberStateOf(false)
+                                            var done by rememberStateOf(it.location.isNullOrBlank().not())
+
+                                            LaunchedEffect(Unit) {
+                                                onExpand.collect {
+                                                    expanded = false
+                                                }
+                                            }
+
+                                            Column(
+                                                verticalArrangement = Arrangement.Top,
+                                                modifier = Modifier
+                                                    .clip(MaterialTheme.shapes.large)
+                                                    .clickable {
+                                                        scope.launch {
+                                                            if (!expanded) {
+                                                                onExpand.emit(Unit)
+                                                            }
+                                                            expanded = !expanded
+                                                        }
+                                                    }
+                                                    .padding(PaddingDefault)
+                                                    .weight(1f)
+                                            ) {
                                                 Text(
-                                                    "11:30am",
-                                                    style = MaterialTheme.typography.labelSmall.let {
+                                                    it.name ?: "",
+                                                    style = MaterialTheme.typography.bodyMedium.let {
                                                         if (done) {
                                                             it.copy(textDecoration = TextDecoration.LineThrough)
                                                         } else {
                                                             it
                                                         }
                                                     },
-                                                    color = MaterialTheme.colorScheme.secondary.let {
+                                                    color = MaterialTheme.colorScheme.onSurface.let {
                                                         if (done) {
                                                             it.copy(alpha = .5f)
                                                         } else {
@@ -207,52 +197,43 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                                                         }
                                                     }
                                                 )
-                                            }
-                                            AnimatedVisibility(expanded) {
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.padding(top = PaddingDefault / 2)
-                                                ) {
-                                                    OutlinedIconButton(
+                                                if (r.nextBoolean()) {
+                                                    Text(
+                                                        "11:30am",
+                                                        style = MaterialTheme.typography.labelSmall.let {
+                                                            if (done) {
+                                                                it.copy(textDecoration = TextDecoration.LineThrough)
+                                                            } else {
+                                                                it
+                                                            }
+                                                        },
+                                                        color = MaterialTheme.colorScheme.secondary.let {
+                                                            if (done) {
+                                                                it.copy(alpha = .5f)
+                                                            } else {
+                                                                it
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                AnimatedVisibility(expanded) {
+                                                    ScheduleItemActions(
                                                         {
-                                                        done = !done
-                                                        expanded = false
-                                                    },
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                                    ) {
-                                                        Icon(
-                                                            Icons.Outlined.Done,
-                                                            "Mark as done",
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.size(18.dp)
-                                                        )
-                                                    }
-                                                    OutlinedIconButton(
-                                                        {
-                                                        expanded = false
-                                                    },
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                                    ) {
-                                                        Icon(
-                                                            Icons.Outlined.Edit,
-                                                            "Edit",
-                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                            modifier = Modifier.size(18.dp)
-                                                        )
-                                                    }
-                                                    OutlinedIconButton(
-                                                        {
-                                                        expanded = false
-                                                    },
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                                                    ) {
-                                                        Icon(
-                                                            Icons.Outlined.Delete,
-                                                            "Delete",
-                                                            tint = MaterialTheme.colorScheme.error,
-                                                            modifier = Modifier.size(18.dp)
-                                                        )
-                                                    }
+                                                            expanded = false
+                                                        },
+                                                        onDone = {
+                                                            done = !done
+                                                        },
+                                                        onOpen = {
+                                                            navController.navigate("card/${it.id!!}")
+                                                        },
+                                                        onEdit = {
+
+                                                        },
+                                                        onRemove = {
+
+                                                        }
+                                                    )
                                                 }
                                             }
                                         }

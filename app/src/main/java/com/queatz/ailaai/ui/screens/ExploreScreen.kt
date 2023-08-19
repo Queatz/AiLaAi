@@ -177,6 +177,11 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                                 navController.navigate("profile/$cardId")
                                 true
                             }
+                            it.startsWith("/link-device/") -> {
+                                val token = it.split("/").getOrNull(2)
+                                navController.navigate("link-device/$token")
+                                true
+                            }
                             else -> null
                         }
                     }

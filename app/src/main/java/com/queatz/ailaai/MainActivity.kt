@@ -426,6 +426,9 @@ class MainActivity : AppCompatActivity() {
                                         composable("explore") {
                                             ExploreScreen(navController) { me }
                                         }
+                                        composable("link-device/{token}") {
+                                            LinkDeviceScreen(navController, it.arguments!!.getString("token")!!) { me }
+                                        }
                                         composable("schedule") {
                                             ScheduleScreen(navController) { me }
                                         }
@@ -502,7 +505,8 @@ class MainActivity : AppCompatActivity() {
                                 Crossfade(
                                     say != null,
                                     modifier = Modifier
-                                        .align(Alignment.BottomCenter)
+                                        .align(Alignment.BottomCenter),
+                                    label = ""
                                 ) {
                                     var lastSay by rememberStateOf(say)
                                     LaunchedEffect(say) {
