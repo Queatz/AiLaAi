@@ -199,7 +199,8 @@ fun Audio(
                 duration > 0,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = PaddingDefault)
+                    .padding(end = PaddingDefault),
+                label = ""
             ) { show ->
                 if (show) {
                     Text(

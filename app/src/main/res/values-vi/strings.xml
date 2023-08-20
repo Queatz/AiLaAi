@@ -383,4 +383,6 @@
     <plurals name="x_selected">
         <item quantity="other">%1$s đẫ chọn</item>
     </plurals>
+    <string name="no">Không</string>
+    <string name="yes">Có</string>
 </resources>
