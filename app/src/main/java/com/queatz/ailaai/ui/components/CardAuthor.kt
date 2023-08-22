@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
@@ -100,8 +101,8 @@ fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavCo
                     Text(person.seen?.timeAgo()?.let { timeAgo ->
                         "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
                     } ?: "",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f)
                     )
                 }
             }

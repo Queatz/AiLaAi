@@ -65,7 +65,7 @@ suspend fun Api.updateProfilePhoto(
     return post("me/profile/photo", MultiPartFormDataContent(
         formData {
             append("photo", scaledPhoto, Headers.build {
-                append(HttpHeaders.ContentType, "image/jpg")
+                append(HttpHeaders.ContentType, "image/jpeg")
                 append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
             })
         }
@@ -120,7 +120,7 @@ suspend fun Api.updateMyPhoto(
         MultiPartFormDataContent(
             formData {
                 append("photo", scaledPhoto, Headers.build {
-                    append(HttpHeaders.ContentType, "image/jpg")
+                    append(HttpHeaders.ContentType, "image/jpeg")
                     append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
                 })
             }

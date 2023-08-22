@@ -127,7 +127,7 @@ suspend fun Api.uploadCardPhoto(
     return post("cards/$id/photo", MultiPartFormDataContent(
         formData {
             append("photo", scaledPhoto, Headers.build {
-                append(HttpHeaders.ContentType, "image/jpg")
+                append(HttpHeaders.ContentType, "image/jpeg")
                 append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
             })
         }

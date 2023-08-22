@@ -14,7 +14,6 @@ import java.io.File
 @Serializable
 private data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
 
-
 suspend fun Api.messages(
     group: String,
     onError: ErrorBlock = null,
@@ -81,7 +80,7 @@ suspend fun Api.sendMedia(
                     "photo[$index]",
                     photo,
                     Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpg")
+                        append(HttpHeaders.ContentType, "image/jpeg")
                         append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
                     }
                 )

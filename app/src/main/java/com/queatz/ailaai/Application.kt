@@ -121,7 +121,8 @@ class Application : android.app.Application() {
 
 enum class DeviceType {
     Hms,
-    Gms
+    Gms,
+    Web
 }
 
 val appLanguage get() = AppCompatDelegate.getApplicationLocales().get(0)?.language

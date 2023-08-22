@@ -1,10 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
-import android.Manifest
 import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Interests
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,59 +20,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
-import com.huawei.hms.hmsscankit.ScanKitActivity
-import com.huawei.hms.hmsscankit.ScanUtil
-import com.huawei.hms.ml.scan.HmsScan
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.cards
 import com.queatz.ailaai.api.myGeo
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.data.appDomain
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.horizontalFadingEdge
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardList
 import com.queatz.ailaai.ui.components.LocationScaffold
-import com.queatz.ailaai.extensions.horizontalFadingEdge
+import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-val qrCodeExplainedKey = booleanPreferencesKey("tutorial.qrCode.explained")
 
 var exploreInitialCategory: String? = null
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     var value by rememberSaveable { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(exploreInitialCategory) }
     var categories by remember { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by remember { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
     var cards by remember { mutableStateOf(emptyList<Card>()) }
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
-    val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
-    var showCameraRationale by rememberStateOf(false)
-    var showQrCodeExplanationDialog by rememberStateOf(false)
     var hasInitialCards by rememberStateOf(false)
     var isLoading by rememberStateOf(true)
     var isError by rememberStateOf(false)
@@ -155,79 +136,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         loadMore(clear = true)
     }
 
-    val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data
-                ?.getParcelableExtra<HmsScan?>(ScanUtil.RESULT)
-                ?.let {
-                    it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
-                        when {
-                            it.startsWith("/card/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("card/$cardId")
-                                true
-                            }
-                            it.startsWith("/story/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("story/$cardId")
-                                true
-                            }
-                            it.startsWith("/profile/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("profile/$cardId")
-                                true
-                            }
-                            it.startsWith("/link-device/") -> {
-                                val token = it.split("/").getOrNull(2)
-                                navController.navigate("link-device/$token")
-                                true
-                            }
-                            else -> null
-                        }
-                    }
-                } ?: run {
-                context.showDidntWork()
-            }
-        }
-    }
-
-    fun scanQrCode() {
-        if (cameraPermissionState.status.isGranted) {
-            scanQrLauncher.launch(
-                // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
-                // Extracted from ScanUtil.java (startScan)
-                Intent(navController.context as Activity, ScanKitActivity::class.java).apply {
-                    putExtra("ScanFormatValue", HmsScan.QRCODE_SCAN_TYPE)
-                    putExtra("ScanViewValue", 1)
-                }
-            )
-        } else {
-            if (cameraPermissionState.status.shouldShowRationale) {
-                showCameraRationale = true
-            } else {
-                cameraPermissionState.launchPermissionRequest()
-            }
-        }
-    }
-
-    fun launchScanQrCode() {
-        scope.launch {
-            if (context.dataStore.data.first()[qrCodeExplainedKey] == true) {
-                scanQrCode()
-            } else {
-                showQrCodeExplanationDialog = true
-            }
-        }
-    }
-
-    if (!initialCameraPermissionState) {
-        LaunchedEffect(cameraPermissionState.status.isGranted) {
-            if (cameraPermissionState.status.isGranted) {
-                scanQrCode()
-            }
-        }
-    }
-
     LocationScaffold(
         geo,
         locationSelector,
@@ -239,7 +147,9 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 {},
                 me,
                 showAppIcon = true
-            )
+            ) {
+                ScanQrCodeButton(navController)
+            }
         }
     ) {
         Column(
@@ -256,20 +166,16 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 },
                 me,
                 actions = {
+                    ScanQrCodeButton(navController)
                     IconButton({
                         navController.navigate("map")
                     }) {
                         Icon(Icons.Outlined.Map, stringResource(R.string.show_on_map))
                     }
                     IconButton({
-                        launchScanQrCode()
-                    }) {
-                        Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
-                    }
-                    IconButton({
                         navController.navigate("saved")
                     }) {
-                        Icon(Icons.Outlined.FavoriteBorder, null)
+                        Icon(Icons.Outlined.Interests, null)
                     }
                 },
                 showAppIcon = true
@@ -348,62 +254,5 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 }
             }
         }
-    }
-
-    if (showQrCodeExplanationDialog) {
-        AlertDialog(
-            {
-                showQrCodeExplanationDialog = false
-            },
-            title = {
-                Text(stringResource(R.string.scan))
-            },
-            text = {
-                Text(stringResource(R.string.scan_a_qr_code_description))
-            },
-            confirmButton = {
-                TextButton(
-                    {
-                        scope.launch {
-                            context.dataStore.edit {
-                                it[qrCodeExplainedKey] = true
-                            }
-                            showQrCodeExplanationDialog = false
-                            scanQrCode()
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.scan_now))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    {
-                        showQrCodeExplanationDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
-            }
-        )
-    }
-
-    if (showCameraRationale) {
-        AlertDialog(
-            { showCameraRationale = false },
-            text = {
-                Text(stringResource(R.string.camera_disabled_description))
-            },
-            confirmButton = {
-                TextButton(
-                    {
-                        showCameraRationale = false
-                        navController.goToSettings()
-                    }
-                ) {
-                    Text(stringResource(R.string.open_settings))
-                }
-            }
-        )
     }
 }

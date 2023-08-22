@@ -25,10 +25,7 @@ import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.mePresence
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.EmptyText
-import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.LocationScaffold
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -70,7 +67,9 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                 {},
                 me,
                 showAppIcon = true
-            )
+            ) {
+                ScanQrCodeButton(navController)
+            }
         }
     ) {
         Column {
@@ -109,7 +108,9 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                 },
                 me,
                 showAppIcon = true
-            )
+            ) {
+                ScanQrCodeButton(navController)
+            }
             Box(modifier = Modifier.fillMaxSize()) {
                 if (isLoading) {
                     Loading()

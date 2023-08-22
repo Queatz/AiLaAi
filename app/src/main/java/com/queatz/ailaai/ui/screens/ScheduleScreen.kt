@@ -29,6 +29,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.schedule.ScheduleItemActions
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -65,7 +66,9 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                     // scroll to top
                 },
                 me
-            )
+            ) {
+                ScanQrCodeButton(navController)
+            }
             if (isLoading) {
                 Loading()
             } else {

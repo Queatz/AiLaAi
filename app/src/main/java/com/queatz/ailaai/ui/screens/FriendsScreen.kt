@@ -37,10 +37,7 @@ import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.services.messages
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.ContactItem
-import com.queatz.ailaai.ui.components.SearchField
-import com.queatz.ailaai.ui.components.SearchResult
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -223,6 +220,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             me,
             showAppIcon = true
         ) {
+            ScanQrCodeButton(navController)
             var showMenu by rememberStateOf(false)
             IconButton(
                 {
