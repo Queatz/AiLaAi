@@ -77,6 +77,8 @@
     <string name="you_cannot_undo_this_card">You cannot undo this.</string>
     <string name="enter_transfer_code">Enter transfer code</string>
     <string name="transfer_code">Transfer code</string>
+    <string name="refresh_transfer_code">Refresh transfer code?</string>
+    <string name="refresh_transfer_code_description">Your current transfer code will no longer work.</string>
     <string name="sign_out">Sign out</string>
     <string name="your_transfer_code_is">Your transfer code is:</string>
     <string name="sign_out_warning">Email this code to yourself or keep it somewhere where you won\'t lose it!\n\nYou will need this transfer code to regain access to your account after signing out.</string>

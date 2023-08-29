@@ -1,11 +1,10 @@
 package com.queatz.ailaai.extensions
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -103,6 +102,32 @@ suspend fun Bitmap.uri(context: Context): Uri? {
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
 }
 
+suspend fun Bitmap.save(context: Context): Uri? {
+    val filename = "ailaai_photo_${System.currentTimeMillis()}.jpg"
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        put(MediaStore.Video.Media.IS_PENDING, 1)
+    }
+
+    val contentResolver = context.contentResolver
+
+    val uri = withContext(Dispatchers.IO) {
+        contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)?.also {
+            contentResolver.openOutputStream(it)?.use {
+                compress(Bitmap.CompressFormat.JPEG, 100, it)
+            }
+        }
+    } ?: return null
+
+    contentValues.clear()
+    contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
+
+    contentResolver.update(uri, contentValues, null, null)
+    return uri
+}
+
 suspend fun String.downloadAudio(context: Context): Uri? {
     val path = File(context.cacheDir, "share")
     path.mkdirs()
@@ -121,6 +146,7 @@ suspend fun String.downloadAudio(context: Context): Uri? {
     val newFile = File(path, "audio.mp4")
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
 }
+
 suspend fun String.shareAsTextFile(context: Context, filename: String, contentType: ContentType): Boolean {
     val path = File(context.cacheDir, "share")
     path.mkdirs()

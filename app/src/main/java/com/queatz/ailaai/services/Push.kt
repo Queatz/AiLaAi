@@ -151,6 +151,11 @@ class Push {
             return
         }
 
+        // Don't notify notifications from myself, but do update latestMessage flow
+        if (data.person.id == meId) {
+            return
+        }
+
         val deeplinkIntent = Intent(
             Intent.ACTION_VIEW,
             "$appDomain/group/${data.group.id}".toUri(),

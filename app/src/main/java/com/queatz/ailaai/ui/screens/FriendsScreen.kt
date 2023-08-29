@@ -249,8 +249,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 ),
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize(),
-                reverseLayout = true
+                modifier = Modifier.fillMaxSize()
             ) {
                 if (isLoading) {
                     item {

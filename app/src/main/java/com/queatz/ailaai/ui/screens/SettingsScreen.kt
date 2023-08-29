@@ -26,12 +26,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
-import com.queatz.ailaai.*
+import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
+import com.queatz.ailaai.appLanguage
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.BiometricPrompt
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -52,7 +54,43 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     var inviteDialog by rememberStateOf(false)
     var urlDialog by rememberStateOf(false)
     var showReleaseNotes by rememberStateOf(false)
+    var showRefreshDialog by rememberStateOf(false)
     var profile by remember { mutableStateOf<PersonProfile?>(null) }
+    var transferCode by remember { mutableStateOf("") }
+    var isRefreshing by rememberStateOf(false)
+    var showBiometrics by rememberStateOf(false)
+    var biometricsSucceeded by rememberStateOf(false)
+
+    fun loadTransferCode() {
+        scope.launch {
+            api.transferCode {
+                transferCode = it.code!!
+            }
+        }
+    }
+
+    fun showTransferCode() {
+        if (biometricsSucceeded) {
+            loadTransferCode()
+        } else {
+            showBiometrics = true
+        }
+    }
+
+    BiometricPrompt(
+        showBiometrics,
+        onError = {
+            showBiometrics = false
+            context.showDidntWork()
+        },
+        onFailed = {
+            showBiometrics = false
+        }
+    ) {
+        showBiometrics = false
+        biometricsSucceeded = true
+        loadTransferCode()
+    }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -135,7 +173,6 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     }
 
     if (signOutDialog) {
-        var transferCode by remember { mutableStateOf("") }
         var confirmSignOut by rememberStateOf(false)
         var confirmSignOutChecked by rememberStateOf(false)
 
@@ -211,16 +248,9 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                                         .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
                                 )
                             }
-                            var isRefreshing by rememberStateOf(false)
                             IconButton(
                                 onClick = {
-                                    isRefreshing = true
-                                    scope.launch {
-                                        api.refreshTransferCode {
-                                            transferCode = it.code!!
-                                        }
-                                        isRefreshing = false
-                                    }
+                                    showRefreshDialog = true
                                 },
                                 enabled = !isRefreshing
                             ) {
@@ -232,16 +262,47 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         Text(stringResource(R.string.sign_out_description))
                         Button(
                             {
-                                scope.launch {
-                                    api.transferCode {
-                                        transferCode = it.code!!
-                                    }
-                                }
+                                showTransferCode()
                             }
                         ) {
                             Text(stringResource(R.string.show_transfer_code))
                         }
                     }
+                }
+            }
+        )
+    }
+
+    if (showRefreshDialog) {
+        AlertDialog(
+            {
+                showRefreshDialog = false
+            },
+            title = {
+                Text(stringResource(R.string.refresh_transfer_code))
+            },
+            text = {
+                Text(stringResource(R.string.refresh_transfer_code_description))
+            },
+            dismissButton = {
+                TextButton({
+                    showRefreshDialog = false
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            confirmButton = {
+                TextButton({
+                    showRefreshDialog = false
+                    isRefreshing = true
+                    scope.launch {
+                        api.refreshTransferCode {
+                            transferCode = it.code!!
+                        }
+                        isRefreshing = false
+                    }
+                }) {
+                    Text(stringResource(R.string.continue_conversation))
                 }
             }
         )

@@ -68,6 +68,8 @@
     <string name="you_cannot_undo_this_card">Bạn không thể lấy lại thẻ này.</string>
     <string name="enter_transfer_code">Nhập mã chuyển khoản</string>
     <string name="transfer_code">Mã chuyển khoản</string>
+    <string name="refresh_transfer_code">Lấy mã chuyển khoản mới?</string>
+    <string name="refresh_transfer_code_description">Mã chuyển khoản hiện tại của bạn sẽ không xài được nữa.</string>
     <string name="sign_out">Đăng xuất</string>
     <string name="your_transfer_code_is">Mã chuyển khoản của bạn là:</string>
     <string name="show_transfer_code">Nhận mã chuyển khoản</string>

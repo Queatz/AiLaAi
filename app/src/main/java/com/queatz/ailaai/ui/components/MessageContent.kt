@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.components
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -52,6 +53,8 @@ import com.queatz.ailaai.ui.story.textContent
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.http.*
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -126,6 +129,7 @@ fun ColumnScope.MessageContent(
 
     if (showMessageDialog) {
         val messageString = stringResource(R.string.message)
+        val savedString = stringResource(R.string.saved)
         Menu(
             {
                 onShowMessageDialog(false)
@@ -148,6 +152,25 @@ fun ColumnScope.MessageContent(
                                 .target { drawable ->
                                     scope.launch {
                                         drawable.toBitmapOrNull()?.share(context, null)
+                                    }
+                                }
+                                .build()
+                        )
+                    }
+                }
+                menuItem(stringResource(R.string.save)) {
+                    onShowMessageDialog(false)
+                    scope.launch {
+                        context.imageLoader.execute(
+                            ImageRequest.Builder(context)
+                                .data(selectedBitmap!!)
+                                .target { drawable ->
+                                    drawable.toBitmapOrNull()?.let { bitmap ->
+                                        scope.launch {
+                                            bitmap.save(context)?.also {
+                                                context.toast(savedString)
+                                            } ?: context.showDidntWork()
+                                        }
                                     }
                                 }
                                 .build()
@@ -378,65 +401,53 @@ fun ColumnScope.MessageContent(
         }
     }
     attachedPhotos?.ifNotEmpty?.let { photos ->
-        val state = rememberLazyListState()
-        var viewport by rememberStateOf(Size(0f, 0f))
-
-        LazyRow(
-            state = state,
-            horizontalArrangement = Arrangement.spacedBy(
-                PaddingDefault,
-                if (isMe) Alignment.End else Alignment.Start
-            ),
-            verticalAlignment = Alignment.Bottom,
-            contentPadding = PaddingValues(PaddingDefault),
-            modifier = Modifier.let {
-                if (isReply) {
-                    it
-                } else {
-                    it.fillMaxWidth()
-                }
-                    .onPlaced { viewport = it.boundsInParent().size }
-                    .horizontalFadingEdge(viewport, state, 12f)
-            }
-        ) {
-            items(photos, key = { it }) { photo ->
-                var isLoaded by rememberStateOf(false)
-                val data = api.url(photo)
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(data)
-                        .crossfade(true)
-                        .build(),
-                    alpha = if (isLoaded) 1f else .125f,
-                    placeholder = rememberVectorPainter(Icons.Outlined.Photo),
-                    onSuccess = {
-                        isLoaded = true
-                    },
-                    contentDescription = "",
-                    contentScale = if (isLoaded) ContentScale.Fit else ContentScale.Inside,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
-                        .combinedClickable(
-                            onClick = { onShowPhoto(photo) },
-                            onLongClick = {
-                                selectedBitmap = data
-                                onShowMessageDialog(true)
-                            }
-                        )
-                        .let {
-                            if (isLoaded) {
-                                it.heightIn(min = PaddingDefault * 2, max = 320.dp)
-                            } else {
-                                it.padding(
-                                    horizontal = 40.dp,
-                                    vertical = 80.dp
-                                )
-                            }
+        @Composable
+        fun photoItem(photo: String) {
+            var isLoaded by rememberStateOf(false)
+            val data = api.url(photo)
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(data)
+                    .crossfade(true)
+                    .build(),
+                alpha = if (isLoaded) 1f else .125f,
+                placeholder = rememberVectorPainter(Icons.Outlined.Photo),
+                onSuccess = {
+                    isLoaded = true
+                },
+                contentDescription = "",
+                contentScale = if (isLoaded) ContentScale.Fit else ContentScale.Inside,
+                alignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
+                    .combinedClickable(
+                        onClick = { onShowPhoto(photo) },
+                        onLongClick = {
+                            selectedBitmap = data
+                            onShowMessageDialog(true)
                         }
-                )
+                    )
+                    .let {
+                        if (isLoaded) {
+                            it.heightIn(min = PaddingDefault * 2, max = 320.dp)
+                        } else {
+                            it.padding(
+                                horizontal = 40.dp,
+                                vertical = 80.dp
+                            )
+                        }
+                    }
+            )
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+            horizontalAlignment = if (isMe) Alignment.End else Alignment.Start
+        ) {
+            photos.forEach {
+                photoItem(it)
             }
         }
     }

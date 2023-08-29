@@ -89,13 +89,15 @@ fun InitialScreen(onKnown: () -> Unit) {
 
     fun signUp(code: String? = null) {
         scope.launch {
-            api.signUp(code, onError = { ex ->
-                if (ex is ResponseException) {
-                    if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
-                        codeExpired = true
+            api.signUp(
+                code,
+                onError = { ex ->
+                    if (ex is ResponseException) {
+                        if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
+                            codeExpired = true
+                        }
                     }
-                }
-            }) {
+                }) {
                 api.setToken(it.token)
                 onKnown()
                 keyboardController.hide()

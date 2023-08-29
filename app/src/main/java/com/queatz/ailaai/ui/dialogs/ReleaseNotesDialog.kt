@@ -64,7 +64,7 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                 versionInfo?.let { versionInfo ->
                     Text(
                         if (updateAvailable) {
-                            stringResource(R.string.version_x_available, BuildConfig.VERSION_NAME, versionInfo.versionName)
+                            stringResource(R.string.version_x_available, versionInfo.versionName, BuildConfig.VERSION_NAME)
                         } else {
                             stringResource(R.string.you_are_using_the_latest_version)
                         },
