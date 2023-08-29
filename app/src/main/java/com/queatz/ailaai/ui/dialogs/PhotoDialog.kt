@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -26,6 +23,10 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.serialization.Serializable
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableState
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 
 @Serializable
 sealed class Media {
@@ -69,6 +70,7 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(medias) { media ->
+                    val zoomableState = rememberZoomableState(ZoomSpec(maxZoomFactor = 4f))
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -86,6 +88,7 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                                     alignment = Alignment.Center,
                                     modifier = Modifier
                                         .fillParentMaxSize()
+                                        .zoomable(zoomableState)
                                 )
                             }
                             is Media.Video -> {

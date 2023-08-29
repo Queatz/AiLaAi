@@ -8,9 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Photo
@@ -53,8 +50,6 @@ import com.queatz.ailaai.ui.story.textContent
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.http.*
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -401,53 +396,36 @@ fun ColumnScope.MessageContent(
         }
     }
     attachedPhotos?.ifNotEmpty?.let { photos ->
-        @Composable
-        fun photoItem(photo: String) {
-            var isLoaded by rememberStateOf(false)
-            val data = api.url(photo)
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(data)
-                    .crossfade(true)
-                    .build(),
-                alpha = if (isLoaded) 1f else .125f,
-                placeholder = rememberVectorPainter(Icons.Outlined.Photo),
-                onSuccess = {
-                    isLoaded = true
-                },
-                contentDescription = "",
-                contentScale = if (isLoaded) ContentScale.Fit else ContentScale.Inside,
-                alignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.large)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
-                    .combinedClickable(
-                        onClick = { onShowPhoto(photo) },
-                        onLongClick = {
-                            selectedBitmap = data
-                            onShowMessageDialog(true)
-                        }
-                    )
-                    .let {
-                        if (isLoaded) {
-                            it.heightIn(min = PaddingDefault * 2, max = 320.dp)
-                        } else {
-                            it.padding(
-                                horizontal = 40.dp,
-                                vertical = 80.dp
-                            )
-                        }
-                    }
-            )
-        }
-
         Column(
             verticalArrangement = Arrangement.spacedBy(PaddingDefault),
-            horizontalAlignment = if (isMe) Alignment.End else Alignment.Start
+            horizontalAlignment = if (isMe) Alignment.End else Alignment.Start,
+            modifier = Modifier
+                .padding(PaddingDefault)
+                .let {
+                    if (isReply) {
+                        it
+                    } else {
+                        when (isMe) {
+                            true -> it.padding(start = PaddingDefault * 12)
+                                .align(Alignment.End)
+
+                            false -> it.padding(end = PaddingDefault * 12)
+                                .align(Alignment.Start)
+                        }
+                    }
+                }
         ) {
             photos.forEach {
-                photoItem(it)
+                PhotoItem(
+                    it,
+                    onClick = {
+                        onShowPhoto(it)
+                    },
+                    onLongClick = {
+                        selectedBitmap = api.url(it)
+                        onShowMessageDialog(true)
+                    }
+                )
             }
         }
     }
@@ -619,4 +597,40 @@ fun ColumnScope.MessageContent(
                 }
         )
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PhotoItem(photo: String, onClick: () -> Unit, onLongClick: () -> Unit) {
+    var aspect by remember(photo) {
+        mutableFloatStateOf(0.75f)
+    }
+    var isLoaded by remember(photo) {
+        mutableStateOf(false)
+    }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(api.url(photo))
+            .crossfade(true)
+            .build(),
+        alpha = if (isLoaded) 1f else .125f,
+//        placeholder = rememberVectorPainter(Icons.Outlined.Photo),
+        contentScale = ContentScale.Fit,
+        onSuccess = {
+            isLoaded = true
+            aspect = it.result.drawable.intrinsicWidth.toFloat() / it.result.drawable.intrinsicHeight.toFloat()
+        },
+        contentDescription = "",
+        alignment = Alignment.Center,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+            .heightIn(min = 80.dp, max = 320.dp)
+            .widthIn(min = 80.dp, max = 320.dp)
+            .aspectRatio(aspect)
+    )
 }
