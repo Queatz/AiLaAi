@@ -145,16 +145,41 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) {
             scope.launch {
-                api.sendMedia(
-                    groupId,
-                    uris,
-                    stageReply?.id?.let {
-                        Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
-                    }
-                ) {
-                    stageReply = null
-                    reloadMessages()
+                val videos = uris.filter { it.isVideo(context) }
+                val photos = uris.filter { it.isPhoto(context) }
+
+                if (photos.isNotEmpty()) {
+                    api.sendMedia(
+                        groupId,
+                        uris,
+                        stageReply?.id?.let {
+                            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+                        }
+                    )
                 }
+
+                if (videos.isNotEmpty()) {
+                    api.sendVideos(
+                        groupId,
+                        videos,
+                        if (photos.isEmpty()) {
+                            stageReply?.id?.let {
+                                Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+                            }
+                        } else {
+                            null
+                        },
+                        processingCallback = {
+
+                        },
+                        uploadCallback = {
+
+                        }
+                    )
+                }
+
+                stageReply = null
+                reloadMessages()
             }
         }
     }
@@ -711,8 +736,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             Row {
                                 IconButton(
                                     onClick = {
-                                        // todo video, file
-                                        launcher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                        launcher.launch(PickVisualMediaRequest())
                                     }
                                 ) {
                                     Icon(
@@ -984,6 +1008,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     }
 }
 
+// Todo should support videos
 private fun List<Message>.photos() =
     flatMap { message -> (message.getAttachment() as? PhotosAttachment)?.photos?.asReversed() ?: emptyList() }
 

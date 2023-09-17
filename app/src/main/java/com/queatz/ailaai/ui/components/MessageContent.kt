@@ -2,13 +2,12 @@ package com.queatz.ailaai.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Reply
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -76,6 +75,7 @@ fun ColumnScope.MessageContent(
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
+    var attachedVideos by remember { mutableStateOf<List<String>?>(null) }
     var attachedSticker by remember { mutableStateOf<Sticker?>(null) }
     var attachedCard by remember { mutableStateOf<Card?>(null) }
     var attachedReply by remember { mutableStateOf<Message?>(null) }
@@ -94,6 +94,10 @@ fun ColumnScope.MessageContent(
 
             is PhotosAttachment -> {
                 attachedPhotos = attachment.photos
+            }
+
+            is VideosAttachment -> {
+                attachedVideos = attachment.videos
             }
 
             is AudioAttachment -> {
@@ -392,6 +396,7 @@ fun ColumnScope.MessageContent(
             )
         }
     }
+
     attachedPhotos?.ifNotEmpty?.let { photos ->
         Column(
             verticalArrangement = Arrangement.spacedBy(PaddingDefault),
@@ -426,6 +431,57 @@ fun ColumnScope.MessageContent(
             }
         }
     }
+
+    attachedVideos?.ifNotEmpty?.let { videos ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+            horizontalAlignment = if (isMe) Alignment.End else Alignment.Start,
+            modifier = Modifier
+                .padding(PaddingDefault)
+                .let {
+                    if (isReply) {
+                        it
+                    } else {
+                        when (isMe) {
+                            true -> it.padding(start = PaddingDefault * 12)
+                                .align(Alignment.End)
+
+                            false -> it.padding(end = PaddingDefault * 12)
+                                .align(Alignment.Start)
+                        }
+                    }
+                }
+        ) {
+            videos.forEach {
+                var isPlaying by remember {
+                    mutableStateOf(false)
+                }
+                // todo loading state
+                Box {
+                    Video(
+                        it.let(api::url),
+                        isPlaying = isPlaying,
+                        modifier = Modifier.clip(MaterialTheme.shapes.large).clickable {
+                            isPlaying = !isPlaying
+                        }
+                    )
+                    if (!isPlaying) {
+                        Icon(
+                            Icons.Outlined.PlayArrow,
+                            null,
+                            modifier = Modifier
+                                .padding(PaddingDefault)
+                                .align(Alignment.Center)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = .5f))
+                                .padding(PaddingDefault)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     attachedAudio?.let { audioUrl ->
         Card(
             shape = MaterialTheme.shapes.large,
@@ -451,6 +507,7 @@ fun ColumnScope.MessageContent(
             )
         }
     }
+
     attachedSticker?.photo?.let { stickerPhoto ->
         StickerPhoto(
             stickerPhoto,
@@ -489,6 +546,7 @@ fun ColumnScope.MessageContent(
             }
         }
     }
+
     attachedStoryId?.also { storyId ->
         Card(
             onClick = {
@@ -537,6 +595,7 @@ fun ColumnScope.MessageContent(
             }
         }
     }
+
     if (!message.text.isNullOrBlank()) {
         LinkifyText(
             message.text ?: "",

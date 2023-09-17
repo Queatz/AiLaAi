@@ -19,10 +19,10 @@ class AudioAttachment(
 }
 
 @Serializable
-class VideoAttachment(
-    var video: String? = null,
+class VideosAttachment(
+    var videos: List<String>? = null,
 ) : MessageAttachment() {
-    override val type = "video"
+    override val type = "videos"
 }
 
 @Serializable
@@ -74,7 +74,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "card" -> json.decodeFromJsonElement<CardAttachment>(jsonElement)
             "photos" -> json.decodeFromJsonElement<PhotosAttachment>(jsonElement)
             "audio" -> json.decodeFromJsonElement<AudioAttachment>(jsonElement)
-            "video" -> json.decodeFromJsonElement<VideoAttachment>(jsonElement)
+            "videos" -> json.decodeFromJsonElement<VideosAttachment>(jsonElement)
             "story" -> json.decodeFromJsonElement<StoryAttachment>(jsonElement)
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
             else -> null

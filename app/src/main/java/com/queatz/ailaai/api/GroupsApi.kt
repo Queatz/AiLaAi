@@ -4,6 +4,7 @@ import android.net.Uri
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
+import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant
@@ -111,6 +112,48 @@ suspend fun Api.sendAudio(
             )
         }
     ), client = dataClient(), onError = onError, onSuccess = onSuccess)
+}
+
+suspend fun Api.sendVideos(
+    group: String,
+    videos: List<Uri>,
+    message: Message? = null,
+    processingCallback: (Float) -> Unit,
+    uploadCallback: (Float) -> Unit,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) {
+    val scaledVideos = try {
+        videos.map { it.asScaledVideo(context, progressCallback = processingCallback) to context.contentResolver.getType(it) }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        onError?.invoke(e)
+        return
+    }
+    return post(
+        "groups/$group/videos",
+        MultiPartFormDataContent(
+            formData {
+                if (message != null) {
+                    append("message", json.encodeToString(message))
+                }
+                scaledVideos.forEachIndexed { index, video ->
+                    append(
+                        "photo[$index]",
+                        video.first.asInputProvider(),
+                        Headers.build {
+                            append(HttpHeaders.ContentType, video.second ?: "video/*")
+                            append(HttpHeaders.ContentDisposition, "filename=${video.second?.split("/")?.lastOrNull() ?: ""}")
+                        }
+                    )
+                }
+            }
+        ),
+        progressCallback = uploadCallback,
+        client = dataClient(),
+        onError = onError,
+        onSuccess = onSuccess
+    )
 }
 
 suspend fun Api.sendMessage(

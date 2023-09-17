@@ -200,6 +200,9 @@
     <plurals name="sent_photos">B
         <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
+    <plurals name="sent_videos">B
+        <item quantity="other">Đã gửi %1$s video</item>
+    </plurals>
     <string name="sent_audio">Đã gửi tin nhắn âm thanh</string>
     <string name="no_cards_nearby">Không có trang nào gần bạn ở. Tất cả trang trong phạm vi 100km của bạn sẽ được hiển thị ở đây.</string>
     <string name="introduction">Giới thiệu</string>

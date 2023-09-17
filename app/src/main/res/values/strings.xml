@@ -235,6 +235,10 @@
         <item quantity="one">Sent a photo</item>
         <item quantity="other">Sent %1$s photos</item>
     </plurals>
+    <plurals name="sent_videos">
+        <item quantity="one">Sent a video</item>
+        <item quantity="other">Sent %1$s videos</item>
+    </plurals>
     <plurals name="friends_plural">
         <item quantity="one">Friend</item>
         <item quantity="other">Friends</item>
