@@ -3,8 +3,9 @@ package com.queatz.ailaai.ui.components
 import android.annotation.SuppressLint
 import android.view.MotionEvent
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.*
-import androidx.compose.animation.core.AnimationConstants.DefaultDurationMillis
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +15,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ImageShader
@@ -43,13 +41,11 @@ import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardItem(
     onClick: (() -> Unit)?,
@@ -58,7 +54,6 @@ fun CardItem(
     card: Card?,
     navController: NavController,
     modifier: Modifier = Modifier,
-    isMine: Boolean = false,
     isChoosing: Boolean = false,
     playVideo: Boolean = true
 ) {
@@ -69,19 +64,9 @@ fun CardItem(
         modifier = modifier
             .clip(RoundedCornerShape(24.dp))
     ) {
-        var hideContent by rememberStateOf(false)
-        val alpha by animateFloatAsState(if (!hideContent) 1f else 0f, tween())
-        val scale by animateFloatAsState(if (!hideContent) 1f else 1.125f, tween(DefaultDurationMillis * 2))
         var isSelectingText by rememberStateOf(false)
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
-        LaunchedEffect(hideContent) {
-            if (hideContent) {
-                delay(2.seconds)
-                hideContent = false
-            }
-        }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,9 +81,6 @@ fun CardItem(
                         it.combinedClickable(
                             enabled = !isSelectingText,
                             onClick = onClick,
-                            onLongClick = {
-                                hideContent = true
-                            }
                         )
                     } else {
                         it
@@ -110,7 +92,7 @@ fun CardItem(
                 if (card.video != null) {
                     Video(
                         card.video!!.let(api::url),
-                        modifier = Modifier.matchParentSize().scale(scale).clip(MaterialTheme.shapes.large),
+                        modifier = Modifier.matchParentSize().clip(MaterialTheme.shapes.large),
                         isPlaying = playVideo
                     )
                 } else if (card.photo != null) {
@@ -123,7 +105,7 @@ fun CardItem(
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
-                            modifier = Modifier.matchParentSize().scale(scale)
+                            modifier = Modifier.matchParentSize()
                         )
                     }
                 } else {
@@ -146,7 +128,6 @@ fun CardItem(
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .alpha(alpha)
                         .padding(PaddingDefault)
                         .align(Alignment.TopEnd)
                 ) {
@@ -181,7 +162,6 @@ fun CardItem(
 
                 Column(
                     modifier = Modifier
-                        .alpha(alpha)
                         .padding(PaddingDefault)
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.background.copy(alpha = .96f))

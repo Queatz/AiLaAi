@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 58
-        versionName = "0.9.58"
+        versionCode = 59
+        versionName = "0.9.59"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -78,6 +78,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
     val ktorVersion = "2.3.4"
     val choiceSdkVersion = "0.3.0"
     val composeVersion = "1.5.0"

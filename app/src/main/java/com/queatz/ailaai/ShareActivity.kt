@@ -24,6 +24,7 @@ import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.dialogs.defaultConfirmPluralFormatter
+import com.queatz.ailaai.ui.screens.seenText
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -103,6 +104,7 @@ class ShareActivity : AppCompatActivity() {
                         },
                         title = content.title(),
                         confirmFormatter = content.confirmFormatter(me),
+                        infoFormatter = { it.seenText(context.getString(R.string.active)) },
                         me = me
                     ) { groups ->
                         send(groups)

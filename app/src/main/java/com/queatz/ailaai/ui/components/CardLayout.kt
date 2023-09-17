@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -62,7 +63,7 @@ fun CardLayout(
                 video.let(api::url),
                 modifier = Modifier
                     .fillMaxWidth()
-//                    .clip(MaterialTheme.shapes.large)
+                    .clipToBounds()
                     .aspectRatio(aspect)
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
                     .clickable {
@@ -82,7 +83,7 @@ fun CardLayout(
                     alignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .clip(MaterialTheme.shapes.large)
+                        .clipToBounds()
                         .aspectRatio(aspect)
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
                         .clickable {
