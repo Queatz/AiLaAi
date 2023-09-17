@@ -175,9 +175,9 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     }
 
     suspend fun reload() {
-            api.group(groupId) {
-                groupExtended = it
-            }
+        api.group(groupId) {
+            groupExtended = it
+        }
     }
 
     OnLifecycleEvent { event ->
@@ -303,7 +303,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                         Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
                     }
 
-                    DropdownMenu(showMenu, { showMenu = false }) {
+                    Dropdown(showMenu, { showMenu = false }) {
                         val hidden = myMember!!.member?.hide == true
 
                         DropdownMenuItem({
@@ -613,6 +613,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                     }
                                 }
                             }
+
                             else -> {
                                 OutlinedTextField(
                                     value = sendMessage,

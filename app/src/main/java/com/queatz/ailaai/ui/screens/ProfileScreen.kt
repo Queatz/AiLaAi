@@ -36,10 +36,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.components.CardLayout
-import com.queatz.ailaai.ui.components.GroupPhoto
-import com.queatz.ailaai.ui.components.LinkifyText
-import com.queatz.ailaai.ui.components.Video
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -364,7 +361,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 .padding(PaddingDefault)
                         ) {
                             Icon(Icons.Outlined.MoreVert, null)
-                            DropdownMenu(showMenu, { showMenu = false }) {
+                            Dropdown(showMenu, { showMenu = false }) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.invite_into_group))
                                 }, {

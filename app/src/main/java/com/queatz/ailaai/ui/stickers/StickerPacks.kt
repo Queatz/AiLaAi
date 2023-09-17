@@ -24,6 +24,7 @@ import com.queatz.ailaai.data.Sticker
 import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.fadingEdge
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
@@ -92,7 +93,7 @@ fun StickerPacks(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp)
                                 )
-                                DropdownMenu(showStickerPackMenu, { showStickerPackMenu = false }) {
+                                Dropdown(showStickerPackMenu, { showStickerPackMenu = false }) {
                                     DropdownMenuItem(
                                         text = {
                                             Text(stringResource(R.string.open_sticker_pack))

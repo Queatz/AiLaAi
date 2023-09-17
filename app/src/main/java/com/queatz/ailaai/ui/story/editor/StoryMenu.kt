@@ -18,6 +18,7 @@ import com.queatz.ailaai.data.Story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
@@ -100,7 +101,7 @@ fun StoryMenu(
         }
     }
 
-    DropdownMenu(
+    Dropdown(
         expanded,
         {
             onDismissRequest()

@@ -18,6 +18,7 @@ import com.queatz.ailaai.api.sendMedia
 import com.queatz.ailaai.api.sendMessage
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
@@ -179,7 +180,7 @@ private fun SharedContent.confirmFormatter(me: Person?): @Composable (List<Group
 
 @Composable
 fun SharedContent.title() = when (this) {
-    is SharedContent.Text -> stringResource(R.string.send_text)
+    is SharedContent.Text -> this.text.notBlank?.let { "\"$it\"" } ?: stringResource(R.string.send_text)
     is SharedContent.Photos -> pluralStringResource(R.plurals.send_photos, photos.size, photos.size)
 }
 

@@ -175,3 +175,5 @@ suspend fun String.shareAudio(context: Context, name: String?): Boolean {
 
 fun <R : Any> AnnotatedString.Builder.bold(block: AnnotatedString.Builder.() -> R) =
     withStyle(SpanStyle(fontWeight = FontWeight.Bold), block)
+
+val String.notBlank get() = takeIf { it.isNotBlank() }

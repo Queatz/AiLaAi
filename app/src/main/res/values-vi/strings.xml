@@ -314,7 +314,7 @@
     <string name="send_story_to_group">Gửi bài viết đến %1$s</string>
     <string name="send_story_to_groups">Gửi bài viết đến %1$s và %2$s</string>
     <string name="send_story_to_x_groups">Gửi bài viết đến %1$s nhóm</string>
-    <string name="send_text">Send text</string>
+    <string name="send_text">Gửi văn bản</string>
     <string name="send_text_to_group">Gửi văn bản đến %1$s</string>
     <string name="send_text_to_groups">Gửi văn bản đến %1$s and %2$s</string>
     <string name="send_text_to_x_groups">Gửi văn bản đến %1$s groups</string>

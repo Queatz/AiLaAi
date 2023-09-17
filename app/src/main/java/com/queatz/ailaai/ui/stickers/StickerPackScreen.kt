@@ -23,6 +23,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.ReportDialog
 import kotlinx.coroutines.launch
 
@@ -75,7 +76,7 @@ fun StickerPackScreen(navController: NavController, stickerPackId: String, me: (
                         }
                     ) {
                         Icon(Icons.Outlined.MoreVert, null)
-                        DropdownMenu(showMenu, { showMenu = false }) {
+                        Dropdown(showMenu, { showMenu = false }) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.view_creator))
                             }, {

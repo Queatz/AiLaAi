@@ -26,6 +26,7 @@ import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.Menu
@@ -245,7 +246,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
                             }
                         ) {
                             Icon(Icons.Outlined.MoreVert, null)
-                            DropdownMenu(showMenu, { showMenu = false }) {
+                            Dropdown(showMenu, { showMenu = false }) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.rename))
                                 }, {

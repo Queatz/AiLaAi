@@ -387,7 +387,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     }
                 }
 
-                DropdownMenu(showMenu, { showMenu = false }) {
+                Dropdown(showMenu, { showMenu = false }) {
                     if (isMine) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.edit))

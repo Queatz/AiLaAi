@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -102,7 +103,10 @@ fun <T> ChooseDialog(
             Text(
                 title,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = PaddingDefault)
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 3,
+                modifier = Modifier
+                    .padding(bottom = PaddingDefault)
             )
             if (showSearch(items)) {
                 OutlinedTextField(

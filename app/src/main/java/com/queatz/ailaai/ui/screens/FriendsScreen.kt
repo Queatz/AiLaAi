@@ -228,7 +228,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
             ) {
                 Icon(Icons.Outlined.MoreVert, null)
-                DropdownMenu(showMenu, { showMenu = false }) {
+                Dropdown(showMenu, { showMenu = false }) {
                     DropdownMenuItem({
                         Text(stringResource(R.string.hidden_groups))
                     }, {

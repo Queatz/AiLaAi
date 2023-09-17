@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.groups
@@ -11,6 +12,7 @@ import com.queatz.ailaai.data.PersonSource
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.timeAgo
 
 
 @Composable
@@ -25,6 +27,7 @@ fun ChoosePeopleDialog(
     extraButtons: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
 ) {
+    val context = LocalContext.current
     var isLoading by rememberStateOf(false)
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
@@ -64,6 +67,11 @@ fun ChoosePeopleDialog(
         extraButtons = extraButtons,
         photoFormatter = { listOf(ContactPhoto(it.name ?: "", it.photo)) },
         nameFormatter = { it.name ?: stringResource(R.string.someone) },
+        infoFormatter = {
+            it.seen?.timeAgo()?.let { timeAgo ->
+                "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+            }
+        },
         confirmFormatter = confirmFormatter,
         textWhenEmpty = { stringResource(R.string.no_people_to_show) },
         searchText = searchText,
