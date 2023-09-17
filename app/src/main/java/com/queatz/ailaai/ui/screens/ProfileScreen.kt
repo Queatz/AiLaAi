@@ -589,7 +589,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     ) {
                         if (isMe || profile?.about?.isBlank() == false) {
                             LinkifyText(
-                                profile?.about ?: (if (isMe) stringResource(R.string.indroduce_yourself) else ""),
+                                profile?.about ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
                                 color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,

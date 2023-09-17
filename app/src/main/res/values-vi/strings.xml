@@ -15,14 +15,14 @@
     <string name="invite_code">Mã mời</string>
     <string name="error">Lỗi</string>
     <string name="invite_code_description">Mã sử dụng một lần này sẽ xài được trong vòng 48 giờ.</string>
-    <string name="your_cards">Thẻ của bạn</string>
+    <string name="your_cards">Trang của bạn</string>
     <string name="invite_into_group">Thêm vào nhóm</string>
     <string name="invite_someone">Mời ai đó</string>
     <string name="invite_person">Thêm %1$s</string>
     <string name="invite_x_and_y">Thêm %1$s và %2$s</string>
     <string name="invite_x_people">Thêm %1$s người</string>
-    <string name="you_have_no_cards">Bạn hiện không có thẻ nào.</string>
-    <string name="add_a_card">Tạo thẻ mới</string>
+    <string name="you_have_no_cards">Bạn hiện không có trang nào.</string>
+    <string name="add_a_card">Tạo trang mới</string>
     <string name="you_have_no_groups">Bạn hiện không có nhóm nào.</string>
     <string name="search">Tìm kiếm</string>
     <string name="open_settings">Mở cài đặt</string>
@@ -30,7 +30,7 @@
     <string name="camera_disabled_description">Quyền chụp ảnh bị tắt trong cài đặt.</string>
     <string name="use_my_location">Sử dụng vị trí mình ở</string>
     <string name="finding_your_location">Đang tìm vị trí của bạn…</string>
-    <string name="no_cards_to_show">Không tìm được thẻ để cho bạn xem.</string>
+    <string name="no_cards_to_show">Không tìm được trang để cho bạn xem.</string>
     <string name="explore">Khám phá</string>
     <string name="messages">Tin nhắn</string>
     <string name="me">Mình</string>
@@ -51,21 +51,21 @@
     <string name="somewhere">Một nơi nào đó</string>
     <string name="reply">Trả lời</string>
     <string name="go_back">Quay lại</string>
-    <string name="card_location">Vị trí của thẻ</string>
+    <string name="card_location">Vị trí của trang</string>
     <string name="hint">Lời gợi ý</string>
     <string name="hint_description">Vị trí, thời gian, hoặc giá</string>
-    <string name="map_description">Nhấn vào bản đồ để đặt vị trí của thẻ này.</string>
+    <string name="map_description">Nhấn vào bản đồ để đặt vị trí của trang này.</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lưu</string>
     <string name="your_reply">Câu trả lời của bạn</string>
-    <string name="card_message_description">Tin nhắn này được hiển thị trên thẻ dưới tên</string>
+    <string name="card_message_description">Tin nhắn này được hiển thị trên trang dưới tên</string>
     <string name="card_reply_description">Tin nhắn này được hiển thị khi ai đó chọn \"%1$s\"</string>
     <string name="option">Lựa chọn</string>
     <string name="continue_conversation">Tiếp tục cuộc trò chuyện này</string>
     <string name="add_an_option">Thêm lựa chọn</string>
-    <string name="delete_card">Xóa thẻ</string>
-    <string name="delete_this_card_q">Xóa thẻ này?</string>
-    <string name="you_cannot_undo_this_card">Bạn không thể lấy lại thẻ này.</string>
+    <string name="delete_card">Xóa trang</string>
+    <string name="delete_this_card_q">Xóa trang này?</string>
+    <string name="you_cannot_undo_this_card">Bạn không thể lấy lại trang này.</string>
     <string name="enter_transfer_code">Nhập mã chuyển khoản</string>
     <string name="transfer_code">Mã chuyển khoản</string>
     <string name="refresh_transfer_code">Lấy mã chuyển khoản mới?</string>
@@ -81,17 +81,17 @@
     <string name="code_expired">Mã hết hạn hoặc không tồn tại</string>
     <string name="you_x">Bạn: %1$s</string>
     <string name="at_a_location">Tại một vị trí nào đó</string>
-    <string name="inside_another_card">Trong thẻ</string>
-    <string name="search_cards">Tìm kiếm thẻ</string>
+    <string name="inside_another_card">Trong trang</string>
+    <string name="search_cards">Tìm kiếm trang</string>
     <string name="created_ago">Tạo %1$s</string>
-    <string name="no_cards">Không có thẻ đây.</string>
+    <string name="no_cards">Không có trang đây.</string>
     <string name="on_profile">Trên trang cá nhân</string>
     <plurals name="number_of_cards">
-        <item quantity="other">%1$s thẻ</item>
+        <item quantity="other">%1$s trang</item>
     </plurals>
-    <string name="on_profile_description">Vị trí của thẻ này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
+    <string name="on_profile_description">Vị trí của trang này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
     <string name="set_photo">Chọn ảnh hoặc video</string>
-    <string name="card">Thẻ</string>
+    <string name="card">Trang</string>
     <string name="copy_link">Sao chép liên kết</string>
     <string name="clear">Bỏ</string>
     <string name="set_my_location">Đặt vị trí của tôi</string>
@@ -112,10 +112,10 @@
     <string name="choose_x_groups">Chọn %1$s nhóm</string>
     <string name="didnt_work">Điều đó đã không làm được</string>
     <string name="connected_ago">Đã kết nối %1$s</string>
-    <string name="open_enclosing_card">Mở thẻ có thẻ này</string>
+    <string name="open_enclosing_card">Mở trang có trang này</string>
     <string name="copied">Đã sao chép!</string>
     <string name="download">Tải xuống ngay</string>
-    <string name="card_not_found">Không tìm được thẻ này</string>
+    <string name="card_not_found">Không tìm được trang này</string>
     <string name="story_not_found">Không tìm được bài viết này</string>
     <string name="leave">Rời khỏi</string>
     <string name="leave_group">Rời khỏi nhóm này không?</string>
@@ -127,19 +127,19 @@
     <string name="group_not_found">Không được tìm thấy nhóm này</string>
     <string name="group_hidden">Nhóm ẩn đến khi tin nhắn mới được gửi</string>
     <string name="saved">Đã lưu</string>
-    <string name="save_card">Lưu thẻ</string>
-    <string name="card_saved">Thẻ được lưu</string>
-    <string name="card_unsaved">Thẻ được bỏ lưu</string>
-    <string name="unsave_card">Bỏ lưu thẻ</string>
-    <string name="discoverable_by_link">Thẻ này sẽ chỉ có thể được khám phá bằng liên kết của nó.</string>
+    <string name="save_card">Lưu trang</string>
+    <string name="card_saved">Trang được lưu</string>
+    <string name="card_unsaved">Trang được bỏ lưu</string>
+    <string name="unsave_card">Bỏ lưu trang</string>
+    <string name="discoverable_by_link">Trang này sẽ chỉ có thể được khám phá bằng liên kết của nó.</string>
     <string name="offline">Ngoại tuyến</string>
-    <string name="send_card">Gửi thẻ</string>
-    <string name="send_card_to_group">Giử thẻ đến %1$s</string>
-    <string name="send_card_to_groups">Giử thẻ đến %1$s và %2$s</string>
-    <string name="send_card_to_x_groups">Giử thẻ đến %1$s nhóm</string>
+    <string name="send_card">Gửi trang</string>
+    <string name="send_card_to_group">Giử trang đến %1$s</string>
+    <string name="send_card_to_groups">Giử trang đến %1$s và %2$s</string>
+    <string name="send_card_to_x_groups">Giử trang đến %1$s nhóm</string>
     <string name="sent">Đã gửi!</string>
     <string name="app_feedback">❔ Gửi phản hồi</string>
-    <string name="sent_a_card">đã gửi thẻ</string>
+    <string name="sent_a_card">đã gửi trang</string>
     <string name="unpublish">Hủy xuất bản</string>
     <string name="publish">Xuất bản</string>
     <string name="published">Được xuất bản</string>
@@ -162,9 +162,9 @@
     <string name="remove_people">Bỏ %1$s và %2$s</string>
     <string name="remove_x_people">Bỏ %1$s người</string>
     <string name="collaboration">Hợp tác</string>
-    <string name="open_card">Mở thẻ</string>
+    <string name="open_card">Mở trang</string>
     <string name="open_story">Mở bài viết</string>
-    <string name="add_card">Thêm thẻ</string>
+    <string name="add_card">Thêm trang</string>
     <string name="person_added_person">%1$s đã thêm %2$s làm hợp tác</string>
     <string name="person_removed_person">%1$s đã xóa %2$s khỏi hợp tác</string>
     <string name="person_added_card">%1$s đã thêm %2$s</string>
@@ -178,11 +178,11 @@
     <string name="inline_hint">lời gợi ý</string>
     <string name="inline_you">bạn</string>
     <string name="inline_someone">một người ai đó</string>
-    <string name="inline_a_card">một thẻ nào đó</string>
-    <string name="leave_card">Rời khỏi thẻ này không?</string>
+    <string name="inline_a_card">một trang nào đó</string>
+    <string name="leave_card">Rời khỏi trang này không?</string>
     <string name="share">Chia sẻ</string>
     <plurals name="x_cards_nearby">
-        <item quantity="other">%1$s thẻ gần bạn ở</item>
+        <item quantity="other">%1$s trang gần bạn ở</item>
     </plurals>
     <plurals name="meters_away">
         <item quantity="other">xa %1$s mét</item>
@@ -190,7 +190,7 @@
     <plurals name="km_away">
         <item quantity="other">xa %1$s km</item>
     </plurals>
-    <string name="friends_cards">Thẻ của bạn bè</string>
+    <string name="friends_cards">Trang của bạn bè</string>
     <string name="friends">Bạn bè</string>
     <string name="invite_people">Thêm ai vào nhóm</string>
     <string name="empty_group_name">Nhóm mới</string>
@@ -201,7 +201,7 @@
         <item quantity="other">Đã gửi %1$s ảnh</item>
     </plurals>
     <string name="sent_audio">Đã gửi tin nhắn âm thanh</string>
-    <string name="no_cards_nearby">Không có thẻ nào gần bạn ở. Tất cả thẻ trong phạm vi 100km của bạn sẽ được hiển thị ở đây.</string>
+    <string name="no_cards_nearby">Không có trang nào gần bạn ở. Tất cả trang trong phạm vi 100km của bạn sẽ được hiển thị ở đây.</string>
     <string name="introduction">Giới thiệu</string>
     <string name="update">Cập nhật</string>
     <string name="send">Gửi</string>
@@ -215,14 +215,14 @@
     <string name="search_people_and_groups">Tìm kiếm người và nhóm</string>
     <string name="not_connected_yet">Chưa kết nối</string>
     <string name="scan">Quét mã QR</string>
-    <string name="indroduce_yourself">Giới thiệu bản thân ở đây…</string>
+    <string name="introduce_yourself">Giới thiệu bản thân ở đây…</string>
     <string name="add_your_name">Thêm tên của bạn…</string>
     <string name="view_profile">Xem trang cá nhân</string>
     <string name="set_category">Chọn danh mục</string>
     <string name="choose_x_quoted">Chọn \"%1$s\"</string>
     <string name="choose_none">Chọn không danh mục</string>
     <string name="your_friend">Bạn của bạn</string>
-    <string name="cards">Thẻ</string>
+    <string name="cards">Trang</string>
     <string name="joined">Đã tham gia</string>
     <string name="invite_to_group">Thêm đến %1$s</string>
     <string name="invite_to_groups">Thêm đến %1$s và %2$s</string>
@@ -234,7 +234,7 @@
         <item quantity="other">%1$s bạn</item>
     </plurals>
     <plurals name="cards_plural">
-        <item quantity="other">Thẻ</item>
+        <item quantity="other">Trang</item>
     </plurals>
     <plurals name="x_words">
         <item quantity="other">%1$s từ</item>
@@ -244,7 +244,7 @@
     <string name="please_wait">Xin chờ</string>
     <string name="app_crashed">Ứng dụng bị lỗi</string>
     <string name="uploading_video">Đang tải video lên</string>
-    <string name="scan_a_qr_code_description">Bạn có thể xem mã QR thẻ từ menu của thẻ.</string>
+    <string name="scan_a_qr_code_description">Bạn có thể xem mã QR trang từ menu của trang.</string>
     <string name="scan_now">Quét luôn</string>
     <string name="record_audio">Ghi âm</string>
     <string name="recording_audio">Đang ghi âm… %1$s</string>
@@ -305,8 +305,8 @@
     <string name="add_a_location_description">Thêm vị trí để chia sẻ bài viết của bạn với những người ở gần (tùy chọn)</string>
     <string name="share_to_groups">Chia sẻ với nhóm</string>
     <string name="share_to_groups_description">Chia sẻ bài viết của bạn tại thời điểm xuất bản (tùy chọn)</string>
-    <string name="all_cards_are_published">Tất cả thẻ đã được xuất bản</string>
-    <string name="story_contains_draft_cards">Bài viết chứa thẻ nháp</string>
+    <string name="all_cards_are_published">Tất cả trang đã được xuất bản</string>
+    <string name="story_contains_draft_cards">Bài viết chứa trang nháp</string>
     <string name="minimum_words_count">Số từ tối thiểu là 25 (hiện có %1$s)</string>
     <string name="audio">Âm thanh</string>
     <string name="no_stories_to_read">" Không có gì để đọc hiện tại.\n\nCó lẽ bạn sẽ viết một điều gì đó?"</string>
@@ -370,7 +370,7 @@
     <string name="report_type_other_description">Hãy cho chúng tôi biết về bất cứ điều gì khác</string>
     <string name="this_is_urgent">Điều này là gấp</string>
     <string name="export_data">Xuất dữ liệu</string>
-    <string name="data_export_description">Xuất dữ liệu bao gồm trang cá nhân, thẻ và bài viết của bạn.</string>
+    <string name="data_export_description">Xuất dữ liệu bao gồm trang cá nhân, trang và bài viết của bạn.</string>
     <string name="skip">Bỏ qua</string>
     <string name="people">Con người</string>
     <string name="your_stories">Bài viết của bạn</string>
@@ -387,4 +387,9 @@
     </plurals>
     <string name="no">Không</string>
     <string name="yes">Có</string>
+    <string name="generate_photo">Tạo ảnh</string>
+    <string name="generate_a_new_photo">Tạo ảnh mới?</string>
+    <string name="this_will_replace_the_current_photo">Ảnh hiện tại sẽ được thay thế.</string>
+    <string name="generating">Đang tạo</string>
+    <string name="generating_description">Trang này sẽ được cập nhật khi ảnh được tạo.\n\nTiêu đề, gợi ý và chi tiết của trang đã chia sẻ với stability.ai.</string>
 </resources>

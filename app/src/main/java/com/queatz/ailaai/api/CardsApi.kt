@@ -7,6 +7,7 @@ import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 
 suspend fun Api.cards(
@@ -113,6 +114,16 @@ suspend fun Api.unsaveCard(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post(
     "cards/$id/unsave",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.generateCardPhoto(
+    cardId: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post(
+    url = "cards/$cardId/photo/generate",
     onError = onError,
     onSuccess = onSuccess
 )

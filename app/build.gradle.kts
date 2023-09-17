@@ -78,7 +78,7 @@ android {
 }
 
 dependencies {
-    val ktorVersion = "2.3.3"
+    val ktorVersion = "2.3.4"
     val choiceSdkVersion = "0.3.0"
     val composeVersion = "1.5.0"
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")

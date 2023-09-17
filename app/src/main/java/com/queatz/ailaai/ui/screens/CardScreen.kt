@@ -72,6 +72,8 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
     var showSetCategory by rememberStateOf(false)
+    var showRegeneratePhotoDialog by rememberStateOf(false)
+    var showGeneratingPhotoDialog by rememberStateOf(false)
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -114,6 +116,24 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
         }
     }
 
+    fun generatePhoto() {
+        scope.launch {
+            api.generateCardPhoto(cardId) {
+                showGeneratingPhotoDialog = true
+            }
+        }
+    }
+
+    fun regeneratePhoto() {
+        card ?: return
+
+        if (card!!.photo.isNullOrBlank()) {
+            generatePhoto()
+        } else {
+            showRegeneratePhotoDialog = true
+        }
+    }
+
     OnLifecycleEvent { event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
@@ -122,6 +142,49 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             }
             else -> {}
         }
+    }
+
+    if (showRegeneratePhotoDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showRegeneratePhotoDialog = false
+            },
+            title = {
+                Text(stringResource(R.string.generate_a_new_photo))
+            },
+            text = {
+                Text(stringResource(R.string.this_will_replace_the_current_photo))
+            },
+            confirmButton = {
+                TextButton({
+                    showRegeneratePhotoDialog = false
+                    generatePhoto()
+                }) {
+                    Text(stringResource(R.string.yes))
+                }
+            }
+        )
+    }
+
+    if (showGeneratingPhotoDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showGeneratingPhotoDialog = false
+            },
+            title = {
+                Text(stringResource(R.string.generating))
+            },
+            text = {
+                Text(stringResource(R.string.generating_description))
+            },
+            confirmButton = {
+                TextButton({
+                    showGeneratingPhotoDialog = false
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
     }
 
     if (showSetCategory) {
@@ -348,6 +411,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             Text(stringResource(R.string.set_photo))
                         }, {
                             launcher.launch(PickVisualMediaRequest())
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.generate_photo))
+                        }, {
+                            regeneratePhoto()
                             showMenu = false
                         })
                         DropdownMenuItem({

@@ -238,7 +238,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
             }
         }
-        Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
+        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = state,
                 contentPadding = PaddingValues(

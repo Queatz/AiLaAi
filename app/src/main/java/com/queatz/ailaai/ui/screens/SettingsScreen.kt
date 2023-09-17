@@ -540,7 +540,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     modifier = Modifier.padding(PaddingDefault)
                 )
             }, {
-                "$appDomain/page/open-source".launchUrl(context)
+                "$appDomain/terms".launchUrl(context)
             })
 
             DropdownMenuItem({
@@ -550,7 +550,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                     modifier = Modifier.padding(PaddingDefault)
                 )
             }, {
-                "$appDomain/terms".launchUrl(context)
+                "$appDomain/info/open-source".launchUrl(context)
             })
 
             DropdownMenuItem({
