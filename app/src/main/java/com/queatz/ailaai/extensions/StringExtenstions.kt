@@ -177,3 +177,5 @@ fun <R : Any> AnnotatedString.Builder.bold(block: AnnotatedString.Builder.() -> 
     withStyle(SpanStyle(fontWeight = FontWeight.Bold), block)
 
 val String.notBlank get() = takeIf { it.isNotBlank() }
+
+fun <T> String.notBlank(block: (String) -> T) = notBlank?.let(block)

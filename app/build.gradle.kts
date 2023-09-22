@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.8.21"
+    kotlin("plugin.serialization") version "1.9.0"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     kotlin("kapt")
@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 59
-        versionName = "0.9.59"
+        versionCode = 61
+        versionName = "0.9.61"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -65,7 +65,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
@@ -81,12 +81,12 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.6")
     val ktorVersion = "2.3.4"
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.5.0"
+    val composeVersion = "1.5.1"
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
-    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.7.0-alpha03")
     implementation("androidx.appcompat:appcompat-resources:1.7.0-alpha03")
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
@@ -99,9 +99,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
-    implementation("androidx.navigation:navigation-compose:2.7.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.navigation:navigation-compose:2.7.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
@@ -116,7 +116,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-    implementation("androidx.compose.ui:ui-viewbinding:1.5.0")
+    implementation("androidx.compose.ui:ui-viewbinding:1.5.1")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("me.saket.telephoto:zoomable-image-coil:0.5.0")
     implementation("com.google.accompanist:accompanist-permissions:0.27.0")

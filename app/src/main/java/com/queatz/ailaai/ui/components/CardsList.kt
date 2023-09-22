@@ -31,7 +31,7 @@ fun CardList(
     navController: NavController,
     onChanged: () -> Unit = {},
     state: LazyGridState = rememberLazyGridState(),
-    placeholder: String? = null,
+    placeholder: String = stringResource(R.string.search),
     showDistance: Boolean = false,
     hasMore: Boolean = false,
     onLoadMore: (suspend () -> Unit)? = null,

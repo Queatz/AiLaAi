@@ -26,7 +26,8 @@ suspend fun Api.cards(
         mapOf("search" to search)
     } ?: mapOf()),
         onError = onError,
-        onSuccess = onSuccess)
+        onSuccess = onSuccess
+    )
 
 suspend fun Api.card(
     id: String,

@@ -5,6 +5,7 @@ import android.icu.text.RelativeDateTimeFormatter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.datetime.*
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import java.time.Duration
 import java.time.format.DateTimeFormatter
@@ -13,6 +14,39 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toKotlinDuration
+
+fun LocalDate.previous(dayOfWeek: DayOfWeek) = this + DatePeriod(
+    days = when {
+        this.dayOfWeek.isoDayNumber > dayOfWeek.isoDayNumber ->
+            this.dayOfWeek.isoDayNumber - dayOfWeek.isoDayNumber
+
+        this.dayOfWeek.isoDayNumber < dayOfWeek.isoDayNumber ->
+            dayOfWeek.isoDayNumber - this.dayOfWeek.isoDayNumber - 7
+
+        else -> 0
+    }
+)
+
+fun Instant.plus(days: Int = 0, weeks: Int = 0, months: Int = 0, years: Int = 0, zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    (LocalDate(it.year, it.month, it.dayOfMonth) + DatePeriod(days = days + weeks * 7, months = months, years = years)).atTime(it.time)
+}.toInstant(zone)
+
+
+fun Instant.startOfDay(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    LocalDate(it.year, it.month, it.dayOfMonth)
+}.atStartOfDayIn(zone)
+
+fun Instant.startOfWeek(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    LocalDate(it.year, it.month, it.dayOfMonth).previous(DayOfWeek.SUNDAY)
+}.atStartOfDayIn(zone)
+
+fun Instant.startOfMonth(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    LocalDate(it.year, it.month, 1)
+}.atStartOfDayIn(zone)
+
+fun Instant.startOfYear(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    LocalDate(it.year, 1, 1)
+}.atStartOfDayIn(zone)
 
 fun Instant.monthYear() = DateTimeFormatter.ofPattern("MMM yyyy")
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
@@ -23,6 +57,9 @@ fun Instant.dayMonthYear() = DateTimeFormatter.ofPattern("MMMM d, yyyy")
 fun Instant.dayOfMonth() = MessageFormat.format("{0,ordinal}", toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth)!!
 fun Instant.day() = toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth
 fun Instant.nameOfDayOfWeek() = DateTimeFormatter.ofPattern("EEE")
+    .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
+
+fun Instant.format(pattern: String) = DateTimeFormatter.ofPattern(pattern)
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
 
 fun Instant.timeAgo() = Duration.between(

@@ -81,7 +81,13 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
         showBiometrics,
         onError = {
             showBiometrics = false
-            context.showDidntWork()
+
+            if (it) {
+                context.showDidntWork()
+            } else {
+                biometricsSucceeded = true
+                loadTransferCode()
+            }
         },
         onFailed = {
             showBiometrics = false

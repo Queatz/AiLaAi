@@ -405,6 +405,15 @@
     <string name="generating">Generating</string>
     <string name="generating_description">The page will be updated when the photo is generated.\n\nPage title, hint, and details are shared with stability.ai.
     </string>
+    <string name="reminders">Reminders</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+    <string name="edit_note">Edit note</string>
+    <string name="edit_reminders">Edit reminders</string>
+    <string name="yes_delete">Yes, delete</string>
+    <string name="delete_this_occurrence">Delete this occurrence?</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

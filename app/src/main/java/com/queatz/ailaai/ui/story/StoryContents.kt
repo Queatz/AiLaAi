@@ -102,7 +102,10 @@ fun StoryContents(
                                             }
                                         }
                                 )
-                                actions?.invoke(content.id)
+                                // https://issuetracker.google.com/issues/300781578
+                                DisableSelection {
+                                    actions?.invoke(content.id)
+                                }
                             }
                         }
                     }

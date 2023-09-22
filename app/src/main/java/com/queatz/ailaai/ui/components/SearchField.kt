@@ -28,7 +28,10 @@ import com.queatz.ailaai.ui.theme.ElevationDefault
 fun SearchField(
     value: String,
     onValueChange: (value: String) -> Unit,
-    placeholder: String? = null,
+    placeholder: String = stringResource(R.string.search),
+    showClear: Boolean = true,
+    imeAction: ImeAction = ImeAction.Search,
+    onAction: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
@@ -45,7 +48,7 @@ fun SearchField(
             onValueChange = onValueChange,
             placeholder = {
                 Text(
-                    placeholder ?: stringResource(R.string.search),
+                    placeholder,
                     maxLines = 1,
                     style = MaterialTheme.typography.bodyMedium,
                     overflow = TextOverflow.Ellipsis,
@@ -56,13 +59,17 @@ fun SearchField(
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences,
-                imeAction = ImeAction.Search
+                imeAction = imeAction
             ),
             keyboardActions = KeyboardActions(onSearch = {
                 keyboardController.hide()
+                onAction()
+            }, onDone = {
+                keyboardController.hide()
+                onAction()
             }),
             trailingIcon = {
-                if (value.isNotEmpty()) {
+                if (showClear && value.isNotEmpty()) {
                     Icon(Icons.Outlined.Close, stringResource(R.string.clear), modifier = Modifier.clickable {
                         onValueChange("")
                     })

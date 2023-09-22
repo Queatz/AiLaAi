@@ -44,20 +44,20 @@ fun ScheduleItemActions(
                 modifier = Modifier.size(18.dp)
             )
         }
-        OutlinedIconButton(
-            {
-                onDismissRequest()
-                onOpen()
-            },
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-        ) {
-            Icon(
-                Icons.Outlined.OpenInNew,
-                "Open",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+//        OutlinedIconButton(
+//            {
+//                onDismissRequest()
+//                onOpen()
+//            },
+//            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+//        ) {
+//            Icon(
+//                Icons.Outlined.OpenInNew,
+//                "Open",
+//                tint = MaterialTheme.colorScheme.primary,
+//                modifier = Modifier.size(18.dp)
+//            )
+//        }
         OutlinedIconButton(
             {
                 onDismissRequest()
