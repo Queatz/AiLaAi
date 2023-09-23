@@ -27,15 +27,11 @@ fun RowScope.PeriodDateTime(view: ScheduleView, date: Instant) {
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleMedium
         )
-        when (view) {
-            ScheduleView.Daily -> {}
-            else -> {
-                Text(
-                    date.formatDateTimeHint(view),
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-        }
+        Text(
+            date.formatDateTimeHint(view),
+            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.labelSmall
+        )
     }
 }
+

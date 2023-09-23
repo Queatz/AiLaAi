@@ -5,17 +5,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.occurrences
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.Reminder
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.schedule.*
 import com.queatz.ailaai.schedule.ScheduleView.*
@@ -25,18 +30,30 @@ import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
+private val viewKey = stringPreferencesKey("schedule.view")
 
 @Composable
 fun ScheduleScreen(navController: NavController, me: () -> Person?) {
+
     var events by rememberStateOf(emptyList<ReminderEvent>())
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
     var isLoading by rememberStateOf(true)
     var view by rememberStateOf(Monthly)
     val state = rememberLazyListState()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        context.dataStore.data.first()[viewKey]?.let {
+            runCatching {
+                view = ScheduleView.valueOf(it)
+            }
+        }
+    }
 
     val now = Clock.System.now().startOfDay()
     var offset by rememberStateOf(now)
@@ -165,6 +182,11 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         view,
                         {
                             view = it
+                            scope.launch {
+                                context.dataStore.edit {
+                                    it[viewKey] = view.toString()
+                                }
+                            }
                             events = emptyList()
                             isLoading = true
                             scrollToTop()

@@ -44,7 +44,9 @@ val ScheduleView.eventFormat
 val ScheduleView.dateTimeFormat
     get() = when (this) {
         ScheduleView.Daily -> "h:mm"
-        else -> "d"
+        ScheduleView.Weekly -> "d"
+        ScheduleView.Monthly -> "d"
+        ScheduleView.Yearly -> "d"
     }
 
 fun Instant.formatTitle(view: ScheduleView) = format(view.titleFormat)
@@ -55,7 +57,9 @@ fun Instant.formatDateTime(view: ScheduleView) = format(view.dateTimeFormat)
 
 fun Instant.formatDateTimeHint(view: ScheduleView) = when (view) {
     ScheduleView.Daily -> format("a")
-    else -> nameOfDayOfWeek()
+    ScheduleView.Weekly -> nameOfDayOfWeek()
+    ScheduleView.Monthly -> nameOfDayOfWeek()
+    ScheduleView.Yearly -> format("MMM")
 }
 
 data class ReminderEvent(

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ai là ai</string>
+    <string name="app_name">Chào Town</string>
     <string name="settings">Cài đặt</string>
     <string name="language_vietnamese">Tiếng Việt</string>
     <string name="language_english">English</string>
@@ -213,7 +213,7 @@
     <string name="give_to_person">Đưa cho %1$s</string>
     <string name="give_to_people">Đưa cho %1$s và %2$s</string>
     <string name="give_to_x_people">Đưa cho %1$s người</string>
-    <string name="invite_text">%1$s đã mời bạn chơi cùng! Tải Ai là ai xuống từ https://ailaai.app và xài mã mời %2$s.</string>
+    <string name="invite_text">%1$s đã mời bạn chơi cùng! Tải Chào Town xuống từ https://ailaai.app và xài mã mời %2$s.</string>
     <string name="group">Nhóm</string>
     <string name="search_people_and_groups">Tìm kiếm người và nhóm</string>
     <string name="not_connected_yet">Chưa kết nối</string>
@@ -342,7 +342,7 @@
     <string name="request_a_new_feature">💎 Yêu cầu tính năng mới</string>
     <string name="report_a_bug">🐞 Báo cáo lỗi</string>
     <string name="thank_you">Xin cảm ơn!</string>
-    <string name="improve_the_app">Giúp phát triển Ai là ai!</string>
+    <string name="improve_the_app">Giúp phát triển Chào Town!</string>
     <string name="hidden_groups">Nhóm đã ẩn</string>
     <string name="notifications_disabled_message">Thông báo hiện đang bị tắt</string>
     <plurals name="send_photos">
