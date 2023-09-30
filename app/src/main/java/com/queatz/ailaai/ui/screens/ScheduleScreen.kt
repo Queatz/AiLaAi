@@ -199,7 +199,6 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
             } else {
                 LazyColumn(
                     state = state,
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = PaddingDefault,
