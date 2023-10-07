@@ -148,7 +148,7 @@
     <string name="publish">Publish</string>
     <string name="published">Published</string>
     <string name="draft">Draft</string>
-    <string name="change_location">Change location</string>
+    <string name="move">Move</string>
     <string name="edit">Edit</string>
     <string name="no_people_to_show">No people to show.</string>
     <string name="person_invited">%1$s added</string>

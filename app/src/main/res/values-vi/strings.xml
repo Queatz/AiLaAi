@@ -144,7 +144,7 @@
     <string name="publish">Xuất bản</string>
     <string name="published">Được xuất bản</string>
     <string name="draft">Bản nháp</string>
-    <string name="change_location">Đổi vị trí</string>
+    <string name="move">Di chuyển</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
     <string name="person_invited">%1$s được thêm vào nhóm</string>

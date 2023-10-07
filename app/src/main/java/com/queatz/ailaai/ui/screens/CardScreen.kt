@@ -62,7 +62,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var openCollaboratorsDialog by rememberSavableStateOf(false)
     var openLeaveCollaboratorsDialog by rememberSavableStateOf(false)
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
-    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>()) { mutableStateOf(emptyList()) }
+    var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>(emptyList())) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val stateLandscape = rememberLazyGridState()
@@ -396,7 +396,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             showMenu = false
                         })
                         DropdownMenuItem({
-                            Text(stringResource(R.string.change_location))
+                            Text(stringResource(R.string.move))
                         }, {
                             openLocationDialog = true
                             showMenu = false
