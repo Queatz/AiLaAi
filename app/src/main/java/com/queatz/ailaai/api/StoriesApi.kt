@@ -12,6 +12,7 @@ suspend fun Api.stories(
     geo: LatLng,
     offset: Int = 0,
     limit: Int = 20,
+    public: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Story>>
 ) = get(
@@ -19,7 +20,8 @@ suspend fun Api.stories(
     mapOf(
         "geo" to "${geo.latitude},${geo.longitude}",
         "offset" to offset.toString(),
-        "limit" to limit.toString()
+        "limit" to limit.toString(),
+        "public" to public.toString()
     ),
     onError = onError,
     onSuccess = onSuccess

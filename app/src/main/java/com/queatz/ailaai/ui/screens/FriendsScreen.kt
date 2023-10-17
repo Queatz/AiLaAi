@@ -32,10 +32,8 @@ import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.extensions.showDidntWork
-import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
@@ -67,6 +65,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
+    var tab by rememberSavableStateOf(MainTab.Friends)
 
     fun update() {
         results = allPeople.map { SearchResult.Connect(it) } +
@@ -208,17 +207,18 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             })
     }
 
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         AppHeader(
             navController,
-            if (allGroups.isEmpty()) stringResource(R.string.your_groups) else "${stringResource(R.string.your_groups)} (${allGroups.size})",
+            stringResource(R.string.your_groups),
             {
                 scope.launch {
                     state.scrollToTop()
                 }
             },
-            me,
-            showAppIcon = true
+            me
         ) {
             ScanQrCodeButton(navController)
             var showMenu by rememberStateOf(false)
@@ -238,6 +238,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
             }
         }
+        MainTabs(tab, { tab = it}, tabs = listOf(MainTab.Friends, MainTab.Local))
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = state,

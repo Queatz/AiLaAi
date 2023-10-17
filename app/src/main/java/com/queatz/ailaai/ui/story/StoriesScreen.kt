@@ -20,6 +20,7 @@ import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.Story
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
@@ -44,6 +45,10 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
         { geo = it },
         navController.context as Activity
     )
+    var tab by rememberSavableStateOf(MainTab.Friends)
+    var stories by remember { mutableStateOf(emptyList<Story>()) }
+    var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
+    var isLoading by rememberStateOf(true)
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -56,6 +61,30 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
         mePresence.readStoriesUntilNow()
     }
 
+    LaunchedEffect(geo, tab) {
+        if (geo != null) {
+            api.stories(
+                geo!!,
+                public = tab == MainTab.Local,
+                onError = {
+                    if (it is CancellationException) {
+                        // Ignored, geo probably changes
+                    } else {
+                        isLoading = false
+                        context.showDidntWork()
+                    }
+                }
+            ) {
+                stories = it
+                storyContents = it.flatMapIndexed { index, story ->
+                    (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
+                            story.asContents()
+                }
+                isLoading = false
+            }
+        }
+    }
+
     LocationScaffold(
         geo,
         locationSelector,
@@ -65,39 +94,13 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                 navController,
                 stringResource(R.string.stories),
                 {},
-                me,
-                showAppIcon = true
+                me
             ) {
                 ScanQrCodeButton(navController)
             }
         }
     ) {
         Column {
-            var stories by remember { mutableStateOf(emptyList<Story>()) }
-            var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
-            var isLoading by rememberStateOf(true)
-
-            LaunchedEffect(geo) {
-                if (geo != null) {
-                    // todo paging
-                    api.stories(geo!!, onError = {
-                        if (it is CancellationException) {
-                            // Ignored, geo probably changes
-                        } else {
-                            isLoading = false
-                            context.showDidntWork()
-                        }
-                    }) {
-                        stories = it
-                        storyContents = it.flatMapIndexed { index, story ->
-                            (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
-                                    story.asContents()
-                        }
-                        isLoading = false
-                    }
-                }
-            }
-
             AppHeader(
                 navController,
                 stringResource(R.string.stories),
@@ -106,14 +109,17 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         state.scrollToTop()
                     }
                 },
-                me,
-                showAppIcon = true
+                me
             ) {
                 ScanQrCodeButton(navController)
             }
+            MainTabs(tab, { tab = it }, tabs = listOf(MainTab.Friends, MainTab.Local))
             Box(modifier = Modifier.fillMaxSize()) {
                 if (isLoading) {
-                    Loading()
+                    Loading(
+                        modifier = Modifier
+                            .padding(PaddingDefault)
+                    )
                 } else if (storyContents.isEmpty()) {
                     EmptyText(stringResource(R.string.no_stories_to_read))
                 } else {

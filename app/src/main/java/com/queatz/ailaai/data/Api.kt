@@ -163,7 +163,7 @@ class Api {
 
     internal suspend inline fun <reified T: Any> get(
         url: String,
-        parameters: Map<String, String>? = null,
+        parameters: Map<String, String?>? = null,
         client: HttpClient = http,
         noinline onError: ErrorBlock,
         noinline onSuccess: SuccessBlock<T>
@@ -185,7 +185,7 @@ class Api {
 
     internal suspend inline fun <reified T : Any> get(
         url: String,
-        parameters: Map<String, String>? = null,
+        parameters: Map<String, String?>? = null,
         client: HttpClient = http,
     ): T = client.get("$baseUrl/${url}") {
         if (token != null) {
@@ -196,7 +196,7 @@ class Api {
             contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
         }
 
-        parameters?.forEach { (key: String, value) -> parameter(key, value) }
+        parameters?.filter { it.value != null }?.forEach { (key: String, value) -> parameter(key, value) }
     }.body()
 
     fun setToken(token: String?) {

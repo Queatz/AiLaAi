@@ -26,4 +26,4 @@ suspend fun Card.reply(conversation: List<String>, onSuccess: (groupId: String) 
     }
 }
 
-val Card.latLng get() = geo?.let { LatLng(it[0], it[1]) }
+val Card.latLng get() = geo!!.let { LatLng(it[0], it[1]) }

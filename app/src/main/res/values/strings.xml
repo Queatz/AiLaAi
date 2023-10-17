@@ -148,7 +148,7 @@
     <string name="publish">Publish</string>
     <string name="published">Published</string>
     <string name="draft">Draft</string>
-    <string name="move">Move</string>
+    <string name="move">Location</string>
     <string name="edit">Edit</string>
     <string name="no_people_to_show">No people to show.</string>
     <string name="person_invited">%1$s added</string>
@@ -392,7 +392,6 @@
     <string name="your_stories">Your stories</string>
     <string name="enable_replies">Enable replies</string>
     <string name="enable_anonymous_replies">Enable anonymous replies from the web</string>
-    <string name="schedule">Schedule</string>
     <string name="nothing_scheduled">Nothing scheduled</string>
     <string name="add_reminder">Add reminder</string>
     <string name="select_multiple">Select multiple</string>
@@ -403,7 +402,7 @@
     <string name="generate_a_new_photo">Generate a new photo?</string>
     <string name="this_will_replace_the_current_photo">This will replace the current photo.</string>
     <string name="generating">Generating</string>
-    <string name="generating_description">The page will be updated when the photo is generated.\n\nPage title, hint, and details are shared with stability.ai.
+    <string name="generating_description">The page will be updated when the photo is generated.\n\nPage title, hint, and details are shared with a 3rd party.
     </string>
     <string name="reminders">Reminders</string>
     <string name="daily">Daily</string>
@@ -414,6 +413,7 @@
     <string name="edit_reminders">Edit reminders</string>
     <string name="yes_delete">Yes, delete</string>
     <string name="delete_this_occurrence">Delete this occurrence?</string>
+    <string name="local">Local</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

@@ -59,7 +59,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun MapScreen(navController: NavController, me: () -> Person?) {
     var position by rememberSaveable(stateSaver = latLngSaver()) {

@@ -31,10 +31,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.json
-import com.queatz.ailaai.extensions.approximate
-import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.latLng
-import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlin.math.ceil
@@ -122,17 +119,17 @@ fun CardConversation(
                     val hasCards = (card.cardCount ?: 0) > 0
                     val distanceText = showDistance?.let {
                         if (card.geo != null) {
-                            it.distance(card.latLng!!).takeIf { it < nearbyMaxDistanceKm }?.let { metersAway ->
+                            it.distance(card.latLng).let { metersAway ->
                                 when {
-                                    metersAway >= 1000f -> ceil(metersAway / 1000).toInt()
-                                        .let { km -> pluralStringResource(R.plurals.km_away, km, km) }
+                                    metersAway >= 1000f -> ceil(metersAway / 1000f).toInt()
+                                        .let { km -> pluralStringResource(R.plurals.km_away, km, km.format()) }
 
                                     else -> metersAway.approximate(10)
-                                        .let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters) }
+                                        .let { meters -> pluralStringResource(R.plurals.meters_away, meters, meters.format()) }
                                 } + (if (hasCards) ", " else "")
-                            } ?: (stringResource(R.string.your_friend) + (if (hasCards) ", " else ""))
+                            }
                         } else {
-                            stringResource(R.string.your_friend) + (if (hasCards) ", " else "")
+                            ""
                         }
                     }
 

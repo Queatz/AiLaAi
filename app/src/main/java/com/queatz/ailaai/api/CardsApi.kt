@@ -7,7 +7,6 @@ import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 
 suspend fun Api.cards(
@@ -15,16 +14,17 @@ suspend fun Api.cards(
     offset: Int = 0,
     limit: Int = 20,
     search: String? = null,
+    public: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Card>>,
 ) =
     get("cards", mapOf(
         "geo" to "${geo.latitude},${geo.longitude}",
         "offset" to offset.toString(),
-        "limit" to limit.toString()
-    ) + (search?.let {
-        mapOf("search" to search)
-    } ?: mapOf()),
+        "limit" to limit.toString(),
+        "public" to public.toString(),
+        "search" to search
+    ),
         onError = onError,
         onSuccess = onSuccess
     )
@@ -59,17 +59,24 @@ suspend fun Api.myCards(
 )
 
 suspend fun Api.savedCards(
+    offset: Int = 0,
+    limit: Int = 20,
     search: String? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<SaveAndCard>>,
-) = get("me/saved", search?.let {
-    mapOf("search" to search)
-} ?: mapOf(),
+) = get(
+    "me/saved",
+    mapOf(
+        "search" to search,
+        "offset" to offset.toString(),
+        "limit" to limit.toString()
+    ),
     onError = onError,
-    onSuccess = onSuccess)
+    onSuccess = onSuccess
+)
 
 suspend fun Api.newCard(
-    card: Card? = Card(offline = true),
+    card: Card? = Card(),
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Card>,
 ) = post(

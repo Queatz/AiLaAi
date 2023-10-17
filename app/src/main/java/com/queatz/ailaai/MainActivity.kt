@@ -75,8 +75,8 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.People),
-            NavButton("schedule", getString(R.string.schedule), Icons.Outlined.Schedule),
-            NavButton("explore", getString(R.string.explore), Icons.Outlined.Description),
+            NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
+            NavButton("explore", getString(R.string.explore), Icons.Outlined.TravelExplore),
             NavButton("stories", getString(R.string.stories), Icons.Outlined.Explore),
         )
     }
@@ -449,9 +449,6 @@ class MainActivity : AppCompatActivity() {
                                         }
                                         composable("write/{id}") {
                                             StoryCreatorScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                        }
-                                        composable("saved") {
-                                            SavedScreen(navController) { me }
                                         }
                                         composable(
                                             "card/{id}",

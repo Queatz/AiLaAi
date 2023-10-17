@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -11,12 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
@@ -27,8 +24,7 @@ fun AppHeader(
     title: String,
     onTitleClick: () -> Unit,
     me: () -> Person?,
-    showAppIcon: Boolean = false,
-    actions: @Composable RowScope.() -> Unit = {}
+    actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     Column {
         TopAppBar(
@@ -37,14 +33,6 @@ fun AppHeader(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
                 ) {
-                    if (false && showAppIcon) {
-                        Image(
-                            painterResource(R.mipmap.ic_app),
-                            null,
-                            modifier = Modifier
-                                .requiredSize(40.dp)
-                        )
-                    }
                     Text(
                         title,
                         maxLines = 1,

@@ -19,6 +19,8 @@ import com.queatz.ailaai.api.newReminder
 import com.queatz.ailaai.data.Reminder
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.startOfMinute
+import com.queatz.ailaai.extensions.startOfYear
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
@@ -36,7 +38,7 @@ fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
             api.newReminder(
                 Reminder(
                     title = value.trim(),
-                    start = Clock.System.now()
+                    start = Clock.System.now().startOfMinute()
                 )
             ) {
                 onReminder(it)

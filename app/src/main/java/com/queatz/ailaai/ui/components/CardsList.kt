@@ -32,7 +32,6 @@ fun CardList(
     onChanged: () -> Unit = {},
     state: LazyGridState = rememberLazyGridState(),
     placeholder: String = stringResource(R.string.search),
-    showDistance: Boolean = false,
     hasMore: Boolean = false,
     onLoadMore: (suspend () -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
@@ -81,7 +80,7 @@ fun CardList(
                         card = it,
                         isMine = isMine(it),
                         showTitle = true,
-                        showDistance = geo.takeIf { showDistance },
+                        showDistance = geo,
                         onClick = {
                             navController.navigate("card/${it.id!!}")
                         },
@@ -94,8 +93,8 @@ fun CardList(
                     )
                 }
 
-                val nearbyCards = if (showDistance && geo != null) cards.takeWhile {
-                    it.geo != null && it.latLng!!.distance(geo) < nearbyMaxDistanceKm
+                val nearbyCards = if (geo != null) cards.takeWhile {
+                    it.geo != null
                 } else emptyList()
 
                 val remainingCards = cards.drop(nearbyCards.size)
@@ -182,5 +181,3 @@ fun CardList(
         }
     }
 }
-
-const val nearbyMaxDistanceKm = 100_000

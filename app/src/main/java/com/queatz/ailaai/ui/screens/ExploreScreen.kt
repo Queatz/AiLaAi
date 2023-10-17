@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Interests
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,18 +25,13 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.cards
 import com.queatz.ailaai.api.myGeo
+import com.queatz.ailaai.api.savedCards
 import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.horizontalFadingEdge
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.CardList
-import com.queatz.ailaai.ui.components.LocationScaffold
-import com.queatz.ailaai.ui.components.ScanQrCodeButton
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.utils.io.*
@@ -59,6 +53,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var isLoading by rememberStateOf(true)
     var isError by rememberStateOf(false)
     var offset by remember { mutableStateOf(0) }
+    val limit = 20
     var hasMore by rememberStateOf(true)
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
     val locationSelector = locationSelector(
@@ -66,6 +61,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         { geo = it },
         navController.context as Activity
     )
+    var tab by rememberSavableStateOf(MainTab.Friends)
+    var shownTab by rememberSaveable { mutableStateOf(tab) }
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -81,6 +78,29 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         exploreInitialCategory = null
     }
 
+    fun onNewPage(page: List<Card>, clear: Boolean) {
+        val oldSize = if (clear) 0 else cards.size
+        cards = if (clear) {
+            page
+        } else {
+            (cards + page).distinctBy { it.id }
+        }
+        updateCategories()
+        offset = cards.size
+        hasMore = cards.size > oldSize
+        isError = false
+        isLoading = false
+        shownGeo = geo
+        shownValue = value
+        shownTab = tab
+
+        if (clear) {
+            scope.launch {
+                state.scrollToTop()
+            }
+        }
+    }
+
     suspend fun loadMore(clear: Boolean = false) {
         if (clear) {
             offset = 0
@@ -88,37 +108,47 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             isLoading = true
             cards = emptyList()
         }
-        api.cards(
-            geo!!,
-            offset = offset,
-            limit = 20,
-            search = value.takeIf { it.isNotBlank() },
-            onError = { ex ->
-                if (ex is CancellationException || ex is InterruptedException) {
-                    // Ignore, probably geo or search value changed, keep isLoading = true
-                } else {
-                    isLoading = false
-                    isError = true
+        when (tab) {
+            MainTab.Friends,
+            MainTab.Local -> {
+                api.cards(
+                    geo!!,
+                    offset = offset,
+                    limit = limit,
+                    search = value.takeIf { it.isNotBlank() },
+                    public = tab == MainTab.Local,
+                    onError = { ex ->
+                        if (ex is CancellationException || ex is InterruptedException) {
+                            // Ignore, probably geo or search value changed, keep isLoading = true
+                        } else {
+                            isLoading = false
+                            isError = true
+                        }
+                    }
+                ) {
+                    onNewPage(it, clear)
                 }
             }
-        ) { page ->
-            val oldSize = if (clear) 0 else cards.size
-            cards = if (clear) {
-                page
-            } else {
-                (cards + page).distinctBy { it.id }
+            MainTab.Saved -> {
+                api.savedCards(
+                    offset,
+                    limit,
+                    value.takeIf { it.isNotBlank() },
+                    onError = { ex ->
+                        if (ex is CancellationException || ex is InterruptedException) {
+                            // Ignore, probably geo or search value changed, keep isLoading = true
+                        } else {
+                            isLoading = false
+                            isError = true
+                        }
+                    }) {
+                    onNewPage(it.mapNotNull { it.card }, clear)
+                }
             }
-            updateCategories()
-            offset = cards.size
-            hasMore = cards.size > oldSize
-            isError = false
-            isLoading = false
-            shownGeo = geo
-            shownValue = value
         }
     }
 
-    LaunchedEffect(geo, value) {
+    LaunchedEffect(geo, value, tab) {
         if (geo == null) {
             return@LaunchedEffect
         }
@@ -129,7 +159,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
 
         // Don't reload if moving < 100m
-        if (shownGeo != null && geo!!.distance(shownGeo!!) < 100 && shownValue == value) {
+        if (shownGeo != null && geo!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
             return@LaunchedEffect
         }
 
@@ -145,8 +175,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 navController,
                 stringResource(R.string.explore),
                 {},
-                me,
-                showAppIcon = true
+                me
             ) {
                 ScanQrCodeButton(navController)
             }
@@ -164,22 +193,16 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         state.scrollToTop()
                     }
                 },
-                me,
-                actions = {
-                    ScanQrCodeButton(navController)
-                    IconButton({
-                        navController.navigate("map")
-                    }) {
-                        Icon(Icons.Outlined.Map, stringResource(R.string.show_on_map))
-                    }
-                    IconButton({
-                        navController.navigate("saved")
-                    }) {
-                        Icon(Icons.Outlined.Interests, null)
-                    }
-                },
-                showAppIcon = true
-            )
+                me
+            ) {
+                IconButton({
+                    navController.navigate("map")
+                }) {
+                    Icon(Icons.Outlined.Map, stringResource(R.string.show_on_map))
+                }
+                ScanQrCodeButton(navController)
+            }
+            MainTabs(tab, { tab = it })
             CardList(
                 state = state,
                 cards = if (selectedCategory == null) cards else cards.filter { it.categories?.contains(selectedCategory) == true },
@@ -195,7 +218,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 value = value,
                 valueChange = { value = it },
                 navController = navController,
-                showDistance = true,
                 placeholder = stringResource(R.string.explore_search_placeholder),
                 hasMore = hasMore,
                 onLoadMore = {

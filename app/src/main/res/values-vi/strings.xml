@@ -144,7 +144,7 @@
     <string name="publish">Xuất bản</string>
     <string name="published">Được xuất bản</string>
     <string name="draft">Bản nháp</string>
-    <string name="move">Di chuyển</string>
+    <string name="move">Vị trí</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
     <string name="person_invited">%1$s được thêm vào nhóm</string>
@@ -379,7 +379,6 @@
     <string name="your_stories">Bài viết của bạn</string>
     <string name="enable_replies">Bật trả lời</string>
     <string name="enable_anonymous_replies">Bật trả lời ẩn danh từ web</string>
-    <string name="schedule">Lịch trình</string>
     <string name="select_multiple">Chọn nhiều</string>
     <string name="open_source">Mã nguồn mở</string>
     <plurals name="x_groups">
@@ -394,5 +393,6 @@
     <string name="generate_a_new_photo">Tạo ảnh mới?</string>
     <string name="this_will_replace_the_current_photo">Ảnh hiện tại sẽ được thay thế.</string>
     <string name="generating">Đang tạo</string>
-    <string name="generating_description">Trang này sẽ được cập nhật khi ảnh được tạo.\n\nTiêu đề, gợi ý và chi tiết của trang đã chia sẻ với stability.ai.</string>
+    <string name="generating_description">Trang này sẽ được cập nhật khi ảnh được tạo.\n\nTiêu đề, gợi ý và chi tiết của trang đã chia sẻ với bên thứ 3.</string>
+    <string name="local">Gần đây</string>
 </resources>
