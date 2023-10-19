@@ -48,15 +48,12 @@ import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.audioRecorder
-import com.queatz.ailaai.ui.components.BackButton
-import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.services.ui
-import com.queatz.ailaai.ui.components.Dropdown
-import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -233,12 +230,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     ) {
         if (groupExtended == null) {
             if (isLoading) {
-                LinearProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingDefault)
-                )
+                Loading()
             }
         } else {
             val allMembers = groupExtended!!.members

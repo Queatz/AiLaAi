@@ -78,7 +78,7 @@ fun GroupPhoto(
             )
         }
     } else {
-        val show = remember { photos.shuffled().map { it.photo ?: "" } }
+        val show = remember { photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L }.map { it.photo ?: "" } }
         Box(
             modifier = Modifier
                 .padding(padding)

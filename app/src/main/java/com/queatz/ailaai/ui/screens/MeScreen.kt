@@ -152,12 +152,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 .weight(1f)
         ) {
             if (isLoading) {
-                LinearProgressIndicator(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault + 80.dp + 58.dp)
-                )
+                Loading()
             } else {
                 val autoplayIndex by state.rememberAutoplayIndex()
                 LaunchedEffect(autoplayIndex) {

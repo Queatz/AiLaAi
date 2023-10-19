@@ -23,74 +23,87 @@ fun LocationScaffold(
     geo: LatLng?,
     locationSelector: LocationSelector,
     navController: NavController,
-    appHeader: @Composable () -> Unit,
+    appHeader: @Composable () -> Unit = {},
+    enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    if (geo == null && !locationSelector.isGranted) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            appHeader()
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2, Alignment.CenterVertically),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(PaddingDefault)
-            ) {
-                val showOpenSettings = locationSelector.shouldShowPermissionRationale
-                Button(
-                    {
-                        if (showOpenSettings) {
-                            navController.goToSettings()
-                        } else {
-                            locationSelector.launchPermissionRequest()
-                        }
-                    }
-                ) {
-                    Text(if (showOpenSettings) stringResource(R.string.open_settings) else stringResource(R.string.use_my_location))
-                }
-
-                if (showOpenSettings) {
-                    Text(
-                        stringResource(R.string.location_disabled_description),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                    )
-                }
-                TextButton({
-                    locationSelector.setLocationManually()
-                }) {
-                    Text(stringResource(R.string.set_my_location))
-                }
-            }
-        }
-    } else if (geo == null) {
-        LaunchedEffect(Unit) {
+    LaunchedEffect(geo == null) {
+        if (geo == null) {
             locationSelector.start()
         }
+    }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            appHeader()
+    when {
+        !enabled -> {
+            content()
+        }
+
+        geo == null && !locationSelector.isGranted -> {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(PaddingDefault)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
-                TextButton({
-                    locationSelector.setLocationManually()
-                }) {
-                    Text(stringResource(R.string.set_my_location))
+                appHeader()
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2, Alignment.CenterVertically),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(PaddingDefault)
+                ) {
+                    val showOpenSettings = locationSelector.shouldShowPermissionRationale
+                    Button(
+                        {
+                            if (showOpenSettings) {
+                                navController.goToSettings()
+                            } else {
+                                locationSelector.launchPermissionRequest()
+                            }
+                        }
+                    ) {
+                        Text(if (showOpenSettings) stringResource(R.string.open_settings) else stringResource(R.string.use_my_location))
+                    }
+
+                    if (showOpenSettings) {
+                        Text(
+                            stringResource(R.string.location_disabled_description),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                        )
+                    }
+                    TextButton({
+                        locationSelector.setLocationManually()
+                    }) {
+                        Text(stringResource(R.string.set_my_location))
+                    }
                 }
             }
         }
-    } else {
-        content()
+
+        geo == null -> {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                appHeader()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(PaddingDefault)
+                ) {
+                    Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
+                    TextButton({
+                        locationSelector.setLocationManually()
+                    }) {
+                        Text(stringResource(R.string.set_my_location))
+                    }
+                }
+            }
+        }
+
+        else -> {
+            content()
+        }
     }
 }

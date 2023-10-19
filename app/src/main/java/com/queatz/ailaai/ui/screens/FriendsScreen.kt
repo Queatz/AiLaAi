@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -34,6 +35,7 @@ import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
@@ -66,6 +68,18 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
     var tab by rememberSavableStateOf(MainTab.Friends)
+    var geo: LatLng? by remember { mutableStateOf(null) }
+    val locationSelector = locationSelector(
+        geo,
+        { geo = it },
+        navController.context as Activity
+    )
+
+    LaunchedEffect(geo) {
+        geo?.let {
+            api.myGeo(it)
+        }
+    }
 
     fun update() {
         results = allPeople.map { SearchResult.Connect(it) } +
@@ -82,27 +96,51 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 }
     }
 
-    suspend fun reload(passive: Boolean) {
+    suspend fun reload(passive: Boolean = false) {
         isLoading = results.isEmpty()
-        api.groups(
-            onError = {
-                if (!passive) {
-                    context.showDidntWork()
+        when (tab) {
+            MainTab.Friends -> {
+                api.groups(
+                    onError = {
+                        if (!passive) {
+                            context.showDidntWork()
+                        }
+                    }
+                ) {
+                    allGroups = it.filter { it.group != null }
+                    messages.refresh(me(), allGroups)
                 }
             }
-        ) {
-            allGroups = it.filter { it.group != null }
+
+            MainTab.Local -> {
+                if (geo != null) {
+                    api.exploreGroups(
+                        geo!!.toList(),
+                        searchText,
+                        public = true,
+                        onError = {
+                            if (!passive) {
+                                context.showDidntWork()
+                            }
+                        }
+                    ) {
+                        allGroups = it.filter { it.group != null }
+                    }
+                }
+            }
+
+            else -> {}
         }
         update()
-        messages.refresh(me(), allGroups)
         isLoading = false
     }
 
     OnLifecycleEvent { event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                reload(passive = true)
+                reload(true)
             }
+
             else -> {}
         }
     }
@@ -121,16 +159,31 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     }
 
     LaunchedEffect(searchText) {
-        // todo search server, set allGroups
         if (searchText.isBlank()) {
             allPeople = emptyList()
         } else {
             api.people(searchText) {
                 allPeople = it
-                update()
             }
         }
         update()
+    }
+
+    var skipFirst by rememberStateOf(true)
+    LaunchedEffect(searchText, tab, geo) {
+        if (geo == null) {
+            return@LaunchedEffect
+        }
+        if (skipFirst) {
+            skipFirst = false
+            return@LaunchedEffect
+        }
+        // todo search server, set allGroups
+        isLoading = true
+        allGroups = emptyList()
+        results = emptyList()
+        state.scrollToTop()
+        reload(true)
     }
 
     if (selectedHiddenGroups.isNotEmpty()) {
@@ -220,7 +273,6 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             },
             me
         ) {
-            ScanQrCodeButton(navController)
             var showMenu by rememberStateOf(false)
             IconButton(
                 {
@@ -237,80 +289,78 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     })
                 }
             }
+            ScanQrCodeButton(navController)
         }
-        MainTabs(tab, { tab = it}, tabs = listOf(MainTab.Friends, MainTab.Local))
-        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                state = state,
-                contentPadding = PaddingValues(
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault + 80.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Bottom),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (isLoading) {
-                    item {
-                        LinearProgressIndicator(
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = PaddingDefault)
-                        )
-                    }
-                } else if (results.isEmpty()) {
-                    item {
-                        Text(
-                            stringResource(if (searchText.isBlank()) R.string.you_have_no_groups else R.string.no_groups_to_show),
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(PaddingDefault * 2)
-                        )
-                    }
-                } else {
-                    items(results, key = {
-                        when (it) {
-                            is SearchResult.Connect -> "connect:${it.person.id}"
-                            is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
+        MainTabs(tab, { tab = it }, tabs = listOf(MainTab.Friends, MainTab.Local))
+        LocationScaffold(geo, locationSelector, navController, enabled = tab == MainTab.Local) {
+            Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = state,
+                    contentPadding = PaddingValues(
+                        PaddingDefault,
+                        PaddingDefault,
+                        PaddingDefault,
+                        PaddingDefault + 80.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (isLoading) {
+                        item {
+                            Loading()
                         }
-                    }) {
-                        ContactItem(navController, it, me()) {
-                            scope.launch {
-                                reload(true)
+                    } else if (results.isEmpty()) {
+                        item {
+                            Text(
+                                stringResource(if (searchText.isBlank()) R.string.you_have_no_groups else R.string.no_groups_to_show),
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(PaddingDefault * 2)
+                            )
+                        }
+                    } else {
+                        items(results, key = {
+                            when (it) {
+                                is SearchResult.Connect -> "connect:${it.person.id}"
+                                is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
+                            }
+                        }) {
+                            ContactItem(navController, it, me()) {
+                                scope.launch {
+                                    reload(true)
+                                }
                             }
                         }
                     }
                 }
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(PaddingDefault * 2)
-                    .widthIn(max = 480.dp)
-            ) {
-                Box(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .weight(1f)
-                        .wrapContentWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(PaddingDefault * 2)
+                        .widthIn(max = 480.dp)
                 ) {
-                    SearchField(
-                        searchText,
-                        { searchText = it },
-                        placeholder = stringResource(R.string.search_people_and_groups),
-                    )
-                }
-                FloatingActionButton(
-                    onClick = {
-                        createGroupName = ""
-                        showCreateGroupName = true
-                    },
-                    modifier = Modifier
-                        .padding(start = PaddingDefault * 2)
-                ) {
-                    Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth()
+                    ) {
+                        SearchField(
+                            searchText,
+                            { searchText = it },
+                            placeholder = stringResource(R.string.search_people_and_groups),
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = {
+                            createGroupName = ""
+                            showCreateGroupName = true
+                        },
+                        modifier = Modifier
+                            .padding(start = PaddingDefault * 2)
+                    ) {
+                        Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                    }
                 }
             }
         }

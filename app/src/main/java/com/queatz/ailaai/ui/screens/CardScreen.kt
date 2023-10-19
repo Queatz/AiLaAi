@@ -528,12 +528,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
         )
 
         if (isLoading) {
-            LinearProgressIndicator(
-                color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
-            )
+            Loading()
         } else if (notFound) {
             Text(
                 stringResource(R.string.card_not_found),

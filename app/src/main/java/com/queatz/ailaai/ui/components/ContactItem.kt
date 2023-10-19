@@ -58,7 +58,7 @@ fun ContactItem(
                 name = item.person.name ?: someone,
                 description = notConnected,
                 photos = listOf(
-                    ContactPhoto(item.person.name ?: "", item.person.photo)
+                    ContactPhoto(item.person.name ?: "", item.person.photo, item.person.seen)
                 )
             )
         }

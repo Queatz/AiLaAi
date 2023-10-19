@@ -400,7 +400,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             listOf(
                                 ContactPhoto(
                                     person?.name ?: "",
-                                    person?.photo
+                                    person?.photo,
+                                    person?.seen
                                 )
                             ),
                             size = 128.dp,

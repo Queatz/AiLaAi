@@ -27,8 +27,8 @@ suspend fun Api.messagesBefore(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Message>>,
 ) = get(
-    "groups/$group/messages",
-    mapOf(
+    url = "groups/$group/messages",
+    parameters = mapOf(
         "before" to before.toString()
     ),
     onError = onError,
@@ -39,6 +39,23 @@ suspend fun Api.groups(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<GroupExtended>>,
 ) = get("groups", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.exploreGroups(
+    geo: List<Double>,
+    search: String? = null,
+    public: Boolean = false,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<GroupExtended>>,
+) = get(
+    url = "groups/explore",
+    parameters = mapOf(
+        "geo" to geo.joinToString(","),
+        "search" to search,
+        "public" to public.toString()
+    ),
+    onError = onError,
+    onSuccess = onSuccess
+)
 
 suspend fun Api.group(
     id: String,

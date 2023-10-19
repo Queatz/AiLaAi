@@ -57,7 +57,7 @@ fun AppHeader(
                     me()?.let { me ->
                         if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
                             GroupPhoto(
-                                listOf(ContactPhoto(me.name ?: "", me.photo)),
+                                listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
                                 size = 40.dp,
                                 modifier = Modifier
                                     .clickable {

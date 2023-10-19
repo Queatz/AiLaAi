@@ -43,12 +43,7 @@ fun CardList(
     val scope = rememberCoroutineScope()
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
-            LinearProgressIndicator(
-                color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + viewport.height.inDp())
-            )
+            Loading()
         } else if (isError || cards.isEmpty()) {
             Text(
                 stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),

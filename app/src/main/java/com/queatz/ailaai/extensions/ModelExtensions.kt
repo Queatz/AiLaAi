@@ -3,10 +3,12 @@ package com.queatz.ailaai.extensions
 import android.content.Context
 import com.queatz.ailaai.*
 import com.queatz.ailaai.data.*
+import kotlinx.datetime.Instant
 
 data class ContactPhoto(
     val name: String = "",
-    val photo: String? = null
+    val photo: String? = null,
+    val seen: Instant? = null
 )
 
 fun GroupExtended.isGroupLike(omitGroupsWith: Person? = null) = group?.name?.isNotBlank() == true && members?.none { it.person?.id == omitGroupsWith?.id } == true
@@ -25,10 +27,10 @@ fun GroupExtended.photos(omit: List<Person> = emptyList(), ifEmpty: List<Person>
         omit.none { person -> it.person?.id == person.id }
     }
     ?.map {
-        ContactPhoto(it.person?.name ?: "", it.person?.photo)
+        ContactPhoto(it.person?.name ?: "", it.person?.photo, it.person?.seen)
     }?.takeIf { it.isNotEmpty() }
     ?: ifEmpty?.map {
-        ContactPhoto(it.name ?: "", it.photo)
+        ContactPhoto(it.name ?: "", it.photo, it.seen)
     }
     ?: listOf(ContactPhoto())
 

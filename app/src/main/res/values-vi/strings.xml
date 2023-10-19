@@ -28,7 +28,7 @@
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
     <string name="camera_disabled_description">Quyền chụp ảnh bị tắt trong cài đặt.</string>
-    <string name="use_my_location">Sử dụng vị trí mình ở</string>
+    <string name="use_my_location">Sử dụng vị trí của mình</string>
     <string name="finding_your_location">Đang tìm vị trí của bạn…</string>
     <string name="no_cards_to_show">Không tìm được trang để cho bạn xem.</string>
     <string name="explore">Khám phá</string>
@@ -94,7 +94,7 @@
     <string name="card">Trang</string>
     <string name="copy_link">Sao chép liên kết</string>
     <string name="clear">Bỏ</string>
-    <string name="set_my_location">Đặt vị trí của tôi</string>
+    <string name="set_my_location">Đặt vị trí của mình</string>
     <string name="reset_location">Đặt lại vị trí</string>
     <string name="no_groups_to_show">Không tìm được nhóm để cho bạn xem.</string>
     <string name="your_groups">Nhóm</string>
@@ -367,10 +367,10 @@
     <string name="content_issue">Vấn đề nội dung</string>
     <string name="spam_or_fake">Thư rác hoặc giả</string>
     <string name="other">Khác</string>
-    <string name="personal_safety_description">Tôi lo lắng cho sự an toàn của ai đó</string>
-    <string name="content_issue_description">Cái này không nên ở đây, làm tôi buồn, phiền hay không vui.</string>
+    <string name="personal_safety_description">Mình lo lắng cho sự an toàn của ai đó</string>
+    <string name="content_issue_description">Cái này không nên ở đây, làm mình buồn, phiền hay không vui.</string>
     <string name="spam_or_fake_description">Cái này giống như thư rác hoặc là giả</string>
-    <string name="report_type_other_description">Hãy cho chúng tôi biết về bất cứ điều gì khác</string>
+    <string name="report_type_other_description">Hãy cho chúng mình biết về bất cứ điều gì khác</string>
     <string name="this_is_urgent">Điều này là gấp</string>
     <string name="export_data">Xuất dữ liệu</string>
     <string name="data_export_description">Xuất dữ liệu bao gồm trang cá nhân, trang và bài viết của bạn.</string>

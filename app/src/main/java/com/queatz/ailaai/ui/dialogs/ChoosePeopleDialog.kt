@@ -65,7 +65,7 @@ fun ChoosePeopleDialog(
         title = title,
         allowNone = allowNone,
         extraButtons = extraButtons,
-        photoFormatter = { listOf(ContactPhoto(it.name ?: "", it.photo)) },
+        photoFormatter = { listOf(ContactPhoto(it.name ?: "", it.photo, it.seen)) },
         nameFormatter = { it.name ?: stringResource(R.string.someone) },
         infoFormatter = {
             it.seen?.timeAgo()?.let { timeAgo ->

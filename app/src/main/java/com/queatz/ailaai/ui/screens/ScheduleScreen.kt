@@ -169,7 +169,6 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                 },
                 me
             ) {
-                ScanQrCodeButton(navController)
                 IconButton(
                     {
                         showMenu = true
@@ -193,6 +192,7 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         }
                     )
                 }
+                ScanQrCodeButton(navController)
             }
             if (isLoading) {
                 Loading()

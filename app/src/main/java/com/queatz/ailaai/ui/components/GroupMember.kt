@@ -23,7 +23,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable fun PersonMember(person: Person, selected: Boolean = false, infoFormatter: (Person) -> String? = { null }, onClick: () -> Unit) {
     GroupMember(
-        listOf(ContactPhoto(person.name ?: "", person.photo)),
+        listOf(ContactPhoto(person.name ?: "", person.photo, person.seen)),
         person.name ?: stringResource(R.string.someone),
         infoFormatter(person),
         selected,

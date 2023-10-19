@@ -68,7 +68,7 @@ fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavCo
             ) {
                 if (person.name?.isNotBlank() == true || person.photo?.isNotBlank() == true) {
                     GroupPhoto(
-                        listOf(ContactPhoto(person.name ?: "", person.photo)),
+                        listOf(ContactPhoto(person.name ?: "", person.photo, person.seen)),
                         size = 28.dp,
                         padding = 0.dp,
                         modifier = Modifier
