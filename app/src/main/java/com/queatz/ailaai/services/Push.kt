@@ -69,6 +69,7 @@ class Push {
             when (PushAction.valueOf(action)) {
                 PushAction.Message -> receive(parse<MessagePushData>(data["data"]!!))
                 PushAction.Collaboration -> receive(parse<CollaborationPushData>(data["data"]!!))
+                PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(data["data"]!!))
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -91,6 +92,25 @@ class Push {
             groupKey = "collaboration/${data.card.id}",
             title = data.card.name ?: context.getString(R.string.collaboration),
             text = eventForCollaborationNotification(data)
+        )
+    }
+
+    private fun receive(data: JoinRequestPushData) {
+        joins.onPush(data)
+
+        val deeplinkIntent = Intent(
+            Intent.ACTION_VIEW,
+            "$appDomain/group/${data.group.id}".toUri(),
+            context,
+            MainActivity::class.java
+        )
+
+        send(
+            deeplinkIntent,
+            Notifications.Host,
+            groupKey = "join-request/${data.joinRequest.id}",
+            title = context.getString(R.string.x_requested_x, data.person.name ?: context.getString(R.string.someone), data.group.name ?: ""),
+            text = data.joinRequest.message ?: ""
         )
     }
 
@@ -212,7 +232,7 @@ class Push {
             meId = context.dataStore.data.first()[meKey]
         }
 
-        Notifications.values().forEach { channel ->
+        Notifications.entries.forEach { channel ->
             val notificationChannel = NotificationChannel(
                 channel.key,
                 context.getString(channel.channelName),
@@ -227,13 +247,30 @@ class Push {
 
 enum class Notifications(@StringRes val channelName: Int, @StringRes val description: Int) {
     Messages(R.string.messages, R.string.messages_notification_channel_description),
+    Host(R.string.host, R.string.host_notification_channel_description),
     Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description);
     val key get() = name.lowercase()
 }
 
 enum class PushAction {
     Message,
-    Collaboration
+    Collaboration,
+    JoinRequest
+}
+
+@Serializable
+sealed class PushDataData
+
+@Serializable
+data class JoinRequestPushData(
+    val person: Person,
+    val group: Group,
+    val joinRequest: JoinRequest,
+    val event: JoinRequestEvent,
+) : PushDataData()
+
+enum class JoinRequestEvent {
+    Request
 }
 
 @Serializable
@@ -241,7 +278,7 @@ data class MessagePushData(
     val group: Group,
     val person: Person,
     val message: Message
-)
+) : PushDataData()
 
 enum class CollaborationEvent {
     AddedPerson,
@@ -272,4 +309,4 @@ data class CollaborationPushData(
     val card: Card,
     val event: CollaborationEvent,
     val data: CollaborationEventData,
-)
+) : PushDataData()

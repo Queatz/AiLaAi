@@ -1,7 +1,7 @@
 package com.queatz.ailaai
 
 import android.content.Context
-import android.util.Log
+import android.content.ContextWrapper
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
@@ -31,6 +31,7 @@ import org.acra.data.CrashReportData
 import org.acra.ktx.initAcra
 import org.acra.sender.ReportSender
 import org.acra.sender.ReportSenderFactory
+import java.util.*
 
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -152,4 +153,11 @@ class CrashSenderFactory : ReportSenderFactory {
     override fun enabled(config : CoreConfiguration) : Boolean {
         return true
     }
+}
+
+fun Context.setAppLocale(locale: Locale): Context {
+    val config = resources.configuration
+    config.setLocale(locale)
+    config.setLayoutDirection(locale)
+    return createConfigurationContext(config)
 }

@@ -8,27 +8,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.queatz.ailaai.*
+import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createGroup
 import com.queatz.ailaai.api.updateMember
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -43,6 +44,8 @@ fun ContactItem(
     val scope = rememberCoroutineScope()
     val someone = stringResource(R.string.someone)
     val notConnected = stringResource(R.string.not_connected_yet)
+
+
 
     when (item) {
         is SearchResult.Connect -> {
@@ -63,6 +66,9 @@ fun ContactItem(
             )
         }
         is SearchResult.Group -> {
+            val joinRequestCount by joins.joins
+                .map { it.count { it.joinRequest?.group == item.groupExtended.group?.id } }
+                .collectAsState(0)
             val groupExtended = item.groupExtended
             val people = groupExtended.members?.filter { it.person?.id != me?.id }?.map { it.person!! } ?: emptyList()
             val myMember = groupExtended.members?.find { it.person?.id == me?.id }
@@ -105,7 +111,8 @@ fun ContactItem(
                 ),
                 photos = groupExtended.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)),
                 lastActive = groupExtended.latestMessage?.createdAt?.timeAgo(),
-                isUnread = isUnread
+                isUnread = isUnread || joinRequestCount > 0,
+                joinRequestCount = joinRequestCount
             )
         }
     }
@@ -120,7 +127,8 @@ fun ContactResult(
     description: String,
     photos: List<ContactPhoto>,
     lastActive: String? = null,
-    isUnread: Boolean = false
+    isUnread: Boolean = false,
+    joinRequestCount: Int = 0
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
@@ -151,7 +159,7 @@ fun ContactResult(
             )
         }
         Text(
-            lastActive ?: "",
+            if (joinRequestCount > 0) pluralStringResource(R.plurals.x_requests, joinRequestCount, joinRequestCount) else lastActive ?: "",
             style = MaterialTheme.typography.labelMedium,
             color = if (isUnread) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
             fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,

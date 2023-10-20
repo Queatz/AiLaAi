@@ -54,6 +54,7 @@
     <string name="active">Active</string>
     <string name="messages_notification_channel_description">Messages from people.</string>
     <string name="collaboration_notification_channel_description">Collaboration notifications.</string>
+    <string name="host_notification_channel_description">Host notifications.</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
@@ -414,6 +415,11 @@
     <string name="yes_delete">Yes, delete</string>
     <string name="delete_this_occurrence">Delete this occurrence?</string>
     <string name="local">Local</string>
+    <string name="join_group">Join group</string>
+    <string name="send_request">Send request</string>
+    <string name="x_requested_x">%1$s requested to join %2$s</string>
+    <string name="host">Host</string>
+    <string name="accept">Accept</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
@@ -421,5 +427,9 @@
     <plurals name="x_selected">
         <item quantity="one">%1$s selected</item>
         <item quantity="other">%1$s selected</item>
+    </plurals>
+    <plurals name="x_requests">
+        <item quantity="one">%1$s person waiting</item>
+        <item quantity="other">%1$s people waiting</item>
     </plurals>
 </resources>

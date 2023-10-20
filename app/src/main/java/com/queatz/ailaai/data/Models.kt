@@ -48,6 +48,19 @@ class Group(
 ) : Model()
 
 @Serializable
+class JoinRequest(
+    var person: String? = null,
+    var group: String? = null,
+    var message: String? = null
+) : Model()
+
+@Serializable
+class JoinRequestAndPerson(
+    var person: Person? = null,
+    var joinRequest: JoinRequest? = null
+)
+
+@Serializable
 class Crash(
     var details: String? = null,
 ) : Model()

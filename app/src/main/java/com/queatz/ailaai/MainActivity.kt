@@ -262,6 +262,7 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(me) {
                         saves.reload()
+                        joins.start(this)
                     }
 
                     if (showSignedOut) {

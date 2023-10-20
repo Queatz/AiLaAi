@@ -11,6 +11,12 @@ data class ContactPhoto(
     val seen: Instant? = null
 )
 
+fun Person.contactPhoto() = ContactPhoto(
+    name ?: "",
+    photo,
+    seen
+)
+
 fun GroupExtended.isGroupLike(omitGroupsWith: Person? = null) = group?.name?.isNotBlank() == true && members?.none { it.person?.id == omitGroupsWith?.id } == true
 
 fun GroupExtended.name(someone: String, emptyGroup: String, omit: List<String>) =
