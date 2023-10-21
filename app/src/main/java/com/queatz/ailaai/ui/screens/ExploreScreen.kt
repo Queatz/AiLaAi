@@ -26,14 +26,14 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.cards
 import com.queatz.ailaai.api.myGeo
 import com.queatz.ailaai.api.savedCards
-import com.queatz.ailaai.data.Card
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
+import com.queatz.db.Person
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 

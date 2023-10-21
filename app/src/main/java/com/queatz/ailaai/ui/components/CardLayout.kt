@@ -22,13 +22,13 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

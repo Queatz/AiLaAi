@@ -21,13 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.JoinRequestAndPerson
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.JoinRequestAndPerson
 import kotlinx.coroutines.launch
 
 @Composable

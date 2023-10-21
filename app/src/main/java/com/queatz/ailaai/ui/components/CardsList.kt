@@ -3,7 +3,10 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,9 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.Card
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.rememberAutoplayIndex
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
 
 @Composable
 fun CardList(

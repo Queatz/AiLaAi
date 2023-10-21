@@ -1,8 +1,9 @@
 package com.queatz.ailaai.extensions
 
 import android.content.Context
-import com.queatz.ailaai.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.R
+import com.queatz.ailaai.data.getAttachment
+import com.queatz.db.*
 import kotlinx.datetime.Instant
 
 data class ContactPhoto(

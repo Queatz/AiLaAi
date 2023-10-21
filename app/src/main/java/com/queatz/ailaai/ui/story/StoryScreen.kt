@@ -7,13 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.Story
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.story
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.editor.StoryActions
+import com.queatz.db.Person
+import com.queatz.db.Story
 
 @Composable
 fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?) {

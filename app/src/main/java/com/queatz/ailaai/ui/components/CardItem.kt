@@ -34,13 +34,13 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 

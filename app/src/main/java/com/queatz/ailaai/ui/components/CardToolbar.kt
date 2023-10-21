@@ -28,7 +28,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.api.uploadCardPhoto
 import com.queatz.ailaai.api.uploadCardVideo
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.isPhoto
@@ -36,6 +35,7 @@ import com.queatz.ailaai.extensions.isVideo
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 

@@ -1,6 +1,9 @@
 package com.queatz.ailaai.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -17,8 +20,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.occurrences
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.Reminder
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
@@ -28,6 +29,8 @@ import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
+import com.queatz.db.Reminder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first

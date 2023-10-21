@@ -4,7 +4,8 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,8 +18,6 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.myGeo
 import com.queatz.ailaai.api.stories
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.Story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -30,6 +29,8 @@ import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
+import com.queatz.db.Story
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

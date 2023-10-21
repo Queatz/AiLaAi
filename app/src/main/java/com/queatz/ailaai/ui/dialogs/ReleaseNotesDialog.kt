@@ -15,15 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.*
+import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.VersionInfo
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.VersionInfo
 
 @Composable
 fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {

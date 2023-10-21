@@ -16,13 +16,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.newReminder
-import com.queatz.ailaai.data.Reminder
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfMinute
-import com.queatz.ailaai.extensions.startOfYear
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 

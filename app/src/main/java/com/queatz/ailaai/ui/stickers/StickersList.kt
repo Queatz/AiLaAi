@@ -20,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.Sticker
-import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Sticker
+import com.queatz.db.StickerPack
 
 @Composable
 fun StickerPackContents(

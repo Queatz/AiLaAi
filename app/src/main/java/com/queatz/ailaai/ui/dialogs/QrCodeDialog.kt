@@ -29,7 +29,6 @@ import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun QrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
     val scope = rememberCoroutineScope()

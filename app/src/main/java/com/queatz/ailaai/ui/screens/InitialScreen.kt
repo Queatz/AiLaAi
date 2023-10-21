@@ -22,6 +22,7 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
+import com.queatz.db.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

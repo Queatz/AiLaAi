@@ -48,21 +48,22 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.helpers.audioRecorder
-import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.group.GroupJoinRequest
+import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
+import com.queatz.db.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

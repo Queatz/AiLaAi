@@ -1,9 +1,9 @@
 package com.queatz.ailaai.services
 
 import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.JoinRequest
-import com.queatz.ailaai.data.JoinRequestAndPerson
 import com.queatz.ailaai.data.api
+import com.queatz.db.JoinRequest
+import com.queatz.db.JoinRequestAndPerson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

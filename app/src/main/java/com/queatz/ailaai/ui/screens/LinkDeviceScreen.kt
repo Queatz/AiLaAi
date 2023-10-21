@@ -15,10 +15,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.confirmLinkDeviceToken
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
 import kotlinx.coroutines.launch
 
 @Composable

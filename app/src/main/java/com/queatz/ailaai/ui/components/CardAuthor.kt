@@ -2,7 +2,10 @@ package com.queatz.ailaai.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,13 +30,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
 
 @Composable
 fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavController, modifier: Modifier = Modifier) {

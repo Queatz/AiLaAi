@@ -16,7 +16,6 @@ import androidx.compose.ui.window.Dialog
 @DslMarker
 annotation class MenuDialogMarker
 
-
 @Composable
 @MenuDialogMarker
 fun Menu(onDismissRequest: () -> Unit, block: @Composable ColumnScope.() -> Unit) {

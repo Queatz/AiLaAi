@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

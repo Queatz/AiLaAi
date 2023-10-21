@@ -28,7 +28,6 @@ android {
         versionCode = 61
         versionName = "0.9.61"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -78,10 +77,12 @@ android {
 }
 
 dependencies {
-    implementation("androidx.exifinterface:exifinterface:1.3.6")
     val ktorVersion = "2.3.4"
     val choiceSdkVersion = "0.3.0"
     val composeVersion = "1.5.3"
+    implementation("app.ailaai.shared:models")
+    implementation("app.ailaai.shared:push")
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -128,10 +129,6 @@ dependencies {
     implementation("ch.acra:acra-core:5.9.7")
     implementation("ch.acra:acra-toast:5.9.7")
     implementation("com.ibm.icu:icu4j:73.2")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     kapt("com.google.auto.service:auto-service:1.0.1")
     compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")

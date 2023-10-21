@@ -1,6 +1,11 @@
 package com.queatz.ailaai.api
 
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.data.Api
+import com.queatz.ailaai.data.ErrorBlock
+import com.queatz.ailaai.data.SuccessBlock
+import com.queatz.db.Card
+import com.queatz.db.Person
+import com.queatz.db.PersonProfile
 
 suspend fun Api.people(
     search: String,

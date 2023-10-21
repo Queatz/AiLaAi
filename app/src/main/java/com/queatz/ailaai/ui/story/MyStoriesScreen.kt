@@ -16,18 +16,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.Story
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
+import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

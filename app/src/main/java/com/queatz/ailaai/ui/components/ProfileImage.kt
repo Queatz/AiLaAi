@@ -16,9 +16,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.db.Person
 
 @Composable
 fun ProfileImage(person: Person?, padding: PaddingValues, onClick: (Person) -> Unit) {

@@ -42,7 +42,6 @@ import com.queatz.ailaai.api.groups
 import com.queatz.ailaai.api.me
 import com.queatz.ailaai.api.updateMe
 import com.queatz.ailaai.data.ErrorBlock
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
@@ -59,6 +58,7 @@ import com.queatz.ailaai.ui.story.StoryScreen
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first

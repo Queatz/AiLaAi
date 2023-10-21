@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.data.Sticker
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Sticker
 
 @Composable
 fun StickerItem(

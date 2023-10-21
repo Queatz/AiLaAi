@@ -16,8 +16,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.stickerPack
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.say
@@ -25,6 +23,8 @@ import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.db.Person
+import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

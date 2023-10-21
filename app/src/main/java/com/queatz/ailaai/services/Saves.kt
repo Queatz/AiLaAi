@@ -13,8 +13,8 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.saveCard
 import com.queatz.ailaai.api.savedCards
 import com.queatz.ailaai.api.unsaveCard
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
+import com.queatz.db.Card
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 val saves by lazy {

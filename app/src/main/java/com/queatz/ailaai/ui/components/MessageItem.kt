@@ -10,10 +10,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.Message
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Message
+import com.queatz.db.Person
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

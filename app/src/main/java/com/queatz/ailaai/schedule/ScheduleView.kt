@@ -1,9 +1,9 @@
 package com.queatz.ailaai.schedule
 
-import com.queatz.ailaai.data.Reminder
-import com.queatz.ailaai.data.ReminderOccurrence
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.nameOfDayOfWeek
+import com.queatz.db.Reminder
+import com.queatz.db.ReminderOccurrence
 import kotlinx.datetime.Instant
 
 enum class ScheduleView {

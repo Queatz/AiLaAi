@@ -22,16 +22,16 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.navigation.NavController
-import com.queatz.ailaai.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.myCards
 import com.queatz.ailaai.api.newCard
-import com.queatz.ailaai.data.Card
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
+import com.queatz.db.Person
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 

@@ -28,12 +28,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.Card
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
+import com.queatz.db.Person
 import kotlin.math.ceil
 
 @OptIn(ExperimentalComposeUiApi::class)

@@ -15,11 +15,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteReminderOccurrence
 import com.queatz.ailaai.api.updateReminderOccurrence
-import com.queatz.ailaai.data.ReminderOccurrence
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 

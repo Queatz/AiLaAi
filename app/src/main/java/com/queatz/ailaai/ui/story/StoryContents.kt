@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.queatz.ailaai.api.card
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -34,6 +33,7 @@ import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
 
 @Composable
 fun StoryContents(

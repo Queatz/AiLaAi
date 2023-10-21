@@ -6,14 +6,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.groups
-import com.queatz.ailaai.data.GroupExtended
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.PersonSource
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
-
+import com.queatz.db.GroupExtended
+import com.queatz.db.Person
+import com.queatz.db.PersonSource
 
 @Composable
 fun ChoosePeopleDialog(

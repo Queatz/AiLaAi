@@ -15,9 +15,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.Sticker
-import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.FileSizeException
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -33,6 +30,9 @@ import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
+import com.queatz.db.Sticker
+import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

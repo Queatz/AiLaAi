@@ -27,6 +27,7 @@ import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
+import com.queatz.db.*
 
 @Composable
 fun StoryCreatorTools(

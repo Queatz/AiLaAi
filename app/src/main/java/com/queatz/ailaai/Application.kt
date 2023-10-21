@@ -1,7 +1,6 @@
 package com.queatz.ailaai
 
 import android.content.Context
-import android.content.ContextWrapper
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
@@ -17,9 +16,9 @@ import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.api.crash
 import com.queatz.ailaai.api.myDevice
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.ui
+import com.queatz.db.DeviceType
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.DisposableObserver
@@ -119,12 +118,6 @@ class Application : android.app.Application() {
         disposable.dispose()
         super.onTerminate()
     }
-}
-
-enum class DeviceType {
-    Hms,
-    Gms,
-    Web
 }
 
 val appLanguage get() = AppCompatDelegate.getApplicationLocales().get(0)?.language

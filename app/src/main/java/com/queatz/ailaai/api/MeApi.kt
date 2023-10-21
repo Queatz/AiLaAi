@@ -2,12 +2,14 @@ package com.queatz.ailaai.api
 
 import android.net.Uri
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.data.Api
+import com.queatz.ailaai.data.ErrorBlock
+import com.queatz.ailaai.data.SuccessBlock
 import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
 import com.queatz.ailaai.extensions.toList
+import com.queatz.db.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 
@@ -37,7 +39,7 @@ suspend fun Api.myDevice(
     deviceToken: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("me/device", Device(deviceType, deviceToken), onError = onError, onSuccess = onSuccess)
+) = post("me/device", MyDevice(deviceType, deviceToken), onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateMe(
     person: Person,

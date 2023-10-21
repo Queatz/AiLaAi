@@ -1,14 +1,13 @@
 package com.queatz.ailaai.services
 
 import com.queatz.ailaai.api.profile
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.PersonProfile
 import com.queatz.ailaai.data.api
+import com.queatz.db.Person
+import com.queatz.db.PersonProfile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
-
 
 val authors by lazy {
     Authors()

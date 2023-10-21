@@ -38,10 +38,8 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
-import com.queatz.ailaai.data.Card
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.cards
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.extensions.px
@@ -51,6 +49,8 @@ import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.helpers.geoKey
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
+import com.queatz.db.Person
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow

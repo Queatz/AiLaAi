@@ -15,8 +15,6 @@ import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStickerPack
 import com.queatz.ailaai.api.myStickerPacks
-import com.queatz.ailaai.data.Person
-import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.say
@@ -26,6 +24,7 @@ import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

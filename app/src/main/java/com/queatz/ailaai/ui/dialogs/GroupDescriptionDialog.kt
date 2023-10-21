@@ -2,10 +2,10 @@ package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.data.Group
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.updateGroup
+import com.queatz.ailaai.data.api
+import com.queatz.db.Group
 
 @Composable
 fun GroupDescriptionDialog(onDismissRequest: () -> Unit, group: Group, onGroupUpdated: (Group) -> Unit) {

@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import com.queatz.ailaai.api.stickerPacks
-import com.queatz.ailaai.data.StickerPack
 import com.queatz.ailaai.data.api
+import com.queatz.db.StickerPack
 import kotlinx.coroutines.flow.MutableStateFlow
 
 val stickers by lazy {

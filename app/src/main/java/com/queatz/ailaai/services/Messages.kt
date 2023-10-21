@@ -1,8 +1,8 @@
 package com.queatz.ailaai.services
 
-import com.queatz.ailaai.data.GroupExtended
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.extensions.isUnread
+import com.queatz.db.GroupExtended
+import com.queatz.db.Person
 import kotlinx.coroutines.flow.MutableStateFlow
 
 val messages by lazy {

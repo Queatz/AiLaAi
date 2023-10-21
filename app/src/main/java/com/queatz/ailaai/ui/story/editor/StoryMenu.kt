@@ -2,7 +2,6 @@ package com.queatz.ailaai.ui.story.editor
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,17 +11,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.Story
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.deleteStory
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.db.Person
+import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
 @Composable

@@ -41,6 +41,7 @@ import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.*
+import com.queatz.db.*
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {

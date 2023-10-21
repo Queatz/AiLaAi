@@ -42,13 +42,13 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.card
 import com.queatz.ailaai.api.myCollaborations
 import com.queatz.ailaai.api.updateCard
-import com.queatz.ailaai.data.Card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")

@@ -5,13 +5,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.groups
-import com.queatz.ailaai.data.Group
-import com.queatz.ailaai.data.GroupExtended
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.db.*
 
 
 @Composable

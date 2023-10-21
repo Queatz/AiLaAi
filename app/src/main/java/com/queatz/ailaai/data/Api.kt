@@ -3,9 +3,9 @@ package com.queatz.ailaai.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.queatz.ailaai.DeviceType
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.db.VersionInfo
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -21,7 +21,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.FileOutputStream
 import kotlin.time.Duration.Companion.seconds
@@ -230,69 +229,3 @@ class Api {
         httpData.get(url).bodyAsChannel().copyTo(outputStream)
     }
 }
-
-@Serializable
-data class VersionInfo(
-    val versionCode: Int,
-    val versionName: String
-)
-
-@Serializable
-data class SignUpRequest(
-    val code: String?
-)
-
-@Serializable
-data class SignInRequest(
-    val code: String,
-)
-
-@Serializable
-data class TokenResponse(
-    val token: String,
-)
-
-@Serializable
-class GroupExtended(
-    var group: Group? = null,
-    var members: List<MemberAndPerson>? = null,
-    var latestMessage: Message? = null,
-)
-
-@Serializable
-class MemberAndPerson(
-    var person: Person? = null,
-    var member: Member? = null,
-)
-
-@Serializable
-data class ProfileStats(
-    val friendsCount: Int,
-    val cardCount: Int,
-)
-
-@Serializable
-data class PersonProfile(
-    val person: Person,
-    val profile: Profile,
-    val stats: ProfileStats,
-)
-
-@Serializable
-class SaveAndCard(
-    var save: Save? = null,
-    var card: Card? = null,
-)
-
-@Serializable
-class Device(
-    val type: DeviceType,
-    val token: String,
-)
-
-@Serializable
-data class ExportDataResponse(
-    val profile: Profile? = null,
-    val cards: List<Card>? = null,
-    val stories: List<Story>? = null
-)

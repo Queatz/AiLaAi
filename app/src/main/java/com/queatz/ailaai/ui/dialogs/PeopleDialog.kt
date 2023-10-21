@@ -10,11 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.data.Person
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.PersonMember
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Person
 
 @Composable
 fun PeopleDialog(
