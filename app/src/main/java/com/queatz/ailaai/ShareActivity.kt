@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import com.queatz.ailaai.api.me
+import app.ailaai.api.me
+import app.ailaai.api.sendMessage
 import com.queatz.ailaai.api.sendMedia
-import com.queatz.ailaai.api.sendMessage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
@@ -82,6 +82,7 @@ class ShareActivity : AppCompatActivity() {
                                 groups.map { group ->
                                     async {
                                         api.sendMedia(
+                                            context,
                                             group.id!!,
                                             content.photos,
                                             null

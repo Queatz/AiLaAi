@@ -17,9 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import app.ailaai.api.card
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.story.ReorderDialog

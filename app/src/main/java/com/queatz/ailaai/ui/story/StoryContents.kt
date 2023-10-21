@@ -23,8 +23,8 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import app.ailaai.api.card
 import coil.compose.AsyncImage
-import com.queatz.ailaai.api.card
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf

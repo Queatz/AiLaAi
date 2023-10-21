@@ -7,7 +7,6 @@ import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.db.VersionInfo
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.observer.*
@@ -36,22 +35,19 @@ val api = Api()
 
 const val appDomain = "https://ailaai.app"
 
-typealias ErrorBlock = (suspend (Exception) -> Unit)?
-typealias SuccessBlock<T> = suspend (T) -> Unit
-
-class Api {
+class Api : app.ailaai.api.Api() {
 
     private val _onUnauthorized = MutableSharedFlow<Unit>()
     val onUnauthorized = _onUnauthorized.asSharedFlow()
 
     internal lateinit var context: Context
 
-    internal val baseUrl = "https://api.ailaai.app"
+    override val baseUrl = "https://api.ailaai.app"
 //    private val baseUrl = "http://10.0.2.2:8080"
 
     private val tokenKey = stringPreferencesKey("token")
 
-    private val http = HttpClient {
+    override val httpClient = HttpClient {
         expectSuccess = true
 
         install(ContentNegotiation) {
@@ -71,7 +67,7 @@ class Api {
         }
     }
 
-    private val httpData = HttpClient {
+    override val httpDataClient = HttpClient {
         expectSuccess = true
 
         install(ContentNegotiation) {
@@ -79,18 +75,17 @@ class Api {
         }
     }
 
-    private var token: String? = null
+    override val httpJson: Json get() = json
+
+    override var authToken: String? = null
 
     fun init(context: Context) {
         this.context = context
 
         runBlocking {
-            token = context.dataStore.data.first()[tokenKey]
+            authToken = context.dataStore.data.first()[tokenKey]
         }
     }
-
-    internal fun client() = http
-    internal fun dataClient() = httpData
 
     fun signOut() {
         setToken(null)
@@ -98,108 +93,18 @@ class Api {
 
     fun url(it: String) = "$baseUrl$it"
 
-    internal suspend inline fun <reified T : Any> post(
-        url: String,
-        noinline progressCallback: ((Float) -> Unit)? = null,
-        client: HttpClient = http,
-        noinline onError: ErrorBlock,
-        noinline onSuccess: SuccessBlock<T>
-    ) {
-        post(url, null as String?, progressCallback, client, onError, onSuccess)
-    }
-
-    internal suspend inline fun <reified Body : Any, reified T : Any> post(
-        url: String,
-        body: Body?,
-        noinline progressCallback: ((Float) -> Unit)? = null,
-        client: HttpClient = http,
-        noinline onError: ErrorBlock,
-        noinline onSuccess: SuccessBlock<T>
-    ) {
-        try {
-            onSuccess(post(url, body, progressCallback, client))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            if (onError?.invoke(e) == null ) {
-                // Usually cancellations are from the user leaving the page
-                if (e !is CancellationException && e !is InterruptedException) {
-                    withContext(Dispatchers.Main) {
-                        context.showDidntWork()
-                    }
-                }
+    override suspend fun showError(t: Throwable) {
+        t.printStackTrace()
+        // Usually cancellations are from the user leaving the page
+        if (t !is CancellationException && t !is InterruptedException) {
+            withContext(Dispatchers.Main) {
+                context.showDidntWork()
             }
         }
     }
-
-    internal suspend inline fun <reified R : Any> post(
-        url: String,
-        noinline progressCallback: ((Float) -> Unit)? = null,
-        client: HttpClient = http,
-    ): R = post(url, null as String?, progressCallback, client)
-
-    internal suspend inline fun <reified R : Any, reified T : Any> post(
-        url: String,
-        body: T?,
-        noinline progressCallback: ((Float) -> Unit)? = null,
-        client: HttpClient = http,
-    ): R = client.post("$baseUrl/${url}") {
-        onUpload { bytesSentTotal, contentLength ->
-            val progress =
-                if (contentLength > 0) (bytesSentTotal.toDouble() / contentLength.toDouble()).toFloat() else 0f
-            progressCallback?.invoke(progress)
-        }
-
-        if (token != null) {
-            header(HttpHeaders.Authorization, "Bearer $token")
-        }
-
-        if (client == http) {
-            contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
-        }
-
-        setBody(body)
-    }.body()
-
-    internal suspend inline fun <reified T: Any> get(
-        url: String,
-        parameters: Map<String, String?>? = null,
-        client: HttpClient = http,
-        noinline onError: ErrorBlock,
-        noinline onSuccess: SuccessBlock<T>
-    ) {
-        try {
-            onSuccess(get(url, parameters, client))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Usually cancellations are from the user leaving the page
-            if (onError?.invoke(e) == null ) {
-                if (e !is CancellationException && e !is InterruptedException) {
-                    withContext(Dispatchers.Main) {
-                        context.showDidntWork()
-                    }
-                }
-            }
-        }
-    }
-
-    internal suspend inline fun <reified T : Any> get(
-        url: String,
-        parameters: Map<String, String?>? = null,
-        client: HttpClient = http,
-    ): T = client.get("$baseUrl/${url}") {
-        if (token != null) {
-            header(HttpHeaders.Authorization, "Bearer $token")
-        }
-
-        if (client == http) {
-            contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
-        }
-
-        parameters?.filter { it.value != null }?.forEach { (key: String, value) -> parameter(key, value) }
-    }.body()
 
     fun setToken(token: String?) {
-        this.token = token
+        this.authToken = token
 
         CoroutineScope(Dispatchers.Default).launch {
             context.dataStore.edit {
@@ -212,20 +117,20 @@ class Api {
         }
     }
 
-    fun hasToken() = token != null
+    fun hasToken() = authToken != null
 
 //    suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
 
-    suspend fun latestAppVersionInfo() = httpData.get("$appDomain/version-info").bodyAsText().trim().split(",").let {
+    suspend fun latestAppVersionInfo() = httpDataClient.get("$appDomain/version-info").bodyAsText().trim().split(",").let {
         VersionInfo(
             versionCode = it.first().toInt(),
             versionName = it[1]
         )
     }
 
-    suspend fun appReleaseNotes() = httpData.get("$appDomain/release-notes").bodyAsText()
+    suspend fun appReleaseNotes() = httpDataClient.get("$appDomain/release-notes").bodyAsText()
 
     suspend fun downloadFile(url: String, outputStream: FileOutputStream) {
-        httpData.get(url).bodyAsChannel().copyTo(outputStream)
+        httpDataClient.get(url).bodyAsChannel().copyTo(outputStream)
     }
 }

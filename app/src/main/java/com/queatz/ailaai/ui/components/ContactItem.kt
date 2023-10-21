@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
+import app.ailaai.api.createGroup
+import app.ailaai.api.updateMember
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.createGroup
-import com.queatz.ailaai.api.updateMember
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.joins

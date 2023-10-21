@@ -31,17 +31,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import app.ailaai.api.createGroup
+import app.ailaai.api.createMember
+import app.ailaai.api.profile
+import app.ailaai.api.profileCards
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.api.updateMyPhoto
+import com.queatz.ailaai.api.updateProfilePhoto
+import com.queatz.ailaai.api.updateProfileVideo
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import kotlinx.coroutines.*
 import com.queatz.db.*
+import kotlinx.coroutines.*
 
 @Composable
 fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
@@ -147,7 +153,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.updateMyPhoto(it) { reload() }
+            api.updateMyPhoto(context, it) { reload() }
         }
     }
 
@@ -159,6 +165,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             if (it.isVideo(context)) {
                 isUploadingVideo = true
                 api.updateProfileVideo(
+                    context,
                     it,
                     context.contentResolver.getType(it) ?: "video/*",
                     it.lastPathSegment ?: "video.${
@@ -174,7 +181,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     }
                 )
             } else if (it.isPhoto(context)) {
-                api.updateProfilePhoto(it)
+                api.updateProfilePhoto(context, it)
             }
             reload()
             isUploadingVideo = false

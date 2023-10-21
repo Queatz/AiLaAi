@@ -26,13 +26,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.navigation.NavController
+import app.ailaai.api.card
+import app.ailaai.api.deleteMessage
+import app.ailaai.api.sticker
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.card
-import com.queatz.ailaai.api.deleteMessage
-import com.queatz.ailaai.api.sticker
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAllAttachments

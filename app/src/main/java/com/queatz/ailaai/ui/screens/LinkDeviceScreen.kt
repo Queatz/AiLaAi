@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import app.ailaai.api.confirmLinkDeviceToken
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.confirmLinkDeviceToken
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.ui.theme.PaddingDefault

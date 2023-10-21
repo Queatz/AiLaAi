@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import app.ailaai.api.crash
+import app.ailaai.api.myDevice
 import at.bluesource.choicesdk.core.ChoiceSdk
 import at.bluesource.choicesdk.messaging.common.RemoteMessage
 import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
@@ -13,8 +15,6 @@ import com.google.auto.service.AutoService
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.maps.MapsInitializer
-import com.queatz.ailaai.api.crash
-import com.queatz.ailaai.api.myDevice
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.ui

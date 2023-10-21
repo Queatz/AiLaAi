@@ -24,17 +24,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import app.ailaai.api.*
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.queatz.ailaai.*
+import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.ui.components.*
@@ -43,11 +42,14 @@ import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Group
+import com.queatz.db.GroupExtended
+import com.queatz.db.Member
+import com.queatz.db.Person
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import com.queatz.db.*
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -78,7 +80,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(geo) {
         geo?.let {
-            api.myGeo(it)
+            api.myGeo(it.toGeo())
         }
     }
 

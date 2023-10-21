@@ -26,11 +26,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
+import app.ailaai.api.*
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
 import com.queatz.ailaai.appLanguage
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.appDomain
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
@@ -38,12 +40,12 @@ import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import com.queatz.db.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,7 +187,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
         fun signOut() {
             scope.launch {
-                api.setToken(null)
+                api.signOut()
                 updateMe()
                 signOutDialog = false
             }

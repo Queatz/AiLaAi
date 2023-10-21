@@ -14,15 +14,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import app.ailaai.api.myGeo
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.myGeo
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.rememberSavableStateOf
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.*
@@ -53,7 +50,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
 
     LaunchedEffect(geo) {
         geo?.let {
-            api.myGeo(it)
+            api.myGeo(it.toGeo())
         }
     }
 
@@ -65,7 +62,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
     LaunchedEffect(geo, tab) {
         if (geo != null) {
             api.stories(
-                geo!!,
+                geo!!.toGeo(),
                 public = tab == MainTab.Local,
                 onError = {
                     if (it is CancellationException) {

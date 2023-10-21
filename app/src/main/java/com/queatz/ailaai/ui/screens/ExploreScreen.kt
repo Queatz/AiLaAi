@@ -21,11 +21,11 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import app.ailaai.api.cards
+import app.ailaai.api.myGeo
+import app.ailaai.api.savedCards
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.cards
-import com.queatz.ailaai.api.myGeo
-import com.queatz.ailaai.api.savedCards
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
@@ -66,7 +66,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(geo) {
         geo?.let {
-            api.myGeo(it)
+            api.myGeo(it.toGeo())
         }
     }
 
@@ -112,7 +112,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             MainTab.Friends,
             MainTab.Local -> {
                 api.cards(
-                    geo!!,
+                    geo!!.toGeo(),
                     offset = offset,
                     limit = limit,
                     search = value.takeIf { it.isNotBlank() },

@@ -43,10 +43,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import com.queatz.ailaai.*
+import app.ailaai.api.*
+import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.api.sendAudio
+import com.queatz.ailaai.api.sendMedia
+import com.queatz.ailaai.api.sendVideos
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.getAttachment
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.group.GroupJoinRequest
 import com.queatz.ailaai.helpers.audioRecorder
@@ -63,7 +68,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
-import com.queatz.db.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -158,6 +162,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
 
                 if (photos.isNotEmpty()) {
                     api.sendMedia(
+                        context,
                         groupId,
                         uris,
                         stageReply?.id?.let {
@@ -168,6 +173,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
 
                 if (videos.isNotEmpty()) {
                     api.sendVideos(
+                        context,
                         groupId,
                         videos,
                         if (photos.isEmpty()) {

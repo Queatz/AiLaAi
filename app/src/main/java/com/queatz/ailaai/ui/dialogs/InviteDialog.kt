@@ -8,9 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
+import app.ailaai.api.invite
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.api.invite
 import com.queatz.ailaai.extensions.shareAsText
 import com.queatz.ailaai.ui.theme.PaddingDefault
 

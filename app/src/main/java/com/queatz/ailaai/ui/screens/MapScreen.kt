@@ -35,17 +35,14 @@ import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.navigation.NavController
+import app.ailaai.api.cards
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
-import com.queatz.ailaai.api.cards
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
-import com.queatz.ailaai.extensions.px
-import com.queatz.ailaai.extensions.rememberSavableStateOf
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.toLatLng
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.geoKey
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -105,7 +102,7 @@ fun MapScreen(navController: NavController, me: () -> Person?) {
 
     suspend fun reload() {
         position = map?.cameraPosition?.target
-        api.cards(position ?: return, limit = 10) {
+        api.cards(position?.toGeo() ?: return, limit = 10) {
             cards = it // todo exclude equipped cards at api layer
         }
     }

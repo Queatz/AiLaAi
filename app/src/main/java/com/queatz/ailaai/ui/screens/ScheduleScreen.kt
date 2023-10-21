@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
+import app.ailaai.api.occurrences
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.occurrences
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*

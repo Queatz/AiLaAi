@@ -7,14 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import app.ailaai.api.createStickerPack
+import app.ailaai.api.myStickerPacks
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.createStickerPack
-import com.queatz.ailaai.api.myStickerPacks
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.say
@@ -24,13 +23,13 @@ import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.*
+import com.queatz.db.Person
+import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showCreateStickerPackDialog by rememberStateOf(false)
     var stickerPacks by rememberStateOf(emptyList<StickerPack>())

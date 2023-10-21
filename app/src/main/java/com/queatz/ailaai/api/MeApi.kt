@@ -1,80 +1,29 @@
 package com.queatz.ailaai.api
 
+import android.content.Context
 import android.net.Uri
-import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.data.Api
-import com.queatz.ailaai.data.ErrorBlock
-import com.queatz.ailaai.data.SuccessBlock
+import app.ailaai.api.*
 import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
-import com.queatz.ailaai.extensions.toList
-import com.queatz.db.*
-import io.ktor.client.request.forms.*
 import io.ktor.http.*
 
-suspend fun Api.me(
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Person>,
-) = get("me", onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.transferCode(
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Transfer>,
-) = get("me/transfer", onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.refreshTransferCode(
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Transfer>,
-) = post("me/transfer/refresh", onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.myGeo(
-    geo: LatLng,
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("me/geo", geo.toList(), onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.myDevice(
-    deviceType: DeviceType,
-    deviceToken: String,
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<HttpStatusCode> = {},
-) = post("me/device", MyDevice(deviceType, deviceToken), onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.updateMe(
-    person: Person,
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Person> = {},
-) = post("me", person, onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.updateProfile(
-    profile: Profile,
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Profile> = {},
-) = post("me/profile", profile, onError = onError, onSuccess = onSuccess)
-
-suspend fun Api.hiddenGroups(
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<List<GroupExtended>> = {},
-) = get("me/groups/hidden", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateProfilePhoto(
+    context: Context,
     photo: Uri,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
-    val scaledPhoto = photo.asScaledJpeg(context)
-    return post("me/profile/photo", MultiPartFormDataContent(
-        formData {
-            append("photo", scaledPhoto, Headers.build {
-                append(HttpHeaders.ContentType, "image/jpeg")
-                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-            })
-        }
-    ), client = dataClient(), onError = onError, onSuccess = onSuccess)
+    return updateProfilePhoto(
+        photo.asScaledJpeg(context),
+        onError,
+        onSuccess
+    )
 }
 
 suspend fun Api.updateProfileVideo(
+    context: Context,
     video: Uri,
     contentType: String,
     filename: String,
@@ -90,46 +39,26 @@ suspend fun Api.updateProfileVideo(
         onError?.invoke(e)
         return
     }
-    return post(
-        "me/profile/video",
-        MultiPartFormDataContent(
-            formData {
-                append(
-                    "photo",
-                    scaledVideo.asInputProvider(),
-                    Headers.build {
-                        append(HttpHeaders.ContentType, contentType)
-                        append(HttpHeaders.ContentDisposition, "filename=${filename}")
-                    }
-                )
-            }
-        ),
-        progressCallback = uploadCallback,
-        client = dataClient(),
-        onError = onError,
-        onSuccess = onSuccess
+    return updateProfileVideo(
+        scaledVideo.asInputProvider(),
+        contentType,
+        filename,
+        uploadCallback,
+        onError,
+        onSuccess
     )
 }
 
 suspend fun Api.updateMyPhoto(
+    context: Context,
     photo: Uri,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
-    val scaledPhoto = photo.asScaledJpeg(context)
-    return post(
-        "me/photo",
-        MultiPartFormDataContent(
-            formData {
-                append("photo", scaledPhoto, Headers.build {
-                    append(HttpHeaders.ContentType, "image/jpeg")
-                    append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
-                })
-            }
-        ),
-        client = dataClient(),
-        onError = onError,
-        onSuccess = onSuccess
+    return updateMyPhoto(
+        photo.asScaledJpeg(context),
+        onError,
+        onSuccess
     )
 }
 

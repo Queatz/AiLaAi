@@ -19,15 +19,14 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.queatz.ailaai.data.api
 import com.queatz.ailaai.api.uploadStoryAudio
 import com.queatz.ailaai.api.uploadStoryPhotos
-import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.horizontalFadingEdge
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.launch
-import com.queatz.db.*
 
 @Composable
 fun StoryCreatorTools(
@@ -35,6 +34,7 @@ fun StoryCreatorTools(
     navController: NavController,
     addPart: (part: StoryContent) -> Unit
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showCardSelectorDialog by rememberStateOf(false)
 
@@ -42,7 +42,7 @@ fun StoryCreatorTools(
         if (it.isEmpty()) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.uploadStoryPhotos(storyId, it) { photoUrls ->
+            api.uploadStoryPhotos(context, storyId, it) { photoUrls ->
                 addPart(StoryContent.Photos(photoUrls))
                 addPart(
                     StoryContent.Text("")
@@ -55,7 +55,7 @@ fun StoryCreatorTools(
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.uploadStoryAudio(storyId, it) { audioUrl ->
+            api.uploadStoryAudio(context, storyId, it) { audioUrl ->
                 addPart(StoryContent.Audio(audioUrl))
                 addPart(
                     StoryContent.Text("")

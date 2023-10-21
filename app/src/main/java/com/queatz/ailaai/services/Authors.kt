@@ -1,6 +1,6 @@
 package com.queatz.ailaai.services
 
-import com.queatz.ailaai.api.profile
+import app.ailaai.api.profile
 import com.queatz.ailaai.data.api
 import com.queatz.db.Person
 import com.queatz.db.PersonProfile

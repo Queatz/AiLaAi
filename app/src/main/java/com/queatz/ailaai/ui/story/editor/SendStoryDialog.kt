@@ -3,8 +3,8 @@ package com.queatz.ailaai.ui.story.editor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import app.ailaai.api.sendMessage
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.sendMessage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.name

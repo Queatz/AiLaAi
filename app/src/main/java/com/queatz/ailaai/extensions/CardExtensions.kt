@@ -1,8 +1,8 @@
 package com.queatz.ailaai.extensions
 
+import app.ailaai.api.cardGroup
+import app.ailaai.api.sendMessage
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.api.cardGroup
-import com.queatz.ailaai.api.sendMessage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json

@@ -13,16 +13,15 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import app.ailaai.api.signIn
+import app.ailaai.api.signUp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.api.signIn
-import com.queatz.ailaai.api.signUp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import io.ktor.client.plugins.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
-import com.queatz.db.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

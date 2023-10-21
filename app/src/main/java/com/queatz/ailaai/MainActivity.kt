@@ -12,7 +12,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,11 +40,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import app.ailaai.api.ErrorBlock
+import app.ailaai.api.groups
+import app.ailaai.api.me
+import app.ailaai.api.updateMe
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.queatz.ailaai.api.groups
-import com.queatz.ailaai.api.me
-import com.queatz.ailaai.api.updateMe
-import com.queatz.ailaai.data.ErrorBlock
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
@@ -58,7 +61,7 @@ import com.queatz.ailaai.ui.story.StoryScreen
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.*
+import com.queatz.db.Person
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first

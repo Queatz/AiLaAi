@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import app.ailaai.api.*
 import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
@@ -38,11 +39,11 @@ import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
-import com.queatz.db.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -364,6 +365,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                         if (it.isVideo(context)) {
                             isUploadingVideo = true
                             api.uploadCardVideo(
+                                context,
                                 card!!.id!!,
                                 it,
                                 context.contentResolver.getType(it) ?: "video/*",
@@ -380,7 +382,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 }
                             )
                         } else if (it.isPhoto(context)) {
-                            api.uploadCardPhoto(card!!.id!!, it)
+                            api.uploadCardPhoto(context, card!!.id!!, it)
                         }
                         api.card(cardId) { card = it }
                         uploadJob = null

@@ -3,8 +3,8 @@ package com.queatz.ailaai.services
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import com.queatz.ailaai.api.presence
-import com.queatz.ailaai.api.readStoriesUntilNow
+import app.ailaai.api.presence
+import app.ailaai.api.readStoriesUntilNow
 import com.queatz.ailaai.data.api
 import com.queatz.db.Presence
 import kotlinx.coroutines.flow.MutableStateFlow

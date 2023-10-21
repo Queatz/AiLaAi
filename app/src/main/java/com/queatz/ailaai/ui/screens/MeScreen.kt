@@ -22,9 +22,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.navigation.NavController
+import app.ailaai.api.myCards
+import app.ailaai.api.newCard
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.myCards
-import com.queatz.ailaai.api.newCard
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*

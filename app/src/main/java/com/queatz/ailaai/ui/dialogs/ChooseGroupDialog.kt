@@ -3,13 +3,15 @@ package com.queatz.ailaai.ui.dialogs
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
+import app.ailaai.api.groups
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.groups
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.db.*
+import com.queatz.db.Group
+import com.queatz.db.GroupExtended
+import com.queatz.db.Person
 
 
 @Composable

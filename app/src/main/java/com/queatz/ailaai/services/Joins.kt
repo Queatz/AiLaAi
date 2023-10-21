@@ -1,6 +1,6 @@
 package com.queatz.ailaai.services
 
-import com.queatz.ailaai.api.*
+import app.ailaai.api.*
 import com.queatz.ailaai.data.api
 import com.queatz.db.JoinRequest
 import com.queatz.db.JoinRequestAndPerson

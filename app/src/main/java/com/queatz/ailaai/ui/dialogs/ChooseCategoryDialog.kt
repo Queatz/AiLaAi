@@ -3,12 +3,13 @@ package com.queatz.ailaai.ui.dialogs
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import app.ailaai.api.categories
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.api.categories
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.geoKey
 import kotlinx.coroutines.flow.first
 
@@ -34,7 +35,7 @@ fun ChooseCategoryDialog(
         val geo = LatLng.getFactory().create(savedGeo[0], savedGeo[1])
 
         isLoading = true
-        api.categories(geo) {
+        api.categories(geo.toGeo()) {
             allCategories = it
         }
         isLoading = false

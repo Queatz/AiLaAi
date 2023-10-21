@@ -9,13 +9,12 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import app.ailaai.api.stickerPack
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.stickerPack
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.say
@@ -31,7 +30,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun StickerPackScreen(navController: NavController, stickerPackId: String, me: () -> Person?) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     var stickerPack by rememberStateOf<StickerPack?>(null)
     var showReportDialog by rememberStateOf(false)
 

@@ -3,7 +3,7 @@ package com.queatz.ailaai.services
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import com.queatz.ailaai.api.stickerPacks
+import app.ailaai.api.stickerPacks
 import com.queatz.ailaai.data.api
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.flow.MutableStateFlow

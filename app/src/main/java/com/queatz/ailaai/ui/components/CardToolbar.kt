@@ -24,8 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import app.ailaai.api.updateCard
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.updateCard
 import com.queatz.ailaai.api.uploadCardPhoto
 import com.queatz.ailaai.api.uploadCardVideo
 import com.queatz.ailaai.data.api
@@ -68,6 +68,7 @@ fun CardToolbar(
             if (it.isVideo(context)) {
                 isUploadingVideo = true
                 api.uploadCardVideo(
+                    context,
                     card!!.id!!,
                     it,
                     context.contentResolver.getType(it) ?: "video/*",
@@ -84,7 +85,7 @@ fun CardToolbar(
                     }
                 )
             } else if (it.isPhoto(context)) {
-                api.uploadCardPhoto(card!!.id!!, it)
+                api.uploadCardPhoto(context, card!!.id!!, it)
             }
             onChange()
             isUploadingVideo = false

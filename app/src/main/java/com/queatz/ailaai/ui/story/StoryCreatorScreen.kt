@@ -24,10 +24,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import app.ailaai.api.card
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.api.story
+import com.queatz.ailaai.api.updateStory
+import com.queatz.ailaai.api.updateStoryDraft
+import com.queatz.ailaai.api.uploadStoryPhotos
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
@@ -39,10 +44,13 @@ import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.Card
+import com.queatz.db.Person
+import com.queatz.db.Story
+import com.queatz.db.StoryDraft
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
-import com.queatz.db.*
 
 @Composable
 fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: () -> Person?) {
@@ -529,7 +537,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     if (it.isEmpty()) return@rememberLauncherForActivityResult
 
                                     scope.launch {
-                                        api.uploadStoryPhotos(storyId, it) { photoUrls ->
+                                        api.uploadStoryPhotos(context, storyId, it) { photoUrls ->
                                             part.edit {
                                                 photos += photoUrls
                                             }
