@@ -17,6 +17,7 @@ import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.api.crash
 import com.queatz.ailaai.api.myDevice
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.ui
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers

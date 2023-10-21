@@ -37,7 +37,7 @@ class Push {
     private lateinit var context: Context
     var navController: NavController? = null
     var latestEvent: Lifecycle.Event? = null
-    val coroutineScope = CoroutineScope(Dispatchers.Default)
+    val scope = CoroutineScope(Dispatchers.Default)
     private val meKey = stringPreferencesKey("me")
     private var meId: String? = null
 
@@ -165,7 +165,7 @@ class Push {
             navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
             navController?.currentBackStackEntry?.arguments?.getString("id") == data.group.id
         ) {
-            coroutineScope.launch {
+            scope.launch {
                 latestMessageFlow.emit(data.group.id)
             }
             return

@@ -195,7 +195,11 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     LaunchedEffect(me) {
-                        mePresence.reload()
+                        if (me != null) {
+                            saves.reload()
+                            joins.reload()
+                            mePresence.reload()
+                        }
                     }
 
                     LaunchedEffect(Unit) {
@@ -258,11 +262,6 @@ class MainActivity : AppCompatActivity() {
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                         }
-                    }
-
-                    LaunchedEffect(me) {
-                        saves.reload()
-                        joins.start(this)
                     }
 
                     if (showSignedOut) {

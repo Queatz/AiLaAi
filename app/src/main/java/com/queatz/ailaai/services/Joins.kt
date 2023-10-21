@@ -5,6 +5,7 @@ import com.queatz.ailaai.data.JoinRequest
 import com.queatz.ailaai.data.JoinRequestAndPerson
 import com.queatz.ailaai.data.api
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -12,28 +13,25 @@ val joins = Joins()
 
 class Joins {
 
-    private lateinit var scope: CoroutineScope
+    val scope = CoroutineScope(Dispatchers.Default)
 
     val myJoins = MutableStateFlow<List<JoinRequestAndPerson>>(emptyList())
     val joins = MutableStateFlow<List<JoinRequestAndPerson>>(emptyList())
 
-    fun start(scope: CoroutineScope) {
-        this.scope = scope
-        scope.launch {
-            reload()
-            reloadMine()
-        }
-    }
-
     suspend fun reload() {
+        reloadIncoming()
+        reloadMine()
+    }
+
+    private suspend fun reloadIncoming() {
         api.joinRequests {
-            joins.emit(it)
+            joins.value = it
         }
     }
 
-    suspend fun reloadMine() {
+    private suspend fun reloadMine() {
         api.myJoinRequests {
-            myJoins.emit(it)
+            myJoins.value = it
         }
     }
 
@@ -44,18 +42,18 @@ class Joins {
 
     suspend fun accept(joinRequest: String) {
         api.acceptJoinRequest(joinRequest)
-        reload()
+        reloadIncoming()
     }
 
     suspend fun delete(joinRequest: String) {
         api.deleteJoinRequest(joinRequest)
-        reload()
+        reloadIncoming()
         reloadMine()
     }
 
     fun onPush(data: JoinRequestPushData) {
         scope.launch {
-            reload()
+            reloadIncoming()
             reloadMine()
         }
     }

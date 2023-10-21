@@ -95,6 +95,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var selectedMessages by rememberStateOf(emptySet<Message>())
 
     val allJoinRequests by joins.joins.collectAsState()
+    val myJoinRequests by joins.myJoins.collectAsState()
     var joinRequests by remember {
         mutableStateOf(emptyList<JoinRequestAndPerson>())
     }
@@ -553,7 +554,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             }
 
             if (myMember == null) {
-                val joinRequestId = joinRequests.find { it.joinRequest?.group == groupId }?.joinRequest?.id
+                val joinRequestId = myJoinRequests.find { it.joinRequest?.group == groupId }?.joinRequest?.id
 
                 Row(
                     horizontalArrangement = Arrangement.Center,
