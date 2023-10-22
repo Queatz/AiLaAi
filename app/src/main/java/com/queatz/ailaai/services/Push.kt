@@ -22,13 +22,13 @@ import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.attachmentText
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.db.*
+import com.queatz.push.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 
 val push by lazy {
     Push()
@@ -45,6 +45,9 @@ class Push {
 
     private val latestMessageFlow = MutableSharedFlow<String?>()
     val latestMessage: Flow<String?> = latestMessageFlow
+
+    private val eventsFlow = MutableSharedFlow<PushDataData>()
+    val events: Flow<PushDataData> = eventsFlow
 
     private val notificationManager by lazy {
         context.getSystemService(NotificationManager::class.java)
@@ -69,11 +72,12 @@ class Push {
 
         try {
             when (PushAction.valueOf(action)) {
-                PushAction.Message -> receive(parse<MessagePushData>(data["data"]!!))
-                PushAction.Collaboration -> receive(parse<CollaborationPushData>(data["data"]!!))
-                PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(data["data"]!!))
+                PushAction.Message -> receive(parse<MessagePushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
+                PushAction.Collaboration -> receive(parse<CollaborationPushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
+                PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
+                PushAction.Group -> receive(parse<GroupPushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
             }
-        } catch (ex: Exception) {
+        } catch (ex: Throwable) {
             ex.printStackTrace()
         }
     }
@@ -116,6 +120,29 @@ class Push {
         )
     }
 
+    private fun receive(data: GroupPushData) {
+        val deeplinkIntent = Intent(
+            Intent.ACTION_VIEW,
+            "$appDomain/group/${data.group.id}".toUri(),
+            context,
+            MainActivity::class.java
+        )
+
+        if (data.event == GroupEvent.Join) {
+            send(
+                deeplinkIntent,
+                Notifications.Host,
+                groupKey = "group/${data.group.id}",
+                title = data.group.name ?: "",
+                text = context.getString(
+                    R.string.x_added_x,
+                    personNameOrYou(data.details?.invitor),
+                    personNameOrYou(data.person)
+                )
+            )
+        }
+    }
+
     private fun eventForCollaborationNotification(data: CollaborationPushData): String {
         val person = data.person.name ?: context.getString(R.string.someone)
         return when (data.event) {
@@ -134,7 +161,7 @@ class Push {
                     context.getString(R.string.person_updated_details, person, cardDetailName(data.data.details))
                 } else {
                     context.getString(
-                        R.string.person_updated_card, person, cardDetailName(data.data.details), data.data.card.name ?: context.getString(
+                        R.string.person_updated_card, person, cardDetailName(data.data.details), data.data.card?.name ?: context.getString(
                             R.string.inline_a_card
                         ))
                 }
@@ -253,62 +280,3 @@ enum class Notifications(@StringRes val channelName: Int, @StringRes val descrip
     Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description);
     val key get() = name.lowercase()
 }
-
-enum class PushAction {
-    Message,
-    Collaboration,
-    JoinRequest
-}
-
-@Serializable
-sealed class PushDataData
-
-@Serializable
-data class JoinRequestPushData(
-    val person: Person,
-    val group: Group,
-    val joinRequest: JoinRequest,
-    val event: JoinRequestEvent,
-) : PushDataData()
-
-enum class JoinRequestEvent {
-    Request
-}
-
-@Serializable
-data class MessagePushData(
-    val group: Group,
-    val person: Person,
-    val message: Message
-) : PushDataData()
-
-enum class CollaborationEvent {
-    AddedPerson,
-    RemovedPerson,
-    AddedCard,
-    RemovedCard,
-    UpdatedCard,
-}
-
-enum class CollaborationEventDataDetails {
-    Photo,
-    Video,
-    Conversation,
-    Name,
-    Location,
-}
-
-@Serializable
-data class CollaborationEventData (
-    val card: Card? = null,
-    val person: Person? = null,
-    val details: CollaborationEventDataDetails? = null
-)
-
-@Serializable
-data class CollaborationPushData(
-    val person: Person,
-    val card: Card,
-    val event: CollaborationEvent,
-    val data: CollaborationEventData,
-) : PushDataData()

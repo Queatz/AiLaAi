@@ -420,6 +420,7 @@
     <string name="x_requested_x">%1$s requested to join %2$s</string>
     <string name="host">Host</string>
     <string name="accept">Accept</string>
+    <string name="x_added_x">%1$s added %2$s</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

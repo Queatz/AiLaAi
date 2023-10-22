@@ -36,6 +36,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.messages
+import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
@@ -46,9 +47,12 @@ import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
+import com.queatz.push.GroupPushData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -118,7 +122,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             MainTab.Local -> {
                 if (geo != null) {
                     api.exploreGroups(
-                        geo!!.toList(),
+                        geo!!.toGeo(),
                         searchText,
                         public = true,
                         onError = {
@@ -136,6 +140,14 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         }
         update()
         isLoading = false
+    }
+
+    LaunchedEffect(Unit) {
+        push.events
+            .filterIsInstance<GroupPushData>()
+            .collectLatest {
+                reload()
+            }
     }
 
     OnLifecycleEvent { event ->

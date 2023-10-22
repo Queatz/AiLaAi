@@ -4,12 +4,30 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/../ailaai-shared" name="ailaai-shared">
+                <projects>
+                  <project path="$PROJECT_DIR$/../ailaai-shared" />
+                  <project path="$PROJECT_DIR$/../ailaai-shared/api" />
+                  <project path="$PROJECT_DIR$/../ailaai-shared/models" />
+                  <project path="$PROJECT_DIR$/../ailaai-shared/push" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/../ailaai-shared" />
+            <option value="$PROJECT_DIR$/../ailaai-shared/api" />
+            <option value="$PROJECT_DIR$/../ailaai-shared/models" />
+            <option value="$PROJECT_DIR$/../ailaai-shared/push" />
           </set>
         </option>
       </GradleProjectSettings>

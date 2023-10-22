@@ -404,4 +404,5 @@
     <string name="x_requested_x">%1$s đã yêu cầu tham gia %2$s</string>
     <string name="host">Chủ trì nhóm</string>
     <string name="accept">Chấp nhận</string>
+    <string name="x_added_x">%1$s đã thêm %2$s</string>
 </resources>
