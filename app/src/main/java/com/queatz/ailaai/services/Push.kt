@@ -9,19 +9,15 @@ import android.content.Intent
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
-import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
-import com.queatz.ailaai.extensions.attachmentText
-import com.queatz.ailaai.extensions.nullIfBlank
-import com.queatz.db.*
+import com.queatz.ailaai.push.receive
+import com.queatz.db.Person
 import com.queatz.push.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,14 +32,14 @@ val push by lazy {
 
 class Push {
 
-    private lateinit var context: Context
+    internal lateinit var context: Context
     var navController: NavController? = null
     var latestEvent: Lifecycle.Event? = null
     val scope = CoroutineScope(Dispatchers.Default)
     private val meKey = stringPreferencesKey("me")
-    private var meId: String? = null
+    internal var meId: String? = null
 
-    private val latestMessageFlow = MutableSharedFlow<String?>()
+    internal val latestMessageFlow = MutableSharedFlow<String?>()
     val latestMessage: Flow<String?> = latestMessageFlow
 
     private val eventsFlow = MutableSharedFlow<PushDataData>()
@@ -60,116 +56,37 @@ class Push {
         }
     }
 
-    fun receive(data: Map<String, String>) {
+    fun got(data: Map<String, String>) {
         if (!data.containsKey("action")) {
-            Log.d("PUSH", "Push notification does not contain 'action'")
+            Log.w("PUSH", "Push notification does not contain 'action'")
             return
         }
 
         Log.d("PUSH", "Got push: ${data["action"]}")
 
         val action = data["action"]!!
+        val push = data["data"]!!
 
         try {
             when (PushAction.valueOf(action)) {
-                PushAction.Message -> receive(parse<MessagePushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
-                PushAction.Collaboration -> receive(parse<CollaborationPushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
-                PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
-                PushAction.Group -> receive(parse<GroupPushData>(data["data"]!!).also { scope.launch { eventsFlow.emit(it) } })
+                PushAction.Message -> receive(parse<MessagePushData>(push))
+                PushAction.Collaboration -> receive(parse<CollaborationPushData>(push))
+                PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(push))
+                PushAction.Group -> receive(parse<GroupPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()
         }
     }
 
-    private inline fun <reified T : Any> parse(action: String): T = json.decodeFromString<T>(action)
-
-    private fun receive(data: CollaborationPushData) {
-        val deeplinkIntent = Intent(
-            Intent.ACTION_VIEW,
-            "$appDomain/card/${data.card.id}".toUri(),
-            context,
-            MainActivity::class.java
-        )
-
-        send(
-            deeplinkIntent,
-            Notifications.Collaboration,
-            groupKey = "collaboration/${data.card.id}",
-            title = data.card.name ?: context.getString(R.string.collaboration),
-            text = eventForCollaborationNotification(data)
-        )
-    }
-
-    private fun receive(data: JoinRequestPushData) {
-        joins.onPush(data)
-
-        val deeplinkIntent = Intent(
-            Intent.ACTION_VIEW,
-            "$appDomain/group/${data.group.id}".toUri(),
-            context,
-            MainActivity::class.java
-        )
-
-        send(
-            deeplinkIntent,
-            Notifications.Host,
-            groupKey = "join-request/${data.joinRequest.id}",
-            title = context.getString(R.string.x_requested_x, data.person.name ?: context.getString(R.string.someone), data.group.name ?: ""),
-            text = data.joinRequest.message ?: ""
-        )
-    }
-
-    private fun receive(data: GroupPushData) {
-        val deeplinkIntent = Intent(
-            Intent.ACTION_VIEW,
-            "$appDomain/group/${data.group.id}".toUri(),
-            context,
-            MainActivity::class.java
-        )
-
-        if (data.event == GroupEvent.Join) {
-            send(
-                deeplinkIntent,
-                Notifications.Host,
-                groupKey = "group/${data.group.id}",
-                title = data.group.name ?: "",
-                text = context.getString(
-                    R.string.x_added_x,
-                    personNameOrYou(data.details?.invitor),
-                    personNameOrYou(data.person)
-                )
-            )
-        }
-    }
-
-    private fun eventForCollaborationNotification(data: CollaborationPushData): String {
-        val person = data.person.name ?: context.getString(R.string.someone)
-        return when (data.event) {
-            CollaborationEvent.AddedPerson -> context.getString(R.string.person_added_person, person, personNameOrYou(data.data.person))
-            CollaborationEvent.RemovedPerson -> context.getString(R.string.person_removed_person, person, personNameOrYou(data.data.person))
-            CollaborationEvent.AddedCard -> context.getString(
-                R.string.person_added_card, person, data.data.card?.name ?: context.getString(
-                    R.string.inline_a_card
-                ))
-            CollaborationEvent.RemovedCard -> context.getString(
-                R.string.person_removed_card, person, data.data.card?.name ?: context.getString(
-                    R.string.inline_a_card
-                ))
-            CollaborationEvent.UpdatedCard -> {
-                if (data.data.card == null) {
-                    context.getString(R.string.person_updated_details, person, cardDetailName(data.data.details))
-                } else {
-                    context.getString(
-                        R.string.person_updated_card, person, cardDetailName(data.data.details), data.data.card?.name ?: context.getString(
-                            R.string.inline_a_card
-                        ))
-                }
+    private inline fun <reified T : PushDataData> parse(action: String): T =
+        json.decodeFromString<T>(action).also {
+            scope.launch {
+                eventsFlow.emit(it)
             }
         }
-    }
 
-    private fun personNameOrYou(person: Person?): String {
+    internal fun personNameOrYou(person: Person?): String {
         return if (person?.id == meId) {
             context.getString(R.string.inline_you)
         } else {
@@ -177,51 +94,7 @@ class Push {
         }
     }
 
-    private fun cardDetailName(detail: CollaborationEventDataDetails?): String {
-        return when (detail) {
-            CollaborationEventDataDetails.Photo -> context.getString(R.string.inline_photo)
-            CollaborationEventDataDetails.Video -> context.getString(R.string.inline_video)
-            CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_group)
-            CollaborationEventDataDetails.Name -> context.getString(R.string.inline_name)
-            CollaborationEventDataDetails.Location -> context.getString(R.string.inline_hint)
-            else -> ""
-        }
-    }
-
-    private fun receive(data: MessagePushData) {
-        if (
-            latestEvent == Lifecycle.Event.ON_RESUME &&
-            navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
-            navController?.currentBackStackEntry?.arguments?.getString("id") == data.group.id
-        ) {
-            scope.launch {
-                latestMessageFlow.emit(data.group.id)
-            }
-            return
-        }
-
-        // Don't notify notifications from myself, but do update latestMessage flow
-        if (data.person.id == meId) {
-            return
-        }
-
-        val deeplinkIntent = Intent(
-            Intent.ACTION_VIEW,
-            "$appDomain/group/${data.group.id}".toUri(),
-            context,
-            MainActivity::class.java
-        )
-
-        send(
-            intent = deeplinkIntent,
-            channel = Notifications.Messages,
-            groupKey = makeGroupKey(data.group.id!!),
-            title = data.person.name ?: context.getString(R.string.someone),
-            text = data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: ""
-        )
-    }
-
-    private fun send(
+    internal fun send(
         intent: Intent,
         channel: Notifications,
         groupKey: String,
@@ -248,7 +121,7 @@ class Push {
         notificationManager.notify(groupKey, 1, builder.build())
     }
 
-    private fun makeGroupKey(groupId: String) = "group/$groupId"
+    internal fun makeGroupKey(groupId: String) = "group/$groupId"
 
     fun clear(groupId: String) {
         notificationManager.cancel(makeGroupKey(groupId), 1)

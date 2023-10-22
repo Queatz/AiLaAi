@@ -85,7 +85,7 @@ class Application : android.app.Application() {
 
         val messageObserver: DisposableObserver<RemoteMessage> = object : DisposableObserver<RemoteMessage>() {
             override fun onNext(remoteMessage: RemoteMessage) {
-                push.receive(remoteMessage.data)
+                push.got(remoteMessage.data)
             }
 
             override fun onError(throwable: Throwable) {
