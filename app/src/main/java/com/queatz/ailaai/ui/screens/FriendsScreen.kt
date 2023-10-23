@@ -6,6 +6,9 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -55,6 +59,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -212,6 +217,8 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         reloadFlow.emit(true)
     }
 
+    val tabs = listOf(MainTab.Friends, MainTab.Local)
+
     if (selectedHiddenGroups.isNotEmpty()) {
         AlertDialog(
             {
@@ -326,7 +333,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 allPeople = emptyList()
                 isLoading = true
             },
-            tabs = listOf(MainTab.Friends, MainTab.Local)
+            tabs = tabs
         )
         LocationScaffold(
             geo,
@@ -334,7 +341,12 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             navController,
             enabled = tab == MainTab.Local
         ) {
-            Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
+            Box(
+                contentAlignment = Alignment.TopCenter,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .swipeMainTabs { tab = tabs.next(tab, it) }
+            ) {
                 LazyColumn(
                     state = state,
                     contentPadding = PaddingValues(

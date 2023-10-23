@@ -48,6 +48,8 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     var isLoading by rememberStateOf(true)
 
+    val tabs = listOf(MainTab.Friends, MainTab.Local)
+
     LaunchedEffect(geo) {
         geo?.let {
             api.myGeo(it.toGeo())
@@ -111,8 +113,12 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
             ) {
                 ScanQrCodeButton(navController)
             }
-            MainTabs(tab, { tab = it }, tabs = listOf(MainTab.Friends, MainTab.Local))
-            Box(modifier = Modifier.fillMaxSize()) {
+            MainTabs(tab, { tab = it }, tabs = tabs)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .swipeMainTabs { tab = tabs.next(tab, it) }
+            ) {
                 if (isLoading) {
                     Loading(
                         modifier = Modifier

@@ -129,6 +129,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     onNewPage(it, clear)
                 }
             }
+
             MainTab.Saved -> {
                 api.savedCards(
                     offset,
@@ -183,8 +184,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-
-            ) {
+        ) {
             AppHeader(
                 navController,
                 stringResource(R.string.explore),
@@ -228,7 +228,9 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 },
                 onAction = {
                     navController.navigate("me")
-                }
+                },
+                modifier = Modifier
+                    .swipeMainTabs { tab = tab.next(it) }
             ) {
                 if (locationSelector.isManual) {
                     ElevatedButton(

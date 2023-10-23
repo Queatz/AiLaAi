@@ -37,16 +37,17 @@ fun CardList(
     onChanged: () -> Unit = {},
     state: LazyGridState = rememberLazyGridState(),
     placeholder: String = stringResource(R.string.search),
+    modifier: Modifier = Modifier,
     hasMore: Boolean = false,
     onLoadMore: (suspend () -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
     onAction: (() -> Unit)? = null,
-    aboveSearchFieldContent: @Composable () -> Unit = {},
+    aboveSearchFieldContent: @Composable () -> Unit = {}
 ) {
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
-    Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
+    Box(contentAlignment = Alignment.TopCenter, modifier = modifier.fillMaxSize()) {
         if (isLoading) {
             Loading()
         } else if (isError || cards.isEmpty()) {
