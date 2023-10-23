@@ -51,6 +51,7 @@ import com.queatz.push.GroupPushData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
@@ -81,6 +82,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         { geo = it },
         navController.context as Activity
     )
+    val reloadFlow = remember {
+        MutableSharedFlow<Boolean>()
+    }
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -143,17 +147,23 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     }
 
     LaunchedEffect(Unit) {
+        reloadFlow.collectLatest {
+            reload(it)
+        }
+    }
+
+    LaunchedEffect(Unit) {
         push.events
             .filterIsInstance<GroupPushData>()
             .collectLatest {
-                reload()
+                reloadFlow.emit(false)
             }
     }
 
     OnLifecycleEvent { event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                reload(true)
+                reloadFlow.emit(true)
             }
 
             else -> {}
@@ -185,6 +195,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     }
 
     var skipFirst by rememberStateOf(true)
+
     LaunchedEffect(searchText, tab, geo) {
         if (geo == null) {
             return@LaunchedEffect
@@ -198,7 +209,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         allGroups = emptyList()
         results = emptyList()
         state.scrollToTop()
-        reload(true)
+        reloadFlow.emit(true)
     }
 
     if (selectedHiddenGroups.isNotEmpty()) {
@@ -233,7 +244,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                                 api.removeMember(member.id!!)
                                             }
                                         }.awaitAll()
-                                    reload(true)
+                                    reloadFlow.emit(true)
                                     selectedHiddenGroups = emptyList()
                                 }
                             }
@@ -264,7 +275,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                             )
                                         }
                                     }.awaitAll()
-                                reload(true)
+                                reloadFlow.emit(true)
                                 selectedHiddenGroups = emptyList()
                             }
                         }
@@ -306,8 +317,23 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             }
             ScanQrCodeButton(navController)
         }
-        MainTabs(tab, { tab = it }, tabs = listOf(MainTab.Friends, MainTab.Local))
-        LocationScaffold(geo, locationSelector, navController, enabled = tab == MainTab.Local) {
+        MainTabs(
+            tab,
+            {
+                tab = it
+                allGroups = emptyList()
+                results = emptyList()
+                allPeople = emptyList()
+                isLoading = true
+            },
+            tabs = listOf(MainTab.Friends, MainTab.Local)
+        )
+        LocationScaffold(
+            geo,
+            locationSelector,
+            navController,
+            enabled = tab == MainTab.Local
+        ) {
             Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     state = state,
@@ -340,11 +366,20 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                 is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
                             }
                         }) {
-                            ContactItem(navController, it, me()) {
-                                scope.launch {
-                                    reload(true)
+                            ContactItem(
+                                navController,
+                                it,
+                                me(),
+                                {
+                                    scope.launch {
+                                        reloadFlow.emit(true)
+                                    }
+                                },
+                                when (tab) {
+                                    MainTab.Friends -> GroupInfo.LatestMessage
+                                    else -> GroupInfo.Members
                                 }
-                            }
+                            )
                         }
                     }
                 }

@@ -11,7 +11,7 @@ import io.ktor.http.*
 import java.io.File
 
 
-suspend fun Api.sendMedia(
+suspend fun Api.sendMediaFromUri(
     context: Context,
     group: String,
     photos: List<Uri>,
@@ -31,7 +31,7 @@ suspend fun Api.sendMedia(
     )
 }
 
-suspend fun Api.sendAudio(
+suspend fun Api.sendAudioFromUri(
     group: String,
     audio: File,
     message: Message? = null,
@@ -47,7 +47,7 @@ suspend fun Api.sendAudio(
     )
 }
 
-suspend fun Api.sendVideos(
+suspend fun Api.sendVideosFromUri(
     context: Context,
     group: String,
     videos: List<Uri>,

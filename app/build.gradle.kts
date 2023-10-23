@@ -8,7 +8,7 @@ plugins {
     kotlin("plugin.serialization") version "1.9.10"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
 val properties = Properties()
@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 61
-        versionName = "0.9.61"
+        versionCode = 64
+        versionName = "0.9.64"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -51,8 +51,8 @@ android {
         }
         release {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
+//            isMinifyEnabled = true
+//            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -115,9 +115,9 @@ dependencies {
     implementation("com.huawei.hms:hianalytics:6.10.0.303")
     implementation("com.huawei.hms:hwid:6.11.0.300")
     implementation("com.huawei.hms:location:6.11.0.301")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("androidx.compose.ui:ui-viewbinding:1.5.3")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("me.saket.telephoto:zoomable-image-coil:0.6.2")
@@ -127,10 +127,10 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.1.1")
     implementation("androidx.media3:media3-ui:1.1.1")
     implementation("com.otaliastudios:transcoder:0.10.5")
-    implementation("ch.acra:acra-core:5.9.7")
-    implementation("ch.acra:acra-toast:5.9.7")
+    implementation("ch.acra:acra-core:5.11.3")
+    implementation("ch.acra:acra-toast:5.11.3")
     implementation("com.ibm.icu:icu4j:73.2")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
-    kapt("com.google.auto.service:auto-service:1.0.1")
-    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
+    ksp("dev.zacsweers.autoservice:auto-service-ksp:1.1.0")
+    implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 }

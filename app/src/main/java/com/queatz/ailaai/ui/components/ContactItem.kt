@@ -6,6 +6,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -36,19 +39,23 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
+enum class GroupInfo {
+    LatestMessage,
+    Members
+}
+
 @Composable
 fun ContactItem(
     navController: NavController,
     item: SearchResult,
     me: Person?,
     onChange: () -> Unit,
+    info: GroupInfo
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val someone = stringResource(R.string.someone)
     val notConnected = stringResource(R.string.not_connected_yet)
-
-
 
     when (item) {
         is SearchResult.Connect -> {
@@ -68,6 +75,7 @@ fun ContactItem(
                 )
             )
         }
+
         is SearchResult.Group -> {
             val joinRequestCount by joins.joins
                 .map { it.count { it.joinRequest?.group == item.groupExtended.group?.id } }
@@ -94,6 +102,32 @@ fun ContactItem(
                 }
             }
 
+            val description = when (info) {
+                GroupInfo.LatestMessage -> {
+                    groupExtended.latestMessage?.preview(context)?.let {
+                        if (groupExtended.latestMessage!!.member == myMember?.member?.id) stringResource(
+                            R.string.you_x,
+                            it
+                        ) else it
+                    } ?: stringResource(
+                        if (people.size == 1) R.string.connected_ago else R.string.created_ago,
+                        groupExtended.group!!.createdAt!!.timeAgo().lowercase()
+                    )
+                }
+
+                GroupInfo.Members -> {
+                    buildString {
+                        append(groupExtended.members!!.size.format())
+                        append(" ")
+                        append(pluralStringResource(R.plurals.inline_members, groupExtended.members!!.size))
+                        if (groupExtended.group?.description.isNullOrBlank().not()) {
+                            append(" • ")
+                            append(groupExtended.group!!.description)
+                        }
+                    }
+                }
+            }
+
             val emptyGroup = stringResource(R.string.empty_group_name)
             ContactResult(
                 onClick = {
@@ -103,19 +137,13 @@ fun ContactItem(
                     showMenu = true
                 },
                 name = groupExtended.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()),
-                description = groupExtended.latestMessage?.preview(context)?.let {
-                    if (groupExtended.latestMessage!!.member == myMember?.member?.id) stringResource(
-                        R.string.you_x,
-                        it
-                    ) else it
-                } ?: stringResource(
-                    if (people.size == 1) R.string.connected_ago else R.string.created_ago,
-                    groupExtended.group!!.createdAt!!.timeAgo().lowercase()
-                ),
+                description = description,
                 photos = groupExtended.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)),
                 lastActive = groupExtended.latestMessage?.createdAt?.timeAgo(),
                 isUnread = isUnread || joinRequestCount > 0,
-                joinRequestCount = joinRequestCount
+                joinRequestCount = joinRequestCount,
+                joined = myMember != null,
+                info = info
             )
         }
     }
@@ -131,7 +159,9 @@ fun ContactResult(
     photos: List<ContactPhoto>,
     lastActive: String? = null,
     isUnread: Boolean = false,
-    joinRequestCount: Int = 0
+    joinRequestCount: Int = 0,
+    joined: Boolean = false,
+    info: GroupInfo = GroupInfo.LatestMessage
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
@@ -161,21 +191,37 @@ fun ContactResult(
                 color = MaterialTheme.colorScheme.secondary
             )
         }
+        val bold = isUnread || (info == GroupInfo.Members && joined)
         Text(
-            if (joinRequestCount > 0) pluralStringResource(R.plurals.x_requests, joinRequestCount, joinRequestCount) else lastActive ?: "",
+            if (info == GroupInfo.Members && joined) {
+                stringResource(R.string.joined)
+            } else if (joinRequestCount > 0) pluralStringResource(
+                R.plurals.x_requests,
+                joinRequestCount,
+                joinRequestCount
+            ) else lastActive ?: "",
             style = MaterialTheme.typography.labelMedium,
-            color = if (isUnread) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
+            color = if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier
                 .padding(PaddingDefault)
                 .let {
-                    if (isUnread) {
+                    if (bold) {
                         it
                     } else {
                         it.alpha(.5f)
                     }
                 }
         )
+        if (info == GroupInfo.Members && joined) {
+            Icon(
+                Icons.Outlined.Check,
+                null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(end = PaddingDefault)
+            )
+        }
     }
 }
 
@@ -188,6 +234,7 @@ private fun Message.preview(context: Context): String? {
 sealed class SearchResult {
     @Serializable
     class Connect(val person: Person) : SearchResult()
+
     @Serializable
     class Group(val groupExtended: GroupExtended) : SearchResult()
 }

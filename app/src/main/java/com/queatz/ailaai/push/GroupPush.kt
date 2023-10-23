@@ -11,6 +11,10 @@ import com.queatz.push.GroupEvent
 import com.queatz.push.GroupPushData
 
 fun Push.receive(data: GroupPushData) {
+    if (meId == data.details?.invitor?.id) {
+        return
+    }
+
     val deeplinkIntent = Intent(
         Intent.ACTION_VIEW,
         "$appDomain/group/${data.group.id}".toUri(),

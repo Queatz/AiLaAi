@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import app.ailaai.api.updateCard
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.uploadCardPhoto
-import com.queatz.ailaai.api.uploadCardVideo
+import com.queatz.ailaai.api.uploadCardPhotoFromUri
+import com.queatz.ailaai.api.uploadCardVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.isPhoto
@@ -67,7 +67,7 @@ fun CardToolbar(
             videoUploadProgress = 0f
             if (it.isVideo(context)) {
                 isUploadingVideo = true
-                api.uploadCardVideo(
+                api.uploadCardVideoFromUri(
                     context,
                     card!!.id!!,
                     it,
@@ -85,7 +85,7 @@ fun CardToolbar(
                     }
                 )
             } else if (it.isPhoto(context)) {
-                api.uploadCardPhoto(context, card!!.id!!, it)
+                api.uploadCardPhotoFromUri(context, card!!.id!!, it)
             }
             onChange()
             isUploadingVideo = false

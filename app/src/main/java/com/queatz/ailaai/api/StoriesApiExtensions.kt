@@ -9,7 +9,7 @@ import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 
 
-suspend fun Api.uploadStoryPhotos(
+suspend fun Api.uploadStoryPhotosFromUri(
     context: Context,
     story: String,
     media: List<Uri>,
@@ -27,7 +27,7 @@ suspend fun Api.uploadStoryPhotos(
     )
 }
 
-suspend fun Api.uploadStoryAudio(
+suspend fun Api.uploadStoryAudioFromUri(
     context: Context,
     story: String,
     audio: Uri,

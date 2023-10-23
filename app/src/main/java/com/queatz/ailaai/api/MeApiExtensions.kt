@@ -9,7 +9,7 @@ import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.http.*
 
 
-suspend fun Api.updateProfilePhoto(
+suspend fun Api.updateProfilePhotoFromUri(
     context: Context,
     photo: Uri,
     onError: ErrorBlock = null,
@@ -22,7 +22,7 @@ suspend fun Api.updateProfilePhoto(
     )
 }
 
-suspend fun Api.updateProfileVideo(
+suspend fun Api.updateProfileVideoFromUri(
     context: Context,
     video: Uri,
     contentType: String,
@@ -49,7 +49,7 @@ suspend fun Api.updateProfileVideo(
     )
 }
 
-suspend fun Api.updateMyPhoto(
+suspend fun Api.updateMyPhotoFromUri(
     context: Context,
     photo: Uri,
     onError: ErrorBlock = null,

@@ -37,9 +37,9 @@ import app.ailaai.api.profile
 import app.ailaai.api.profileCards
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.updateMyPhoto
-import com.queatz.ailaai.api.updateProfilePhoto
-import com.queatz.ailaai.api.updateProfileVideo
+import com.queatz.ailaai.api.updateMyPhotoFromUri
+import com.queatz.ailaai.api.updateProfilePhotoFromUri
+import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
@@ -153,7 +153,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.updateMyPhoto(context, it) { reload() }
+            api.updateMyPhotoFromUri(context, it) { reload() }
         }
     }
 
@@ -164,7 +164,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
             videoUploadProgress = 0f
             if (it.isVideo(context)) {
                 isUploadingVideo = true
-                api.updateProfileVideo(
+                api.updateProfileVideoFromUri(
                     context,
                     it,
                     context.contentResolver.getType(it) ?: "video/*",
@@ -181,7 +181,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     }
                 )
             } else if (it.isPhoto(context)) {
-                api.updateProfilePhoto(context, it)
+                api.updateProfilePhotoFromUri(context, it)
             }
             reload()
             isUploadingVideo = false

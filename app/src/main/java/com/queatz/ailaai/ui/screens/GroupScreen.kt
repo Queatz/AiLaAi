@@ -46,9 +46,9 @@ import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.sendAudio
-import com.queatz.ailaai.api.sendMedia
-import com.queatz.ailaai.api.sendVideos
+import com.queatz.ailaai.api.sendAudioFromUri
+import com.queatz.ailaai.api.sendMediaFromUri
+import com.queatz.ailaai.api.sendVideosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
@@ -80,6 +80,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var isLoading by rememberStateOf(false)
     var showGroupNotFound by rememberStateOf(false)
     var showLeaveGroup by rememberStateOf(false)
+    var showManageDialog by rememberStateOf(false)
+    var showChangeGroupStatus by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showDescriptionDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
@@ -129,7 +131,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
         { isRecordingAudio = it },
         { recordingAudioDuration = it },
     ) { file ->
-        api.sendAudio(groupId, file, stageReply?.id?.let {
+        api.sendAudioFromUri(groupId, file, stageReply?.id?.let {
             Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
         }) {
             stageReply = null
@@ -161,7 +163,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 val photos = uris.filter { it.isPhoto(context) }
 
                 if (photos.isNotEmpty()) {
-                    api.sendMedia(
+                    api.sendMediaFromUri(
                         context,
                         groupId,
                         uris,
@@ -172,7 +174,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 }
 
                 if (videos.isNotEmpty()) {
-                    api.sendVideos(
+                    api.sendVideosFromUri(
                         context,
                         groupId,
                         videos,
@@ -306,11 +308,16 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        otherMembers.maxByOrNull {
-                            it.person?.seen ?: fromEpochMilliseconds(0)
-                        }?.person?.seen?.let {
+                        val details = listOfNotNull(
+                            if (groupExtended?.group?.open == true) stringResource(R.string.open_group) else null,
+                            otherMembers.maxByOrNull {
+                                it.person?.seen ?: fromEpochMilliseconds(0)
+                            }?.person?.seen?.timeAgo()?.lowercase()?.let { "${stringResource(R.string.active)} $it" }
+                        )
+
+                        if (details.isNotEmpty()) {
                             Text(
-                                "${stringResource(R.string.active)} ${it.timeAgo().lowercase()}",
+                                details.joinToString(" • "),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )
@@ -354,7 +361,6 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             showGroupMembers = true
                         })
                         if (myMember != null) {
-
                             DropdownMenuItem({
                                 Text(stringResource(R.string.rename))
                             }, {
@@ -367,13 +373,21 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 showMenu = false
                                 showDescriptionDialog = true
                             })
+                            if (myMember.member?.host == true) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.manage))
+                                }, {
+                                    showMenu = false
+                                    showManageDialog = true
+                                })
+                            }
                             DropdownMenuItem({
                                 Text(stringResource(R.string.leave))
                             }, {
                                 showMenu = false
                                 showLeaveGroup = true
                             })
-                            val hidden = myMember?.member?.hide == true
+                            val hidden = myMember.member?.hide == true
                             DropdownMenuItem({
                                 Text(
                                     if (hidden) stringResource(R.string.show) else stringResource(
@@ -1089,6 +1103,61 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     joins.join(groupId, it)
                     showJoinDialog = false
                 }
+            }
+
+            if (showManageDialog) {
+                Menu(
+                    { showManageDialog = false }
+                ) {
+                    if (groupExtended?.group?.open == true) {
+                        menuItem(stringResource(R.string.make_group_closed)) {
+                            showManageDialog = false
+                            showChangeGroupStatus = true
+                        }
+                    } else {
+                        menuItem(stringResource(R.string.make_group_open)) {
+                            showManageDialog = false
+                            showChangeGroupStatus = true
+                        }
+                    }
+                }
+            }
+
+            if (showChangeGroupStatus) {
+                val open = groupExtended?.group?.open == true
+                AlertDialog(
+                    {
+                        showChangeGroupStatus = false
+                    },
+                    title = {
+                        if (!open) Text(stringResource(R.string.action_open_group))
+                        else Text(stringResource(R.string.action_close_group))
+                    },
+                    text = {
+                        if (!open) Text(stringResource(R.string.make_group_open_description))
+                        else Text(stringResource(R.string.make_group_closed_description))
+                    },
+                    confirmButton = {
+                        Button({
+                            scope.launch {
+                                api.updateGroup(groupExtended!!.group!!.id!!, Group(open = !open)) {
+                                    reload()
+                                }
+                                showChangeGroupStatus = false
+                            }
+                        }) {
+                            if (!open) Text(stringResource(R.string.make_group_open))
+                            else Text(stringResource(R.string.make_group_closed))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton({
+                            showChangeGroupStatus = false
+                        }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                )
             }
         }
     }

@@ -46,7 +46,7 @@ fun CardList(
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
-    Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
+    Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
             Loading()
         } else if (isError || cards.isEmpty()) {
@@ -54,7 +54,7 @@ fun CardList(
                 stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
-                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault * 3.5f + viewport.height.inDp())
+                    .padding(PaddingDefault * 2)
             )
         } else {
             val autoplayIndex by state.rememberAutoplayIndex()

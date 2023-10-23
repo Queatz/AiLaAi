@@ -364,7 +364,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                         videoUploadProgress = 0f
                         if (it.isVideo(context)) {
                             isUploadingVideo = true
-                            api.uploadCardVideo(
+                            api.uploadCardVideoFromUri(
                                 context,
                                 card!!.id!!,
                                 it,
@@ -382,7 +382,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 }
                             )
                         } else if (it.isPhoto(context)) {
-                            api.uploadCardPhoto(context, card!!.id!!, it)
+                            api.uploadCardPhotoFromUri(context, card!!.id!!, it)
                         }
                         api.card(cardId) { card = it }
                         uploadJob = null

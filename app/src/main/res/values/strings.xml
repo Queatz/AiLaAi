@@ -421,6 +421,15 @@
     <string name="host">Host</string>
     <string name="accept">Accept</string>
     <string name="x_added_x">%1$s added %2$s</string>
+    <string name="open_group">Open group</string>
+    <string name="make_group_open">Make group open</string>
+    <string name="make_group_closed">Make group closed</string>
+    <string name="make_group_open_description">Anyone will be able to discover this group, see all members, messages,
+        and request to become a member.
+    </string>
+    <string name="make_group_closed_description">This group will only be accessible to members.</string>
+    <string name="action_open_group">Open group</string>
+    <string name="action_close_group">Close group</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
@@ -432,5 +441,9 @@
     <plurals name="x_requests">
         <item quantity="one">%1$s person waiting</item>
         <item quantity="other">%1$s people waiting</item>
+    </plurals>
+    <plurals name="inline_members">
+        <item quantity="one">member</item>
+        <item quantity="other">members</item>
     </plurals>
 </resources>

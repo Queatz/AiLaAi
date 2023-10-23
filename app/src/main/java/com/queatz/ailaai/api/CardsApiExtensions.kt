@@ -8,7 +8,7 @@ import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.http.*
 
-suspend fun Api.uploadCardPhoto(
+suspend fun Api.uploadCardPhotoFromUri(
     context: Context,
     id: String,
     photo: Uri,
@@ -23,7 +23,7 @@ suspend fun Api.uploadCardPhoto(
     )
 }
 
-suspend fun Api.uploadCardVideo(
+suspend fun Api.uploadCardVideoFromUri(
     context: Context,
     id: String,
     video: Uri,

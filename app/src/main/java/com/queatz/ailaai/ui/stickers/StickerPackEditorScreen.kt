@@ -198,7 +198,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
 
         scope.launch {
             it.forEach { file ->
-                api.createSticker(
+                api.createStickerFromUri(
                     stickerPackId,
                     file,
                     context,

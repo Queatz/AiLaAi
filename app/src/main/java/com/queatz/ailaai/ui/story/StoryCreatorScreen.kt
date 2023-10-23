@@ -30,7 +30,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.api.updateStory
 import com.queatz.ailaai.api.updateStoryDraft
-import com.queatz.ailaai.api.uploadStoryPhotos
+import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
@@ -537,7 +537,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     if (it.isEmpty()) return@rememberLauncherForActivityResult
 
                                     scope.launch {
-                                        api.uploadStoryPhotos(context, storyId, it) { photoUrls ->
+                                        api.uploadStoryPhotosFromUri(context, storyId, it) { photoUrls ->
                                             part.edit {
                                                 photos += photoUrls
                                             }

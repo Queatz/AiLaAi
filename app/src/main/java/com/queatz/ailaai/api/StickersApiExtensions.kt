@@ -10,7 +10,7 @@ import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.db.Sticker
 
 
-suspend fun Api.createSticker(
+suspend fun Api.createStickerFromUri(
     id: String,
     photo: Uri,
     context: Context,

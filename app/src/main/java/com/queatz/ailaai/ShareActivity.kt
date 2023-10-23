@@ -15,7 +15,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.me
 import app.ailaai.api.sendMessage
-import com.queatz.ailaai.api.sendMedia
+import com.queatz.ailaai.api.sendMediaFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
@@ -81,7 +81,7 @@ class ShareActivity : AppCompatActivity() {
                             coroutineScope {
                                 groups.map { group ->
                                     async {
-                                        api.sendMedia(
+                                        api.sendMediaFromUri(
                                             context,
                                             group.id!!,
                                             content.photos,

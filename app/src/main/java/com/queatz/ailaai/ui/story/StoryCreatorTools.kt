@@ -19,8 +19,8 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import com.queatz.ailaai.api.uploadStoryAudio
-import com.queatz.ailaai.api.uploadStoryPhotos
+import com.queatz.ailaai.api.uploadStoryAudioFromUri
+import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -42,7 +42,7 @@ fun StoryCreatorTools(
         if (it.isEmpty()) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.uploadStoryPhotos(context, storyId, it) { photoUrls ->
+            api.uploadStoryPhotosFromUri(context, storyId, it) { photoUrls ->
                 addPart(StoryContent.Photos(photoUrls))
                 addPart(
                     StoryContent.Text("")
@@ -55,7 +55,7 @@ fun StoryCreatorTools(
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.uploadStoryAudio(context, storyId, it) { audioUrl ->
+            api.uploadStoryAudioFromUri(context, storyId, it) { audioUrl ->
                 addPart(StoryContent.Audio(audioUrl))
                 addPart(
                     StoryContent.Text("")
