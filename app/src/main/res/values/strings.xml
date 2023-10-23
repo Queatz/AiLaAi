@@ -416,6 +416,7 @@
     <string name="delete_this_occurrence">Delete this occurrence?</string>
     <string name="local">Local</string>
     <string name="join_group">Join group</string>
+    <string name="cancel_join_request">Cancel join request</string>
     <string name="send_request">Send request</string>
     <string name="x_requested_x">%1$s requested to join %2$s</string>
     <string name="host">Host</string>

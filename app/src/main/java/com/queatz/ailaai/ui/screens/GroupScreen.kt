@@ -588,7 +588,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 showJoinDialog = true
                             }
                         ) {
-                            Text("Join group")
+                            Text(stringResource(R.string.join_group))
                         }
                     } else {
                         OutlinedButton(
@@ -598,7 +598,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 }
                             }
                         ) {
-                            Text("Cancel join request")
+                            Text(stringResource(R.string.cancel_join_request))
                         }
                     }
                 }

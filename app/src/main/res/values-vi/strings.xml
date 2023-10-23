@@ -400,6 +400,7 @@
     <string name="generating_description">Trang này sẽ được cập nhật khi ảnh được tạo.\n\nTiêu đề, gợi ý và chi tiết của trang đã chia sẻ với bên thứ 3.</string>
     <string name="local">Gần đây</string>
     <string name="join_group">Tham gia nhóm</string>
+    <string name="cancel_join_request">Hủy yêu cầu tham gia</string>
     <string name="send_request">Giử yêu cầu</string>
     <string name="x_requested_x">%1$s đã yêu cầu tham gia %2$s</string>
     <string name="host">Chủ trì nhóm</string>
