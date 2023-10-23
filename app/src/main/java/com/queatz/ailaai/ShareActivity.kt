@@ -109,7 +109,7 @@ class ShareActivity : AppCompatActivity() {
                         },
                         title = content.title(),
                         confirmFormatter = content.confirmFormatter(me),
-                        infoFormatter = { it.seenText(context.getString(R.string.active)) },
+                        infoFormatter = { it.seenText(context.getString(R.string.active), me) },
                         me = me
                     ) { groups ->
                         send(groups)

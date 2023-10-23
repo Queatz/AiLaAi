@@ -310,9 +310,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
 
                         val details = listOfNotNull(
                             if (groupExtended?.group?.open == true) stringResource(R.string.open_group) else null,
-                            otherMembers.maxByOrNull {
-                                it.person?.seen ?: fromEpochMilliseconds(0)
-                            }?.person?.seen?.timeAgo()?.lowercase()?.let { "${stringResource(R.string.active)} $it" }
+                            groupExtended?.seenText(stringResource(R.string.active), me())
                         )
 
                         if (details.isNotEmpty()) {

@@ -23,6 +23,30 @@ import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
+private fun Modifier.multiPhoto(size: Dp, padding: Dp): Modifier = composed {
+    this
+        .let {
+            if (size < 64.dp) {
+                it.requiredSize(size / 1.5f)
+            } else {
+                it.padding(padding)
+                    .requiredSize(size / 2)
+            }
+        }
+        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
+        .clip(CircleShape)
+        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+}
+
+private fun Modifier.singlePhoto(size: Dp, padding: Dp, border: Boolean): Modifier = composed {
+    this
+        .padding(padding)
+        .requiredSize(size)
+        .bordered(border)
+        .clip(CircleShape)
+        .background(MaterialTheme.colorScheme.secondaryContainer)
+}
+
 @Composable
 fun GroupPhoto(
     photos: List<ContactPhoto>,
@@ -35,11 +59,7 @@ fun GroupPhoto(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(padding)
-                .requiredSize(size)
-                .bordered(border)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .singlePhoto(size, padding, border)
                 .then(modifier)
         ) {}
     }
@@ -50,11 +70,7 @@ fun GroupPhoto(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(padding)
-                    .requiredSize(size)
-                    .bordered(border)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .singlePhoto(size, padding, border)
                     .then(modifier)
             ) {
                 Text(
@@ -78,7 +94,7 @@ fun GroupPhoto(
             )
         }
     } else {
-        val show = remember { photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L }.map { it.photo ?: "" } }
+        val show = remember { photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L } }
         Box(
             modifier = Modifier
                 .padding(padding)
@@ -86,25 +102,30 @@ fun GroupPhoto(
                 .then(modifier)
         ) {
             listOf(Alignment.TopEnd, Alignment.BottomStart).forEachIndexed { index, alignment ->
-                AsyncImage(
-                    model = show[index].let { api.url(it) },
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .align(alignment)
-                        .let {
-                            if (size < 64.dp) {
-                                it.requiredSize(size / 1.5f)
-                            } else {
-                                it.padding(padding)
-                                    .requiredSize(size / 2)
-                            }
-                        }
-                        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
-                )
+                val photo = show[index].photo?.let { api.url(it) }
+                if (photo == null) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .align(alignment)
+                            .multiPhoto(size, padding)
+                    ) {
+                        Text(
+                            show[index].name.take(1),
+                            style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
+                        )
+                    }
+                } else {
+                    AsyncImage(
+                        model = photo,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .align(alignment)
+                            .multiPhoto(size, padding)
+                    )
+                }
             }
         }
     }

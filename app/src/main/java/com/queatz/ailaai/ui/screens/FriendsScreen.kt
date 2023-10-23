@@ -6,9 +6,6 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +19,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -59,7 +55,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import kotlin.math.abs
+import kotlinx.datetime.Instant
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -217,6 +213,14 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         reloadFlow.emit(true)
     }
 
+    fun setTab(it: MainTab) {
+        tab = it
+        allGroups = emptyList()
+        results = emptyList()
+        allPeople = emptyList()
+        isLoading = true
+    }
+
     val tabs = listOf(MainTab.Friends, MainTab.Local)
 
     if (selectedHiddenGroups.isNotEmpty()) {
@@ -327,11 +331,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         MainTabs(
             tab,
             {
-                tab = it
-                allGroups = emptyList()
-                results = emptyList()
-                allPeople = emptyList()
-                isLoading = true
+                setTab(it)
             },
             tabs = tabs
         )
@@ -345,7 +345,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 contentAlignment = Alignment.TopCenter,
                 modifier = Modifier
                     .fillMaxSize()
-                    .swipeMainTabs { tab = tabs.next(tab, it) }
+                    .swipeMainTabs { setTab(tabs.next(tab, it)) }
             ) {
                 LazyColumn(
                     state = state,
@@ -436,7 +436,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             },
             title = stringResource(R.string.hidden_groups),
             confirmFormatter = { stringResource(R.string.next) },
-            infoFormatter = { it.seenText(context.getString(R.string.active)) },
+            infoFormatter = { it.seenText(context.getString(R.string.active), me()) },
             me = me(),
             groups = {
                 api.hiddenGroups {
@@ -518,6 +518,11 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     }
 }
 
-fun GroupExtended.seenText(active: String) = group?.seen?.timeAgo()?.let { timeAgo ->
-    "$active ${timeAgo.lowercase()}"
+fun GroupExtended.seenText(active: String, me: Person?): String? {
+    val otherMemberLastSeen = members?.filter { it.person?.id != me?.id }?.maxByOrNull {
+        it.person?.seen ?: Instant.fromEpochMilliseconds(0)
+    }?.person?.seen
+    return (otherMemberLastSeen ?: group?.seen)?.timeAgo()?.lowercase()?.let { timeAgo ->
+        "$active $timeAgo"
+    }
 }
