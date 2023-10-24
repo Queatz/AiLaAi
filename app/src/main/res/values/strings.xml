@@ -431,6 +431,7 @@
     <string name="make_group_closed_description">This group will only be accessible to members.</string>
     <string name="action_open_group">Open group</string>
     <string name="action_close_group">Close group</string>
+    <string name="no_groups_nearby">No groups in the area.</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

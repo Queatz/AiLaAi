@@ -157,7 +157,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         push.events
             .filterIsInstance<GroupPushData>()
             .collectLatest {
-                reloadFlow.emit(false)
+                reloadFlow.emit(true)
             }
     }
 
@@ -193,12 +193,13 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             }
         }
         update()
+        reloadFlow.emit(true)
     }
 
     var skipFirst by rememberStateOf(true)
 
-    LaunchedEffect(searchText, tab, geo) {
-        if (geo == null) {
+    LaunchedEffect(geo) {
+        if (geo == null || tab != MainTab.Local) {
             return@LaunchedEffect
         }
         if (skipFirst) {
@@ -206,10 +207,6 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             return@LaunchedEffect
         }
         // todo search server, set allGroups
-        isLoading = true
-        allGroups = emptyList()
-        results = emptyList()
-        state.scrollToTop()
         reloadFlow.emit(true)
     }
 
@@ -219,6 +216,10 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         results = emptyList()
         allPeople = emptyList()
         isLoading = true
+        scope.launch {
+            state.scrollToTop()
+            reloadFlow.emit(false)
+        }
     }
 
     val tabs = listOf(MainTab.Friends, MainTab.Local)
@@ -366,7 +367,10 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     } else if (results.isEmpty()) {
                         item {
                             Text(
-                                stringResource(if (searchText.isBlank()) R.string.you_have_no_groups else R.string.no_groups_to_show),
+                                stringResource(if (searchText.isBlank()) when (tab) {
+                                    MainTab.Friends -> R.string.you_have_no_groups
+                                    else -> R.string.no_groups_nearby
+                                } else R.string.no_groups_to_show),
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(PaddingDefault * 2)
                             )

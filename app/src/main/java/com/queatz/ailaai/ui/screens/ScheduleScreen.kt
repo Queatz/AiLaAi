@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.screens
 
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,12 +35,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 private val viewKey = stringPreferencesKey("schedule.view")
 
 @Composable
 fun ScheduleScreen(navController: NavController, me: () -> Person?) {
-
     var events by rememberStateOf(emptyList<ReminderEvent>())
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
@@ -58,21 +57,26 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    fun initialRange(): Pair<Instant, Instant> {
+        val now = Clock.System.now().startOfDay()
+
+        return when (view) {
+            Daily -> now.startOfDay()
+            Weekly -> now.startOfWeek()
+            Monthly -> now.startOfMonth()
+            Yearly -> now.startOfYear()
+        } to when (view) {
+            Daily -> now.plus(days = Daily.range)
+            Weekly -> now.plus(weeks = Weekly.range)
+            Monthly -> now.plus(months = Monthly.range)
+            Yearly -> now.plus(years = Yearly.range)
+        }
+    }
+
     var showMenu by rememberStateOf(false)
     var range by remember(view) {
-        val now = Clock.System.now().startOfDay()
         mutableStateOf(
-            when (view) {
-                Daily -> now.startOfDay()
-                Weekly -> now.startOfWeek()
-                Monthly -> now.startOfMonth()
-                Yearly -> now.startOfYear()
-            } to when (view) {
-                Daily -> now.plus(days = Daily.range)
-                Weekly -> now.plus(weeks = Weekly.range)
-                Monthly -> now.plus(months = Monthly.range)
-                Yearly -> now.plus(years = Yearly.range)
-            }
+            initialRange()
         )
     }
     var shownRange by rememberStateOf(range)
@@ -198,15 +202,19 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         { showMenu = false },
                         view,
                         {
-                            view = it
-                            scope.launch {
-                                context.dataStore.edit {
-                                    it[viewKey] = view.toString()
+                            if (view == it) {
+                                range = initialRange()
+                            } else {
+                                view = it
+                                scope.launch {
+                                    context.dataStore.edit {
+                                        it[viewKey] = view.toString()
+                                    }
                                 }
+                                events = emptyList()
+                                isLoading = true
+                                scrollToTop()
                             }
-                            events = emptyList()
-                            isLoading = true
-                            scrollToTop()
                         }
                     )
                 }

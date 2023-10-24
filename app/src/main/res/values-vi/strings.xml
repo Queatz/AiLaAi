@@ -429,4 +429,5 @@
     <string name="edit_reminders">chỉnh sửa lời nhắc</string>
     <string name="yes_delete">Vâng, xóa</string>
     <string name="delete_this_occurrence">Xóa lần xuất hiện này?</string>
+    <string name="no_groups_nearby">Không có nhóm nào gần đây.</string>
 </resources>
