@@ -79,7 +79,7 @@ android {
 dependencies {
     val ktorVersion = "2.3.4"
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.5.3"
+    val composeVersion = "1.5.4"
     implementation("app.ailaai.shared:models")
     implementation("app.ailaai.shared:push")
     implementation("app.ailaai.shared:api")
@@ -118,10 +118,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    implementation("androidx.compose.ui:ui-viewbinding:1.5.3")
+    implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("me.saket.telephoto:zoomable-image-coil:0.6.2")
-    implementation("com.google.accompanist:accompanist-permissions:0.27.0")
+    implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
+    implementation("com.google.accompanist:accompanist-permissions:0.28.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.media3:media3-exoplayer:1.1.1")

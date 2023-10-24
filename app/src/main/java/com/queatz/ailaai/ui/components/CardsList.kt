@@ -110,26 +110,10 @@ fun CardList(
                 }
                 if (onLoadMore != null && cards.isNotEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        var isLoadingMore by rememberStateOf(true)
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
+                        LoadMore(
+                            hasMore && cards.isNotEmpty()
                         ) {
-                            LaunchedEffect(Unit) {
-                                onLoadMore()
-                                isLoadingMore = false
-                            }
-                            AnimatedVisibility(hasMore && cards.isNotEmpty() && isLoadingMore) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(PaddingDefault * 2)
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                    )
-                                }
-                            }
+                            onLoadMore()
                         }
                     }
                 }

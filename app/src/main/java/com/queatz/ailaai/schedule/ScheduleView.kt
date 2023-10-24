@@ -5,6 +5,7 @@ import com.queatz.ailaai.extensions.nameOfDayOfWeek
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.days
 
 enum class ScheduleView {
     Daily,
@@ -25,6 +26,14 @@ val ScheduleView.range
         ScheduleView.Weekly -> 4
         ScheduleView.Monthly -> 3
         ScheduleView.Yearly -> 2
+    }
+
+val ScheduleView.duration
+    get() = when (this) {
+        ScheduleView.Daily -> 1.days * 7
+        ScheduleView.Weekly -> 7.days * 4
+        ScheduleView.Monthly -> 30.days * 3
+        ScheduleView.Yearly -> 365.days * 2
     }
 
 val ScheduleView.titleFormat

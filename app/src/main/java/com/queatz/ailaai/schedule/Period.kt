@@ -40,11 +40,11 @@ fun LazyListScope.Period(
         )
     }
     if (events.isEmpty()) {
-        item {
+        item(contentType = 1) {
             PeriodEmpty()
         }
     } else {
-        itemsIndexed(events) { index, event ->
+        itemsIndexed(events, key = { _, it -> "${it.reminder.id}:${it.date}:${it.occurrence?.id}" }) { index, event ->
             Row(
                 verticalAlignment = Alignment.Top,
                 modifier = Modifier

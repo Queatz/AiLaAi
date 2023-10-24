@@ -1,9 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -26,11 +24,13 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.schedule.*
 import com.queatz.ailaai.schedule.ScheduleView.*
 import com.queatz.ailaai.ui.components.AppHeader
+import com.queatz.ailaai.ui.components.LoadMore
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
 import com.queatz.db.Reminder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -58,32 +58,38 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    val now = Clock.System.now().startOfDay()
-    var offset by rememberStateOf(now)
-
     var showMenu by rememberStateOf(false)
+    var range by remember(view) {
+        val now = Clock.System.now().startOfDay()
+        mutableStateOf(
+            when (view) {
+                Daily -> now.startOfDay()
+                Weekly -> now.startOfWeek()
+                Monthly -> now.startOfMonth()
+                Yearly -> now.startOfYear()
+            } to when (view) {
+                Daily -> now.plus(days = Daily.range)
+                Weekly -> now.plus(weeks = Weekly.range)
+                Monthly -> now.plus(months = Monthly.range)
+                Yearly -> now.plus(years = Yearly.range)
+            }
+        )
+    }
+    var shownRange by rememberStateOf(range)
 
     val updates = remember {
         MutableSharedFlow<Reminder>()
     }
 
     suspend fun reload() {
-        val start = when (view) {
-            Daily -> offset.startOfDay()
-            Weekly -> offset.startOfWeek()
-            Monthly -> offset.startOfMonth()
-            Yearly -> offset.startOfYear()
-        }
-
+        val range = range
         api.occurrences(
-            start,
-            when (view) {
-                Daily -> start.plus(days = Daily.range)
-                Weekly -> start.plus(weeks = Weekly.range)
-                Monthly -> start.plus(months = Monthly.range)
-                Yearly -> start.plus(years = Yearly.range)
-            }
+            range.first,
+            range.second
         ) {
+            isLoading = false
+            val scrollToTop = range.first != shownRange.first
+            shownRange = range
             events = buildList {
                 it.forEach {
                     if (it.reminder.schedule == null) {
@@ -145,11 +151,20 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
             }.sortedBy { it.date }
+
+            if (scrollToTop) {
+                delay(100)
+                state.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType != -1 }?.index?.let {
+                    state.animateScrollToItem(
+                        it,
+                        0
+                    )
+                }
+            }
         }
-        isLoading = false
     }
 
-    LaunchedEffect(view, offset) {
+    LaunchedEffect(view, range) {
         reload()
         updates.collectLatest {
             reload()
@@ -210,8 +225,21 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         bottom = PaddingDefault + 80.dp
                     )
                 ) {
-                    var today = offset
-                    (0 until view.range).forEach { period ->
+                    item(contentType = -1) {
+                        var isInitial by remember {
+                            mutableStateOf(true)
+                        }
+                        LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
+                            if (isInitial) {
+                                isInitial = false
+                            } else {
+                                range = (range.first - view.duration) to range.second
+                            }
+                        }
+                    }
+
+                    var today = shownRange.first
+                    while (events.any { it.date >= today }) {
                         val start = when (view) {
                             Daily -> today.startOfDay()
                             Weekly -> today.startOfWeek()
@@ -226,8 +254,6 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                             Yearly -> start.plus(years = 1)
                         }
 
-                        today = end
-
                         Period(
                             view,
                             start,
@@ -240,6 +266,14 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                                 scope.launch { updates.emit(it.reminder) }
                             }
                         )
+
+                        today = end
+                    }
+
+                    item(contentType = -1) {
+                        LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
+                            range = range.first to (range.second + view.duration)
+                        }
                     }
                 }
             }
