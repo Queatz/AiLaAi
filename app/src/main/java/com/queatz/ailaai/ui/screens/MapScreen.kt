@@ -129,8 +129,9 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
     var renderedCards by rememberStateOf(listOf<Card>())
 
     LaunchedEffect(cards) {
-        val goneCards = renderedCards.filter { rendered -> cards.none { it.id == rendered.id } }
-        renderedCards = cards + goneCards
+        val cardsWithGeo = cards.filter { it.geo != null }
+        val goneCards = renderedCards.filter { rendered -> cardsWithGeo.none { it.id == rendered.id } }
+        renderedCards = cardsWithGeo + goneCards
         delay(duration.toLong())
         renderedCards -= goneCards
     }
@@ -307,7 +308,6 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun OutlinedText(
     text: String,

@@ -2,9 +2,7 @@ package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -20,6 +18,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import app.ailaai.api.cards
 import app.ailaai.api.myGeo
@@ -28,6 +27,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.ElevationDefault
@@ -44,8 +44,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     var value by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(exploreInitialCategory) }
-    var categories by remember { mutableStateOf(emptyList<String>()) }
+    var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
+    var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by remember { mutableStateOf(null) }
     var mapGeo: LatLng? by remember { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
@@ -53,8 +53,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var hasInitialCards by rememberStateOf(false)
     var isLoading by rememberStateOf(true)
     var isError by rememberStateOf(false)
-    var showAsMap by rememberStateOf(false)
-    var offset by remember { mutableStateOf(0) }
+    var showAsMap by rememberSavableStateOf(false)
+    var offset by remember { mutableIntStateOf(0) }
     val limit = 20
     var hasMore by rememberStateOf(true)
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
@@ -153,7 +153,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     }
 
     LaunchedEffect(geo, mapGeo, value, tab) {
-        if (geo == null) {
+        if (geo == null && mapGeo == null) {
             return@LaunchedEffect
         }
 
@@ -167,7 +167,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             return@LaunchedEffect
         }
 
-        loadMore(clear = true)
+        loadMore(clear = !showAsMap)
     }
 
     LocationScaffold(
@@ -214,8 +214,43 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
 
             MainTabs(tab, { tab = it })
             if (showAsMap) {
-                MapScreen(navController, cards) {
-                    mapGeo = it
+                Box(
+                    contentAlignment = Alignment.BottomCenter,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    MapScreen(navController, cards) {
+                        mapGeo = it
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(PaddingDefault * 2)
+                            .widthIn(max = 480.dp)
+                            .fillMaxWidth()
+                    ) {
+                        SearchContent(
+                            locationSelector,
+                            isLoading,
+                            categories,
+                            selectedCategory
+                        ) {
+                            selectedCategory = it
+                        }
+                        SearchFieldAndAction(
+                            value,
+                            { value = it },
+                            placeholder = stringResource(R.string.explore_search_placeholder),
+                            action = {
+                                Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                            },
+                            onAction = {
+                                navController.navigate("me")
+                            },
+                        )
+                    }
                 }
             } else {
                 CardList(
@@ -247,53 +282,73 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     modifier = Modifier
                         .swipeMainTabs { tab = tab.next(it) }
                 ) {
-                    if (locationSelector.isManual) {
-                        ElevatedButton(
-                            elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-                            onClick = {
-                                locationSelector.reset()
-                            }
-                        ) {
-                            Text(
-                                stringResource(R.string.reset_location),
-                                modifier = Modifier.padding(end = PaddingDefault)
-                            )
-                            Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
-                        }
+                    SearchContent(
+                        locationSelector,
+                        isLoading,
+                        categories,
+                        selectedCategory
+                    ) {
+                        selectedCategory = it
                     }
-                    if (categories.size > 2 && !isLoading) {
-                        var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-                        val scrollState = rememberScrollState()
-                        Row(
-                            modifier = Modifier
-                                .horizontalScroll(scrollState)
-                                .onPlaced { viewport = it.boundsInParent().size }
-                                .horizontalFadingEdge(viewport, scrollState)
-                        ) {
-                            categories.forEachIndexed { index, category ->
-                                OutlinedButton(
-                                    {
-                                        selectedCategory = if (selectedCategory == category) {
-                                            null
-                                        } else {
-                                            category
-                                        }
-                                    },
-                                    border = IconButtonDefaults.outlinedIconToggleButtonBorder(
-                                        true,
-                                        selectedCategory == category
-                                    ),
-                                    colors = if (selectedCategory != category) ButtonDefaults.outlinedButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.background,
-                                        contentColor = MaterialTheme.colorScheme.onBackground
-                                    ) else ButtonDefaults.buttonColors(),
-                                    modifier = Modifier.padding(end = PaddingDefault)
-                                ) {
-                                    Text(category)
-                                }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchContent(
+    locationSelector: LocationSelector,
+    isLoading: Boolean,
+    categories: List<String>,
+    category: String?,
+    onCategory: (String?) -> Unit
+) {
+    if (locationSelector.isManual) {
+        ElevatedButton(
+            elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
+            onClick = {
+                locationSelector.reset()
+            }
+        ) {
+            Text(
+                stringResource(R.string.reset_location),
+                modifier = Modifier.padding(end = PaddingDefault)
+            )
+            Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
+        }
+    }
+    if (categories.size > 2 && !isLoading) {
+        var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+        val scrollState = rememberScrollState()
+        Row(
+            modifier = Modifier
+                .horizontalScroll(scrollState)
+                .onPlaced { viewport = it.boundsInParent().size }
+                .horizontalFadingEdge(viewport, scrollState)
+        ) {
+            categories.forEachIndexed { index, it ->
+                OutlinedButton(
+                    {
+                        onCategory(
+                            if (category == it) {
+                                null
+                            } else {
+                                it
                             }
-                        }
-                    }
+                        )
+                    },
+                    border = IconButtonDefaults.outlinedIconToggleButtonBorder(
+                        true,
+                        category == it
+                    ),
+                    colors = if (category != it) ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.onBackground
+                    ) else ButtonDefaults.buttonColors(),
+                    modifier = Modifier.padding(end = PaddingDefault)
+                ) {
+                    Text(it)
                 }
             }
         }

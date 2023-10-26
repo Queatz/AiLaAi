@@ -130,39 +130,7 @@ fun CardList(
                 .fillMaxWidth()
         ) {
             aboveSearchFieldContent()
-            if (action == null) {
-                SearchField(
-                    value,
-                    valueChange,
-                    placeholder
-                )
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .wrapContentWidth()
-                    ) {
-                        SearchField(
-                            value,
-                            valueChange,
-                            placeholder
-                        )
-                    }
-                    FloatingActionButton(
-                        onClick = {
-                            onAction?.invoke()
-                        },
-                        modifier = Modifier
-                            .padding(start = PaddingDefault * 2)
-                    ) {
-                        action()
-                    }
-                }
-            }
+            SearchFieldAndAction(value, valueChange, placeholder, action, onAction)
         }
     }
 }
