@@ -88,7 +88,7 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                                     alignment = Alignment.Center,
                                     modifier = Modifier
                                         .fillParentMaxSize()
-                                        .zoomable(zoomableState)
+                                        .zoomable(zoomableState, onClick = { onDismissRequest() })
                                 )
                             }
                             is Media.Video -> {

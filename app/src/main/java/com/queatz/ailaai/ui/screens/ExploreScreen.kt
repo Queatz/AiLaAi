@@ -47,11 +47,13 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var selectedCategory by remember { mutableStateOf(exploreInitialCategory) }
     var categories by remember { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by remember { mutableStateOf(null) }
+    var mapGeo: LatLng? by remember { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
     var cards by remember { mutableStateOf(emptyList<Card>()) }
     var hasInitialCards by rememberStateOf(false)
     var isLoading by rememberStateOf(true)
     var isError by rememberStateOf(false)
+    var showAsMap by rememberStateOf(false)
     var offset by remember { mutableStateOf(0) }
     val limit = 20
     var hasMore by rememberStateOf(true)
@@ -102,6 +104,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     }
 
     suspend fun loadMore(clear: Boolean = false) {
+        val geo = (mapGeo?.takeIf { showAsMap } ?: geo)!!
         if (clear) {
             offset = 0
             hasMore = true
@@ -112,7 +115,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             MainTab.Friends,
             MainTab.Local -> {
                 api.cards(
-                    geo!!.toGeo(),
+                    geo.toGeo(),
                     offset = offset,
                     limit = limit,
                     search = value.takeIf { it.isNotBlank() },
@@ -149,7 +152,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    LaunchedEffect(geo, value, tab) {
+    LaunchedEffect(geo, mapGeo, value, tab) {
         if (geo == null) {
             return@LaunchedEffect
         }
@@ -160,7 +163,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
 
         // Don't reload if moving < 100m
-        if (shownGeo != null && geo!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
+        if (shownGeo != null && (mapGeo?.takeIf { showAsMap } ?: geo)!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
             return@LaunchedEffect
         }
 
@@ -196,82 +199,98 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 me
             ) {
                 IconButton({
-                    navController.navigate("map")
+                    showAsMap = !showAsMap
                 }) {
-                    Icon(Icons.Outlined.Map, stringResource(R.string.show_on_map))
+                    Icon(Icons.Outlined.Map, stringResource(R.string.map))
                 }
                 ScanQrCodeButton(navController)
             }
+
+            val cards = if (selectedCategory == null) cards else cards.filter {
+                it.categories?.contains(
+                    selectedCategory
+                ) == true
+            }
+
             MainTabs(tab, { tab = it })
-            CardList(
-                state = state,
-                cards = if (selectedCategory == null) cards else cards.filter { it.categories?.contains(selectedCategory) == true },
-                isMine = { it.person == me()?.id },
-                geo = geo,
-                onChanged = {
-                    scope.launch {
-                        loadMore(clear = true)
-                    }
-                },
-                isLoading = isLoading,
-                isError = isError,
-                value = value,
-                valueChange = { value = it },
-                navController = navController,
-                placeholder = stringResource(R.string.explore_search_placeholder),
-                hasMore = hasMore,
-                onLoadMore = {
-                    loadMore()
-                },
-                action = {
-                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
-                },
-                onAction = {
-                    navController.navigate("me")
-                },
-                modifier = Modifier
-                    .swipeMainTabs { tab = tab.next(it) }
-            ) {
-                if (locationSelector.isManual) {
-                    ElevatedButton(
-                        elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-                        onClick = {
-                            locationSelector.reset()
-                        }
-                    ) {
-                        Text(stringResource(R.string.reset_location), modifier = Modifier.padding(end = PaddingDefault))
-                        Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
-                    }
+            if (showAsMap) {
+                MapScreen(navController, cards) {
+                    mapGeo = it
                 }
-                if (categories.size > 2 && !isLoading) {
-                    var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-                    val scrollState = rememberScrollState()
-                    Row(
-                        modifier = Modifier
-                            .horizontalScroll(scrollState)
-                            .onPlaced { viewport = it.boundsInParent().size }
-                            .horizontalFadingEdge(viewport, scrollState)
-                    ) {
-                        categories.forEachIndexed { index, category ->
-                            OutlinedButton(
-                                {
-                                    selectedCategory = if (selectedCategory == category) {
-                                        null
-                                    } else {
-                                        category
-                                    }
-                                },
-                                border = IconButtonDefaults.outlinedIconToggleButtonBorder(
-                                    true,
-                                    selectedCategory == category
-                                ),
-                                colors = if (selectedCategory != category) ButtonDefaults.outlinedButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.background,
-                                    contentColor = MaterialTheme.colorScheme.onBackground
-                                ) else ButtonDefaults.buttonColors(),
+            } else {
+                CardList(
+                    state = state,
+                    cards = cards,
+                    isMine = { it.person == me()?.id },
+                    geo = geo,
+                    onChanged = {
+                        scope.launch {
+                            loadMore(clear = true)
+                        }
+                    },
+                    isLoading = isLoading,
+                    isError = isError,
+                    value = value,
+                    valueChange = { value = it },
+                    navController = navController,
+                    placeholder = stringResource(R.string.explore_search_placeholder),
+                    hasMore = hasMore,
+                    onLoadMore = {
+                        loadMore()
+                    },
+                    action = {
+                        Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                    },
+                    onAction = {
+                        navController.navigate("me")
+                    },
+                    modifier = Modifier
+                        .swipeMainTabs { tab = tab.next(it) }
+                ) {
+                    if (locationSelector.isManual) {
+                        ElevatedButton(
+                            elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
+                            onClick = {
+                                locationSelector.reset()
+                            }
+                        ) {
+                            Text(
+                                stringResource(R.string.reset_location),
                                 modifier = Modifier.padding(end = PaddingDefault)
-                            ) {
-                                Text(category)
+                            )
+                            Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
+                        }
+                    }
+                    if (categories.size > 2 && !isLoading) {
+                        var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                        val scrollState = rememberScrollState()
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(scrollState)
+                                .onPlaced { viewport = it.boundsInParent().size }
+                                .horizontalFadingEdge(viewport, scrollState)
+                        ) {
+                            categories.forEachIndexed { index, category ->
+                                OutlinedButton(
+                                    {
+                                        selectedCategory = if (selectedCategory == category) {
+                                            null
+                                        } else {
+                                            category
+                                        }
+                                    },
+                                    border = IconButtonDefaults.outlinedIconToggleButtonBorder(
+                                        true,
+                                        selectedCategory == category
+                                    ),
+                                    colors = if (selectedCategory != category) ButtonDefaults.outlinedButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.background,
+                                        contentColor = MaterialTheme.colorScheme.onBackground
+                                    ) else ButtonDefaults.buttonColors(),
+                                    modifier = Modifier.padding(end = PaddingDefault)
+                                ) {
+                                    Text(category)
+                                }
                             }
                         }
                     }

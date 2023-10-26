@@ -57,11 +57,10 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 @Composable
-fun MapScreen(navController: NavController, me: () -> Person?) {
+fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -> Unit) {
     var position by rememberSaveable(stateSaver = latLngSaver()) {
         mutableStateOf(null)
     }
-    var cards by rememberStateOf(emptyList<Card>())
     var mapType by rememberSavableStateOf(Map.MAP_TYPE_NORMAL)
     val scope = rememberCoroutineScope()
     val disposable = remember { CompositeDisposable() }
@@ -83,6 +82,12 @@ fun MapScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
+    LaunchedEffect(position) {
+        if (position != null) {
+            onGeo(position!!)
+        }
+    }
+
     var composed by rememberStateOf(false)
     var map: Map? by remember { mutableStateOf(null) }
     var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
@@ -98,13 +103,6 @@ fun MapScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(map, mapType) {
         map?.mapType = mapType
-    }
-
-    suspend fun reload() {
-        position = map?.cameraPosition?.target
-        api.cards(position?.toGeo() ?: return, limit = 10) {
-            cards = it // todo exclude equipped cards at api layer
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -177,9 +175,7 @@ fun MapScreen(navController: NavController, me: () -> Person?) {
                     }
 
                     setOnCameraIdleListener {
-                        scope.launch {
-                            reload()
-                        }
+                        position = map?.cameraPosition?.target
                     }
 
                     moveCamera(

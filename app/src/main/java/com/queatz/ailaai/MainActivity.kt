@@ -435,9 +435,6 @@ class MainActivity : AppCompatActivity() {
                                         composable("schedule") {
                                             ScheduleScreen(navController) { me }
                                         }
-                                        composable("map") {
-                                            MapScreen(navController) { me }
-                                        }
                                         composable("stories") {
                                             StoriesScreen(navController) { me }
                                         }
