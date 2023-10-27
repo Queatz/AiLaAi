@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.story
 
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.wordCount
 import com.queatz.db.Person
 import com.queatz.db.Story
@@ -73,9 +74,9 @@ fun Story.contents(): List<StoryContent> = json
 
 fun Story.textContent(): String = contents().mapNotNull {
     when (it) {
-        is StoryContent.Title -> it.title.takeIf { it.isNotBlank() }
-        is StoryContent.Section -> it.section.takeIf { it.isNotBlank() }
-        is StoryContent.Text -> it.text.takeIf { it.isNotBlank() }
+        is StoryContent.Title -> it.title.notBlank
+        is StoryContent.Section -> it.section.notBlank
+        is StoryContent.Text -> it.text.notBlank
         else -> null
     }
 }.joinToString("\n")

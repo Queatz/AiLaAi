@@ -8,6 +8,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.geoKey
@@ -76,7 +77,7 @@ fun ChooseCategoryDialog(
         },
         showSearch = { true },
         onConfirm = {
-            onCategory(it.firstOrNull() ?: searchText.takeIf { it.isNotBlank() })
+            onCategory(it.firstOrNull() ?: searchText.notBlank)
         }
     )
 }

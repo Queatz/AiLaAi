@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Sticker
 import com.queatz.db.StickerPack
@@ -40,7 +41,7 @@ fun StickerPackContents(
         columns = GridCells.Adaptive(80.dp),
         modifier = modifier
     ) {
-        stickerPack.description?.takeIf { it.isNotBlank() }?.let { description ->
+        stickerPack.description?.notBlank?.let { description ->
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     description,

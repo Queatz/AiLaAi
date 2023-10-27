@@ -50,12 +50,10 @@ import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.pow
 
@@ -69,6 +67,7 @@ fun MapScreen(
         mutableStateOf(null)
     }
     var mapType by rememberSavableStateOf(Map.MAP_TYPE_NORMAL)
+    var zoom by rememberSavableStateOf<Float?>(null)
     val scope = rememberCoroutineScope()
     val disposable = remember { CompositeDisposable() }
     var cameraPosition by rememberStateOf<CameraPosition?>(null)
@@ -79,6 +78,7 @@ fun MapScreen(
     var map: Map? by remember { mutableStateOf(null) }
     var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
     val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
+
 
 
     LaunchedEffect(Unit) {
@@ -129,10 +129,10 @@ fun MapScreen(
     }
 
     LaunchedEffect(map) {
-        recenter.emit((position ?: return@LaunchedEffect) to null)
+        recenter.emit((position ?: return@LaunchedEffect) to zoom)
     }
 
-    val duration = 500
+    val duration = 200
     var cardPositions by rememberStateOf<List<Pin>>(listOf())
     var renderedCards by rememberStateOf(listOf<Card>())
 
@@ -189,13 +189,14 @@ fun MapScreen(
 
                     setOnCameraIdleListener {
                         position = map?.cameraPosition?.target
+                        zoom = map?.cameraPosition?.zoom
                     }
 
                     moveCamera(
                         CameraUpdateFactory.get().newCameraPosition(
                             CameraPosition.Builder()
                                 .setTarget(position ?: return@apply)
-                                .setZoom(14f)
+                                .setZoom(zoom ?: 14f)
                                 .build()
                         )
                     )

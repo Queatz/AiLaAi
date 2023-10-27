@@ -17,10 +17,7 @@ import app.ailaai.api.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.FileSizeException
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.showDidntWork
-import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
@@ -222,7 +219,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
         TopAppBar(
             title = {
                 Text(
-                    stickerPack?.name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.sticker_pack),
+                    stickerPack?.name?.notBlank ?: stringResource(R.string.sticker_pack),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

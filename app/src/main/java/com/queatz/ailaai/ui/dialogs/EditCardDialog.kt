@@ -32,6 +32,7 @@ import app.ailaai.api.updateCard
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.ui.components.CardOptions
@@ -156,7 +157,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                             modifier = Modifier.padding(end = PaddingDefault)
                         )
                         Text(
-                            backstack.last().message.takeIf { it.isNotBlank() }
+                            backstack.last().message.notBlank
                                 ?: stringResource(R.string.go_back),
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1

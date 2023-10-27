@@ -312,7 +312,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 Column {
                     Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
 
-                    card?.location?.takeIf { it.isNotBlank() }?.let {
+                    card?.location?.notBlank?.let {
                         Text(
                             it,
                             maxLines = 1,

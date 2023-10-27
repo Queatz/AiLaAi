@@ -119,7 +119,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     geo.toGeo(),
                     offset = offset,
                     limit = limit,
-                    search = value.takeIf { it.isNotBlank() },
+                    search = value.notBlank,
                     public = tab == MainTab.Local,
                     onError = { ex ->
                         if (ex is CancellationException || ex is InterruptedException) {
@@ -138,7 +138,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 api.savedCards(
                     offset,
                     limit,
-                    value.takeIf { it.isNotBlank() },
+                    value.notBlank,
                     onError = { ex ->
                         if (ex is CancellationException || ex is InterruptedException) {
                             // Ignore, probably geo or search value changed, keep isLoading = true
@@ -244,7 +244,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         SearchFieldAndAction(
                             value,
                             { value = it },
-                            placeholder = stringResource(R.string.explore_search_placeholder),
+                            placeholder = stringResource(R.string.search),
                             action = {
                                 Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                             },
@@ -270,7 +270,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     value = value,
                     valueChange = { value = it },
                     navController = navController,
-                    placeholder = stringResource(R.string.explore_search_placeholder),
+                    placeholder = stringResource(R.string.search),
                     hasMore = hasMore,
                     onLoadMore = {
                         loadMore()
