@@ -30,6 +30,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
@@ -46,8 +47,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var value by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    var geo: LatLng? by remember { mutableStateOf(null) }
-    var mapGeo: LatLng? by remember { mutableStateOf(null) }
+    var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var shownValue by rememberSaveable { mutableStateOf("") }
     var cards by remember { mutableStateOf(emptyList<Card>()) }
     var hasInitialCards by rememberStateOf(false)
@@ -57,7 +58,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     var offset by remember { mutableIntStateOf(0) }
     val limit = 20
     var hasMore by rememberStateOf(true)
-    var shownGeo: LatLng? by remember { mutableStateOf(null) }
+    var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     val locationSelector = locationSelector(
         geo,
         { geo = it },
@@ -167,7 +168,8 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             return@LaunchedEffect
         }
 
-        loadMore(clear = !showAsMap)
+        // The map doesn't clear for geo updates, but should for value and tab changes
+        loadMore(clear = !showAsMap || shownValue != value || shownTab != tab)
     }
 
     LocationScaffold(
@@ -206,7 +208,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 ScanQrCodeButton(navController)
             }
 
-            val cards = if (selectedCategory == null) cards else cards.filter {
+            val cardsOfCategory = if (selectedCategory == null) cards else cards.filter {
                 it.categories?.contains(
                     selectedCategory
                 ) == true
@@ -219,7 +221,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    MapScreen(navController, cards) {
+                    MapScreen(navController, cardsOfCategory) {
                         mapGeo = it
                     }
                     Column(
@@ -255,7 +257,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             } else {
                 CardList(
                     state = state,
-                    cards = cards,
+                    cards = cardsOfCategory,
                     isMine = { it.person == me()?.id },
                     geo = geo,
                     onChanged = {

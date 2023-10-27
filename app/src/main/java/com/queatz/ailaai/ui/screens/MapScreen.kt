@@ -16,13 +16,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,29 +35,36 @@ import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.navigation.NavController
-import app.ailaai.api.cards
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.extensions.rememberSavableStateOf
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.helpers.geoKey
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
-import com.queatz.db.Person
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.pow
 
 @Composable
-fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -> Unit) {
+fun MapScreen(
+    navController: NavController,
+    cards: List<Card>,
+    onGeo: (LatLng) -> Unit
+) {
     var position by rememberSaveable(stateSaver = latLngSaver()) {
         mutableStateOf(null)
     }
@@ -67,6 +74,12 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
     var cameraPosition by rememberStateOf<CameraPosition?>(null)
 
     val context = LocalContext.current
+
+    var composed by rememberStateOf(false)
+    var map: Map? by remember { mutableStateOf(null) }
+    var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
+    val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
+
 
     LaunchedEffect(Unit) {
         if (position == null) {
@@ -87,11 +100,6 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
             onGeo(position!!)
         }
     }
-
-    var composed by rememberStateOf(false)
-    var map: Map? by remember { mutableStateOf(null) }
-    var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
-    val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
 
     LaunchedEffect(cameraPosition) {
         mapType = if ((cameraPosition?.zoom ?: 0f) > 20f) {
@@ -124,7 +132,7 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
         recenter.emit((position ?: return@LaunchedEffect) to null)
     }
 
-    val duration = 200
+    val duration = 500
     var cardPositions by rememberStateOf<List<Pin>>(listOf())
     var renderedCards by rememberStateOf(listOf<Card>())
 
@@ -133,25 +141,29 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
         val goneCards = renderedCards.filter { rendered -> cardsWithGeo.none { it.id == rendered.id } }
         renderedCards = cardsWithGeo + goneCards
         delay(duration.toLong())
-        renderedCards -= goneCards
+        renderedCards = renderedCards.filter { it !in goneCards }
     }
 
     LaunchedEffect(map, cameraPosition, renderedCards) {
         map ?: return@LaunchedEffect
-
-        cardPositions = renderedCards.map { card ->
-            Pin(
-                card,
-                map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
-            )
+            cardPositions = renderedCards.map { card ->
+                Pin(
+                    card,
+                    map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
+                )
         }
     }
 
-    Box {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clipToBounds()
+    ) {
         AndroidViewBinding(
             LayoutMapBinding::inflate,
             modifier = Modifier
                 .fillMaxSize()
+                .clipToBounds()
         ) {
             mapView = this
             if (composed) return@AndroidViewBinding else composed = true
@@ -209,69 +221,44 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
                 }
             }
 
-            cardPositions.sortedBy { it.card.id ?: "" }.forEach {
-                val (card, pos) = it
-                var size by rememberStateOf(IntSize(0, 0))
-                val s = (map.cameraPosition.zoom / 16f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0).toFloat()
-                val shown = it.card in cards
-                val scale = remember { Animatable(if (shown) 0f else 1f) }
-                var placed by rememberStateOf(false)
-                var name by rememberStateOf("")
+            cardPositions.forEach {
+                key(it.card.id) {
+                    val (card, pos) = it
+                    val s = (map.cameraPosition.zoom / 16f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0).toFloat()
+                    var size by remember { mutableStateOf(IntSize(0, 0)) }
+                    var placed by remember(card.name) { mutableStateOf(false) }
+                    val shown = cards.any { c -> c.id == card.id }
+                    val scale = remember { Animatable(if (shown) 0f else 1f) }
 
-                if (name != it.card.name) {
-                    placed = false
-                    name = it.card.name ?: ""
-                }
+                    LaunchedEffect(card.id, shown) {
+                        if (shown) delay(25L * cardPositions.indexOf(it))
+                        scale.animateTo(if (shown) 1f else 0f, tween(duration))
+                    }
 
-                LaunchedEffect(shown) {
-                    if (shown) delay(25L * cardPositions.indexOf(it))
-                    scale.animateTo(if (shown) 1f else 0f, tween(duration))
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .wrapContentSize(unbounded = true)
-                        .onPlaced {
-                            placed = true
-                            size = it.size
-                        }
-                        .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
-                        .zIndex(1f + pos.y)
-                        .graphicsLayer(
-                            scaleX = s * scale.value,
-                            scaleY = s * scale.value,
-                            alpha = if (!placed) 0f else scale.value,
-                            transformOrigin = TransformOrigin(.5f, 1f)
-                        )
-
-                ) {
-                    OutlinedText(
-                        card.name ?: "",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .clickable(
-                                MutableInteractionSource(),
-                                null
-                            ) {
-                                tryNav(pos) {
-                                    navController.navigate("card/${card.id!!}")
-                                }
+                            .wrapContentSize(unbounded = true)
+                            .onPlaced {
+                                placed = true
+                                size = it.size
                             }
-                            .widthIn(max = 120.dp)
-                    )
-                    card.categories?.firstOrNull()?. let { category ->
+                            .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
+                            .zIndex(1f + pos.y)
+                            .graphicsLayer(
+                                scaleX = s * scale.value,
+                                scaleY = s * scale.value,
+                                alpha = if (!placed) 0f else scale.value,
+                                transformOrigin = TransformOrigin(.5f, 1f)
+                            )
+
+                    ) {
                         OutlinedText(
-                            category,
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            outlineWidth = 4f,
-                            style = MaterialTheme.typography.labelSmall,
+                            card.name ?: "",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .padding(bottom = PaddingDefault)
                                 .clickable(
                                     MutableInteractionSource(),
                                     null
@@ -282,26 +269,47 @@ fun MapScreen(navController: NavController, cards: List<Card>, onGeo: (LatLng) -
                                 }
                                 .widthIn(max = 120.dp)
                         )
-                    }
-                    AsyncImage(
-                        model = card.photo?.let(api::url),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        alignment = Alignment.Center,
-                        modifier = Modifier
-                            .requiredSize(32.dp)
-                            .shadow(2.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .border(1.5f.dp, MaterialTheme.colorScheme.background, CircleShape)
-                            .padding(1.5f.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                tryNav(pos) {
-                                    navController.navigate("card/${card.id!!}")
+                        card.categories?.firstOrNull()?.let { category ->
+                            OutlinedText(
+                                category,
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                outlineWidth = 4f,
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(bottom = PaddingDefault)
+                                    .clickable(
+                                        MutableInteractionSource(),
+                                        null
+                                    ) {
+                                        tryNav(pos) {
+                                            navController.navigate("card/${card.id!!}")
+                                        }
+                                    }
+                                    .widthIn(max = 120.dp)
+                            )
+                        }
+                        AsyncImage(
+                            model = card.photo?.let(api::url),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.Center,
+                            modifier = Modifier
+                                .requiredSize(32.dp)
+                                .shadow(2.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .border(1.5f.dp, MaterialTheme.colorScheme.background, CircleShape)
+                                .padding(1.5f.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    tryNav(pos) {
+                                        navController.navigate("card/${card.id!!}")
+                                    }
                                 }
-                            }
-                    )
+                        )
+                    }
                 }
             }
         }
