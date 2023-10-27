@@ -220,7 +220,7 @@
     <string name="uploading_video">Uploading video</string>
     <string name="please_wait">Please wait</string>
     <string name="app_crashed">App crashed</string>
-    <string name="scan_a_qr_code_description">The QR code of a card can be viewed from the card\'s menu.</string>
+    <string name="scan_a_qr_code_description">The QR code of a page can be viewed from the page\'s menu.</string>
     <plurals name="x_cards_nearby">
         <item quantity="one">%1$s page nearby</item>
         <item quantity="other">%1$s pages nearby</item>
@@ -432,6 +432,7 @@
     <string name="action_open_group">Open group</string>
     <string name="action_close_group">Close group</string>
     <string name="no_groups_nearby">No groups in the area.</string>
+    <string name="go_here">Go here</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

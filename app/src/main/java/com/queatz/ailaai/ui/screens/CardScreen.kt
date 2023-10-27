@@ -647,7 +647,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     FloatingActionButton(
                         onClick = {
                             scope.launch {
-                                api.newCard(Card(parent = cardId, name = "")) {
+                                api.newCard(Card(parent = cardId)) {
                                     reloadCards()
                                     navController.navigate("card/${it.id}")
                                 }

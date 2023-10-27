@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,17 +36,18 @@ import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.navigation.NavController
+import app.ailaai.api.newCard
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
+import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
-import com.queatz.ailaai.extensions.px
-import com.queatz.ailaai.extensions.rememberSavableStateOf
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.toLatLng
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.geoKey
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
@@ -78,8 +80,7 @@ fun MapScreen(
     var map: Map? by remember { mutableStateOf(null) }
     var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
     val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
-
-
+    var showMapClickMenu by remember { mutableStateOf<LatLng?>(null) }
 
     LaunchedEffect(Unit) {
         if (position == null) {
@@ -180,7 +181,7 @@ fun MapScreen(
                     getUiSettings().isMyLocationButtonEnabled = true
 
                     setOnMapClickListener {
-                        position = it
+                        showMapClickMenu = it
                     }
 
                     setOnCameraMoveListener {
@@ -311,6 +312,31 @@ fun MapScreen(
                                 }
                         )
                     }
+                }
+            }
+        }
+    }
+
+    showMapClickMenu?.let { clickGeo ->
+        Menu(
+            {
+                showMapClickMenu = null
+            }
+        ) {
+            menuItem(stringResource(R.string.add_a_card)) {
+                showMapClickMenu = null
+                scope.launch {
+                    api.newCard(
+                        Card(geo = clickGeo.toList())
+                    ) {
+                        navController.navigate("card/${it.id!!}")
+                    }
+                }
+            }
+            menuItem(stringResource(R.string.go_here)) {
+                showMapClickMenu = null
+                scope.launch {
+                    recenter.emit(clickGeo to null)
                 }
             }
         }

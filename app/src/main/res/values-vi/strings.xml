@@ -430,4 +430,5 @@
     <string name="yes_delete">Vâng, xóa</string>
     <string name="delete_this_occurrence">Xóa lần xuất hiện này?</string>
     <string name="no_groups_nearby">Không có nhóm nào gần đây.</string>
+    <string name="go_here">Đến đây</string>
 </resources>
