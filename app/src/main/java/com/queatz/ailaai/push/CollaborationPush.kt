@@ -14,7 +14,7 @@ import com.queatz.push.CollaborationPushData
 fun Push.receive(data: CollaborationPushData) {
     val deeplinkIntent = Intent(
         Intent.ACTION_VIEW,
-        "${appDomain}/card/${data.card.id}".toUri(),
+        "${appDomain}/page/${data.card.id}".toUri(),
         context,
         MainActivity::class.java
     )

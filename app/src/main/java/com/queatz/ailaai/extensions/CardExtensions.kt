@@ -11,9 +11,9 @@ import com.queatz.db.CardAttachment
 import com.queatz.db.Message
 import kotlinx.serialization.encodeToString
 
-val Card.url get() = "$appDomain/card/$id"
+val Card.url get() = "$appDomain/page/$id"
 
-fun cardUrl(id: String) = "$appDomain/card/$id"
+fun cardUrl(id: String) = "$appDomain/page/$id"
 fun storyUrl(urlOrId: String) = "$appDomain/story/$urlOrId"
 fun profileUrl(id: String) = "$appDomain/profile/$id"
 

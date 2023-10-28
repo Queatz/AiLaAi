@@ -24,12 +24,15 @@ fun SearchFieldAndAction(
         SearchField(
             value,
             valueChange,
-            placeholder
+            placeholder,
+            modifier = Modifier
+                .padding(horizontal = PaddingDefault * 2)
         )
     } else {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
+                .padding(horizontal = PaddingDefault * 2)
         ) {
             Box(
                 modifier = Modifier

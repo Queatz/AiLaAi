@@ -29,6 +29,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import com.queatz.db.Person
@@ -206,7 +207,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                 modifier = Modifier
-                    .padding(PaddingDefault * 2)
+                    .padding(vertical = PaddingDefault * 2)
                     .widthIn(max = 480.dp)
                     .fillMaxWidth()
             ) {
@@ -217,7 +218,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                         .fillMaxWidth()
                         .horizontalScroll(scrollState)
                         .onPlaced { viewport = it.boundsInParent().size }
-                        .horizontalFadingEdge(viewport, scrollState)
+                        .padding(horizontal = PaddingDefault)
                 ) {
                     CardParentSelector(
                         cardParentType,
@@ -229,14 +230,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     ) {
                         setParentType(if (it == cardParentType) null else it)
                     }
-                    OutlinedButton(
+                    Button(
                         {
                             setFilters(filters.minus(Filter.NotActive).toggle(Filter.Active))
                         },
-                        border = IconButtonDefaults.outlinedIconToggleButtonBorder(
-                            true,
-                            filters.contains(Filter.Active)
-                        ),
+                              elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault / 2),
                         colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onBackground
@@ -245,14 +243,11 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     ) {
                         Text(stringResource(R.string.published))
                     }
-                    OutlinedButton(
+                    Button(
                         {
                             setFilters(filters.minus(Filter.Active).toggle(Filter.NotActive))
                         },
-                        border = IconButtonDefaults.outlinedIconToggleButtonBorder(
-                            true,
-                            filters.contains(Filter.NotActive)
-                        ),
+                               elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault / 2),
                         colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onBackground
@@ -263,7 +258,9 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(horizontal = PaddingDefault * 2)
                 ) {
                     Box(
                         modifier = Modifier

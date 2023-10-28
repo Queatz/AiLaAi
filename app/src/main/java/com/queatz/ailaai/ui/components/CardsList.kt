@@ -47,7 +47,10 @@ fun CardList(
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
-    Box(contentAlignment = Alignment.TopCenter, modifier = modifier.fillMaxSize()) {
+    Box(
+        contentAlignment = Alignment.TopCenter,
+        modifier = modifier.fillMaxSize()
+    ) {
         if (isLoading) {
             Loading()
         } else if (isError || cards.isEmpty()) {
@@ -124,7 +127,7 @@ fun CardList(
             verticalArrangement = Arrangement.spacedBy(PaddingDefault),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(PaddingDefault * 2)
+                .padding(vertical = PaddingDefault * 2)
                 .widthIn(max = 480.dp)
                 .onPlaced { viewport = it.boundsInParent().size }
                 .fillMaxWidth()

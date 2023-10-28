@@ -1,22 +1,15 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -27,11 +20,9 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.latLngSaver
-import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import com.queatz.db.Person
@@ -203,7 +194,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 IconButton({
                     showAsMap = !showAsMap
                 }) {
-                    Icon(Icons.Outlined.Map, stringResource(R.string.map))
+                    Icon(if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map, stringResource(R.string.map))
                 }
                 ScanQrCodeButton(navController)
             }
@@ -229,7 +220,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(PaddingDefault * 2)
+                            .padding(vertical = PaddingDefault * 2)
                             .widthIn(max = 480.dp)
                             .fillMaxWidth()
                     ) {
@@ -298,61 +289,3 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     }
 }
 
-@Composable
-private fun SearchContent(
-    locationSelector: LocationSelector,
-    isLoading: Boolean,
-    categories: List<String>,
-    category: String?,
-    onCategory: (String?) -> Unit
-) {
-    if (locationSelector.isManual) {
-        ElevatedButton(
-            elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
-            onClick = {
-                locationSelector.reset()
-            }
-        ) {
-            Text(
-                stringResource(R.string.reset_location),
-                modifier = Modifier.padding(end = PaddingDefault)
-            )
-            Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
-        }
-    }
-    if (categories.size > 2 && !isLoading) {
-        var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-        val scrollState = rememberScrollState()
-        Row(
-            modifier = Modifier
-                .horizontalScroll(scrollState)
-                .onPlaced { viewport = it.boundsInParent().size }
-                .horizontalFadingEdge(viewport, scrollState)
-        ) {
-            categories.forEachIndexed { index, it ->
-                OutlinedButton(
-                    {
-                        onCategory(
-                            if (category == it) {
-                                null
-                            } else {
-                                it
-                            }
-                        )
-                    },
-                    border = IconButtonDefaults.outlinedIconToggleButtonBorder(
-                        true,
-                        category == it
-                    ),
-                    colors = if (category != it) ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        contentColor = MaterialTheme.colorScheme.onBackground
-                    ) else ButtonDefaults.buttonColors(),
-                    modifier = Modifier.padding(end = PaddingDefault)
-                ) {
-                    Text(it)
-                }
-            }
-        }
-    }
-}

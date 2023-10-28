@@ -49,6 +49,11 @@ fun ScanQrCodeButton(navController: NavController) {
                 ?.let {
                     it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
                         when {
+                            it.startsWith("/page/") -> {
+                                val cardId = it.split("/").getOrNull(2)
+                                navController.navigate("page/$cardId")
+                                true
+                            }
                             it.startsWith("/card/") -> {
                                 val cardId = it.split("/").getOrNull(2)
                                 navController.navigate("card/$cardId")

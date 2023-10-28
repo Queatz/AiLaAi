@@ -452,7 +452,7 @@ class MainActivity : AppCompatActivity() {
                                         }
                                         composable(
                                             "card/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/card/{id}" })
+                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/page/{id}" }, navDeepLink { uriPattern = "$appDomain/card/{id}" })
                                         ) {
                                             CardScreen(it.arguments!!.getString("id")!!, navController) { me }
                                         }

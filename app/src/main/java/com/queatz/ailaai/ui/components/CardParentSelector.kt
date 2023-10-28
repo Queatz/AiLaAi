@@ -25,31 +25,54 @@ fun CardParentSelector(
         horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
         modifier = modifier
     ) {
-        val colors = IconButtonDefaults.outlinedIconToggleButtonColors(
+        val colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.background,
-            checkedContainerColor = MaterialTheme.colorScheme.primary,
-            checkedContentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.primary)
+            contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.background)
         )
-        OutlinedIconToggleButton(value == CardParentType.Person, {
-            onChange(CardParentType.Person)
-        }, colors = colors, modifier = Modifier.weight(1f)) {
+        val checkedColors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.primary)
+        )
+        Button(
+            {
+                onChange(CardParentType.Person)
+            },
+            colors = if (value == CardParentType.Person) checkedColors else colors,
+            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
+            modifier = Modifier.weight(1f)
+        ) {
             Icon(Icons.Outlined.Person, stringResource(R.string.on_profile))
         }
-        OutlinedIconToggleButton(value == CardParentType.Map, {
-            onChange(CardParentType.Map)
-        }, colors = colors, modifier = Modifier.weight(1f)) {
+        Button(
+            {
+                onChange(CardParentType.Map)
+            },
+            colors = if (value == CardParentType.Map) checkedColors else colors,
+            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
+            modifier = Modifier.weight(1f)
+        ) {
             Icon(Icons.Outlined.Place, stringResource(R.string.at_a_location))
         }
         if (showOffline) {
-            OutlinedIconToggleButton(value == CardParentType.Offline, {
-                onChange(CardParentType.Offline)
-            }, colors = colors, modifier = Modifier.weight(1f)) {
+            Button(
+                {
+                    onChange(CardParentType.Offline)
+                },
+                colors = if (value == CardParentType.Offline) checkedColors else colors,
+                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
+                modifier = Modifier.weight(1f)
+            ) {
                 Icon(Icons.Outlined.CloudOff, stringResource(R.string.none))
             }
         } else {
-            OutlinedIconToggleButton(value == CardParentType.Card, {
-                onChange(CardParentType.Card)
-            }, colors = colors, modifier = Modifier.weight(1f)) {
+            Button(
+                {
+                    onChange(CardParentType.Card)
+                },
+                colors = if (value == CardParentType.Card) checkedColors else colors,
+                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
+                modifier = Modifier.weight(1f)
+            ) {
                 Icon(Icons.Outlined.Search, stringResource(R.string.inside_another_card))
             }
         }
