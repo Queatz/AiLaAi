@@ -40,6 +40,7 @@ import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
@@ -92,21 +93,13 @@ fun ColumnScope.MessageContent(
     var showStoragePermissionDialog by rememberStateOf(false)
 
     if (showStoragePermissionDialog) {
-        AlertDialog(
+        RationaleDialog(
             {
                 showStoragePermissionDialog = false
             },
-            text = {
-                Text(stringResource(R.string.permission_request))
-            },
-            confirmButton = {
-                TextButton({
-                    showStoragePermissionDialog = false
-                    navController.goToSettings()
-                }) {
-                    Text(stringResource(R.string.open_settings))
-                }
-            })
+            navController,
+            stringResource(R.string.permission_request)
+        )
     }
 
     // todo: support multiple attachments of the same type

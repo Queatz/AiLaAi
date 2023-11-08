@@ -27,6 +27,7 @@ import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.goToSettings
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -121,21 +122,12 @@ fun ScanQrCodeButton(navController: NavController) {
     }
 
     if (showCameraRationale) {
-        AlertDialog(
-            { showCameraRationale = false },
-            text = {
-                Text(stringResource(R.string.camera_disabled_description))
+        RationaleDialog(
+            {
+                showCameraRationale = false
             },
-            confirmButton = {
-                TextButton(
-                    {
-                        showCameraRationale = false
-                        navController.goToSettings()
-                    }
-                ) {
-                    Text(stringResource(R.string.open_settings))
-                }
-            }
+            navController,
+            stringResource(R.string.camera_disabled_description)
         )
     }
 

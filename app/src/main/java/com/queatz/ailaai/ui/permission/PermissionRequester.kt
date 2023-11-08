@@ -2,10 +2,12 @@
 
 package com.queatz.ailaai.ui.permission
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.runtime.Composable
 import com.google.accompanist.permissions.*
 
-class PermissionRequester {
+class PermissionRequester(private val permission: String) {
 
     internal lateinit var state: PermissionState
     private var onPermanentlyDenied: (() -> Unit)? = null
@@ -14,6 +16,16 @@ class PermissionRequester {
     fun use(onPermanentlyDenied: () -> Unit = {}, onGranted: () -> Unit) {
         require(this.onPermanentlyDenied == null)
         require(this.onGranted == null)
+
+        // Special cases for retired permissions
+        when (permission) {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    onGranted()
+                    return
+                }
+            }
+        }
 
         if (state.status == PermissionStatus.Granted) {
             onGranted()
@@ -40,7 +52,7 @@ class PermissionRequester {
 
 @Composable
 fun permissionRequester(permission: String): PermissionRequester {
-    val requester = PermissionRequester()
+    val requester = PermissionRequester(permission)
 
     requester.state = rememberPermissionState(permission) {
         requester.resolve(it)

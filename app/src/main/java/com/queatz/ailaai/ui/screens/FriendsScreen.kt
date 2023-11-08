@@ -38,10 +38,7 @@ import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
-import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
-import com.queatz.ailaai.ui.dialogs.TextFieldDialog
-import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
@@ -455,23 +452,12 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     }
 
     if (showPushPermissionDialog) {
-        AlertDialog(
+        RationaleDialog(
             {
                 showPushPermissionDialog = false
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        navController.goToSettings()
-                        showPushPermissionDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.open_settings))
-                }
-            },
-            text = {
-                Text(stringResource(R.string.notifications_disabled_message))
-            }
+            navController,
+            stringResource(R.string.notifications_disabled_message)
         )
     }
 
