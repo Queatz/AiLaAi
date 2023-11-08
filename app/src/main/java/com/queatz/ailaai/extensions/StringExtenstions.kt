@@ -3,6 +3,7 @@ package com.queatz.ailaai.extensions
 import android.content.*
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.compose.ui.text.AnnotatedString
@@ -15,6 +16,7 @@ import com.queatz.ailaai.data.api
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -103,12 +105,19 @@ suspend fun Bitmap.uri(context: Context): Uri? {
 }
 
 suspend fun Bitmap.save(context: Context): Uri? {
-    val filename = "ailaai_photo_${System.currentTimeMillis()}.jpg"
+    val filename = "ailaai_photo_${Clock.System.now()}.jpg"
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-        put(MediaStore.Video.Media.IS_PENDING, 1)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            put(MediaStore.Video.Media.IS_PENDING, 1)
+        } else {
+            put(
+                MediaStore.MediaColumns.DATA,
+                "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath}${File.separator}$filename"
+            )
+        }
     }
 
     val contentResolver = context.contentResolver
@@ -121,10 +130,13 @@ suspend fun Bitmap.save(context: Context): Uri? {
         }
     } ?: return null
 
-    contentValues.clear()
-    contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        contentValues.clear()
+        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
 
-    contentResolver.update(uri, contentValues, null, null)
+        contentResolver.update(uri, contentValues, null, null)
+    }
+
     return uri
 }
 

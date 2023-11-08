@@ -3,10 +3,7 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudOff
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -62,7 +59,7 @@ fun CardParentSelector(
                 elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
                 modifier = Modifier.weight(1f)
             ) {
-                Icon(Icons.Outlined.CloudOff, stringResource(R.string.none))
+                Icon(Icons.Outlined.LocationOff, stringResource(R.string.none))
             }
         } else {
             Button(

@@ -24,6 +24,8 @@ import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 
 @Composable
 fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
@@ -37,7 +39,9 @@ fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
             api.newReminder(
                 Reminder(
                     title = value.trim(),
-                    start = Clock.System.now().startOfMinute()
+                    start = Clock.System.now().startOfMinute(),
+                    timezone = TimeZone.currentSystemDefault().id,
+                    utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0),
                 )
             ) {
                 onReminder(it)

@@ -68,13 +68,14 @@ fun SearchField(
                 keyboardController.hide()
                 onAction()
             }),
-            trailingIcon = {
-                if (showClear && value.isNotEmpty()) {
+            trailingIcon =
+            if (showClear && value.isNotEmpty()) {
+                {
                     Icon(Icons.Outlined.Close, stringResource(R.string.clear), modifier = Modifier.clickable {
                         onValueChange("")
                     })
                 }
-            },
+            } else null,
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.large)

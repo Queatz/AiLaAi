@@ -412,9 +412,7 @@
     </plurals>
     <string name="make_group_open">Chuyển sang nhóm mở</string>
     <string name="make_group_closed">Chuyển sang nhóm đóng</string>
-    <string name="make_group_open_description">Bất kì ai cũng có thể khám phá nhóm này, xem tất cả thành viên, tin nhắn
-        và yêu cầu trở thành thành viên.
-    </string>
+    <string name="make_group_open_description">Bất kì ai cũng có thể khám phá nhóm này, xem tất cả thành viên, tin nhắn và yêu cầu trở thành thành viên.</string>
     <string name="make_group_closed_description">Nhóm này sẽ chỉ có thể truy cập được đối với các thành viên.</string>
     <string name="action_open_group">Mở nhóm</string>
     <string name="action_close_group">Đóng nhóm</string>
@@ -431,4 +429,5 @@
     <string name="delete_this_occurrence">Xóa lần xuất hiện này?</string>
     <string name="no_groups_nearby">Không có nhóm nào gần đây.</string>
     <string name="go_here">Đến đây</string>
+    <string name="permission_request">Chào Town không có quyền để làm điều đó.</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.components
 
+import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.*
@@ -40,6 +41,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryAuthors
@@ -85,6 +87,27 @@ fun ColumnScope.MessageContent(
     var attachedStoryNotFound by remember { mutableStateOf(false) }
     var attachedAudio by remember { mutableStateOf<String?>(null) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
+
+    val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    var showStoragePermissionDialog by rememberStateOf(false)
+
+    if (showStoragePermissionDialog) {
+        AlertDialog(
+            {
+                showStoragePermissionDialog = false
+            },
+            text = {
+                Text(stringResource(R.string.permission_request))
+            },
+            confirmButton = {
+                TextButton({
+                    showStoragePermissionDialog = false
+                    navController.goToSettings()
+                }) {
+                    Text(stringResource(R.string.open_settings))
+                }
+            })
+    }
 
     // todo: support multiple attachments of the same type
     // todo: right now the only possibility for 2 attachments is with message replies
@@ -164,10 +187,16 @@ fun ColumnScope.MessageContent(
                                 .data(selectedBitmap!!)
                                 .target { drawable ->
                                     drawable.toBitmapOrNull()?.let { bitmap ->
-                                        scope.launch {
-                                            bitmap.save(context)?.also {
-                                                context.toast(savedString)
-                                            } ?: context.showDidntWork()
+                                        writeExternalStoragePermissionRequester.use(
+                                            onPermanentlyDenied = {
+                                                showStoragePermissionDialog = true
+                                            }
+                                        ) {
+                                            scope.launch {
+                                                bitmap.save(context)?.also {
+                                                    context.toast(savedString)
+                                                } ?: context.showDidntWork()
+                                            }
                                         }
                                     }
                                 }

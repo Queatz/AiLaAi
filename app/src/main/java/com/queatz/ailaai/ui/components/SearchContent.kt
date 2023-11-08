@@ -1,5 +1,8 @@
 package com.queatz.ailaai.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -41,7 +44,11 @@ fun SearchContent(
             Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
         }
     }
-    if (categories.size > 2 && !isLoading) {
+    AnimatedVisibility (
+        categories.size > 2 && !isLoading,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
         var viewport by remember { mutableStateOf(Size(0f, 0f)) }
         val scrollState = rememberScrollState()
         Row(

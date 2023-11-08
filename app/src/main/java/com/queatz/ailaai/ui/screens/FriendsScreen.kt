@@ -462,11 +462,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val intent = Intent(
-                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            Uri.parse("package:${navController.context.packageName}")
-                        )
-                        (navController.context as Activity).startActivity(intent)
+                        navController.goToSettings()
                         showPushPermissionDialog = false
                     }
                 ) {
