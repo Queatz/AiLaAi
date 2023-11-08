@@ -39,15 +39,21 @@ import kotlinx.datetime.Instant
 
 private val viewKey = stringPreferencesKey("schedule.view")
 
+private var cache = emptyList<ReminderEvent>()
+
 @Composable
 fun ScheduleScreen(navController: NavController, me: () -> Person?) {
-    var events by rememberStateOf(emptyList<ReminderEvent>())
+    var events by rememberStateOf(cache)
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
-    var isLoading by rememberStateOf(true)
+    var isLoading by rememberStateOf(events.isEmpty())
     var view by rememberStateOf(Monthly)
     val state = rememberLazyListState()
     val context = LocalContext.current
+
+    LaunchedEffect(events) {
+        cache = events
+    }
 
     LaunchedEffect(Unit) {
         context.dataStore.data.first()[viewKey]?.let {

@@ -44,7 +44,6 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import app.ailaai.api.*
-import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
 import com.queatz.ailaai.api.sendMediaFromUri
@@ -54,6 +53,7 @@ import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.group.GroupJoinRequest
+import com.queatz.ailaai.helpers.OnStart
 import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.components.*
@@ -222,14 +222,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
         }
     }
 
-    OnLifecycleEvent { event ->
-        when (event) {
-            Lifecycle.Event.ON_START -> {
-                reloadMessages()
-            }
-
-            else -> {}
-        }
+    OnStart {
+        reloadMessages()
     }
 
     LaunchedEffect(Unit) {

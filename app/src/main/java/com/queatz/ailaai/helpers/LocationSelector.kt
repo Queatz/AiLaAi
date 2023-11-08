@@ -17,7 +17,7 @@ import com.google.accompanist.permissions.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.toLatLng
+import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable

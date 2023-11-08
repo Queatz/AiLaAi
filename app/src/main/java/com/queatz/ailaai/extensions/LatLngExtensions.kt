@@ -23,3 +23,5 @@ fun List<Double>.toLatLng() = takeIf { it.size == 2 }?.let {
 fun LatLng.toList() = listOf(latitude, longitude)
 
 fun LatLng.toGeo() = Geo(latitude, longitude)
+
+fun Location.toLatLng() = LatLng(latitude, longitude)

@@ -11,7 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import app.ailaai.api.newReminder
@@ -27,11 +29,13 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
     val scope = rememberCoroutineScope()
     var value by rememberStateOf("")
     var isAdding by rememberStateOf(false)
+    val keyboardController = LocalSoftwareKeyboardController.current!!
 
     fun addReminder() {
         scope.launch {
@@ -48,6 +52,7 @@ fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
                 value = ""
             }
             isAdding = false
+            keyboardController.hide()
         }
     }
 

@@ -27,11 +27,11 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import app.ailaai.api.*
-import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
@@ -136,14 +136,9 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
         }
     }
 
-    OnLifecycleEvent { event ->
-        when (event) {
-            Lifecycle.Event.ON_RESUME -> {
-                reload()
-                reloadCards()
-            }
-            else -> {}
-        }
+    OnResume {
+        reload()
+        reloadCards()
     }
 
     if (showRegeneratePhotoDialog) {

@@ -26,11 +26,15 @@ import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private var cache = emptyList<Story>()
+private var cacheTab = MainTab.Friends
 
 @Composable
 fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
@@ -43,12 +47,20 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
         { geo = it },
         navController.context as Activity
     )
-    var tab by rememberSavableStateOf(MainTab.Friends)
-    var stories by remember { mutableStateOf(emptyList<Story>()) }
+    var tab by rememberSavableStateOf(cacheTab)
+    var stories by remember { mutableStateOf(cache) }
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
-    var isLoading by rememberStateOf(true)
+    var isLoading by rememberStateOf(stories.isEmpty())
 
     val tabs = listOf(MainTab.Friends, MainTab.Local)
+
+    LaunchedEffect(stories) {
+        cache = stories
+    }
+
+    LaunchedEffect(tab) {
+        cacheTab = tab
+    }
 
     LaunchedEffect(geo) {
         geo?.let {

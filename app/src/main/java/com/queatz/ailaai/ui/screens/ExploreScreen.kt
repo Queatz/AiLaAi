@@ -4,8 +4,11 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.ViewAgenda
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.latLngSaver
@@ -31,37 +35,47 @@ import kotlinx.coroutines.launch
 
 var exploreInitialCategory: String? = null
 
+private var cache = emptyList<Card>()
+private var cacheTab = MainTab.Friends
+
 @Composable
 fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
-    var value by rememberSaveable { mutableStateOf("") }
+    var value by rememberSavableStateOf("")
+    var shownValue by rememberSavableStateOf(value)
     var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
-    var shownValue by rememberSaveable { mutableStateOf("") }
-    var cards by remember { mutableStateOf(emptyList<Card>()) }
-    var hasInitialCards by rememberStateOf(false)
-    var isLoading by rememberStateOf(true)
+    var cards by remember { mutableStateOf(cache) }
+    var isLoading by rememberStateOf(cards.isEmpty())
     var isError by rememberStateOf(false)
     var showAsMap by rememberSavableStateOf(false)
     var offset by remember { mutableIntStateOf(0) }
     val limit = 20
     var hasMore by rememberStateOf(true)
-    var shownGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var shownGeo: LatLng? by remember { mutableStateOf(null) }
     val locationSelector = locationSelector(
         geo,
         { geo = it },
         navController.context as Activity
     )
-    var tab by rememberSavableStateOf(MainTab.Friends)
-    var shownTab by rememberSaveable { mutableStateOf(tab) }
+    var tab by rememberSavableStateOf(cacheTab)
+    var shownTab by rememberSavableStateOf(tab)
 
     LaunchedEffect(geo) {
         geo?.let {
             api.myGeo(it.toGeo())
         }
+    }
+
+    LaunchedEffect(cards) {
+        cache = cards
+    }
+
+    LaunchedEffect(tab) {
+        cacheTab = tab
     }
 
     fun updateCategories() {
@@ -149,18 +163,17 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             return@LaunchedEffect
         }
 
-        if (hasInitialCards) {
-            hasInitialCards = false
-            return@LaunchedEffect
-        }
-
         // Don't reload if moving < 100m
         if (shownGeo != null && (mapGeo?.takeIf { showAsMap } ?: geo)!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
             return@LaunchedEffect
         }
 
         // The map doesn't clear for geo updates, but should for value and tab changes
-        loadMore(clear = !showAsMap || shownValue != value || shownTab != tab)
+        loadMore(clear = !showAsMap && (shownValue != value || shownTab != tab))
+    }
+
+    OnResume {
+        loadMore()
     }
 
     LocationScaffold(

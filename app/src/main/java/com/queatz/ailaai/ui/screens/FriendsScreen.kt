@@ -3,9 +3,6 @@ package com.queatz.ailaai.ui.screens
 import android.Manifest
 import android.app.Activity
 import android.app.NotificationManager
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import app.ailaai.api.*
 import at.bluesource.choicesdk.maps.common.LatLng
@@ -30,10 +26,10 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.queatz.ailaai.OnLifecycleEvent
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
@@ -54,16 +50,19 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
+private var cache = emptyList<GroupExtended>()
+private var cacheTab = MainTab.Friends
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
-    var allGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
+    var allGroups by remember { mutableStateOf(cache) }
     var allHiddenGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
     var allPeople by remember { mutableStateOf(emptyList<Person>()) }
     var results by remember { mutableStateOf(emptyList<SearchResult>()) }
-    var isLoading by rememberStateOf(true)
+    var isLoading by rememberStateOf(allGroups.isEmpty())
     var createGroupName by remember { mutableStateOf("") }
     var showCreateGroupName by rememberStateOf(false)
     var showCreateGroupMembers by rememberStateOf(false)
@@ -73,7 +72,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
-    var tab by rememberSavableStateOf(MainTab.Friends)
+    var tab by rememberSavableStateOf(cacheTab)
     var geo: LatLng? by remember { mutableStateOf(null) }
     val locationSelector = locationSelector(
         geo,
@@ -88,6 +87,14 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         geo?.let {
             api.myGeo(it.toGeo())
         }
+    }
+
+    LaunchedEffect(allGroups) {
+        cache = allGroups
+    }
+
+    LaunchedEffect(tab) {
+        cacheTab = tab
     }
 
     fun update() {
@@ -158,14 +165,8 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             }
     }
 
-    OnLifecycleEvent { event ->
-        when (event) {
-            Lifecycle.Event.ON_RESUME -> {
-                reloadFlow.emit(true)
-            }
-
-            else -> {}
-        }
+    OnResume {
+        reloadFlow.emit(true)
     }
 
     LaunchedEffect(Unit) {

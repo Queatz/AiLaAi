@@ -1,6 +1,5 @@
 package com.queatz.ailaai
 
-import android.location.Location
 import android.os.Bundle
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -25,15 +24,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,10 +40,10 @@ import app.ailaai.api.ErrorBlock
 import app.ailaai.api.groups
 import app.ailaai.api.me
 import app.ailaai.api.updateMe
-import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.OnLifecycleEvent
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.*
@@ -546,30 +542,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
-@Composable
-fun OnLifecycleEvent(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
-    val eventHandler = rememberUpdatedState(onEvent)
-    val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
-    val scope = rememberCoroutineScope()
-
-    DisposableEffect(lifecycleOwner.value) {
-        val lifecycle = lifecycleOwner.value.lifecycle
-        val observer = LifecycleEventObserver { _, event ->
-            scope.launch {
-                eventHandler.value(event)
-            }
-        }
-
-        lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycle.removeObserver(observer)
-        }
-    }
-}
-
-fun Location.toLatLng() = LatLng(latitude, longitude)
 
 data class NavButton(
     val route: String,
