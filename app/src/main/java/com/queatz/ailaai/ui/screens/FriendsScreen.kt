@@ -31,6 +31,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.*
@@ -149,6 +150,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         }
         update()
         isLoading = false
+        scope.launch {
+            joins.reload()
+        }
     }
 
     LaunchedEffect(Unit) {

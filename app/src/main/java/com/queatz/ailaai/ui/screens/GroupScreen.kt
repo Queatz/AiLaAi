@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.R
@@ -65,9 +64,12 @@ import com.queatz.db.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +91,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var showRemoveGroupMembers by rememberStateOf(false)
     var showInviteMembers by rememberStateOf(false)
     var showJoinDialog by rememberStateOf(false)
+    var showSnoozeDialog by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var stageReply by remember { mutableStateOf<Message?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
@@ -269,6 +272,24 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 }
             }
 
+            fun snooze(snoozed: Boolean) {
+                scope.launch {
+                    api.updateMember(myMember!!.member!!.id!!, Member(snoozed = snoozed)) {
+                        context.toast(if (snoozed) R.string.group_snoozed else R.string.group_unsnoozed)
+                        reload()
+                    }
+                }
+            }
+
+            fun snooze(snoozedUntil: Instant) {
+                scope.launch {
+                    api.updateMember(myMember!!.member!!.id!!, Member(snoozedUntil = snoozedUntil)) {
+                        context.toast(R.string.group_snoozed)
+                        reload()
+                    }
+                }
+            }
+
             TopAppBar(
                 {
                     Column(
@@ -322,12 +343,27 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 actions = {
                     var showMenu by rememberStateOf(false)
 
+                    val isSnoozed =
+                        myMember?.member?.snoozed == true || myMember?.member?.snoozedUntil?.takeIf { it > now() } != null
+
                     if (!showDescription && groupExtended?.group?.description?.isBlank() == false) {
                         IconButton({
                             showDescription = !showDescription
                             ui.setShowDescription(groupId, showDescription)
                         }) {
                             Icon(Icons.Outlined.Info, stringResource(R.string.introduction))
+                        }
+                    }
+
+                    if (isSnoozed) {
+                        IconButton({
+                            snooze(false)
+                        }) {
+                            Icon(
+                                Icons.Outlined.NotificationsPaused,
+                                stringResource(R.string.unsnooze),
+                                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = .5f)
+                            )
                         }
                     }
 
@@ -395,6 +431,30 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 }
                                 showMenu = false
                             })
+                            if (isSnoozed) {
+                                DropdownMenuItem({
+                                    Column {
+                                        Text(stringResource(R.string.unsnooze))
+                                        Text(
+                                            if (myMember.member?.snoozed == true) {
+                                                stringResource(R.string.indefinitely)
+                                            } else {
+                                                stringResource(R.string.until_x, myMember.member?.snoozedUntil?.formatFuture() ?: "")
+                                            },
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                }, {
+                                    showMenu = false
+                                    snooze(false)
+                                })
+                            } else {
+                                DropdownMenuItem({ Text(stringResource(R.string.snooze)) }, {
+                                    showMenu = false
+                                    showSnoozeDialog = true
+                                })
+                            }
                             DropdownMenuItem({ Text(stringResource(R.string.report)) }, {
                                 showMenu = false
                                 showReportDialog = true
@@ -966,6 +1026,45 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 }
             }
 
+            if (showSnoozeDialog) {
+                Menu({
+                    showSnoozeDialog = false
+                }) {
+                    menuItem(stringResource(R.string.for_an_hour)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 1.hours)
+                    }
+                    menuItem(stringResource(R.string.for_3_hours)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 3.hours)
+                    }
+                    menuItem(stringResource(R.string.for_6_hours)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 6.hours)
+                    }
+                    menuItem(stringResource(R.string.for_12_hours)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 12.hours)
+                    }
+                    menuItem(stringResource(R.string.for_a_day)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 1.days)
+                    }
+                    menuItem(stringResource(R.string.for_a_week)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 7.days)
+                    }
+                    menuItem(stringResource(R.string.for_a_month)) {
+                        showSnoozeDialog = false
+                        snooze(now() + 30.days)
+                    }
+                    menuItem(stringResource(R.string.indefinitely)) {
+                        showSnoozeDialog = false
+                        snooze(true)
+                    }
+                }
+            }
+
             if (showInviteMembers) {
                 val someone = stringResource(R.string.someone)
                 val omit = groupExtended!!.members!!.mapNotNull { it.person?.id }
@@ -1084,8 +1183,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             if (showJoinDialog) {
                 TextFieldDialog(
                     {
-                    showJoinDialog = false
-                },
+                        showJoinDialog = false
+                    },
                     title = stringResource(R.string.join_group),
                     button = stringResource(R.string.send_request),
                     placeholder = stringResource(R.string.message),

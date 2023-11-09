@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.R
@@ -538,8 +537,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             )
         } else {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
-            var verticalAspect by rememberStateOf(false)
-            val headerAspect by animateFloatAsState(if (verticalAspect) .75f else 1.5f)
             var playingVideo by remember { mutableStateOf<Card?>(null) }
             val isAtTop by state.isAtTop()
             val autoplayIndex by state.rememberAutoplayIndex()
@@ -566,8 +563,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             cardHeaderItem(
                                 card,
                                 isMine,
-                                headerAspect,
-                                onClick = { verticalAspect = !verticalAspect },
+                                1.5f,
+                                onClick = {
+                                    if (isMine) {
+                                        openEditDialog = true
+                                    }
+                                },
                                 onChange = {
                                     if (card?.id == cardId) {
                                         reload()
@@ -595,8 +596,12 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             cardHeaderItem(
                                 card,
                                 isMine,
-                                headerAspect,
-                                onClick = { verticalAspect = !verticalAspect },
+                                1.5f,
+                                onClick = {
+                                    if (isMine) {
+                                        openEditDialog = true
+                                    }
+                                },
                                 onChange = {
                                     if (card?.id == cardId) {
                                         reload()

@@ -430,4 +430,20 @@
     <string name="no_groups_nearby">Không có nhóm nào gần đây.</string>
     <string name="go_here">Đến đây</string>
     <string name="permission_request">Chào Town không có quyền để làm điều đó.</string>
+    <string name="group_snoozed">Thông báo nhóm đã tắt</string>
+    <string name="group_unsnoozed">Thông báo nhóm đã bật</string>
+    <string name="snooze">Tắt thông báo</string>
+    <string name="unsnooze">Bật thông báo</string>
+    <string name="for_an_hour">Trong 1 giờ</string>
+    <string name="for_3_hours">Trong 3 giờ</string>
+    <string name="for_6_hours">Trong 6 giờ</string>
+    <string name="for_12_hours">Trong 12 giờ</string>
+    <string name="for_a_day">Trong 1 ngày</string>
+    <string name="for_a_week">Trong 1 tuần</string>
+    <string name="for_a_month">Trong 1 tháng</string>
+    <string name="indefinitely">Vô thời hạn</string>
+    <string name="until_x">Tới %1$s</string>
+    <string name="inline_today">hôm nay</string>
+    <string name="inline_tomorrow">ngày mai</string>
+    <string name="inline_yesterday">hôm qua</string>
 </resources>

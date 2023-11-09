@@ -18,11 +18,15 @@ import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import kotlinx.coroutines.delay
-import java.util.logging.Logger
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun LoadMore(hasMore: Boolean, permanent: Boolean = false, contentPadding: Dp = 0.dp, onLoadMore: suspend () -> Unit) {
+fun LoadMore(
+    hasMore: Boolean,
+    permanent: Boolean = false,
+    contentPadding: Dp = 0.dp,
+    onLoadMore: () -> Unit
+) {
     var isLoadingMore by rememberStateOf(true)
     var viewport by remember {
         mutableStateOf(Rect.Zero)

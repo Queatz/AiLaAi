@@ -4,7 +4,11 @@ import android.icu.text.MessageFormat
 import android.icu.text.RelativeDateTimeFormatter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.R
 import kotlinx.datetime.*
+import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import java.time.Duration
@@ -35,11 +39,11 @@ fun Instant.plus(days: Int = 0, weeks: Int = 0, months: Int = 0, years: Int = 0,
 fun Instant.startOfMinute() = toJavaInstant().truncatedTo(ChronoUnit.MINUTES).toKotlinInstant()
 
 fun Instant.startOfDay(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
-    LocalDate(it.year, it.month, it.dayOfMonth)
+    it.date
 }.atStartOfDayIn(zone)
 
 fun Instant.startOfWeek(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
-    LocalDate(it.year, it.month, it.dayOfMonth).previous(DayOfWeek.SUNDAY)
+    it.date.previous(DayOfWeek.SUNDAY)
 }.atStartOfDayIn(zone)
 
 fun Instant.startOfMonth(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
@@ -64,9 +68,36 @@ fun Instant.nameOfDayOfWeek() = DateTimeFormatter.ofPattern("EEE")
 fun Instant.format(pattern: String) = DateTimeFormatter.ofPattern(pattern)
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
 
+fun Instant.isToday(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    it.date == now().toLocalDateTime(zone).date
+}
+
+fun Instant.isTomorrow(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    it.date == ((now() + 1.days).toLocalDateTime(zone).date)
+}
+
+fun Instant.isYesterday(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    it.date == ((now() - 1.days).toLocalDateTime(zone).date)
+}
+
+@Composable
+fun Instant.formatFuture() = when {
+    isToday() -> {
+        "${format("h:mm a")} ${stringResource(R.string.inline_today)}"
+    }
+
+    isTomorrow() -> {
+        "${format("h:mm a")} ${stringResource(R.string.inline_tomorrow)}"
+    }
+
+    else -> {
+        format("EEEE, MMMM d")
+    }
+}
+
 fun Instant.timeAgo() = Duration.between(
     toJavaInstant(),
-    Clock.System.now().toJavaInstant()
+    now().toJavaInstant()
 ).toKotlinDuration().let {
     val formatter = RelativeDateTimeFormatter.getInstance(AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault())
 

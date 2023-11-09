@@ -23,6 +23,7 @@ import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
+import kotlinx.coroutines.launch
 
 @Composable
 fun CardList(
@@ -116,7 +117,9 @@ fun CardList(
                         LoadMore(
                             hasMore && cards.isNotEmpty()
                         ) {
-                            onLoadMore()
+                            scope.launch {
+                                onLoadMore()
+                            }
                         }
                     }
                 }

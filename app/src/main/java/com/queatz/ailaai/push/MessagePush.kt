@@ -37,11 +37,13 @@ fun Push.receive(data: MessagePushData) {
         MainActivity::class.java
     )
 
-    send(
-        intent = deeplinkIntent,
-        channel = Notifications.Messages,
-        groupKey = makeGroupKey(data.group.id!!),
-        title = data.person.name ?: context.getString(R.string.someone),
-        text = data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: ""
-    )
+    if (data.show != false) {
+        send(
+            intent = deeplinkIntent,
+            channel = Notifications.Messages,
+            groupKey = makeGroupKey(data.group.id!!),
+            title = data.person.name ?: context.getString(R.string.someone),
+            text = data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: ""
+        )
+    }
 }

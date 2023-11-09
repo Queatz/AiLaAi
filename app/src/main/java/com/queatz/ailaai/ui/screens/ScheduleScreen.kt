@@ -46,7 +46,7 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
     var events by rememberStateOf(cache)
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
-    var isLoading by rememberStateOf(events.isEmpty())
+    var isLoading by rememberStateOf(true)
     var view by rememberStateOf(Monthly)
     val state = rememberLazyListState()
     val context = LocalContext.current
@@ -206,8 +206,8 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                     ScheduleMenu(
                         showMenu,
                         { showMenu = false },
-                        view,
-                        {
+                        view = view,
+                        onView = {
                             if (view == it) {
                                 range = initialRange()
                             } else {
@@ -219,8 +219,8 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                                 }
                                 events = emptyList()
                                 isLoading = true
-                                scrollToTop()
                             }
+                            scrollToTop()
                         }
                     )
                 }
