@@ -46,6 +46,7 @@ import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.geoKey
+import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.state.latLngSaver
@@ -317,6 +318,20 @@ fun MapScreen(
         }
     }
 
+    var newCard by rememberStateOf<Card?>(null)
+
+    if (newCard != null) {
+        EditCardDialog(
+            newCard!!,
+            {
+                newCard = null
+            },
+            create = true
+        ) {
+            navController.navigate("card/${it.id!!}")
+        }
+    }
+
     showMapClickMenu?.let { clickGeo ->
         Menu(
             {
@@ -325,13 +340,7 @@ fun MapScreen(
         ) {
             menuItem(stringResource(R.string.add_a_card)) {
                 showMapClickMenu = null
-                scope.launch {
-                    api.newCard(
-                        Card(geo = clickGeo.toList())
-                    ) {
-                        navController.navigate("card/${it.id!!}")
-                    }
-                }
+                newCard = Card(geo = clickGeo.toList())
             }
             menuItem(stringResource(R.string.go_here)) {
                 showMapClickMenu = null

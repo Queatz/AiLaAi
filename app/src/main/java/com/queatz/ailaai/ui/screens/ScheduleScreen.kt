@@ -239,15 +239,17 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         bottom = PaddingDefault + 80.dp
                     )
                 ) {
-                    item(contentType = -1) {
-                        var isInitial by remember {
-                            mutableStateOf(true)
-                        }
-                        LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
-                            if (isInitial) {
-                                isInitial = false
-                            } else {
-                                range = (range.first - view.duration) to range.second
+                    if (events.isNotEmpty()) {
+                        item(contentType = -1) {
+                            var isInitial by remember {
+                                mutableStateOf(true)
+                            }
+                            LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
+                                if (isInitial) {
+                                    isInitial = false
+                                } else {
+                                    range = (range.first - view.duration) to range.second
+                                }
                             }
                         }
                     }
@@ -284,9 +286,11 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         today = end
                     }
 
-                    item(contentType = -1) {
-                        LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
-                            range = range.first to (range.second + view.duration)
+                    if (events.isNotEmpty()) {
+                        item(contentType = -1) {
+                            LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
+                                range = range.first to (range.second + view.duration)
+                            }
                         }
                     }
                 }

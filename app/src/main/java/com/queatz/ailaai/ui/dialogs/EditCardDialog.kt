@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -28,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
+import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
@@ -47,7 +50,12 @@ import kotlinx.serialization.encodeToString
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Unit) {
+fun EditCardDialog(
+    card: Card,
+    onDismissRequest: () -> Unit,
+    create: Boolean = false,
+    onChange: (Card) -> Unit
+) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current!!
 
@@ -82,6 +90,11 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
         fun invalidate() {
             currentRecomposeScope.invalidate()
         }
+        val titleFocusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(Unit) {
+            titleFocusRequester.requestFocus()
+        }
 
         Column(
             modifier = Modifier
@@ -89,7 +102,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 .verticalScroll(scrollState)
         ) {
             Text(
-                stringResource(R.string.edit),
+                if (create) stringResource(R.string.create_page) else stringResource(R.string.edit),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
@@ -113,6 +126,7 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                     }
                 ),
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(titleFocusRequester)
             )
             OutlinedTextField(
                 locationName,
@@ -133,12 +147,6 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                 }),
                 modifier = Modifier
                     .fillMaxWidth()
-            )
-            Text(
-                stringResource(R.string.hint_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(PaddingValues(top = PaddingDefault, bottom = PaddingDefault * 2))
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(PaddingDefault),
@@ -354,6 +362,19 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                         trim(conversation)
 
                         scope.launch {
+                            var cardToUpdate: Card? = null
+                            if (create) {
+                                api.newCard(card) {
+                                    cardToUpdate = it
+                                }
+                            } else {
+                                cardToUpdate = card
+                            }
+
+                            if (cardToUpdate == null) {
+                                return@launch
+                            }
+
                             api.updateCard(
                                 card.id!!,
                                 Card(
@@ -367,16 +388,17 @@ fun EditCardDialog(card: Card, onDismissRequest: () -> Unit, onChange: () -> Uni
                                 card.location = update.location
                                 card.conversation = update.conversation
                                 card.options = update.options
-
                                 onDismissRequest()
-                                onChange()
+                                onChange(update)
                             }
                             disableSaveButton = false
                         }
                     },
                     enabled = !disableSaveButton
                 ) {
-                    Text(stringResource(R.string.save))
+                    Text(stringResource(
+                        if (create) R.string.create else R.string.update
+                    ))
                 }
             }
         }

@@ -179,7 +179,7 @@ fun CardToolbar(
     if (openEditDialog) {
         EditCardDialog(card, {
             openEditDialog = false
-        }, onChange)
+        }, onChange = { onChange() })
     }
 
     if (openDeleteDialog) {

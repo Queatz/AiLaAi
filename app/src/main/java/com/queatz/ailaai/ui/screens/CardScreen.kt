@@ -220,9 +220,24 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     if (openEditDialog) {
         EditCardDialog(card!!, {
             openEditDialog = false
-        }, {
+        }) {
             recomposeScope.invalidate()
-        })
+        }
+    }
+
+    var newCard by rememberStateOf<Card?>(null)
+
+    if (newCard != null) {
+        EditCardDialog(
+            newCard!!,
+            {
+                newCard = null
+            },
+            create = true
+        ) {
+            reloadCards()
+            navController.navigate("card/${it.id}")
+        }
     }
 
     card?.let { card ->
@@ -646,12 +661,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 if (isMineOrIAmACollaborator) {
                     FloatingActionButton(
                         onClick = {
-                            scope.launch {
-                                api.newCard(Card(parent = cardId)) {
-                                    reloadCards()
-                                    navController.navigate("card/${it.id}")
-                                }
-                            }
+                            newCard = Card(parent = cardId)
                         },
                         modifier = Modifier
                             .padding(PaddingDefault * 2)

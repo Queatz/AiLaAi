@@ -29,7 +29,7 @@
     <string name="choose_x_and_x">Choose %1$s and %2$s</string>
     <string name="choose_x_groups">Choose %1$s groups</string>
     <string name="you_have_no_cards">You currently have no pages.</string>
-    <string name="add_a_card">Add a page</string>
+    <string name="add_a_card">Create a page</string>
     <string name="you_have_no_groups">You currently have no groups.</string>
     <string name="no_cards">No pages.</string>
     <string name="no_cards_to_show">No pages to show.</string>
@@ -63,7 +63,6 @@
     <string name="go_back">Go back</string>
     <string name="card_location">Page location</string>
     <string name="hint">Hint</string>
-    <string name="hint_description">Location, time, or price</string>
     <string name="map_description">Tap on the map to set the location of this page.</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -448,6 +447,7 @@
     <string name="inline_today">today</string>
     <string name="inline_tomorrow">tomorrow</string>
     <string name="inline_yesterday">yesterday</string>
+    <string name="create_page">Create a new page</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

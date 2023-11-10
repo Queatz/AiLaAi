@@ -29,6 +29,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
@@ -124,6 +125,20 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                     it.name?.contains(searchTextTrimmed, true) == true ||
                                     it.location?.contains(searchTextTrimmed, true) == true
                             ))
+        }
+    }
+
+    var newCard by rememberStateOf<Card?>(null)
+
+    if (newCard != null) {
+        EditCardDialog(
+            newCard!!,
+            {
+                newCard = null
+            },
+            create = true
+        ) {
+            navController.navigate("card/${it.id!!}")
         }
     }
 
@@ -274,11 +289,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     }
                     FloatingActionButton(
                         onClick = {
-                            scope.launch {
-                                api.newCard {
-                                    navController.navigate("card/${it.id}")
-                                }
-                            }
+                            newCard = Card()
                         },
                         modifier = Modifier
                             .padding(start = PaddingDefault * 2)
