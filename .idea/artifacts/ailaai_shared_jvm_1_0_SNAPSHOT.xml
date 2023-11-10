@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ailaai-shared-jvm-1.0-SNAPSHOT">
+    <output-path>$PROJECT_DIR$/../ailaai-shared/build/libs</output-path>
+    <root id="archive" name="ailaai-shared-jvm-1.0-SNAPSHOT.jar">
+      <element id="module-output" name="ailaai-shared.jvmMain" />
+    </root>
+  </artifact>
+</component>
