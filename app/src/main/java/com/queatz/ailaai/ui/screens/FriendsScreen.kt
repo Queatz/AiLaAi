@@ -348,7 +348,19 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                 contentAlignment = Alignment.TopCenter,
                 modifier = Modifier
                     .fillMaxSize()
-                    .swipeMainTabs { setTab(tabs.next(tab, it)) }
+                    .swipeMainTabs {
+                        when (val it = tabs.swipe(tab, it)) {
+                            is SwipeResult.Previous -> {
+                                navController.navigate("stories")
+                            }
+                            is SwipeResult.Next -> {
+                                navController.navigate("schedule")
+                            }
+                            is SwipeResult.Select<*> -> {
+                                setTab(it.item as MainTab)
+                            }
+                        }
+                    }
             ) {
                 LazyColumn(
                     state = state,

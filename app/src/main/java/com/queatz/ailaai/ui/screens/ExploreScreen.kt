@@ -286,7 +286,19 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         navController.navigate("me")
                     },
                     modifier = Modifier
-                        .swipeMainTabs { tab = tab.next(it) }
+                        .swipeMainTabs {
+                            when (val it = MainTab.entries.swipe(tab, it)) {
+                                is SwipeResult.Previous -> {
+                                    navController.navigate("schedule")
+                                }
+                                is SwipeResult.Next -> {
+                                    navController.navigate("stories")
+                                }
+                                is SwipeResult.Select<*> -> {
+                                    tab = it.item as MainTab
+                                }
+                            }
+                        }
                 ) {
                     SearchContent(
                         locationSelector,

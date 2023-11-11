@@ -129,7 +129,19 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .swipeMainTabs { tab = tabs.next(tab, it) }
+                    .swipeMainTabs {
+                        when (val it = tabs.swipe(tab, it)) {
+                            is SwipeResult.Previous -> {
+                                navController.navigate("explore")
+                            }
+                            is SwipeResult.Next -> {
+                                navController.navigate("messages")
+                            }
+                            is SwipeResult.Select<*> -> {
+                                tab = it.item as MainTab
+                            }
+                        }
+                    }
             ) {
                 if (isLoading) {
                     Loading(

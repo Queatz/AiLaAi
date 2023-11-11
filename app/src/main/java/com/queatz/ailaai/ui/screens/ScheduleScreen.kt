@@ -22,10 +22,7 @@ import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.schedule.*
 import com.queatz.ailaai.schedule.ScheduleView.*
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.LoadMore
-import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.ScanQrCodeButton
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
 import com.queatz.db.Reminder
@@ -187,7 +184,23 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .swipeMainTabs {
+                when (emptyList<Unit>().swipe(Unit, it)) {
+                    is SwipeResult.Previous -> {
+                        navController.navigate("messages")
+                    }
+                    is SwipeResult.Next -> {
+                        navController.navigate("explore")
+                    }
+                    is SwipeResult.Select<*> -> {
+                        // Impossible
+                    }
+                }
+            }
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
                 navController,

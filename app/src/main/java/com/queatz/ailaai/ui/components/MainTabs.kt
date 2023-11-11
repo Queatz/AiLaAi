@@ -23,8 +23,6 @@ enum class MainTab {
     Saved
 }
 
-fun MainTab.next(offset: Int = 1) = MainTab.entries[(ordinal + offset).coerceIn(0 until MainTab.entries.size)]
-
 private val MainTab.stringResource
     get() = when (this) {
         MainTab.Friends -> R.string.friends

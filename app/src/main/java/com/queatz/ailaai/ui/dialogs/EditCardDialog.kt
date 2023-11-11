@@ -376,7 +376,7 @@ fun EditCardDialog(
                             }
 
                             api.updateCard(
-                                card.id!!,
+                                cardToUpdate!!.id!!,
                                 Card(
                                     name = cardName.trim(),
                                     location = locationName.trim(),
