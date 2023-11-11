@@ -448,6 +448,8 @@
     <string name="inline_tomorrow">tomorrow</string>
     <string name="inline_yesterday">yesterday</string>
     <string name="create_page">Create a new page</string>
+    <string name="add_group">Add a group</string>
+    <string name="loading_group">Loading group…</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

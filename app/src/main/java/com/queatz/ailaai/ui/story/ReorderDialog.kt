@@ -37,7 +37,11 @@ fun <T> ReorderDialog(
     ) {
         if (list) {
             val reorderState = rememberReorderableLazyListState(
-                onMove = onMove,
+                onMove = { from, to ->
+                    if (draggable(items[from.index]) && draggable(items[to.index])) {
+                        onMove(from, to)
+                    }
+                },
                 canDragOver = { draggedOver, dragging -> draggable(items[draggedOver.index]) }
             )
             LazyColumn(

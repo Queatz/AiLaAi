@@ -18,6 +18,7 @@ sealed class StoryContent(val key: Long = Random.nextLong()) {
     @Serializable class Section(var section: String) : StoryContent()
     @Serializable class Text(var text: String) : StoryContent()
     @Serializable class Cards(var cards: List<String>) : StoryContent()
+    @Serializable class Groups(var groups: List<String>) : StoryContent()
     @Serializable class Photos(var photos: List<String>, var aspect: Float = 0.75f) : StoryContent()
     @Serializable class Audio(var audio: String) : StoryContent()
 }
@@ -29,6 +30,7 @@ fun StoryContent.partType() = when (this) {
     is StoryContent.Section -> "section"
     is StoryContent.Text -> "text"
     is StoryContent.Cards -> "cards"
+    is StoryContent.Groups -> "groups"
     is StoryContent.Photos -> "photos"
     is StoryContent.Audio -> "audio"
     else -> throw NotImplementedError("$this is not a valid story part")
@@ -38,6 +40,7 @@ fun StoryContent.isPart() = when (this) {
     is StoryContent.Section -> true
     is StoryContent.Text -> true
     is StoryContent.Cards -> true
+    is StoryContent.Groups -> true
     is StoryContent.Photos -> true
     is StoryContent.Audio -> true
     else -> false
@@ -55,6 +58,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "section" -> json.decodeFromJsonElement<StoryContent.Section>(content)
         "text" -> json.decodeFromJsonElement<StoryContent.Text>(content)
         "cards" -> json.decodeFromJsonElement<StoryContent.Cards>(content)
+        "groups" -> json.decodeFromJsonElement<StoryContent.Groups>(content)
         "photos" -> json.decodeFromJsonElement<StoryContent.Photos>(content)
         "audio" -> json.decodeFromJsonElement<StoryContent.Audio>(content)
         else -> null

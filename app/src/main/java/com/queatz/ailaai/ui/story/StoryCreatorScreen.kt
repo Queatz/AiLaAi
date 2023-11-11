@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import app.ailaai.api.card
+import app.ailaai.api.group
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
@@ -34,20 +35,13 @@ import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.components.Audio
-import com.queatz.ailaai.ui.components.CardItem
-import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
-import com.queatz.ailaai.ui.dialogs.Menu
-import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Card
-import com.queatz.db.Person
-import com.queatz.db.Story
-import com.queatz.db.StoryDraft
+import com.queatz.db.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
@@ -210,6 +204,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
     if (showReorderContentDialog) {
         ReorderStoryContentsDialog(
             navController = navController,
+            me,
             {
                 showReorderContentDialog = false
             },
@@ -408,6 +403,146 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                         Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error)
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    is StoryContent.Groups -> {
+                        itemsIndexed(
+                            part.groups,
+                            span = { _, _ -> GridItemSpan(maxLineSpan) },
+                            key = { index, it -> "${part.key}.$it" }
+                        ) { index, groupId ->
+                            var group by remember { mutableStateOf<GroupExtended?>(null) }
+                            var showGroupMenu by rememberStateOf(false)
+                            var showAddGroupDialog by rememberStateOf(false)
+                            var showReorderDialog by rememberStateOf(false)
+
+                            if (showAddGroupDialog) {
+                                val someone = stringResource(R.string.someone)
+                                val emptyGroup = stringResource(R.string.empty_group_name)
+
+                                ChooseGroupDialog(
+                                    {
+                                        showAddGroupDialog = false
+                                    },
+                                    title = stringResource(R.string.add_group),
+                                    confirmFormatter = defaultConfirmFormatter(
+                                        R.string.choose_group,
+                                        R.string.choose_x,
+                                        R.string.choose_x_and_x,
+                                        R.string.choose_x_groups
+                                    ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
+                                    infoFormatter = {
+                                        buildString {
+                                            val count = it.members?.size ?: 0
+                                            append("$count ")
+                                            append(context.resources.getQuantityString(R.plurals.inline_members, count))
+                                            if (it.group?.description.isNullOrBlank().not()) {
+                                                append(" • ")
+                                                append(it.group!!.description)
+                                            }
+                                        }
+                                    },
+                                    me = me(),
+                                    filter = {
+                                        it.group?.open == true && part.groups.none { id -> it.group?.id == id }
+                                    }
+                                ) {
+                                    part.edit {
+                                        groups += it.mapNotNull { it.id }
+                                    }
+                                }
+                            }
+
+                            if (showReorderDialog) {
+                                ReorderDialog(
+                                    { showReorderDialog = false },
+                                    onMove = { from, to ->
+                                        part.edit {
+                                            groups = groups.toMutableList().apply {
+                                                add(to.index, removeAt(from.index))
+                                            }
+                                        }
+                                    },
+                                    list = true,
+                                    items = part.groups,
+                                    key = { it }
+                                ) { groupId, elevation ->
+                                    var group by remember { mutableStateOf<GroupExtended?>(null) }
+
+                                    LaunchedEffect(groupId) {
+                                        api.group(groupId) { group = it }
+                                    }
+
+                                    LoadingText(group != null, stringResource(R.string.loading_group)) {
+                                        ContactItem(
+                                            onClick = null,
+                                            onLongClick = null,
+                                            item = SearchResult.Group(group!!),
+                                            me = me(),
+                                            info = GroupInfo.LatestMessage
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (showGroupMenu) {
+                                Menu(
+                                    {
+                                        showGroupMenu = false
+                                    }
+                                ) {
+                                    menuItem(stringResource(R.string.add_group)) {
+                                        showGroupMenu = false
+                                        showAddGroupDialog = true
+                                    }
+                                    menuItem(stringResource(R.string.open_group)) {
+                                        showGroupMenu = false
+                                        navController.navigate("group/$groupId")
+                                    }
+                                    if (part.groups.size > 1) {
+                                        menuItem(stringResource(R.string.reorder)) {
+                                            showGroupMenu = false
+                                            showReorderDialog = true
+                                        }
+                                    }
+                                    menuItem(stringResource(R.string.remove)) {
+                                        showGroupMenu = false
+                                        if (part.groups.size == 1) {
+                                            showGroupMenu = false
+                                            removePartAt(partIndex)
+                                        } else {
+                                            part.edit {
+                                                groups = groups.toMutableList().apply {
+                                                    removeAt(index)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (part.groups.size > 1) {
+                                        menuItem(stringResource(R.string.remove_all)) {
+                                            showGroupMenu = false
+                                            removePartAt(partIndex)
+                                        }
+                                    }
+                                }
+                            }
+
+                            LaunchedEffect(groupId) {
+                                api.group(groupId) { group = it }
+                            }
+
+                            LoadingText(group != null, stringResource(R.string.loading_group)) {
+                                ContactItem(
+                                    onClick = {
+                                        showGroupMenu = true
+                                    },
+                                    onLongClick = {},
+                                    SearchResult.Group(group!!),
+                                    me(),
+                                    info = GroupInfo.LatestMessage
+                                )
                             }
                         }
                     }
@@ -666,7 +801,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                 }
             }
         }
-        StoryCreatorTools(storyId, navController = navController, ::addPart)
+        StoryCreatorTools(storyId, navController = navController, me = me, ::addPart)
     }
 }
 

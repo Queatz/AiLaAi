@@ -53,6 +53,7 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
             contents,
             state,
             navController,
+            me,
             modifier = Modifier.widthIn(max = 640.dp).fillMaxSize(),
         )
     }

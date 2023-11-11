@@ -20,26 +20,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import app.ailaai.api.card
+import app.ailaai.api.group
 import coil.compose.AsyncImage
+import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.components.Audio
-import com.queatz.ailaai.ui.components.CardItem
-import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
+import com.queatz.db.GroupExtended
+import com.queatz.db.Person
 
 @Composable
 fun StoryContents(
     content: List<StoryContent>,
     state: LazyGridState,
     navController: NavController,
+    me: () -> Person?,
     modifier: Modifier = Modifier,
     bottomContentPadding: Dp = 0.dp,
     actions: (@Composable (storyId: String) -> Unit)? = null
@@ -139,6 +143,28 @@ fun StoryContents(
                                 content.publishDate,
                                 content.authors
                             )
+                        }
+                    }
+
+                    is StoryContent.Groups -> {
+                        items(content.groups, span = { GridItemSpan(maxLineSpan) }) { groupId ->
+                            DisableSelection {
+                                var group by remember { mutableStateOf<GroupExtended?>(null) }
+
+                                LaunchedEffect(groupId) {
+                                    api.group(groupId) { group = it }
+                                }
+
+                                LoadingText(group != null, stringResource(R.string.loading_group)) {
+                                    ContactItem(
+                                        navController,
+                                        SearchResult.Group(group!!),
+                                        me(),
+                                        onChange = {},
+                                        info = GroupInfo.LatestMessage
+                                    )
+                                }
+                            }
                         }
                     }
 

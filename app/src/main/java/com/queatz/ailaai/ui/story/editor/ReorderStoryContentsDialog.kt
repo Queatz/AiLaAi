@@ -18,18 +18,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import app.ailaai.api.card
+import app.ailaai.api.group
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.ui.components.CardItem
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.StoryContent
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
+import com.queatz.db.GroupExtended
+import com.queatz.db.Person
 
 @Composable
 fun ReorderStoryContentsDialog(
     navController: NavController,
+    me: () -> Person?,
     onDismissRequest: () -> Unit,
     storyContents: List<StoryContent>,
     onStoryContents: (List<StoryContent>) -> Unit
@@ -53,7 +57,7 @@ fun ReorderStoryContentsDialog(
                 }
             )
         },
-        draggable = { it !is StoryContent.Title}
+        draggable = { it !is StoryContent.Title }
     ) { it, elevation ->
         when (it) {
             is StoryContent.Cards -> {
@@ -74,6 +78,30 @@ fun ReorderStoryContentsDialog(
                             navController = navController,
                             modifier = Modifier.width(80.dp)
                         )
+                    }
+                }
+            }
+
+            is StoryContent.Groups -> {
+                Card(
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    it.groups.firstOrNull()?.let { groupId ->
+                        var group by remember { mutableStateOf<GroupExtended?>(null) }
+
+                        LaunchedEffect(groupId) {
+                            api.group(groupId) { group = it }
+                        }
+
+                        LoadingText(group != null, stringResource(R.string.loading_group)) {
+                            ContactItem(
+                                onClick = null,
+                                onLongClick = null,
+                                item = SearchResult.Group(group!!),
+                                me = me(),
+                                info = GroupInfo.LatestMessage
+                            )
+                        }
                     }
                 }
             }

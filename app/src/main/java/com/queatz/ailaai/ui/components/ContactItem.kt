@@ -54,19 +54,74 @@ fun ContactItem(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    var showMenu by rememberStateOf(false)
+
+    if (showMenu) {
+        Menu(
+            { showMenu = false }
+        ) {
+            val groupExtended = (item as? SearchResult.Group)?.groupExtended
+            if (groupExtended != null) {
+                menuItem(stringResource(R.string.hide)) {
+                    showMenu = false
+                    scope.launch {
+                        val myMember = groupExtended.members?.find { it.person?.id == me?.id }
+                        api.updateMember(myMember!!.member!!.id!!, Member(hide = true)) {
+                            context.toast(R.string.group_hidden)
+                            onChange()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ContactItem(
+        {
+            scope.launch {
+                when (item) {
+                    is SearchResult.Connect -> {
+                        api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true) { group ->
+                            navController.navigate("group/${group.id!!}")
+                        }
+                    }
+
+                    is SearchResult.Group -> {
+                        val groupExtended = item.groupExtended
+                        navController.navigate("group/${groupExtended.group!!.id!!}")
+
+                    }
+                }
+            }
+        },
+        {
+            if (item is SearchResult.Group) {
+                showMenu = true
+            }
+        },
+        item,
+        me,
+        info
+    )
+}
+
+@Composable
+fun ContactItem(
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
+    item: SearchResult,
+    me: Person?,
+    info: GroupInfo
+) {
+    val context = LocalContext.current
     val someone = stringResource(R.string.someone)
     val notConnected = stringResource(R.string.not_connected_yet)
 
     when (item) {
         is SearchResult.Connect -> {
             ContactResult(
-                onClick = {
-                    scope.launch {
-                        api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true) { group ->
-                            navController.navigate("group/${group.id!!}")
-                        }
-                    }
-                },
+                onClick = onClick,
                 onLongClick = {},
                 name = item.person.name ?: someone,
                 description = notConnected,
@@ -84,23 +139,6 @@ fun ContactItem(
             val people = groupExtended.members?.filter { it.person?.id != me?.id }?.map { it.person!! } ?: emptyList()
             val myMember = groupExtended.members?.find { it.person?.id == me?.id }
             val isUnread = groupExtended.isUnread(myMember?.member)
-            var showMenu by rememberStateOf(false)
-
-            if (showMenu) {
-                Menu(
-                    { showMenu = false }
-                ) {
-                    menuItem(stringResource(R.string.hide)) {
-                        showMenu = false
-                        scope.launch {
-                            api.updateMember(myMember!!.member!!.id!!, Member(hide = true)) {
-                                context.toast(R.string.group_hidden)
-                                onChange()
-                            }
-                        }
-                    }
-                }
-            }
 
             val description = when (info) {
                 GroupInfo.LatestMessage -> {
@@ -130,12 +168,8 @@ fun ContactItem(
 
             val emptyGroup = stringResource(R.string.empty_group_name)
             ContactResult(
-                onClick = {
-                    navController.navigate("group/${groupExtended.group!!.id!!}")
-                },
-                onLongClick = {
-                    showMenu = true
-                },
+                onClick = onClick,
+                onLongClick = onLongClick,
                 name = groupExtended.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()),
                 description = description,
                 photos = groupExtended.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)),
@@ -152,8 +186,8 @@ fun ContactItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContactResult(
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     name: String,
     description: String,
     photos: List<ContactPhoto>,
@@ -166,12 +200,17 @@ fun ContactResult(
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .clip(MaterialTheme.shapes.large)
-            .combinedClickable(
-                onLongClick = {
-                    onLongClick()
+            .let {
+                if (onClick == null && onLongClick == null) {
+                    it
+                } else {
+                    it.combinedClickable(
+                        onLongClick = onLongClick,
+                        onClick = {
+                            onClick?.invoke()
+                        }
+                    )
                 }
-            ) {
-                onClick()
             }
     ) {
         GroupPhoto(photos)

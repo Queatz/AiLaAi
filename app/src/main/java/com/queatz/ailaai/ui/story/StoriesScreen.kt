@@ -155,6 +155,7 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         storyContents,
                         state,
                         navController,
+                        me,
                         Modifier.align(Alignment.TopCenter).widthIn(max = 640.dp).fillMaxSize(),
                         bottomContentPadding = 80.dp
                     ) { storyId ->
