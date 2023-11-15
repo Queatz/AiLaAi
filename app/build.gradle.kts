@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.20"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 66
-        versionName = "0.9.66"
+        versionCode = 68
+        versionName = "0.9.68"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -64,7 +64,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
@@ -77,7 +77,7 @@ android {
 }
 
 dependencies {
-    val ktorVersion = "2.3.4"
+    val ktorVersion = "2.3.6"
     val choiceSdkVersion = "0.3.0"
     val composeVersion = "1.5.4"
     implementation("app.ailaai.shared:models")

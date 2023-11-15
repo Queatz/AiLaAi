@@ -180,6 +180,7 @@
     <string name="inline_group">group</string>
     <string name="inline_name">name</string>
     <string name="inline_hint">hint</string>
+    <string name="inline_content">content</string>
     <string name="inline_you">you</string>
     <string name="inline_someone">someone</string>
     <string name="inline_a_card">some page</string>
@@ -378,6 +379,8 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="personal_safety">Personal safety</string>
     <string name="content_issue">Content issue</string>
+    <string name="content">Content</string>
+    <string name="add_content">Add content</string>
     <string name="spam_or_fake">Spam or fake</string>
     <string name="other">Other</string>
     <string name="personal_safety_description">I have a concern for someone\'s safety</string>

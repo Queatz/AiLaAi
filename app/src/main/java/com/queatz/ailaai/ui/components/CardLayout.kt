@@ -3,13 +3,13 @@ package com.queatz.ailaai.ui.components
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,9 +22,12 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.queatz.ailaai.api.storyByUrl
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.reply
+import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -117,6 +120,20 @@ fun CardLayout(
                     .fillMaxWidth()
                     .padding(PaddingDefault * 1.5f)
             )
+
+            card.content?.let { content ->
+                Box(
+                    modifier = Modifier
+                        .heightIn(max = 360.dp)
+                ) {
+                    CardContent(
+                        content,
+                        navController,
+                        { null }//todo
+                    )
+                }
+            }
+
             if (isMine && showToolbar) {
                 CardToolbar(
                     navController = navController,

@@ -17,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
@@ -29,6 +31,7 @@ import app.ailaai.api.group
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.*
@@ -49,6 +52,7 @@ fun StoryContents(
     actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
+    var size by rememberStateOf(Size.Zero)
 
     SelectionContainer(modifier = modifier) {
         LazyVerticalGrid(
@@ -64,8 +68,10 @@ fun StoryContents(
             verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
             modifier = Modifier
                 .onPlaced {
+                    size = it.boundsInParent().size
                     viewHeight = it.boundsInParent().height
                 }
+                .fadingEdge(size, state)
         ) {
             content.forEach { content ->
                 when (content) {

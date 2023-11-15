@@ -177,6 +177,7 @@
     <string name="inline_group">nhóm</string>
     <string name="inline_name">tên</string>
     <string name="inline_hint">lời gợi ý</string>
+    <string name="inline_content">nội dung</string>
     <string name="inline_you">bạn</string>
     <string name="inline_someone">một người ai đó</string>
     <string name="inline_a_card">một trang nào đó</string>
@@ -365,6 +366,8 @@
     <string name="privacy_policy">Chính sách bảo mật</string>
     <string name="personal_safety">Sự an toàn của ai đó</string>
     <string name="content_issue">Vấn đề nội dung</string>
+    <string name="content">Nội dung</string>
+    <string name="add_content">Thêm nội dung</string>
     <string name="spam_or_fake">Thư rác hoặc giả</string>
     <string name="other">Khác</string>
     <string name="personal_safety_description">Mình lo lắng cho sự an toàn của ai đó</string>

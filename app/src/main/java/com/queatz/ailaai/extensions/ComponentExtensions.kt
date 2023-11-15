@@ -20,10 +20,7 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 
 suspend fun LazyGridState.scrollToTop() {
     if (firstVisibleItemIndex > 2) {
@@ -170,6 +167,53 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: LazyListState, factor: Floa
             }
             scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.let { lastVisibleItemInfo ->
                 val scrollFromEnd = (lastVisibleItemInfo.offset + lastVisibleItemInfo.size) - viewport.height
+                val isLastItemVisible = lastVisibleItemInfo.index == scrollState.layoutInfo.totalItemsCount - 1
+                val h = when (isLastItemVisible) {
+                    true -> scrollFromEnd.coerceAtMost(fadeSize).coerceAtLeast(0f)
+                    false -> fadeSize
+                }
+
+                if (h <= 0) return@let
+
+                if (!isLastItemVisible || scrollFromEnd != 0f) {
+                    drawRect(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Black, Color.Transparent),
+                            startY = viewport.height - h,
+                            endY = viewport.height
+                        ),
+                        blendMode = BlendMode.DstIn
+                    )
+                }
+            }
+        }
+)
+
+fun Modifier.fadingEdge(viewport: Size, scrollState: LazyGridState, factor: Float = 3f) = then(
+    Modifier
+        .graphicsLayer(alpha = 0.99f)
+        .drawWithContent {
+            drawContent()
+
+            val fadeSize = viewport.height / factor
+            val value = scrollState.firstVisibleItemScrollOffset
+            if (scrollState.firstVisibleItemIndex != 0 || value != 0) {
+                val h = when (scrollState.firstVisibleItemIndex == 0) {
+                    true -> value.toFloat().coerceAtMost(fadeSize).coerceAtLeast(0f)
+                    false -> fadeSize
+                }
+
+                drawRect(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black, Color.Transparent),
+                        startY = h,
+                        endY = 0.0f
+                    ),
+                    blendMode = BlendMode.DstIn
+                )
+            }
+            scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.let { lastVisibleItemInfo ->
+                val scrollFromEnd = (lastVisibleItemInfo.offset.y + lastVisibleItemInfo.size.height) - viewport.height
                 val isLastItemVisible = lastVisibleItemInfo.index == scrollState.layoutInfo.totalItemsCount - 1
                 val h = when (isLastItemVisible) {
                     true -> scrollFromEnd.coerceAtMost(fadeSize).coerceAtLeast(0f)

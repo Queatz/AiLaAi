@@ -50,10 +50,7 @@ import com.queatz.ailaai.ui.screens.*
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
 import com.queatz.ailaai.ui.stickers.StickerPackScreen
 import com.queatz.ailaai.ui.stickers.StickerPacksScreen
-import com.queatz.ailaai.ui.story.MyStoriesScreen
-import com.queatz.ailaai.ui.story.StoriesScreen
-import com.queatz.ailaai.ui.story.StoryCreatorScreen
-import com.queatz.ailaai.ui.story.StoryScreen
+import com.queatz.ailaai.ui.story.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -129,6 +126,7 @@ class MainActivity : AppCompatActivity() {
                         it.startsWith("group/")
                                 || it.startsWith("write/")
                                 || it.startsWith("sticker-pack/")
+                                || (it.startsWith("card/") && it.endsWith("/edit"))
                                 || it == "sticker-packs"
                     } != true
 
@@ -444,13 +442,18 @@ class MainActivity : AppCompatActivity() {
                                             MyStoriesScreen(navController) { me }
                                         }
                                         composable("write/{id}") {
-                                            StoryCreatorScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                            StoryCreatorScreen(StorySource.Story(it.arguments!!.getString("id")!!), navController) { me }
                                         }
                                         composable(
                                             "card/{id}",
                                             deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/page/{id}" }, navDeepLink { uriPattern = "$appDomain/card/{id}" })
                                         ) {
                                             CardScreen(it.arguments!!.getString("id")!!, navController) { me }
+                                        }
+                                        composable(
+                                            "card/{id}/edit"
+                                        ) {
+                                            StoryCreatorScreen(StorySource.Card(it.arguments!!.getString("id")!!), navController) { me }
                                         }
                                         composable("messages") {
                                             FriendsScreen(navController) { me }

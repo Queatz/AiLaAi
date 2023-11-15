@@ -26,12 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import app.ailaai.api.card
 import app.ailaai.api.group
+import app.ailaai.api.updateCard
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.story
-import com.queatz.ailaai.api.updateStory
-import com.queatz.ailaai.api.updateStoryDraft
-import com.queatz.ailaai.api.uploadStoryPhotosFromUri
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
@@ -46,8 +44,17 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
 
+sealed class StorySource {
+    data class Card(val id: String) : StorySource()
+    data class Story(val id: String) : StorySource()
+}
+
 @Composable
-fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: () -> Person?) {
+fun StoryCreatorScreen(
+    source: StorySource,
+    navController: NavHostController,
+    me: () -> Person?
+) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
@@ -59,6 +66,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
     var edited by rememberStateOf(false)
     var currentFocus by rememberStateOf(0)
     var story by rememberStateOf<Story?>(null)
+    var card by rememberStateOf<Card?>(null)
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     val recompose = currentRecomposeScope
 
@@ -68,12 +76,23 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
 
     LaunchedEffect(Unit) {
         isLoading = true
-        api.story(storyId) {
-            story = it
-            storyContents = listOf(
-                StoryContent.Title(story?.title ?: "", storyId)
-            ) + story!!.contents()
-            recompose.invalidate()
+        when (source) {
+            is StorySource.Story -> {
+                api.story(source.id) {
+                    story = it
+                    storyContents = listOf(
+                        StoryContent.Title(story?.title ?: "", source.id)
+                    ) + story!!.contents()
+                    recompose.invalidate()
+                }
+            }
+            is StorySource.Card -> {
+                api.card(source.id) {
+                    card = it
+                    storyContents = card?.content?.asStoryContents() ?: emptyList()
+                    recompose.invalidate()
+                }
+            }
         }
         isLoading = false
     }
@@ -105,24 +124,46 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
 
     suspend fun save(): Boolean {
         var hasError = false
-        api.updateStory(
-            storyId,
-            Story(
-                // todo only send title if it was edited
-                title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title,
-                content = json.encodeToString(buildJsonArray {
-                    storyContents.filter { it.isPart() }.forEach { part ->
-                        add(part.toJsonStoryPart())
+
+        when (source) {
+            is StorySource.Story -> {
+                api.updateStory(
+                    source.id,
+                    Story(
+                        // todo only send title if it was edited
+                        title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title,
+                        content = json.encodeToString(buildJsonArray {
+                            storyContents.filter { it.isPart() }.forEach { part ->
+                                add(part.toJsonStoryPart())
+                            }
+                        })
+                    ),
+                    onError = {
+                        hasError = true
                     }
-                })
-            ),
-            onError = {
-                hasError = true
+                ) {
+                    story = it
+                    edited = false
+                }
             }
-        ) {
-            story = it
-            edited = false
+
+            is StorySource.Card -> {
+                api.updateCard(
+                    source.id,
+                    Card(
+                        content = json.encodeToString(buildJsonArray {
+                            storyContents.filter { it.isPart() }.forEach { part ->
+                                add(part.toJsonStoryPart())
+                            }
+                        })
+                    )
+                ) {
+                    card = it
+                    edited = false
+                }
+            }
         }
+
         return !hasError
     }
 
@@ -139,9 +180,14 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
             storyContents = storyContents.toMutableList().filterNot(::isBlankText)
             save()
         }
-        api.updateStory(storyId, Story(published = true)) {
-            context.toast(R.string.published)
-            navController.popBackStackOrFinish()
+        when (source) {
+            is StorySource.Story -> {
+                api.updateStory(source.id, Story(published = true)) {
+                    context.toast(R.string.published)
+                    navController.popBackStackOrFinish()
+                }
+            }
+            else -> {}
         }
     }
 
@@ -151,11 +197,12 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
         recompose.invalidate()
     }
 
-    if (story == null) {
+    if (story == null && card == null) {
         return
     }
 
     if (showPublishDialog) {
+        val storyId = (source as StorySource.Story).id
         PublishStoryDialog(
             {
                 showPublishDialog = false
@@ -225,9 +272,16 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
             }
         },
         actions = {
-            if (story == null) return@StoryScaffold
-
-            StoryTitle(state, story)
+            if (story != null) {
+                StoryTitle(state, story)
+            } else if (card != null) {
+                Text(
+                    stringResource(R.string.content),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = PaddingDefault),
+                )
+            }
             IconButton(
                 {
                     showMenu = true
@@ -239,23 +293,42 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                StoryMenu(
-                    showMenu,
-                    {
-                        showMenu = false
-                    },
-                    navController,
-                    storyId,
-                    story,
-                    me = me(),
-                    isMine = story?.person == me()?.id,
-                    edited = edited,
-                    editing = true,
-                    onReorder = {
-                        showReorderContentDialog = true
+                when (source) {
+                    is StorySource.Story -> {
+                        StoryMenu(
+                            showMenu,
+                            {
+                                showMenu = false
+                            },
+                            navController,
+                            source.id,
+                            story,
+                            me = me(),
+                            isMine = story?.person == me()?.id,
+                            edited = edited,
+                            editing = true,
+                            onReorder = {
+                                showReorderContentDialog = true
+                            }
+                        )
                     }
-                )
+
+                    is StorySource.Card -> {
+                        Dropdown(
+                            showMenu,
+                            {
+                                showMenu = false
+                            }
+                        ) {
+                            DropdownMenuItem({ Text(stringResource(R.string.reorder)) }, {
+                                showMenu = false
+                                showReorderContentDialog = true
+                            })
+                        }
+                    }
+                }
             }
+
             if (edited) {
                 Button(
                     onClick = {
@@ -268,13 +341,18 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                     Text(stringResource(R.string.save))
                 }
             } else {
-                OutlinedButton(
-                    onClick = {
-                        showPublishDialog = true
-                    },
-                    modifier = Modifier.padding(end = PaddingDefault * 2)
-                ) {
-                    Text(stringResource(R.string.publish))
+                when (source) {
+                    is StorySource.Story -> {
+                        OutlinedButton(
+                            onClick = {
+                                showPublishDialog = true
+                            },
+                            modifier = Modifier.padding(end = PaddingDefault * 2)
+                        ) {
+                            Text(stringResource(R.string.publish))
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
@@ -672,9 +750,25 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                                     if (it.isEmpty()) return@rememberLauncherForActivityResult
 
                                     scope.launch {
-                                        api.uploadStoryPhotosFromUri(context, storyId, it) { photoUrls ->
-                                            part.edit {
-                                                photos += photoUrls
+                                        when (source) {
+                                            is StorySource.Story -> {
+                                                api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
+                                                    part.edit {
+                                                        photos += photoUrls
+                                                    }
+                                                }
+                                            }
+
+                                            is StorySource.Card -> {
+                                                api.uploadCardContentPhotosFromUri(
+                                                    context,
+                                                    source.id,
+                                                    it
+                                                ) { photoUrls ->
+                                                    part.edit {
+                                                        photos += photoUrls
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -801,7 +895,7 @@ fun StoryCreatorScreen(storyId: String, navController: NavHostController, me: ()
                 }
             }
         }
-        StoryCreatorTools(storyId, navController = navController, me = me, ::addPart)
+        StoryCreatorTools(source, navController = navController, me = me, ::addPart)
     }
 }
 

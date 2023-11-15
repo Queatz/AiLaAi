@@ -51,3 +51,36 @@ suspend fun Api.uploadCardVideoFromUri(
         onSuccess
     )
 }
+
+suspend fun Api.uploadCardContentPhotosFromUri(
+    context: Context,
+    card: String,
+    media: List<Uri>,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<String>>
+) {
+    val scaledPhotos = media.map {
+        it.asScaledJpeg(context)
+    }
+    return uploadCardContentPhotos(
+        card,
+        scaledPhotos,
+        onError,
+        onSuccess
+    )
+}
+
+suspend fun Api.uploadCardContentAudioFromUri(
+    context: Context,
+    card: String,
+    audio: Uri,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<String>
+) {
+    return uploadCardContentAudio(
+        card,
+        audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
+        onError,
+        onSuccess
+    )
+}

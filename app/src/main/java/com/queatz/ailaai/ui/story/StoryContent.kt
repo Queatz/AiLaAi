@@ -70,8 +70,10 @@ fun Story.asContents() = listOf(
     StoryContent.Authors(publishDate, authors ?: emptyList()),
 ) + contents()
 
-fun Story.contents(): List<StoryContent> = json
-    .decodeFromString<List<JsonElement>>(content ?: "[]")
+fun Story.contents(): List<StoryContent> = (content ?: "[]").asStoryContents()
+
+fun String.asStoryContents() = json
+    .decodeFromString<List<JsonElement>>(this)
     .mapNotNull {
         it.jsonObject.toStoryContent()
     }

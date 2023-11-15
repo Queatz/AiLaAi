@@ -79,6 +79,7 @@ private fun Push.cardDetailName(detail: CollaborationEventDataDetails?): String 
         CollaborationEventDataDetails.Conversation -> context.getString(R.string.inline_group)
         CollaborationEventDataDetails.Name -> context.getString(R.string.inline_name)
         CollaborationEventDataDetails.Location -> context.getString(R.string.inline_hint)
+        CollaborationEventDataDetails.Content -> context.getString(R.string.inline_content)
         else -> ""
     }
 }

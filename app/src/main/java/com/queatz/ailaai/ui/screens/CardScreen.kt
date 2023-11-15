@@ -432,6 +432,15 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             showMenu = false
                         })
                         DropdownMenuItem({
+                            Text(
+                                stringResource(
+                                    if (card?.content == null) R.string.add_content else R.string.content
+                                )
+                            )
+                        }, {
+                            navController.navigate("card/${card!!.id!!}/edit")
+                        })
+                        DropdownMenuItem({
                             Text(stringResource(R.string.manage))
                         }, {
                             showManageMenu = true

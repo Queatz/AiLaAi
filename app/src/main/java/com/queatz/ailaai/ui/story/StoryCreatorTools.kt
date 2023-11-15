@@ -21,8 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.uploadStoryAudioFromUri
-import com.queatz.ailaai.api.uploadStoryPhotosFromUri
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.name
@@ -36,7 +35,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun StoryCreatorTools(
-    storyId: String,
+    source: StorySource,
     navController: NavController,
     me: () -> Person?,
     addPart: (part: StoryContent) -> Unit
@@ -50,11 +49,24 @@ fun StoryCreatorTools(
         if (it.isEmpty()) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.uploadStoryPhotosFromUri(context, storyId, it) { photoUrls ->
-                addPart(StoryContent.Photos(photoUrls))
-                addPart(
-                    StoryContent.Text("")
-                )
+            when (source) {
+                is StorySource.Story -> {
+                    api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
+                        addPart(StoryContent.Photos(photoUrls))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                    }
+                }
+
+                is StorySource.Card -> {
+                    api.uploadCardContentPhotosFromUri(context, source.id, it) { photoUrls ->
+                        addPart(StoryContent.Photos(photoUrls))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                    }
+                }
             }
         }
     }
@@ -63,11 +75,24 @@ fun StoryCreatorTools(
         if (it == null) return@rememberLauncherForActivityResult
 
         scope.launch {
-            api.uploadStoryAudioFromUri(context, storyId, it) { audioUrl ->
-                addPart(StoryContent.Audio(audioUrl))
-                addPart(
-                    StoryContent.Text("")
-                )
+            when (source) {
+                is StorySource.Story -> {
+                    api.uploadStoryAudioFromUri(context, source.id, it) { audioUrl ->
+                        addPart(StoryContent.Audio(audioUrl))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                    }
+                }
+
+                is StorySource.Card -> {
+                    api.uploadCardContentAudioFromUri(context, source.id, it) { audioUrl ->
+                        addPart(StoryContent.Audio(audioUrl))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                    }
+                }
             }
         }
     }
