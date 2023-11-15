@@ -49,6 +49,7 @@ fun StoryContents(
     me: () -> Person?,
     modifier: Modifier = Modifier,
     bottomContentPadding: Dp = 0.dp,
+    fade: Boolean = false,
     actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
@@ -71,7 +72,13 @@ fun StoryContents(
                     size = it.boundsInParent().size
                     viewHeight = it.boundsInParent().height
                 }
-                .fadingEdge(size, state)
+                .let {
+                    if (fade) {
+                        it.fadingEdge(size, state)
+                    } else {
+                        it
+                    }
+                }
         ) {
             content.forEach { content ->
                 when (content) {

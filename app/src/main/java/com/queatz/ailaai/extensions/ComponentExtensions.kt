@@ -199,7 +199,7 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: LazyGridState, factor: Floa
             val value = scrollState.firstVisibleItemScrollOffset
             if (scrollState.firstVisibleItemIndex != 0 || value != 0) {
                 val h = when (scrollState.firstVisibleItemIndex == 0) {
-                    true -> value.toFloat().coerceAtMost(fadeSize).coerceAtLeast(0f)
+                    true -> value.toFloat().coerceIn(0f, fadeSize)
                     false -> fadeSize
                 }
 
@@ -212,6 +212,7 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: LazyGridState, factor: Floa
                     blendMode = BlendMode.DstIn
                 )
             }
+
             scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.let { lastVisibleItemInfo ->
                 val scrollFromEnd = (lastVisibleItemInfo.offset.y + lastVisibleItemInfo.size.height) - viewport.height
                 val isLastItemVisible = lastVisibleItemInfo.index == scrollState.layoutInfo.totalItemsCount - 1

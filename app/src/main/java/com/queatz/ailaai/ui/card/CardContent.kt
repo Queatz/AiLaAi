@@ -23,6 +23,7 @@ fun CardContent(
         contents,
         state,
         navController,
-        me
+        me,
+        fade = true
     )
 }

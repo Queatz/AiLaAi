@@ -36,7 +36,6 @@ import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
 import androidx.navigation.NavController
-import app.ailaai.api.newCard
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
@@ -57,6 +56,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.pow
 
@@ -66,6 +66,7 @@ fun MapScreen(
     cards: List<Card>,
     onGeo: (LatLng) -> Unit
 ) {
+    val context = LocalContext.current
     var position by rememberSaveable(stateSaver = latLngSaver()) {
         mutableStateOf(null)
     }
@@ -74,9 +75,6 @@ fun MapScreen(
     val scope = rememberCoroutineScope()
     val disposable = remember { CompositeDisposable() }
     var cameraPosition by rememberStateOf<CameraPosition?>(null)
-
-    val context = LocalContext.current
-
     var composed by rememberStateOf(false)
     var map: Map? by remember { mutableStateOf(null) }
     var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
@@ -148,11 +146,11 @@ fun MapScreen(
 
     LaunchedEffect(map, cameraPosition, renderedCards) {
         map ?: return@LaunchedEffect
-            cardPositions = renderedCards.map { card ->
-                Pin(
-                    card,
-                    map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
-                )
+        cardPositions = renderedCards.map { card ->
+            Pin(
+                card,
+                map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
+            )
         }
     }
 
@@ -227,7 +225,8 @@ fun MapScreen(
             cardPositions.forEach {
                 key(it.card.id) {
                     val (card, pos) = it
-                    val s = (map.cameraPosition.zoom / 16f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0).toFloat()
+                    val s = (map.cameraPosition.zoom / 16f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0)
+                        .toFloat()
                     var size by remember { mutableStateOf(IntSize(0, 0)) }
                     var placed by remember(card.name) { mutableStateOf(false) }
                     val shown = cards.any { c -> c.id == card.id }

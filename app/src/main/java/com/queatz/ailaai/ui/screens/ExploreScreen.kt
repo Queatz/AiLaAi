@@ -169,7 +169,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
         }
 
         // The map doesn't clear for geo updates, but should for value and tab changes
-        loadMore(clear = !showAsMap && (shownValue != value || shownTab != tab))
+        loadMore(clear = shownValue != value || shownTab != tab)
     }
 
     OnResume {
@@ -212,10 +212,12 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 ScanQrCodeButton(navController)
             }
 
-            val cardsOfCategory = if (selectedCategory == null) cards else cards.filter {
-                it.categories?.contains(
-                    selectedCategory
-                ) == true
+            val cardsOfCategory = remember(cards) {
+                if (selectedCategory == null) cards else cards.filter {
+                    it.categories?.contains(
+                        selectedCategory
+                    ) == true
+                }
             }
 
             MainTabs(tab, { tab = it })
