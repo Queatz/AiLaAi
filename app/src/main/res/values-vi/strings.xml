@@ -451,4 +451,6 @@
     <string name="create_page">Tạo trang mới</string>
     <string name="add_group">Thêm nhóm</string>
     <string name="loading_group">Đang tải nhóm…</string>
+    <string name="impact_effort_table">Bảng tác động / nỗ lực</string>
+    <string name="widget">Tiện ích</string>
 </resources>

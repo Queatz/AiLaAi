@@ -50,6 +50,7 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
         }
     ) {
         StoryContents(
+            StorySource.Story(storyId),
             contents,
             state,
             navController,

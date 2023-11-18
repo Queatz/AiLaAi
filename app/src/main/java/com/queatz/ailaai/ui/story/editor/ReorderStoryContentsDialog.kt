@@ -25,6 +25,8 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.StoryContent
+import com.queatz.ailaai.ui.story.Stub
+import com.queatz.ailaai.ui.story.stringResource
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
@@ -187,6 +189,10 @@ fun ReorderStoryContentsDialog(
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
                         .padding(PaddingDefault * 2)
                 )
+            }
+
+            is StoryContent.Widget -> {
+                Stub(it.widget.stringResource)
             }
 
             else -> {

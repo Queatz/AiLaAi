@@ -23,15 +23,18 @@ import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
-import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
-import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
+import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.ImpactEffortTableData
+import createWidget
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 
 @Composable
 fun StoryCreatorTools(
@@ -44,6 +47,7 @@ fun StoryCreatorTools(
     val scope = rememberCoroutineScope()
     var showCardSelectorDialog by rememberStateOf(false)
     var showCardGroupSelectorDialog by rememberStateOf(false)
+    var showWidgetsMenu by rememberStateOf(false)
 
     val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) {
         if (it.isEmpty()) return@rememberLauncherForActivityResult
@@ -93,6 +97,24 @@ fun StoryCreatorTools(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    if (showWidgetsMenu) {
+        Menu({
+            showWidgetsMenu = false
+        }) {
+            menuItem(stringResource(R.string.impact_effort_table)) {
+                scope.launch {
+                    api.createWidget(
+                        Widgets.ImpactEffortTable,
+                        data = json.encodeToString(ImpactEffortTableData(card = (source as? StorySource.Card)?.id))
+                    ) {
+                        addPart(StoryContent.Widget(it.widget!!, it.id!!))
+                    }
+                }
+                showWidgetsMenu = false
             }
         }
     }
@@ -160,7 +182,7 @@ fun StoryCreatorTools(
                 .onPlaced { viewport = it.boundsInParent().size }
                 .horizontalFadingEdge(viewport, scrollState)
         ) {
-            listOf(
+            listOfNotNull(
                 Icons.Outlined.Title to {
                     addPart(
                         StoryContent.Section("")
@@ -185,6 +207,9 @@ fun StoryCreatorTools(
                 },
                 Icons.Outlined.PlayCircle to {
                     audioLauncher.launch("audio/*")
+                },
+                Icons.Outlined.MoreHoriz to {
+                    showWidgetsMenu = true
                 }
             ).forEach {
                 IconButton(

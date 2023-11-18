@@ -26,7 +26,6 @@ import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.CancellationException
@@ -152,11 +151,15 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                     EmptyText(stringResource(R.string.no_stories_to_read))
                 } else {
                     StoryContents(
+                        null,
                         storyContents,
                         state,
                         navController,
                         me,
-                        Modifier.align(Alignment.TopCenter).widthIn(max = 640.dp).fillMaxSize(),
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .widthIn(max = 640.dp)
+                            .fillMaxSize(),
                         bottomContentPadding = 80.dp
                     ) { storyId ->
                         Row {

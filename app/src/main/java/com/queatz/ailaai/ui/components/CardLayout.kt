@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,13 +19,12 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.queatz.ailaai.api.storyByUrl
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
-import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
+import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
@@ -127,6 +123,7 @@ fun CardLayout(
                         .heightIn(max = 360.dp)
                 ) {
                     CardContent(
+                        StorySource.Card(card.id!!),
                         content,
                         navController,
                         { null }//todo

@@ -453,6 +453,8 @@
     <string name="create_page">Create a new page</string>
     <string name="add_group">Add a group</string>
     <string name="loading_group">Loading group…</string>
+    <string name="widget">Widget</string>
+    <string name="impact_effort_table">Impact/Effort Table</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>

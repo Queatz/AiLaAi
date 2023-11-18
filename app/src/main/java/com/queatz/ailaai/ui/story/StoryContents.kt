@@ -9,19 +9,16 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Flare
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,9 +28,7 @@ import app.ailaai.api.group
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.fadingEdge
-import com.queatz.ailaai.extensions.inDp
-import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -43,6 +38,7 @@ import com.queatz.db.Person
 
 @Composable
 fun StoryContents(
+    source: StorySource?,
     content: List<StoryContent>,
     state: LazyGridState,
     navController: NavController,
@@ -53,7 +49,39 @@ fun StoryContents(
     actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
+    var showOpenWidgetDialog by rememberStateOf(false)
     var size by rememberStateOf(Size.Zero)
+
+    if (showOpenWidgetDialog) {
+        val context = LocalContext.current
+        AlertDialog(
+            {
+                showOpenWidgetDialog = false
+            },
+            text = {
+               Text("Widgets are currently only interactable on web.")
+            },
+            dismissButton = {
+                TextButton(
+                    {
+                        showOpenWidgetDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.close))
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    {
+                        showOpenWidgetDialog = false
+                        Card().apply { id = (source as StorySource.Card).id }.url.launchUrl(context)
+                    }
+                ) {
+                    Text(stringResource(R.string.open_card))
+                }
+            }
+        )
+    }
 
     SelectionContainer(modifier = modifier) {
         LazyVerticalGrid(
@@ -74,7 +102,7 @@ fun StoryContents(
                 }
                 .let {
                     if (fade) {
-                        it.fadingEdge(size, state)
+                        it.fadingEdge(size, state, 12f)
                     } else {
                         it
                     }
@@ -244,6 +272,18 @@ fun StoryContents(
                                         modifier = Modifier
                                             .fillMaxSize()
                                     )
+                                }
+                            }
+                        }
+                    }
+
+                    is StoryContent.Widget -> {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            DisableSelection {
+                                Stub(content.widget.stringResource) {
+                                    if (source is StorySource.Card) {
+                                        showOpenWidgetDialog = true
+                                    }
                                 }
                             }
                         }

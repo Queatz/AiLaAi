@@ -5,6 +5,7 @@ import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.wordCount
 import com.queatz.db.Person
 import com.queatz.db.Story
+import com.queatz.widgets.Widgets
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
@@ -21,6 +22,7 @@ sealed class StoryContent(val key: Long = Random.nextLong()) {
     @Serializable class Groups(var groups: List<String>) : StoryContent()
     @Serializable class Photos(var photos: List<String>, var aspect: Float = 0.75f) : StoryContent()
     @Serializable class Audio(var audio: String) : StoryContent()
+    @Serializable class Widget(var widget: Widgets, var id: String) : StoryContent()
 }
 
 @Serializable
@@ -33,6 +35,7 @@ fun StoryContent.partType() = when (this) {
     is StoryContent.Groups -> "groups"
     is StoryContent.Photos -> "photos"
     is StoryContent.Audio -> "audio"
+    is StoryContent.Widget -> "widget"
     else -> throw NotImplementedError("$this is not a valid story part")
 }
 
@@ -43,6 +46,7 @@ fun StoryContent.isPart() = when (this) {
     is StoryContent.Groups -> true
     is StoryContent.Photos -> true
     is StoryContent.Audio -> true
+    is StoryContent.Widget -> true
     else -> false
 }
 
@@ -61,6 +65,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "groups" -> json.decodeFromJsonElement<StoryContent.Groups>(content)
         "photos" -> json.decodeFromJsonElement<StoryContent.Photos>(content)
         "audio" -> json.decodeFromJsonElement<StoryContent.Audio>(content)
+        "widget" -> json.decodeFromJsonElement<StoryContent.Widget>(content)
         else -> null
     }
 }

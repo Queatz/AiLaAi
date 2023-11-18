@@ -22,6 +22,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import app.ailaai.api.card
@@ -40,6 +42,7 @@ import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.*
+import com.queatz.widgets.Widgets
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
@@ -889,13 +892,45 @@ fun StoryCreatorScreen(
                         }
                     }
 
+                    is StoryContent.Widget -> {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            var showWidgetMenu by rememberStateOf(false)
+
+                            if (showWidgetMenu) {
+                                Menu({
+                                    showWidgetMenu = false
+                                }) {
+                                    menuItem(stringResource(R.string.remove)) {
+                                        showWidgetMenu = false
+                                        removePartAt(partIndex)
+                                    }
+                                }
+                            }
+
+                            Stub(part.widget.stringResource) {
+                                showWidgetMenu = true
+                            }
+                        }
+                    }
+
                     else -> {
                         // Not supported in the editor
                     }
                 }
             }
         }
-        StoryCreatorTools(source, navController = navController, me = me, ::addPart)
+        StoryCreatorTools(
+            source,
+            navController = navController,
+            me = me,
+            ::addPart
+        )
     }
 }
 
+val Widgets.stringResource @Composable get() = stringResource(
+    when (this) {
+        Widgets.ImpactEffortTable -> R.string.impact_effort_table
+        else -> R.string.widget
+    }
+)
