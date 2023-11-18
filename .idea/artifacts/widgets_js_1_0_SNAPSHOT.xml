@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="widgets-js-1.0-SNAPSHOT">
+    <output-path>$PROJECT_DIR$/../ailaai-shared/widgets/build/libs</output-path>
+    <root id="archive" name="widgets-js-1.0-SNAPSHOT.jar">
+      <element id="module-output" name="ailaai-shared.widgets.jsMain" />
+    </root>
+  </artifact>
+</component>
