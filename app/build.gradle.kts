@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 68
-        versionName = "0.9.68"
+        versionCode = 69
+        versionName = "0.9.69"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -83,6 +83,7 @@ dependencies {
     implementation("app.ailaai.shared:models")
     implementation("app.ailaai.shared:push")
     implementation("app.ailaai.shared:api")
+    implementation("app.ailaai.shared:widgets")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")

@@ -243,7 +243,11 @@ class MainActivity : AppCompatActivity() {
 
                     LaunchedEffect(Unit) {
                         try {
-                            if (context.dataStore.data.first()[appVersionCode] != BuildConfig.VERSION_CODE) {
+                            if (
+                                context.dataStore.data.first()[appVersionCode].let {
+                                    it != null && it != BuildConfig.VERSION_CODE
+                                }
+                            ) {
                                 context.dataStore.edit {
                                     it[appVersionCode] = BuildConfig.VERSION_CODE
                                 }

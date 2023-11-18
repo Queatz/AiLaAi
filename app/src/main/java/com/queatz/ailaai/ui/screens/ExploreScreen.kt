@@ -212,7 +212,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                 ScanQrCodeButton(navController)
             }
 
-            val cardsOfCategory = remember(cards) {
+            val cardsOfCategory = remember(cards, selectedCategory) {
                 if (selectedCategory == null) cards else cards.filter {
                     it.categories?.contains(
                         selectedCategory

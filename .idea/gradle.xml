@@ -13,6 +13,7 @@
                   <project path="$PROJECT_DIR$/../ailaai-shared/api" />
                   <project path="$PROJECT_DIR$/../ailaai-shared/models" />
                   <project path="$PROJECT_DIR$/../ailaai-shared/push" />
+                  <project path="$PROJECT_DIR$/../ailaai-shared/widgets" />
                 </projects>
               </build>
             </builds>
@@ -28,6 +29,7 @@
             <option value="$PROJECT_DIR$/../ailaai-shared/api" />
             <option value="$PROJECT_DIR$/../ailaai-shared/models" />
             <option value="$PROJECT_DIR$/../ailaai-shared/push" />
+            <option value="$PROJECT_DIR$/../ailaai-shared/widgets" />
           </set>
         </option>
       </GradleProjectSettings>
