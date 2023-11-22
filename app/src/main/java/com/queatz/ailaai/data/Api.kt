@@ -73,6 +73,10 @@ class Api : app.ailaai.api.Api() {
         install(ContentNegotiation) {
             json(json)
         }
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = 120.seconds.inWholeMilliseconds
+        }
     }
 
     override val httpJson: Json get() = json
