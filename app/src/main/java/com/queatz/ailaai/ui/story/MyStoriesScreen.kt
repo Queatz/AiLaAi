@@ -19,6 +19,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
@@ -94,7 +95,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     Text(
-                                        story.title ?: stringResource(R.string.empty_story_name),
+                                        story.title?.notBlank ?: stringResource(R.string.empty_story_name),
                                         style = MaterialTheme.typography.headlineMedium
                                     )
                                     Text(

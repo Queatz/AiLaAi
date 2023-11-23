@@ -389,18 +389,20 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                             )
                         }
                     } else {
-                        item {
-                            Friends(
-                                remember(allGroups) {
-                                    allGroups.people().filter { it.id != me()?.id }
-                                }
-                            ) {
-                                scope.launch {
-                                    api.createGroup(
-                                        listOf(me()!!.id!!, it.id!!),
-                                        reuse = true
-                                    ) { group ->
-                                        navController.navigate("group/${group.id!!}")
+                        if (searchText.isBlank()) {
+                            item {
+                                Friends(
+                                    remember(allGroups) {
+                                        allGroups.people().filter { it.id != me()?.id }
+                                    }
+                                ) {
+                                    scope.launch {
+                                        api.createGroup(
+                                            listOf(me()!!.id!!, it.id!!),
+                                            reuse = true
+                                        ) { group ->
+                                            navController.navigate("group/${group.id!!}")
+                                        }
                                     }
                                 }
                             }

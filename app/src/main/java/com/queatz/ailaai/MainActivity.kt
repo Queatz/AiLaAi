@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                     val downloadString = stringResource(R.string.download)
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
 
-                    window.setSoftInputMode(if (showNavigation || isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
+                    window.setSoftInputMode(if (isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
 
                     fun updateAppLanguage(me: Person?) {
                         val language = appLanguage
