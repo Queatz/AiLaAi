@@ -1261,3 +1261,5 @@ private fun List<Message>.photos() =
 fun Person.seenText(active: String) = seen?.timeAgo()?.let { timeAgo ->
     "$active ${timeAgo.lowercase()}"
 }
+
+fun Person.seenText() = seen?.timeAgo()?.lowercase()

@@ -453,4 +453,23 @@
     <string name="loading_group">Đang tải nhóm…</string>
     <string name="impact_effort_table">Bảng tác động / nỗ lực</string>
     <string name="widget">Tiện ích</string>
+    <plurals name="time_x_years">
+        <item quantity="other">%1$s năm</item>
+    </plurals>
+    <plurals name="time_x_months">
+        <item quantity="other">%1$s tháng</item>
+    </plurals>
+    <plurals name="time_x_weeks">
+        <item quantity="other">%1$s tuần</item>
+    </plurals>
+    <plurals name="time_x_days">
+        <item quantity="other">%1$s ngày</item>
+    </plurals>
+    <plurals name="time_x_hours">
+        <item quantity="other">%1$s giờ</item>
+    </plurals>
+    <plurals name="time_x_minutes">
+        <item quantity="other">%1$s phút</item>
+    </plurals>
+    <string name="now">Bây giờ</string>
 </resources>

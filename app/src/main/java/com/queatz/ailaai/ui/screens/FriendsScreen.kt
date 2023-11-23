@@ -34,21 +34,20 @@ import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
+import com.queatz.ailaai.ui.Friends
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.people
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.push.GroupPushData
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
 private var cache = emptyList<GroupExtended>()
@@ -390,12 +389,32 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                             )
                         }
                     } else {
-                        items(results, key = {
-                            when (it) {
-                                is SearchResult.Connect -> "connect:${it.person.id}"
-                                is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
+                        item {
+                            Friends(
+                                remember(allGroups) {
+                                    allGroups.people().filter { it.id != me()?.id }
+                                }
+                            ) {
+                                scope.launch {
+                                    api.createGroup(
+                                        listOf(me()!!.id!!, it.id!!),
+                                        reuse = true
+                                    ) { group ->
+                                        navController.navigate("group/${group.id!!}")
+                                    }
+                                }
                             }
-                        }) {
+                        }
+
+                        items(
+                            results,
+                            key = {
+                                when (it) {
+                                    is SearchResult.Connect -> "connect:${it.person.id}"
+                                    is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
+                                }
+                            }
+                        ) {
                             ContactItem(
                                 navController,
                                 it,

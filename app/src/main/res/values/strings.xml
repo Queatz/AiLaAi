@@ -455,6 +455,31 @@
     <string name="loading_group">Loading group…</string>
     <string name="widget">Widget</string>
     <string name="impact_effort_table">Impact/Effort Table</string>
+    <plurals name="time_x_years">
+        <item quantity="one">%1$sy</item>
+        <item quantity="other">%1$sy</item>
+    </plurals>
+    <plurals name="time_x_months">
+        <item quantity="one">%1$smo</item>
+        <item quantity="other">%1$smo</item>
+    </plurals>
+    <plurals name="time_x_weeks">
+        <item quantity="one">%1$sw</item>
+        <item quantity="other">%1$sw</item>
+    </plurals>
+    <plurals name="time_x_days">
+        <item quantity="one">%1$sd</item>
+        <item quantity="other">%1$sd</item>
+    </plurals>
+    <plurals name="time_x_hours">
+        <item quantity="one">%1$sh</item>
+        <item quantity="other">%1$sh</item>
+    </plurals>
+    <plurals name="time_x_minutes">
+        <item quantity="one">%1$sm</item>
+        <item quantity="other">%1$sm</item>
+    </plurals>
+    <string name="now">Now</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
