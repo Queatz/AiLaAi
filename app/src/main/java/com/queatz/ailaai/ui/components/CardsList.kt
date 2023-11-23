@@ -131,7 +131,13 @@ fun CardList(
                 .onPlaced { viewport = it.boundsInParent().size }
         ) {
             aboveSearchFieldContent()
-            SearchFieldAndAction(value, valueChange, placeholder, action, onAction)
+            SearchFieldAndAction(value,
+                valueChange = valueChange,
+                placeholder = placeholder,
+                showClear = true,
+                action = action,
+                onAction = onAction
+            )
         }
     }
 }

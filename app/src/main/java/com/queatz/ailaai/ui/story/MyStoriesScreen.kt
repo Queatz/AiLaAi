@@ -63,7 +63,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
             } else {
                 val shownStories = remember(stories, search) {
                     stories.filter {
-                        it.textContent().contains(search, ignoreCase = true)
+                        it.asTextContent().contains(search, ignoreCase = true)
                     }
                 }
                 LazyColumn(
@@ -110,7 +110,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                                 navController.navigate("write/${it.id}")
                             }
                         }
-                    },
+                    }
                 )
             }
         }

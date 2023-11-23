@@ -17,14 +17,16 @@ fun SearchFieldAndAction(
     value: String,
     valueChange: (String) -> Unit,
     placeholder: String = stringResource(R.string.search),
+    showClear: Boolean = true,
     action: (@Composable () -> Unit)? = null,
     onAction: (() -> Unit)? = null
 ) {
     if (action == null) {
         SearchField(
-            value,
-            valueChange,
-            placeholder,
+            value = value,
+            onValueChange = valueChange,
+            placeholder = placeholder,
+            showClear = showClear,
             modifier = Modifier
                 .padding(horizontal = PaddingDefault * 2)
         )
@@ -40,9 +42,10 @@ fun SearchFieldAndAction(
                     .wrapContentWidth()
             ) {
                 SearchField(
-                    value,
-                    valueChange,
-                    placeholder
+                    value = value,
+                    onValueChange = valueChange,
+                    placeholder = placeholder,
+                    showClear = showClear
                 )
             }
             FloatingActionButton(

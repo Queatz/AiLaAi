@@ -472,4 +472,5 @@
         <item quantity="other">%1$s phút</item>
     </plurals>
     <string name="now">Bây giờ</string>
+    <string name="share_a_thought">Chia sẻ những suy nghĩ của bạn</string>
 </resources>

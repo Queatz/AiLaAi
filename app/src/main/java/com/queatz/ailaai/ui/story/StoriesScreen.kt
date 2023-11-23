@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
@@ -17,6 +18,7 @@ import androidx.navigation.NavHostController
 import app.ailaai.api.myGeo
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
@@ -173,19 +175,37 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         }
                     }
                 }
-                FloatingActionButton(
-                    onClick = {
-                        navController.navigate("write")
-                    },
+                var thought by rememberStateOf("")
+                PageInput(
                     modifier = Modifier
-                        .padding(
-                            end = PaddingDefault * 2,
-                            bottom = PaddingDefault * 2
-                        )
-                        .align(Alignment.BottomEnd)
+                        .align(Alignment.BottomCenter)
                 ) {
-                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
+                    SearchFieldAndAction(
+                        thought,
+                        { thought = it },
+                        placeholder = stringResource(R.string.share_a_thought),
+                        showClear = false,
+                        action = {
+                            if (thought.isBlank()) {
+                                Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
+                            } else {
+                                Icon(Icons.Outlined.Add, stringResource(R.string.write_a_story))
+                            }
+                        },
+                        onAction = {
+                            if (thought.isBlank()) {
+                                navController.navigate("write")
+                            } else {
+                                scope.launch {
+                                    api.createStory(Story(title = thought)) {
+                                        navController.navigate("write/${it.id}")
+                                    }
+                                }
+                            }
+                        },
+                    )
                 }
+//                }
                 if (locationSelector.isManual) {
                     ElevatedButton(
                         elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),

@@ -83,7 +83,11 @@ fun String.asStoryContents() = json
         it.jsonObject.toStoryContent()
     }
 
-fun Story.textContent(): String = contents().mapNotNull {
+fun Story.asTextContent(): String = asContents().asText()
+
+fun Story.textContent(): String = contents().asText()
+
+fun List<StoryContent>.asText() = mapNotNull {
     when (it) {
         is StoryContent.Title -> it.title.notBlank
         is StoryContent.Section -> it.section.notBlank
