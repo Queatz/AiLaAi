@@ -71,9 +71,15 @@ fun SearchField(
             trailingIcon =
             if (showClear && value.isNotEmpty()) {
                 {
-                    Icon(Icons.Outlined.Close, stringResource(R.string.clear), modifier = Modifier.clickable {
-                        onValueChange("")
-                    })
+                    Icon(
+                        Icons.Outlined.Close,
+                        stringResource(R.string.clear),
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .clickable {
+                                onValueChange("")
+                            }
+                    )
                 }
             } else null,
             modifier = Modifier

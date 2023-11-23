@@ -39,7 +39,7 @@ fun StoryCard(
             modifier = Modifier
                 .padding(PaddingDefault * 2)
         ) {
-            story?.let { story ->
+            story?.also { story ->
                 Text(
                     story.title?.notBlank ?: stringResource(R.string.empty_story_name),
                     style = MaterialTheme.typography.headlineSmall
@@ -49,7 +49,9 @@ fun StoryCard(
                     story.publishDate,
                     story.authors ?: emptyList()
                 )
-                Text(story.textContent(), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                story.textContent().notBlank?.let {
+                    Text(it, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                }
             } ?: run {
                 Text(
                     if (!isLoading) stringResource(R.string.story_not_found) else stringResource(R.string.please_wait),

@@ -48,6 +48,9 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("release")
+
+            // This is here because of just how slow Jetpack Compose is in debug mode
+            isDebuggable = false
         }
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -105,7 +108,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation("androidx.activity:activity-compose:1.8.1")
     implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-messaging:$choiceSdkVersion")
@@ -125,8 +128,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.28.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("androidx.media3:media3-exoplayer:1.1.1")
-    implementation("androidx.media3:media3-ui:1.1.1")
+    implementation("androidx.media3:media3-exoplayer:1.2.0")
+    implementation("androidx.media3:media3-ui:1.2.0")
     implementation("com.otaliastudios:transcoder:0.10.5")
     implementation("ch.acra:acra-core:5.11.3")
     implementation("ch.acra:acra-toast:5.11.3")

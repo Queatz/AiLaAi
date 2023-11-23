@@ -90,7 +90,7 @@ fun CardList(
                             navController.navigate("card/${it.id!!}")
                         },
                         onChange = {
-                           onChanged()
+                            onChanged()
                         },
                         scope = scope,
                         navController = navController,
@@ -125,15 +125,10 @@ fun CardList(
                 }
             }
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+        PageInput(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(vertical = PaddingDefault * 2)
-                .widthIn(max = 480.dp)
                 .onPlaced { viewport = it.boundsInParent().size }
-                .fillMaxWidth()
         ) {
             aboveSearchFieldContent()
             SearchFieldAndAction(value, valueChange, placeholder, action, onAction)

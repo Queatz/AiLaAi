@@ -6,8 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,9 +19,7 @@ import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.EmptyText
-import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
 import com.queatz.db.Story
@@ -35,6 +31,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
     val state = rememberLazyListState()
     var isLoading by rememberStateOf(true)
     var stories by remember { mutableStateOf(emptyList<Story>()) }
+    var search by rememberStateOf("")
 
     LaunchedEffect(Unit) {
         api.myStories {
@@ -55,12 +52,20 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
             me
         )
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            contentAlignment = Alignment.BottomCenter,
+            modifier = Modifier.fillMaxSize()
+        ) {
             if (isLoading) {
                 Loading()
             } else if (stories.isEmpty()) {
                 EmptyText(stringResource(R.string.you_havent_written))
             } else {
+                val shownStories = remember(stories, search) {
+                    stories.filter {
+                        it.textContent().contains(search, ignoreCase = true)
+                    }
+                }
                 LazyColumn(
                     state = state,
                     modifier = Modifier.fillMaxSize(),
@@ -72,7 +77,9 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                     ),
                     verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2)
                 ) {
-                    items(stories) { story ->
+                    items(
+                        shownStories
+                    ) { story ->
                         StoryCard(
                             story,
                             navController,
@@ -89,22 +96,22 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                     }
                 }
             }
-            FloatingActionButton(
-                onClick = {
-                    scope.launch {
-                        api.createStory(Story()) {
-                            navController.navigate("write/${it.id}")
+            PageInput {
+                SearchFieldAndAction(
+                    search,
+                    { search = it },
+                    placeholder = stringResource(R.string.search),
+                    action = {
+                        Icon(Icons.Outlined.Add, stringResource(R.string.write_a_story))
+                    },
+                    onAction = {
+                        scope.launch {
+                            api.createStory(Story()) {
+                                navController.navigate("write/${it.id}")
+                            }
                         }
-                    }
-                },
-                modifier = Modifier
-                    .padding(
-                        end = PaddingDefault * 2,
-                        bottom = PaddingDefault * 2
-                    )
-                    .align(Alignment.BottomEnd)
-            ) {
-                Icon(Icons.Outlined.Add, stringResource(R.string.write_a_story))
+                    },
+                )
             }
         }
     }

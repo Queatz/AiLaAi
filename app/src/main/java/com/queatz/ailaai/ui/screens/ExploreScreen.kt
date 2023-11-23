@@ -230,14 +230,9 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     MapScreen(navController, cardsOfCategory) {
                         mapGeo = it
                     }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    PageInput(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(vertical = PaddingDefault * 2)
-                            .widthIn(max = 480.dp)
-                            .fillMaxWidth()
                     ) {
                         SearchContent(
                             locationSelector,
