@@ -394,6 +394,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                 Friends(
                                     remember(allGroups) {
                                         allGroups.people().filter { it.id != me()?.id }
+                                    },
+                                    {
+                                        navController.navigate("profile/${it.id!!}")
                                     }
                                 ) {
                                     scope.launch {

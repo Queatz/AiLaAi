@@ -1,6 +1,8 @@
 package com.queatz.ailaai.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,8 +26,9 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import kotlinx.datetime.Instant
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Friends(people: List<Person>, onPerson: (Person) -> Unit) {
+fun Friends(people: List<Person>, onLongClick: (Person) -> Unit, onClick: (Person) -> Unit) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
         contentPadding = PaddingValues(PaddingDefault)
@@ -35,11 +38,14 @@ fun Friends(people: List<Person>, onPerson: (Person) -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.large)
-                    .clickable(
-                        MutableInteractionSource(),
-                        null
+                    .combinedClickable(
+                        onLongClick = {
+                            onLongClick(it)
+                        },
+                        interactionSource = MutableInteractionSource(),
+                        indication = null
                     ) {
-                        onPerson(it)
+                        onClick(it)
                     }
             ) {
                 GroupPhoto(

@@ -14,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
@@ -23,7 +22,6 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.navigation.NavController
@@ -45,8 +43,7 @@ import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
-import com.queatz.ailaai.ui.story.StoryAuthors
-import com.queatz.ailaai.ui.story.textContent
+import com.queatz.ailaai.ui.story.StoryCard
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.*
 import io.ktor.http.*
@@ -572,50 +569,26 @@ fun ColumnScope.MessageContent(
     }
 
     attachedStoryId?.also { storyId ->
-        Card(
-            onClick = {
-                if (!attachedStoryNotFound) {
-                    navController.navigate("story/$storyId")
-                }
-            },
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.padding(PaddingDefault).let {
+        StoryCard(
+            attachedStory,
+            navController,
+            isLoading = !attachedStoryNotFound,
+            modifier = Modifier.padding(PaddingDefault).then(
                 if (isReply) {
-                    it
+                    Modifier
                 } else {
                     when (isMe) {
-                        true -> it.padding(start = PaddingDefault * 8)
+                        true -> Modifier.padding(start = PaddingDefault * 8)
                             .align(Alignment.End)
 
-                        false -> it.padding(end = PaddingDefault * 8)
+                        false -> Modifier.padding(end = PaddingDefault * 8)
                             .align(Alignment.Start)
                     }
                 }
-            }
+            )
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault / 2),
-                modifier = Modifier
-                    .padding(PaddingDefault * 2)
-            ) {
-                attachedStory?.let { story ->
-                    Text(
-                        story.title ?: "",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    StoryAuthors(
-                        navController,
-                        story.publishDate,
-                        story.authors ?: emptyList()
-                    )
-                    Text(story.textContent(), maxLines = 3, overflow = TextOverflow.Ellipsis)
-                } ?: run {
-                    Text(
-                        if (attachedStoryNotFound) stringResource(R.string.story_not_found) else stringResource(R.string.please_wait),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.alpha(0.5f)
-                    )
-                }
+            if (!attachedStoryNotFound) {
+                navController.navigate("story/$storyId")
             }
         }
     }

@@ -6,20 +6,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.ui.components.AppHeader
@@ -30,7 +29,6 @@ import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
     val scope = rememberCoroutineScope()
@@ -75,37 +73,17 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                     verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2)
                 ) {
                     items(stories) { story ->
-                        Card(
-                            onClick = {
-                                if (story.published == true) {
-                                    navController.navigate("story/${story.id}")
-                                } else {
-                                    navController.navigate("write/${story.id}")
-                                }
-                            },
-                            shape = MaterialTheme.shapes.large
+                        StoryCard(
+                            story,
+                            navController,
+                            isLoading = false,
+                            modifier = Modifier
+                                .fillMaxWidth()
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(PaddingDefault * 1.5f)
-                            ) {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(
-                                        story.title?.notBlank ?: stringResource(R.string.empty_story_name),
-                                        style = MaterialTheme.typography.headlineMedium
-                                    )
-                                    Text(
-                                        stringResource(if (story.published == true) R.string.published else R.string.draft),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = if (story.published == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                                    )
-                                    Text(story.textContent(), maxLines = 3, overflow = TextOverflow.Ellipsis)
-                                }
-                                Icon(Icons.Outlined.ArrowForward, null)
+                            if (story.published == true) {
+                                navController.navigate("story/${story.id}")
+                            } else {
+                                navController.navigate("write/${story.id}")
                             }
                         }
                     }
