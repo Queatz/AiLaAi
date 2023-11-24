@@ -230,6 +230,7 @@ enum class ConversationAction {
 enum class CardParentType {
     Map,
     Card,
+    Group,
     Person,
     Offline
 }

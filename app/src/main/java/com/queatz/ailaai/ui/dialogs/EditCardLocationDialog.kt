@@ -4,16 +4,15 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.MotionEvent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -123,7 +122,11 @@ fun EditCardLocationDialog(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
-            CardParentSelector(cardParentType) {
+            CardParentSelector(
+                cardParentType,
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+            ) {
                 cardParentType = if (cardParentType == it) {
                     null
                 } else {
@@ -165,8 +168,9 @@ fun EditCardLocationDialog(
                     when (cardParentType) {
                         CardParentType.Map -> stringResource(R.string.at_a_location)
                         CardParentType.Card -> stringResource(R.string.inside_another_card)
+                        CardParentType.Group -> stringResource(R.string.in_a_group)
                         CardParentType.Person -> stringResource(R.string.on_profile)
-                        else -> stringResource(R.string.none)
+                        CardParentType.Offline, null -> stringResource(R.string.none)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -298,6 +302,10 @@ fun EditCardLocationDialog(
                         }
                     }
 
+                    CardParentType.Group -> {
+
+                    }
+
                     else -> {
                         Text(
                             stringResource(R.string.discoverable_by_link),
@@ -349,7 +357,7 @@ fun EditCardLocationDialog(
                             disableSaveButton = false
                         }
                     },
-                    enabled = !disableSaveButton && !(cardParentType == CardParentType.Card && card.parent == null)
+                    enabled = !disableSaveButton && !(cardParentType == CardParentType.Card && card.parent == null) && !(cardParentType == CardParentType.Group && card.group == null)
                 ) {
                     Text(stringResource(R.string.save))
                 }

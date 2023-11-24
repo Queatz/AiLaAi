@@ -143,6 +143,7 @@ fun CardToolbar(
             Text(
                 when {
                     card.parent != null -> stringResource(R.string.inside_another_card)
+                    card.group != null -> stringResource(R.string.in_a_group)
                     card.equipped == true -> stringResource(R.string.on_profile)
                     card.offline != true -> stringResource(R.string.at_a_location)
                     else -> stringResource(R.string.none)

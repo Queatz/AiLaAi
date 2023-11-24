@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -35,42 +36,52 @@ fun CardParentSelector(
                 onChange(CardParentType.Person)
             },
             colors = if (value == CardParentType.Person) checkedColors else colors,
-            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
-            modifier = Modifier.weight(1f)
+            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
         ) {
             Icon(Icons.Outlined.Person, stringResource(R.string.on_profile))
+            Text(stringResource(R.string.on_profile), modifier = Modifier.padding(start = PaddingDefault))
         }
         Button(
             {
                 onChange(CardParentType.Map)
             },
             colors = if (value == CardParentType.Map) checkedColors else colors,
-            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
-            modifier = Modifier.weight(1f)
+            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
         ) {
             Icon(Icons.Outlined.Place, stringResource(R.string.at_a_location))
+            Text(stringResource(R.string.at_a_location), modifier = Modifier.padding(start = PaddingDefault))
         }
+            Button(
+                {
+                    onChange(CardParentType.Card)
+                },
+                colors = if (value == CardParentType.Card) checkedColors else colors,
+                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
+            ) {
+                Icon(Icons.Outlined.Description, stringResource(R.string.inside_another_card))
+                Text(stringResource(R.string.inside_another_card), modifier = Modifier.padding(start = PaddingDefault))
+            }
+            Button(
+                {
+                    onChange(CardParentType.Group)
+                },
+                colors = if (value == CardParentType.Group) checkedColors else colors,
+                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
+            ) {
+                Icon(Icons.Outlined.Group, stringResource(R.string.in_a_group))
+                Text(stringResource(R.string.in_a_group), modifier = Modifier.padding(start = PaddingDefault))
+            }
+
         if (showOffline) {
             Button(
                 {
                     onChange(CardParentType.Offline)
                 },
                 colors = if (value == CardParentType.Offline) checkedColors else colors,
-                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
-                modifier = Modifier.weight(1f)
+                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
             ) {
                 Icon(Icons.Outlined.LocationOff, stringResource(R.string.none))
-            }
-        } else {
-            Button(
-                {
-                    onChange(CardParentType.Card)
-                },
-                colors = if (value == CardParentType.Card) checkedColors else colors,
-                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2),
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Outlined.Search, stringResource(R.string.inside_another_card))
+                Text(stringResource(R.string.none), modifier = Modifier.padding(start = PaddingDefault))
             }
         }
     }

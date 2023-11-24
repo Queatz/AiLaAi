@@ -228,6 +228,24 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
         }
     }
 
+    var newCard by rememberStateOf<Card?>(null)
+
+    if (newCard != null) {
+        EditCardDialog(
+            newCard!!,
+            {
+                newCard = null
+            },
+            create = true
+        ) {
+            scope.launch {
+                reload()
+                navController.navigate("card/${it.id}")
+            }
+        }
+    }
+
+
     OnStart {
         reloadMessages()
     }
@@ -355,6 +373,14 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             ui.setShowDescription(groupId, showDescription)
                         }) {
                             Icon(Icons.Outlined.Info, stringResource(R.string.introduction))
+                        }
+                    }
+
+                    if (showCards && myMember != null) {
+                        IconButton({
+                            newCard = Card(group = groupId)
+                        }) {
+                            Icon(Icons.Outlined.Add, stringResource(R.string.create_page))
                         }
                     }
 

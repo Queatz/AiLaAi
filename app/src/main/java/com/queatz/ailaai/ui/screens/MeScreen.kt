@@ -149,6 +149,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 when (cardParentType) {
                     CardParentType.Map -> R.string.at_a_location
                     CardParentType.Card -> R.string.inside_another_card
+                    CardParentType.Group -> R.string.in_a_group
                     CardParentType.Person -> R.string.on_profile
                     CardParentType.Offline -> R.string.none
                     else -> R.string.your_cards
@@ -238,7 +239,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                     CardParentSelector(
                         cardParentType,
                         modifier = Modifier
-                            .width(240.dp)
+                            .wrapContentWidth(unbounded = true)
                             .padding(horizontal = PaddingDefault)
                             .padding(bottom = PaddingDefault / 2),
                         showOffline = true

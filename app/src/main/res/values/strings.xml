@@ -481,6 +481,7 @@
     </plurals>
     <string name="now">Now</string>
     <string name="share_a_thought">Share a thought</string>
+    <string name="in_a_group">In a group</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
