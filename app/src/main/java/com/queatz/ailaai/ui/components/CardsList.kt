@@ -1,10 +1,7 @@
 package com.queatz.ailaai.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -20,7 +17,6 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
-import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import kotlinx.coroutines.launch

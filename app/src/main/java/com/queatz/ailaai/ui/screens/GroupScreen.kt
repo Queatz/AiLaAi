@@ -86,6 +86,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var showChangeGroupStatus by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showDescriptionDialog by rememberStateOf(false)
+    var showCategoryDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
     var showGroupMembers by rememberStateOf(false)
     var showRemoveGroupMembers by rememberStateOf(false)
@@ -401,6 +402,14 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 showMenu = false
                                 showDescriptionDialog = true
                             })
+
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.set_category))
+                            }, {
+                                showMenu = false
+                                showCategoryDialog = true
+                            })
+
                             if (myMember.member?.host == true) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.manage))
@@ -942,6 +951,27 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     },
                     Media.Photo(showPhoto!!),
                     messages.photos().map { Media.Photo(it) }
+                )
+            }
+
+            if (showCategoryDialog) {
+                ChooseCategoryDialog(
+                    {
+                        showCategoryDialog = false
+                    },
+                    preselect = groupExtended?.group?.categories?.firstOrNull(),
+                    { category ->
+                        scope.launch {
+                            api.updateGroup(
+                                groupId,
+                                Group().apply {
+                                    categories = if (category == null) emptyList() else listOf(category)
+                                }
+                            ) {
+                                reload()
+                            }
+                        }
+                    }
                 )
             }
 

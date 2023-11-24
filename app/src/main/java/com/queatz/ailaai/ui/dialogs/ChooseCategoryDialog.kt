@@ -8,6 +8,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toGeo
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.first
 @Composable
 fun ChooseCategoryDialog(
     onDismissRequest: () -> Unit,
+    preselect: String? = null,
     onCategory: (String?) -> Unit
 ) {
     val context = LocalContext.current
@@ -24,7 +26,7 @@ fun ChooseCategoryDialog(
     var searchText by remember { mutableStateOf("") }
     var allCategories by remember { mutableStateOf(listOf<String>()) }
     var categories by remember { mutableStateOf(listOf<String>()) }
-    var selected by remember { mutableStateOf(listOf<String>()) }
+    var selected by remember { mutableStateOf(preselect?.inList() ?: listOf()) }
 
     LaunchedEffect(Unit) {
         val savedGeo = context.dataStore.data.first()[geoKey]?.split(",")?.map { it.toDouble() } // todo user LocationSelector
@@ -49,7 +51,9 @@ fun ChooseCategoryDialog(
     }
 
     LaunchedEffect(searchText) {
-        selected = emptyList()
+        if (searchText.isNotBlank()) {
+            selected = emptyList()
+        }
     }
 
     ChooseDialog(

@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.screens
 import android.Manifest
 import android.app.Activity
 import android.app.NotificationManager
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,10 +45,13 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.push.GroupPushData
-import kotlinx.coroutines.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
 private var cache = emptyList<GroupExtended>()
@@ -82,6 +86,8 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     val reloadFlow = remember {
         MutableSharedFlow<Boolean>()
     }
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
+    var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -91,6 +97,9 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
 
     LaunchedEffect(allGroups) {
         cache = allGroups
+        categories = allGroups
+            .flatMap { it.group?.categories ?: emptyList() }
+            .distinct()
     }
 
     LaunchedEffect(tab) {
@@ -98,7 +107,8 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     }
 
     fun update() {
-        results = allPeople.map { SearchResult.Connect(it) } +
+        results = allPeople
+            .map { SearchResult.Connect(it) } +
                 searchText.trim().let { text ->
                     (if (text.isBlank()) allGroups else allGroups.filter {
                         (it.group?.name?.contains(text, true) ?: false) ||
@@ -109,6 +119,10 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                     ) ?: false
                                 } ?: false
                     }).map { SearchResult.Group(it) }
+                }.let {
+                    if (selectedCategory == null) it else it.filter {
+                        it.groupExtended.group?.categories?.contains(selectedCategory) == true
+                    }
                 }
     }
 
@@ -195,6 +209,10 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         }
         update()
         reloadFlow.emit(true)
+    }
+
+    LaunchedEffect(selectedCategory) {
+        update()
     }
 
     var skipFirst by rememberStateOf(true)
@@ -352,9 +370,11 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                             is SwipeResult.Previous -> {
                                 navController.navigate("stories")
                             }
+
                             is SwipeResult.Next -> {
                                 navController.navigate("schedule")
                             }
+
                             is SwipeResult.Select<*> -> {
                                 setTab(it.item as MainTab)
                             }
@@ -380,36 +400,40 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     } else if (results.isEmpty()) {
                         item {
                             Text(
-                                stringResource(if (searchText.isBlank()) when (tab) {
-                                    MainTab.Friends -> R.string.you_have_no_groups
-                                    else -> R.string.no_groups_nearby
-                                } else R.string.no_groups_to_show),
+                                stringResource(
+                                    if (searchText.isBlank()) when (tab) {
+                                        MainTab.Friends -> R.string.you_have_no_groups
+                                        else -> R.string.no_groups_nearby
+                                    } else R.string.no_groups_to_show
+                                ),
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(PaddingDefault * 2)
                             )
                         }
                     } else {
-                        if (searchText.isBlank()) {
                             item {
-                                Friends(
-                                    remember(allGroups) {
-                                        allGroups.people().filter { it.id != me()?.id }
-                                    },
-                                    {
-                                        navController.navigate("profile/${it.id!!}")
-                                    }
-                                ) {
-                                    scope.launch {
-                                        api.createGroup(
-                                            listOf(me()!!.id!!, it.id!!),
-                                            reuse = true
-                                        ) { group ->
-                                            navController.navigate("group/${group.id!!}")
+                                Column {
+                                    AnimatedVisibility(searchText.isBlank() && selectedCategory == null) {
+                                        Friends(
+                                            remember(allGroups) {
+                                                allGroups.people().filter { it.id != me()?.id }
+                                            },
+                                            {
+                                                navController.navigate("profile/${it.id!!}")
+                                            }
+                                        ) {
+                                            scope.launch {
+                                                api.createGroup(
+                                                    listOf(me()!!.id!!, it.id!!),
+                                                    reuse = true
+                                                ) { group ->
+                                                    navController.navigate("group/${group.id!!}")
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
                         items(
                             results,
@@ -437,34 +461,31 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                         }
                     }
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+
+                PageInput(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(PaddingDefault * 2)
-                        .widthIn(max = 480.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .wrapContentWidth()
+                    SearchContent(
+                        locationSelector,
+                        isLoading,
+                        categories,
+                        selectedCategory
                     ) {
-                        SearchField(
-                            searchText,
-                            { searchText = it },
-                            placeholder = stringResource(R.string.search_people_and_groups),
-                        )
+                        selectedCategory = it
                     }
-                    FloatingActionButton(
-                        onClick = {
-                            createGroupName = ""
+                    SearchFieldAndAction(
+                        searchText,
+                        { searchText = it },
+                        placeholder = stringResource(R.string.search_people_and_groups),
+                        action = {
+                            Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                        },
+                        onAction = {
+                            createGroupName = searchText
                             showCreateGroupName = true
                         },
-                        modifier = Modifier
-                            .padding(start = PaddingDefault * 2)
-                    ) {
-                        Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
-                    }
+                    )
                 }
             }
         }

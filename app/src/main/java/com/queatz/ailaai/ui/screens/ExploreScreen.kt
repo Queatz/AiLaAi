@@ -110,7 +110,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     }
 
     suspend fun loadMore(clear: Boolean = false) {
-        val geo = (mapGeo?.takeIf { showAsMap } ?: geo)!!
+        val geo = (mapGeo?.takeIf { showAsMap } ?: geo) ?: return
         if (clear) {
             offset = 0
             hasMore = true

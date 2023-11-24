@@ -188,6 +188,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             {
                 showSetCategory = false
             },
+            preselect = card?.categories?.firstOrNull(),
             { category ->
                 scope.launch {
                     api.updateCard(
