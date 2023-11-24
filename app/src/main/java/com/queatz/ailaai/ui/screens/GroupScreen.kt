@@ -51,6 +51,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.group.GroupCards
 import com.queatz.ailaai.group.GroupJoinRequest
 import com.queatz.ailaai.helpers.OnStart
 import com.queatz.ailaai.helpers.audioRecorder
@@ -104,6 +105,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     var maxInputAreaHeight by rememberStateOf(0f)
     val stickerPacks by stickers.rememberStickerPacks()
     var selectedMessages by rememberStateOf(emptySet<Message>())
+    var showCards by rememberStateOf(false)
 
     val allJoinRequests by joins.joins.collectAsState()
     val myJoinRequests by joins.myJoins.collectAsState()
@@ -347,7 +349,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     val isSnoozed =
                         myMember?.member?.snoozed == true || myMember?.member?.snoozedUntil?.takeIf { it > now() } != null
 
-                    if (!showDescription && groupExtended?.group?.description?.isBlank() == false) {
+                    if (!showDescription && groupExtended?.group?.description?.isBlank() == false && !showCards) {
                         IconButton({
                             showDescription = !showDescription
                             ui.setShowDescription(groupId, showDescription)
@@ -365,6 +367,25 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 stringResource(R.string.unsnooze),
                                 tint = MaterialTheme.colorScheme.tertiary.copy(alpha = .5f)
                             )
+                        }
+                    }
+
+                    if ((groupExtended?.cardCount ?: 0) > 0 || showCards) {
+                        if (showCards) {
+                            IconButton({
+                                showCards = !showCards
+                            }) {
+                                Icon(Icons.Outlined.Forum, stringResource(R.string.go_back))
+                            }
+                        } else {
+                            IconAndCount(
+                                {
+                                    Icon(Icons.Outlined.TravelExplore, stringResource(R.string.cards))
+                                },
+                                groupExtended?.cardCount ?: 0
+                            ) {
+                                showCards = !showCards
+                            }
                         }
                     }
 
@@ -390,6 +411,18 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             showGroupMembers = true
                         })
                         if (myMember != null) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.cards))
+                            }, {
+                                showMenu = false
+                                showCards = !showCards
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.rename))
+                            }, {
+                                showMenu = false
+                                showRenameGroup = true
+                            })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.rename))
                             }, {
@@ -473,472 +506,479 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 },
                 modifier = Modifier.zIndex(1f)
             )
-            if (joinRequests.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = PaddingDefault)
-                        .shadow(1.dp, MaterialTheme.shapes.large)
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .heightIn(max = 160.dp),
-                    ) {
-                        items(joinRequests) {
-                            GroupJoinRequest(it, navController) {
-                                scope.launch {
-                                    reload()
-                                }
-                            }
-                        }
-                    }
-                }
+
+            if (showCards && groupExtended != null) {
+                GroupCards(groupExtended!!, navController)
             } else {
-                AnimatedVisibility(showDescription && groupExtended?.group?.description?.isBlank() == false) {
-                    OutlinedCard(
-                        onClick = {
-                            showDescription = false
-                            ui.setShowDescription(groupId, showDescription)
-                        },
-                        shape = MaterialTheme.shapes.large,
-                        elevation = CardDefaults.elevatedCardElevation(ElevationDefault),
+                // todo: extract else block new component
+                if (joinRequests.isNotEmpty()) {
+                    Box(
                         modifier = Modifier
-                            .padding(PaddingDefault)
+                            .padding(horizontal = PaddingDefault)
+                            .shadow(1.dp, MaterialTheme.shapes.large)
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-                            val textScrollState = rememberScrollState()
-                            LinkifyText(
-                                groupExtended?.group?.description ?: "",
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .heightIn(max = 128.dp)
-                                    .verticalScroll(textScrollState)
-                                    .onPlaced { viewport = it.boundsInParent().size }
-                                    .fadingEdge(viewport, textScrollState)
-                                    .padding(PaddingDefault * 1.5f)
-                            )
-                            Icon(
-                                Icons.Outlined.Close,
-                                null,
-                                modifier = Modifier
-                                    .padding(end = PaddingDefault * 1.5f)
-                            )
-                        }
-                    }
-                }
-            }
-            LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
-                itemsIndexed(messages, key = { _, it -> it.id!! }) { index, it ->
-                    MessageItem(
-                        it,
-                        index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
-                        selectedMessages = selectedMessages,
-                        onSelectedChange = { message, selected ->
-                            selectedMessages = if (selected) {
-                                selectedMessages + message
-                            } else {
-                                selectedMessages - message
-                            }
-                        },
-                        getPerson = {
-                            groupExtended?.members?.find { member -> member.member?.id == it }?.person
-                        },
-                        getMessage = { messageId ->
-                            var message: Message? = messages.find { it.id == messageId }
-                            api.message(messageId) {
-                                message = it
-                            }
-                            message
-                        },
-                        me = myMember?.member?.id,
-                        onDeleted = {
-                            scope.launch {
-                                reloadMessages()
-                            }
-                        },
-                        onReply = { stageReply = it },
-                        onShowPhoto = { showPhoto = it },
-                        navController = navController,
-                    )
-                }
-                item {
-                    AnimatedVisibility(hasOlderMessages && messages.isNotEmpty()) {
-                        Box(
+                        LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(PaddingDefault * 2)
+                                .wrapContentHeight()
+                                .heightIn(max = 160.dp),
                         ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                            )
-                            LaunchedEffect(Unit) {
-                                loadMore()
-                            }
-                        }
-                    }
-                }
-            }
-
-            fun send() {
-                if (sendMessage.isNotBlank()) {
-                    val text = sendMessage.trim()
-                    val stagedReply = stageReply
-                    scope.launch {
-                        api.sendMessage(groupId, Message(text = text).also {
-                            it.attachments = stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
-                        }, onError = {
-                            if (sendMessage.isBlank()) {
-                                sendMessage = text
-                            }
-                            if (stageReply == null) {
-                                stageReply = stagedReply
-                            }
-                            context.showDidntWork()
-                        }) {
-                            reloadMessages()
-                        }
-                    }
-                }
-
-                stageReply = null
-                sendMessage = ""
-                focusRequester.requestFocus()
-            }
-
-            fun sendSticker(sticker: Sticker) {
-                val stagedReply = stageReply
-                scope.launch {
-                    api.sendMessage(
-                        groupId,
-                        Message(
-                            attachment = json.encodeToString(
-                                StickerAttachment(
-                                    photo = sticker.photo,
-                                    sticker = sticker.id,
-                                    message = sticker.message
-                                )
-                            )
-                        ).also {
-                            it.attachments =
-                                stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
-                        }
-                    )
-                    reloadMessages()
-                }
-            }
-
-            if (myMember == null) {
-                val joinRequestId = myJoinRequests.find { it.joinRequest?.group == groupId }?.joinRequest?.id
-
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingDefault)
-                ) {
-                    if (joinRequestId == null) {
-                        Button(
-                            onClick = {
-                                showJoinDialog = true
-                            }
-                        ) {
-                            Text(stringResource(R.string.join_group))
-                        }
-                    } else {
-                        OutlinedButton(
-                            onClick = {
-                                scope.launch {
-                                    joins.delete(joinRequestId)
+                            items(joinRequests) {
+                                GroupJoinRequest(it, navController) {
+                                    scope.launch {
+                                        reload()
+                                    }
                                 }
                             }
-                        ) {
-                            Text(stringResource(R.string.cancel_join_request))
                         }
                     }
-                }
-            } else {
-                AnimatedVisibility(stageReply != null) {
-                    var stagedReply by remember { mutableStateOf(stageReply) }
-                    stagedReply = stageReply ?: stagedReply
-                    stagedReply?.let { message ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                } else {
+                    AnimatedVisibility(showDescription && groupExtended?.group?.description?.isBlank() == false) {
+                        OutlinedCard(
+                            onClick = {
+                                showDescription = false
+                                ui.setShowDescription(groupId, showDescription)
+                            },
+                            shape = MaterialTheme.shapes.large,
+                            elevation = CardDefaults.elevatedCardElevation(ElevationDefault),
                             modifier = Modifier
-                                .padding(
-                                    top = PaddingDefault,
-                                    start = PaddingDefault,
-                                    end = PaddingDefault
-                                )
-                                .clip(MaterialTheme.shapes.large)
-                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                                .padding(PaddingDefault)
                         ) {
-                            Icon(
-                                Icons.Outlined.Reply,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .5f),
-                                modifier = Modifier
-                                    .padding(start = PaddingDefault * 2, end = PaddingDefault)
-                                    .requiredSize(16.dp)
-                            )
-                            Text(
-                                message.text ?: message.attachmentText(context) ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(PaddingDefault / 2)
-                                    .heightIn(max = 64.dp)
-                            )
-                            IconButton(
-                                onClick = {
-                                    stageReply = null
-                                }
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
+                                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                                val textScrollState = rememberScrollState()
+                                LinkifyText(
+                                    groupExtended?.group?.description ?: "",
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .heightIn(max = 128.dp)
+                                        .verticalScroll(textScrollState)
+                                        .onPlaced { viewport = it.boundsInParent().size }
+                                        .fadingEdge(viewport, textScrollState)
+                                        .padding(PaddingDefault * 1.5f)
+                                )
                                 Icon(
                                     Icons.Outlined.Close,
                                     null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    modifier = Modifier
+                                        .padding(end = PaddingDefault * 1.5f)
                                 )
                             }
                         }
                     }
                 }
-
-                val showTools = isRecordingAudio || selectedMessages.isNotEmpty()
-
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onPlaced {
-                            maxInputAreaHeight = maxInputAreaHeight.coerceAtLeast(it.boundsInParent().size.height)
-                        }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        Crossfade(showTools, label = "") { show ->
-                            when (show) {
-                                true -> {
-                                    if (selectedMessages.isNotEmpty()) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .heightIn(min = maxInputAreaHeight.inDp())
-                                        ) {
-                                            Text(
-                                                pluralStringResource(
-                                                    R.plurals.x_selected,
-                                                    selectedMessages.size,
-                                                    selectedMessages.size
-                                                ),
-                                                overflow = TextOverflow.Ellipsis,
-                                                textAlign = TextAlign.Center,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier
-                                                    .padding(PaddingDefault)
-                                                    .fillMaxWidth()
-                                            )
-                                        }
-                                    } else if (isRecordingAudio) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .heightIn(min = maxInputAreaHeight.inDp())
-                                        ) {
-                                            IconButton(
-                                                {
-                                                    audioRecorder.cancelRecording()
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Outlined.Delete,
-                                                    stringResource(R.string.discard_recording),
-                                                    tint = MaterialTheme.colorScheme.error
-                                                )
-                                            }
-                                            Text(
-                                                stringResource(
-                                                    R.string.recording_audio,
-                                                    recordingAudioDuration.formatTime()
-                                                ),
-                                                overflow = TextOverflow.Ellipsis,
-                                                textAlign = TextAlign.Center,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier
-                                                    .padding(PaddingDefault)
-                                                    .fillMaxWidth()
-                                            )
-                                        }
-                                    }
+                LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
+                    itemsIndexed(messages, key = { _, it -> it.id!! }) { index, it ->
+                        MessageItem(
+                            it,
+                            index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
+                            selectedMessages = selectedMessages,
+                            onSelectedChange = { message, selected ->
+                                selectedMessages = if (selected) {
+                                    selectedMessages + message
+                                } else {
+                                    selectedMessages - message
                                 }
-
-                                else -> {
-                                    OutlinedTextField(
-                                        value = sendMessage,
-                                        onValueChange = {
-                                            sendMessage = it
-                                        },
-                                        trailingIcon = {
-                                            Crossfade(targetState = sendMessage.isNotBlank()) { show ->
-                                                when (show) {
-                                                    true -> IconButton({ send() }) {
-                                                        Icon(
-                                                            Icons.Default.Send,
-                                                            Icons.Default.Send.name,
-                                                            tint = MaterialTheme.colorScheme.primary
-                                                        )
-                                                    }
-
-                                                    false -> {}
-                                                }
-                                            }
-                                        },
-                                        placeholder = {
-                                            Text(
-                                                stringResource(R.string.message),
-                                                modifier = Modifier.alpha(.5f)
-                                            )
-                                        },
-                                        keyboardOptions = KeyboardOptions(
-                                            capitalization = KeyboardCapitalization.Sentences,
-                                            imeAction = ImeAction.Default
-                                        ),
-                                        keyboardActions = KeyboardActions(
-                                            onSend = {
-                                                send()
-                                            }
-                                        ),
-                                        shape = MaterialTheme.shapes.large,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(max = 128.dp)
-                                            .padding(PaddingDefault)
-                                            .focusRequester(focusRequester)
-                                    )
+                            },
+                            getPerson = {
+                                groupExtended?.members?.find { member -> member.member?.id == it }?.person
+                            },
+                            getMessage = { messageId ->
+                                var message: Message? = messages.find { it.id == messageId }
+                                api.message(messageId) {
+                                    message = it
+                                }
+                                message
+                            },
+                            me = myMember?.member?.id,
+                            onDeleted = {
+                                scope.launch {
+                                    reloadMessages()
+                                }
+                            },
+                            onReply = { stageReply = it },
+                            onShowPhoto = { showPhoto = it },
+                            navController = navController,
+                        )
+                    }
+                    item {
+                        AnimatedVisibility(hasOlderMessages && messages.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(PaddingDefault * 2)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                )
+                                LaunchedEffect(Unit) {
+                                    loadMore()
                                 }
                             }
                         }
                     }
-                    AnimatedVisibility(sendMessage.isBlank()) {
-                        Row {
-                            if (selectedMessages.isNotEmpty()) {
-                                IconButton(
-                                    {
-                                        selectedMessages.sortedBy {
-                                            it.createdAt
-                                        }.joinToString("\n") { it.text ?: "" }
-                                            .copyToClipboard(context)
-                                        context.toast(R.string.copied)
-                                        selectedMessages = emptySet()
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Outlined.ContentCopy,
-                                        null
-                                    )
+                }
+
+                fun send() {
+                    if (sendMessage.isNotBlank()) {
+                        val text = sendMessage.trim()
+                        val stagedReply = stageReply
+                        scope.launch {
+                            api.sendMessage(groupId, Message(text = text).also {
+                                it.attachments =
+                                    stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
+                            }, onError = {
+                                if (sendMessage.isBlank()) {
+                                    sendMessage = text
                                 }
+                                if (stageReply == null) {
+                                    stageReply = stagedReply
+                                }
+                                context.showDidntWork()
+                            }) {
+                                reloadMessages()
+                            }
+                        }
+                    }
+
+                    stageReply = null
+                    sendMessage = ""
+                    focusRequester.requestFocus()
+                }
+
+                fun sendSticker(sticker: Sticker) {
+                    val stagedReply = stageReply
+                    scope.launch {
+                        api.sendMessage(
+                            groupId,
+                            Message(
+                                attachment = json.encodeToString(
+                                    StickerAttachment(
+                                        photo = sticker.photo,
+                                        sticker = sticker.id,
+                                        message = sticker.message
+                                    )
+                                )
+                            ).also {
+                                it.attachments =
+                                    stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
+                            }
+                        )
+                        reloadMessages()
+                    }
+                }
+
+                if (myMember == null) {
+                    val joinRequestId = myJoinRequests.find { it.joinRequest?.group == groupId }?.joinRequest?.id
+
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(PaddingDefault)
+                    ) {
+                        if (joinRequestId == null) {
+                            Button(
+                                onClick = {
+                                    showJoinDialog = true
+                                }
+                            ) {
+                                Text(stringResource(R.string.join_group))
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = {
+                                    scope.launch {
+                                        joins.delete(joinRequestId)
+                                    }
+                                }
+                            ) {
+                                Text(stringResource(R.string.cancel_join_request))
+                            }
+                        }
+                    }
+                } else {
+                    AnimatedVisibility(stageReply != null) {
+                        var stagedReply by remember { mutableStateOf(stageReply) }
+                        stagedReply = stageReply ?: stagedReply
+                        stagedReply?.let { message ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(
+                                        top = PaddingDefault,
+                                        start = PaddingDefault,
+                                        end = PaddingDefault
+                                    )
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Reply,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .5f),
+                                    modifier = Modifier
+                                        .padding(start = PaddingDefault * 2, end = PaddingDefault)
+                                        .requiredSize(16.dp)
+                                )
+                                Text(
+                                    message.text ?: message.attachmentText(context) ?: "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(PaddingDefault / 2)
+                                        .heightIn(max = 64.dp)
+                                )
                                 IconButton(
-                                    {
-                                        selectedMessages = emptySet()
+                                    onClick = {
+                                        stageReply = null
                                     }
                                 ) {
                                     Icon(
                                         Icons.Outlined.Close,
-                                        null
-                                    )
-                                }
-                            } else {
-                                IconButton(
-                                    onClick = {
-                                        if (isRecordingAudio) {
-                                            audioRecorder.sendActiveRecording()
-                                        } else {
-                                            audioRecorder.recordAudio()
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        if (isRecordingAudio) Icons.Default.Send else Icons.Outlined.Mic,
-                                        stringResource(R.string.record_audio),
+                                        null,
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
-                            AnimatedVisibility(!showTools) {
-                                Row {
+                        }
+                    }
+
+                    val showTools = isRecordingAudio || selectedMessages.isNotEmpty()
+
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onPlaced {
+                                maxInputAreaHeight = maxInputAreaHeight.coerceAtLeast(it.boundsInParent().size.height)
+                            }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            Crossfade(showTools, label = "") { show ->
+                                when (show) {
+                                    true -> {
+                                        if (selectedMessages.isNotEmpty()) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .heightIn(min = maxInputAreaHeight.inDp())
+                                            ) {
+                                                Text(
+                                                    pluralStringResource(
+                                                        R.plurals.x_selected,
+                                                        selectedMessages.size,
+                                                        selectedMessages.size
+                                                    ),
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    textAlign = TextAlign.Center,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier
+                                                        .padding(PaddingDefault)
+                                                        .fillMaxWidth()
+                                                )
+                                            }
+                                        } else if (isRecordingAudio) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .heightIn(min = maxInputAreaHeight.inDp())
+                                            ) {
+                                                IconButton(
+                                                    {
+                                                        audioRecorder.cancelRecording()
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        Icons.Outlined.Delete,
+                                                        stringResource(R.string.discard_recording),
+                                                        tint = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                                Text(
+                                                    stringResource(
+                                                        R.string.recording_audio,
+                                                        recordingAudioDuration.formatTime()
+                                                    ),
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    textAlign = TextAlign.Center,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier
+                                                        .padding(PaddingDefault)
+                                                        .fillMaxWidth()
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    else -> {
+                                        OutlinedTextField(
+                                            value = sendMessage,
+                                            onValueChange = {
+                                                sendMessage = it
+                                            },
+                                            trailingIcon = {
+                                                Crossfade(targetState = sendMessage.isNotBlank()) { show ->
+                                                    when (show) {
+                                                        true -> IconButton({ send() }) {
+                                                            Icon(
+                                                                Icons.Default.Send,
+                                                                Icons.Default.Send.name,
+                                                                tint = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        }
+
+                                                        false -> {}
+                                                    }
+                                                }
+                                            },
+                                            placeholder = {
+                                                Text(
+                                                    stringResource(R.string.message),
+                                                    modifier = Modifier.alpha(.5f)
+                                                )
+                                            },
+                                            keyboardOptions = KeyboardOptions(
+                                                capitalization = KeyboardCapitalization.Sentences,
+                                                imeAction = ImeAction.Default
+                                            ),
+                                            keyboardActions = KeyboardActions(
+                                                onSend = {
+                                                    send()
+                                                }
+                                            ),
+                                            shape = MaterialTheme.shapes.large,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(max = 128.dp)
+                                                .padding(PaddingDefault)
+                                                .focusRequester(focusRequester)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        AnimatedVisibility(sendMessage.isBlank()) {
+                            Row {
+                                if (selectedMessages.isNotEmpty()) {
                                     IconButton(
-                                        onClick = {
-                                            launcher.launch(PickVisualMediaRequest())
+                                        {
+                                            selectedMessages.sortedBy {
+                                                it.createdAt
+                                            }.joinToString("\n") { it.text ?: "" }
+                                                .copyToClipboard(context)
+                                            context.toast(R.string.copied)
+                                            selectedMessages = emptySet()
                                         }
                                     ) {
                                         Icon(
-                                            Icons.Outlined.Photo,
-                                            stringResource(R.string.add),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            Icons.Outlined.ContentCopy,
+                                            null
                                         )
                                     }
                                     IconButton(
-                                        onClick = {
-                                            showMore = !showMore
-                                        },
-                                        modifier = Modifier
-                                            .padding(end = PaddingDefault)
+                                        {
+                                            selectedMessages = emptySet()
+                                        }
                                     ) {
                                         Icon(
-                                            if (showMore) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                                            null,
+                                            Icons.Outlined.Close,
+                                            null
+                                        )
+                                    }
+                                } else {
+                                    IconButton(
+                                        onClick = {
+                                            if (isRecordingAudio) {
+                                                audioRecorder.sendActiveRecording()
+                                            } else {
+                                                audioRecorder.recordAudio()
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            if (isRecordingAudio) Icons.Default.Send else Icons.Outlined.Mic,
+                                            stringResource(R.string.record_audio),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+                                    }
+                                }
+                                AnimatedVisibility(!showTools) {
+                                    Row {
+                                        IconButton(
+                                            onClick = {
+                                                launcher.launch(PickVisualMediaRequest())
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.Photo,
+                                                stringResource(R.string.add),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                showMore = !showMore
+                                            },
+                                            modifier = Modifier
+                                                .padding(end = PaddingDefault)
+                                        ) {
+                                            Icon(
+                                                if (showMore) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                AnimatedVisibility(showMore) {
-                    Box(
-                        modifier = Modifier.height(240.dp)
-                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                            .shadow(0.25.dp)
-                    ) {
-                        StickerPacks(
-                            stickerPacks ?: emptyList(),
-                            onStickerLongClick = {
-                                scope.launch {
-                                    say.say(it.message)
-                                }
-                            },
-                            onStickerPack = {
-                                navController.navigate("sticker-pack/${it.id!!}")
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        ) { sticker ->
-                            showMore = false
-                            focusRequester.requestFocus()
-                            sendSticker(sticker)
-                        }
-                        FloatingActionButton(
-                            onClick = {
-                                navController.navigate("sticker-packs")
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(bottom = PaddingDefault * 2, end = PaddingDefault * 2)
-                                .size(32.dp + PaddingDefault)
+                    AnimatedVisibility(showMore) {
+                        Box(
+                            modifier = Modifier.height(240.dp)
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                                .shadow(0.25.dp)
                         ) {
-                            Icon(Icons.Outlined.Add, null, modifier = Modifier.size(16.dp))
+                            StickerPacks(
+                                stickerPacks ?: emptyList(),
+                                onStickerLongClick = {
+                                    scope.launch {
+                                        say.say(it.message)
+                                    }
+                                },
+                                onStickerPack = {
+                                    navController.navigate("sticker-pack/${it.id!!}")
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            ) { sticker ->
+                                showMore = false
+                                focusRequester.requestFocus()
+                                sendSticker(sticker)
+                            }
+                            FloatingActionButton(
+                                onClick = {
+                                    navController.navigate("sticker-packs")
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(bottom = PaddingDefault * 2, end = PaddingDefault * 2)
+                                    .size(32.dp + PaddingDefault)
+                            ) {
+                                Icon(Icons.Outlined.Add, null, modifier = Modifier.size(16.dp))
+                            }
                         }
                     }
                 }

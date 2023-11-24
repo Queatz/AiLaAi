@@ -312,6 +312,7 @@ class MainActivity : AppCompatActivity() {
                                                 icon = {
                                                     Box {
                                                         Icon(item.icon, contentDescription = null)
+                                                        // todo reusable icon IconAndCount
                                                         if (item.route == "messages" && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
@@ -328,7 +329,7 @@ class MainActivity : AppCompatActivity() {
                                                         }
                                                         if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0
                                                         ) {
-                                                            // todo reusable icon
+                                                            // todo reusable icon IconAndCount
                                                             Text(
                                                                 (presence?.unreadStoriesCount ?: 0).toString(),
                                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -198,6 +198,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         isLoading = false
     }
 
+    // todo: this needs to be reusable, which video plays
     val state = rememberLazyGridState()
     val isAtTop by state.isAtTop()
     var playingVideo by remember { mutableStateOf<Card?>(null) }
