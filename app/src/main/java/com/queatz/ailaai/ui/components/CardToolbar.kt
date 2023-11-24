@@ -36,6 +36,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
+import com.queatz.db.Person
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -85,7 +86,7 @@ fun CardToolbar(
                     }
                 )
             } else if (it.isPhoto(context)) {
-                api.uploadCardPhotoFromUri(context, card!!.id!!, it)
+                api.uploadCardPhotoFromUri(context, card.id!!, it)
             }
             onChange()
             isUploadingVideo = false

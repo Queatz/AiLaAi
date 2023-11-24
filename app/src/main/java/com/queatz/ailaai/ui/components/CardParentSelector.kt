@@ -7,7 +7,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -19,6 +23,7 @@ fun CardParentSelector(
     showOffline: Boolean = false,
     onChange: (CardParentType) -> Unit
 ) {
+    // todo: make this a loop
     Row(
         horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
         modifier = modifier
@@ -51,26 +56,26 @@ fun CardParentSelector(
             Icon(Icons.Outlined.Place, stringResource(R.string.at_a_location))
             Text(stringResource(R.string.at_a_location), modifier = Modifier.padding(start = PaddingDefault))
         }
-            Button(
-                {
-                    onChange(CardParentType.Card)
-                },
-                colors = if (value == CardParentType.Card) checkedColors else colors,
-                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
-            ) {
-                Icon(Icons.Outlined.Description, stringResource(R.string.inside_another_card))
-                Text(stringResource(R.string.inside_another_card), modifier = Modifier.padding(start = PaddingDefault))
-            }
-            Button(
-                {
-                    onChange(CardParentType.Group)
-                },
-                colors = if (value == CardParentType.Group) checkedColors else colors,
-                elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
-            ) {
-                Icon(Icons.Outlined.Group, stringResource(R.string.in_a_group))
-                Text(stringResource(R.string.in_a_group), modifier = Modifier.padding(start = PaddingDefault))
-            }
+        Button(
+            {
+                onChange(CardParentType.Card)
+            },
+            colors = if (value == CardParentType.Card) checkedColors else colors,
+            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
+        ) {
+            Icon(Icons.Outlined.Description, stringResource(R.string.inside_another_card))
+            Text(stringResource(R.string.inside_another_card), modifier = Modifier.padding(start = PaddingDefault))
+        }
+        Button(
+            {
+                onChange(CardParentType.Group)
+            },
+            colors = if (value == CardParentType.Group) checkedColors else colors,
+            elevation = ButtonDefaults.elevatedButtonElevation(PaddingDefault / 2)
+        ) {
+            Icon(Icons.Outlined.Group, stringResource(R.string.in_a_group))
+            Text(stringResource(R.string.in_a_group), modifier = Modifier.padding(start = PaddingDefault))
+        }
 
         if (showOffline) {
             Button(

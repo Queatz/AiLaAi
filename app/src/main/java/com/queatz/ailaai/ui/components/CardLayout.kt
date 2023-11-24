@@ -28,6 +28,7 @@ import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
+import com.queatz.db.Person
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

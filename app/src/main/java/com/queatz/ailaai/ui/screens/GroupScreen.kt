@@ -450,12 +450,6 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 showRenameGroup = true
                             })
                             DropdownMenuItem({
-                                Text(stringResource(R.string.rename))
-                            }, {
-                                showMenu = false
-                                showRenameGroup = true
-                            })
-                            DropdownMenuItem({
                                 Text(stringResource(R.string.introduction))
                             }, {
                                 showMenu = false

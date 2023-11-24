@@ -110,6 +110,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             CardParentType.Person -> myCards.filter { it.parent == null && it.equipped.isTrue }
             CardParentType.Map -> myCards.filter { it.parent == null && it.equipped.isFalse && it.geo != null && it.offline.isFalse }
             CardParentType.Card -> myCards.filter { it.parent != null }
+            CardParentType.Group -> myCards.filter { it.group != null }
             CardParentType.Offline -> myCards.filter { it.offline == true }
             else -> myCards
         }.filter {

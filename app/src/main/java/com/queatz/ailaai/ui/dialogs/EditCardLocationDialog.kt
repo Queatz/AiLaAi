@@ -5,12 +5,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.MotionEvent
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -22,8 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,9 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import app.ailaai.api.card
-import app.ailaai.api.myCollaborations
-import app.ailaai.api.updateCard
+import app.ailaai.api.*
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -42,12 +44,14 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
+import com.queatz.db.GroupExtended
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -60,11 +64,14 @@ fun EditCardLocationDialog(
     onDismissRequest: () -> Unit,
     onChange: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current!!
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(activity)
 
     var parentCard by remember { mutableStateOf<Card?>(null) }
+    var parentGroup by remember { mutableStateOf<GroupExtended?>(null) }
     var searchCardsValue by remember { mutableStateOf("") }
+    var searchGroupsValue by remember { mutableStateOf("") }
     var position by remember { mutableStateOf(LatLng(card.geo?.get(0) ?: 0.0, card.geo?.get(1) ?: 0.0)) }
     val coroutineScope = rememberCoroutineScope()
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -77,6 +84,12 @@ fun EditCardLocationDialog(
         cardParentType = null
     } else if (card.equipped == true) {
         cardParentType = CardParentType.Person
+    } else if (card.group != null) {
+        cardParentType = CardParentType.Group
+
+        LaunchedEffect(Unit) {
+            api.group(card.group!!) { parentGroup = it }
+        }
     } else if (card.parent != null) {
         cardParentType = CardParentType.Card
 
@@ -122,10 +135,14 @@ fun EditCardLocationDialog(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = PaddingDefault)
             )
+            val state = rememberScrollState()
+            var viewport by remember { mutableStateOf(Size(0f, 0f)) }
             CardParentSelector(
                 cardParentType,
                 modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
+                    .horizontalScroll(state)
+                    .onPlaced { viewport = it.boundsInParent().size }
+                    .horizontalFadingEdge(viewport, state)
             ) {
                 cardParentType = if (cardParentType == it) {
                     null
@@ -133,30 +150,46 @@ fun EditCardLocationDialog(
                     it
                 }
 
+                // todo: clean this up
                 when (cardParentType) {
                     CardParentType.Person -> {
                         card.parent = null
+                        card.group = null
                         card.offline = null
                         parentCard = null
+                        parentGroup = null
                         card.equipped = true
                     }
 
                     CardParentType.Map -> {
                         card.parent = null
+                        card.group = null
                         card.offline = null
                         parentCard = null
+                        parentGroup = null
                         card.equipped = false
                     }
 
                     CardParentType.Card -> {
                         card.equipped = false
                         card.offline = false
+                        parentGroup = null
+                        card.group = null
+                    }
+
+                    CardParentType.Group -> {
+                        card.equipped = false
+                        card.offline = false
+                        parentCard = null
+                        card.parent = null
                     }
 
                     else -> {
                         card.offline = true
                         card.parent = null
+                        card.group = null
                         parentCard = null
+                        parentGroup = null
                         card.equipped = false
                     }
                 }
@@ -303,6 +336,94 @@ fun EditCardLocationDialog(
                     }
 
                     CardParentType.Group -> {
+                        when (parentGroup) {
+                            null -> {
+                                val state = rememberLazyListState()
+                                var groups by rememberStateOf(emptyList<GroupExtended>())
+                                var results by rememberStateOf(emptyList<GroupExtended>())
+
+                                LaunchedEffect(Unit) {
+                                    api.groups {
+                                        groups = it
+                                    }
+                                }
+
+                                OutlinedTextField(
+                                    searchGroupsValue,
+                                    onValueChange = { searchGroupsValue = it },
+                                    label = { Text(stringResource(R.string.search_people_and_groups)) },
+                                    shape = MaterialTheme.shapes.large,
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(
+                                        capitalization = KeyboardCapitalization.Sentences,
+                                        imeAction = ImeAction.Next
+                                    ),
+                                    keyboardActions = KeyboardActions(onSearch = {
+                                        keyboardController.hide()
+                                    }),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = PaddingDefault)
+                                )
+
+                                LaunchedEffect(groups, searchGroupsValue) {
+                                    results = if (searchGroupsValue.isBlank()) {
+                                        groups
+                                    } else {
+                                        groups.filter {
+                                            (it.group?.name?.contains(searchGroupsValue, true) ?: false) ||
+                                                    it.members?.any {
+                                                        it.person?.id != null /* me */ && it.person?.name?.contains(
+                                                            searchGroupsValue,
+                                                            true
+                                                        ) ?: false
+                                                    } ?: false
+                                        }
+                                    }
+                                }
+
+                                LazyColumn(
+                                    state = state,
+                                    contentPadding = PaddingValues(PaddingDefault),
+                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxSize()
+                                        .fillMaxWidth()
+                                        .aspectRatio(.75f)
+                                ) {
+                                    items(
+                                        results,
+                                        key = { it.group!!.id!! }
+                                    ) {
+                                        ContactItem(
+                                            onClick = {
+                                                parentGroup = it
+                                                card.group = it.group?.id
+                                            },
+                                            item = SearchResult.Group(it),
+                                            me = null,//todo
+                                            info = GroupInfo.Members
+                                        )
+                                    }
+                                }
+                            }
+                            else -> {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(vertical = PaddingDefault)
+                                ) {
+                                    ContactItem(
+                                        onClick = {
+                                            parentGroup = null
+                                            card.group = null
+                                        },
+                                        item = SearchResult.Group(parentGroup!!),
+                                        me = null,//todo
+                                        info = GroupInfo.Members
+                                    )
+                                }
+                            }
+                        }
 
                     }
 
@@ -341,14 +462,15 @@ fun EditCardLocationDialog(
                                 Card(
                                     geo = position.toList(),
                                     parent = card.parent,
+                                    group = card.group,
                                     equipped = card.equipped,
                                     offline = card.offline
                                 )
                             ) { update ->
-                                card.location = update.location
                                 card.equipped = update.equipped
                                 card.offline = update.offline
                                 card.parent = update.parent
+                                card.group = update.group
                                 card.geo = update.geo
 
                                 onDismissRequest()
