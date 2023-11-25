@@ -22,27 +22,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.card
 import app.ailaai.api.group
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
-import com.queatz.db.Person
 
 @Composable
 fun StoryContents(
     source: StorySource?,
     content: List<StoryContent>,
     state: LazyGridState,
-    navController: NavController,
-    me: () -> Person?,
     modifier: Modifier = Modifier,
     bottomContentPadding: Dp = 0.dp,
     fade: Boolean = false,
@@ -51,6 +48,7 @@ fun StoryContents(
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
     var showOpenWidgetDialog by rememberStateOf(false)
     var size by rememberStateOf(Size.Zero)
+    val nav = nav
 
     if (showOpenWidgetDialog) {
         val context = LocalContext.current
@@ -142,7 +140,7 @@ fun StoryContents(
                                                         remember { MutableInteractionSource() },
                                                         indication = null
                                                     ) {
-                                                        navController.navigate("story/${content.id}")
+                                                        nav.navigate("story/${content.id}")
                                                     }
                                             }
                                         }
@@ -180,7 +178,7 @@ fun StoryContents(
                     is StoryContent.Authors -> {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             StoryAuthors(
-                                navController,
+                                nav,
                                 content.publishDate,
                                 content.authors
                             )
@@ -198,9 +196,7 @@ fun StoryContents(
 
                                 LoadingText(group != null, stringResource(R.string.loading_group)) {
                                     ContactItem(
-                                        navController,
                                         SearchResult.Group(group!!),
-                                        me(),
                                         onChange = {},
                                         info = GroupInfo.LatestMessage
                                     )
@@ -218,13 +214,12 @@ fun StoryContents(
                                 }
                                 CardItem(
                                     {
-                                        navController.navigate("card/$it")
+                                        nav.navigate("card/$it")
                                     },
                                     onCategoryClick = {
                                         exploreInitialCategory = it
-                                        navController.navigate("explore")
+                                        nav.navigate("explore")
                                     },
-                                    navController = navController,
                                     card = card,
                                     isChoosing = true,
                                     modifier = Modifier

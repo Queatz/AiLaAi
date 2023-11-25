@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.*
 import at.bluesource.choicesdk.location.factory.FusedLocationProviderFactory
 import at.bluesource.choicesdk.maps.common.LatLng
@@ -59,7 +58,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditCardLocationDialog(
     card: Card,
-    navController: NavController,
     activity: Activity,
     onDismissRequest: () -> Unit,
     onChange: () -> Unit
@@ -309,7 +307,6 @@ fun EditCardLocationDialog(
                                             },
                                             onCategoryClick = {},
                                             card = it,
-                                            navController = navController,
                                             isChoosing = true
                                         )
                                     }
@@ -327,7 +324,6 @@ fun EditCardLocationDialog(
                                     },
                                     card = parentCard!!,
                                     isChoosing = true,
-                                    navController = navController,
                                     modifier = Modifier
                                         .padding(top = PaddingDefault)
                                 )
@@ -401,7 +397,6 @@ fun EditCardLocationDialog(
                                                 card.group = it.group?.id
                                             },
                                             item = SearchResult.Group(it),
-                                            me = null,//todo
                                             info = GroupInfo.Members
                                         )
                                     }
@@ -418,7 +413,6 @@ fun EditCardLocationDialog(
                                             card.group = null
                                         },
                                         item = SearchResult.Group(parentGroup!!),
-                                        me = null,//todo
                                         info = GroupInfo.Members
                                     )
                                 }

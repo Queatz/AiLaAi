@@ -29,20 +29,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
 
 @Composable
-fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavController, modifier: Modifier = Modifier) {
+fun CardAuthor(
+    people: List<Person>,
+    interactable: Boolean,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     var viewport by rememberStateOf(Size(0f, 0f))
     val scrollState = rememberLazyListState()
+    val nav = nav
+
     LazyRow(
         state = scrollState,
         horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
@@ -62,7 +68,7 @@ fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavCo
                                 MutableInteractionSource(),
                                 null
                             ) {
-                                navController.navigate("profile/${person.id}")
+                                nav.navigate("profile/${person.id}")
                             }
                         } else {
                             it
@@ -81,7 +87,7 @@ fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavCo
                                         MutableInteractionSource(),
                                         null
                                     ) {
-                                        navController.navigate("profile/${person.id}")
+                                        nav.navigate("profile/${person.id}")
                                     }
                                 } else {
                                     it
@@ -90,7 +96,7 @@ fun CardAuthor(people: List<Person>, interactable: Boolean, navController: NavCo
                     )
                 } else {
                     IconButton({
-                        navController.navigate("profile/${person.id}")
+                        nav.navigate("profile/${person.id}")
                     }) {
                         Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                     }

@@ -17,13 +17,15 @@ import app.ailaai.api.confirmLinkDeviceToken
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
 import kotlinx.coroutines.launch
 
 @Composable
-fun LinkDeviceScreen(navController: NavController, token: String, me: () -> Person?) {
+fun LinkDeviceScreen(token: String) {
     val scope = rememberCoroutineScope()
+    val nav = nav
 
     LaunchedEffect(Unit) {
         // todo check if code is still valid
@@ -41,14 +43,14 @@ fun LinkDeviceScreen(navController: NavController, token: String, me: () -> Pers
             modifier = Modifier.padding(PaddingDefault * 2)
         )
         Button({
-            navController.popBackStackOrFinish()
+            nav.popBackStackOrFinish()
         }) {
             Text(stringResource(R.string.no))
         }
         OutlinedButton({
             scope.launch {
                 api.confirmLinkDeviceToken(token) {
-                    navController.popBackStackOrFinish()
+                    nav.popBackStackOrFinish()
                 }
             }
         }) {

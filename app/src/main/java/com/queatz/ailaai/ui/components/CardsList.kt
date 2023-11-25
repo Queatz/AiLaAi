@@ -17,6 +17,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
 import kotlinx.coroutines.launch
@@ -30,7 +31,6 @@ fun CardList(
     isError: Boolean,
     value: String,
     valueChange: (String) -> Unit,
-    navController: NavController,
     onChanged: () -> Unit = {},
     state: LazyGridState = rememberLazyGridState(),
     placeholder: String = stringResource(R.string.search),
@@ -44,6 +44,8 @@ fun CardList(
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
+    val nav = nav
+
     Box(
         contentAlignment = Alignment.TopCenter,
         modifier = modifier.fillMaxSize()
@@ -83,13 +85,12 @@ fun CardList(
                         showTitle = true,
                         showDistance = geo,
                         onClick = {
-                            navController.navigate("card/${it.id!!}")
+                            nav.navigate("card/${it.id!!}")
                         },
                         onChange = {
                             onChanged()
                         },
                         scope = scope,
-                        navController = navController,
                         playVideo = playingVideo == it,
                     )
                 }

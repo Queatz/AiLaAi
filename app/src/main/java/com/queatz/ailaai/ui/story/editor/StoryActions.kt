@@ -17,6 +17,8 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.db.Person
 import com.queatz.db.Story
@@ -24,10 +26,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun StoryActions(
-    navController: NavController,
     storyId: String,
     story: Story?,
-    me: () -> Person?,
     showOpen: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
@@ -35,6 +35,9 @@ fun StoryActions(
     var showMessageDialog by rememberStateOf(false)
     var showDeleteDialog by rememberStateOf(false)
     var showManageMenu by rememberStateOf(false)
+    val nav = nav
+    val me = me
+
     if (showManageMenu) {
         Menu({
             showManageMenu = false
@@ -58,7 +61,7 @@ fun StoryActions(
             scope.launch {
                 api.deleteStory(story!!.id!!) {
                     showDeleteDialog = false
-                    navController.popBackStack()
+                    nav.popBackStack()
                 }
             }
         }
@@ -86,8 +89,8 @@ fun StoryActions(
             people = story?.authors ?: emptyList(),
             onPeopleSelected = { authors ->
                 scope.launch {
-                    api.createGroup(authors.map { it.id!! } + me()!!.id!!, reuse = true) {
-                        navController.navigate("group/${it.id!!}")
+                    api.createGroup(authors.map { it.id!! } + me!!.id!!, reuse = true) {
+                        nav.navigate("group/${it.id!!}")
                     }
                 }
                 showMessageDialog = false
@@ -122,11 +125,9 @@ fun StoryActions(
             {
                 showMenu = false
             },
-            navController,
             storyId,
             story,
-            me = me(),
-            isMine = story?.person == me()?.id,
+            isMine = story?.person == me?.id,
             showOpen = showOpen,
             editing = false
         )

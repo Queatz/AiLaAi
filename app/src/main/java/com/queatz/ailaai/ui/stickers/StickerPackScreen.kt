@@ -12,26 +12,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
 import app.ailaai.api.stickerPack
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.ReportDialog
-import com.queatz.db.Person
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StickerPackScreen(navController: NavController, stickerPackId: String, me: () -> Person?) {
+fun StickerPackScreen(stickerPackId: String) {
     val scope = rememberCoroutineScope()
     var stickerPack by rememberStateOf<StickerPack?>(null)
     var showReportDialog by rememberStateOf(false)
+    val nav = nav
 
     LaunchedEffect(stickerPackId) {
         api.stickerPack(stickerPackId) {
@@ -58,7 +58,7 @@ fun StickerPackScreen(navController: NavController, stickerPackId: String, me: (
                 )
             },
             navigationIcon = {
-                BackButton(navController)
+                BackButton()
             },
             actions = {
                 var showMenu by rememberStateOf(false)
@@ -79,7 +79,7 @@ fun StickerPackScreen(navController: NavController, stickerPackId: String, me: (
                                 Text(stringResource(R.string.view_creator))
                             }, {
                                 showMenu = false
-                                navController.navigate("profile/${stickerPack.person!!}")
+                                nav.navigate("profile/${stickerPack.person!!}")
                             })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.report))

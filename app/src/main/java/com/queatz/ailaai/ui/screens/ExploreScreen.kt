@@ -1,7 +1,9 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -14,8 +16,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.cards
 import app.ailaai.api.myGeo
 import app.ailaai.api.savedCards
@@ -25,11 +25,11 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.state.latLngSaver
-import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
-import com.queatz.db.Person
 import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 
@@ -39,7 +39,7 @@ private var cache = emptyList<Card>()
 private var cacheTab = MainTab.Friends
 
 @Composable
-fun ExploreScreen(navController: NavController, me: () -> Person?) {
+fun ExploreScreen() {
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     var value by rememberSavableStateOf("")
@@ -56,10 +56,11 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     val limit = 20
     var hasMore by rememberStateOf(true)
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
+    val nav = nav
     val locationSelector = locationSelector(
         geo,
         { geo = it },
-        navController.context as Activity
+        nav.context as Activity
     )
     var tab by rememberSavableStateOf(cacheTab)
     var shownTab by rememberSavableStateOf(tab)
@@ -179,15 +180,12 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
     LocationScaffold(
         geo,
         locationSelector,
-        navController,
         appHeader = {
             AppHeader(
-                navController,
                 stringResource(R.string.explore),
                 {},
-                me
             ) {
-                ScanQrCodeButton(navController)
+                ScanQrCodeButton()
             }
         }
     ) {
@@ -195,21 +193,19 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AppHeader(
-                navController,
                 stringResource(R.string.explore),
                 {
                     scope.launch {
                         state.scrollToTop()
                     }
-                },
-                me
+                }
             ) {
                 IconButton({
                     showAsMap = !showAsMap
                 }) {
                     Icon(if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map, stringResource(R.string.map))
                 }
-                ScanQrCodeButton(navController)
+                ScanQrCodeButton()
             }
 
             val cardsOfCategory = remember(cards, selectedCategory) {
@@ -227,7 +223,7 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    MapScreen(navController, cardsOfCategory) {
+                    MapScreen(nav, cardsOfCategory) {
                         mapGeo = it
                     }
                     PageInput(
@@ -250,16 +246,17 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                                 Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                             },
                             onAction = {
-                                navController.navigate("me")
+                                nav.navigate("me")
                             },
                         )
                     }
                 }
             } else {
+                val me = me
                 CardList(
                     state = state,
                     cards = cardsOfCategory,
-                    isMine = { it.person == me()?.id },
+                    isMine = { it.person == me?.id },
                     geo = geo,
                     onChanged = {
                         scope.launch {
@@ -270,7 +267,6 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                     isError = isError,
                     value = value,
                     valueChange = { value = it },
-                    navController = navController,
                     placeholder = stringResource(R.string.search),
                     hasMore = hasMore,
                     onLoadMore = {
@@ -280,16 +276,16 @@ fun ExploreScreen(navController: NavController, me: () -> Person?) {
                         Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                     },
                     onAction = {
-                        navController.navigate("me")
+                        nav.navigate("me")
                     },
                     modifier = Modifier
                         .swipeMainTabs {
                             when (val it = MainTab.entries.swipe(tab, it)) {
                                 is SwipeResult.Previous -> {
-                                    navController.navigate("schedule")
+                                    nav.navigate("schedule")
                                 }
                                 is SwipeResult.Next -> {
-                                    navController.navigate("stories")
+                                    nav.navigate("stories")
                                 }
                                 is SwipeResult.Select<*> -> {
                                     tab = it.item as MainTab

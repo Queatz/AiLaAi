@@ -1,6 +1,9 @@
 package com.queatz.ailaai.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -14,17 +17,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.navigation.NavController
 import app.ailaai.api.occurrences
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.schedule.*
 import com.queatz.ailaai.schedule.ScheduleView.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
 import com.queatz.db.Reminder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -39,7 +41,7 @@ private val viewKey = stringPreferencesKey("schedule.view")
 private var cache = emptyList<ReminderEvent>()
 
 @Composable
-fun ScheduleScreen(navController: NavController, me: () -> Person?) {
+fun ScheduleScreen() {
     var events by rememberStateOf(cache)
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
@@ -47,6 +49,7 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
     var view by rememberStateOf(Monthly)
     val state = rememberLazyListState()
     val context = LocalContext.current
+    val nav = nav
 
     LaunchedEffect(events) {
         cache = events
@@ -190,10 +193,10 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
             .swipeMainTabs {
                 when (emptyList<Unit>().swipe(Unit, it)) {
                     is SwipeResult.Previous -> {
-                        navController.navigate("messages")
+                        nav.navigate("messages")
                     }
                     is SwipeResult.Next -> {
-                        navController.navigate("explore")
+                        nav.navigate("explore")
                     }
                     is SwipeResult.Select<*> -> {
                         // Impossible
@@ -203,12 +206,10 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
-                navController,
                 stringResource(R.string.reminders),
                 {
                     scrollToTop()
                 },
-                me
             ) {
                 IconButton(
                     {
@@ -237,7 +238,7 @@ fun ScheduleScreen(navController: NavController, me: () -> Person?) {
                         }
                     )
                 }
-                ScanQrCodeButton(navController)
+                ScanQrCodeButton()
             }
             if (isLoading) {
                 Loading()

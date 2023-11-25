@@ -40,7 +40,6 @@ import kotlin.math.ceil
 @Composable
 fun CardConversation(
     card: Card,
-    navController: NavController,
     modifier: Modifier = Modifier,
     interactable: Boolean = true,
     onReply: (List<String>) -> Unit = {},
@@ -170,8 +169,7 @@ fun CardConversation(
             cardAuthors?.let { authors ->
                 CardAuthor(
                     authors,
-                    interactable = interactable,
-                    navController
+                    interactable = interactable
                 )
             }
         }

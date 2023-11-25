@@ -8,9 +8,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.goToSettings
+import com.queatz.ailaai.nav
 
 @Composable
-fun RationaleDialog(onDismissRequest: () -> Unit, navController: NavController, message: String) {
+fun RationaleDialog(onDismissRequest: () -> Unit, message: String) {
+    val nav = nav
+
     AlertDialog(
         onDismissRequest,
         text = {
@@ -20,7 +23,7 @@ fun RationaleDialog(onDismissRequest: () -> Unit, navController: NavController, 
             TextButton(
                 {
                     onDismissRequest()
-                    navController.goToSettings()
+                    nav.goToSettings()
                 }
             ) {
                 Text(stringResource(R.string.open_settings))

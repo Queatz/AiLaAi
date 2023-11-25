@@ -21,12 +21,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.navigation.NavController
 import app.ailaai.api.createGroup
 import app.ailaai.api.updateMember
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
@@ -46,15 +47,14 @@ enum class GroupInfo {
 
 @Composable
 fun ContactItem(
-    navController: NavController,
     item: SearchResult,
-    me: Person?,
     onChange: () -> Unit,
     info: GroupInfo
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
+    val me = me
+    val nav = nav
     var showMenu by rememberStateOf(false)
 
     if (showMenu) {
@@ -83,13 +83,13 @@ fun ContactItem(
                 when (item) {
                     is SearchResult.Connect -> {
                         api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true) { group ->
-                            navController.navigate("group/${group.id!!}")
+                            nav.navigate("group/${group.id!!}")
                         }
                     }
 
                     is SearchResult.Group -> {
                         val groupExtended = item.groupExtended
-                        navController.navigate("group/${groupExtended.group!!.id!!}")
+                        nav.navigate("group/${groupExtended.group!!.id!!}")
 
                     }
                 }
@@ -101,7 +101,6 @@ fun ContactItem(
             }
         },
         item,
-        me,
         info
     )
 }
@@ -111,7 +110,6 @@ fun ContactItem(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     item: SearchResult,
-    me: Person?,
     info: GroupInfo
 ) {
     val context = LocalContext.current

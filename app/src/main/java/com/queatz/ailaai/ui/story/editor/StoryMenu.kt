@@ -10,17 +10,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
-import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
@@ -28,10 +27,8 @@ import kotlinx.coroutines.launch
 fun StoryMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    navController: NavController,
     storyId: String,
     story: Story?,
-    me: Person?,
     isMine: Boolean,
     showOpen: Boolean = false,
     edited: Boolean = false,
@@ -47,6 +44,7 @@ fun StoryMenu(
     var showReportDialog by rememberStateOf(false)
     val textCopied = stringResource(R.string.copied)
     val storyString = stringResource(R.string.story)
+    val nav = nav
 
     if (showDeleteDialog) {
         DeleteStoryDialog(
@@ -57,7 +55,7 @@ fun StoryMenu(
             scope.launch {
                 api.deleteStory(storyId) {
                     showDeleteDialog = false
-                    navController.popBackStack()
+                    nav.popBackStack()
                 }
             }
         }
@@ -79,8 +77,7 @@ fun StoryMenu(
             {
                 showSendDialog = false
             },
-            storyId,
-            me
+            storyId
         )
     }
 
@@ -109,12 +106,12 @@ fun StoryMenu(
         if (showOpen) {
             DropdownMenuItem({ Text(stringResource(R.string.open_story)) }, {
                 onDismissRequest()
-                navController.navigate("story/$storyId")
+                nav.navigate("story/$storyId")
             })
         } else if (!edited && editing) {
             DropdownMenuItem({ Text(stringResource(R.string.preview)) }, {
                 onDismissRequest()
-                navController.navigate("story/$storyId")
+                nav.navigate("story/$storyId")
             })
         }
         if (editing) {
@@ -146,7 +143,7 @@ fun StoryMenu(
                     })"
                 )
                 val intent = Intent(Intent.ACTION_VIEW, uri)
-                navController.context.startActivity(Intent.createChooser(intent, null))
+                nav.context.startActivity(Intent.createChooser(intent, null))
             })
         }
         DropdownMenuItem({ Text(stringResource(R.string.share)) }, {

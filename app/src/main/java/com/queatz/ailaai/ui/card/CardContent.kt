@@ -15,8 +15,6 @@ import com.queatz.db.Person
 fun CardContent(
     source: StorySource,
     content: String,
-    navController: NavController,
-    me: () -> Person?
 ) {
     val state = rememberLazyGridState()
     val contents by remember(content) { mutableStateOf(content.asStoryContents()) }
@@ -25,8 +23,6 @@ fun CardContent(
         source,
         contents,
         state,
-        navController,
-        me,
         fade = true
     )
 }

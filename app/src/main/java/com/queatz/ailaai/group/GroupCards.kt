@@ -18,6 +18,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.CardLayout
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -26,12 +27,12 @@ import com.queatz.db.GroupExtended
 import kotlinx.coroutines.launch
 
 @Composable
-fun GroupCards(group: GroupExtended, navController: NavController) {
+fun GroupCards(group: GroupExtended) {
     var isLoading by rememberStateOf(false)
     var cards by rememberStateOf(emptyList<Card>())
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
-
+    val nav = nav
     val isAtTop by state.isAtTop()
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val autoplayIndex by state.rememberAutoplayIndex()
@@ -71,7 +72,7 @@ fun GroupCards(group: GroupExtended, navController: NavController) {
                     isMine = false,
                     showTitle = true,
                     onClick = {
-                        navController.navigate("card/${card.id!!}")
+                        nav.navigate("card/${card.id!!}")
                     },
                     onChange = {
                         scope.launch {
@@ -79,7 +80,6 @@ fun GroupCards(group: GroupExtended, navController: NavController) {
                         }
                     },
                     scope = scope,
-                    navController = navController,
                     playVideo = card == playingVideo && !isAtTop,
                     modifier = Modifier.padding(horizontal = PaddingDefault)
                 )

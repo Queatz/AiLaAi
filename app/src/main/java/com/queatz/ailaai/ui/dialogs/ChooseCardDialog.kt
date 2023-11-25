@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.myCollaborations
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
@@ -35,7 +34,6 @@ import com.queatz.db.Card
 @Composable
 fun ChooseCardDialog(
     onDismissRequest: () -> Unit,
-    navController: NavController,
     onCard: (String) -> Unit
 ) {
     DialogBase(onDismissRequest) {
@@ -44,7 +42,6 @@ fun ChooseCardDialog(
                 .padding(PaddingDefault * 3)
         ) {
             ChooseCardSelector(
-                navController = navController,
                 modifier = Modifier.weight(1f)
             ) {
                 onDismissRequest()
@@ -70,7 +67,6 @@ fun ChooseCardDialog(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChooseCardSelector(
-    navController: NavController,
     modifier: Modifier = Modifier,
     onCard: (String) -> Unit
 ) {
@@ -130,7 +126,6 @@ fun ChooseCardSelector(
                     onCard(it.id!!)
                 },
                 card = it,
-                navController = navController,
                 isChoosing = true
             )
         }

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Message
 import com.queatz.db.Person
@@ -27,12 +28,12 @@ fun MessageItem(
     me: String?,
     onDeleted: () -> Unit,
     onReply: (Message) -> Unit,
-    onShowPhoto: (String) -> Unit,
-    navController: NavController,
+    onShowPhoto: (String) -> Unit
 ) {
     var showTime by rememberStateOf(false)
     var showMessageDialog by rememberStateOf(false)
     val isMe = me == message.member
+    val nav = nav
 
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -52,7 +53,7 @@ fun MessageItem(
                     getPerson(message.member!!),
                     PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault),
                 ) { person ->
-                    navController.navigate("profile/${person.id!!}")
+                    nav.navigate("profile/${person.id!!}")
                 }
             } else {
                 Box(Modifier.requiredSize(32.dp + PaddingDefault))
@@ -79,7 +80,6 @@ fun MessageItem(
                 onReply,
                 onDeleted,
                 onShowPhoto,
-                navController,
                 selected = message in selectedMessages,
                 onSelectedChange = {
                     onSelectedChange(message, it)

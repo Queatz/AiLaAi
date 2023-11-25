@@ -23,7 +23,6 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.updateCard
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadCardPhotoFromUri
@@ -36,14 +35,12 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
-import com.queatz.db.Person
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission", "UnrememberedMutableState")
 @Composable
 fun CardToolbar(
-    navController: NavController,
     activity: Activity,
     onChange: () -> Unit,
     onDelete: () -> Unit,
@@ -173,7 +170,7 @@ fun CardToolbar(
     }
 
     if (openLocationDialog) {
-        EditCardLocationDialog(card, navController = navController, activity, {
+        EditCardLocationDialog(card, activity, {
             openLocationDialog = false
         }, onChange)
     }

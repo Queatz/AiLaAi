@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
@@ -31,6 +30,8 @@ import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.*
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.OnResume
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
@@ -46,7 +47,7 @@ import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) {
+fun CardScreen(cardId: String) {
     var isLoading by rememberStateOf(false)
     var notFound by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
@@ -75,6 +76,8 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     var showSetCategory by rememberStateOf(false)
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
+    val me = me
+    val nav = nav
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -101,8 +104,8 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
         isLoading = false
     }
 
-    val isMine = me()?.id == card?.person
-    val isMineOrIAmACollaborator = isMine || card?.collaborators?.contains(me()?.id) == true
+    val isMine = me?.id == card?.person
+    val isMineOrIAmACollaborator = isMine || card?.collaborators?.contains(me?.id) == true
     val recomposeScope = currentRecomposeScope
 
     fun reload() {
@@ -211,7 +214,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
     }
 
     if (openLocationDialog) {
-        EditCardLocationDialog(card!!, navController = navController, navController.context as Activity, {
+        EditCardLocationDialog(card!!, nav.context as Activity, {
             openLocationDialog = false
         }, {
             recomposeScope.invalidate()
@@ -237,7 +240,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             create = true
         ) {
             reloadCards()
-            navController.navigate("card/${it.id}")
+            nav.navigate("card/${it.id}")
         }
     }
 
@@ -246,7 +249,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             DeleteCardDialog(card, {
                 openDeleteCard = false
             }) {
-                navController.popBackStackOrFinish()
+                nav.popBackStackOrFinish()
             }
         }
     }
@@ -264,7 +267,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 R.string.give_to_people,
                 R.string.give_to_x_people
             ) { it.name ?: someone },
-            omit = { it.id == me()?.id },
+            omit = { it.id == me?.id },
             multiple = false,
             onPeopleSelected = {
                 if (it.size == 1) {
@@ -334,7 +337,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 }
             },
             navigationIcon = {
-                BackButton(navController)
+                BackButton()
             },
             actions = {
                 card?.let { card ->
@@ -439,7 +442,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                 )
                             )
                         }, {
-                            navController.navigate("card/${card!!.id!!}/edit")
+                            nav.navigate("card/${card!!.id!!}/edit")
                         })
                         DropdownMenuItem({
                             Text(stringResource(R.string.manage))
@@ -472,14 +475,14 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                         DropdownMenuItem({
                             Text(stringResource(R.string.view_profile))
                         }, {
-                            navController.navigate("profile/${card.person!!}")
+                            nav.navigate("profile/${card.person!!}")
                             showMenu = false
                         })
                         if (card.parent != null) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.open_enclosing_card))
                             }, {
-                                navController.navigate("card/${card.parent!!}")
+                                nav.navigate("card/${card.parent!!}")
                                 showMenu = false
                             })
                         }
@@ -507,7 +510,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                     })"
                                 )
                                 val intent = Intent(Intent.ACTION_VIEW, uri)
-                                navController.context.startActivity(Intent.createChooser(intent, null))
+                                nav.context.startActivity(Intent.createChooser(intent, null))
                             }
                             showMenu = false
                         })
@@ -602,7 +605,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                     }
                                 },
                                 scope,
-                                navController,
                                 elevation = 2,
                                 playVideo = isAtTop
                             )
@@ -635,7 +637,6 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                                     }
                                 },
                                 scope,
-                                navController,
                                 playVideo = isAtTop
                             )
                         }
@@ -654,14 +655,13 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                             items(cards, { it.id!! }) {
                                 CardLayout(
                                     card = it,
-                                    isMine = it.person == me()?.id,
+                                    isMine = it.person == me?.id,
                                     showTitle = true,
                                     onClick = {
-                                        navController.navigate("card/${it.id!!}")
+                                        nav.navigate("card/${it.id!!}")
                                     },
                                     onChange = { reloadCards() },
                                     scope = scope,
-                                    navController = navController,
                                     playVideo = playingVideo == it && !isAtTop,
                                 )
                             }
@@ -737,7 +737,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     card = it
                 }
             },
-            omit = { it.id == me()?.id || card!!.collaborators?.contains(it.id) == true }
+            omit = { it.id == me?.id || card!!.collaborators?.contains(it.id) == true }
         )
     }
 
@@ -791,7 +791,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
             {
                 openCollaboratorsDialog = false
             }, collaborators, infoFormatter = { person ->
-                if (person.id == me()?.id) {
+                if (person.id == me?.id) {
                     context.getString(R.string.leave)
                 } else {
                     person.seen?.timeAgo()?.let { timeAgo ->
@@ -799,13 +799,13 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                     }
                 }
             }) { person ->
-            if (person.id == me()?.id) {
+            if (person.id == me?.id) {
                 openLeaveCollaboratorsDialog = true
                 openCollaboratorsDialog = false
             } else {
                 scope.launch {
-                    api.createGroup(listOf(me()!!.id!!, person.id!!), reuse = true) {
-                        navController.navigate("group/${it.id!!}")
+                    api.createGroup(listOf(me!!.id!!, person.id!!), reuse = true) {
+                        nav.navigate("group/${it.id!!}")
                         openCollaboratorsDialog = false
                     }
                 }
@@ -825,8 +825,7 @@ fun CardScreen(cardId: String, navController: NavController, me: () -> Person?) 
                 R.string.send_card_to_group,
                 R.string.send_card_to_groups,
                 R.string.send_card_to_x_groups
-            ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
-            me = me()
+            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) }
         ) { groups ->
             coroutineScope {
                 var sendSuccess = false
@@ -865,7 +864,6 @@ private fun LazyGridScope.cardHeaderItem(
     onClick: () -> Unit,
     onChange: () -> Unit,
     scope: CoroutineScope,
-    navController: NavController,
     elevation: Int = 1,
     playVideo: Boolean = false
 ) {
@@ -878,7 +876,6 @@ private fun LazyGridScope.cardHeaderItem(
             onClick = onClick,
             onChange = onChange,
             scope = scope,
-            navController = navController,
             elevation = elevation,
             playVideo = playVideo,
             showToolbar = true

@@ -22,6 +22,7 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.reply
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.story.StorySource
@@ -42,12 +43,13 @@ fun CardLayout(
     onClick: () -> Unit,
     onChange: () -> Unit,
     scope: CoroutineScope,
-    navController: NavController,
     elevation: Int = 1,
     showDistance: LatLng? = null,
     playVideo: Boolean = false,
     showToolbar: Boolean = false
 ) {
+    val nav = nav
+
     Column(
         modifier = modifier
             .shadow(1.dp, MaterialTheme.shapes.large)
@@ -97,16 +99,15 @@ fun CardLayout(
                 card,
                 interactable = true,
                 showTitle = showTitle,
-                navController = navController,
                 showDistance = showDistance,
                 onCategoryClick = {
                     exploreInitialCategory = it
-                    navController.navigate("explore")
+                    nav.navigate("explore")
                 },
                 onReply = { conversation ->
                     scope.launch {
                         it.reply(conversation) { groupId ->
-                            navController.navigate("group/${groupId}")
+                            nav.navigate("group/${groupId}")
                         }
                     }
                 },
@@ -125,19 +126,16 @@ fun CardLayout(
                 ) {
                     CardContent(
                         StorySource.Card(card.id!!),
-                        content,
-                        navController,
-                        { null }//todo
+                        content
                     )
                 }
             }
 
             if (isMine && showToolbar) {
                 CardToolbar(
-                    navController = navController,
-                    navController.context as Activity,
+                    nav.context as Activity,
                     onChange,
-                    { navController.popBackStackOrFinish() },
+                    { nav.popBackStackOrFinish() },
                     it,
                     modifier = Modifier.padding(horizontal = PaddingDefault * 1.5f)
                 )

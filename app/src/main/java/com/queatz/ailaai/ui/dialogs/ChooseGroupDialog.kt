@@ -9,6 +9,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.photos
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.me
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
@@ -19,7 +20,6 @@ fun ChooseGroupDialog(
     onDismissRequest: () -> Unit,
     title: String,
     confirmFormatter: @Composable (List<GroupExtended>) -> String,
-    me: Person?,
     infoFormatter: (@Composable (GroupExtended) -> String?)? = null,
     groups: (suspend () -> List<GroupExtended>)? = null,
     omit: List<Group> = emptyList(),
@@ -35,6 +35,7 @@ fun ChooseGroupDialog(
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var shownGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var selected by remember { mutableStateOf(listOf<GroupExtended>()) }
+    val me = me
 
     if (groups == null) {
         LaunchedEffect(Unit) {

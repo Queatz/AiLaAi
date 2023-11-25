@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
 import app.ailaai.api.profile
@@ -42,6 +41,8 @@ import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
@@ -50,7 +51,7 @@ import com.queatz.db.*
 import kotlinx.coroutines.*
 
 @Composable
-fun ProfileScreen(personId: String, navController: NavController, me: () -> Person?) {
+fun ProfileScreen(personId: String) {
     val scope = rememberCoroutineScope()
     var cards by remember { mutableStateOf(emptyList<Card>()) }
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
@@ -70,6 +71,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     var isUploadingVideo by rememberStateOf(false)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
+    val me = me
+    val nav = nav
 
     val context = LocalContext.current
 
@@ -106,8 +109,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                 R.string.invite_to_group,
                 R.string.invite_to_groups,
                 R.string.invite_to_x_groups
-            ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
-            me = me(),
+            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
             filter = {
                 it.isGroupLike(person)
             }
@@ -203,6 +205,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
     val isAtTop by state.isAtTop()
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val autoplayIndex by state.rememberAutoplayIndex()
+
     LaunchedEffect(autoplayIndex) {
         playingVideo = cards.getOrNull(
             (autoplayIndex - 1).coerceAtLeast(0)
@@ -219,7 +222,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         modifier = Modifier.fillMaxSize(),
         columns = GridCells.Adaptive(240.dp)
     ) {
-        val isMe = me()?.id == personId
+        val isMe = me?.id == personId
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
@@ -309,7 +312,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     )
                     IconButton(
                         {
-                            navController.popBackStack()
+                            nav.popBackStack()
                         },
                         colors = colors,
                         modifier = Modifier
@@ -347,7 +350,7 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                             }
                             IconButton(
                                 {
-                                    navController.navigate("settings")
+                                    nav.navigate("settings")
                                 },
                                 Modifier
                                     .size(42.dp)
@@ -475,8 +478,8 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                                 IconButton(
                                     {
                                         scope.launch {
-                                            api.createGroup(listOf(me()!!.id!!, personId), reuse = true) { group ->
-                                                navController.navigate("group/${group.id!!}")
+                                            api.createGroup(listOf(me!!.id!!, personId), reuse = true) { group ->
+                                                nav.navigate("group/${group.id!!}")
                                             }
                                         }
                                     },
@@ -616,10 +619,10 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
         items(cards, key = { it.id!! }) { card ->
             CardLayout(
                 card = card,
-                isMine = card.person == me()?.id,
+                isMine = card.person == me?.id,
                 showTitle = true,
                 onClick = {
-                    navController.navigate("card/${card.id!!}")
+                    nav.navigate("card/${card.id!!}")
                 },
                 onChange = {
                     scope.launch {
@@ -627,7 +630,6 @@ fun ProfileScreen(personId: String, navController: NavController, me: () -> Pers
                     }
                 },
                 scope = scope,
-                navController = navController,
                 playVideo = card == playingVideo && !isAtTop,
                 modifier = Modifier.padding(horizontal = PaddingDefault)
             )

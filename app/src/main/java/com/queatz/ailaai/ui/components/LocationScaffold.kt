@@ -11,22 +11,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.goToSettings
 import com.queatz.ailaai.helpers.LocationSelector
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
 
 @Composable
 fun LocationScaffold(
     geo: LatLng?,
     locationSelector: LocationSelector,
-    navController: NavController,
     appHeader: @Composable () -> Unit = {},
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val nav = nav
+
     LaunchedEffect(geo == null) {
         if (geo == null) {
             locationSelector.start()
@@ -55,7 +56,7 @@ fun LocationScaffold(
                     Button(
                         {
                             if (showOpenSettings) {
-                                navController.goToSettings()
+                                nav.goToSettings()
                             } else {
                                 locationSelector.launchPermissionRequest()
                             }

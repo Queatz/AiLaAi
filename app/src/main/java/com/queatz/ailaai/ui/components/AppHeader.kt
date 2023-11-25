@@ -12,20 +12,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHeader(
-    navController: NavController,
     title: String,
     onTitleClick: () -> Unit,
-    me: () -> Person?,
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
+    val nav = nav
+
     Column {
         TopAppBar(
             {
@@ -54,19 +54,20 @@ fun AppHeader(
                         .padding(start = PaddingDefault / 2)
                 ) {
                     actions()
-                    me()?.let { me ->
+                    me?.let { me ->
                         if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
+                            val nav = nav
                             GroupPhoto(
                                 listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
                                 size = 40.dp,
                                 modifier = Modifier
                                     .clickable {
-                                        navController.navigate("profile/${me.id}")
+                                        nav.navigate("profile/${me.id}")
                                     }
                             )
                         } else {
                             IconButton({
-                                navController.navigate("profile/${me.id}")
+                                nav.navigate("profile/${me.id}")
                             }) {
                                 Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                             }

@@ -327,7 +327,8 @@ class MainActivity : AppCompatActivity() {
                                                                     .padding(PaddingDefault, PaddingDefault / 4)
                                                             )
                                                         }
-                                                        if (item.route == "stories" && (presence?.unreadStoriesCount ?: 0) > 0
+                                                        if (item.route == "stories" && (presence?.unreadStoriesCount
+                                                                ?: 0) > 0
                                                         ) {
                                                             // todo reusable icon IconAndCount
                                                             Text(
@@ -412,91 +413,106 @@ class MainActivity : AppCompatActivity() {
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 if (startDestinationLoaded) {
-                                    NavHost(
-                                        navController,
-                                        startDestination ?: "explore",
-                                        modifier = Modifier
-                                            .padding(it)
-                                            .fillMaxSize()
+                                    CompositionLocalProvider(
+                                        LocalAppState provides AppState(me, navController)
                                     ) {
-                                        composable(
-                                            "profile/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/profile/{id}" })
+                                        NavHost(
+                                            navController,
+                                            startDestination ?: "explore",
+                                            modifier = Modifier
+                                                .padding(it)
+                                                .fillMaxSize()
                                         ) {
-                                            ProfileScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                        }
-                                        composable("explore") {
-                                            ExploreScreen(navController) { me }
-                                        }
-                                        composable("link-device/{token}") {
-                                            LinkDeviceScreen(navController, it.arguments!!.getString("token")!!) { me }
-                                        }
-                                        composable("schedule") {
-                                            ScheduleScreen(navController) { me }
-                                        }
-                                        composable("stories") {
-                                            StoriesScreen(navController) { me }
-                                        }
-                                        composable(
-                                            "story/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/story/{id}" })
-                                        ) {
-                                            StoryScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                        }
-                                        composable("write") {
-                                            MyStoriesScreen(navController) { me }
-                                        }
-                                        composable("write/{id}") {
-                                            StoryCreatorScreen(StorySource.Story(it.arguments!!.getString("id")!!), navController) { me }
-                                        }
-                                        composable(
-                                            "card/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/page/{id}" }, navDeepLink { uriPattern = "$appDomain/card/{id}" })
-                                        ) {
-                                            CardScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                        }
-                                        composable(
-                                            "card/{id}/edit"
-                                        ) {
-                                            StoryCreatorScreen(StorySource.Card(it.arguments!!.getString("id")!!), navController) { me }
-                                        }
-                                        composable("messages") {
-                                            FriendsScreen(navController) { me }
-                                        }
-                                        composable(
-                                            "group/{id}",
-                                            deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/group/{id}" })
-                                        ) {
-                                            GroupScreen(it.arguments!!.getString("id")!!, navController) { me }
-                                        }
-                                        composable("me") {
-                                            MeScreen(navController) { me }
-                                        }
-                                        composable("sticker-packs") {
-                                            StickerPacksScreen(navController) { me }
-                                        }
-                                        composable("sticker-pack/{id}") {
-                                            StickerPackScreen(navController, it.arguments!!.getString("id")!!) { me }
-                                        }
-                                        composable("sticker-pack/{id}/edit") {
-                                            StickerPackEditorScreen(
-                                                navController,
-                                                it.arguments!!.getString("id")!!
-                                            ) { me }
-                                        }
-                                        composable("settings") {
-                                            SettingsScreen(navController, { me }) {
-                                                if (api.hasToken()) {
-                                                    scope.launch {
-                                                        loadMe(onError = {
-                                                            snackbarHostState.showSnackbar(
-                                                                getString(R.string.cant_connect),
-                                                                withDismissAction = true
-                                                            )
-                                                        })
+                                            composable(
+                                                "profile/{id}",
+                                                deepLinks = listOf(navDeepLink {
+                                                    uriPattern = "$appDomain/profile/{id}"
+                                                })
+                                            ) {
+                                                ProfileScreen(it.arguments!!.getString("id")!!)
+                                            }
+                                            composable("explore") {
+                                                ExploreScreen()
+                                            }
+                                            composable("link-device/{token}") {
+                                                LinkDeviceScreen(
+                                                    it.arguments!!.getString("token")!!
+                                                )
+                                            }
+                                            composable("schedule") {
+                                                ScheduleScreen()
+                                            }
+                                            composable("stories") {
+                                                StoriesScreen()
+                                            }
+                                            composable(
+                                                "story/{id}",
+                                                deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/story/{id}" })
+                                            ) {
+                                                StoryScreen(it.arguments!!.getString("id")!!)
+                                            }
+                                            composable("write") {
+                                                MyStoriesScreen()
+                                            }
+                                            composable("write/{id}") {
+                                                StoryCreatorScreen(
+                                                    StorySource.Story(it.arguments!!.getString("id")!!),
+                                                )
+                                            }
+                                            composable(
+                                                "card/{id}",
+                                                deepLinks = listOf(
+                                                    navDeepLink { uriPattern = "$appDomain/page/{id}" },
+                                                    navDeepLink { uriPattern = "$appDomain/card/{id}" })
+                                            ) {
+                                                CardScreen(it.arguments!!.getString("id")!!)
+                                            }
+                                            composable(
+                                                "card/{id}/edit"
+                                            ) {
+                                                StoryCreatorScreen(
+                                                    StorySource.Card(it.arguments!!.getString("id")!!)
+                                                )
+                                            }
+                                            composable("messages") {
+                                                FriendsScreen()
+                                            }
+                                            composable(
+                                                "group/{id}",
+                                                deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/group/{id}" })
+                                            ) {
+                                                GroupScreen(it.arguments!!.getString("id")!!)
+                                            }
+                                            composable("me") {
+                                                MeScreen()
+                                            }
+                                            composable("sticker-packs") {
+                                                StickerPacksScreen()
+                                            }
+                                            composable("sticker-pack/{id}") {
+                                                StickerPackScreen(
+                                                    it.arguments!!.getString("id")!!
+                                                )
+                                            }
+                                            composable("sticker-pack/{id}/edit") {
+                                                StickerPackEditorScreen(
+                                                    it.arguments!!.getString("id")!!
+                                                )
+                                            }
+                                            composable("settings") {
+                                                SettingsScreen {
+                                                    if (api.hasToken()) {
+                                                        scope.launch {
+                                                            loadMe(onError = {
+                                                                snackbarHostState.showSnackbar(
+                                                                    getString(R.string.cant_connect),
+                                                                    withDismissAction = true
+                                                                )
+                                                            })
+                                                        }
+                                                    } else {
+                                                        known = false
                                                     }
-                                                } else {
-                                                    known = false
                                                 }
                                             }
                                         }

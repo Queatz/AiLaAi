@@ -10,6 +10,7 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.db.Message
@@ -24,12 +25,13 @@ import kotlinx.serialization.encodeToString
 fun SendStoryDialog(
     onDismissRequest: () -> Unit,
     storyId: String,
-    me: Person?,
 ) {
     val context = LocalContext.current
     val sent = stringResource(R.string.sent)
     val someone = stringResource(R.string.someone)
     val emptyGroup = stringResource(R.string.empty_group_name)
+    val me = me
+
     ChooseGroupDialog(
         {
             onDismissRequest()
@@ -41,7 +43,6 @@ fun SendStoryDialog(
             R.string.send_story_to_groups,
             R.string.send_story_to_x_groups
         ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
-        me = me
     ) { groups ->
         coroutineScope {
             var hasError = false

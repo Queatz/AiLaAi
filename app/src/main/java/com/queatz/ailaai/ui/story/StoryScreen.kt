@@ -6,17 +6,16 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.editor.StoryActions
-import com.queatz.db.Person
 import com.queatz.db.Story
 
 @Composable
-fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?) {
+fun StoryScreen(storyId: String) {
     // todo storyId could be a url from a deeplink
     val state = rememberLazyGridState()
     var isLoading by rememberStateOf(true)
@@ -39,22 +38,22 @@ fun StoryScreen(storyId: String, navController: NavController, me: () -> Person?
         return
     }
 
+    val nav = nav
+
     StoryScaffold(
         {
-            navController.popBackStack()
+            nav.popBackStack()
         },
         actions = {
             if (story == null) return@StoryScaffold
             StoryTitle(state, story)
-            StoryActions(navController, storyId, story, me)
+            StoryActions(storyId, story)
         }
     ) {
         StoryContents(
             StorySource.Story(storyId),
             contents,
             state,
-            navController,
-            me,
             modifier = Modifier.widthIn(max = 640.dp).fillMaxSize(),
         )
     }

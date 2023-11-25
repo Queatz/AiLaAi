@@ -6,7 +6,6 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes

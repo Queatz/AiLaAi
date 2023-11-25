@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Story
 
@@ -22,7 +23,6 @@ import com.queatz.db.Story
 @Composable
 fun StoryCard(
     story: Story?,
-    navController: NavController,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
@@ -45,7 +45,7 @@ fun StoryCard(
                     style = MaterialTheme.typography.headlineSmall
                 )
                 StoryAuthors(
-                    navController,
+                    nav,
                     story.publishDate,
                     story.authors ?: emptyList()
                 )

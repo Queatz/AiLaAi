@@ -22,10 +22,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import app.ailaai.api.card
 import app.ailaai.api.group
 import app.ailaai.api.updateCard
@@ -35,13 +32,18 @@ import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.GroupExtended
+import com.queatz.db.Story
+import com.queatz.db.StoryDraft
 import com.queatz.widgets.Widgets
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -54,9 +56,7 @@ sealed class StorySource {
 
 @Composable
 fun StoryCreatorScreen(
-    source: StorySource,
-    navController: NavHostController,
-    me: () -> Person?
+    source: StorySource
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
@@ -72,6 +72,8 @@ fun StoryCreatorScreen(
     var card by rememberStateOf<Card?>(null)
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     val recompose = currentRecomposeScope
+    val nav = nav
+    val me = me
 
     BackHandler(enabled = edited && !showBackDialog) {
         showBackDialog = true
@@ -187,7 +189,7 @@ fun StoryCreatorScreen(
             is StorySource.Story -> {
                 api.updateStory(source.id, Story(published = true)) {
                     context.toast(R.string.published)
-                    navController.popBackStackOrFinish()
+                    nav.popBackStackOrFinish()
                 }
             }
             else -> {}
@@ -210,10 +212,9 @@ fun StoryCreatorScreen(
             {
                 showPublishDialog = false
             },
-            navController.context as Activity,
+            nav.context as Activity,
             story!!,
             storyContents,
-            me,
             onLocationChanged = {
                 scope.launch {
                     api.updateStory(storyId, Story(geo = it?.toList() ?: emptyList())) {
@@ -239,12 +240,12 @@ fun StoryCreatorScreen(
                 showBackDialog = false
             },
             onDiscard = {
-                navController.popBackStack()
+                nav.popBackStack()
             },
             onSave = {
                 scope.launch {
                     if (save()) {
-                        navController.popBackStack()
+                        nav.popBackStack()
                     }
                 }
             }
@@ -253,8 +254,6 @@ fun StoryCreatorScreen(
 
     if (showReorderContentDialog) {
         ReorderStoryContentsDialog(
-            navController = navController,
-            me,
             {
                 showReorderContentDialog = false
             },
@@ -271,7 +270,7 @@ fun StoryCreatorScreen(
             if (edited) {
                 showBackDialog = true
             } else {
-                navController.popBackStack()
+                nav.popBackStack()
             }
         },
         actions = {
@@ -303,11 +302,9 @@ fun StoryCreatorScreen(
                             {
                                 showMenu = false
                             },
-                            navController,
                             source.id,
                             story,
-                            me = me(),
-                            isMine = story?.person == me()?.id,
+                            isMine = story?.person == me?.id,
                             edited = edited,
                             editing = true,
                             onReorder = {
@@ -513,7 +510,7 @@ fun StoryCreatorScreen(
                                         R.string.choose_x,
                                         R.string.choose_x_and_x,
                                         R.string.choose_x_groups
-                                    ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
+                                    ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
                                     infoFormatter = {
                                         buildString {
                                             val count = it.members?.size ?: 0
@@ -525,7 +522,6 @@ fun StoryCreatorScreen(
                                             }
                                         }
                                     },
-                                    me = me(),
                                     filter = {
                                         it.group?.open == true && part.groups.none { id -> it.group?.id == id }
                                     }
@@ -561,7 +557,6 @@ fun StoryCreatorScreen(
                                             onClick = null,
                                             onLongClick = null,
                                             item = SearchResult.Group(group!!),
-                                            me = me(),
                                             info = GroupInfo.LatestMessage
                                         )
                                     }
@@ -580,7 +575,7 @@ fun StoryCreatorScreen(
                                     }
                                     menuItem(stringResource(R.string.open_group)) {
                                         showGroupMenu = false
-                                        navController.navigate("group/$groupId")
+                                        nav.navigate("group/$groupId")
                                     }
                                     if (part.groups.size > 1) {
                                         menuItem(stringResource(R.string.reorder)) {
@@ -621,7 +616,6 @@ fun StoryCreatorScreen(
                                     },
                                     onLongClick = {},
                                     SearchResult.Group(group!!),
-                                    me(),
                                     info = GroupInfo.LatestMessage
                                 )
                             }
@@ -640,7 +634,6 @@ fun StoryCreatorScreen(
                                     {
                                         showAddCardDialog = false
                                     },
-                                    navController = navController,
                                 ) {
                                     part.edit {
                                         cards = cards + it
@@ -670,7 +663,6 @@ fun StoryCreatorScreen(
                                     CardItem(
                                         onClick = null,
                                         card = card,
-                                        navController = navController,
                                         isChoosing = true,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -693,7 +685,7 @@ fun StoryCreatorScreen(
                                     }
                                     menuItem(stringResource(R.string.open_card)) {
                                         showCardMenu = false
-                                        navController.navigate("card/$cardId")
+                                        nav.navigate("card/$cardId")
                                     }
                                     if (part.cards.size > 1) {
                                         menuItem(stringResource(R.string.reorder)) {
@@ -729,7 +721,6 @@ fun StoryCreatorScreen(
                                 },
                                 onCategoryClick = {},
                                 card = card,
-                                navController = navController,
                                 isChoosing = true,
                                 modifier = Modifier.fillMaxWidth(.75f)
                             )
@@ -921,8 +912,6 @@ fun StoryCreatorScreen(
         }
         StoryCreatorTools(
             source,
-            navController = navController,
-            me = me,
             ::addPart
         )
     }

@@ -21,19 +21,17 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.navigation.NavController
 import app.ailaai.api.myCards
-import app.ailaai.api.newCard
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.theme.ElevationDefault
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Card
-import com.queatz.db.Person
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -46,7 +44,7 @@ private val meParentTypeKey = stringPreferencesKey("me.parentType")
 private val meFiltersKey = stringSetPreferencesKey("me.filters")
 
 @Composable
-fun MeScreen(navController: NavController, me: () -> Person?) {
+fun MeScreen() {
     var myCards by remember { mutableStateOf(emptyList<Card>()) }
     var isLoading by rememberStateOf(true)
     val scope = rememberCoroutineScope()
@@ -56,6 +54,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
     var filters by rememberSaveable { mutableStateOf(emptySet<Filter>()) }
     val context = LocalContext.current
     var playingVideo by remember { mutableStateOf<Card?>(null) }
+    val nav = nav
 
     LaunchedEffect(Unit) {
         context.dataStore.data.first().let {
@@ -139,13 +138,12 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
             },
             create = true
         ) {
-            navController.navigate("card/${it.id!!}")
+            nav.navigate("card/${it.id!!}")
         }
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         AppHeader(
-            navController,
             stringResource(
                 when (cardParentType) {
                     CardParentType.Map -> R.string.at_a_location
@@ -160,8 +158,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                 scope.launch {
                     state.scrollToTop()
                 }
-            },
-            me
+            }
         )
         Box(
             contentAlignment = Alignment.BottomCenter,
@@ -195,7 +192,7 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                             isMine = true,
                             showTitle = true,
                             onClick = {
-                                navController.navigate("card/${card.id!!}")
+                                nav.navigate("card/${card.id!!}")
                             },
                             onChange = {
                                 scope.launch {
@@ -203,7 +200,6 @@ fun MeScreen(navController: NavController, me: () -> Person?) {
                                 }
                             },
                             scope = scope,
-                            navController = navController,
                             playVideo = playingVideo == card
                         )
                     }

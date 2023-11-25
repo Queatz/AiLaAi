@@ -19,6 +19,7 @@ import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
 import com.queatz.db.Person
@@ -26,12 +27,13 @@ import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
 @Composable
-fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
+fun MyStoriesScreen() {
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
     var isLoading by rememberStateOf(true)
     var stories by remember { mutableStateOf(emptyList<Story>()) }
     var search by rememberStateOf("")
+    val nav = nav
 
     LaunchedEffect(Unit) {
         api.myStories {
@@ -42,14 +44,12 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
 
     Column {
         AppHeader(
-            navController,
             stringResource(R.string.write),
             {
                 scope.launch {
                     state.scrollToTop()
                 }
-            },
-            me
+            }
         )
 
         Box(
@@ -82,15 +82,14 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                     ) { story ->
                         StoryCard(
                             story,
-                            navController,
                             isLoading = false,
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
                             if (story.published == true) {
-                                navController.navigate("story/${story.id}")
+                                nav.navigate("story/${story.id}")
                             } else {
-                                navController.navigate("write/${story.id}")
+                                nav.navigate("write/${story.id}")
                             }
                         }
                     }
@@ -107,7 +106,7 @@ fun MyStoriesScreen(navController: NavController, me: () -> Person?) {
                     onAction = {
                         scope.launch {
                             api.createStory(Story()) {
-                                navController.navigate("write/${it.id}")
+                                nav.navigate("write/${it.id}")
                             }
                         }
                     }

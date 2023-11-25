@@ -19,17 +19,19 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
+import com.queatz.ailaai.api.uploadCardContentAudioFromUri
+import com.queatz.ailaai.api.uploadCardContentPhotosFromUri
+import com.queatz.ailaai.api.uploadStoryAudioFromUri
+import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
 import createWidget
@@ -39,8 +41,6 @@ import kotlinx.serialization.encodeToString
 @Composable
 fun StoryCreatorTools(
     source: StorySource,
-    navController: NavController,
-    me: () -> Person?,
     addPart: (part: StoryContent) -> Unit
 ) {
     val context = LocalContext.current
@@ -123,8 +123,7 @@ fun StoryCreatorTools(
         ChooseCardDialog(
             {
                 showCardSelectorDialog = false
-            },
-            navController = navController
+            }
         ) { cardId ->
             addPart(
                 StoryContent.Cards(listOf(cardId))
@@ -138,6 +137,7 @@ fun StoryCreatorTools(
     if (showCardGroupSelectorDialog) {
         val someone = stringResource(R.string.someone)
         val emptyGroup = stringResource(R.string.empty_group_name)
+        val me = me
 
         ChooseGroupDialog(
             {
@@ -149,7 +149,7 @@ fun StoryCreatorTools(
                 R.string.choose_x,
                 R.string.choose_x_and_x,
                 R.string.choose_x_groups
-            ) { it.name(someone, emptyGroup, me()?.id?.let(::listOf) ?: emptyList()) },
+            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
             infoFormatter = {
                 buildString {
                     val count = it.members?.size ?: 0
@@ -161,7 +161,6 @@ fun StoryCreatorTools(
                     }
                 }
             },
-            me = me(),
             filter = {
                 it.group?.open == true
             }

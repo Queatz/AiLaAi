@@ -12,12 +12,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
+import com.queatz.ailaai.api.createStickerFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
@@ -28,14 +28,13 @@ import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
 import com.queatz.db.Sticker
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StickerPackEditorScreen(navController: NavController, stickerPackId: String, me: () -> Person?) {
+fun StickerPackEditorScreen(stickerPackId: String) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var stickerPack by rememberStateOf<StickerPack?>(null)
@@ -47,6 +46,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
     var showStickerMessageDialog by rememberStateOf<Sticker?>(null)
     var showDeleteStickerDialog by rememberStateOf<Sticker?>(null)
     val recomposeScope = currentRecomposeScope
+    val nav = nav
 
     suspend fun reload() {
         api.stickerPack(stickerPackId) {
@@ -184,7 +184,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
                 api.deleteStickerPack(stickerPackId) {
                     stickers.reload()
                     showDeleteDialog = false
-                    navController.popBackStack()
+                    nav.popBackStack()
                 }
             }
         }
@@ -225,7 +225,7 @@ fun StickerPackEditorScreen(navController: NavController, stickerPackId: String,
                 )
             },
             navigationIcon = {
-                BackButton(navController)
+                BackButton()
             },
             actions = {
                 var showMenu by rememberStateOf(false)

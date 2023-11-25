@@ -19,11 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.theme.PaddingDefault
@@ -31,16 +31,17 @@ import com.queatz.db.JoinRequestAndPerson
 import kotlinx.coroutines.launch
 
 @Composable
-fun GroupJoinRequest(joinRequest: JoinRequestAndPerson, navController: NavController, onChange: () -> Unit) {
+fun GroupJoinRequest(joinRequest: JoinRequestAndPerson, onChange: () -> Unit) {
     var isLoading by rememberStateOf(false)
     val scope = rememberCoroutineScope()
+    val nav = nav
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
         modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .clickable {
-                navController.navigate("profile/${joinRequest.joinRequest!!.person!!}")
+                nav.navigate("profile/${joinRequest.joinRequest!!.person!!}")
             }
             .padding(PaddingDefault)
     ) {

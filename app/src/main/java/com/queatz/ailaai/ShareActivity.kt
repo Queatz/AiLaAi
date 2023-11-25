@@ -77,6 +77,7 @@ class ShareActivity : AppCompatActivity() {
                                 }.awaitAll()
                             }
                         }
+
                         is SharedContent.Photos -> {
                             coroutineScope {
                                 groups.map { group ->
@@ -100,19 +101,20 @@ class ShareActivity : AppCompatActivity() {
                     }
                 }
 
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    ChooseGroupDialog(
-                        {
-                            finish()
-                        },
-                        title = content.title(),
-                        confirmFormatter = content.confirmFormatter(me),
-                        infoFormatter = { it.seenText(context.getString(R.string.active), me) },
-                        me = me
-                    ) { groups ->
-                        send(groups)
+                CompositionLocalProvider(LocalAppState provides AppState(me)) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        ChooseGroupDialog(
+                            {
+                                finish()
+                            },
+                            title = content.title(),
+                            confirmFormatter = content.confirmFormatter(me),
+                            infoFormatter = { it.seenText(context.getString(R.string.active), me) }
+                        ) { groups ->
+                            send(groups)
+                        }
                     }
                 }
             }

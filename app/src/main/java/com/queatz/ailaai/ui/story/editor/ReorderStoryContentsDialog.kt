@@ -34,8 +34,6 @@ import com.queatz.db.Person
 
 @Composable
 fun ReorderStoryContentsDialog(
-    navController: NavController,
-    me: () -> Person?,
     onDismissRequest: () -> Unit,
     storyContents: List<StoryContent>,
     onStoryContents: (List<StoryContent>) -> Unit
@@ -77,7 +75,6 @@ fun ReorderStoryContentsDialog(
                             onClick = null,
                             card = card,
                             isChoosing = true,
-                            navController = navController,
                             modifier = Modifier.width(80.dp)
                         )
                     }
@@ -100,7 +97,6 @@ fun ReorderStoryContentsDialog(
                                 onClick = null,
                                 onLongClick = null,
                                 item = SearchResult.Group(group!!),
-                                me = me(),
                                 info = GroupInfo.LatestMessage
                             )
                         }

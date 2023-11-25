@@ -55,6 +55,8 @@ import com.queatz.ailaai.group.GroupCards
 import com.queatz.ailaai.group.GroupJoinRequest
 import com.queatz.ailaai.helpers.OnStart
 import com.queatz.ailaai.helpers.audioRecorder
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
@@ -74,7 +76,7 @@ import kotlin.time.Duration.Companion.hours
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?) {
+fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var sendMessage by remember { mutableStateOf("") }
@@ -106,6 +108,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
     val stickerPacks by stickers.rememberStickerPacks()
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
+    val nav = nav
+    val me = me
 
     val allJoinRequests by joins.joins.collectAsState()
     val myJoinRequests by joins.myJoins.collectAsState()
@@ -240,7 +244,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
         ) {
             scope.launch {
                 reload()
-                navController.navigate("card/${it.id}")
+                nav.navigate("card/${it.id}")
             }
         }
     }
@@ -273,8 +277,8 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             val allMembers = groupExtended!!.members
                 ?.sortedByDescending { it.person?.seen ?: fromEpochMilliseconds(0) }
                 ?: emptyList()
-            val myMember = groupExtended!!.members?.find { it.person?.id == me()?.id }
-            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me()?.id } ?: emptyList()
+            val myMember = groupExtended!!.members?.find { it.person?.id == me?.id }
+            val otherMembers = groupExtended!!.members?.filter { it.person?.id != me?.id } ?: emptyList()
             val state = rememberLazyListState()
 
             var latestMessage by remember { mutableStateOf<Instant?>(null) }
@@ -325,7 +329,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                     }
                                 } else {
                                     if (otherMembers.size == 1) {
-                                        navController.navigate("profile/${otherMembers.first().person!!.id!!}")
+                                        nav.navigate("profile/${otherMembers.first().person!!.id!!}")
                                     } else {
                                         showGroupMembers = true
                                     }
@@ -338,7 +342,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             groupExtended!!.name(
                                 someone,
                                 emptyGroup,
-                                me()?.id?.let(::listOf) ?: emptyList()
+                                me?.id?.let(::listOf) ?: emptyList()
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -346,7 +350,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
 
                         val details = listOfNotNull(
                             if (groupExtended?.group?.open == true) stringResource(R.string.open_group) else null,
-                            groupExtended?.seenText(stringResource(R.string.active), me())
+                            groupExtended?.seenText(stringResource(R.string.active), me)
                         )
 
                         if (details.isNotEmpty()) {
@@ -359,7 +363,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     }
                 },
                 navigationIcon = {
-                    BackButton(navController)
+                    BackButton()
                 },
                 actions = {
                     var showMenu by rememberStateOf(false)
@@ -488,7 +492,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 scope.launch {
                                     api.updateMember(myMember.member!!.id!!, Member(hide = !hidden)) {
                                         context.toast(R.string.group_hidden)
-                                        navController.popBackStack()
+                                        nav.popBackStack()
                                     }
                                 }
                                 showMenu = false
@@ -528,7 +532,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
             )
 
             if (showCards && groupExtended != null) {
-                GroupCards(groupExtended!!, navController)
+                GroupCards(groupExtended!!)
             } else {
                 // todo: extract else block new component
                 if (joinRequests.isNotEmpty()) {
@@ -546,7 +550,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 .heightIn(max = 160.dp),
                         ) {
                             items(joinRequests) {
-                                GroupJoinRequest(it, navController) {
+                                GroupJoinRequest(it) {
                                     scope.launch {
                                         reload()
                                     }
@@ -622,8 +626,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                 }
                             },
                             onReply = { stageReply = it },
-                            onShowPhoto = { showPhoto = it },
-                            navController = navController,
+                            onShowPhoto = { showPhoto = it }
                         )
                     }
                     item {
@@ -980,7 +983,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                                     }
                                 },
                                 onStickerPack = {
-                                    navController.navigate("sticker-pack/${it.id!!}")
+                                    nav.navigate("sticker-pack/${it.id!!}")
                                 },
                                 modifier = Modifier.fillMaxSize()
                             ) { sticker ->
@@ -990,7 +993,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             }
                             FloatingActionButton(
                                 onClick = {
-                                    navController.navigate("sticker-packs")
+                                    nav.navigate("sticker-packs")
                                 },
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
@@ -1059,7 +1062,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     }
                 ) {
                     showGroupMembers = false
-                    navController.navigate("profile/${it.id!!}")
+                    nav.navigate("profile/${it.id!!}")
                 }
             }
 
@@ -1067,7 +1070,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                 val someone = stringResource(R.string.someone)
                 val members = groupExtended!!.members!!
                     .mapNotNull { it.person?.id }
-                    .filter { it != me()?.id }
+                    .filter { it != me?.id }
                 ChoosePeopleDialog(
                     {
                         showRemoveGroupMembers = false
@@ -1232,7 +1235,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                             scope.launch {
                                 api.removeMember(myMember!!.member!!.id!!) {
                                     showLeaveGroup = false
-                                    navController.popBackStack()
+                                    nav.popBackStack()
                                 }
                             }
                         }) {
@@ -1262,7 +1265,7 @@ fun GroupScreen(groupId: String, navController: NavController, me: () -> Person?
                     confirmButton = {
                         TextButton({
                             showGroupNotFound = false
-                            navController.popBackStack()
+                            nav.popBackStack()
                         }) {
                             Text(stringResource(R.string.leave))
                         }

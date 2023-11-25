@@ -52,7 +52,6 @@ fun CardItem(
     onCategoryClick: (String) -> Unit = {},
     onReply: (List<String>) -> Unit = {},
     card: Card?,
-    navController: NavController,
     modifier: Modifier = Modifier,
     isChoosing: Boolean = false,
     playVideo: Boolean = true
@@ -186,7 +185,6 @@ fun CardItem(
                         card,
                         interactable = !isChoosing,
                         onReply = onReply,
-                        navController = navController,
                         selectingText = {
                             isSelectingText = it
                         },

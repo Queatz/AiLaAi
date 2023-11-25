@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
 import app.ailaai.api.createStickerPack
 import app.ailaai.api.myStickerPacks
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.ui.components.BackButton
@@ -23,17 +23,17 @@ import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
+fun StickerPacksScreen() {
     val scope = rememberCoroutineScope()
     var showCreateStickerPackDialog by rememberStateOf(false)
     var stickerPacks by rememberStateOf(emptyList<StickerPack>())
     var isLoading by rememberStateOf(true)
+    val nav = nav
 
     LaunchedEffect(Unit) {
         api.myStickerPacks {
@@ -55,7 +55,7 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
             api.createStickerPack(StickerPack(name = value)) {
                 stickers.reload()
                 showCreateStickerPackDialog = false
-                navController.navigate("sticker-pack/${it.id}/edit")
+                nav.navigate("sticker-pack/${it.id}/edit")
             }
         }
     }
@@ -69,7 +69,7 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
                 Text(stringResource(R.string.sticker_pack_editor), maxLines = 1, overflow = TextOverflow.Ellipsis)
             },
             navigationIcon = {
-                BackButton(navController)
+                BackButton()
             },
             modifier = Modifier.zIndex(1f)
         )
@@ -88,7 +88,7 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
                     stickerPacks,
                     edit = true,
                     onEdit = {
-                        navController.navigate("sticker-pack/${it.id}/edit")
+                        nav.navigate("sticker-pack/${it.id}/edit")
                     },
                     onStickerLongClick = {
                         scope.launch {
@@ -96,7 +96,7 @@ fun StickerPacksScreen(navController: NavController, me: () -> Person?) {
                         }
                     }
                 ) {
-                    navController.navigate("sticker-pack/${it.pack}/edit")
+                    nav.navigate("sticker-pack/${it.pack}/edit")
                 }
             }
             FloatingActionButton(

@@ -23,6 +23,8 @@ import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
@@ -38,7 +40,7 @@ private var cache = emptyList<Story>()
 private var cacheTab = MainTab.Friends
 
 @Composable
-fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
+fun StoriesScreen() {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
@@ -46,13 +48,14 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
     val locationSelector = locationSelector(
         geo,
         { geo = it },
-        navController.context as Activity
+        nav.context as Activity
     )
     var tab by rememberSavableStateOf(cacheTab)
     var stories by remember { mutableStateOf(cache) }
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     var isLoading by rememberStateOf(stories.isEmpty())
-
+    val me = me
+    val nav = nav
     val tabs = listOf(MainTab.Friends, MainTab.Local)
 
     LaunchedEffect(stories) {
@@ -101,30 +104,25 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
     LocationScaffold(
         geo,
         locationSelector,
-        navController,
         appHeader = {
             AppHeader(
-                navController,
                 stringResource(R.string.stories),
-                {},
-                me
+                {}
             ) {
-                ScanQrCodeButton(navController)
+                ScanQrCodeButton()
             }
         }
     ) {
         Column {
             AppHeader(
-                navController,
                 stringResource(R.string.stories),
                 {
                     scope.launch {
                         state.scrollToTop()
                     }
-                },
-                me
+                }
             ) {
-                ScanQrCodeButton(navController)
+                ScanQrCodeButton()
             }
             MainTabs(tab, { tab = it }, tabs = tabs)
             Box(
@@ -133,10 +131,10 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                navController.navigate("explore")
+                                nav.navigate("explore")
                             }
                             is SwipeResult.Next -> {
-                                navController.navigate("messages")
+                                nav.navigate("messages")
                             }
                             is SwipeResult.Select<*> -> {
                                 tab = it.item as MainTab
@@ -156,8 +154,6 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         null,
                         storyContents,
                         state,
-                        navController,
-                        me,
                         Modifier
                             .align(Alignment.TopCenter)
                             .widthIn(max = 640.dp)
@@ -166,10 +162,8 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                     ) { storyId ->
                         Row {
                             StoryActions(
-                                navController,
                                 storyId,
                                 stories.find { it.id == storyId },
-                                me,
                                 showOpen = true
                             )
                         }
@@ -194,11 +188,11 @@ fun StoriesScreen(navController: NavHostController, me: () -> Person?) {
                         },
                         onAction = {
                             if (thought.isBlank()) {
-                                navController.navigate("write")
+                                nav.navigate("write")
                             } else {
                                 scope.launch {
                                     api.createStory(Story(title = thought)) {
-                                        navController.navigate("write/${it.id}")
+                                        nav.navigate("write/${it.id}")
                                     }
                                 }
                             }

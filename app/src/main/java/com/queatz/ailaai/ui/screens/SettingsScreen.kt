@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
-import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
@@ -34,13 +33,17 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.*
+import com.queatz.db.AppFeedback
+import com.queatz.db.AppFeedbackType
+import com.queatz.db.PersonProfile
+import com.queatz.db.Profile
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -49,7 +52,7 @@ import kotlinx.serialization.encodeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: () -> Unit) {
+fun SettingsScreen(updateMe: () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var signOutDialog by rememberStateOf(false)
@@ -63,6 +66,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
     var isRefreshing by rememberStateOf(false)
     var showBiometrics by rememberStateOf(false)
     var biometricsSucceeded by rememberStateOf(false)
+    val me = me
 
     fun loadTransferCode() {
         scope.launch {
@@ -103,7 +107,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
     LaunchedEffect(Unit) {
         while (true) {
-            val meId = me()?.id
+            val meId = me?.id
 
             if (meId == null) {
                 delay(1_000)
@@ -119,7 +123,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
 
     if (inviteDialog) {
         InviteDialog(
-            me()?.name ?: context.getString(R.string.someone)
+            me?.name ?: context.getString(R.string.someone)
         ) { inviteDialog = false }
     }
 
@@ -350,7 +354,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                 }
             },
             navigationIcon = {
-                BackButton(navController)
+                BackButton()
             }
         )
 
@@ -430,7 +434,7 @@ fun SettingsScreen(navController: NavController, me: () -> Person?, updateMe: ()
                         )
                     }
                 }, {
-                    if (me() != null) {
+                    if (me != null) {
                         urlDialog = true
                     }
                 }, modifier = Modifier.weight(1f))

@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.*
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -32,6 +31,8 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
@@ -59,7 +60,7 @@ private var cacheTab = MainTab.Friends
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun FriendsScreen(navController: NavController, me: () -> Person?) {
+fun FriendsScreen() {
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(cache) }
@@ -78,10 +79,12 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
     var tab by rememberSavableStateOf(cacheTab)
     var geo: LatLng? by remember { mutableStateOf(null) }
+    val nav = nav
+    val me = me
     val locationSelector = locationSelector(
         geo,
         { geo = it },
-        navController.context as Activity
+        nav.context as Activity
     )
     val reloadFlow = remember {
         MutableSharedFlow<Boolean>()
@@ -113,7 +116,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     (if (text.isBlank()) allGroups else allGroups.filter {
                         (it.group?.name?.contains(text, true) ?: false) ||
                                 it.members?.any {
-                                    it.person?.id != me()?.id && it.person?.name?.contains(
+                                    it.person?.id != me?.id && it.person?.name?.contains(
                                         text,
                                         true
                                     ) ?: false
@@ -138,7 +141,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     }
                 ) {
                     allGroups = it.filter { it.group != null }
-                    messages.refresh(me(), allGroups)
+                    messages.refresh(me, allGroups)
                 }
             }
 
@@ -268,7 +271,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                         .filter { group -> selectedHiddenGroups.any { it.id == group.group?.id } }
                                         .mapNotNull { groupExtended ->
                                             val member =
-                                                groupExtended.members?.firstOrNull { it.person?.id == me()?.id }?.member
+                                                groupExtended.members?.firstOrNull { it.person?.id == me?.id }?.member
                                                     ?: return@mapNotNull null
 
                                             async {
@@ -294,7 +297,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                     .filter { group -> selectedHiddenGroups.any { it.id == group.group?.id } }
                                     .mapNotNull { groupExtended ->
                                         val member =
-                                            groupExtended.members?.firstOrNull { it.person?.id == me()?.id }?.member
+                                            groupExtended.members?.firstOrNull { it.person?.id == me?.id }?.member
                                                 ?: return@mapNotNull null
 
                                         async {
@@ -321,14 +324,12 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppHeader(
-            navController,
             stringResource(R.string.your_groups),
             {
                 scope.launch {
                     state.scrollToTop()
                 }
-            },
-            me
+            }
         ) {
             var showMenu by rememberStateOf(false)
             IconButton(
@@ -346,7 +347,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     })
                 }
             }
-            ScanQrCodeButton(navController)
+            ScanQrCodeButton()
         }
         MainTabs(
             tab,
@@ -358,7 +359,6 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
         LocationScaffold(
             geo,
             locationSelector,
-            navController,
             enabled = tab == MainTab.Local
         ) {
             Box(
@@ -368,11 +368,11 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                navController.navigate("stories")
+                                nav.navigate("stories")
                             }
 
                             is SwipeResult.Next -> {
-                                navController.navigate("schedule")
+                                nav.navigate("schedule")
                             }
 
                             is SwipeResult.Select<*> -> {
@@ -416,18 +416,18 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                                     AnimatedVisibility(searchText.isBlank() && selectedCategory == null) {
                                         Friends(
                                             remember(allGroups) {
-                                                allGroups.people().filter { it.id != me()?.id }
+                                                allGroups.people().filter { it.id != me?.id }
                                             },
                                             {
-                                                navController.navigate("profile/${it.id!!}")
+                                                nav.navigate("profile/${it.id!!}")
                                             }
                                         ) {
                                             scope.launch {
                                                 api.createGroup(
-                                                    listOf(me()!!.id!!, it.id!!),
+                                                    listOf(me!!.id!!, it.id!!),
                                                     reuse = true
                                                 ) { group ->
-                                                    navController.navigate("group/${group.id!!}")
+                                                    nav.navigate("group/${group.id!!}")
                                                 }
                                             }
                                         }
@@ -445,9 +445,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                             }
                         ) {
                             ContactItem(
-                                navController,
                                 it,
-                                me(),
                                 {
                                     scope.launch {
                                         reloadFlow.emit(true)
@@ -499,8 +497,7 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             },
             title = stringResource(R.string.hidden_groups),
             confirmFormatter = { stringResource(R.string.next) },
-            infoFormatter = { it.seenText(context.getString(R.string.active), me()) },
-            me = me(),
+            infoFormatter = { it.seenText(context.getString(R.string.active), me) },
             groups = {
                 api.hiddenGroups {
                     groups = it
@@ -518,7 +515,6 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
             {
                 showPushPermissionDialog = false
             },
-            navController,
             stringResource(R.string.notifications_disabled_message)
         )
     }
@@ -558,10 +554,10 @@ fun FriendsScreen(navController: NavController, me: () -> Person?) {
                     if (createGroupName.isNotBlank()) {
                         api.updateGroup(group.id!!, Group(name = createGroupName))
                     }
-                    navController.navigate("group/${group.id!!}")
+                    nav.navigate("group/${group.id!!}")
                 }
             },
-            omit = { it.id == me()?.id }
+            omit = { it.id == me?.id }
         )
     }
 }

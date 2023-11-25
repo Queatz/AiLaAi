@@ -28,11 +28,15 @@ import com.queatz.ailaai.api.storyDraft
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.Group
+import com.queatz.db.Story
+import com.queatz.db.StoryDraft
 import io.ktor.http.*
 
 @Composable
@@ -41,7 +45,6 @@ fun PublishStoryDialog(
     activity: Activity,
     story: Story,
     storyContents: List<StoryContent>,
-    me: () -> Person?,
     onLocationChanged: (LatLng?) -> Unit,
     onGroupsChanged: (List<Group>) -> Unit,
     onPublish: () -> Unit,
@@ -62,6 +65,7 @@ fun PublishStoryDialog(
         { geo = it },
         activity
     )
+    val me = me
 
     LaunchedEffect(Unit) {
         locationSelector.start()
@@ -92,8 +96,8 @@ fun PublishStoryDialog(
         }
     }
 
-    LaunchedEffect(me()) {
-        me()?.id?.let { me ->
+    LaunchedEffect(me) {
+        me?.id?.let { me ->
             api.profile(me) {
                 friendCount = it.stats.friendsCount
             }
@@ -399,11 +403,10 @@ fun PublishStoryDialog(
                 R.string.choose_x,
                 R.string.choose_x_and_x,
                 R.string.choose_x_groups
-            ) { it.name(someone, emptyGroup, omit = me()?.id?.let(::listOf) ?: emptyList()) },
+            ) { it.name(someone, emptyGroup, omit = me?.id?.let(::listOf) ?: emptyList()) },
             filter = { it.isGroupLike() },
             allowNone = true,
-            preselect = shareToGroups,
-            me = me()
+            preselect = shareToGroups
         ) {
             shareToGroups = it
             onGroupsChanged(it)

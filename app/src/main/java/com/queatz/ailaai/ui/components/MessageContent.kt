@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmapOrNull
-import androidx.navigation.NavController
 import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.sticker
@@ -36,6 +35,7 @@ import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
@@ -64,7 +64,6 @@ fun ColumnScope.MessageContent(
     onReply: (Message) -> Unit,
     onDeleted: () -> Unit,
     onShowPhoto: (String) -> Unit,
-    navController: NavController,
     isReply: Boolean = false,
     selected: Boolean = false,
     onSelectedChange: ((Boolean) -> Unit)? = null,
@@ -85,7 +84,7 @@ fun ColumnScope.MessageContent(
     var attachedStoryNotFound by remember { mutableStateOf(false) }
     var attachedAudio by remember { mutableStateOf<String?>(null) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
-
+    val nav = nav
     val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     var showStoragePermissionDialog by rememberStateOf(false)
 
@@ -94,7 +93,6 @@ fun ColumnScope.MessageContent(
             {
                 showStoragePermissionDialog = false
             },
-            navController,
             stringResource(R.string.permission_request)
         )
     }
@@ -369,7 +367,6 @@ fun ColumnScope.MessageContent(
                     onReply,
                     {}, // todo delete from reply
                     {}, // todo open photo in reply
-                    navController,
                     isReply = true
                 )
             }
@@ -405,13 +402,12 @@ fun ColumnScope.MessageContent(
         ) {
             CardItem(
                 {
-                    navController.navigate("card/$it")
+                    nav.navigate("card/$it")
                 },
                 onCategoryClick = {
                     exploreInitialCategory = it
-                    navController.navigate("explore")
+                    nav.navigate("explore")
                 },
-                navController = navController,
                 card = attachedCard,
                 isChoosing = true
             )
@@ -557,7 +553,7 @@ fun ColumnScope.MessageContent(
                         }
                     ) {
                         val id = it.pack!!
-                        navController.navigate("sticker-pack/$id")
+                        nav.navigate("sticker-pack/$id")
                     }
                 }
             }
@@ -571,7 +567,6 @@ fun ColumnScope.MessageContent(
     attachedStoryId?.also { storyId ->
         StoryCard(
             attachedStory,
-            navController,
             isLoading = !attachedStoryNotFound,
             modifier = Modifier.padding(PaddingDefault).then(
                 if (isReply) {
@@ -588,7 +583,7 @@ fun ColumnScope.MessageContent(
             )
         ) {
             if (!attachedStoryNotFound) {
-                navController.navigate("story/$storyId")
+                nav.navigate("story/$storyId")
             }
         }
     }

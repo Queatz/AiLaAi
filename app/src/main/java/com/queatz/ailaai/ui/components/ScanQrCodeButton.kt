@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -24,9 +23,9 @@ import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.dataStore
-import com.queatz.ailaai.extensions.goToSettings
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -35,13 +34,14 @@ val qrCodeExplainedKey = booleanPreferencesKey("tutorial.qrCode.explained")
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ScanQrCodeButton(navController: NavController) {
+fun ScanQrCodeButton() {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showQrCodeExplanationDialog by rememberStateOf(false)
     var showCameraRationale by rememberStateOf(false)
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
+    val nav = nav
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -52,27 +52,27 @@ fun ScanQrCodeButton(navController: NavController) {
                         when {
                             it.startsWith("/page/") -> {
                                 val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("page/$cardId")
+                                nav.navigate("page/$cardId")
                                 true
                             }
                             it.startsWith("/card/") -> {
                                 val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("card/$cardId")
+                                nav.navigate("card/$cardId")
                                 true
                             }
                             it.startsWith("/story/") -> {
                                 val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("story/$cardId")
+                                nav.navigate("story/$cardId")
                                 true
                             }
                             it.startsWith("/profile/") -> {
                                 val cardId = it.split("/").getOrNull(2)
-                                navController.navigate("profile/$cardId")
+                                nav.navigate("profile/$cardId")
                                 true
                             }
                             it.startsWith("/link-device/") -> {
                                 val token = it.split("/").getOrNull(2)
-                                navController.navigate("link-device/$token")
+                                nav.navigate("link-device/$token")
                                 true
                             }
                             else -> null
@@ -89,7 +89,7 @@ fun ScanQrCodeButton(navController: NavController) {
             scanQrLauncher.launch(
                 // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
                 // Extracted from ScanUtil.java (startScan)
-                Intent(navController.context as Activity, ScanKitActivity::class.java).apply {
+                Intent(nav.context as Activity, ScanKitActivity::class.java).apply {
                     putExtra("ScanFormatValue", HmsScan.QRCODE_SCAN_TYPE)
                     putExtra("ScanViewValue", 1)
                 }
@@ -126,7 +126,6 @@ fun ScanQrCodeButton(navController: NavController) {
             {
                 showCameraRationale = false
             },
-            navController,
             stringResource(R.string.camera_disabled_description)
         )
     }
