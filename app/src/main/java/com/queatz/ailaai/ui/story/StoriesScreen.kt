@@ -36,8 +36,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private var cache = emptyList<Story>()
-private var cacheTab = MainTab.Friends
+private var cache = mutableMapOf<MainTab, List<Story>>()
 
 @Composable
 fun StoriesScreen() {
@@ -50,20 +49,15 @@ fun StoriesScreen() {
         { geo = it },
         nav.context as Activity
     )
-    var tab by rememberSavableStateOf(cacheTab)
-    var stories by remember { mutableStateOf(cache) }
+    var tab by rememberSavableStateOf(MainTab.Friends)
+    var stories by remember { mutableStateOf(cache[tab] ?: emptyList()) }
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     var isLoading by rememberStateOf(stories.isEmpty())
-    val me = me
     val nav = nav
     val tabs = listOf(MainTab.Friends, MainTab.Local)
 
     LaunchedEffect(stories) {
-        cache = stories
-    }
-
-    LaunchedEffect(tab) {
-        cacheTab = tab
+        cache[tab] = stories
     }
 
     LaunchedEffect(geo) {

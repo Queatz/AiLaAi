@@ -26,3 +26,9 @@ fun <E> List<E>.swipe(current: E, offset: Int): SwipeResult {
         SwipeResult.Select(get(index))
     }
 }
+
+fun <T> List<T>.sortedDistinct(): List<T> = groupBy { it }.let { occurrences ->
+    distinct().sortedByDescending {
+        occurrences[it]?.size ?: 0
+    }
+}

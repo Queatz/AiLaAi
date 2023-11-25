@@ -35,8 +35,7 @@ import kotlinx.coroutines.launch
 
 var exploreInitialCategory: String? = null
 
-private var cache = emptyList<Card>()
-private var cacheTab = MainTab.Friends
+private var cache = mutableMapOf<MainTab, List<Card>>()
 
 @Composable
 fun ExploreScreen() {
@@ -48,8 +47,6 @@ fun ExploreScreen() {
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
-    var cards by remember { mutableStateOf(cache) }
-    var isLoading by rememberStateOf(cards.isEmpty())
     var isError by rememberStateOf(false)
     var showAsMap by rememberSavableStateOf(false)
     var offset by remember { mutableIntStateOf(0) }
@@ -62,8 +59,10 @@ fun ExploreScreen() {
         { geo = it },
         nav.context as Activity
     )
-    var tab by rememberSavableStateOf(cacheTab)
+    var tab by rememberSavableStateOf(MainTab.Friends)
     var shownTab by rememberSavableStateOf(tab)
+    var cards by remember { mutableStateOf(cache[tab] ?: emptyList()) }
+    var isLoading by rememberStateOf(cards.isEmpty())
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -72,18 +71,14 @@ fun ExploreScreen() {
     }
 
     LaunchedEffect(cards) {
-        cache = cards
-    }
-
-    LaunchedEffect(tab) {
-        cacheTab = tab
+        cache[tab] = cards
     }
 
     fun updateCategories() {
         selectedCategory = selectedCategory ?: exploreInitialCategory
         categories = ((exploreInitialCategory?.let(::listOf) ?: emptyList()) + cards
             .flatMap { it.categories ?: emptyList() })
-            .distinct()
+            .sortedDistinct()
         exploreInitialCategory = null
     }
 

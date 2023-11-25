@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -46,28 +47,22 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.push.GroupPushData
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
-private var cache = emptyList<GroupExtended>()
-private var cacheTab = MainTab.Friends
+private var cache = mutableMapOf<MainTab, List<GroupExtended>>()
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun FriendsScreen() {
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
-    var allGroups by remember { mutableStateOf(cache) }
     var allHiddenGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
     var allPeople by remember { mutableStateOf(emptyList<Person>()) }
     var results by remember { mutableStateOf(emptyList<SearchResult>()) }
-    var isLoading by rememberStateOf(allGroups.isEmpty())
     var createGroupName by remember { mutableStateOf("") }
     var showCreateGroupName by rememberStateOf(false)
     var showCreateGroupMembers by rememberStateOf(false)
@@ -77,7 +72,11 @@ fun FriendsScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
-    var tab by rememberSavableStateOf(cacheTab)
+    var tab by rememberSavableStateOf(MainTab.Friends)
+    var allGroups by remember { mutableStateOf(
+        cache[tab] ?: emptyList()
+    ) }
+    var isLoading by rememberStateOf(allGroups.isEmpty())
     var geo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
     val me = me
@@ -99,14 +98,10 @@ fun FriendsScreen() {
     }
 
     LaunchedEffect(allGroups) {
-        cache = allGroups
+        cache[tab] = allGroups
         categories = allGroups
             .flatMap { it.group?.categories ?: emptyList() }
-            .distinct()
-    }
-
-    LaunchedEffect(tab) {
-        cacheTab = tab
+            .sortedDistinct()
     }
 
     fun update() {
@@ -135,7 +130,7 @@ fun FriendsScreen() {
             MainTab.Friends -> {
                 api.groups(
                     onError = {
-                        if (!passive) {
+                        if (!passive && it !is CancellationException) {
                             context.showDidntWork()
                         }
                     }
@@ -152,7 +147,7 @@ fun FriendsScreen() {
                         searchText,
                         public = true,
                         onError = {
-                            if (!passive) {
+                            if (!passive && it !is CancellationException) {
                                 context.showDidntWork()
                             }
                         }
@@ -234,10 +229,11 @@ fun FriendsScreen() {
 
     fun setTab(it: MainTab) {
         tab = it
-        allGroups = emptyList()
-        results = emptyList()
+        allGroups = cache[tab] ?: emptyList()
         allPeople = emptyList()
-        isLoading = true
+        update()
+        isLoading = allGroups.isEmpty()
+        selectedCategory = null
         scope.launch {
             state.scrollToTop()
             reloadFlow.emit(false)
@@ -361,6 +357,8 @@ fun FriendsScreen() {
             locationSelector,
             enabled = tab == MainTab.Local
         ) {
+            var h by rememberStateOf(80.dp.px)
+
             Box(
                 contentAlignment = Alignment.TopCenter,
                 modifier = Modifier
@@ -387,7 +385,7 @@ fun FriendsScreen() {
                         PaddingDefault,
                         PaddingDefault,
                         PaddingDefault,
-                        PaddingDefault + 80.dp
+                        PaddingDefault * 3 + h.inDp()
                     ),
                     verticalArrangement = Arrangement.spacedBy(PaddingDefault),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -463,6 +461,9 @@ fun FriendsScreen() {
                 PageInput(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .onPlaced {
+                            h = it.size.height
+                        }
                 ) {
                     SearchContent(
                         locationSelector,
