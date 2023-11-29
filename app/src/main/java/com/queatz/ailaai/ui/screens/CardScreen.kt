@@ -51,6 +51,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +84,7 @@ fun CardScreen(cardId: String) {
     var showSetCategory by rememberStateOf(false)
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
+    var oldPhoto by rememberStateOf<String?>(null)
     val me = me
     val nav = nav
 
@@ -131,6 +133,7 @@ fun CardScreen(cardId: String) {
         scope.launch {
             api.generateCardPhoto(cardId) {
                 showGeneratingPhotoDialog = true
+                oldPhoto = card?.photo
             }
         }
     }
@@ -148,6 +151,19 @@ fun CardScreen(cardId: String) {
     OnResume {
         reload()
         reloadCards()
+    }
+
+    LaunchedEffect(oldPhoto) {
+        var tries = 0
+        while (tries++ < 5 && oldPhoto != null) {
+            delay(3.seconds)
+            api.card(cardId) {
+                if (it.photo != oldPhoto) {
+                    reload()
+                    oldPhoto = null
+                }
+            }
+        }
     }
 
     if (showRegeneratePhotoDialog) {
