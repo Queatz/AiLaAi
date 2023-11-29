@@ -68,6 +68,8 @@ fun FriendsScreen() {
     var showCreateGroupMembers by rememberStateOf(false)
     var showPushPermissionDialog by rememberStateOf(false)
     var showHiddenGroupsDialog by rememberStateOf(false)
+    var showSharedGroupsDialogPerson by rememberStateOf<Person?>(null)
+    var showSharedGroupsDialog by rememberStateOf<List<GroupExtended>>(emptyList())
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -241,6 +243,25 @@ fun FriendsScreen() {
     }
 
     val tabs = listOf(MainTab.Friends, MainTab.Local)
+
+    if (showSharedGroupsDialog.isNotEmpty()) {
+        ChooseGroupDialog(
+            {
+                showSharedGroupsDialog = emptyList()
+            },
+            title = showSharedGroupsDialogPerson?.name ?: stringResource(R.string.someone),
+            multiple = false,
+            allowNone = true,
+            confirmFormatter = { stringResource(R.string.close) },
+            infoFormatter = { it.seenText(context.getString(R.string.active), me) },
+            groups = {
+                showSharedGroupsDialog
+            }
+        ) { selected ->
+            showSharedGroupsDialog = emptyList()
+            nav.navigate("group/${selected.first()!!.id!!}")
+        }
+    }
 
     if (selectedHiddenGroups.isNotEmpty()) {
         AlertDialog(
@@ -419,13 +440,17 @@ fun FriendsScreen() {
                                             {
                                                 nav.navigate("profile/${it.id!!}")
                                             }
-                                        ) {
+                                        ) { person ->
                                             scope.launch {
-                                                api.createGroup(
-                                                    listOf(me!!.id!!, it.id!!),
-                                                    reuse = true
-                                                ) { group ->
-                                                    nav.navigate("group/${group.id!!}")
+                                                api.groupsWith(
+                                                    listOf(me!!.id!!, person.id!!)
+                                                ) {
+                                                    if (it.size == 1) {
+                                                        nav.navigate("group/${it.first().group!!.id!!}")
+                                                    } else {
+                                                        showSharedGroupsDialogPerson = person
+                                                        showSharedGroupsDialog = it
+                                                    }
                                                 }
                                             }
                                         }

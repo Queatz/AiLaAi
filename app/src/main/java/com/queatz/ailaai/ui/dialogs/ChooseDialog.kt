@@ -78,13 +78,14 @@ fun <T> ChooseDialog(
     extraButtons: @Composable RowScope.() -> Unit = {},
     infoFormatter: (@Composable (T) -> String?)? = null,
     maxSelectedCount: Int = 50,
+    multiple: Boolean = true,
     searchText: String,
     searchTextChange: (String) -> Unit,
     items: List<T>,
     key: (item: T) -> String,
     selected: List<T>,
     onSelectedChange: (List<T>) -> Unit,
-    showSearch: (List<T>) -> Boolean = { searchText.isNotEmpty() || it.size > 5 },
+    showSearch: (List<T>) -> Boolean = { it.size > 5 },
     onConfirm: suspend (List<T>) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
@@ -108,7 +109,7 @@ fun <T> ChooseDialog(
                 modifier = Modifier
                     .padding(bottom = 1.pad)
             )
-            if (showSearch(items)) {
+            if (searchText.isNotEmpty() || showSearch(items)) {
                 OutlinedTextField(
                     searchText,
                     onValueChange = searchTextChange,
@@ -170,22 +171,28 @@ fun <T> ChooseDialog(
                 }
                 TextButton(
                     {
-                        disableSubmit = true
+                        if (multiple) {
+                            disableSubmit = true
 
-                        coroutineScope.launch {
-                            try {
-                                onConfirm(selected)
-                                onDismissRequest()
-                            } finally {
-                                disableSubmit = false
+                            coroutineScope.launch {
+                                try {
+                                    onConfirm(selected)
+                                    onDismissRequest()
+                                } finally {
+                                    disableSubmit = false
+                                }
                             }
+                        } else {
+                            onDismissRequest()
                         }
                     },
                     enabled = !disableSubmit && !isLoading,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     Text(confirmFormatter(selected), textAlign = TextAlign.End, modifier = Modifier.weight(0.5f, false))
-                    Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.padding(start = 1.pad))
+                    if (multiple) {
+                        Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.padding(start = 1.pad))
+                    }
                 }
             }
         }

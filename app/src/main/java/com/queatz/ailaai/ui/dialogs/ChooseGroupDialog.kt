@@ -26,6 +26,7 @@ fun ChooseGroupDialog(
     filter: (GroupExtended) -> Boolean = { true },
     extraButtons: @Composable RowScope.() -> Unit = {},
     allowNone: Boolean = false,
+    multiple: Boolean = true,
     preselect: List<Group>? = null,
     onGroupsSelected: suspend (List<Group>) -> Unit
 ) {
@@ -69,11 +70,20 @@ fun ChooseGroupDialog(
         }
     }
 
+    if (!multiple) {
+        LaunchedEffect(selected) {
+            if (selected.isNotEmpty()) {
+                onGroupsSelected(selected.mapNotNull { it.group })
+            }
+        }
+    }
+
     ChooseDialog(
         onDismissRequest = onDismissRequest,
         isLoading = isLoading,
         title = title,
         allowNone = allowNone,
+        multiple = multiple,
         extraButtons = extraButtons,
         photoFormatter = { it.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)) },
         nameFormatter = { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
