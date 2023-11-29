@@ -440,13 +440,13 @@ fun GroupScreen(groupId: String) {
                             showMenu = false
                             showGroupMembers = true
                         })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.cards))
+                        }, {
+                            showMenu = false
+                            showCards = !showCards
+                        })
                         if (myMember != null) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.cards))
-                            }, {
-                                showMenu = false
-                                showCards = !showCards
-                            })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.rename))
                             }, {
