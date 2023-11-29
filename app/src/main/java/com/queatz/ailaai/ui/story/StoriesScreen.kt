@@ -28,8 +28,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.CancellationException
@@ -139,7 +138,7 @@ fun StoriesScreen() {
                 if (isLoading) {
                     Loading(
                         modifier = Modifier
-                            .padding(PaddingDefault)
+                            .padding(1.pad)
                     )
                 } else if (storyContents.isEmpty()) {
                     EmptyText(stringResource(R.string.no_stories_to_read))
@@ -196,17 +195,17 @@ fun StoriesScreen() {
 //                }
                 if (locationSelector.isManual) {
                     ElevatedButton(
-                        elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
+                        elevation = ButtonDefaults.elevatedButtonElevation(2.pad),
                         onClick = {
                             locationSelector.reset()
                         },
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = PaddingDefault * 2)
+                            .padding(bottom = 2.pad)
                     ) {
                         Text(
                             stringResource(R.string.reset_location),
-                            modifier = Modifier.padding(end = PaddingDefault)
+                            modifier = Modifier.padding(end = 1.pad)
                         )
                         Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
                     }

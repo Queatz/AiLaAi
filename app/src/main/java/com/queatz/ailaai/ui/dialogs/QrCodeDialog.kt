@@ -26,7 +26,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.bitmapResource
 import com.queatz.ailaai.extensions.share
 import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,10 +48,10 @@ fun QrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(
-                    PaddingDefault * 3,
-                    PaddingDefault * 3,
-                    PaddingDefault * 3,
-                    PaddingDefault
+                    3.pad,
+                    3.pad,
+                    3.pad,
+                    1.pad
                 )
         ) {
             Image(qrCode.asImageBitmap(), contentDescription = null, modifier = Modifier.background(Color.White))

@@ -39,7 +39,7 @@ import com.queatz.ailaai.ui.components.BiometricPrompt
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AppFeedback
 import com.queatz.db.AppFeedbackType
 import com.queatz.db.PersonProfile
@@ -226,12 +226,12 @@ fun SettingsScreen(updateMe: () -> Unit) {
             properties = DialogProperties(usePlatformDefaultWidth = false),
             text = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault)
+                    verticalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     if (confirmSignOut) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                            horizontalArrangement = Arrangement.spacedBy(1.pad),
                             modifier = Modifier
                                 .clip(MaterialTheme.shapes.large)
                                 .clickable {
@@ -245,7 +245,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                     } else if (transferCode.isNotBlank()) {
                         Text(stringResource(R.string.your_transfer_code_is))
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(
-                            PaddingDefault)) {
+                            1.pad)) {
                             SelectionContainer(
                                 modifier = Modifier
                                     .weight(1f)
@@ -256,9 +256,9 @@ fun SettingsScreen(updateMe: () -> Unit) {
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = PaddingDefault)
+                                        .padding(vertical = 1.pad)
                                         .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                        .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
+                                        .padding(horizontal = 2.pad, vertical = 1.pad)
                                 )
                             }
                             IconButton(
@@ -343,12 +343,12 @@ fun SettingsScreen(updateMe: () -> Unit) {
                     },
                     enabled = !inviteDialog,
                     modifier = Modifier
-                        .padding(horizontal = PaddingDefault * 2)
+                        .padding(horizontal = 2.pad)
                 ) {
                     Icon(
                         Icons.Outlined.PersonAdd,
                         stringResource(R.string.invite_someone),
-                        modifier = Modifier.padding(end = PaddingDefault)
+                        modifier = Modifier.padding(end = 1.pad)
                     )
                     Text(stringResource(R.string.invite_someone))
                 }
@@ -422,7 +422,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DropdownMenuItem({
-                    Column(modifier = Modifier.padding(PaddingDefault)) {
+                    Column(modifier = Modifier.padding(1.pad)) {
                         Text(
                             stringResource(R.string.your_profile_url),
                             style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
@@ -444,7 +444,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                             "$appDomain/${profile!!.profile.url!!}".copyToClipboard(context)
                             context.toast(R.string.copied)
                         },
-                        modifier = Modifier.padding(PaddingDefault)
+                        modifier = Modifier.padding(1.pad)
                     ) {
                         Icon(
                             Icons.Outlined.ContentCopy,
@@ -455,7 +455,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
             }
 
             DropdownMenuItem({
-                Column(modifier = Modifier.padding(PaddingDefault)) {
+                Column(modifier = Modifier.padding(1.pad)) {
                     Text(
                         stringResource(R.string.language),
                         style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
@@ -476,7 +476,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
 
             Column(
                 modifier = Modifier
-                    .padding(horizontal = PaddingDefault * 2, vertical = PaddingDefault)
+                    .padding(horizontal = 2.pad, vertical = 1.pad)
                     .shadow(1.dp, MaterialTheme.shapes.large)
                     .clip(MaterialTheme.shapes.large)
 //                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
@@ -487,7 +487,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = PaddingDefault, start = PaddingDefault * 1.5f, end = PaddingDefault * 1.5f)
+                    modifier = Modifier.padding(top = 1.pad, start = 1.5f.pad, end = 1.5f.pad)
                 )
 
                 DropdownMenuItem({
@@ -520,7 +520,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
 
             DropdownMenuItem({
                 Column(
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 ) {
                     Text(
                         stringResource(R.string.release_history),
@@ -540,7 +540,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 Text(
                     stringResource(R.string.privacy_policy),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 )
             }, {
                 "$appDomain/privacy".launchUrl(context)
@@ -550,7 +550,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 Text(
                     stringResource(R.string.terms_of_use),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 )
             }, {
                 "$appDomain/terms".launchUrl(context)
@@ -560,7 +560,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 Text(
                     stringResource(R.string.open_source),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 )
             }, {
                 "$appDomain/info/open-source".launchUrl(context)
@@ -570,7 +570,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 Text(
                     stringResource(R.string.export_data),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 )
             }, {
                 exportDataDialog = true
@@ -580,7 +580,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 Text(
                     stringResource(R.string.sign_out_or_transfer),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 )
             }, {
                 signOutDialog = true
@@ -591,7 +591,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                     stringResource(R.string.made_with_love),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(PaddingDefault)
+                    modifier = Modifier.padding(1.pad)
                 )
             }, {
             }, enabled = false)

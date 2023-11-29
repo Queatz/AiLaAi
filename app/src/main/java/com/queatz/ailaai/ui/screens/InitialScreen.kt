@@ -18,7 +18,7 @@ import app.ailaai.api.signUp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import io.ktor.client.plugins.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
@@ -63,7 +63,7 @@ fun InitialScreen(onKnown: () -> Unit) {
             },
             text = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault)
+                    verticalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     var transferCode by remember { mutableStateOf("") }
                     OutlinedTextField(
@@ -107,17 +107,17 @@ fun InitialScreen(onKnown: () -> Unit) {
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(
                 PaddingValues(
-                    top = PaddingDefault,
-                    start = PaddingDefault,
-                    end = PaddingDefault,
-                    bottom = PaddingDefault * 8
+                    top = 1.pad,
+                    start = 1.pad,
+                    end = 1.pad,
+                    bottom = 8.pad
                 )
             )
     ) {
@@ -162,12 +162,12 @@ fun InitialScreen(onKnown: () -> Unit) {
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(2.pad)) {
             TextButton(
                 {
                     signUp()
                 },
-                modifier = Modifier.padding(vertical = PaddingDefault * 3)
+                modifier = Modifier.padding(vertical = 3.pad)
             ) {
                 Text(stringResource(R.string.sign_up))
             }
@@ -175,7 +175,7 @@ fun InitialScreen(onKnown: () -> Unit) {
                 {
                     signInDialog = true
                 },
-                modifier = Modifier.padding(vertical = PaddingDefault * 3)
+                modifier = Modifier.padding(vertical = 3.pad)
             ) {
                 Text(stringResource(R.string.sign_in))
             }

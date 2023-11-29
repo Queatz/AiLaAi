@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun SearchFieldAndAction(
@@ -28,13 +28,13 @@ fun SearchFieldAndAction(
             placeholder = placeholder,
             showClear = showClear,
             modifier = Modifier
-                .padding(horizontal = PaddingDefault * 2)
+                .padding(horizontal = 2.pad)
         )
     } else {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(horizontal = PaddingDefault * 2)
+                .padding(horizontal = 2.pad)
         ) {
             Box(
                 modifier = Modifier
@@ -53,7 +53,7 @@ fun SearchFieldAndAction(
                     onAction?.invoke()
                 },
                 modifier = Modifier
-                    .padding(start = PaddingDefault * 2)
+                    .padding(start = 2.pad)
             ) {
                 action()
             }

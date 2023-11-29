@@ -12,11 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Story
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,9 +34,9 @@ fun StoryCard(
         modifier = modifier
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault / 2),
+            verticalArrangement = Arrangement.spacedBy(.5f.pad),
             modifier = Modifier
-                .padding(PaddingDefault * 2)
+                .padding(2.pad)
         ) {
             story?.also { story ->
                 Text(

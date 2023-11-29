@@ -9,7 +9,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun SaveChangesDialog(
@@ -28,7 +28,7 @@ fun SaveChangesDialog(
             Text(stringResource(R.string.all_changes_will_be_lost))
         },
         dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(PaddingDefault)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(1.pad)) {
                 TextButton(
                     {
                         onDismissRequest()

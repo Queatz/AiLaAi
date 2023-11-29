@@ -15,7 +15,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -26,10 +25,9 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.story.StorySource
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
-import com.queatz.db.Person
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -67,7 +65,7 @@ fun CardLayout(
                     .fillMaxWidth()
                     .clipToBounds()
                     .aspectRatio(aspect)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(elevation.elevation))
                     .clickable {
                         onClick()
                     },
@@ -87,7 +85,7 @@ fun CardLayout(
                         .fillMaxWidth()
                         .clipToBounds()
                         .aspectRatio(aspect)
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(ElevationDefault * elevation))
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(elevation.elevation))
                         .clickable {
                             onClick()
                         }
@@ -116,7 +114,7 @@ fun CardLayout(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingDefault * 1.5f)
+                    .padding(1.5f.pad)
             )
 
             card.content?.let { content ->
@@ -137,7 +135,7 @@ fun CardLayout(
                     onChange,
                     { nav.popBackStackOrFinish() },
                     it,
-                    modifier = Modifier.padding(horizontal = PaddingDefault * 1.5f)
+                    modifier = Modifier.padding(horizontal = 1.5f.pad)
                 )
             }
         }

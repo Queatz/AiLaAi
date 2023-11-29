@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +31,7 @@ fun AppHeader(
             {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+                    horizontalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     Text(
                         title,
@@ -51,7 +51,7 @@ fun AppHeader(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(start = PaddingDefault / 2)
+                        .padding(start = .5f.pad)
                 ) {
                     actions()
                     me?.let { me ->

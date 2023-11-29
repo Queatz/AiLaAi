@@ -22,7 +22,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.ui.components.SearchField
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -61,7 +61,7 @@ fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .padding(
-                PaddingDefault * 2,
+                2.pad,
             )
     ) {
         Box(
@@ -93,7 +93,7 @@ fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
             },
             modifier = Modifier
                 .padding(
-                    start = PaddingDefault * 2,
+                    start = 2.pad,
                 )
         ) {
             if (value.isNotBlank()) {

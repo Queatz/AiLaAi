@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -30,7 +30,7 @@ fun Loading(
             color = MaterialTheme.colorScheme.tertiary,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = PaddingDefault)
+                .padding(horizontal = 1.pad)
         )
     }
 }

@@ -18,7 +18,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -80,8 +80,8 @@ fun RowScope.PeriodEvent(
             {
                 showEditNote = false
             },
-            title = stringResource(com.queatz.ailaai.R.string.edit_note),
-            button = stringResource(com.queatz.ailaai.R.string.update),
+            title = stringResource(R.string.edit_note),
+            button = stringResource(R.string.update),
             initialValue = event.occurrence?.note ?: event.reminder.note ?: "",
         ) { note ->
             api.updateReminderOccurrence(
@@ -107,7 +107,7 @@ fun RowScope.PeriodEvent(
                     expanded = !expanded
                 }
             }
-            .padding(PaddingDefault)
+            .padding(1.pad)
             .weight(1f)
     ) {
         Text(

@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun StoryScaffold(
@@ -28,7 +28,7 @@ fun StoryScaffold(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
-                .padding(top = PaddingDefault)
+                .padding(top = 1.pad)
         ) {
             IconButton(
                 {

@@ -31,7 +31,7 @@ import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.*
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
 import createWidget
@@ -175,7 +175,7 @@ fun StoryCreatorTools(
         var viewport by remember { mutableStateOf(Size(0f, 0f)) }
         val scrollState = rememberScrollState()
         Row(
-            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+            horizontalArrangement = Arrangement.spacedBy(1.pad),
             modifier = Modifier
                 .horizontalScroll(scrollState)
                 .onPlaced { viewport = it.boundsInParent().size }

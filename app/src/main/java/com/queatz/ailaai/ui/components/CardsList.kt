@@ -12,13 +12,12 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.launch
 
@@ -57,7 +56,7 @@ fun CardList(
                 stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
-                    .padding(PaddingDefault * 2)
+                    .padding(2.pad)
             )
         } else {
             val autoplayIndex by state.rememberAutoplayIndex()
@@ -67,13 +66,13 @@ fun CardList(
             LazyVerticalGrid(
                 state = state,
                 contentPadding = PaddingValues(
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault,
-                    PaddingDefault * 3.5f + viewport.height.inDp()
+                    1.pad,
+                    1.pad,
+                    1.pad,
+                    3.5f.pad + viewport.height.inDp()
                 ),
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+                verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
                 modifier = Modifier.fillMaxSize(),
                 columns = GridCells.Adaptive(240.dp)
             ) {

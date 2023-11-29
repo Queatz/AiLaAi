@@ -16,7 +16,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.goToSettings
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun LocationScaffold(
@@ -47,10 +47,10 @@ fun LocationScaffold(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(2.pad, Alignment.CenterVertically),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(PaddingDefault)
+                        .padding(1.pad)
                 ) {
                     val showOpenSettings = locationSelector.shouldShowPermissionRationale
                     Button(
@@ -88,10 +88,10 @@ fun LocationScaffold(
                 appHeader()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(PaddingDefault)
+                        .padding(1.pad)
                 ) {
                     Text(stringResource(R.string.finding_your_location), color = MaterialTheme.colorScheme.secondary)
                     TextButton({

@@ -39,7 +39,7 @@ import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.Story
@@ -281,7 +281,7 @@ fun StoryCreatorScreen(
                     stringResource(R.string.content),
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = PaddingDefault),
+                        .padding(horizontal = 1.pad),
                 )
             }
             IconButton(
@@ -336,7 +336,7 @@ fun StoryCreatorScreen(
                             save()
                         }
                     },
-                    modifier = Modifier.padding(end = PaddingDefault * 2)
+                    modifier = Modifier.padding(end = 2.pad)
                 ) {
                     Text(stringResource(R.string.save))
                 }
@@ -347,7 +347,7 @@ fun StoryCreatorScreen(
                             onClick = {
                                 showPublishDialog = true
                             },
-                            modifier = Modifier.padding(end = PaddingDefault * 2)
+                            modifier = Modifier.padding(end = 2.pad)
                         ) {
                             Text(stringResource(R.string.publish))
                         }
@@ -360,13 +360,13 @@ fun StoryCreatorScreen(
         LazyVerticalGrid(
             state = state,
             columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(PaddingDefault * 2),
-            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+            contentPadding = PaddingValues(2.pad),
+            horizontalArrangement = Arrangement.spacedBy(1.pad),
+            verticalArrangement = Arrangement.spacedBy(1.pad),
             modifier = Modifier
                 .widthIn(max = 640.dp)
                 .fillMaxWidth()
-                .padding(bottom = PaddingDefault)
+                .padding(bottom = 1.pad)
                 .weight(1f)
         ) {
             storyContents.forEachIndexed { partIndex, part ->
@@ -465,7 +465,7 @@ fun StoryCreatorScreen(
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+                                    horizontalArrangement = Arrangement.spacedBy(1.pad)
                                 ) {
                                     Audio(
                                         api.url(part.audio),

@@ -15,7 +15,7 @@ import at.bluesource.choicesdk.maps.common.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.MapWithMarker
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 
 @SuppressLint("MissingPermission")
@@ -32,13 +32,13 @@ fun SetLocationDialog(
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
-                    .padding(PaddingValues(vertical = PaddingDefault * 2))
+                    .padding(PaddingValues(vertical = 2.pad))
                     .clip(MaterialTheme.shapes.large)
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
@@ -48,7 +48,7 @@ fun SetLocationDialog(
                 }
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {

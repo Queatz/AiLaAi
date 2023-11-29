@@ -6,13 +6,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun EmptyText(text: String, modifier: Modifier = Modifier) {
     Text(
         text,
         textAlign = TextAlign.Center,
-        modifier = Modifier.padding(PaddingDefault * 2).fillMaxWidth().then(modifier)
+        modifier = Modifier.padding(2.pad).fillMaxWidth().then(modifier)
     )
 }

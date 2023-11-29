@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun ScheduleItemActions(
@@ -27,7 +27,7 @@ fun ScheduleItemActions(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = PaddingDefault / 2)
+        modifier = Modifier.padding(top = .5f.pad)
     ) {
         OutlinedIconButton(
             {

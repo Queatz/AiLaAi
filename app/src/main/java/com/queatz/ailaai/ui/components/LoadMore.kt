@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -56,7 +56,7 @@ fun LoadMore(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingDefault * 2)
+                    .padding(2.pad)
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier

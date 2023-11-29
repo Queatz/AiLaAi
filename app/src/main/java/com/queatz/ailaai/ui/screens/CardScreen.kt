@@ -23,11 +23,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
-import com.queatz.ailaai.data.*
+import com.queatz.ailaai.api.uploadCardPhotoFromUri
+import com.queatz.ailaai.api.uploadCardVideoFromUri
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.OnResume
 import com.queatz.ailaai.me
@@ -35,11 +36,17 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
-import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.CardLayout
+import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
-import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.*
+import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Card
+import com.queatz.db.CardAttachment
+import com.queatz.db.Message
+import com.queatz.db.Person
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
@@ -561,7 +568,7 @@ fun CardScreen(cardId: String) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingDefault * 2)
+                    .padding(2.pad)
             )
         } else {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
@@ -580,9 +587,9 @@ fun CardScreen(cardId: String) {
                     if (isLandscape) {
                         LazyVerticalGrid(
                             state = stateLandscape,
-                            contentPadding = PaddingValues(PaddingDefault),
-                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
-                            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                            contentPadding = PaddingValues(1.pad),
+                            horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
+                            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
                             columns = GridCells.Fixed(1),
                             modifier = Modifier
                                 .width(240.dp)
@@ -613,9 +620,9 @@ fun CardScreen(cardId: String) {
 
                     LazyVerticalGrid(
                         state = state,
-                        contentPadding = PaddingValues(PaddingDefault),
-                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
-                        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                        contentPadding = PaddingValues(1.pad),
+                        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
                         modifier = Modifier.fillMaxSize(),
                         columns = GridCells.Adaptive(240.dp)
                     ) {
@@ -647,7 +654,7 @@ fun CardScreen(cardId: String) {
                                         stringResource(R.string.no_cards),
                                         textAlign = TextAlign.Center,
                                         color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.padding(PaddingDefault * 2)
+                                        modifier = Modifier.padding(2.pad)
                                     )
                                 }
                             }
@@ -674,7 +681,7 @@ fun CardScreen(cardId: String) {
                             newCard = Card(parent = cardId)
                         },
                         modifier = Modifier
-                            .padding(PaddingDefault * 2)
+                            .padding(2.pad)
                             .align(Alignment.BottomEnd)
                     ) {
                         Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))

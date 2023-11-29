@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.R
@@ -39,7 +38,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -124,10 +123,10 @@ fun CardItem(
                     )
                 }
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    horizontalArrangement = Arrangement.spacedBy(1.pad),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(PaddingDefault)
+                        .padding(1.pad)
                         .align(Alignment.TopEnd)
                 ) {
                     IconButton({
@@ -161,7 +160,7 @@ fun CardItem(
 
                 Column(
                     modifier = Modifier
-                        .padding(PaddingDefault)
+                        .padding(1.pad)
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.background.copy(alpha = .96f))
                         .animateContentSize(
@@ -178,7 +177,7 @@ fun CardItem(
                                 it.minAspectRatio(if (conversation.isNotEmpty()) .75f else 1.5f)
                             }
                         }
-                        .padding(PaddingDefault * 1.5f)
+                        .padding(1.5f.pad)
                 ) {
                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                     CardConversation(

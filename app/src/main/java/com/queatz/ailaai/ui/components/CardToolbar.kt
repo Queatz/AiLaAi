@@ -33,7 +33,7 @@ import com.queatz.ailaai.extensions.isPhoto
 import com.queatz.ailaai.extensions.isVideo
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.*
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -101,7 +101,7 @@ fun CardToolbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(PaddingValues(top = PaddingDefault))
+            .padding(PaddingValues(top = 1.pad))
             .horizontalScroll(scrollState)
             .onPlaced { viewport = it.boundsInParent().size }
             .horizontalFadingEdge(viewport, scrollState)
@@ -130,7 +130,7 @@ fun CardToolbar(
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .padding(start = PaddingDefault)
+                    .padding(start = 1.pad)
             )
         }
         Box(modifier = Modifier.weight(1f))

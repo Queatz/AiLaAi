@@ -46,7 +46,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import kotlinx.coroutines.*
 
@@ -215,10 +215,10 @@ fun ProfileScreen(personId: String) {
     LazyVerticalGrid(
         state = state,
         contentPadding = PaddingValues(
-            bottom = PaddingDefault
+            bottom = 1.pad
         ),
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+        verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
         modifier = Modifier.fillMaxSize(),
         columns = GridCells.Adaptive(240.dp)
     ) {
@@ -229,7 +229,7 @@ fun ProfileScreen(personId: String) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(bottom = PaddingDefault)
+                    .padding(bottom = 1.pad)
             ) {
                 Box {
                     val bottomPadding = 128.dp / 3
@@ -298,12 +298,12 @@ fun ProfileScreen(personId: String) {
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
                                 .padding(bottom = bottomPadding)
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                                 .scale(.85f)
                                 .align(Alignment.BottomEnd)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.background)
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                         )
                     }
                     val containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
@@ -317,7 +317,7 @@ fun ProfileScreen(personId: String) {
                         colors = colors,
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(PaddingDefault)
+                            .padding(1.pad)
                             .clip(CircleShape)
                     ) {
                         Icon(
@@ -331,7 +331,7 @@ fun ProfileScreen(personId: String) {
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(PaddingDefault + 2.dp)
+                                .padding(1.pad + 2.dp)
                                 .clip(MaterialTheme.shapes.extraLarge)
                                 .background(containerColor)
                         ) {
@@ -370,7 +370,7 @@ fun ProfileScreen(personId: String) {
                             colors = colors,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                         ) {
                             Icon(Icons.Outlined.MoreVert, null)
                             Dropdown(showMenu, { showMenu = false }) {
@@ -435,11 +435,11 @@ fun ProfileScreen(personId: String) {
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
-                                    .padding(PaddingDefault / 2)
+                                    .padding(.5f.pad)
                                     .scale(.85f)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.background)
-                                    .padding(PaddingDefault)
+                                    .padding(1.pad)
                             )
                         }
                     }
@@ -464,7 +464,7 @@ fun ProfileScreen(personId: String) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .padding(horizontal = PaddingDefault)
+                                .padding(horizontal = 1.pad)
                                 .align(Alignment.Center)
                         ) {
                             Text(
@@ -496,12 +496,12 @@ fun ProfileScreen(personId: String) {
                     stats?.let { stats ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(
-                                PaddingDefault * 2,
+                                2.pad,
                                 Alignment.CenterHorizontally
                             ),
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                                 .widthIn(max = 360.dp) // todo what size
                         ) {
                             Column(
@@ -511,7 +511,7 @@ fun ProfileScreen(personId: String) {
                                     .clip(MaterialTheme.shapes.large)
 //                                .clickable {  }
                                     .weight(1f)
-                                    .padding(PaddingDefault * 2)
+                                    .padding(2.pad)
                             ) {
                                 Text(
                                     stats.friendsCount.toString(),
@@ -539,7 +539,7 @@ fun ProfileScreen(personId: String) {
                                     .clip(MaterialTheme.shapes.large)
 //                                .clickable {  }
                                     .weight(1f)
-                                    .padding(PaddingDefault * 2)
+                                    .padding(2.pad)
                             ) {
                                 Text(
                                     stats.cardCount.toString(),
@@ -565,7 +565,7 @@ fun ProfileScreen(personId: String) {
                                         showJoined = true
                                     }
                                     .weight(1f)
-                                    .padding(PaddingDefault * 2)
+                                    .padding(2.pad)
                             ) {
                                 Text(
                                     person?.createdAt?.monthYear() ?: "?",
@@ -595,7 +595,7 @@ fun ProfileScreen(personId: String) {
                                     context.toast(copiedString)
                                 }
                             }
-                            .padding(PaddingDefault)
+                            .padding(1.pad)
                     ) {
                         if (isMe || profile?.about?.isBlank() == false) {
                             LinkifyText(
@@ -631,7 +631,7 @@ fun ProfileScreen(personId: String) {
                 },
                 scope = scope,
                 playVideo = card == playingVideo && !isAtTop,
-                modifier = Modifier.padding(horizontal = PaddingDefault)
+                modifier = Modifier.padding(horizontal = 1.pad)
             )
         }
     }

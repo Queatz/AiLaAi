@@ -22,7 +22,7 @@ import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
@@ -79,7 +79,7 @@ fun StickerPacksScreen() {
         ) {
             if (isLoading) {
                 Loading(
-                    modifier = Modifier.padding(top = PaddingDefault)
+                    modifier = Modifier.padding(top = 1.pad)
                 )
             } else if (stickerPacks.isEmpty()) {
                 EmptyText(stringResource(R.string.create_and_share_sticker_packs))
@@ -105,7 +105,7 @@ fun StickerPacksScreen() {
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(bottom = PaddingDefault * 2, end = PaddingDefault * 2)
+                    .padding(bottom = 2.pad, end = 2.pad)
             ) {
                 Icon(Icons.Outlined.Add, null)
             }

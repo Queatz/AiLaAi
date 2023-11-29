@@ -61,8 +61,8 @@ import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
@@ -410,7 +410,7 @@ fun GroupScreen(groupId: String) {
                         } else {
                             IconAndCount(
                                 {
-                                    Icon(Icons.Outlined.TravelExplore, stringResource(R.string.cards))
+                                    Icon(Icons.Outlined.Home, stringResource(R.string.cards))
                                 },
                                 groupExtended?.cardCount ?: 0
                             ) {
@@ -538,7 +538,7 @@ fun GroupScreen(groupId: String) {
                 if (joinRequests.isNotEmpty()) {
                     Box(
                         modifier = Modifier
-                            .padding(horizontal = PaddingDefault)
+                            .padding(horizontal = 1.pad)
                             .shadow(1.dp, MaterialTheme.shapes.large)
                             .clip(MaterialTheme.shapes.large)
                             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
@@ -566,12 +566,12 @@ fun GroupScreen(groupId: String) {
                                 ui.setShowDescription(groupId, showDescription)
                             },
                             shape = MaterialTheme.shapes.large,
-                            elevation = CardDefaults.elevatedCardElevation(ElevationDefault),
+                            elevation = CardDefaults.elevatedCardElevation(1.elevation),
                             modifier = Modifier
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                         ) {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 var viewport by remember { mutableStateOf(Size(0f, 0f)) }
@@ -584,13 +584,13 @@ fun GroupScreen(groupId: String) {
                                         .verticalScroll(textScrollState)
                                         .onPlaced { viewport = it.boundsInParent().size }
                                         .fadingEdge(viewport, textScrollState)
-                                        .padding(PaddingDefault * 1.5f)
+                                        .padding(1.5f.pad)
                                 )
                                 Icon(
                                     Icons.Outlined.Close,
                                     null,
                                     modifier = Modifier
-                                        .padding(end = PaddingDefault * 1.5f)
+                                        .padding(end = 1.5f.pad)
                                 )
                             }
                         }
@@ -634,7 +634,7 @@ fun GroupScreen(groupId: String) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(PaddingDefault * 2)
+                                    .padding(2.pad)
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier
@@ -705,7 +705,7 @@ fun GroupScreen(groupId: String) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(PaddingDefault)
+                            .padding(1.pad)
                     ) {
                         if (joinRequestId == null) {
                             Button(
@@ -736,9 +736,9 @@ fun GroupScreen(groupId: String) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .padding(
-                                        top = PaddingDefault,
-                                        start = PaddingDefault,
-                                        end = PaddingDefault
+                                        top = 1.pad,
+                                        start = 1.pad,
+                                        end = 1.pad
                                     )
                                     .clip(MaterialTheme.shapes.large)
                                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
@@ -748,7 +748,7 @@ fun GroupScreen(groupId: String) {
                                     null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .5f),
                                     modifier = Modifier
-                                        .padding(start = PaddingDefault * 2, end = PaddingDefault)
+                                        .padding(start = 2.pad, end = 1.pad)
                                         .requiredSize(16.dp)
                                 )
                                 Text(
@@ -757,7 +757,7 @@ fun GroupScreen(groupId: String) {
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier
                                         .weight(1f)
-                                        .padding(PaddingDefault / 2)
+                                        .padding(.5f.pad)
                                         .heightIn(max = 64.dp)
                                 )
                                 IconButton(
@@ -809,7 +809,7 @@ fun GroupScreen(groupId: String) {
                                                     textAlign = TextAlign.Center,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     modifier = Modifier
-                                                        .padding(PaddingDefault)
+                                                        .padding(1.pad)
                                                         .fillMaxWidth()
                                                 )
                                             }
@@ -839,7 +839,7 @@ fun GroupScreen(groupId: String) {
                                                     textAlign = TextAlign.Center,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     modifier = Modifier
-                                                        .padding(PaddingDefault)
+                                                        .padding(1.pad)
                                                         .fillMaxWidth()
                                                 )
                                             }
@@ -886,7 +886,7 @@ fun GroupScreen(groupId: String) {
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .heightIn(max = 128.dp)
-                                                .padding(PaddingDefault)
+                                                .padding(1.pad)
                                                 .focusRequester(focusRequester)
                                         )
                                     }
@@ -956,7 +956,7 @@ fun GroupScreen(groupId: String) {
                                                 showMore = !showMore
                                             },
                                             modifier = Modifier
-                                                .padding(end = PaddingDefault)
+                                                .padding(end = 1.pad)
                                         ) {
                                             Icon(
                                                 if (showMore) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
@@ -997,8 +997,8 @@ fun GroupScreen(groupId: String) {
                                 },
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
-                                    .padding(bottom = PaddingDefault * 2, end = PaddingDefault * 2)
-                                    .size(32.dp + PaddingDefault)
+                                    .padding(bottom = 2.pad, end = 2.pad)
+                                    .size(32.dp + 1.pad)
                             ) {
                                 Icon(Icons.Outlined.Add, null, modifier = Modifier.size(16.dp))
                             }

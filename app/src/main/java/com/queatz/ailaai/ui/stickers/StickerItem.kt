@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Sticker
 
 @Composable
@@ -39,7 +39,7 @@ fun StickerItem(
                 style = MaterialTheme.typography.labelSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(PaddingDefault)
+                    .padding(1.pad)
             )
         }
     } else {

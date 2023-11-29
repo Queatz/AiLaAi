@@ -32,7 +32,7 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Group
 import com.queatz.db.Story
@@ -139,12 +139,12 @@ fun PublishStoryDialog(
         text = {
             val dialogScroll = rememberScrollState()
             Column(
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault / 2),
+                verticalArrangement = Arrangement.spacedBy(.5f.pad),
                 modifier = Modifier
                     .verticalScroll(dialogScroll)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    horizontalArrangement = Arrangement.spacedBy(1.pad),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val wordCount = storyContents.sumOf { it.wordCount() }
@@ -156,7 +156,7 @@ fun PublishStoryDialog(
                             text = stringResource(R.string.minimum_words_count, wordCount),
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
-                                .padding(bottom = PaddingDefault / 2)
+                                .padding(bottom = .5f.pad)
                                 .fillMaxWidth()
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
@@ -165,14 +165,14 @@ fun PublishStoryDialog(
                                     MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
                                     MaterialTheme.shapes.medium
                                 )
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                         )
                     }
                 }
                 if (containsCards == true) {
                     allCardsArePublished?.let { allCardsArePublished ->
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                            horizontalArrangement = Arrangement.spacedBy(1.pad),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (allCardsArePublished) {
@@ -183,7 +183,7 @@ fun PublishStoryDialog(
                                     text = stringResource(R.string.story_contains_draft_cards),
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier
-                                        .padding(bottom = PaddingDefault / 2)
+                                        .padding(bottom = .5f.pad)
                                         .fillMaxWidth()
                                         .clip(MaterialTheme.shapes.medium)
                                         .background(MaterialTheme.colorScheme.secondaryContainer)
@@ -192,7 +192,7 @@ fun PublishStoryDialog(
                                             MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
                                             MaterialTheme.shapes.medium
                                         )
-                                        .padding(PaddingDefault)
+                                        .padding(1.pad)
                                 )
                             }
                         }
@@ -200,7 +200,7 @@ fun PublishStoryDialog(
                 }
                 if (friendCount > 0) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                        horizontalArrangement = Arrangement.spacedBy(1.pad),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Outlined.Group, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -226,14 +226,14 @@ fun PublishStoryDialog(
                                 shareToGeo = null
                                 onLocationChanged(null)
                             }
-                            .padding(vertical = PaddingDefault / 2)
+                            .padding(vertical = .5f.pad)
                     ) {
                         val peopleNearby = stringResource(R.string.inline_people_nearby)
                         Icon(
                             Icons.Outlined.Place,
                             null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(end = PaddingDefault)
+                            modifier = Modifier.padding(end = 1.pad)
                         )
                         Text(
                             buildAnnotatedString {
@@ -249,7 +249,7 @@ fun PublishStoryDialog(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
-                                .padding(horizontal = PaddingDefault / 2)
+                                .padding(horizontal = .5f.pad)
                                 .size(16.dp)
                         )
                     }
@@ -263,13 +263,13 @@ fun PublishStoryDialog(
                             .clickable {
                                 showGroupsDialog = true
                             }
-                            .padding(vertical = PaddingDefault / 2)
+                            .padding(vertical = .5f.pad)
                     ) {
                         Icon(
                             Icons.Outlined.Forum,
                             null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(end = PaddingDefault)
+                            modifier = Modifier.padding(end = 1.pad)
                         )
                         Text(
                             buildAnnotatedString {
@@ -290,13 +290,13 @@ fun PublishStoryDialog(
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
-                                .padding(horizontal = PaddingDefault / 2)
+                                .padding(horizontal = .5f.pad)
                                 .size(16.dp)
                         )
                     }
                 }
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    horizontalArrangement = Arrangement.spacedBy(1.pad),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Outlined.Info, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -309,7 +309,7 @@ fun PublishStoryDialog(
                             showLocationDialog = true
                         }
                     ) {
-                        Icon(Icons.Outlined.Place, null, modifier = Modifier.padding(end = PaddingDefault))
+                        Icon(Icons.Outlined.Place, null, modifier = Modifier.padding(end = 1.pad))
                         Text(stringResource(R.string.add_a_location))
                     }
                     Text(
@@ -325,7 +325,7 @@ fun PublishStoryDialog(
                             showGroupsDialog = true
                         }
                     ) {
-                        Icon(Icons.Outlined.GroupAdd, null, modifier = Modifier.padding(end = PaddingDefault))
+                        Icon(Icons.Outlined.GroupAdd, null, modifier = Modifier.padding(end = 1.pad))
                         Text(stringResource(R.string.share_to_groups))
                     }
                     Text(
@@ -340,7 +340,7 @@ fun PublishStoryDialog(
 //
 //                    }
 //                ) {
-//                    Icon(Icons.Outlined.GroupAdd, null, modifier = Modifier.padding(end = PaddingDefault))
+//                    Icon(Icons.Outlined.GroupAdd, null, modifier = Modifier.padding(end = 1.pad))
 //                    Text("Add collaborators")
 //                }
 //                Text(
@@ -372,7 +372,7 @@ fun PublishStoryDialog(
             }
         },
         modifier = Modifier
-            .padding(PaddingDefault * 2)
+            .padding(2.pad)
             .imePadding()
     )
 

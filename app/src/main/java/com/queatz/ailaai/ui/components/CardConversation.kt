@@ -25,13 +25,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.authors
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Person
 import kotlin.math.ceil
@@ -79,7 +78,7 @@ fun CardConversation(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+        verticalArrangement = Arrangement.spacedBy(1.pad),
         modifier = modifier
     ) {
         val hasTitle = showTitle || stack.isNotEmpty()
@@ -208,7 +207,7 @@ fun CardConversation(
                             Button({
                                 onReply(stack.map { it.title } + current.title + it.title)
                             }) {
-                                Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
+                                Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = 1.pad))
                                 Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                             }
                         }
@@ -228,7 +227,7 @@ fun CardConversation(
                     Button({
                         onReply(stack.map { it.title } + current.title)
                     }) {
-                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = PaddingDefault))
+                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = 1.pad))
                         Text(
                             stringResource(R.string.message),
                             overflow = TextOverflow.Ellipsis,
@@ -248,7 +247,7 @@ fun CardConversation(
                         }
                     }) {
                         Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
-                        Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = PaddingDefault))
+                        Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = 1.pad))
                     }
                 }
             }

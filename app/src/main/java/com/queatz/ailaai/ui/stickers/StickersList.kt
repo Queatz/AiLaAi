@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.notBlank
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Sticker
 import com.queatz.db.StickerPack
 
@@ -35,9 +35,9 @@ fun StickerPackContents(
     onStickerClick: (Sticker) -> Unit,
 ) {
     LazyVerticalGrid(
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault),
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-        contentPadding = PaddingValues(PaddingDefault),
+        verticalArrangement = Arrangement.spacedBy(1.pad),
+        horizontalArrangement = Arrangement.spacedBy(1.pad),
+        contentPadding = PaddingValues(1.pad),
         columns = GridCells.Adaptive(80.dp),
         modifier = modifier
     ) {
@@ -47,7 +47,7 @@ fun StickerPackContents(
                     description,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(PaddingDefault * 2)
+                        .padding(2.pad)
                 )
             }
         }
@@ -67,7 +67,7 @@ fun StickerPackContents(
         if (showAddStickerButton) {
             item {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxSize()
@@ -76,7 +76,7 @@ fun StickerPackContents(
                         .clickable {
                             onAddStickerClick?.invoke()
                         }
-                        .padding(PaddingDefault * 2)
+                        .padding(2.pad)
                 ) {
                     Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.primary)
                     Text(

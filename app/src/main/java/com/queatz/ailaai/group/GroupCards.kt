@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.groupCards
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.isAtTop
@@ -21,7 +20,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.CardLayout
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import kotlinx.coroutines.launch
@@ -59,10 +58,10 @@ fun GroupCards(group: GroupExtended) {
         LazyVerticalGrid(
             state = state,
             contentPadding = PaddingValues(
-                bottom = PaddingDefault
+                bottom = 1.pad
             ),
-            horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+            horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
             modifier = Modifier.fillMaxSize(),
             columns = GridCells.Adaptive(240.dp)
         ) {
@@ -81,7 +80,7 @@ fun GroupCards(group: GroupExtended) {
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,
-                    modifier = Modifier.padding(horizontal = PaddingDefault)
+                    modifier = Modifier.padding(horizontal = 1.pad)
                 )
             }
         }

@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.scrollToTop
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
@@ -26,7 +26,7 @@ fun RowScope.StoryTitle(state: LazyGridState, story: Story?) {
         isScrolled,
         modifier = Modifier
             .weight(1f)
-            .padding(horizontal = PaddingDefault),
+            .padding(horizontal = 1.pad),
         label = ""
     ) {
         when (it) {

@@ -27,7 +27,7 @@ import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Sticker
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
@@ -231,7 +231,7 @@ fun StickerPackEditorScreen(stickerPackId: String) {
                 var showMenu by rememberStateOf(false)
                 stickerPack?.let { stickerPack ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+                        horizontalArrangement = Arrangement.spacedBy(1.pad)
                     ) {
                         UseStickerPackButton(stickerPack) {
                             scope.launch {
@@ -278,7 +278,7 @@ fun StickerPackEditorScreen(stickerPackId: String) {
             val stickerPack = stickerPack
             if (stickerPack == null) {
                 Loading(
-                    modifier = Modifier.padding(top = PaddingDefault)
+                    modifier = Modifier.padding(top = 1.pad)
                 )
             } else {
                 StickerPackContents(

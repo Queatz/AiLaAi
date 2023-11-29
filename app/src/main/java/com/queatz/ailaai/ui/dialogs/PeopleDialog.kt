@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.PersonMember
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 
 @Composable
@@ -29,12 +29,12 @@ fun PeopleDialog(
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
         ) {
             Text(
                 if (showCountInTitle) "$title (${people.size})" else title,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = PaddingDefault)
+                modifier = Modifier.padding(bottom = 1.pad)
             )
             LazyColumn(
                 modifier = Modifier
@@ -45,7 +45,7 @@ fun PeopleDialog(
                 }
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()
             ) {

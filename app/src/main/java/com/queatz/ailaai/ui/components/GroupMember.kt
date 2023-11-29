@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 
 @Composable fun PersonMember(person: Person, selected: Boolean = false, infoFormatter: (Person) -> String? = { null }, onClick: () -> Unit) {
@@ -58,8 +58,8 @@ fun GroupMember(photos: List<ContactPhoto>?, name: String, info: String?, select
         Column(
             modifier = Modifier
                 .padding(
-                    vertical = PaddingDefault,
-                    horizontal = if (photos == null) PaddingDefault * 2 else PaddingDefault
+                    vertical = 1.pad,
+                    horizontal = if (photos == null) 2.pad else 1.pad
                 )
         ) {
             Text(

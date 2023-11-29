@@ -42,7 +42,7 @@ import com.queatz.ailaai.ui.components.CardOptions
 import com.queatz.ailaai.ui.components.ConversationAction
 import com.queatz.ailaai.ui.components.ConversationItem
 import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -98,13 +98,13 @@ fun EditCardDialog(
 
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
                 .verticalScroll(scrollState)
         ) {
             Text(
                 if (create) stringResource(R.string.create_page) else stringResource(R.string.edit),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = PaddingDefault)
+                modifier = Modifier.padding(bottom = 1.pad)
             )
             OutlinedTextField(
                 cardName,
@@ -149,7 +149,7 @@ fun EditCardDialog(
                     .fillMaxWidth()
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                verticalArrangement = Arrangement.spacedBy(1.pad),
                 modifier = Modifier
             ) {
                 if (backstack.isNotEmpty()) {
@@ -162,7 +162,7 @@ fun EditCardDialog(
                         Icon(
                             Icons.Outlined.ArrowBack,
                             stringResource(R.string.go_back),
-                            modifier = Modifier.padding(end = PaddingDefault)
+                            modifier = Modifier.padding(end = 1.pad)
                         )
                         Text(
                             backstack.last().message.notBlank
@@ -202,7 +202,7 @@ fun EditCardDialog(
                         stringResource(R.string.card_reply_description, cardConversation.title),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
+                        modifier = Modifier.padding(PaddingValues(bottom = 1.pad))
                     )
                 }
 
@@ -291,7 +291,7 @@ fun EditCardDialog(
                         Icon(
                             Icons.Outlined.Add,
                             stringResource(R.string.add_an_option),
-                            modifier = Modifier.padding(end = PaddingDefault)
+                            modifier = Modifier.padding(end = 1.pad)
                         )
                         Text(stringResource(R.string.add_an_option))
                     }
@@ -299,13 +299,13 @@ fun EditCardDialog(
                 Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                        horizontalArrangement = Arrangement.spacedBy(1.pad),
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.large)
                             .clickable {
                                 enableReplies = !enableReplies
                             }
-                            .padding(end = PaddingDefault * 2)) {
+                            .padding(end = 2.pad)) {
                         Checkbox(enableReplies, {
                             enableReplies = it
                         })
@@ -317,13 +317,13 @@ fun EditCardDialog(
                     AnimatedVisibility(enableReplies) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                            horizontalArrangement = Arrangement.spacedBy(1.pad),
                             modifier = Modifier
                                 .clip(MaterialTheme.shapes.large)
                                 .clickable {
                                     enableWebReplies = !enableWebReplies
                                 }
-                                .padding(end = PaddingDefault * 2)) {
+                                .padding(end = 2.pad)) {
                             Checkbox(enableWebReplies, {
                                 enableWebReplies = it
                             })
@@ -336,7 +336,7 @@ fun EditCardDialog(
                 }
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {

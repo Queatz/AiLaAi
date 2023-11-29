@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlin.math.abs
 
 enum class MainTab {
@@ -54,7 +54,7 @@ fun MainTabs(tab: MainTab, onTab: (MainTab) -> Unit, tabs: List<MainTab>? = null
             )
         },
         modifier = Modifier
-            .padding(start = PaddingDefault, end = PaddingDefault, bottom = PaddingDefault / 2)
+            .padding(start = 1.pad, end = 1.pad, bottom = .5f.pad)
     ) {
         (tabs?.sortedBy { it.ordinal } ?: MainTab.entries).forEachIndexed { index, it ->
             Tab(
@@ -71,7 +71,7 @@ fun MainTabs(tab: MainTab, onTab: (MainTab) -> Unit, tabs: List<MainTab>? = null
                     stringResource(it.stringResource),
                     fontWeight = if (tab.ordinal == index) FontWeight.Black else FontWeight.Normal,
                     modifier = Modifier
-                        .padding(PaddingDefault)
+                        .padding(1.pad)
                 )
             }
         }

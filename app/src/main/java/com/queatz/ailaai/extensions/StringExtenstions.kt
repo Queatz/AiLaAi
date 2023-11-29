@@ -108,7 +108,7 @@ suspend fun Bitmap.save(context: Context): Uri? {
     val filename = "ailaai_photo_${Clock.System.now()}.jpg"
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")// todo use PNG if it has transparency
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
             put(MediaStore.Video.Media.IS_PENDING, 1)

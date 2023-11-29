@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -22,7 +21,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.theme.ElevationDefault
+import com.queatz.ailaai.ui.theme.elevation
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -39,7 +38,7 @@ fun SearchField(
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(),
-        elevation = CardDefaults.elevatedCardElevation(ElevationDefault / 2),
+        elevation = CardDefaults.elevatedCardElevation(.5f.elevation),
         modifier = modifier
             .widthIn(max = 480.dp)
             .fillMaxWidth()

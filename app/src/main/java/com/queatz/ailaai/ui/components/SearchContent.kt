@@ -19,8 +19,8 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.helpers.LocationSelector
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun SearchContent(
@@ -32,14 +32,14 @@ fun SearchContent(
 ) {
     if (locationSelector.isManual) {
         ElevatedButton(
-            elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault * 2),
+            elevation = ButtonDefaults.elevatedButtonElevation(2.elevation),
             onClick = {
                 locationSelector.reset()
             }
         ) {
             Text(
                 stringResource(R.string.reset_location),
-                modifier = Modifier.padding(end = PaddingDefault)
+                modifier = Modifier.padding(end = 1.pad)
             )
             Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
         }
@@ -52,11 +52,11 @@ fun SearchContent(
         var viewport by remember { mutableStateOf(Size(0f, 0f)) }
         val scrollState = rememberScrollState()
         Row(
-            horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+            horizontalArrangement = Arrangement.spacedBy(1.pad),
             modifier = Modifier
                 .horizontalScroll(scrollState)
                 .onPlaced { viewport = it.boundsInParent().size }
-                .padding(horizontal = PaddingDefault * 2)
+                .padding(horizontal = 2.pad)
         ) {
             categories.forEachIndexed { index, it ->
                 Button(
@@ -69,7 +69,7 @@ fun SearchContent(
                             }
                         )
                     },
-                    elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault / 2),
+                    elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
                     colors = if (category != it) ButtonDefaults.outlinedButtonColors(
                         containerColor = MaterialTheme.colorScheme.background,
                         contentColor = MaterialTheme.colorScheme.onBackground

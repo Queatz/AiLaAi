@@ -26,7 +26,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.components.GroupPhoto
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.JoinRequestAndPerson
 import kotlinx.coroutines.launch
 
@@ -37,13 +37,13 @@ fun GroupJoinRequest(joinRequest: JoinRequestAndPerson, onChange: () -> Unit) {
     val nav = nav
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+        horizontalArrangement = Arrangement.spacedBy(1.pad),
         modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .clickable {
                 nav.navigate("profile/${joinRequest.joinRequest!!.person!!}")
             }
-            .padding(PaddingDefault)
+            .padding(1.pad)
     ) {
         GroupPhoto(joinRequest.person!!.contactPhoto().inList(), padding = 0.dp)
         Column(

@@ -28,7 +28,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 
 @Composable
@@ -39,7 +39,7 @@ fun ChooseCardDialog(
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
         ) {
             ChooseCardSelector(
                 modifier = Modifier.weight(1f)
@@ -48,7 +48,7 @@ fun ChooseCardDialog(
                 onCard(it)
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -111,12 +111,12 @@ fun ChooseCardSelector(
         }),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = PaddingDefault)
+            .padding(bottom = 1.pad)
             .focusRequester(focusRequester)
     )
     LazyVerticalGrid(
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+        verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
         columns = GridCells.Adaptive(120.dp),
         modifier = modifier
     ) {

@@ -29,7 +29,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.EVENT_TIMELINE_CHANGED
 import androidx.media3.exoplayer.ExoPlayer
 import com.queatz.ailaai.extensions.formatTime
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.android.awaitFrame
 
 enum class PlaybackSpeed(val factor: Float) {
@@ -158,7 +158,7 @@ fun Audio(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(
-                    horizontal = PaddingDefault
+                    horizontal = 1.pad
                 )
                 .fillMaxSize()
         ) {
@@ -199,7 +199,7 @@ fun Audio(
                 duration > 0,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = PaddingDefault),
+                    .padding(end = 1.pad),
                 label = ""
             ) { show ->
                 if (show) {

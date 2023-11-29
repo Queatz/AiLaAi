@@ -16,10 +16,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
 @Composable
@@ -49,13 +48,13 @@ fun TextFieldDialog(
         val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
                 .verticalScroll(scrollState)
         ) {
             Text(
                 title,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = PaddingDefault)
+                modifier = Modifier.padding(bottom = 1.pad)
             )
             extraContent?.invoke(this)
             OutlinedTextField(
@@ -74,11 +73,11 @@ fun TextFieldDialog(
                 placeholder = { Text(placeholder, modifier = Modifier.alpha(0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = PaddingDefault)
+                    .padding(bottom = 1.pad)
                     .focusRequester(focusRequester)
             )
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {

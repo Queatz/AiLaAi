@@ -11,10 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.TravelExplore
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,8 +49,8 @@ import com.queatz.ailaai.ui.stickers.StickerPackScreen
 import com.queatz.ailaai.ui.stickers.StickerPacksScreen
 import com.queatz.ailaai.ui.story.*
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -70,10 +67,10 @@ class MainActivity : AppCompatActivity() {
 
     private val menuItems by lazy {
         listOf(
-            NavButton("messages", getString(R.string.talk), Icons.Outlined.People),
+            NavButton("messages", getString(R.string.talk), Icons.Outlined.Group),
             NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
-            NavButton("explore", getString(R.string.explore), Icons.Outlined.TravelExplore),
-            NavButton("stories", getString(R.string.stories), Icons.Outlined.Explore),
+            NavButton("explore", getString(R.string.cards), Icons.Outlined.Home),
+            NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
         )
     }
 
@@ -320,11 +317,11 @@ class MainActivity : AppCompatActivity() {
                                                                 style = MaterialTheme.typography.labelSmall,
                                                                 fontWeight = FontWeight.Bold,
                                                                 modifier = Modifier
-                                                                    .offset(PaddingDefault * 2, -PaddingDefault / 2)
+                                                                    .offset(2.pad, -2.pad)
                                                                     .align(Alignment.TopEnd)
                                                                     .clip(CircleShape)
                                                                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                                                                    .padding(PaddingDefault, PaddingDefault / 4)
+                                                                    .padding(1.pad, .25f.pad)
                                                             )
                                                         }
                                                         if (item.route == "stories" && (presence?.unreadStoriesCount
@@ -337,11 +334,11 @@ class MainActivity : AppCompatActivity() {
                                                                 style = MaterialTheme.typography.labelSmall,
                                                                 fontWeight = FontWeight.Bold,
                                                                 modifier = Modifier
-                                                                    .offset(PaddingDefault * 2, -PaddingDefault / 2)
+                                                                    .offset(2.pad, -.5f.pad)
                                                                     .align(Alignment.TopEnd)
                                                                     .clip(CircleShape)
                                                                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                                                                    .padding(PaddingDefault, PaddingDefault / 4)
+                                                                    .padding(1.pad, .25f.pad)
                                                             )
                                                         }
                                                     }
@@ -369,7 +366,7 @@ class MainActivity : AppCompatActivity() {
                                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut()
                                 ) {
                                     PermanentDrawerSheet(Modifier.width(240.dp)) {
-                                        Spacer(Modifier.height(PaddingDefault))
+                                        Spacer(Modifier.height(1.pad))
                                         menuItems.forEach { item ->
                                             NavigationDrawerItem(
                                                 icon = { Icon(item.icon, contentDescription = null) },
@@ -401,7 +398,7 @@ class MainActivity : AppCompatActivity() {
                                                     navController.popBackStack()
                                                     navController.navigate(item.route)
                                                 },
-                                                modifier = Modifier.padding(horizontal = PaddingDefault / 2)
+                                                modifier = Modifier.padding(horizontal = .5f.pad)
                                             )
                                         }
                                     }
@@ -537,10 +534,10 @@ class MainActivity : AppCompatActivity() {
                                                 lastSay ?: "",
                                                 modifier = Modifier
                                                     .padding(
-                                                        horizontal = PaddingDefault * 3,
-                                                        vertical = PaddingDefault * (isLandscape { 6 } ?: 12)
+                                                        horizontal = 3.pad,
+                                                        vertical = 1.pad * (isLandscape { 6 } ?: 12)
                                                     )
-                                                    .shadow(ElevationDefault, MaterialTheme.shapes.large)
+                                                    .shadow(1.elevation, MaterialTheme.shapes.large)
                                                     .clip(MaterialTheme.shapes.large)
                                                     .background(MaterialTheme.colorScheme.surface)
                                                     .clickable {
@@ -548,8 +545,8 @@ class MainActivity : AppCompatActivity() {
                                                         context.toast(R.string.copied)
                                                     }
                                                     .padding(
-                                                        horizontal = PaddingDefault * 2,
-                                                        vertical = PaddingDefault
+                                                        horizontal = 2.pad,
+                                                        vertical = 1.pad
                                                     )
                                             )
                                         }

@@ -31,7 +31,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Message
@@ -241,7 +241,7 @@ fun ContactResult(
             color = if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
             fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier
-                .padding(PaddingDefault)
+                .padding(1.pad)
                 .let {
                     if (bold) {
                         it
@@ -256,7 +256,7 @@ fun ContactResult(
                 null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(end = PaddingDefault)
+                    .padding(end = 1.pad)
             )
         }
     }

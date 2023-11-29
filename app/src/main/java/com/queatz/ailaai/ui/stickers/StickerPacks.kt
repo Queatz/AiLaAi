@@ -23,7 +23,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Dropdown
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Sticker
 import com.queatz.db.StickerPack
 
@@ -43,7 +43,7 @@ fun StickerPacks(
         ) {
             Text(
                 text = stringResource(R.string.no_sticker_packs),
-                modifier = Modifier.align(Alignment.Center).padding(PaddingDefault * 2)
+                modifier = Modifier.align(Alignment.Center).padding(2.pad)
             )
         }
     } else {
@@ -66,7 +66,7 @@ fun StickerPacks(
                         Text(
                             stickerPack.name ?: "",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(PaddingDefault)
+                            modifier = Modifier.padding(1.pad)
                         )
                         if (edit) {
                             IconButton(
@@ -108,8 +108,8 @@ fun StickerPacks(
                         }
                     }
                     LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-                        contentPadding = PaddingValues(PaddingDefault)
+                        horizontalArrangement = Arrangement.spacedBy(1.pad),
+                        contentPadding = PaddingValues(1.pad)
                     ) {
                         items(stickerPack.stickers ?: emptyList(), key = { it.id!! }) { sticker ->
                             StickerItem(

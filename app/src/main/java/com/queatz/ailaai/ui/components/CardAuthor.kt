@@ -35,7 +35,7 @@ import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 
 @Composable
@@ -51,7 +51,7 @@ fun CardAuthor(
 
     LazyRow(
         state = scrollState,
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+        horizontalArrangement = Arrangement.spacedBy(1.pad),
         modifier = modifier
             .fillMaxWidth()
             .onPlaced { viewport = it.boundsInParent().size }
@@ -59,7 +59,7 @@ fun CardAuthor(
     ) {
         items(people) { person ->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                horizontalArrangement = Arrangement.spacedBy(1.pad),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .let {

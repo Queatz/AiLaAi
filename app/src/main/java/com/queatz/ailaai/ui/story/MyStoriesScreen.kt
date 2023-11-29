@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
@@ -21,8 +20,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
@@ -70,12 +68,12 @@ fun MyStoriesScreen() {
                     state = state,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
-                        top = PaddingDefault,
-                        start = PaddingDefault,
-                        end = PaddingDefault,
-                        bottom = PaddingDefault + 80.dp
+                        top = 1.pad,
+                        start = 1.pad,
+                        end = 1.pad,
+                        bottom = 1.pad + 80.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2)
+                    verticalArrangement = Arrangement.spacedBy(2.pad)
                 ) {
                     items(
                         shownStories

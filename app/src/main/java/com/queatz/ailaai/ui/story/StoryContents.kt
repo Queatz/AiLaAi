@@ -31,7 +31,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 
@@ -86,13 +86,13 @@ fun StoryContents(
             state = state,
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(
-                PaddingDefault * 2,
+                2.pad,
                 0.dp,
-                PaddingDefault * 2,
-                PaddingDefault * 2 + bottomContentPadding
+                2.pad,
+                2.pad + bottomContentPadding
             ),
-            horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Start),
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+            horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
             modifier = Modifier
                 .onPlaced {
                     size = it.boundsInParent().size
@@ -114,7 +114,7 @@ fun StoryContents(
                                 Icon(
                                     Icons.Outlined.Flare,
                                     null,
-                                    modifier = Modifier.padding(PaddingDefault * 2)
+                                    modifier = Modifier.padding(2.pad)
                                 )
                             }
                         }
@@ -123,7 +123,7 @@ fun StoryContents(
                     is StoryContent.Title -> {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                                horizontalArrangement = Arrangement.spacedBy(1.pad),
                             ) {
                                 Text(
                                     content.title,
@@ -135,7 +135,7 @@ fun StoryContents(
                                             if (actions == null) {
                                                 it
                                             } else {
-                                                it.padding(top = PaddingDefault)
+                                                it.padding(top = 1.pad)
                                                     .clickable(
                                                         remember { MutableInteractionSource() },
                                                         indication = null

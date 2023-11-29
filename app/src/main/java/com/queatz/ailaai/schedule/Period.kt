@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.datetime.Instant
 
@@ -32,10 +32,10 @@ fun LazyListScope.Period(
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier
                 .padding(
-                    start = PaddingDefault,
-                    end = PaddingDefault,
-                    top = PaddingDefault * 2,
-                    bottom = PaddingDefault,
+                    start = 1.pad,
+                    end = 1.pad,
+                    top = 2.pad,
+                    bottom = 1.pad,
                 )
         )
     }

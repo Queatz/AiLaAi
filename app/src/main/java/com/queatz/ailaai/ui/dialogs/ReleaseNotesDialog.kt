@@ -22,7 +22,7 @@ import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.VersionInfo
 
 @Composable
@@ -53,12 +53,12 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
         ) {
             Text(
                 stringResource(R.string.release_history),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = PaddingDefault)
+                modifier = Modifier.padding(bottom = 1.pad)
             )
             AnimatedVisibility(versionInfo != null) {
                 versionInfo?.let { versionInfo ->
@@ -70,7 +70,7 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                         },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = PaddingDefault)
+                        modifier = Modifier.padding(bottom = 1.pad)
                     )
                 }
             }
@@ -82,7 +82,7 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                 Text(releaseNotes)
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {

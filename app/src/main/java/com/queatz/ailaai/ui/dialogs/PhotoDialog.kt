@@ -21,10 +21,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.Video
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.serialization.Serializable
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 
@@ -66,7 +65,7 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                 state = state,
                 flingBehavior = rememberSnapFlingBehavior(state),
                 reverseLayout = true,
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
+                horizontalArrangement = Arrangement.spacedBy(2.pad),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(medias) { media ->

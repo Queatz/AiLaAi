@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun DialogBase(
@@ -31,7 +31,7 @@ fun DialogBase(
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
-                .padding(PaddingDefault * 2)
+                .padding(2.pad)
                 .imePadding()
                 .then(modifier)
         ) {

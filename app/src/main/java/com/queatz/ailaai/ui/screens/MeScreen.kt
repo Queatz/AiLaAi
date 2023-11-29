@@ -29,8 +29,8 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -176,13 +176,13 @@ fun MeScreen() {
                 LazyVerticalGrid(
                     state = state,
                     contentPadding = PaddingValues(
-                        PaddingDefault,
-                        PaddingDefault,
-                        PaddingDefault,
-                        PaddingDefault + 80.dp + 58.dp
+                        1.pad,
+                        1.pad,
+                        1.pad,
+                        1.pad + 80.dp + 58.dp
                     ),
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.Top),
+                    horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Adaptive(240.dp)
                 ) {
@@ -210,7 +210,7 @@ fun MeScreen() {
                                 stringResource(if (cardParentType == null && filters.isEmpty() && searchText.isBlank()) R.string.you_have_no_cards else R.string.no_cards_to_show),
                                 color = MaterialTheme.colorScheme.secondary,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(PaddingDefault * 2)
+                                modifier = Modifier.padding(2.pad)
                             )
                         }
                     }
@@ -218,9 +218,9 @@ fun MeScreen() {
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                verticalArrangement = Arrangement.spacedBy(1.pad),
                 modifier = Modifier
-                    .padding(vertical = PaddingDefault * 2)
+                    .padding(vertical = 2.pad)
                     .widthIn(max = 480.dp)
                     .fillMaxWidth()
             ) {
@@ -231,14 +231,14 @@ fun MeScreen() {
                         .fillMaxWidth()
                         .horizontalScroll(scrollState)
                         .onPlaced { viewport = it.boundsInParent().size }
-                        .padding(horizontal = PaddingDefault)
+                        .padding(horizontal = 1.pad)
                 ) {
                     CardParentSelector(
                         cardParentType,
                         modifier = Modifier
                             .wrapContentWidth(unbounded = true)
-                            .padding(horizontal = PaddingDefault)
-                            .padding(bottom = PaddingDefault / 2),
+                            .padding(horizontal = 1.pad)
+                            .padding(bottom = .5f.pad),
                         showOffline = true
                     ) {
                         setParentType(if (it == cardParentType) null else it)
@@ -247,12 +247,12 @@ fun MeScreen() {
                         {
                             setFilters(filters.minus(Filter.NotActive).toggle(Filter.Active))
                         },
-                              elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault / 2),
+                              elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
                         colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onBackground
                         ) else ButtonDefaults.buttonColors(),
-                        modifier = Modifier.padding(end = PaddingDefault)
+                        modifier = Modifier.padding(end = 1.pad)
                     ) {
                         Text(stringResource(R.string.published))
                     }
@@ -260,12 +260,12 @@ fun MeScreen() {
                         {
                             setFilters(filters.minus(Filter.Active).toggle(Filter.NotActive))
                         },
-                               elevation = ButtonDefaults.elevatedButtonElevation(ElevationDefault / 2),
+                               elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
                         colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onBackground
                         ) else ButtonDefaults.buttonColors(),
-                        modifier = Modifier.padding(end = PaddingDefault)
+                        modifier = Modifier.padding(end = 1.pad)
                     ) {
                         Text(stringResource(R.string.draft))
                     }
@@ -273,7 +273,7 @@ fun MeScreen() {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(horizontal = PaddingDefault * 2)
+                        .padding(horizontal = 2.pad)
                 ) {
                     Box(
                         modifier = Modifier
@@ -290,7 +290,7 @@ fun MeScreen() {
                             newCard = Card()
                         },
                         modifier = Modifier
-                            .padding(start = PaddingDefault * 2)
+                            .padding(start = 2.pad)
                     ) {
                         Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
                     }

@@ -48,7 +48,7 @@ import com.queatz.ailaai.extensions.isTrue
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import kotlinx.coroutines.launch
@@ -62,7 +62,6 @@ fun EditCardLocationDialog(
     onDismissRequest: () -> Unit,
     onChange: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current!!
     val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(activity)
 
@@ -125,13 +124,13 @@ fun EditCardLocationDialog(
     DialogBase(onDismissRequest, dismissable = false, modifier = Modifier.wrapContentHeight()) {
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
                 .verticalScroll(scrollState, enabled = scrollEnabled)
         ) {
             Text(
                 stringResource(R.string.card_location),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = PaddingDefault)
+                modifier = Modifier.padding(bottom = 1.pad)
             )
             val state = rememberScrollState()
             var viewport by remember { mutableStateOf(Size(0f, 0f)) }
@@ -205,7 +204,7 @@ fun EditCardLocationDialog(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = PaddingDefault),
+                        .padding(top = 1.pad),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary
@@ -217,7 +216,7 @@ fun EditCardLocationDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = PaddingDefault)
+                                .padding(vertical = 1.pad)
                         )
                     }
 
@@ -226,7 +225,7 @@ fun EditCardLocationDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f)
-                                .padding(PaddingValues(vertical = PaddingDefault * 2))
+                                .padding(PaddingValues(vertical = 2.pad))
                                 .clip(MaterialTheme.shapes.large)
                                 .background(MaterialTheme.colorScheme.primaryContainer)
                                 .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
@@ -250,7 +249,7 @@ fun EditCardLocationDialog(
                             stringResource(R.string.map_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(PaddingValues(bottom = PaddingDefault))
+                            modifier = Modifier.padding(PaddingValues(bottom = 1.pad))
                         )
                     }
 
@@ -289,11 +288,11 @@ fun EditCardLocationDialog(
                                     }),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = PaddingDefault)
+                                        .padding(bottom = 1.pad)
                                 )
                                 LazyVerticalGrid(
-                                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
-                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                                    horizontalArrangement = Arrangement.spacedBy(1.pad),
+                                    verticalArrangement = Arrangement.spacedBy(1.pad),
                                     columns = GridCells.Adaptive(120.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -325,7 +324,7 @@ fun EditCardLocationDialog(
                                     card = parentCard!!,
                                     isChoosing = true,
                                     modifier = Modifier
-                                        .padding(top = PaddingDefault)
+                                        .padding(top = 1.pad)
                                 )
                             }
                         }
@@ -359,7 +358,7 @@ fun EditCardLocationDialog(
                                     }),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = PaddingDefault)
+                                        .padding(bottom = 1.pad)
                                 )
 
                                 LaunchedEffect(groups, searchGroupsValue) {
@@ -380,8 +379,8 @@ fun EditCardLocationDialog(
 
                                 LazyColumn(
                                     state = state,
-                                    contentPadding = PaddingValues(PaddingDefault),
-                                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                                    contentPadding = PaddingValues(1.pad),
+                                    verticalArrangement = Arrangement.spacedBy(1.pad),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.fillMaxSize()
                                         .fillMaxWidth()
@@ -405,7 +404,7 @@ fun EditCardLocationDialog(
                             else -> {
                                 Column(
                                     modifier = Modifier
-                                        .padding(vertical = PaddingDefault)
+                                        .padding(vertical = 1.pad)
                                 ) {
                                     ContactItem(
                                         onClick = {
@@ -427,13 +426,13 @@ fun EditCardLocationDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = PaddingDefault)
+                                .padding(vertical = 1.pad)
                         )
                     }
                 }
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {

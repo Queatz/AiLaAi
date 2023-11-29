@@ -12,7 +12,7 @@ import app.ailaai.api.invite
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.shareAsText
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun InviteDialog(meName: String, onDismissRequest: () -> Unit) {
@@ -57,7 +57,7 @@ fun InviteDialog(meName: String, onDismissRequest: () -> Unit) {
         title = { Text(stringResource(R.string.invite_code)) },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault)
+                verticalArrangement = Arrangement.spacedBy(1.pad)
             ) {
                 if (inviteCode.isBlank()) {
                     CircularProgressIndicator()

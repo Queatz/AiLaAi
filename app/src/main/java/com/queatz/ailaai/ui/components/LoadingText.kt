@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun LoadingText(
@@ -23,7 +23,7 @@ fun LoadingText(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp + PaddingDefault * 2)
+                .height(48.dp + 2.pad)
         ) {
             Text(
                 text,

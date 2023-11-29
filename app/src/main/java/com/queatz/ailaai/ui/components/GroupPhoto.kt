@@ -21,7 +21,7 @@ import coil.compose.AsyncImage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.nullIfBlank
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 private fun Modifier.multiPhoto(size: Dp, padding: Dp): Modifier = composed {
     this
@@ -52,7 +52,7 @@ fun GroupPhoto(
     photos: List<ContactPhoto>,
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
-    padding: Dp = PaddingDefault,
+    padding: Dp = 1.pad,
     border: Boolean = false
 ) {
     if (photos.isEmpty()) {

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun PageInput(
@@ -14,9 +14,9 @@ fun PageInput(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+        verticalArrangement = Arrangement.spacedBy(1.pad),
         modifier = Modifier
-            .padding(vertical = PaddingDefault * 2)
+            .padding(vertical = 2.pad)
             .widthIn(max = 480.dp)
             .fillMaxWidth()
             .then(modifier)

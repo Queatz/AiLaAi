@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +20,7 @@ import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.shortAgo
 import com.queatz.ailaai.ui.components.GroupPhoto
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import kotlinx.datetime.Instant
@@ -30,8 +29,8 @@ import kotlinx.datetime.Instant
 @Composable
 fun Friends(people: List<Person>, onLongClick: (Person) -> Unit, onClick: (Person) -> Unit) {
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
-        contentPadding = PaddingValues(PaddingDefault)
+        horizontalArrangement = Arrangement.spacedBy(2.pad),
+        contentPadding = PaddingValues(1.pad)
     ) {
         items(people) {
             Column(
@@ -57,7 +56,7 @@ fun Friends(people: List<Person>, onLongClick: (Person) -> Unit, onClick: (Perso
                     it.seen?.shortAgo() ?: "",
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier
-                        .padding(top = PaddingDefault)
+                        .padding(top = 1.pad)
                 )
             }
         }

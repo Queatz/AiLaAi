@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun Stub(text: String, onClick: (() -> Unit)? = null) {
@@ -35,6 +35,6 @@ fun Stub(text: String, onClick: (() -> Unit)? = null) {
                     }
                 } ?: Modifier
             )
-            .padding(PaddingDefault * 2)
+            .padding(2.pad)
     )
 }

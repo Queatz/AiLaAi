@@ -16,7 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import app.ailaai.api.card
 import app.ailaai.api.group
 import coil.compose.AsyncImage
@@ -27,10 +26,9 @@ import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.StoryContent
 import com.queatz.ailaai.ui.story.Stub
 import com.queatz.ailaai.ui.story.stringResource
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
-import com.queatz.db.Person
 
 @Composable
 fun ReorderStoryContentsDialog(
@@ -62,7 +60,7 @@ fun ReorderStoryContentsDialog(
         when (it) {
             is StoryContent.Cards -> {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+                    horizontalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     items(it.cards, key = { it }) { cardId ->
                         var card by remember { mutableStateOf<Card?>(null) }
@@ -106,7 +104,7 @@ fun ReorderStoryContentsDialog(
 
             is StoryContent.Photos -> {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(PaddingDefault)
+                    horizontalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     items(it.photos, key = { it }) { photo ->
                         AsyncImage(
@@ -133,9 +131,9 @@ fun ReorderStoryContentsDialog(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(PaddingDefault),
+                        horizontalArrangement = Arrangement.spacedBy(1.pad),
                         modifier = Modifier
-                            .padding(PaddingDefault)
+                            .padding(1.pad)
                     ) {
                         Icon(Icons.Outlined.PlayCircle, null)
                         Text(
@@ -169,7 +167,7 @@ fun ReorderStoryContentsDialog(
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                        .padding(PaddingDefault * 2)
+                        .padding(2.pad)
                 )
             }
 
@@ -183,7 +181,7 @@ fun ReorderStoryContentsDialog(
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                        .padding(PaddingDefault * 2)
+                        .padding(2.pad)
                 )
             }
 

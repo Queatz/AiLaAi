@@ -22,7 +22,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Report
 import com.queatz.db.ReportType
 
@@ -112,7 +112,7 @@ fun ReportDialog(entity: String, onDismissRequest: () -> Unit) {
                     Text(stringResource(R.string.this_is_urgent))
                 }
             }
-            Box(modifier = Modifier.height(PaddingDefault * 2))
+            Box(modifier = Modifier.height(2.pad))
         }
     ) { value ->
         api.sendReport(

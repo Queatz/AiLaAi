@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 enum class ProcessingVideoStage {
     Processing,
@@ -53,7 +53,7 @@ fun ProcessingVideoDialog(
                 Text(
                     stringResource(R.string.please_wait),
                     modifier = Modifier
-                        .padding(start = PaddingDefault * 2)
+                        .padding(start = 2.pad)
                 )
             }
         },

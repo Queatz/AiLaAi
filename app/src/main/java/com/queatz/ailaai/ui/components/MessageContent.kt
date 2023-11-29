@@ -44,12 +44,12 @@ import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryCard
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ColumnScope.MessageContent(
     message: Message,
@@ -305,11 +305,11 @@ fun ColumnScope.MessageContent(
                 .align(if (isMe) Alignment.End else Alignment.Start)
                 .let {
                     when (isMe) {
-                        true -> it.padding(start = PaddingDefault * 8)
-                        false -> it.padding(end = PaddingDefault * 8)
+                        true -> it.padding(start = 8.pad)
+                        false -> it.padding(end = 8.pad)
                     }
                 }
-                .padding(horizontal = PaddingDefault)
+                .padding(horizontal = 1.pad)
                 .clip(
                     when (isMe) {
                         true -> RoundedCornerShape(
@@ -349,8 +349,8 @@ fun ColumnScope.MessageContent(
                     }
                     .let {
                         when (isMe) {
-                            true -> it.padding(end = 4.dp + PaddingDefault)
-                            false -> it.padding(start = 4.dp + PaddingDefault)
+                            true -> it.padding(end = 4.dp + 1.pad)
+                            false -> it.padding(start = 4.dp + 1.pad)
                         }
                     }
             ) {
@@ -384,17 +384,17 @@ fun ColumnScope.MessageContent(
 
     attachedCardId?.let {
         Box(modifier = Modifier
-            .padding(PaddingDefault)
+            .padding(1.pad)
             .widthIn(max = 320.dp)
             .let {
                 if (isReply) {
                     it
                 } else {
                     when (isMe) {
-                        true -> it.padding(start = PaddingDefault * 12)
+                        true -> it.padding(start = 12.pad)
                             .align(Alignment.End)
 
-                        false -> it.padding(end = PaddingDefault * 12)
+                        false -> it.padding(end = 12.pad)
                             .align(Alignment.Start)
                     }
                 }
@@ -416,19 +416,19 @@ fun ColumnScope.MessageContent(
 
     attachedPhotos?.ifNotEmpty?.let { photos ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+            verticalArrangement = Arrangement.spacedBy(1.pad),
             horizontalAlignment = if (isMe) Alignment.End else Alignment.Start,
             modifier = Modifier
-                .padding(PaddingDefault)
+                .padding(1.pad)
                 .let {
                     if (isReply) {
                         it
                     } else {
                         when (isMe) {
-                            true -> it.padding(start = PaddingDefault * 12)
+                            true -> it.padding(start = 12.pad)
                                 .align(Alignment.End)
 
-                            false -> it.padding(end = PaddingDefault * 12)
+                            false -> it.padding(end = 12.pad)
                                 .align(Alignment.Start)
                         }
                     }
@@ -451,19 +451,19 @@ fun ColumnScope.MessageContent(
 
     attachedVideos?.ifNotEmpty?.let { videos ->
         Column(
-            verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+            verticalArrangement = Arrangement.spacedBy(1.pad),
             horizontalAlignment = if (isMe) Alignment.End else Alignment.Start,
             modifier = Modifier
-                .padding(PaddingDefault)
+                .padding(1.pad)
                 .let {
                     if (isReply) {
                         it
                     } else {
                         when (isMe) {
-                            true -> it.padding(start = PaddingDefault * 12)
+                            true -> it.padding(start = 12.pad)
                                 .align(Alignment.End)
 
-                            false -> it.padding(end = PaddingDefault * 12)
+                            false -> it.padding(end = 12.pad)
                                 .align(Alignment.Start)
                         }
                     }
@@ -487,11 +487,11 @@ fun ColumnScope.MessageContent(
                             Icons.Outlined.PlayArrow,
                             null,
                             modifier = Modifier
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                                 .align(Alignment.Center)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = .5f))
-                                .padding(PaddingDefault)
+                                .padding(1.pad)
                         )
                     }
                 }
@@ -503,15 +503,15 @@ fun ColumnScope.MessageContent(
         Card(
             shape = MaterialTheme.shapes.large,
             modifier = Modifier
-                .padding(PaddingDefault)
+                .padding(1.pad)
                 .let {
                     if (isReply) {
                         it
                     } else {
                         if (isMe) {
-                            it.padding(start = PaddingDefault * 8)
+                            it.padding(start = 8.pad)
                         } else {
-                            it.padding(end = PaddingDefault * 8)
+                            it.padding(end = 8.pad)
                         }
                     }
                 }
@@ -528,15 +528,15 @@ fun ColumnScope.MessageContent(
     attachedSticker?.photo?.let { stickerPhoto ->
         StickerPhoto(
             stickerPhoto,
-            modifier = Modifier.padding(PaddingDefault).let {
+            modifier = Modifier.padding(1.pad).let {
                 if (isReply) {
                     it
                 } else {
                     when (isMe) {
-                        true -> it.padding(start = PaddingDefault * 8)
+                        true -> it.padding(start = 8.pad)
                             .align(Alignment.End)
 
-                        false -> it.padding(end = PaddingDefault * 8)
+                        false -> it.padding(end = 8.pad)
                             .align(Alignment.Start)
                     }
                 }
@@ -568,15 +568,15 @@ fun ColumnScope.MessageContent(
         StoryCard(
             attachedStory,
             isLoading = !attachedStoryNotFound,
-            modifier = Modifier.padding(PaddingDefault).then(
+            modifier = Modifier.padding(1.pad).then(
                 if (isReply) {
                     Modifier
                 } else {
                     when (isMe) {
-                        true -> Modifier.padding(start = PaddingDefault * 8)
+                        true -> Modifier.padding(start = 8.pad)
                             .align(Alignment.End)
 
-                        false -> Modifier.padding(end = PaddingDefault * 8)
+                        false -> Modifier.padding(end = 8.pad)
                             .align(Alignment.Start)
                     }
                 }
@@ -594,14 +594,14 @@ fun ColumnScope.MessageContent(
             color = if (isMeActual) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .align(if (isMe) Alignment.End else Alignment.Start)
-                .padding(PaddingDefault)
+                .padding(1.pad)
                 .let {
                     if (isReply) {
                         it
                     } else {
                         when (isMe) {
-                            true -> it.padding(start = PaddingDefault * 8)
-                            false -> it.padding(end = PaddingDefault * 8)
+                            true -> it.padding(start = 8.pad)
+                            false -> it.padding(end = 8.pad)
                         }
                     }
                 }
@@ -624,7 +624,7 @@ fun ColumnScope.MessageContent(
                     onClick = { onShowTime(!showTime) },
                     onLongClick = { onShowMessageDialog(true) }
                 )
-                .padding(PaddingDefault * 2, PaddingDefault)
+                .padding(2.pad, 1.pad)
         )
     }
 
@@ -635,10 +635,10 @@ fun ColumnScope.MessageContent(
             style = MaterialTheme.typography.bodySmall,
             textAlign = if (isMe) TextAlign.End else TextAlign.Start,
             modifier = Modifier
-                .padding(horizontal = PaddingDefault)
+                .padding(horizontal = 1.pad)
                 .let {
                     if (isReply) {
-                        it.padding(bottom = PaddingDefault / 2)
+                        it.padding(bottom = .5f.pad)
                     } else {
                         it
                     }

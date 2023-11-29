@@ -28,7 +28,7 @@ import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.GroupMember
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
 @Composable
@@ -98,7 +98,7 @@ fun <T> ChooseDialog(
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
-                .padding(PaddingDefault * 3)
+                .padding(3.pad)
         ) {
             Text(
                 title,
@@ -106,7 +106,7 @@ fun <T> ChooseDialog(
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 3,
                 modifier = Modifier
-                    .padding(bottom = PaddingDefault)
+                    .padding(bottom = 1.pad)
             )
             if (showSearch(items)) {
                 OutlinedTextField(
@@ -124,11 +124,11 @@ fun <T> ChooseDialog(
                     }),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = PaddingDefault)
+                        .padding(bottom = 1.pad)
                 )
             }
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                verticalArrangement = Arrangement.spacedBy(1.pad),
                 modifier = Modifier
                     .weight(1f, fill = items.size > 5)
             ) {
@@ -141,7 +141,7 @@ fun <T> ChooseDialog(
                         Text(
                             textWhenEmpty(searchText.isBlank()),
                             color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.padding(PaddingDefault * 2)
+                            modifier = Modifier.padding(2.pad)
                         )
                     }
                 } else {
@@ -161,7 +161,7 @@ fun <T> ChooseDialog(
                 }
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -185,7 +185,7 @@ fun <T> ChooseDialog(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     Text(confirmFormatter(selected), textAlign = TextAlign.End, modifier = Modifier.weight(0.5f, false))
-                    Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.padding(start = PaddingDefault))
+                    Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.padding(start = 1.pad))
                 }
             }
         }

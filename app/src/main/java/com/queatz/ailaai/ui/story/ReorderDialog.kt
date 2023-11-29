@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.theme.ElevationDefault
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 import org.burnoutcrew.reorderable.*
 
 @Composable
@@ -46,8 +46,8 @@ fun <T> ReorderDialog(
             )
             LazyColumn(
                 state = reorderState.listState,
-                contentPadding = PaddingValues(PaddingDefault * 2),
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
+                contentPadding = PaddingValues(2.pad),
+                verticalArrangement = Arrangement.spacedBy(2.pad),
                 modifier = Modifier
                     .reorderable(reorderState)
                     .detectReorder(reorderState)
@@ -56,7 +56,7 @@ fun <T> ReorderDialog(
                 items(items, key = key) {
                     if (draggable(it)) {
                         ReorderableItem(reorderState, key = key(it)) { isDragging ->
-                            val elevation by animateDpAsState(if (isDragging) ElevationDefault * 2 else 0.dp)
+                            val elevation by animateDpAsState(if (isDragging) 2.elevation else 0.dp)
                             item(it, elevation)
                         }
                     } else {
@@ -69,9 +69,9 @@ fun <T> ReorderDialog(
             LazyVerticalGrid(
                 state = reorderState.gridState,
                 columns = GridCells.Adaptive(80.dp),
-                contentPadding = PaddingValues(PaddingDefault * 2),
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
-                verticalArrangement = Arrangement.spacedBy(PaddingDefault * 2),
+                contentPadding = PaddingValues(2.pad),
+                horizontalArrangement = Arrangement.spacedBy(2.pad),
+                verticalArrangement = Arrangement.spacedBy(2.pad),
                 modifier = Modifier
                     .reorderable(reorderState)
                     .detectReorder(reorderState)
@@ -80,7 +80,7 @@ fun <T> ReorderDialog(
                 items(items, key = key) {
                     if (draggable(it)) {
                         ReorderableItem(reorderState, key(it)) { isDragging ->
-                            val elevation by animateDpAsState(if (isDragging) ElevationDefault * 2 else 0.dp)
+                            val elevation by animateDpAsState(if (isDragging) 2.elevation else 0.dp)
                             item(it, elevation)
                         }
                     } else {
@@ -106,11 +106,11 @@ private fun ReorderDialogBase(
                 content()
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(PaddingDefault, Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingDefault * 2)
+                    .padding(2.pad)
             ) {
                 TextButton(
                     {

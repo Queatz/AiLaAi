@@ -9,10 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Message
 import com.queatz.db.Person
 
@@ -51,12 +50,12 @@ fun MessageItem(
             if (previousMessage?.member != message.member) {
                 ProfileImage(
                     getPerson(message.member!!),
-                    PaddingValues(PaddingDefault, PaddingDefault, 0.dp, PaddingDefault),
+                    PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
                 ) { person ->
                     nav.navigate("profile/${person.id!!}")
                 }
             } else {
-                Box(Modifier.requiredSize(32.dp + PaddingDefault))
+                Box(Modifier.requiredSize(32.dp + 1.pad))
             }
         }
 

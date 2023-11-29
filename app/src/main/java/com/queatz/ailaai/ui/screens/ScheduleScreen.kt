@@ -26,7 +26,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.schedule.*
 import com.queatz.ailaai.schedule.ScheduleView.*
 import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -247,10 +247,10 @@ fun ScheduleScreen() {
                     state = state,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
-                        start = PaddingDefault,
-                        end = PaddingDefault,
-                        top = PaddingDefault,
-                        bottom = PaddingDefault + 80.dp
+                        start = 1.pad,
+                        end = 1.pad,
+                        top = 1.pad,
+                        bottom = 1.pad + 80.dp
                     )
                 ) {
                     if (events.isNotEmpty()) {
@@ -258,7 +258,7 @@ fun ScheduleScreen() {
                             var isInitial by remember {
                                 mutableStateOf(true)
                             }
-                            LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
+                            LoadMore(true, permanent = true, contentPadding = 1.pad) {
                                 if (isInitial) {
                                     isInitial = false
                                 } else {
@@ -302,7 +302,7 @@ fun ScheduleScreen() {
 
                     if (events.isNotEmpty()) {
                         item(contentType = -1) {
-                            LoadMore(true, permanent = true, contentPadding = PaddingDefault) {
+                            LoadMore(true, permanent = true, contentPadding = 1.pad) {
                                 range = range.first to (range.second + view.duration)
                             }
                         }

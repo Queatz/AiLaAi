@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun IconAndCount(
@@ -34,11 +34,11 @@ fun IconAndCount(
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .offset(-PaddingDefault / 4, PaddingDefault / 4)
+                    .offset(-.25f.pad, .25f.pad)
                     .align(Alignment.TopEnd)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(PaddingDefault, PaddingDefault / 4)
+                    .padding(1.pad, .25f.pad)
             )
         }
     }

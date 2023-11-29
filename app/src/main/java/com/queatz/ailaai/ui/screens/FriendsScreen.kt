@@ -41,7 +41,7 @@ import com.queatz.ailaai.ui.Friends
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.people
-import com.queatz.ailaai.ui.theme.PaddingDefault
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
@@ -251,7 +251,7 @@ fun FriendsScreen() {
                 Text(pluralStringResource(R.plurals.x_groups, selectedHiddenGroups.size, selectedHiddenGroups.size))
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(PaddingDefault)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(1.pad)) {
                     TextButton(
                         {
                             selectedHiddenGroups = emptyList()
@@ -382,12 +382,12 @@ fun FriendsScreen() {
                 LazyColumn(
                     state = state,
                     contentPadding = PaddingValues(
-                        PaddingDefault,
-                        PaddingDefault,
-                        PaddingDefault,
-                        PaddingDefault * 3 + h.inDp()
+                        1.pad,
+                        1.pad,
+                        1.pad,
+                        3.pad + h.inDp()
                     ),
-                    verticalArrangement = Arrangement.spacedBy(PaddingDefault),
+                    verticalArrangement = Arrangement.spacedBy(1.pad),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -405,7 +405,7 @@ fun FriendsScreen() {
                                     } else R.string.no_groups_to_show
                                 ),
                                 color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(PaddingDefault * 2)
+                                modifier = Modifier.padding(2.pad)
                             )
                         }
                     } else {

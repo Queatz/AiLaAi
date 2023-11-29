@@ -12,14 +12,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import app.ailaai.api.confirmLinkDeviceToken
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.theme.PaddingDefault
-import com.queatz.db.Person
+import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,12 +33,12 @@ fun LinkDeviceScreen(token: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(PaddingDefault)
+            .padding(1.pad)
     ) {
         // todo translate
         Text(
             "Are your sure you want to link this device?",
-            modifier = Modifier.padding(PaddingDefault * 2)
+            modifier = Modifier.padding(2.pad)
         )
         Button({
             nav.popBackStackOrFinish()
