@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.dialogs
 
+import android.Manifest
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -15,13 +16,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.graphics.drawable.toBitmapOrNull
 import coil.compose.AsyncImage
+import coil.imageLoader
 import coil.request.ImageRequest
+import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.Video
+import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.theme.pad
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -38,6 +46,73 @@ sealed class Media {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<Media>) {
+    val savedString = stringResource(R.string.saved)
+    var showMenu by rememberStateOf(false)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var selectedBitmap by remember { mutableStateOf<String?>(null) }
+    val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    var showStoragePermissionDialog by rememberStateOf(false)
+
+    if (showStoragePermissionDialog) {
+        RationaleDialog(
+            {
+                showStoragePermissionDialog = false
+            },
+            stringResource(R.string.permission_request)
+        )
+    }
+
+    if (showMenu) {
+        Menu(
+            {
+                showMenu = false
+            }
+        ) {
+            menuItem(stringResource(R.string.share)) {
+                showMenu = false
+                scope.launch {
+                    context.imageLoader.execute(
+                        ImageRequest.Builder(context)
+                            .data(selectedBitmap!!)
+                            .target { drawable ->
+                                scope.launch {
+                                    drawable.toBitmapOrNull()?.share(context, null)
+                                }
+                            }
+                            .build()
+                    )
+                }
+            }
+
+            menuItem(stringResource(R.string.save)) {
+                showMenu = false
+                scope.launch {
+                    context.imageLoader.execute(
+                        ImageRequest.Builder(context)
+                            .data(selectedBitmap!!)
+                            .target { drawable ->
+                                drawable.toBitmapOrNull()?.let { bitmap ->
+                                    writeExternalStoragePermissionRequester.use(
+                                        onPermanentlyDenied = {
+                                            showStoragePermissionDialog = true
+                                        }
+                                    ) {
+                                        scope.launch {
+                                            bitmap.save(context)?.also {
+                                                context.toast(savedString)
+                                            } ?: context.showDidntWork()
+                                        }
+                                    }
+                                }
+                            }
+                            .build()
+                    )
+                }
+            }
+        }
+    }
+
     Dialog(
         {
             onDismissRequest()
@@ -88,6 +163,10 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                                     modifier = Modifier
                                         .fillParentMaxSize()
                                         .zoomable(zoomableState, onClick = { onDismissRequest() })
+                                        .clickable {
+                                            selectedBitmap = api.url(media.url)
+                                            showMenu = true
+                                        }
                                 )
                             }
                             is Media.Video -> {

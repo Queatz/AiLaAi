@@ -188,7 +188,7 @@ fun ExploreScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AppHeader(
-                stringResource(R.string.explore),
+                stringResource(R.string.cards),
                 {
                     scope.launch {
                         state.scrollToTop()

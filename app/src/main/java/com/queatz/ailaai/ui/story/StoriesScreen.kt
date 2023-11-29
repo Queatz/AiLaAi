@@ -99,7 +99,7 @@ fun StoriesScreen() {
         locationSelector,
         appHeader = {
             AppHeader(
-                stringResource(R.string.stories),
+                stringResource(R.string.explore),
                 {}
             ) {
                 ScanQrCodeButton()
@@ -108,7 +108,7 @@ fun StoriesScreen() {
     ) {
         Column {
             AppHeader(
-                stringResource(R.string.stories),
+                stringResource(R.string.explore),
                 {
                     scope.launch {
                         state.scrollToTop()
