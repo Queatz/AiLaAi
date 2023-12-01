@@ -32,7 +32,13 @@ import com.queatz.db.Person
 }
 
 @Composable
-fun GroupMember(photos: List<ContactPhoto>?, name: String, info: String?, selected: Boolean = false, onClick: () -> Unit) {
+fun GroupMember(
+    photos: List<ContactPhoto>?,
+    name: String,
+    info: String?,
+    selected: Boolean = false,
+    onClick: () -> Unit
+) {
     val backgroundColor by animateColorAsState(
         if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.surface

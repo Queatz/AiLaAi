@@ -493,8 +493,8 @@ fun FriendsScreen() {
                     SearchContent(
                         locationSelector,
                         isLoading,
-                        categories,
-                        selectedCategory
+                        categories = categories,
+                        category = selectedCategory
                     ) {
                         selectedCategory = it
                     }

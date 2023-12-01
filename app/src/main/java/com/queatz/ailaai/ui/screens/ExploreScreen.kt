@@ -39,10 +39,12 @@ private var cache = mutableMapOf<MainTab, List<Card>>()
 
 @Composable
 fun ExploreScreen() {
+    val paidString = stringResource(R.string.paid)
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     var value by rememberSavableStateOf("")
     var shownValue by rememberSavableStateOf(value)
+    var filterPaid by rememberSavableStateOf(false)
     var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
@@ -63,6 +65,24 @@ fun ExploreScreen() {
     var shownTab by rememberSavableStateOf(tab)
     var cards by remember { mutableStateOf(cache[tab] ?: emptyList()) }
     var isLoading by rememberStateOf(cards.isEmpty())
+    val filters by remember(filterPaid, tab) {
+        mutableStateOf(
+            when (tab) {
+                MainTab.Local, MainTab.Friends -> {
+                    listOf(
+                        SearchFilter(
+                            paidString,
+                            filterPaid
+                        ) {
+                            filterPaid = !filterPaid
+                        }
+                    )
+                }
+
+                else -> emptyList()
+            }
+        )
+    }
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -76,8 +96,8 @@ fun ExploreScreen() {
 
     fun updateCategories() {
         selectedCategory = selectedCategory ?: exploreInitialCategory
-        categories = ((exploreInitialCategory?.let(::listOf) ?: emptyList()) + cards
-            .flatMap { it.categories ?: emptyList() })
+        categories = ((exploreInitialCategory.inList() + cards
+            .flatMap { it.categories ?: emptyList() }) + selectedCategory.inList())
             .sortedDistinct()
         exploreInitialCategory = null
     }
@@ -120,6 +140,7 @@ fun ExploreScreen() {
                     geo.toGeo(),
                     offset = offset,
                     limit = limit,
+                    paid = filterPaid,
                     search = value.notBlank,
                     public = tab == MainTab.Local,
                     onError = { ex ->
@@ -154,13 +175,18 @@ fun ExploreScreen() {
         }
     }
 
+    LaunchedEffect(filterPaid) {
+        loadMore(clear = true)
+    }
+
     LaunchedEffect(geo, mapGeo, value, tab) {
         if (geo == null && mapGeo == null) {
             return@LaunchedEffect
         }
 
         // Don't reload if moving < 100m
-        if (shownGeo != null && (mapGeo?.takeIf { showAsMap } ?: geo)!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
+        if (shownGeo != null && (mapGeo?.takeIf { showAsMap }
+                ?: geo)!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
             return@LaunchedEffect
         }
 
@@ -228,6 +254,7 @@ fun ExploreScreen() {
                         SearchContent(
                             locationSelector,
                             isLoading,
+                            filters,
                             categories,
                             selectedCategory
                         ) {
@@ -279,9 +306,11 @@ fun ExploreScreen() {
                                 is SwipeResult.Previous -> {
                                     nav.navigate("schedule")
                                 }
+
                                 is SwipeResult.Next -> {
                                     nav.navigate("stories")
                                 }
+
                                 is SwipeResult.Select<*> -> {
                                     tab = it.item as MainTab
                                 }
@@ -291,6 +320,7 @@ fun ExploreScreen() {
                     SearchContent(
                         locationSelector,
                         isLoading,
+                        filters,
                         categories,
                         selectedCategory
                     ) {

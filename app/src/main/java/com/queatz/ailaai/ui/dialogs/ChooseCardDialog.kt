@@ -16,7 +16,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -74,7 +73,6 @@ fun ChooseCardSelector(
     var myCards by rememberStateOf(listOf<Card>())
     var shownCards by rememberStateOf(listOf<Card>())
     val keyboardController = LocalSoftwareKeyboardController.current!!
-    val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(myCards, searchCardsValue) {

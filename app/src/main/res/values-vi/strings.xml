@@ -148,7 +148,6 @@
     <string name="edit">Chỉnh sửa</string>
     <string name="no_people_to_show">Không tìm được người để cho bạn xem.</string>
     <string name="person_invited">%1$s được thêm vào nhóm</string>
-    <string name="copy_location">Sao chép vị trí</string>
     <string name="show_on_map">Mở trên bản đồ</string>
     <string name="map">Bản đồ</string>
     <string name="youve_been_signed_out">Có vẻ như bạn đã bị đăng xuất.</string>
@@ -223,6 +222,9 @@
     <string name="introduce_yourself">Giới thiệu bản thân ở đây…</string>
     <string name="add_your_name">Thêm tên của bạn…</string>
     <string name="view_profile">Xem trang cá nhân</string>
+    <string name="pay">Lương</string>
+    <string name="add_pay">Thêm lương</string>
+    <string name="change_pay">Đổi lương</string>
     <string name="set_category">Chọn danh mục</string>
     <string name="choose_x_quoted">Chọn \"%1$s\"</string>
     <string name="choose_none">Chọn không danh mục</string>
@@ -421,6 +423,7 @@
     <string name="nothing_scheduled">Không có gì được lên lịch</string>
     <string name="add_reminder">Lời nhắc mới</string>
     <string name="reminders">Lời nhắc</string>
+    <string name="hourly">Theo giờ</string>
     <string name="daily">Theo ngày</string>
     <string name="weekly">Theo tuần</string>
     <string name="monthly">Theo tháng</string>
@@ -474,4 +477,10 @@
     <string name="now">Bây giờ</string>
     <string name="share_a_thought">Chia sẻ những suy nghĩ của bạn</string>
     <string name="in_a_group">Trong nhóm</string>
+    <string name="paid">Được trả lương</string>
+    <string name="inlineHour">giờ</string>
+    <string name="inlineDay">ngày</string>
+    <string name="inlineWeekly">tuần</string>
+    <string name="inlineMonthly">tháng</string>
+    <string name="inlineYearly">năm</string>
 </resources>

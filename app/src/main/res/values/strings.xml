@@ -152,7 +152,6 @@
     <string name="edit">Edit</string>
     <string name="no_people_to_show">No people to show.</string>
     <string name="person_invited">%1$s added</string>
-    <string name="copy_location">Copy location</string>
     <string name="show_on_map">Show on map</string>
     <string name="map">Map</string>
     <string name="youve_been_signed_out">It looks like you\'ve been signed out.</string>
@@ -209,6 +208,9 @@
     <string name="introduce_yourself">Introduce yourself here…</string>
     <string name="add_your_name">Add your name…</string>
     <string name="view_profile">View profile</string>
+    <string name="pay">Pay</string>
+    <string name="add_pay">Add pay</string>
+    <string name="change_pay">Change pay</string>
     <string name="set_category">Set category</string>
     <string name="choose_x_quoted">Choose \"%1$s\"</string>
     <string name="choose_none">Choose none</string>
@@ -408,6 +410,7 @@
     <string name="generating_description">The page will be updated when the photo is generated.\n\nPage title, hint, and details are shared with a 3rd party.
     </string>
     <string name="reminders">Reminders</string>
+    <string name="hourly">Hourly</string>
     <string name="daily">Daily</string>
     <string name="weekly">Weekly</string>
     <string name="monthly">Monthly</string>
@@ -482,6 +485,7 @@
     <string name="now">Now</string>
     <string name="share_a_thought">Share a thought</string>
     <string name="in_a_group">In a group</string>
+    <string name="paid">Paid</string>
     <plurals name="x_groups">
         <item quantity="one">%1$s group</item>
         <item quantity="other">%1$s groups</item>
@@ -498,4 +502,9 @@
         <item quantity="one">member</item>
         <item quantity="other">members</item>
     </plurals>
+    <string name="inlineHour">hour</string>
+    <string name="inlineDay">day</string>
+    <string name="inlineWeekly">week</string>
+    <string name="inlineMonthly">month</string>
+    <string name="inlineYearly">year</string>
 </resources>

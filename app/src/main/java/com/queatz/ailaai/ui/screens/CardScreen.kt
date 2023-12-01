@@ -82,6 +82,7 @@ fun CardScreen(cardId: String) {
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
     var showSetCategory by rememberStateOf(false)
+    var showPay by rememberStateOf(false)
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
     var oldPhoto by rememberStateOf<String?>(null)
@@ -230,6 +231,23 @@ fun CardScreen(cardId: String) {
         )
     }
 
+    if (showPay) {
+        PayDialog(
+            {
+                showPay = false
+            },
+            defaultPay = card?.pay?.pay,
+            defaultFrequency = card?.pay?.frequency
+        ) { pay ->
+            api.updateCard(
+                cardId,
+                Card(pay = pay)
+            ) {
+                reload()
+            }
+        }
+    }
+
     if (showReportDialog) {
         ReportDialog("card/$cardId") {
             showReportDialog = false
@@ -348,7 +366,7 @@ fun CardScreen(cardId: String) {
                 Column {
                     Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
 
-                    card?.location?.notBlank?.let {
+                    card?.hint?.notBlank?.let {
                         Text(
                             it,
                             maxLines = 1,
@@ -447,6 +465,12 @@ fun CardScreen(cardId: String) {
                             showMenu = false
                         })
                         DropdownMenuItem({
+                            Text(stringResource(if (card?.pay == null) R.string.add_pay else R.string.change_pay))
+                        }, {
+                            showPay = true
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
                             Text(stringResource(R.string.set_photo))
                         }, {
                             launcher.launch(PickVisualMediaRequest())
@@ -539,17 +563,6 @@ fun CardScreen(cardId: String) {
                         })
                     }
                     val textCopied = stringResource(R.string.copied)
-                    if (card?.location.isNullOrBlank().not()) {
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.copy_location))
-                        }, {
-                            card?.let { card ->
-                                card.location?.copyToClipboard(context, card.name ?: cardString)
-                                context.showDidntWork()
-                            }
-                            showMenu = false
-                        })
-                    }
                     DropdownMenuItem({
                         Text(stringResource(R.string.share))
                     }, {

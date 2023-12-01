@@ -97,8 +97,7 @@ fun CardConversation(
                         MaterialTheme.typography.titleSmall.toSpanStyle()
                             .copy(color = MaterialTheme.colorScheme.secondary)
                     ) {
-                        append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.location
-                        ?: "")
+                        append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.hint)
                     }
                 }
                 if (text.isNotBlank()) {
