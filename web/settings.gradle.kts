@@ -12,6 +12,6 @@ pluginManagement {
     }
 }
 
-includeBuild("../ailaai-shared")
+includeBuild("../shared")
 
 rootProject.name = "ailaai"

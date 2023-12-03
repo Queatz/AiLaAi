@@ -9,6 +9,6 @@ dependencyResolutionManagement {
 
 include(":app")
 
-includeBuild("../ailaai-shared")
+includeBuild("../shared")
 
 rootProject.name = "Ai La Ai"

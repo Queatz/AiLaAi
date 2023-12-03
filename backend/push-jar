@@ -1,0 +1,5 @@
+#! /bin/bash
+
+sftp 'root@api.ailaai.app:/root' <<< $'put "build/libs/Ai La Ai Backend-0.0.1-all.jar"'
+
+
