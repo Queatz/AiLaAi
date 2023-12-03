@@ -1,0 +1,112 @@
+0.9.71
+======
+
+ - See groups you have in common with a friend
+ - Set pay rate
+
+0.9.70
+======
+
+ - See active friends
+ - Add group pages
+ - Set group category
+
+0.9.69
+======
+
+ - Add widgets to page content
+
+0.9.68
+======
+
+ - Add additional content to pages
+
+0.9.67
+======
+
+ - Mention open groups in stories
+
+0.9.66
+======
+
+ - Snooze group notifications
+ - Pages are now created after entering the details
+ - It is now possible to swipe between screens
+
+0.9.65
+======
+
+ - Fixed crash saving images to device
+ - Fixed bug where pages would load forever
+ - Added caching on main screens
+
+0.9.64
+======
+
+ - Improved map integration
+
+0.9.62
+======
+
+ - Discover local groups, pages, and stories
+ - Open or close your group to the public
+ - Request to join groups
+ - View and accept group join request
+ - View your reminders created on web (more in-app features to come)
+
+0.9.59
+======
+
+ - Generate card photos
+ - Send video messages
+
+ 0.9.58
+======
+
+ - Save photos to device
+ - Zoom in on photo
+ - Recently active groups now show at the top
+
+0.9.57
+======
+
+ - Connect account to web browser
+
+0.9.56
+======
+
+ - Card layout updates
+ - Ability to hide message button on cards
+ - Favorites button moved to explore tab
+
+0.9.55
+======
+
+ - Card layout changes for readability
+
+0.9.54
+======
+
+ - View cards on the map
+ - An invite code no longer needed create an account
+
+0.9.53
+======
+
+ - Report issues with profiles, groups, cards, and stories
+ - Export your data
+
+0.9.52
+======
+
+ - See groups you've previously hidden
+ - Send text to your groups from other apps
+ - Send photos to your groups from other apps
+ - Improve video processing speed
+ - Reduce APK size
+ 
+ 0.9.51
+======
+
+ - Story editor improvements
+ - Add release history in app
