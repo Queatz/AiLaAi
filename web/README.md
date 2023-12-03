@@ -4,7 +4,7 @@ Ai là ai is a collaboration platform that helps you discover and stay connected
 
 ## Prerequesites
 
-The [`ailaai-shared`](https://github.com/Queatz/ailaai-shared) respository should be cloned as a sibling to this `ailaai-web` repository.
+[Gradle](https://gradle.org/) is required to build Ai Ai là ai Web.
 
 ## Contributing
 
