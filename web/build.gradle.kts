@@ -2,9 +2,9 @@
 val ktorVersion = "2.3.6"
 
 plugins {
-    kotlin("multiplatform") version "1.9.20"
-    kotlin("plugin.serialization") version "1.9.20"
-    id("org.jetbrains.compose") version "1.5.10"
+    kotlin("multiplatform") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.21"
+    id("org.jetbrains.compose") version "1.5.11"
 }
 
 group = "app.ailaai"
@@ -38,7 +38,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-js:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
                 implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.1.2") // todo: needs update
                 implementation("app.softwork:routing-compose:0.2.12")
                 implementation(npm("@paulmillr/qr", "0.1.1"))

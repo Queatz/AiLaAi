@@ -245,7 +245,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                     }
                 }
 
-                TopBarSearch(search, { search = it }) {
+                TopBarSearch(search, { search = it }, focus = false) {
                     marginTop(2.r)
                     marginLeft(1.r)
                     marginRight(1.r)

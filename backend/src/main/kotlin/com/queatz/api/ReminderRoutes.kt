@@ -5,6 +5,7 @@ import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.respond
+import com.queatz.startOfSecond
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -46,8 +47,8 @@ fun Route.reminderRoutes() {
                         attachment = new.attachment,
                         title = new.title,
                         note = new.note,
-                        start = new.start,
-                        end = new.end,
+                        start = new.start?.startOfSecond(),
+                        end = new.end?.startOfSecond(),
                         timezone = new.timezone,
                         utcOffset = new.utcOffset ?: 0.0,
                         schedule = new.schedule
@@ -103,7 +104,7 @@ fun Route.reminderRoutes() {
                     }
 
                     if (update.start != null) {
-                        reminder.start = update.start
+                        reminder.start = update.start?.startOfSecond()
                     }
 
                     if (update.timezone != null) {
@@ -116,7 +117,7 @@ fun Route.reminderRoutes() {
 
                     // TODO need a way for the user to delete
                     if (update.end != null) {
-                        reminder.end = update.end
+                        reminder.end = update.end?.startOfSecond()
                     }
 
                     // TODO need a way for the user to delete
@@ -140,7 +141,7 @@ fun Route.reminderRoutes() {
                     return@respond HttpStatusCode.NotFound
                 }
 
-                val at = parameter("occurrence").toInstant()
+                val at = parameter("occurrence").toInstant().startOfSecond()
                 val occurrence = db.occurrence(reminder.id!!, at) ?: ReminderOccurrence(
                     reminder = reminder.id!!,
                     occurrence = at,
@@ -150,7 +151,7 @@ fun Route.reminderRoutes() {
                 val occurrenceUpdate = call.receive<ReminderOccurrence>()
 
                 if (occurrenceUpdate.date != null) {
-                    occurrence.date = occurrenceUpdate.date
+                    occurrence.date = occurrenceUpdate.date?.startOfSecond()
                 }
                 if (occurrenceUpdate.note != null) {
                     occurrence.note = occurrenceUpdate.note
@@ -188,7 +189,7 @@ fun Route.reminderRoutes() {
                     return@respond HttpStatusCode.NotFound
                 }
 
-                db.upsertReminderOccurrenceGone(reminder.id!!, parameter("date").toInstant(), true)
+                db.upsertReminderOccurrenceGone(reminder.id!!, parameter("date").toInstant().startOfSecond(), true)
 
                 HttpStatusCode.NoContent
             }
