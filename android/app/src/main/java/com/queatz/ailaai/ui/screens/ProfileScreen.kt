@@ -212,451 +212,18 @@ fun ProfileScreen(personId: String) {
         )
     }
 
-    LazyVerticalGrid(
-        state = state,
-        contentPadding = PaddingValues(
-            bottom = 1.pad
-        ),
-        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
-        verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
-        modifier = Modifier.fillMaxSize(),
-        columns = GridCells.Adaptive(240.dp)
-    ) {
-        val isMe = me?.id == personId
+    var newCard by rememberStateOf<Card?>(null)
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(bottom = 1.pad)
-            ) {
-                Box {
-                    val bottomPadding = 128.dp / 3
-                    val video = profile?.video
-                    if (video != null) {
-                        Box(
-                            modifier = Modifier
-                                .aspectRatio(if (isLandscape) 2f else 1.5f)
-                                .fillMaxWidth()
-                                .padding(bottom = bottomPadding)
-                                .clip(
-                                    RoundedCornerShape(
-                                        MaterialTheme.shapes.large.topStart,
-                                        MaterialTheme.shapes.large.topEnd,
-                                        CornerSize(0.dp),
-                                        CornerSize(0.dp)
-                                    )
-                                )
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .clickable {
-                                    if (isMe) {
-                                        profilePhotoLauncher.launch(PickVisualMediaRequest())
-                                    } else {
-                                        showMedia = Media.Video(video)
-                                    }
-                                }
-                        ) {
-                            Video(
-                                video.let(api::url),
-                                isPlaying = isAtTop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                            )
-                        }
-                    } else {
-                        AsyncImage(
-                            model = profile?.photo?.let(api::url),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .aspectRatio(if (isLandscape) 2f else 1.5f)
-                                .fillMaxWidth()
-                                .padding(bottom = bottomPadding)
-                                .clip(
-                                    RoundedCornerShape(
-                                        MaterialTheme.shapes.large.topStart,
-                                        MaterialTheme.shapes.large.topEnd,
-                                        CornerSize(0.dp),
-                                        CornerSize(0.dp)
-                                    )
-                                )
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .clickable {
-                                    if (isMe) {
-                                        profilePhotoLauncher.launch(PickVisualMediaRequest())
-                                    } else {
-                                        showMedia = profile?.photo?.let { Media.Photo(it) }
-                                    }
-                                }
-                        )
-                    }
-                    if (isMe) {
-                        Icon(
-                            Icons.Outlined.Edit,
-                            null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .padding(bottom = bottomPadding)
-                                .padding(1.pad)
-                                .scale(.85f)
-                                .align(Alignment.BottomEnd)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(1.pad)
-                        )
-                    }
-                    val containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
-                    val colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = containerColor
-                    )
-                    IconButton(
-                        {
-                            nav.popBackStack()
-                        },
-                        colors = colors,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(1.pad)
-                            .clip(CircleShape)
-                    ) {
-                        Icon(
-                            Icons.Outlined.ArrowBack,
-                            stringResource(R.string.go_back),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (isMe) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(1.pad + 2.dp)
-                                .clip(MaterialTheme.shapes.extraLarge)
-                                .background(containerColor)
-                        ) {
-                            IconButton(
-                                {
-                                    showQrCodeDialog = true
-                                },
-                                Modifier
-                                    .size(42.dp)
-                            ) {
-                                Icon(
-                                    Icons.Outlined.QrCode2,
-                                    stringResource(R.string.qr_code),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            IconButton(
-                                {
-                                    nav.navigate("settings")
-                                },
-                                Modifier
-                                    .size(42.dp)
-                            ) {
-                                Icon(
-                                    Icons.Outlined.Settings,
-                                    stringResource(R.string.settings),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    } else {
-                        IconButton(
-                            {
-                                showMenu = true
-                            },
-                            colors = colors,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(1.pad)
-                        ) {
-                            Icon(Icons.Outlined.MoreVert, null)
-                            Dropdown(showMenu, { showMenu = false }) {
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.invite_into_group))
-                                }, {
-                                    showInviteDialog = true
-                                    showMenu = false
-                                })
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.qr_code))
-                                }, {
-                                    showMenu = false
-                                    showQrCodeDialog = true
-                                })
-                                person?.let { person ->
-                                    val someoneString = stringResource(R.string.someone)
-                                    DropdownMenuItem({
-                                        Text(stringResource(R.string.share))
-                                    }, {
-                                        profileUrl(person.id!!).shareAsUrl(context, person.name ?: someoneString)
-                                        showMenu = false
-                                    })
-                                }
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.report))
-                                }, {
-                                    showMenu = false
-                                    showReportDialog = true
-                                })
-                            }
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                    ) {
-                        GroupPhoto(
-                            listOf(
-                                ContactPhoto(
-                                    person?.name ?: "",
-                                    person?.photo,
-                                    person?.seen
-                                )
-                            ),
-                            size = 128.dp,
-                            padding = 0.dp,
-                            border = true,
-                            modifier = Modifier
-                                .clickable {
-                                    if (isMe) {
-                                        photoLauncher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
-                                    } else {
-                                        showMedia = person?.photo?.let { Media.Photo(it) }
-                                    }
-                                }
-                        )
-                        if (isMe) {
-                            Icon(
-                                Icons.Outlined.Edit,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(.5f.pad)
-                                    .scale(.85f)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.background)
-                                    .padding(1.pad)
-                            )
-                        }
-                    }
-                }
-                if (!isLoading && !isError) {
-                    val copiedString = stringResource(R.string.copied)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(
-                                interactionSource = MutableInteractionSource(),
-                                indication = null
-                            ) {
-                                if (isMe) {
-                                    showEditName = true
-                                } else {
-                                    person?.name?.copyToClipboard(context)
-                                    context.toast(copiedString)
-                                }
-                            }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(horizontal = 1.pad)
-                                .align(Alignment.Center)
-                        ) {
-                            Text(
-                                person?.name
-                                    ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
-                                color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                                style = MaterialTheme.typography.titleLarge,
-                                textAlign = TextAlign.Center
-                            )
-                            if (!isMe) {
-                                IconButton(
-                                    {
-                                        scope.launch {
-                                            api.createGroup(listOf(me!!.id!!, personId), reuse = true) { group ->
-                                                nav.navigate("group/${group.id!!}")
-                                            }
-                                        }
-                                    },
-                                    colors = IconButtonDefaults.outlinedIconButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    enabled = true
-                                ) {
-                                    Icon(Icons.Outlined.Message, "")
-                                }
-                            }
-                        }
-                    }
-                    stats?.let { stats ->
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                2.pad,
-                                Alignment.CenterHorizontally
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .padding(1.pad)
-                                .widthIn(max = 360.dp) // todo what size
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                    .clip(MaterialTheme.shapes.large)
-//                                .clickable {  }
-                                    .weight(1f)
-                                    .padding(2.pad)
-                            ) {
-                                Text(
-                                    stats.friendsCount.toString(),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                Text(
-                                    pluralStringResource(
-                                        R.plurals.friends_plural,
-                                        stats.friendsCount,
-                                        stats.friendsCount
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                    .clip(MaterialTheme.shapes.large)
-//                                .clickable {  }
-                                    .weight(1f)
-                                    .padding(2.pad)
-                            ) {
-                                Text(
-                                    stats.cardCount.toString(),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                Text(
-                                    pluralStringResource(R.plurals.cards_plural, stats.cardCount, stats.cardCount),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                    .clip(MaterialTheme.shapes.large)
-                                    .clickable {
-                                        showJoined = true
-                                    }
-                                    .weight(1f)
-                                    .padding(2.pad)
-                            ) {
-                                Text(
-                                    person?.createdAt?.monthYear() ?: "?",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                Text(
-                                    stringResource(R.string.joined),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.large)
-                            .clickable {
-                                if (isMe) {
-                                    showEditAbout = true
-                                } else {
-                                    profile?.about?.copyToClipboard(context)
-                                    context.toast(copiedString)
-                                }
-                            }
-                            .padding(1.pad)
-                    ) {
-                        if (isMe || profile?.about?.isBlank() == false) {
-                            LinkifyText(
-                                profile?.about ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
-                                color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
-                    }
-                }
-
-                Box {
-
-                }
-            }
-        }
-
-        items(cards, key = { it.id!! }) { card ->
-            CardLayout(
-                card = card,
-                isMine = card.person == me?.id,
-                showTitle = true,
-                onClick = {
-                    nav.navigate("card/${card.id!!}")
-                },
-                onChange = {
-                    scope.launch {
-                        reload()
-                    }
-                },
-                scope = scope,
-                playVideo = card == playingVideo && !isAtTop,
-                modifier = Modifier.padding(horizontal = 1.pad)
-            )
-        }
-    }
-
-    if (showJoined) {
-        AlertDialog(
+    if (newCard != null) {
+        EditCardDialog(
+            newCard!!,
             {
-                showJoined = false
+                newCard = null
             },
-            title = {
-                Text(stringResource(R.string.joined))
-            },
-            text = {
-                Text(person?.createdAt?.dayMonthYear() ?: "?")
-            },
-            confirmButton = {
-                TextButton(
-                    {
-                        showJoined = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
-            }
-        )
+            create = true
+        ) {
+            nav.navigate("card/${it.id!!}")
+        }
     }
 
     if (showEditName) {
@@ -694,6 +261,466 @@ fun ProfileScreen(personId: String) {
             },
             showMedia!!,
             listOf(showMedia!!)
+        )
+    }
+
+    Box {
+        LazyVerticalGrid(
+            state = state,
+            contentPadding = PaddingValues(
+                bottom = 1.pad + 80.dp
+            ),
+            horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
+            modifier = Modifier.fillMaxSize(),
+            columns = GridCells.Adaptive(240.dp)
+        ) {
+            val isMe = me?.id == personId
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(bottom = 1.pad)
+                ) {
+                    Box {
+                        val bottomPadding = 128.dp / 3
+                        val video = profile?.video
+                        if (video != null) {
+                            Box(
+                                modifier = Modifier
+                                    .aspectRatio(if (isLandscape) 2f else 1.5f)
+                                    .fillMaxWidth()
+                                    .padding(bottom = bottomPadding)
+                                    .clip(
+                                        RoundedCornerShape(
+                                            MaterialTheme.shapes.large.topStart,
+                                            MaterialTheme.shapes.large.topEnd,
+                                            CornerSize(0.dp),
+                                            CornerSize(0.dp)
+                                        )
+                                    )
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .clickable {
+                                        if (isMe) {
+                                            profilePhotoLauncher.launch(PickVisualMediaRequest())
+                                        } else {
+                                            showMedia = Media.Video(video)
+                                        }
+                                    }
+                            ) {
+                                Video(
+                                    video.let(api::url),
+                                    isPlaying = isAtTop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                )
+                            }
+                        } else {
+                            AsyncImage(
+                                model = profile?.photo?.let(api::url),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .aspectRatio(if (isLandscape) 2f else 1.5f)
+                                    .fillMaxWidth()
+                                    .padding(bottom = bottomPadding)
+                                    .clip(
+                                        RoundedCornerShape(
+                                            MaterialTheme.shapes.large.topStart,
+                                            MaterialTheme.shapes.large.topEnd,
+                                            CornerSize(0.dp),
+                                            CornerSize(0.dp)
+                                        )
+                                    )
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .clickable {
+                                        if (isMe) {
+                                            profilePhotoLauncher.launch(PickVisualMediaRequest())
+                                        } else {
+                                            showMedia = profile?.photo?.let { Media.Photo(it) }
+                                        }
+                                    }
+                            )
+                        }
+                        if (isMe) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .padding(bottom = bottomPadding)
+                                    .padding(1.pad)
+                                    .scale(.85f)
+                                    .align(Alignment.BottomEnd)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .padding(1.pad)
+                            )
+                        }
+                        val containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f)
+                        val colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = containerColor
+                        )
+                        IconButton(
+                            {
+                                nav.popBackStack()
+                            },
+                            colors = colors,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(1.pad)
+                                .clip(CircleShape)
+                        ) {
+                            Icon(
+                                Icons.Outlined.ArrowBack,
+                                stringResource(R.string.go_back),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (isMe) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(1.pad + 2.dp)
+                                    .clip(MaterialTheme.shapes.extraLarge)
+                                    .background(containerColor)
+                            ) {
+                                IconButton(
+                                    {
+                                        showQrCodeDialog = true
+                                    },
+                                    Modifier
+                                        .size(42.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.QrCode2,
+                                        stringResource(R.string.qr_code),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                IconButton(
+                                    {
+                                        nav.navigate("settings")
+                                    },
+                                    Modifier
+                                        .size(42.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.Settings,
+                                        stringResource(R.string.settings),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            IconButton(
+                                {
+                                    showMenu = true
+                                },
+                                colors = colors,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(1.pad)
+                            ) {
+                                Icon(Icons.Outlined.MoreVert, null)
+                                Dropdown(showMenu, { showMenu = false }) {
+                                    DropdownMenuItem({
+                                        Text(stringResource(R.string.invite_into_group))
+                                    }, {
+                                        showInviteDialog = true
+                                        showMenu = false
+                                    })
+                                    DropdownMenuItem({
+                                        Text(stringResource(R.string.qr_code))
+                                    }, {
+                                        showMenu = false
+                                        showQrCodeDialog = true
+                                    })
+                                    person?.let { person ->
+                                        val someoneString = stringResource(R.string.someone)
+                                        DropdownMenuItem({
+                                            Text(stringResource(R.string.share))
+                                        }, {
+                                            profileUrl(person.id!!).shareAsUrl(context, person.name ?: someoneString)
+                                            showMenu = false
+                                        })
+                                    }
+                                    DropdownMenuItem({
+                                        Text(stringResource(R.string.report))
+                                    }, {
+                                        showMenu = false
+                                        showReportDialog = true
+                                    })
+                                }
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                        ) {
+                            GroupPhoto(
+                                listOf(
+                                    ContactPhoto(
+                                        person?.name ?: "",
+                                        person?.photo,
+                                        person?.seen
+                                    )
+                                ),
+                                size = 128.dp,
+                                padding = 0.dp,
+                                border = true,
+                                modifier = Modifier
+                                    .clickable {
+                                        if (isMe) {
+                                            photoLauncher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                        } else {
+                                            showMedia = person?.photo?.let { Media.Photo(it) }
+                                        }
+                                    }
+                            )
+                            if (isMe) {
+                                Icon(
+                                    Icons.Outlined.Edit,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(.5f.pad)
+                                        .scale(.85f)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.background)
+                                        .padding(1.pad)
+                                )
+                            }
+                        }
+                    }
+                    if (!isLoading && !isError) {
+                        val copiedString = stringResource(R.string.copied)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = MutableInteractionSource(),
+                                    indication = null
+                                ) {
+                                    if (isMe) {
+                                        showEditName = true
+                                    } else {
+                                        person?.name?.copyToClipboard(context)
+                                        context.toast(copiedString)
+                                    }
+                                }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(horizontal = 1.pad)
+                                    .align(Alignment.Center)
+                            ) {
+                                Text(
+                                    person?.name
+                                        ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
+                                    color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    textAlign = TextAlign.Center
+                                )
+                                if (!isMe) {
+                                    IconButton(
+                                        {
+                                            scope.launch {
+                                                api.createGroup(listOf(me!!.id!!, personId), reuse = true) { group ->
+                                                    nav.navigate("group/${group.id!!}")
+                                                }
+                                            }
+                                        },
+                                        colors = IconButtonDefaults.outlinedIconButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        enabled = true
+                                    ) {
+                                        Icon(Icons.Outlined.Message, "")
+                                    }
+                                }
+                            }
+                        }
+                        stats?.let { stats ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    2.pad,
+                                    Alignment.CenterHorizontally
+                                ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(1.pad)
+                                    .widthIn(max = 360.dp) // todo what size
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                        .clip(MaterialTheme.shapes.large)
+//                                .clickable {  }
+                                        .weight(1f)
+                                        .padding(2.pad)
+                                ) {
+                                    Text(
+                                        stats.friendsCount.toString(),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        pluralStringResource(
+                                            R.plurals.friends_plural,
+                                            stats.friendsCount,
+                                            stats.friendsCount
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                        .clip(MaterialTheme.shapes.large)
+//                                .clickable {  }
+                                        .weight(1f)
+                                        .padding(2.pad)
+                                ) {
+                                    Text(
+                                        stats.cardCount.toString(),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        pluralStringResource(R.plurals.cards_plural, stats.cardCount, stats.cardCount),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                        .clip(MaterialTheme.shapes.large)
+                                        .clickable {
+                                            showJoined = true
+                                        }
+                                        .weight(1f)
+                                        .padding(2.pad)
+                                ) {
+                                    Text(
+                                        person?.createdAt?.monthYear() ?: "?",
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        stringResource(R.string.joined),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.large)
+                                .clickable {
+                                    if (isMe) {
+                                        showEditAbout = true
+                                    } else {
+                                        profile?.about?.copyToClipboard(context)
+                                        context.toast(copiedString)
+                                    }
+                                }
+                                .padding(1.pad)
+                        ) {
+                            if (isMe || profile?.about?.isBlank() == false) {
+                                LinkifyText(
+                                    profile?.about ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
+                                    color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+
+                    Box {
+
+                    }
+                }
+            }
+
+            items(cards, key = { it.id!! }) { card ->
+                CardLayout(
+                    card = card,
+                    isMine = card.person == me?.id,
+                    showTitle = true,
+                    onClick = {
+                        nav.navigate("card/${card.id!!}")
+                    },
+                    onChange = {
+                        scope.launch {
+                            reload()
+                        }
+                    },
+                    scope = scope,
+                    playVideo = card == playingVideo && !isAtTop,
+                    modifier = Modifier.padding(horizontal = 1.pad)
+                )
+            }
+        }
+
+        FloatingActionButton(
+            onClick = {
+                newCard = Card(equipped = true)
+            },
+            modifier = Modifier
+                .padding(2.pad)
+                .align(Alignment.BottomEnd)
+        ) {
+            Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
+        }
+    }
+
+    if (showJoined) {
+        AlertDialog(
+            {
+                showJoined = false
+            },
+            title = {
+                Text(stringResource(R.string.joined))
+            },
+            text = {
+                Text(person?.createdAt?.dayMonthYear() ?: "?")
+            },
+            confirmButton = {
+                TextButton(
+                    {
+                        showJoined = false
+                    }
+                ) {
+                    Text(stringResource(R.string.close))
+                }
+            }
         )
     }
 }
