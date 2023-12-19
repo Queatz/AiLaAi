@@ -37,7 +37,8 @@ class Ai {
             "duchaiten_anime",
             "duchaiten_dreamworld",
             "icbinp_seco",
-            "something_2"
+            "something_2",
+            "basil_mix"
         )
         private const val height = 416
         private const val width = 608
