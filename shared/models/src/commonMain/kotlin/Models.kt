@@ -292,7 +292,8 @@ class ReminderSchedule(
 enum class DeviceType {
     Hms,
     Gms,
-    Web
+    Web,
+    Apns
 }
 
 enum class PersonSource {

@@ -289,7 +289,7 @@ fun GroupTopBar(
             } else {
                 group.cardCount?.takeIf { it > 0 }?.let {
                     IconButton(
-                        name = "travel_explore",
+                        name = "home",
                         title = appString { this.cards },
                         count = it,
                         styles = {
