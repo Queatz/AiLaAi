@@ -212,6 +212,9 @@ class Push {
             DeviceType.Web -> {
                 events.emit(pushData to device)
             }
+            DeviceType.Apns -> {
+                // Todo
+            }
         }
     }
 
