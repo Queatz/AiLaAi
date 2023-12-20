@@ -427,7 +427,7 @@ object Strings {
     )
     val title = Translation(
         "Title",
-        "Tiêu"
+        "Tiêu đề"
     )
     val create = Translation(
         "Create",
