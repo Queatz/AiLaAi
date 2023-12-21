@@ -3,22 +3,19 @@ package components
 import Styles
 import androidx.compose.runtime.*
 import api
-import app.ailaai.api.activeCardsOfPerson
-import app.ailaai.api.profile
-import app.ailaai.api.profileByUrl
-import app.ailaai.api.profileCards
+import app.AppStyles
+import app.ailaai.api.*
 import app.components.Empty
 import app.components.TopBarSearch
+import app.group.GroupList
 import app.softwork.routingcompose.Router
 import appString
 import baseUrl
 import com.queatz.db.Card
+import com.queatz.db.GroupExtended
 import com.queatz.db.PersonProfile
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Source
-import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.Video
+import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLVideoElement
 import profile.ProfileStyles
 import r
@@ -27,6 +24,7 @@ import kotlin.js.Date
 @Composable
 fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (PersonProfile) -> Unit) {
     Style(ProfileStyles)
+    Style(AppStyles)
 
     var personId by remember { mutableStateOf(personId) }
     val scope = rememberCoroutineScope()
@@ -196,7 +194,6 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                             Div({
                                 classes(Styles.cardContent, ProfileStyles.profileContent)
                             }) {
-
                                 Div({
                                     classes(ProfileStyles.name)
                                 }) {
@@ -238,6 +235,41 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                         classes(ProfileStyles.infoAbout)
                                     }) {
                                         LinkifyText(profile.profile.about!!)
+                                    }
+                                }
+
+                                var groups by remember {
+                                    mutableStateOf<List<GroupExtended>>(emptyList())
+                                }
+
+                                LaunchedEffect(personId) {
+                                    api.groupsOfPerson(personId ?: return@LaunchedEffect) {
+                                        groups = it
+                                    }
+                                }
+
+                                if (groups.isNotEmpty()) {
+                                    Span({
+                                        style {
+                                            marginTop(1.r)
+                                            fontWeight("bold")
+                                            fontSize(24.px)
+                                        }
+                                    }) {
+                                        Text("${profile.person.name ?: appString { someone }} ${appString { inlineIsAMember }}")
+                                    }
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            flexDirection(FlexDirection.Column)
+                                            width(100.percent)
+                                        }
+                                    }) {
+                                        // todo hover color is on surface already
+                                        GroupList(groups) {
+                                            // todo navigate to group
+                                            router.navigate("/signin")
+                                        }
                                     }
                                 }
                             }

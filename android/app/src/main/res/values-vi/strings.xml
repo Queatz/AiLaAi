@@ -483,4 +483,5 @@
     <string name="inlineWeekly">tuần</string>
     <string name="inlineMonthly">tháng</string>
     <string name="inlineYearly">năm</string>
+    <string name="x_is_a_member">%1$s là thành viên</string>
 </resources>

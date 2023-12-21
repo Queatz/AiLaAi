@@ -1,6 +1,7 @@
 package app.ailaai.api
 
 import com.queatz.db.Card
+import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 
@@ -15,6 +16,12 @@ suspend fun Api.profile(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<PersonProfile>,
 ) = get("people/$personId/profile", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.groupsOfPerson(
+    personId: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<GroupExtended>>,
+) = get("people/$personId/groups", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.profileCards(
     personId: String,

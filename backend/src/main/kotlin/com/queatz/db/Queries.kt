@@ -339,7 +339,7 @@ fun Db.presenceOfPerson(person: String) = one(
     )
 )!!
 
-private fun Db.groupExtended(groupVar: String = "group") = """{
+fun Db.groupExtended(groupVar: String = "group") = """{
     $groupVar,
     members: (
         for person, member in inbound $groupVar graph `${Member::class.graph()}`

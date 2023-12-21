@@ -30,10 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.createGroup
-import app.ailaai.api.createMember
-import app.ailaai.api.profile
-import app.ailaai.api.profileCards
+import app.ailaai.api.*
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
@@ -663,8 +660,34 @@ fun ProfileScreen(personId: String) {
                         }
                     }
 
-                    Box {
+                    var groups by remember {
+                        mutableStateOf<List<GroupExtended>>(emptyList())
+                    }
 
+                    LaunchedEffect(personId) {
+                        api.groupsOfPerson(personId) {
+                            groups = it
+                        }
+                    }
+
+                    if (groups.isNotEmpty()) {
+                        Column(modifier = Modifier.padding(1.pad)) {
+                            Text(
+                                stringResource(
+                                    R.string.x_is_a_member,
+                                    person?.name ?: stringResource(R.string.someone)
+                                ),
+                                modifier = Modifier.padding(bottom = 1.pad)
+                            )
+
+                            groups.forEach { group ->
+                                ContactItem(
+                                    SearchResult.Group(group),
+                                    onChange = {},
+                                    info = GroupInfo.Members
+                                )
+                            }
+                        }
                     }
                 }
             }

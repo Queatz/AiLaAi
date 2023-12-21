@@ -507,4 +507,5 @@
     <string name="inlineWeekly">week</string>
     <string name="inlineMonthly">month</string>
     <string name="inlineYearly">year</string>
+    <string name="x_is_a_member">%1$s is a member</string>
 </resources>

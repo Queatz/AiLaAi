@@ -62,6 +62,18 @@ fun Route.peopleRoutes() {
                 }
             }
         }
+
+        get("/people/{id}/groups") {
+            respond {
+                val person = db.document(Person::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                // todo support search
+                val search = call.parameters["search"]
+
+                db.openGroupsOfPerson(person.id!!)
+            }
+        }
     }
 
     authenticate {

@@ -537,6 +537,10 @@ object Strings {
         "people waiting",
         "người đang chờ"
     )
+    val inlineIsAMember = Translation(
+        "is a member",
+        "là thành viên"
+    )
     val onProfile = Translation(
         "On profile",
         "Trên trang cá nhân"
