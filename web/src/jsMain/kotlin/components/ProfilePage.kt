@@ -266,7 +266,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                         }
                                     }) {
                                         // todo hover color is on surface already
-                                        GroupList(groups) {
+                                        GroupList(groups, onSurface = true) {
                                             // todo navigate to group
                                             router.navigate("/signin")
                                         }

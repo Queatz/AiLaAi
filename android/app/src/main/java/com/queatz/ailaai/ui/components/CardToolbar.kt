@@ -101,7 +101,6 @@ fun CardToolbar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(PaddingValues(top = 1.pad))
             .horizontalScroll(scrollState)
             .onPlaced { viewport = it.boundsInParent().size }
             .horizontalFadingEdge(viewport, scrollState)
@@ -125,7 +124,7 @@ fun CardToolbar(
         )
         if (activeCommitted) {
             Text(
-                stringResource(R.string.published),
+                stringResource(R.string.posted),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier

@@ -80,14 +80,10 @@ fun CardList(
                 fun basicCard(it: Card) {
                     CardLayout(
                         card = it,
-                        isMine = isMine(it),
                         showTitle = true,
                         showDistance = geo,
                         onClick = {
                             nav.navigate("card/${it.id!!}")
-                        },
-                        onChange = {
-                            onChanged()
                         },
                         scope = scope,
                         playVideo = playingVideo == it,

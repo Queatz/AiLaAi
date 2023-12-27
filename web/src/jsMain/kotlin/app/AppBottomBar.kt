@@ -34,14 +34,14 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Schedule)
         }
-        IconButton("rocket", "Play", styles = {
-            if (nav == NavPage.Schedule) {
-                backgroundColor(Styles.colors.primary)
-                color(Color.white)
-            }
-        }) {
-            onNavClick(NavPage.Schedule)
-        }
+//        IconButton("rocket", "Play", styles = {
+//            if (nav == NavPage.Schedule) {
+//                backgroundColor(Styles.colors.primary)
+//                color(Color.white)
+//            }
+//        }) {
+//            onNavClick(NavPage.Schedule)
+//        }
         IconButton("home", appString { cards }, styles = {
             if (nav == NavPage.Cards) {
                 backgroundColor(Styles.colors.primary)

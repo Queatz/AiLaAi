@@ -133,9 +133,6 @@ fun PublishStoryDialog(
             decorFitsSystemWindows = Build.VERSION.SDK_INT < Build.VERSION_CODES.S, // Dialogs missing scrim
             usePlatformDefaultWidth = false
         ),
-        title = {
-            Text(stringResource(R.string.publish_story))
-        },
         text = {
             val dialogScroll = rememberScrollState()
             Column(
@@ -177,10 +174,10 @@ fun PublishStoryDialog(
                         ) {
                             if (allCardsArePublished) {
                                 Icon(Icons.Outlined.CheckCircle, null, tint = MaterialTheme.colorScheme.primary)
-                                Text(stringResource(R.string.all_cards_are_published))
+                                Text(stringResource(R.string.all_cards_are_posted))
                             } else {
                                 Text(
-                                    text = stringResource(R.string.story_contains_draft_cards),
+                                    text = stringResource(R.string.story_contains_unposted_cards),
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier
                                         .padding(bottom = .5f.pad)
@@ -295,13 +292,6 @@ fun PublishStoryDialog(
                         )
                     }
                 }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(1.pad),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Outlined.Info, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(stringResource(R.string.published_stories_cant_be_edited))
-                }
 
                 if (shareToGeo == null) {
                     OutlinedButton(
@@ -368,7 +358,7 @@ fun PublishStoryDialog(
                 },
                 enabled = publishEnabled
             ) {
-                Text(stringResource(R.string.publish))
+                Text(stringResource(R.string.post))
             }
         },
         modifier = Modifier

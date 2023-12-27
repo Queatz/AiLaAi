@@ -39,7 +39,8 @@ class Ai {
             "icbinp_seco",
             "something_2",
             "basil_mix",
-            "kidsmix"
+            "kidsmix",
+            "icbinp_seco"
         )
         private const val height = 416
         private const val width = 608

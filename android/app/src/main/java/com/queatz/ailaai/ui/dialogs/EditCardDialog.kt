@@ -90,10 +90,15 @@ fun EditCardDialog(
         fun invalidate() {
             currentRecomposeScope.invalidate()
         }
+
         val titleFocusRequester = remember { FocusRequester() }
 
         LaunchedEffect(Unit) {
-            titleFocusRequester.requestFocus()
+            try {
+                titleFocusRequester.requestFocus()
+            } catch (e: IllegalStateException) {
+                // Ignore
+            }
         }
 
         Column(
@@ -101,53 +106,55 @@ fun EditCardDialog(
                 .padding(3.pad)
                 .verticalScroll(scrollState)
         ) {
-            Text(
-                if (create) stringResource(R.string.create_page) else stringResource(R.string.edit),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 1.pad)
-            )
-            OutlinedTextField(
-                cardName,
-                onValueChange = {
-                    cardName = it
-                },
-                label = {
-                    Text(stringResource(R.string.title))
-                },
-                shape = MaterialTheme.shapes.large,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = {
+            if (backstack.isEmpty()) {
+                Text(
+                    if (create) stringResource(R.string.create_page) else stringResource(R.string.edit),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 1.pad)
+                )
+                OutlinedTextField(
+                    cardName,
+                    onValueChange = {
+                        cardName = it
+                    },
+                    label = {
+                        Text(stringResource(R.string.title))
+                    },
+                    shape = MaterialTheme.shapes.large,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            keyboardController.hide()
+                        }
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                        .focusRequester(titleFocusRequester)
+                )
+                OutlinedTextField(
+                    locationName,
+                    onValueChange = {
+                        locationName = it
+                    },
+                    label = {
+                        Text(stringResource(R.string.hint))
+                    },
+                    shape = MaterialTheme.shapes.large,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
                         keyboardController.hide()
-                    }
-                ),
-                modifier = Modifier.fillMaxWidth()
-                    .focusRequester(titleFocusRequester)
-            )
-            OutlinedTextField(
-                locationName,
-                onValueChange = {
-                    locationName = it
-                },
-                label = {
-                    Text(stringResource(R.string.hint))
-                },
-                shape = MaterialTheme.shapes.large,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(onSearch = {
-                    keyboardController.hide()
-                }),
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+                    }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
             Column(
                 verticalArrangement = Arrangement.spacedBy(1.pad),
                 modifier = Modifier
@@ -296,41 +303,43 @@ fun EditCardDialog(
                         Text(stringResource(R.string.add_an_option))
                     }
                 }
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(1.pad),
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.large)
-                            .clickable {
-                                enableReplies = !enableReplies
-                            }
-                            .padding(end = 2.pad)) {
-                        Checkbox(enableReplies, {
-                            enableReplies = it
-                        })
-                        Text(
-                            stringResource(R.string.enable_replies),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                    AnimatedVisibility(enableReplies) {
+                if (backstack.isEmpty()) {
+                    Column {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(1.pad),
                             modifier = Modifier
                                 .clip(MaterialTheme.shapes.large)
                                 .clickable {
-                                    enableWebReplies = !enableWebReplies
+                                    enableReplies = !enableReplies
                                 }
                                 .padding(end = 2.pad)) {
-                            Checkbox(enableWebReplies, {
-                                enableWebReplies = it
+                            Checkbox(enableReplies, {
+                                enableReplies = it
                             })
                             Text(
-                                stringResource(R.string.enable_anonymous_replies),
+                                stringResource(R.string.enable_replies),
                                 style = MaterialTheme.typography.labelLarge
                             )
+                        }
+                        AnimatedVisibility(enableReplies) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(1.pad),
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.large)
+                                    .clickable {
+                                        enableWebReplies = !enableWebReplies
+                                    }
+                                    .padding(end = 2.pad)) {
+                                Checkbox(enableWebReplies, {
+                                    enableWebReplies = it
+                                })
+                                Text(
+                                    stringResource(R.string.enable_anonymous_replies),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
                         }
                     }
                 }
@@ -396,9 +405,11 @@ fun EditCardDialog(
                     },
                     enabled = !disableSaveButton
                 ) {
-                    Text(stringResource(
-                        if (create) R.string.create else R.string.update
-                    ))
+                    Text(
+                        stringResource(
+                            if (create) R.string.create else R.string.update
+                        )
+                    )
                 }
             }
         }

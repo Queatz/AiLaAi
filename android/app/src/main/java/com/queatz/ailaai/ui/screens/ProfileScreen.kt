@@ -695,15 +695,9 @@ fun ProfileScreen(personId: String) {
             items(cards, key = { it.id!! }) { card ->
                 CardLayout(
                     card = card,
-                    isMine = card.person == me?.id,
                     showTitle = true,
                     onClick = {
                         nav.navigate("card/${card.id!!}")
-                    },
-                    onChange = {
-                        scope.launch {
-                            reload()
-                        }
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,

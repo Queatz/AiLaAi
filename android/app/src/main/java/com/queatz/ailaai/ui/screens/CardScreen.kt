@@ -36,10 +36,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
-import com.queatz.ailaai.ui.components.BackButton
-import com.queatz.ailaai.ui.components.CardLayout
-import com.queatz.ailaai.ui.components.Dropdown
-import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.pad
@@ -332,7 +329,7 @@ fun CardScreen(cardId: String) {
                 showManageMenu = false
             }
         ) {
-            menuItem(stringResource(if (card?.active == true) R.string.unpublish else R.string.publish)) {
+            menuItem(stringResource(if (card?.active == true) R.string.unpost else R.string.post)) {
                 card?.let { card ->
                     scope.launch {
                         api.updateCard(
@@ -340,7 +337,7 @@ fun CardScreen(cardId: String) {
                             Card(active = card.active?.not() ?: true)
                         ) {
                             card.active = it.active
-                            context.toast(if (card.active == true) R.string.published else R.string.draft)
+                            context.toast(if (card.active == true) R.string.posted else R.string.not_posted)
                         }
                     }
                 }
@@ -691,12 +688,10 @@ fun CardScreen(cardId: String) {
                             items(cards, { it.id!! }) {
                                 CardLayout(
                                     card = it,
-                                    isMine = it.person == me?.id,
                                     showTitle = true,
                                     onClick = {
                                         nav.navigate("card/${it.id!!}")
                                     },
-                                    onChange = { reloadCards() },
                                     scope = scope,
                                     playVideo = playingVideo == it && !isAtTop,
                                 )
@@ -904,18 +899,27 @@ private fun LazyGridScope.cardHeaderItem(
     playVideo: Boolean = false
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
-        CardLayout(
-            card = card,
-            isMine = isMine,
-            showTitle = false,
-            aspect = aspect,
-            onClick = onClick,
-            onChange = onChange,
-            scope = scope,
-            elevation = elevation,
-            playVideo = playVideo,
-            showToolbar = true
-        )
+        val nav = nav
+
+        Column {
+            if (card != null && isMine) {
+                CardToolbar(
+                    nav.context as Activity,
+                    onChange,
+                    { nav.popBackStackOrFinish() },
+                    card
+                )
+            }
+            CardLayout(
+                card = card,
+                showTitle = false,
+                aspect = aspect,
+                onClick = onClick,
+                scope = scope,
+                elevation = elevation,
+                playVideo = playVideo,
+            )
+        }
     }
 }
 

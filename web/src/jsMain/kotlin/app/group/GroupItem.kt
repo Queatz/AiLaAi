@@ -36,6 +36,7 @@ fun GroupItem(
     group: GroupExtended,
     selectable: Boolean = true,
     selected: Boolean = false,
+    onSurface: Boolean = false,
     onSelected: () -> Unit,
     info: GroupInfo = GroupInfo.LatestMessage,
     styles: StyleScope.() -> Unit = {}
@@ -56,6 +57,9 @@ fun GroupItem(
                 }
                 if (!selectable) {
                     add(AppStyles.groupItemDefault)
+                }
+                if (onSurface) {
+                    add(AppStyles.groupItemOnSurface)
                 }
             }
         )

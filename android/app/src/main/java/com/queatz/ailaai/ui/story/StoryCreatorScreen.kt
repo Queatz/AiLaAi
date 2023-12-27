@@ -188,7 +188,7 @@ fun StoryCreatorScreen(
         when (source) {
             is StorySource.Story -> {
                 api.updateStory(source.id, Story(published = true)) {
-                    context.toast(R.string.published)
+                    context.toast(R.string.posted)
                     nav.popBackStackOrFinish()
                 }
             }
@@ -349,7 +349,7 @@ fun StoryCreatorScreen(
                             },
                             modifier = Modifier.padding(end = 2.pad)
                         ) {
-                            Text(stringResource(R.string.publish))
+                            Text(stringResource(R.string.post))
                         }
                     }
                     else -> {}

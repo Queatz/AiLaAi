@@ -186,7 +186,7 @@ fun ExploreScreen() {
 
         // Don't reload if moving < 100m
         if (shownGeo != null && (mapGeo?.takeIf { showAsMap }
-                ?: geo)!!.distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
+                ?: geo ?: return@LaunchedEffect).distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
             return@LaunchedEffect
         }
 

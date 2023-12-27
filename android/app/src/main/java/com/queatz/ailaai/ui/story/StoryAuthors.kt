@@ -16,6 +16,7 @@ import kotlinx.datetime.Instant
 @Composable
 fun StoryAuthors(navController: NavController, publishDate: Instant?, authors: List<Person>) {
     val someone = stringResource(R.string.someone)
+    val and = stringResource(R.string.inline_and)
     val authorsText = buildAnnotatedString {
         append("${publishDate?.timeAgo() ?: stringResource(R.string.draft)} ${stringResource(R.string.inline_by)} ")
         authors
@@ -23,7 +24,7 @@ fun StoryAuthors(navController: NavController, publishDate: Instant?, authors: L
                 if (index != 0) {
                     append(", ")
                     if (index == authors.lastIndex) {
-                        append("and")
+                        append(and)
                         append(" ")
                     }
                 }

@@ -68,15 +68,9 @@ fun GroupCards(group: GroupExtended) {
             items(cards, key = { it.id!! }) { card ->
                 CardLayout(
                     card = card,
-                    isMine = false,
                     showTitle = true,
                     onClick = {
                         nav.navigate("card/${card.id!!}")
-                    },
-                    onChange = {
-                        scope.launch {
-                            reload()
-                        }
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,

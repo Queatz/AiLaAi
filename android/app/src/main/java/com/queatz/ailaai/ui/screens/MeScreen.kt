@@ -189,15 +189,9 @@ fun MeScreen() {
                     items(cards, key = { it.id!! }) { card ->
                         CardLayout(
                             card = card,
-                            isMine = true,
                             showTitle = true,
                             onClick = {
                                 nav.navigate("card/${card.id!!}")
-                            },
-                            onChange = {
-                                scope.launch {
-                                    reload()
-                                }
                             },
                             scope = scope,
                             playVideo = playingVideo == card
@@ -254,7 +248,7 @@ fun MeScreen() {
                         ) else ButtonDefaults.buttonColors(),
                         modifier = Modifier.padding(end = 1.pad)
                     ) {
-                        Text(stringResource(R.string.published))
+                        Text(stringResource(R.string.posted))
                     }
                     Button(
                         {
@@ -267,7 +261,7 @@ fun MeScreen() {
                         ) else ButtonDefaults.buttonColors(),
                         modifier = Modifier.padding(end = 1.pad)
                     ) {
-                        Text(stringResource(R.string.draft))
+                        Text(stringResource(R.string.not_posted))
                     }
                 }
                 Row(

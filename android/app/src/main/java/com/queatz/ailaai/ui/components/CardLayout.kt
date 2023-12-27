@@ -34,17 +34,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun CardLayout(
     card: Card?,
-    isMine: Boolean,
     showTitle: Boolean,
     modifier: Modifier = Modifier,
     aspect: Float = 1.5f,
     onClick: () -> Unit,
-    onChange: () -> Unit,
     scope: CoroutineScope,
     elevation: Int = 1,
     showDistance: LatLng? = null,
     playVideo: Boolean = false,
-    showToolbar: Boolean = false
 ) {
     val nav = nav
 
@@ -127,16 +124,6 @@ fun CardLayout(
                         content
                     )
                 }
-            }
-
-            if (isMine && showToolbar) {
-                CardToolbar(
-                    nav.context as Activity,
-                    onChange,
-                    { nav.popBackStackOrFinish() },
-                    it,
-                    modifier = Modifier.padding(horizontal = 1.5f.pad)
-                )
             }
         }
     }

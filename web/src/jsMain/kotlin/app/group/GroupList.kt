@@ -8,18 +8,22 @@ import r
 @Composable
 fun GroupList(
     groups: List<GroupExtended>,
+    onSurface: Boolean = false,
     onSelected: (GroupExtended) -> Unit
 ) {
-    groups.forEach {
+    groups.forEachIndexed { index, it ->
         GroupItem(
             it,
-            selectable = false,
+            selectable = onSurface,
+            onSurface = onSurface,
             onSelected = {
                 onSelected(it)
             },
             info = GroupInfo.Members,
             styles = {
-                marginBottom(1.r)
+                if (index != groups.lastIndex) {
+                    marginBottom(1.r)
+                }
             }
         )
     }
