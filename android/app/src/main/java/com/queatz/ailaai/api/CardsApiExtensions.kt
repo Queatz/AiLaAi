@@ -19,7 +19,10 @@ suspend fun Api.uploadCardPhotoFromUri(
 ) {
     return uploadCardPhoto(
         id,
-        photo.asScaledJpeg(context),
+        photo.asScaledJpeg(context) ?: run {
+            onError?.invoke(IllegalStateException("Uri returned null photo"))
+            return
+        },
         onError,
         onSuccess
     )
@@ -61,7 +64,7 @@ suspend fun Api.uploadCardContentPhotosFromUri(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<String>>
 ) {
-    val scaledPhotos = media.map {
+    val scaledPhotos = media.mapNotNull {
         it.asScaledJpeg(context)
     }
     return uploadCardContentPhotos(
@@ -94,7 +97,7 @@ suspend fun Api.uploadProfileContentPhotosFromUri(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<String>>
 ) {
-    val scaledPhotos = media.map {
+    val scaledPhotos = media.mapNotNull {
         it.asScaledJpeg(context)
     }
     return uploadProfileContentPhotos(

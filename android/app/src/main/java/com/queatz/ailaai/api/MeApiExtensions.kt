@@ -16,7 +16,10 @@ suspend fun Api.updateProfilePhotoFromUri(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
     return updateProfilePhoto(
-        photo.asScaledJpeg(context),
+        photo.asScaledJpeg(context) ?: run {
+            onError?.invoke(IllegalStateException("Uri returned null photo"))
+            return
+        },
         onError,
         onSuccess
     )
@@ -56,7 +59,10 @@ suspend fun Api.updateMyPhotoFromUri(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
     return updateMyPhoto(
-        photo.asScaledJpeg(context),
+        photo.asScaledJpeg(context) ?: run {
+            onError?.invoke(IllegalStateException("Uri returned null photo"))
+            return
+        },
         onError,
         onSuccess
     )

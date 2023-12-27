@@ -16,7 +16,7 @@ suspend fun Api.uploadStoryPhotosFromUri(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<String>>
 ) {
-    val scaledPhotos = media.map {
+    val scaledPhotos = media.mapNotNull {
         it.asScaledJpeg(context)
     }
     return uploadStoryPhotos(

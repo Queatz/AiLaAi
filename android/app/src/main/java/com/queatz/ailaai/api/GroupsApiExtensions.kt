@@ -19,7 +19,7 @@ suspend fun Api.sendMediaFromUri(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
-    val scaledPhotos = photos.map {
+    val scaledPhotos = photos.mapNotNull {
         it.asScaledJpeg(context)
     }
     return sendMedia(

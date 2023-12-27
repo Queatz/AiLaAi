@@ -23,10 +23,10 @@ suspend fun Uri.orientation(context: Context): Int = withContext(Dispatchers.IO)
     } ?: ExifInterface.ORIENTATION_NORMAL
 }
 
-suspend fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 1600): ByteArray {
+suspend fun Uri.asScaledJpeg(context: Context, longestEdge: Int = 1600): ByteArray? {
     return withContext(Dispatchers.IO) {
         val orientation = this@asScaledJpeg.orientation(context)
-        val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(this@asScaledJpeg))
+        val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(this@asScaledJpeg)) ?: return@withContext null
         val w = if (bitmap.width > bitmap.height) longestEdge else (longestEdge * bitmap.aspect).toInt()
         val h = if (bitmap.height > bitmap.width) longestEdge else (longestEdge / bitmap.aspect).toInt()
 
