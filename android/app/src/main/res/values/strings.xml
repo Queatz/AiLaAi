@@ -512,4 +512,5 @@
     <string name="inlineYearly">year</string>
     <string name="x_is_a_member">%1$s is a member</string>
     <string name="profile">Profile</string>
+    <string name="dont_show">Don\'t show again</string>
 </resources>

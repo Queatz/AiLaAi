@@ -9,8 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,12 +22,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import app.ailaai.api.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadCardPhotoFromUri
 import com.queatz.ailaai.api.uploadCardVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
@@ -46,9 +48,12 @@ import com.queatz.db.Message
 import com.queatz.db.Person
 import io.ktor.http.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
+
+private val showGeneratingMessage = booleanPreferencesKey("ui.showGeneratingMessage")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +90,39 @@ fun CardScreen(cardId: String) {
     var oldPhoto by rememberStateOf<String?>(null)
     val me = me
     val nav = nav
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
+        if (it == null) return@rememberLauncherForActivityResult
+
+        uploadJob = scope.launch {
+            videoUploadProgress = 0f
+            if (it.isVideo(context)) {
+                isUploadingVideo = true
+                api.uploadCardVideoFromUri(
+                    context,
+                    card!!.id!!,
+                    it,
+                    context.contentResolver.getType(it) ?: "video/*",
+                    it.lastPathSegment ?: "video.${
+                        context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                    }",
+                    processingCallback = {
+                        videoUploadStage = ProcessingVideoStage.Processing
+                        videoUploadProgress = it
+                    },
+                    uploadCallback = {
+                        videoUploadStage = ProcessingVideoStage.Uploading
+                        videoUploadProgress = it
+                    }
+                )
+            } else if (it.isPhoto(context)) {
+                api.uploadCardPhotoFromUri(context, card!!.id!!, it)
+            }
+            api.card(cardId) { card = it }
+            uploadJob = null
+            isUploadingVideo = false
+        }
+    }
 
     if (isUploadingVideo) {
         ProcessingVideoDialog(
@@ -130,7 +168,13 @@ fun CardScreen(cardId: String) {
     fun generatePhoto() {
         scope.launch {
             api.generateCardPhoto(cardId) {
-                showGeneratingPhotoDialog = true
+                if (
+                    context.dataStore.data.first().let {
+                        it[showGeneratingMessage] != false
+                    }
+                ) {
+                    showGeneratingPhotoDialog = true
+                }
                 oldPhoto = card?.photo
             }
         }
@@ -197,13 +241,25 @@ fun CardScreen(cardId: String) {
             text = {
                 Text(stringResource(R.string.generating_description))
             },
-            confirmButton = {
+            dismissButton = {
                 TextButton({
                     showGeneratingPhotoDialog = false
                 }) {
                     Text(stringResource(R.string.close))
                 }
-            }
+            },
+            confirmButton = {
+                TextButton({
+                    showGeneratingPhotoDialog = false
+                    scope.launch {
+                        context.dataStore.edit {
+                            it[showGeneratingMessage] = false
+                        }
+                    }
+                }) {
+                    Text(stringResource(R.string.dont_show))
+                }
+            },
         )
     }
 
@@ -329,20 +385,6 @@ fun CardScreen(cardId: String) {
                 showManageMenu = false
             }
         ) {
-            menuItem(stringResource(if (card?.active == true) R.string.unpost else R.string.post)) {
-                card?.let { card ->
-                    scope.launch {
-                        api.updateCard(
-                            card.id!!,
-                            Card(active = card.active?.not() ?: true)
-                        ) {
-                            card.active = it.active
-                            context.toast(if (card.active == true) R.string.posted else R.string.not_posted)
-                        }
-                    }
-                }
-                showManageMenu = false
-            }
             menuItem(stringResource(R.string.change_owner)) {
                 openChangeOwner = true
                 showManageMenu = false
@@ -408,86 +450,8 @@ fun CardScreen(cardId: String) {
 
                 val cardString = stringResource(R.string.card)
 
-                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-                    if (it == null) return@rememberLauncherForActivityResult
-
-                    uploadJob = scope.launch {
-                        videoUploadProgress = 0f
-                        if (it.isVideo(context)) {
-                            isUploadingVideo = true
-                            api.uploadCardVideoFromUri(
-                                context,
-                                card!!.id!!,
-                                it,
-                                context.contentResolver.getType(it) ?: "video/*",
-                                it.lastPathSegment ?: "video.${
-                                    context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                                }",
-                                processingCallback = {
-                                    videoUploadStage = ProcessingVideoStage.Processing
-                                    videoUploadProgress = it
-                                },
-                                uploadCallback = {
-                                    videoUploadStage = ProcessingVideoStage.Uploading
-                                    videoUploadProgress = it
-                                }
-                            )
-                        } else if (it.isPhoto(context)) {
-                            api.uploadCardPhotoFromUri(context, card!!.id!!, it)
-                        }
-                        api.card(cardId) { card = it }
-                        uploadJob = null
-                        isUploadingVideo = false
-                    }
-                }
-
                 Dropdown(showMenu, { showMenu = false }) {
                     if (isMine) {
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.edit))
-                        }, {
-                            openEditDialog = true
-                            showMenu = false
-                        })
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.move))
-                        }, {
-                            openLocationDialog = true
-                            showMenu = false
-                        })
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.set_category))
-                        }, {
-                            showSetCategory = true
-                            showMenu = false
-                        })
-                        DropdownMenuItem({
-                            Text(stringResource(if (card?.pay == null) R.string.add_pay else R.string.change_pay))
-                        }, {
-                            showPay = true
-                            showMenu = false
-                        })
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.set_photo))
-                        }, {
-                            launcher.launch(PickVisualMediaRequest())
-                            showMenu = false
-                        })
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.generate_photo))
-                        }, {
-                            regeneratePhoto()
-                            showMenu = false
-                        })
-                        DropdownMenuItem({
-                            Text(
-                                stringResource(
-                                    if (card?.content == null) R.string.add_content else R.string.content
-                                )
-                            )
-                        }, {
-                            nav.navigate("card/${card!!.id!!}/edit")
-                        })
                         DropdownMenuItem({
                             Text(stringResource(R.string.manage))
                         }, {
@@ -585,6 +549,136 @@ fun CardScreen(cardId: String) {
                 .zIndex(1f)
         )
 
+        fun LazyGridScope.cardHeaderItem(
+            card: Card?,
+            isMine: Boolean,
+            aspect: Float,
+            onClick: () -> Unit,
+            scope: CoroutineScope,
+            elevation: Int = 1,
+            playVideo: Boolean = false
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (card != null && isMine) {
+                        var active by remember { mutableStateOf(card.active ?: false) }
+                        var activeCommitted by remember { mutableStateOf(active) }
+
+                        CardToolbar(
+                            modifier = Modifier.padding(bottom = 1.pad)
+                        ) {
+                            item(
+                                if (active) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                                if (activeCommitted) stringResource(R.string.posted) else stringResource(R.string.not_posted),
+                                selected = active
+                            ) {
+                                active = !active
+                                scope.launch {
+                                    api.updateCard(card.id!!, Card(active = active)) {
+                                        card.active = it.active
+                                        activeCommitted = it.active ?: false
+                                        active = activeCommitted
+                                    }
+                                }
+                            }
+
+                            item(
+                                Icons.Outlined.Place,
+                                when {
+                                    card.parent != null -> stringResource(R.string.inside_another_card)
+                                    card.group != null -> stringResource(R.string.in_a_group)
+                                    card.equipped == true -> stringResource(R.string.on_profile)
+                                    card.offline != true -> stringResource(R.string.at_a_location)
+                                    else -> stringResource(R.string.none)
+                                },
+                                selected = when {
+                                    card.parent != null -> true
+                                    card.group != null -> true
+                                    card.equipped == true -> true
+                                    card.offline != true -> true
+                                    else -> false
+                                }
+                            ) {
+                                openLocationDialog = true
+                            }
+
+                            item(
+                                Icons.Outlined.Edit,
+                                stringResource(R.string.edit)
+                            ) {
+                                openEditDialog = true
+                            }
+
+                            item(
+                                Icons.Outlined.Photo,
+                                stringResource(R.string.set_photo),
+                            ) {
+                                launcher.launch(PickVisualMediaRequest())
+                            }
+
+                            item(
+                                Icons.Outlined.AutoAwesome,
+                                stringResource(R.string.generate_photo)
+                            ) {
+                                regeneratePhoto()
+                                showMenu = false
+                            }
+
+//                            item(
+//                                Icons.Outlined.AutoAwesome,
+//                                stringResource("Take photo or video")
+//                            ) {
+//                                regeneratePhoto()
+//                                showMenu = false
+//                            }
+//
+//                            item(
+//                                Icons.Outlined.AutoAwesome,
+//                                stringResource("Hire a photographer")
+//                            ) {
+//                                regeneratePhoto()
+//                                showMenu = false
+//                            }
+
+                            item(
+                                Icons.Outlined.Category,
+                                stringResource(R.string.set_category)
+                            ) {
+                                showSetCategory = true
+                                showMenu = false
+                            }
+
+                            item(
+                                Icons.Outlined.Payments,
+                                stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay)
+                            ) {
+                                showPay = true
+                                showMenu = false
+                            }
+
+                            item(
+                                Icons.Outlined.AddBox,
+                                stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content)
+                            ) {
+                                nav.navigate("card/${card.id!!}/edit")
+                            }
+                        }
+                    }
+                    CardLayout(
+                        card = card,
+                        showTitle = false,
+                        aspect = aspect,
+                        onClick = onClick,
+                        scope = scope,
+                        elevation = elevation,
+                        playVideo = playVideo,
+                    )
+                }
+            }
+        }
+
         if (isLoading) {
             Loading()
         } else if (notFound) {
@@ -630,13 +724,6 @@ fun CardScreen(cardId: String) {
                                         openEditDialog = true
                                     }
                                 },
-                                onChange = {
-                                    if (card?.id == cardId) {
-                                        reload()
-                                    } else {
-                                        reloadCards()
-                                    }
-                                },
                                 scope,
                                 elevation = 2,
                                 playVideo = isAtTop
@@ -660,13 +747,6 @@ fun CardScreen(cardId: String) {
                                 onClick = {
                                     if (isMine) {
                                         openEditDialog = true
-                                    }
-                                },
-                                onChange = {
-                                    if (card?.id == cardId) {
-                                        reload()
-                                    } else {
-                                        reloadCards()
                                     }
                                 },
                                 scope,
@@ -887,39 +967,3 @@ fun CardScreen(cardId: String) {
         )
     }
 }
-
-private fun LazyGridScope.cardHeaderItem(
-    card: Card?,
-    isMine: Boolean,
-    aspect: Float,
-    onClick: () -> Unit,
-    onChange: () -> Unit,
-    scope: CoroutineScope,
-    elevation: Int = 1,
-    playVideo: Boolean = false
-) {
-    item(span = { GridItemSpan(maxLineSpan) }) {
-        val nav = nav
-
-        Column {
-            if (card != null && isMine) {
-                CardToolbar(
-                    nav.context as Activity,
-                    onChange,
-                    { nav.popBackStackOrFinish() },
-                    card
-                )
-            }
-            CardLayout(
-                card = card,
-                showTitle = false,
-                aspect = aspect,
-                onClick = onClick,
-                scope = scope,
-                elevation = elevation,
-                playVideo = playVideo,
-            )
-        }
-    }
-}
-
