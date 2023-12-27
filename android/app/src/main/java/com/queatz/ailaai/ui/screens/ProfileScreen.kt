@@ -680,18 +680,22 @@ fun ProfileScreen(personId: String) {
                         }
                     }
 
-                    OutlinedButton(
-                        onClick = {
-                            nav.navigate("profile/${person!!.id!!}/edit")
-                        }
-                    ) {
-                        Text(stringResource(
-                            if (profile?.content.isNullOrBlank()) {
-                                R.string.add_content
-                            } else {
-                                R.string.edit_content
+                    if (isMe) {
+                        OutlinedButton(
+                            onClick = {
+                                nav.navigate("profile/${person!!.id!!}/edit")
                             }
-                        ))
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (profile?.content.isNullOrBlank()) {
+                                        R.string.add_content
+                                    } else {
+                                        R.string.edit_content
+                                    }
+                                )
+                            )
+                        }
                     }
 
                     person?.let {
