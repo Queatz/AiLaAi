@@ -212,7 +212,6 @@ suspend fun Api.wildReply(
     onSuccess = onSuccess
 )
 
-
 suspend fun Api.uploadCardContentPhotos(
     card: String,
     media: List<ByteArray>,

@@ -30,7 +30,7 @@ import com.queatz.ailaai.api.uploadCardVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.helpers.OnResume
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.SavedIcon
@@ -146,7 +146,7 @@ fun CardScreen(cardId: String) {
         }
     }
 
-    OnResume {
+    ResumeEffect {
         reload()
         reloadCards()
     }

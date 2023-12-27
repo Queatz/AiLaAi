@@ -148,10 +148,14 @@ fun Route.meRoutes() {
                     profile.photo = null
                 }
 
+                if (update.content != null) {
+                    profile.content = update.content
+                }
+
                 if (update.url != null && profile.url != update.url) {
                     val url = update.url!!.urlize()
                     if (db.profileByUrl(url) != null) {
-                        return@respond HttpStatusCode.Conflict.description("URL in use")
+                        return@respond HttpStatusCode.Conflict.description("URL is already in use")
                     }
                     profile.url = url
                 }

@@ -372,6 +372,7 @@
     <string name="content_issue">Vấn đề nội dung</string>
     <string name="content">Nội dung</string>
     <string name="add_content">Thêm nội dung</string>
+    <string name="edit_content">Chỉnh sửa nội dung</string>
     <string name="spam_or_fake">Thư rác hoặc giả</string>
     <string name="other">Khác</string>
     <string name="personal_safety_description">Mình lo lắng cho sự an toàn của ai đó</string>
@@ -486,4 +487,5 @@
     <string name="inlineMonthly">tháng</string>
     <string name="inlineYearly">năm</string>
     <string name="x_is_a_member">%1$s là thành viên</string>
+    <string name="profile">Trang cá nhân</string>
 </resources>

@@ -154,7 +154,7 @@ fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) 
                                     replyMessage = it
                                 }
                             )
-                            CardContent(card)
+                            Content(card.content)
                         }
                     }
                 }

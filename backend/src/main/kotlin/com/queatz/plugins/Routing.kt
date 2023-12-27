@@ -29,6 +29,7 @@ fun Application.configureRouting() {
         categoryRoutes()
         groupRoutes()
         peopleRoutes()
+        profileRoutes()
         reminderRoutes()
         memberRoutes()
         messageRoutes()

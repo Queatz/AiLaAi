@@ -23,9 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.card
-import app.ailaai.api.group
-import app.ailaai.api.updateCard
+import app.ailaai.api.*
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
@@ -40,10 +38,7 @@ import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.Card
-import com.queatz.db.GroupExtended
-import com.queatz.db.Story
-import com.queatz.db.StoryDraft
+import com.queatz.db.*
 import com.queatz.widgets.Widgets
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -52,6 +47,7 @@ import kotlinx.serialization.json.buildJsonArray
 sealed class StorySource {
     data class Card(val id: String) : StorySource()
     data class Story(val id: String) : StorySource()
+    data class Profile(val id: String) : StorySource()
 }
 
 @Composable
@@ -70,6 +66,7 @@ fun StoryCreatorScreen(
     var currentFocus by rememberStateOf(0)
     var story by rememberStateOf<Story?>(null)
     var card by rememberStateOf<Card?>(null)
+    var profile by rememberStateOf<PersonProfile?>(null)
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     val recompose = currentRecomposeScope
     val nav = nav
@@ -95,6 +92,13 @@ fun StoryCreatorScreen(
                 api.card(source.id) {
                     card = it
                     storyContents = card?.content?.asStoryContents() ?: emptyList()
+                    recompose.invalidate()
+                }
+            }
+            is StorySource.Profile -> {
+                api.profile(source.id) {
+                    profile = it
+                    storyContents = profile?.profile?.content?.asStoryContents() ?: emptyList()
                     recompose.invalidate()
                 }
             }
@@ -167,6 +171,17 @@ fun StoryCreatorScreen(
                     edited = false
                 }
             }
+
+            is StorySource.Profile -> {
+                api.updateProfile(Profile(content = json.encodeToString(buildJsonArray {
+                    storyContents.filter { it.isPart() }.forEach { part ->
+                        add(part.toJsonStoryPart())
+                    }
+                }))) {
+                    profile = profile?.copy(profile = it)
+                    edited = false
+                }
+            }
         }
 
         return !hasError
@@ -202,7 +217,8 @@ fun StoryCreatorScreen(
         recompose.invalidate()
     }
 
-    if (story == null && card == null) {
+    // todo make sealed class
+    if (story == null && card == null && profile == null) {
         return
     }
 
@@ -283,6 +299,13 @@ fun StoryCreatorScreen(
                         .weight(1f)
                         .padding(horizontal = 1.pad),
                 )
+            } else if (profile != null) {
+                Text(
+                    stringResource(R.string.profile),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 1.pad),
+                )
             }
             IconButton(
                 {
@@ -313,7 +336,8 @@ fun StoryCreatorScreen(
                         )
                     }
 
-                    is StorySource.Card -> {
+                    is StorySource.Card,
+                    is StorySource.Profile -> {
                         Dropdown(
                             showMenu,
                             {
@@ -755,6 +779,18 @@ fun StoryCreatorScreen(
 
                                             is StorySource.Card -> {
                                                 api.uploadCardContentPhotosFromUri(
+                                                    context,
+                                                    source.id,
+                                                    it
+                                                ) { photoUrls ->
+                                                    part.edit {
+                                                        photos += photoUrls
+                                                    }
+                                                }
+                                            }
+
+                                            is StorySource.Profile -> {
+                                                api.uploadProfileContentPhotosFromUri(
                                                     context,
                                                     source.id,
                                                     it

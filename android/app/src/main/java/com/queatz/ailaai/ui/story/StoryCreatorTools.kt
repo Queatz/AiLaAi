@@ -20,10 +20,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.uploadCardContentAudioFromUri
-import com.queatz.ailaai.api.uploadCardContentPhotosFromUri
-import com.queatz.ailaai.api.uploadStoryAudioFromUri
-import com.queatz.ailaai.api.uploadStoryPhotosFromUri
+import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.horizontalFadingEdge
@@ -71,6 +68,15 @@ fun StoryCreatorTools(
                         )
                     }
                 }
+
+                is StorySource.Profile -> {
+                    api.uploadProfileContentPhotosFromUri(context, source.id, it) { photoUrls ->
+                        addPart(StoryContent.Photos(photoUrls))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                    }
+                }
             }
         }
     }
@@ -91,6 +97,15 @@ fun StoryCreatorTools(
 
                 is StorySource.Card -> {
                     api.uploadCardContentAudioFromUri(context, source.id, it) { audioUrl ->
+                        addPart(StoryContent.Audio(audioUrl))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                    }
+                }
+
+                is StorySource.Profile -> {
+                    api.uploadProfileContentAudioFromUri(context, source.id, it) { audioUrl ->
                         addPart(StoryContent.Audio(audioUrl))
                         addPart(
                             StoryContent.Text("")

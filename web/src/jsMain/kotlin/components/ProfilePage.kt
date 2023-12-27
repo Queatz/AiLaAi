@@ -7,6 +7,7 @@ import app.AppStyles
 import app.ailaai.api.*
 import app.components.Empty
 import app.components.TopBarSearch
+import app.dialog.photoDialog
 import app.group.GroupList
 import app.softwork.routingcompose.Router
 import appString
@@ -14,6 +15,8 @@ import baseUrl
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.PersonProfile
+import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLVideoElement
@@ -119,15 +122,23 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                         classes(Styles.navContent)
                     }) {
                         profile.profile.photo?.let { // photo or video
+                            val url = "$baseUrl$it"
                             Div({
                                 style {
                                     width(100.percent)
                                     backgroundColor(Styles.colors.background)
-                                    backgroundImage("url($baseUrl$it)")
+                                    backgroundImage("url($url)")
                                     backgroundPosition("center")
                                     backgroundSize("cover")
                                     maxHeight(50.vh)
+                                    cursor("pointer")
                                     property("aspect-ratio", "2")
+                                }
+
+                                onClick {
+                                    scope.launch {
+                                        photoDialog(url)
+                                    }
                                 }
                             }) {}
                         } ?: profile.profile.video?.let {
@@ -180,6 +191,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                             classes(ProfileStyles.mainContent)
                         }) {
                             profile.person.photo?.let {
+                                val url = "$baseUrl$it"
                                 Div({
                                     if (profile.profile.photo == null && profile.profile.video == null) {
                                         classes(ProfileStyles.photo, ProfileStyles.nophoto)
@@ -187,7 +199,14 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                         classes(ProfileStyles.photo)
                                     }
                                     style {
-                                        backgroundImage("url($baseUrl$it)")
+                                        backgroundImage("url($url)")
+                                        cursor("pointer")
+                                    }
+
+                                    onClick {
+                                        scope.launch {
+                                            photoDialog(url)
+                                        }
                                     }
                                 }) {}
                             }
@@ -237,6 +256,8 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                         LinkifyText(profile.profile.about!!)
                                     }
                                 }
+
+                                Content(profile.profile.content?.notBlank)
 
                                 var groups by remember {
                                     mutableStateOf<List<GroupExtended>>(emptyList())

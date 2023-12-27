@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
 import app.ailaai.api.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
@@ -53,7 +52,7 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.group.GroupCards
 import com.queatz.ailaai.group.GroupJoinRequest
-import com.queatz.ailaai.helpers.OnStart
+import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -250,7 +249,7 @@ fun GroupScreen(groupId: String) {
     }
 
 
-    OnStart {
+    StartEffect {
         reloadMessages()
     }
 

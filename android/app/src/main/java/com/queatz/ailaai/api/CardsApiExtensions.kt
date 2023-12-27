@@ -7,6 +7,8 @@ import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
 import io.ktor.http.*
+import uploadProfileContentAudio
+import uploadProfileContentPhotos
 
 suspend fun Api.uploadCardPhotoFromUri(
     context: Context,
@@ -78,6 +80,39 @@ suspend fun Api.uploadCardContentAudioFromUri(
     onSuccess: SuccessBlock<String>
 ) {
     return uploadCardContentAudio(
+        card,
+        audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
+        onError,
+        onSuccess
+    )
+}
+
+suspend fun Api.uploadProfileContentPhotosFromUri(
+    context: Context,
+    card: String,
+    media: List<Uri>,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<String>>
+) {
+    val scaledPhotos = media.map {
+        it.asScaledJpeg(context)
+    }
+    return uploadProfileContentPhotos(
+        card,
+        scaledPhotos,
+        onError,
+        onSuccess
+    )
+}
+
+suspend fun Api.uploadProfileContentAudioFromUri(
+    context: Context,
+    card: String,
+    audio: Uri,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<String>
+) {
+    return uploadProfileContentAudio(
         card,
         audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
         onError,

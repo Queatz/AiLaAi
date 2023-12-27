@@ -2,8 +2,10 @@ package components
 
 import Styles
 import androidx.compose.runtime.*
+import app.dialog.photoDialog
 import baseUrl
 import com.queatz.db.Card
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Source
@@ -12,17 +14,28 @@ import org.w3c.dom.HTMLVideoElement
 
 @Composable
 fun CardPhotoOrVideo(card: Card, styles: StyleScope.() -> Unit = {}) {
+    val scope = rememberCoroutineScope()
+
     card.photo?.let {
+        val url = "$baseUrl$it"
+
         Div({
             style {
                 width(100.percent)
                 backgroundColor(Styles.colors.background)
-                backgroundImage("url($baseUrl$it)")
+                backgroundImage("url($url)")
                 backgroundPosition("center")
                 backgroundSize("cover")
                 maxHeight(50.vh)
                 property("aspect-ratio", "2")
+                cursor("pointer")
                 styles()
+            }
+
+            onClick {
+                scope.launch {
+                    photoDialog(url)
+                }
             }
         }) {}
     } ?: card.video?.let {

@@ -40,7 +40,7 @@ import app.ailaai.api.updateMe
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.helpers.OnLifecycleEvent
+import com.queatz.ailaai.helpers.LifecycleEffect
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.*
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                 var newMessages by remember { mutableStateOf(0) }
                 val presence by mePresence.rememberPresence()
 
-                OnLifecycleEvent {
+                LifecycleEffect {
                     if (push.navController == navController) {
                         push.latestEvent = it
                     }
@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                                 || it.startsWith("write/")
                                 || it.startsWith("sticker-pack/")
                                 || (it.startsWith("card/") && it.endsWith("/edit"))
+                                || (it.startsWith("profile/") && it.endsWith("/edit"))
                                 || it == "sticker-packs"
                     } != true
 
@@ -427,6 +428,13 @@ class MainActivity : AppCompatActivity() {
                                                 })
                                             ) {
                                                 ProfileScreen(it.arguments!!.getString("id")!!)
+                                            }
+                                            composable(
+                                                "profile/{id}/edit"
+                                            ) {
+                                                StoryCreatorScreen(
+                                                    StorySource.Profile(it.arguments!!.getString("id")!!)
+                                                )
                                             }
                                             composable("explore") {
                                                 ExploreScreen()

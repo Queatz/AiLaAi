@@ -43,6 +43,7 @@ class Profile(
     var photo: String? = null,
     var video: String? = null,
     var about: String? = null,
+    var content: String? = null,
     var url: String? = null
 ) : Model()
 

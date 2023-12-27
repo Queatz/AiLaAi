@@ -30,7 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.*
+import app.ailaai.api.createGroup
+import app.ailaai.api.createMember
+import app.ailaai.api.profile
+import app.ailaai.api.profileCards
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
@@ -38,11 +41,15 @@ import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.profile.ProfileGroups
+import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.state.jsonSaver
+import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import kotlinx.coroutines.*
@@ -188,7 +195,7 @@ fun ProfileScreen(personId: String) {
         }
     }
 
-    LaunchedEffect(Unit) {
+    ResumeEffect {
         if (cards.isEmpty() || person == null || profile == null) {
             isLoading = true
         }
@@ -660,34 +667,35 @@ fun ProfileScreen(personId: String) {
                         }
                     }
 
-                    var groups by remember {
-                        mutableStateOf<List<GroupExtended>>(emptyList())
-                    }
-
-                    LaunchedEffect(personId) {
-                        api.groupsOfPerson(personId) {
-                            groups = it
-                        }
-                    }
-
-                    if (groups.isNotEmpty()) {
-                        Column(modifier = Modifier.padding(1.pad)) {
-                            Text(
-                                stringResource(
-                                    R.string.x_is_a_member,
-                                    person?.name ?: stringResource(R.string.someone)
-                                ),
-                                modifier = Modifier.padding(bottom = 1.pad)
+                    profile?.content?.notBlank?.let { content ->
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 1.pad)
+                                .heightIn(max = 2096.dp)
+                        ) {
+                            CardContent(
+                                StorySource.Profile(person!!.id!!),
+                                content
                             )
-
-                            groups.forEach { group ->
-                                ContactItem(
-                                    SearchResult.Group(group),
-                                    onChange = {},
-                                    info = GroupInfo.Members
-                                )
-                            }
                         }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            nav.navigate("profile/${person!!.id!!}/edit")
+                        }
+                    ) {
+                        Text(stringResource(
+                            if (profile?.content.isNullOrBlank()) {
+                                R.string.add_content
+                            } else {
+                                R.string.edit_content
+                            }
+                        ))
+                    }
+
+                    person?.let {
+                        ProfileGroups(it)
                     }
                 }
             }

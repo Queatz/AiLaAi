@@ -10,7 +10,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.launch
 
 @Composable
-fun OnLifecycleEvent(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
+fun LifecycleEffect(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
     val eventHandler = rememberUpdatedState(onEvent)
     val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
     val scope = rememberCoroutineScope()
@@ -32,8 +32,8 @@ fun OnLifecycleEvent(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
 }
 
 @Composable
-fun OnResume(block: suspend () -> Unit) {
-    OnLifecycleEvent {
+fun ResumeEffect(block: suspend () -> Unit) {
+    LifecycleEffect {
         if (it == Lifecycle.Event.ON_RESUME) {
             block()
         }
@@ -41,8 +41,8 @@ fun OnResume(block: suspend () -> Unit) {
 }
 
 @Composable
-fun OnStart(block: suspend () -> Unit) {
-    OnLifecycleEvent {
+fun StartEffect(block: suspend () -> Unit) {
+    LifecycleEffect {
         if (it == Lifecycle.Event.ON_START) {
             block()
         }

@@ -385,6 +385,7 @@
     <string name="content_issue">Content issue</string>
     <string name="content">Content</string>
     <string name="add_content">Add content</string>
+    <string name="edit_content">Edit content</string>
     <string name="spam_or_fake">Spam or fake</string>
     <string name="other">Other</string>
     <string name="personal_safety_description">I have a concern for someone\'s safety</string>
@@ -510,4 +511,5 @@
     <string name="inlineMonthly">month</string>
     <string name="inlineYearly">year</string>
     <string name="x_is_a_member">%1$s is a member</string>
+    <string name="profile">Profile</string>
 </resources>

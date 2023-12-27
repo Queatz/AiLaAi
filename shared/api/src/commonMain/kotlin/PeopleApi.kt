@@ -4,6 +4,8 @@ import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import com.queatz.db.PersonProfile
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
 
 suspend fun Api.people(
     search: String,

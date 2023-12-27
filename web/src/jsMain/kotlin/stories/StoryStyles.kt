@@ -99,6 +99,7 @@ object StoryStyles : StyleSheet() {
         maxWidth(100.percent)
         marginRight(1.r)
         marginBottom(1.r)
+        cursor("pointer")
 
         media(mediaMaxWidth(640.px)) {
             self style {

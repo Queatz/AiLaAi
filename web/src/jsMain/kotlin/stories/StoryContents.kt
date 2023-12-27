@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import api
 import app.AppStyles
 import app.ailaai.api.group
+import app.dialog.photoDialog
 import app.group.GroupInfo
 import app.group.GroupItem
 import app.widget.ImpactEffortTable
@@ -16,6 +17,7 @@ import components.CardItem
 import components.Icon
 import components.LinkifyText
 import components.LoadingText
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import lib.format
 import lib.isThisYear
@@ -38,6 +40,9 @@ fun StoryContents(
 ) {
     Style(StoryStyles)
     Style(AppStyles)
+
+    val scope = rememberCoroutineScope()
+
     storyContent.forEach { part ->
         when (part) {
             is StoryContent.Title -> {
@@ -137,12 +142,19 @@ fun StoryContents(
                     classes(StoryStyles.contentPhotos)
                 }) {
                     part.photos.forEach { photo ->
+                        val url = "$baseUrl$photo"
                         Div({
                             classes(StoryStyles.contentPhotosPhoto)
                             style {
                                 backgroundColor(Styles.colors.background)
-                                backgroundImage("url($baseUrl$photo)")
+                                backgroundImage("url($url)")
                                 property("aspect-ratio", "${part.aspect}")
+                            }
+
+                            onClick {
+                                scope.launch {
+                                    photoDialog(url)
+                                }
                             }
                         })
                     }

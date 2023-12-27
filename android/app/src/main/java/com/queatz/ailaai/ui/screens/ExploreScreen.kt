@@ -23,7 +23,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.helpers.OnResume
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -194,7 +194,7 @@ fun ExploreScreen() {
         loadMore(clear = shownValue != value || shownTab != tab)
     }
 
-    OnResume {
+    ResumeEffect {
         loadMore()
     }
 

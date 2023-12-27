@@ -30,7 +30,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.helpers.OnResume
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -182,7 +182,7 @@ fun FriendsScreen() {
             }
     }
 
-    OnResume {
+    ResumeEffect {
         reloadFlow.emit(true)
     }
 
