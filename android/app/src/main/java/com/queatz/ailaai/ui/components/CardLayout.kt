@@ -117,7 +117,7 @@ fun CardLayout(
             card.content?.let { content ->
                 Box(
                     modifier = Modifier
-                        .heightIn(max = 360.dp)
+                        .heightIn(max = 2096.dp)
                 ) {
                     CardContent(
                         StorySource.Card(card.id!!),

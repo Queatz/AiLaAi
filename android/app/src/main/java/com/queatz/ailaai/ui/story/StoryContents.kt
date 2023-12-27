@@ -57,6 +57,7 @@ fun StoryContents(
                 showOpenWidgetDialog = false
             },
             text = {
+                // todo translate
                Text("Widgets are currently only interactable on web.")
             },
             dismissButton = {

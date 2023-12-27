@@ -40,6 +40,7 @@ object StoryStyles : StyleSheet() {
         justifyContent(JustifyContent.Stretch)
         whiteSpace("pre-wrap")
         fontSize(16.px)
+        textAlign("justify")
     }
 
     val contentPhotos by style {

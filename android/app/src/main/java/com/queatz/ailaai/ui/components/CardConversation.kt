@@ -163,7 +163,7 @@ fun CardConversation(
             }
         }
 
-        AnimatedVisibility(stack.isEmpty()) {
+        if (stack.isEmpty()) {
             cardAuthors?.let { authors ->
                 CardAuthor(
                     authors,
