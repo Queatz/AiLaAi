@@ -36,10 +36,12 @@ fun Route.wildRoutes() {
                 }
 
                 val people = listOf(wildPerson.id!!, card.person!!).distinct()
-                val group = db.group(people) ?: app.createGroup(people).let {
-                    // todo translate
-                    it.description =
-                        "This is a message from the web. The other person may not see your replies, but you can jot down notes here."
+                val group = app.createGroup(people).let {
+                    if (meOrNull == null) {
+                        // todo translate
+                        it.description =
+                            "This is a message from the web. The other person may not see your replies, but you can jot down notes here."
+                    }
                     db.update(it)
                 }
                 val wildMember = db.member(wildPerson.id!!, group.id!!)
