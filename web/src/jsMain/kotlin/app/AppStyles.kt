@@ -1,4 +1,5 @@
 package app
+
 import Styles
 import Styles.elevated
 import Styles.textIcon
@@ -89,9 +90,12 @@ object AppStyles : StyleSheet() {
             backgroundColor(Color.black)
             color(Color.white)
         }
+
+        mobile(self) {
+            flexDirection(FlexDirection.ColumnReverse)
+        }
     }
     val sideLayout by style {
-        width(24.r)
         overflow("hidden")
         flexShrink(0)
         display(DisplayStyle.Flex)
@@ -105,6 +109,15 @@ object AppStyles : StyleSheet() {
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
         }
+
+        mobile(self) {
+            property("width", "calc(${100.percent} - ${2.r})")
+            height(33.vh)
+        }
+
+        desktop(self) {
+            width(24.r)
+        }
     }
     val mainLayout by style {
         overflow("hidden")
@@ -112,6 +125,7 @@ object AppStyles : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.ColumnReverse)
     }
+
     @OptIn(ExperimentalComposeWebApi::class)
     val bottomBar by style {
         display(DisplayStyle.Flex)
@@ -438,7 +452,7 @@ object AppStyles : StyleSheet() {
         overflow("hidden")
         maxWidth(36.r)
 
-    dark(self) {
+        dark(self) {
             backgroundColor(Styles.colors.dark.background)
         }
     }
