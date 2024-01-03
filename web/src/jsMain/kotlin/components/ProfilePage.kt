@@ -11,6 +11,7 @@ import app.dialog.photoDialog
 import app.group.GroupList
 import app.softwork.routingcompose.Router
 import appString
+import application
 import baseUrl
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
@@ -35,6 +36,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
     var profile by remember { mutableStateOf<PersonProfile?>(null) }
     var cards by remember { mutableStateOf<List<Card>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
+    val me by application.me.collectAsState()
 
     var search by remember {
         mutableStateOf("")
@@ -217,6 +219,42 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     classes(ProfileStyles.name)
                                 }) {
                                     NameAndLocation(profile.person.name, "")
+                                }
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                    }
+                                }) {
+                                    if (me == null) {
+                                        Button({
+                                            classes(Styles.button)
+
+                                            onClick {
+                                                router.navigate("/signin")
+                                            }
+                                        }) {
+                                            Text(appString { connect })
+                                        }
+                                    } else {
+                                        Button({
+                                            classes(Styles.button)
+
+                                            onClick {
+                                                // todo go to specific group
+                                                router.navigate("/")
+                                            }
+                                        }) {
+                                            Text(appString { message })
+                                        }
+                                    }
+//                                    Button({
+//                                        classes(Styles.button)
+//                                    style {
+//                                        marginLeft(1.r)
+//                                    }
+//                                    }) {
+//                                        Text("Trade")
+//                                    }
                                 }
                                 Div({
                                     style {

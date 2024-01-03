@@ -725,6 +725,10 @@ object Strings {
         "Pay",
         "Lương"
     )
+    val connect = Translation(
+        "Connect",
+        "Kết nối"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {
