@@ -75,6 +75,7 @@ import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(groupId: String) {
@@ -172,6 +173,28 @@ fun GroupScreen(groupId: String) {
             }
         }
     }
+
+    val cameraUri = "photo.jpg".asCacheFileUri(context)
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                scope.launch {
+                    api.sendMediaFromUri(
+                        context,
+                        groupId,
+                        cameraUri.inList(),
+                        stageReply?.id?.let {
+                            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+                        }
+                    ) {
+                        reloadMessages()
+                    }
+                }
+            }
+        }
+    )
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) {
@@ -959,8 +982,8 @@ fun GroupScreen(groupId: String) {
                                                 )
                                             } else {
                                                 Icon(
-                                                    Icons.Outlined.Add,
-                                                    stringResource(R.string.add),
+                                                    Icons.Outlined.CameraAlt,
+                                                    stringResource(R.string.photo),
                                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
@@ -1066,6 +1089,7 @@ fun GroupScreen(groupId: String) {
                     button = stringResource(R.string.generate_photo),
                     requireNotBlank = true,
                     requireModification = false,
+                    placeholder = stringResource(R.string.describe_photo),
                     extraContent = {
                         CardToolbar {
                             item(Icons.Outlined.Photo, stringResource(R.string.add_photo)) {
@@ -1075,6 +1099,7 @@ fun GroupScreen(groupId: String) {
 
                             item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {
                                 showPhotoDialog = false
+                                cameraLauncher.launch(cameraUri)
                             }
 
                             item(Icons.Outlined.AutoAwesome, allStyles.firstOrNull { it.second == selectedStyle }?.first ?: stringResource(R.string.style), selected = selectedStyle != null) {
@@ -1093,7 +1118,10 @@ fun GroupScreen(groupId: String) {
                                 Message(
                                     // todo let the user choose to include the prompt
                                     // text = prompt,
-                                    attachment = json.encodeToString(PhotosAttachment(photos = listOf(response.photo)))
+                                    attachment = json.encodeToString(PhotosAttachment(photos = listOf(response.photo))),
+                                    attachments = stageReply?.id?.let {
+                                        listOf(json.encodeToString(ReplyAttachment(it)))
+                                    }
                                 )
                             ) {
                                 reloadMessages()

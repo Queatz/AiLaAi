@@ -515,4 +515,6 @@
     <string name="dont_show">Don\'t show again</string>
     <string name="take_photo">Take photo</string>
     <string name="style">Style</string>
+    <string name="photo">Photo</string>
+    <string name="describe_photo">Describe the photo</string>
 </resources>

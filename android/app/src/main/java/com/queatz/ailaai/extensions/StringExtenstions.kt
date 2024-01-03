@@ -85,6 +85,13 @@ suspend fun Bitmap.share(context: Context, name: String?): Boolean {
     return true
 }
 
+fun String.asCacheFileUri(context: Context): Uri {
+    val path = File(context.cacheDir, "share")
+    path.mkdirs()
+    val newFile = File(path, this)
+    return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
+}
+
 suspend fun Bitmap.uri(context: Context): Uri? {
     val path = File(context.cacheDir, "share")
     path.mkdirs()

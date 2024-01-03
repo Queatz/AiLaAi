@@ -491,4 +491,6 @@
     <string name="dont_show">Không hiển thị lại</string>
     <string name="take_photo">Chụp hình</string>
     <string name="style">Kiểu</string>
+    <string name="photo">Ảnh</string>
+    <string name="describe_photo">Mô tả ảnh</string>
 </resources>
