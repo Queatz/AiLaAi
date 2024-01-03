@@ -112,6 +112,7 @@ fun GroupScreen(groupId: String) {
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
     var aiStyleMenu by rememberStateOf(false)
+    var aiPrompt by rememberStateOf("")
     var allStyles by rememberStateOf(emptyList<Pair<String, String>>())
     var selectedStyle by rememberStateOf<String?>(null)
     val nav = nav
@@ -1061,8 +1062,10 @@ fun GroupScreen(groupId: String) {
                         showPhotoDialog = false
                     },
                     title = null,
+                    initialValue = aiPrompt,
                     button = stringResource(R.string.generate_photo),
                     requireNotBlank = true,
+                    requireModification = false,
                     extraContent = {
                         CardToolbar {
                             item(Icons.Outlined.Photo, stringResource(R.string.add_photo)) {
@@ -1080,6 +1083,7 @@ fun GroupScreen(groupId: String) {
                         }
                     }
                 ) { prompt ->
+                    aiPrompt = prompt
                     showPhotoDialog = false
                     scope.launch {
                         isGeneratingPhoto = true
@@ -1087,7 +1091,8 @@ fun GroupScreen(groupId: String) {
                             api.sendMessage(
                                 groupId,
                                 Message(
-//                                    text = prompt,
+                                    // todo let the user choose to include the prompt
+                                    // text = prompt,
                                     attachment = json.encodeToString(PhotosAttachment(photos = listOf(response.photo)))
                                 )
                             ) {

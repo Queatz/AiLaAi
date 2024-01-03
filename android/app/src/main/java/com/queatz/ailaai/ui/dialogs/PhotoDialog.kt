@@ -162,11 +162,10 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                                     alignment = Alignment.Center,
                                     modifier = Modifier
                                         .fillParentMaxSize()
-                                        .zoomable(zoomableState, onClick = { onDismissRequest() })
-                                        .clickable {
+                                        .zoomable(zoomableState, onClick = { onDismissRequest() }, onLongClick = {
                                             selectedBitmap = api.url(media.url)
                                             showMenu = true
-                                        }
+                                        })
                                 )
                             }
                             is Media.Video -> {
