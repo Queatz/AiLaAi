@@ -21,27 +21,27 @@ import kotlin.time.Duration.Companion.minutes
 class Ai {
 
     companion object {
-        private const val endpoint = "https://api.dezgo.com/text2image"
-        private val defaultStylePresets = listOf(
-            "absolute_reality_1_8_1",
-            "anything_5_0",
-            "openniji",
-            "pastel_mix",
-            "furrytoonmix",
-            "eimis_anime_diffusion_1",
-            "realistic_vision_5_1",
-            "toonify_2",
-            "blood_orange_mix",
-            "dreamix_1",
-            "abyss_orange_mix_2",
-            "duchaiten_anime",
-            "duchaiten_dreamworld",
-            "icbinp_seco",
-            "something_2",
-            "basil_mix",
-            "kidsmix",
-            "icbinp_seco"
+        val styles = listOf(
+            "Absolute Reality" to "absolute_reality_1_8_1",
+            "Anything" to "anything_5_0",
+            "Niji" to "openniji",
+            "Pastel" to "pastel_mix",
+            "Animal" to "furrytoonmix",
+            "Eimis" to "eimis_anime_diffusion_1",
+            "Realistic Vision" to "realistic_vision_5_1",
+            "Toon" to "toonify_2",
+            "Blood Orange" to "blood_orange_mix",
+            "Dreamix" to "dreamix_1",
+            "Abyss Orange" to "abyss_orange_mix_2",
+            "Duc Haiten" to "duchaiten_anime",
+            "Duc Haiten Dream" to "duchaiten_dreamworld",
+            "Icbinp Seco" to "icbinp_seco",
+            "Something" to "something_2",
+            "Basil" to "basil_mix",
+            "Kids" to "kidsmix",
         )
+        private val defaultStylePresets = styles.map { it.second }
+        private const val endpoint = "https://api.dezgo.com/text2image"
         private const val height = 416
         private const val width = 608
         private val basePrompt = TextPrompt(
@@ -58,8 +58,8 @@ class Ai {
         }
     }
 
-    suspend fun photo(prefix: String, prompts: List<TextPrompt>): String {
-        val model = defaultStylePresets.random()
+    suspend fun photo(prefix: String, prompts: List<TextPrompt>, style: String? = null): String {
+        val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.random()
         val body = json.encodeToString(
             DezgoPrompt(
                 prompt = (prompts + basePrompt).joinToString { it.text },

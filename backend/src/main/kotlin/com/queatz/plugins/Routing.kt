@@ -46,6 +46,7 @@ fun Application.configureRouting() {
         pushRoutes()
         joinRequestRoutes()
         widgetRoutes()
+        aiRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {

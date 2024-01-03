@@ -76,7 +76,7 @@ fun CardsNavPage(cardUpdates: Flow<Card>, nav: CardNav, onSelected: (CardNav) ->
             myCards//.filter { it.parent == null }
         } else {
             myCards.filter {
-                (it.name?.contains(search, true) ?: false)
+                (it.name?.contains(search, true) ?: false) || (it.conversation?.contains(search, true) ?: false)
             }
         }).sortedByDescending { saved.any { save -> it.id == save.id } }.let {
             if (filters.isNotEmpty()) {

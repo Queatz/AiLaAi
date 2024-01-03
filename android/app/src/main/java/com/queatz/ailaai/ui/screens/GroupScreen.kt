@@ -1,5 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
+import aiPhoto
+import aiStyles
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -93,6 +95,8 @@ fun GroupScreen(groupId: String) {
     var showGroupMembers by rememberStateOf(false)
     var showRemoveGroupMembers by rememberStateOf(false)
     var showInviteMembers by rememberStateOf(false)
+    var showPhotoDialog by rememberStateOf(false)
+    var isGeneratingPhoto by rememberStateOf(false)
     var showJoinDialog by rememberStateOf(false)
     var showSnoozeDialog by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
@@ -107,6 +111,9 @@ fun GroupScreen(groupId: String) {
     val stickerPacks by stickers.rememberStickerPacks()
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
+    var aiStyleMenu by rememberStateOf(false)
+    var allStyles by rememberStateOf(emptyList<Pair<String, String>>())
+    var selectedStyle by rememberStateOf<String?>(null)
     val nav = nav
     val me = me
 
@@ -941,14 +948,21 @@ fun GroupScreen(groupId: String) {
                                     Row {
                                         IconButton(
                                             onClick = {
-                                                launcher.launch(PickVisualMediaRequest())
+                                                showPhotoDialog = true
                                             }
                                         ) {
-                                            Icon(
-                                                Icons.Outlined.Photo,
-                                                stringResource(R.string.add),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
+                                            if (isGeneratingPhoto) {
+                                                CircularProgressIndicator(
+                                                    strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            } else {
+                                                Icon(
+                                                    Icons.Outlined.Add,
+                                                    stringResource(R.string.add),
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
                                         }
                                         IconButton(
                                             onClick = {
@@ -1014,6 +1028,75 @@ fun GroupScreen(groupId: String) {
                     Media.Photo(showPhoto!!),
                     messages.photos().map { Media.Photo(it) }
                 )
+            }
+
+            if (showPhotoDialog) {
+                LaunchedEffect(aiStyleMenu) {
+                    if (aiStyleMenu && allStyles.isEmpty()) {
+                        api.aiStyles {
+                            allStyles = it
+                        }
+                    }
+                }
+
+                if (aiStyleMenu && allStyles.isNotEmpty()) {
+                    Menu({
+                        aiStyleMenu = false
+                    }) {
+                        allStyles.forEach {
+                            menuItem(it.first) {
+                                aiStyleMenu = false
+                                selectedStyle = if (selectedStyle == it.second) {
+                                    null
+                                } else {
+                                    it.second
+                                }
+                            }
+                        }
+                    }
+                }
+
+                TextFieldDialog(
+                    {
+                        showPhotoDialog = false
+                    },
+                    title = null,
+                    button = stringResource(R.string.generate_photo),
+                    requireNotBlank = true,
+                    extraContent = {
+                        CardToolbar {
+                            item(Icons.Outlined.Photo, stringResource(R.string.add_photo)) {
+                                showPhotoDialog = false
+                                launcher.launch(PickVisualMediaRequest())
+                            }
+
+                            item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {
+                                showPhotoDialog = false
+                            }
+
+                            item(Icons.Outlined.AutoAwesome, allStyles.firstOrNull { it.second == selectedStyle }?.first ?: stringResource(R.string.style), selected = selectedStyle != null) {
+                                aiStyleMenu = true
+                            }
+                        }
+                    }
+                ) { prompt ->
+                    showPhotoDialog = false
+                    scope.launch {
+                        isGeneratingPhoto = true
+                        api.aiPhoto(AiPhotoRequest(prompt, selectedStyle)) { response ->
+                            api.sendMessage(
+                                groupId,
+                                Message(
+//                                    text = prompt,
+                                    attachment = json.encodeToString(PhotosAttachment(photos = listOf(response.photo)))
+                                )
+                            ) {
+                                reloadMessages()
+                            }
+                        }
+                        isGeneratingPhoto = false
+                    }
+                }
             }
 
             if (showCategoryDialog) {

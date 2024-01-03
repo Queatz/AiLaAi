@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TextFieldDialog(
     onDismissRequest: () -> Unit,
-    title: String,
+    title: String?,
     button: String,
     singleLine: Boolean = false,
     initialValue: String = "",
@@ -51,11 +51,13 @@ fun TextFieldDialog(
                 .padding(3.pad)
                 .verticalScroll(scrollState)
         ) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 1.pad)
-            )
+            if (title != null) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 1.pad)
+                )
+            }
             extraContent?.invoke(this)
             OutlinedTextField(
                 text,

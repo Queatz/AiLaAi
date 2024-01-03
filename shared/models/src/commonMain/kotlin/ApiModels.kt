@@ -104,6 +104,17 @@ class MyDevice(
 )
 
 @Serializable
+class AiPhotoRequest(
+    val prompt: String,
+    val style: String? = null,
+)
+
+@Serializable
+class AiPhotoResponse(
+    val photo: String
+)
+
+@Serializable
 data class VersionInfo(
     val versionCode: Int,
     val versionName: String

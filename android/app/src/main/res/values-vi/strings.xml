@@ -489,4 +489,6 @@
     <string name="x_is_a_member">%1$s là thành viên</string>
     <string name="profile">Trang cá nhân</string>
     <string name="dont_show">Không hiển thị lại</string>
+    <string name="take_photo">Chụp hình</string>
+    <string name="style">Kiểu</string>
 </resources>
