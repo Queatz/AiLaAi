@@ -110,13 +110,16 @@ fun EventRow(
     menuTarget?.let { target ->
         Menu({ menuTarget = null }, target) {
             if (showOpen) {
+                // todo: translate
                 item("Open") {
                     onOpenReminder()
                 }
             }
+            // todo: translate
             item("Reschedule") {
                 reschedule()
             }
+            // todo: translate
             item("Delete") {
                 delete()
             }
@@ -126,12 +129,14 @@ fun EventRow(
     val eventType = event.event
     val date = event.date
     val done = event.occurrence?.done ?: false
+    // todo: translate
     val text = event.reminder.title?.notBlank ?: "New reminder"
     val note = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: ""
 
     Div({
         classes(SchedulePageStyles.row)
 
+        // todo: translate
         title("Mark as done")
 
         onClick {
@@ -201,11 +206,13 @@ fun EventRow(
         Div({
             classes(SchedulePageStyles.rowActions)
         }) {
+            // todo: translate
             IconButton("edit", "Edit", styles = {
             }) {
                 it.stopPropagation()
                 edit()
             }
+            // todo: translate
             IconButton("more_vert", "Options", styles = {
             }) {
                 it.stopPropagation()

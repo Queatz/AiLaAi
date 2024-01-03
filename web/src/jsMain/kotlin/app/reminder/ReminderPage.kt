@@ -166,6 +166,7 @@ fun ReminderPage(
 
             item(appString { delete }) {
                 scope.launch {
+                    // Todo: translate
                     val result = dialog("Delete this reminder?", confirmButton = "Yes, delete") {
                         Text("You cannot undo this.")
                     }

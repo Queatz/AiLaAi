@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,7 @@ import com.queatz.ailaai.ui.theme.pad
 
 class SearchFilter(
     val name: String,
+    val icon: ImageVector,
     val selected: Boolean,
     val onClick: () -> Unit
 )
@@ -78,7 +80,7 @@ fun SearchContent(
                         contentColor = MaterialTheme.colorScheme.onBackground
                     ) else ButtonDefaults.buttonColors()
                 ) {
-                    Icon(Icons.Outlined.FilterList, null, modifier = Modifier.padding(end = 1.pad))
+                    Icon(it.icon, null, modifier = Modifier.padding(end = 1.pad))
                     Text(it.name)
                 }
             }

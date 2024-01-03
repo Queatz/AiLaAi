@@ -2,6 +2,8 @@ package com.queatz.ailaai.ui.screens
 
 import android.graphics.Point
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +60,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.random.Random
 
 @Composable
 fun MapScreen(
@@ -232,8 +235,8 @@ fun MapScreen(
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
 
                     LaunchedEffect(card.id, shown) {
-                        if (shown) delay(25L * cardPositions.indexOf(it))
-                        scale.animateTo(if (shown) 1f else 0f, tween(duration))
+                        if (shown) delay((100L * Random.nextFloat()).toLong())
+                        scale.animateTo(if (shown) 1f else 0f, spring(dampingRatio = Spring.DampingRatioLowBouncy))
                     }
 
                     Column(

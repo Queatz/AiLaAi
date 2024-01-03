@@ -6,7 +6,7 @@ plugins {
     application
     kotlin("jvm") version "1.9.21"
     kotlin("plugin.serialization") version "1.9.21"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.queatz"
@@ -47,7 +47,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
-    implementation("com.arangodb:arangodb-java-driver:7.1.0")
+    implementation("com.arangodb:arangodb-java-driver:7.4.0")
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-compression-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
@@ -62,7 +62,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-cio-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-caching-headers-jvm:2.2.4")
+    implementation("io.ktor:ktor-server-caching-headers-jvm:2.3.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
 }

@@ -294,7 +294,7 @@ fun StoryCreatorScreen(
                 StoryTitle(state, story)
             } else if (card != null) {
                 Text(
-                    stringResource(R.string.content),
+                    card?.name ?: stringResource(R.string.content),
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 1.pad),

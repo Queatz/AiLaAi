@@ -175,7 +175,7 @@ fun CardScreen(cardId: String) {
                 ) {
                     showGeneratingPhotoDialog = true
                 }
-                oldPhoto = card?.photo
+                oldPhoto = card?.photo ?: ""
             }
         }
     }
@@ -458,7 +458,7 @@ fun CardScreen(cardId: String) {
                             showManageMenu = true
                             showMenu = false
                         })
-                        if (!((card?.collaborators?.isNotEmpty() == true))) {
+                        if (card?.collaborators?.isNotEmpty() != true) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.add_collaborators))
                             }, {
@@ -620,7 +620,8 @@ fun CardScreen(cardId: String) {
 
                             item(
                                 Icons.Outlined.AutoAwesome,
-                                stringResource(R.string.generate_photo)
+                                stringResource(R.string.generate_photo),
+                                isLoading = oldPhoto != null
                             ) {
                                 regeneratePhoto()
                                 showMenu = false
@@ -642,9 +643,11 @@ fun CardScreen(cardId: String) {
 //                                showMenu = false
 //                            }
 
+                            val category = card.categories?.firstOrNull()
                             item(
                                 Icons.Outlined.Category,
-                                stringResource(R.string.set_category)
+                                category ?: stringResource(R.string.set_category),
+                                selected = category != null
                             ) {
                                 showSetCategory = true
                                 showMenu = false
@@ -652,7 +655,8 @@ fun CardScreen(cardId: String) {
 
                             item(
                                 Icons.Outlined.Payments,
-                                stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay)
+                                stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay),
+                                selected = card.pay != null
                             ) {
                                 showPay = true
                                 showMenu = false
@@ -660,7 +664,8 @@ fun CardScreen(cardId: String) {
 
                             item(
                                 Icons.Outlined.AddBox,
-                                stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content)
+                                stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
+                                selected = card.content?.notBlank != null
                             ) {
                                 nav.navigate("card/${card.id!!}/edit")
                             }

@@ -11,9 +11,11 @@ import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.renderComposableInBody
+import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
 import org.w3c.dom.set
 
@@ -62,6 +64,14 @@ fun main() {
             LaunchedEffect(language) {
                 localStorage["language"] = language
                 application.language = language
+            }
+
+            LaunchedEffect(Unit) {
+                indicator.hasIndicator.collectLatest {
+                    val faviconElement = document.querySelector("link[rel*='icon']") as HTMLLinkElement
+
+                    faviconElement.href = if (it) "/icon-new.png" else "icon.png"
+                }
             }
 
             LaunchedEffect(Unit) {

@@ -17,6 +17,7 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import components.IconButton
 import components.Loading
+import indicator
 import joins
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -65,6 +66,14 @@ fun GroupsNavPage(
     LaunchedEffect(selected) {
         searchText = ""
         showSearch = false
+    }
+
+    LaunchedEffect(groups) {
+        indicator.set(IndicatorSource.Group, groups.count {
+            val myMember = it.members?.firstOrNull { it.person?.id == me?.id }
+
+            it.isUnread(myMember?.member)
+        })
     }
 
     val shownGroups = remember(groups, searchText) {

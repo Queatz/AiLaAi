@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,6 +73,7 @@ fun ExploreScreen() {
                     listOf(
                         SearchFilter(
                             paidString,
+                            Icons.Outlined.Payments,
                             filterPaid
                         ) {
                             filterPaid = !filterPaid

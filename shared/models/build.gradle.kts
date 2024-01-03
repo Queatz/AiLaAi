@@ -34,7 +34,7 @@ kotlin {
                 implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
                 implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
-                implementation("com.arangodb:jackson-serde-json:7.2.0")
+                implementation("com.arangodb:jackson-serde-json:7.4.0")
             }
         }
         val jsMain by getting
