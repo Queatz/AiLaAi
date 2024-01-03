@@ -1092,7 +1092,7 @@ fun GroupScreen(groupId: String) {
                     placeholder = stringResource(R.string.describe_photo),
                     extraContent = {
                         CardToolbar {
-                            item(Icons.Outlined.Photo, stringResource(R.string.add_photo)) {
+                            item(Icons.Outlined.Photo, stringResource(R.string.set_photo)) {
                                 showPhotoDialog = false
                                 launcher.launch(PickVisualMediaRequest())
                             }

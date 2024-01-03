@@ -200,7 +200,7 @@ fun CardScreen(cardId: String) {
         while (tries++ < 5 && oldPhoto != null) {
             delay(3.seconds)
             api.card(cardId) {
-                if (it.photo != oldPhoto) {
+                if (if (oldPhoto.isNullOrBlank()) !it.photo.isNullOrBlank() else it.photo != oldPhoto) {
                     reload()
                     oldPhoto = null
                 }
