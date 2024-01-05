@@ -36,7 +36,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
 import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
-import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
@@ -77,6 +76,10 @@ fun ProfileScreen(personId: String) {
     var videoUploadProgress by remember { mutableStateOf(0f) }
     val me = me
     val nav = nav
+
+    val setPhotoState = remember(person == null) {
+        ChoosePhotoDialogState(mutableStateOf(person?.name ?: ""))
+    }
 
     val context = LocalContext.current
 
@@ -158,6 +161,7 @@ fun ProfileScreen(personId: String) {
     if (showProfilePhotoDialog) {
         ChoosePhotoDialog(
             scope = scope,
+            state = setPhotoState,
             onDismissRequest = { showProfilePhotoDialog = false },
             multiple = false,
             imagesOnly = true,
@@ -180,6 +184,7 @@ fun ProfileScreen(personId: String) {
     if (showCoverPhotoDialog) {
         ChoosePhotoDialog(
             scope = scope,
+            state = setPhotoState,
             onDismissRequest = { showCoverPhotoDialog = false },
             multiple = false,
             onPhotos = { photos ->

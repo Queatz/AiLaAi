@@ -12,11 +12,13 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -221,6 +223,14 @@ fun ContactResult(
                     )
                 }
             }
+            .let {
+                if (coverPhoto == null) {
+                    it
+                } else {
+                    it
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                }
+            }
     ) {
         if (coverPhoto != null) {
             AsyncImage(
@@ -233,7 +243,7 @@ fun ContactResult(
                 alignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp)
+                    .height(180.dp)
                     .clip(
                         RoundedCornerShape(
                             MaterialTheme.shapes.large.topStart,
@@ -250,7 +260,13 @@ fun ContactResult(
         ) {
             GroupPhoto(photos)
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).let {
+                    if (coverPhoto == null) {
+                        it
+                    } else {
+                        it.padding(vertical = 1.pad)
+                    }
+                }
             ) {
                 Text(
                     name,

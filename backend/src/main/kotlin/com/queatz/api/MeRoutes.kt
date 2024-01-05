@@ -250,6 +250,10 @@ fun Route.meRoutes() {
                     person.name = update.name?.trim()
                 }
 
+                if (update.photo != null) {
+                    person.photo = update.photo?.notBlank
+                }
+
                 if (!update.language.isNullOrBlank()) {
                     person.language = update.language?.trim()
                 }

@@ -39,11 +39,19 @@ class Ai {
             "Something" to "something_2",
             "Basil" to "basil_mix",
             "Kids" to "kidsmix",
+            "Blue Pencil (HD)" to "bluepencilxl_1024px",
+            "Dreamshaper (HD)" to "dreamshaperxl_1024px",
+            "Juggernaut (HD)" to "juggernautxl_1024px",
+            "Sdxl (HD)" to "sdxl_1024px",
+            "T-Shirt (HD)" to "tshirtdesignredmond_1024px",
         )
         private val defaultStylePresets = styles.map { it.second }
         private const val endpoint = "https://api.dezgo.com/text2image"
+        private const val endpointXl = "https://api.dezgo.com/text2image_sdxl"
         private const val height = 416
         private const val width = 608
+        private const val heightXl = 832
+        private const val widthXl = 1216
         private val basePrompt = TextPrompt(
             "lovely, beautiful, cute, happy, sweet, natural",
             .125
@@ -60,21 +68,25 @@ class Ai {
 
     suspend fun photo(prefix: String, prompts: List<TextPrompt>, style: String? = null): String {
         val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.random()
+
+        val isXl = model.endsWith("_1024px")
+
         val body = json.encodeToString(
             DezgoPrompt(
                 prompt = (prompts + basePrompt).joinToString { it.text },
                 negativePrompt = negativePrompt,
                 model = model,
-                height = height,
-                width = width,
+                refiner = true,
+                height = if (isXl) heightXl else height,
+                width = if (isXl) widthXl else width,
             )
         )
 
         Logger.getAnonymousLogger().info("Sending text-to-image prompt: $body")
 
-        return http.post(endpoint) {
+        return http.post(if (isXl) endpointXl else endpoint) {
             header("X-Dezgo-Key", secrets.dezgo.key)
-            accept(ContentType.Image.PNG)
+            accept(ContentType.Image.JPEG)
             contentType(ContentType.Application.Json.withCharset(UTF_8))
             setBody(body)
         }.body<ByteArray>().let {
@@ -110,6 +122,7 @@ data class DezgoPrompt(
     val width: Int,
     val sampler: String? = "dpmpp_2m_karras",
     val steps: Int = 25,
+    val refiner: Boolean? = null,
     val guidance: Int = 7,
     val format: String = "jpg",
 )

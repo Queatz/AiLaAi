@@ -6,12 +6,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -19,6 +18,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
@@ -46,6 +46,7 @@ fun StoryCreatorTools(
     var showCardGroupSelectorDialog by rememberStateOf(false)
     var showWidgetsMenu by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
+    var isGeneratingPhoto by rememberStateOf(false)
     val photoState = remember {
         ChoosePhotoDialogState(mutableStateOf(""))
     }
@@ -113,6 +114,9 @@ fun StoryCreatorTools(
                         }
                     }
                 }
+            },
+            onIsGeneratingPhoto = {
+                isGeneratingPhoto = it
             }
         )
     }
@@ -232,41 +236,68 @@ fun StoryCreatorTools(
                 .onPlaced { viewport = it.boundsInParent().size }
                 .horizontalFadingEdge(viewport, scrollState)
         ) {
-            listOfNotNull(
-                Icons.Outlined.Title to {
+            IconButton(
+                onClick = {
                     addPart(
                         StoryContent.Section("")
                     )
                     addPart(
                         StoryContent.Text("")
                     )
-                },
-                Icons.Outlined.Notes to {
+                }
+            ) {
+                Icon(Icons.Outlined.Title, null)
+            }
+            IconButton(
+                onClick = {
                     addPart(
                         StoryContent.Text("")
                     )
-                },
-                Icons.Outlined.Style to {
+                }
+            ) {
+                Icon(Icons.Outlined.Notes, null)
+            }
+            IconButton(
+                onClick = {
                     showCardSelectorDialog = true
-                },
-                Icons.Outlined.People to {
+                }
+            ) {
+                Icon(Icons.Outlined.Style, null)
+            }
+            IconButton(
+                onClick = {
                     showCardGroupSelectorDialog = true
-                },
-                Icons.Outlined.Photo to {
+                }
+            ) {
+                Icon(Icons.Outlined.People, null)
+            }
+            IconButton(
+                onClick = {
                     showPhotoDialog = true
-                },
-                Icons.Outlined.PlayCircle to {
+                }
+            ) {
+                if (isGeneratingPhoto) {
+                    CircularProgressIndicator(
+                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Icon(Icons.Outlined.Photo, null)
+                }
+            }
+            IconButton(
+                onClick = {
                     audioLauncher.launch("audio/*")
-                },
-                Icons.Outlined.MoreHoriz to {
+                }
+            ) {
+                Icon(Icons.Outlined.PlayCircle, null)
+            }
+            IconButton(
+                onClick = {
                     showWidgetsMenu = true
                 }
-            ).forEach {
-                IconButton(
-                    onClick = it.second
-                ) {
-                    Icon(it.first, null)
-                }
+            ) {
+                Icon(Icons.Outlined.MoreHoriz, null)
             }
         }
     }
