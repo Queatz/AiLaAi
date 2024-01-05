@@ -376,6 +376,7 @@ fun Route.cardRoutes() {
                     check(Card::video) {
                         card.photo = update.photo
                     }
+                    check(Card::background)
                     check(Card::offline) {
                         card.parent = update.parent
                         card.equipped = update.equipped

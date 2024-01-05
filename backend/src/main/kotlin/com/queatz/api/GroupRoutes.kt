@@ -146,6 +146,14 @@ fun Route.groupRoutes() {
                         group.description = groupUpdated.description
                     }
 
+                    if (groupUpdated.photo != null) {
+                        group.photo = groupUpdated.photo
+                    }
+
+                    if (groupUpdated.background != null) {
+                        group.background = groupUpdated.background
+                    }
+
                     if (groupUpdated.categories != null) {
                         group.categories = groupUpdated.categories
                     }

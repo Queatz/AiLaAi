@@ -517,4 +517,5 @@
     <string name="style">Style</string>
     <string name="photo">Photo</string>
     <string name="describe_photo">Describe the photo</string>
+    <string name="background">Background</string>
 </resources>

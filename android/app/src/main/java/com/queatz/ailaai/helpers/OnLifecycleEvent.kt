@@ -48,3 +48,12 @@ fun StartEffect(block: suspend () -> Unit) {
         }
     }
 }
+
+@Composable
+fun StopEffect(block: suspend () -> Unit) {
+    LifecycleEffect {
+        if (it == Lifecycle.Event.ON_STOP) {
+            block()
+        }
+    }
+}

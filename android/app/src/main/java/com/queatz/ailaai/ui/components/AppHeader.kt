@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.extensions.ContactPhoto
@@ -17,7 +18,6 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHeader(
     title: String,
@@ -27,8 +27,8 @@ fun AppHeader(
     val nav = nav
 
     Column {
-        TopAppBar(
-            {
+        AppBar(
+            title = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(1.pad)

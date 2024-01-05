@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +47,7 @@ fun Modifier.swipeMainTabs(onSwipe: (Int) -> Unit): Modifier = composed {
 @Composable
 fun MainTabs(tab: MainTab, onTab: (MainTab) -> Unit, tabs: List<MainTab>? = null) {
     TabRow(
+        containerColor = Color.Transparent, // todo: only transparent if background exists
         selectedTabIndex = tab.ordinal,
         divider = {},
         indicator = {

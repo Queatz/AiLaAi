@@ -1,8 +1,6 @@
 package com.queatz.ailaai
 
 import android.os.Bundle
-import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
-import android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
@@ -11,7 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,11 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -37,10 +40,14 @@ import app.ailaai.api.ErrorBlock
 import app.ailaai.api.groups
 import app.ailaai.api.me
 import app.ailaai.api.updateMe
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LifecycleEffect
+import com.queatz.ailaai.helpers.StartEffect
+import com.queatz.ailaai.helpers.StopEffect
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.*
@@ -53,14 +60,44 @@ import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 private val appTabKey = stringPreferencesKey("app.tab")
 private val appVersionCode = intPreferencesKey("app.versionCode")
 
+private class Background(val url: String)
+
+private val _background = MutableStateFlow<List<Background>>(emptyList())
+
+val background = _background.map { it.lastOrNull()?.url }
+
+@Composable
+fun background(url: String?) {
+    if (url != null) {
+        val value = Background(url)
+
+        StopEffect {
+            _background.update {
+                it - value
+            }
+        }
+
+        DisposableEffect(url) {
+            _background.update {
+                it + value
+            }
+            onDispose {
+                _background.update {
+                    it - value
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavHostController
@@ -76,6 +113,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             AiLaAiTheme {
@@ -149,7 +187,7 @@ class MainActivity : AppCompatActivity() {
                     val downloadString = stringResource(R.string.download)
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
 
-                    window.setSoftInputMode(if (isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
+//                    window.setSoftInputMode(if (isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
 
                     fun updateAppLanguage(me: Person?) {
                         val language = appLanguage
@@ -409,7 +447,38 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             Box(
                                 modifier = Modifier.fillMaxSize()
+                                    .let {
+                                        if (showNavigation) {
+                                            it.consumeWindowInsets(PaddingValues(bottom = 54.dp))
+                                        } else {
+                                            it
+                                        }
+                                    }
+                                    .imePadding()
                             ) {
+                                val background by background.collectAsState(null)
+                                var lastBackground by rememberStateOf(background)
+
+                                LaunchedEffect(background) {
+                                    lastBackground = background ?: lastBackground
+                                }
+
+                                Crossfade(background != null) { show ->
+                                    if (show) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(LocalContext.current)
+                                                .data(lastBackground)
+                                                .crossfade(true)
+                                                .build(),
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop,
+                                            alignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                        )
+                                    }
+                                }
+
                                 if (startDestinationLoaded) {
                                     CompositionLocalProvider(
                                         LocalAppState provides AppState(me, navController)

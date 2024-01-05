@@ -108,7 +108,7 @@ fun GroupPage(
                     }
                 }) {
                     if (groups.isNotEmpty()) {
-                        GroupList(groups) {
+                        GroupList(groups, coverPhoto = true) {
                             onGroup(it)
                         }
                     } else if (search.isNotBlank()) {

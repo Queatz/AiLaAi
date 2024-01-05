@@ -11,6 +11,7 @@ import app.nav.name
 import appString
 import appText
 import application
+import baseUrl
 import com.queatz.db.*
 import components.GroupPhoto
 import components.Icon
@@ -37,6 +38,7 @@ fun GroupItem(
     selectable: Boolean = true,
     selected: Boolean = false,
     onSurface: Boolean = false,
+    coverPhoto: Boolean = false,
     onSelected: () -> Unit,
     info: GroupInfo = GroupInfo.LatestMessage,
     styles: StyleScope.() -> Unit = {}
@@ -47,6 +49,28 @@ fun GroupItem(
     val joinRequestCount by joins.joins
         .map { it.count { it.joinRequest?.group == group.group?.id } }
         .collectAsState(0)
+
+    val hasCover = coverPhoto && group.group?.photo != null
+
+    if (hasCover) {
+        Div({
+            style {
+                width(100.percent)
+                height(16.r)
+                background("url($baseUrl${group.group?.photo})")
+                backgroundSize("cover")
+                backgroundPosition("center")
+                borderRadius(1.r, 1.r, 0.r, 0.r)
+                cursor("pointer")
+            }
+
+            onClick {
+                onSelected()
+            }
+        }) {
+
+        }
+    }
 
     Div({
         classes(
@@ -64,6 +88,10 @@ fun GroupItem(
             }
         )
         style {
+            if (hasCover) {
+                borderRadius(0.r, 0.r, 1.r, 1.r)
+            }
+
             styles()
         }
         onClick {

@@ -1,16 +1,26 @@
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import app.NavPage
 import app.ailaai.api.me
 import com.queatz.db.Person
 import kotlinx.browser.localStorage
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.encodeToString
 import org.w3c.dom.get
 import org.w3c.dom.set
 
 val application = Application()
 
+private class Background(val url: String)
+
 class Application {
+    private val _background = MutableStateFlow<List<Background>>(emptyList())
+
     val me = MutableStateFlow<Person?>(null)
+    val background = _background.map { it.lastOrNull()?.url }
     val bearerToken = MutableStateFlow<String?>(null)
 
     var navPage: NavPage = NavPage.Groups
@@ -79,6 +89,24 @@ class Application {
         if (me.value != null && bearerToken.value != null) {
             api.me {
                 setMe(it)
+            }
+        }
+    }
+
+    @Composable
+    fun background(url: String?) {
+        if (url != null) {
+            val value = Background(url)
+            DisposableEffect(url) {
+                _background.update {
+                    it + value
+                }
+
+                onDispose {
+                    _background.update {
+                        it - value
+                    }
+                }
             }
         }
     }

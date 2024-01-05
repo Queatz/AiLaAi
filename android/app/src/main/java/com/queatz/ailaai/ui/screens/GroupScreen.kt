@@ -1,10 +1,5 @@
 package com.queatz.ailaai.ui.screens
 
-import aiPhoto
-import aiStyles
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -32,6 +27,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
@@ -45,9 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.ailaai.api.*
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.sendAudioFromUri
-import com.queatz.ailaai.api.sendMediaFromUri
-import com.queatz.ailaai.api.sendVideosFromUri
+import com.queatz.ailaai.api.*
+import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
@@ -91,6 +86,8 @@ fun GroupScreen(groupId: String) {
     var showChangeGroupStatus by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showDescriptionDialog by rememberStateOf(false)
+    var showSetPhotoDialog by rememberStateOf(false)
+    var showSetBackgroundDialog by rememberStateOf(false)
     var showCategoryDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
     var showGroupMembers by rememberStateOf(false)
@@ -98,6 +95,8 @@ fun GroupScreen(groupId: String) {
     var showInviteMembers by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
+    var isGeneratingGroupBackground by rememberStateOf(false)
+    var isGeneratingGroupPhoto by rememberStateOf(false)
     var showJoinDialog by rememberStateOf(false)
     var showSnoozeDialog by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
@@ -112,18 +111,26 @@ fun GroupScreen(groupId: String) {
     val stickerPacks by stickers.rememberStickerPacks()
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
-    var aiStyleMenu by rememberStateOf(false)
-    var aiPrompt by rememberStateOf("")
-    var allStyles by rememberStateOf(emptyList<Pair<String, String>>())
-    var selectedStyle by rememberStateOf<String?>(null)
     val nav = nav
     val me = me
+
+    val generatePhotoState = remember {
+        ChoosePhotoDialogState(mutableStateOf(""))
+    }
+    val setPhotoDialogState = remember(groupExtended == null) {
+        ChoosePhotoDialogState(mutableStateOf(groupExtended?.group?.name ?: ""))
+    }
+    val setBackgroundDialogState = remember(groupExtended == null) {
+        ChoosePhotoDialogState(mutableStateOf(groupExtended?.group?.name ?: ""))
+    }
 
     val allJoinRequests by joins.joins.collectAsState()
     val myJoinRequests by joins.myJoins.collectAsState()
     var joinRequests by remember {
         mutableStateOf(emptyList<JoinRequestAndPerson>())
     }
+
+    background(groupExtended?.group?.background?.let(api::url))
 
     LaunchedEffect(allJoinRequests) {
         joinRequests = allJoinRequests.filter { it.joinRequest?.group == groupId }
@@ -170,72 +177,6 @@ fun GroupScreen(groupId: String) {
                 hasOlderMessages = false
             } else {
                 messages = newMessages
-            }
-        }
-    }
-
-    val cameraUri = "photo.jpg".asCacheFileUri(context)
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                scope.launch {
-                    api.sendMediaFromUri(
-                        context,
-                        groupId,
-                        cameraUri.inList(),
-                        stageReply?.id?.let {
-                            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
-                        }
-                    ) {
-                        reloadMessages()
-                    }
-                }
-            }
-        }
-    )
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
-        if (uris.isNotEmpty()) {
-            scope.launch {
-                val videos = uris.filter { it.isVideo(context) }
-                val photos = uris.filter { it.isPhoto(context) }
-
-                if (photos.isNotEmpty()) {
-                    api.sendMediaFromUri(
-                        context,
-                        groupId,
-                        uris,
-                        stageReply?.id?.let {
-                            Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
-                        }
-                    )
-                }
-
-                if (videos.isNotEmpty()) {
-                    api.sendVideosFromUri(
-                        context,
-                        groupId,
-                        videos,
-                        if (photos.isEmpty()) {
-                            stageReply?.id?.let {
-                                Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
-                            }
-                        } else {
-                            null
-                        },
-                        processingCallback = {
-
-                        },
-                        uploadCallback = {
-
-                        }
-                    )
-                }
-
-                stageReply = null
-                reloadMessages()
             }
         }
     }
@@ -345,8 +286,8 @@ fun GroupScreen(groupId: String) {
                 }
             }
 
-            TopAppBar(
-                {
+            AppBar(
+                title = {
                     Column(
                         modifier = Modifier
                             .clickable(
@@ -452,7 +393,14 @@ fun GroupScreen(groupId: String) {
                     IconButton({
                         showMenu = !showMenu
                     }) {
-                        Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
+                        if (isGeneratingGroupBackground || isGeneratingGroupPhoto) {
+                            CircularProgressIndicator(
+                                strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
+                        }
                     }
 
                     Dropdown(showMenu, { showMenu = false }) {
@@ -489,14 +437,24 @@ fun GroupScreen(groupId: String) {
                                 showMenu = false
                                 showDescriptionDialog = true
                             })
-
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.photo))
+                            }, {
+                                showMenu = false
+                                showSetPhotoDialog = true
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.background))
+                            }, {
+                                showMenu = false
+                                showSetBackgroundDialog = true
+                            })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.set_category))
                             }, {
                                 showMenu = false
                                 showCategoryDialog = true
                             })
-
                             if (myMember.member?.host == true) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.manage))
@@ -535,7 +493,10 @@ fun GroupScreen(groupId: String) {
                                             if (myMember.member?.snoozed == true) {
                                                 stringResource(R.string.indefinitely)
                                             } else {
-                                                stringResource(R.string.until_x, myMember.member?.snoozedUntil?.formatFuture() ?: "")
+                                                stringResource(
+                                                    R.string.until_x,
+                                                    myMember.member?.snoozedUntil?.formatFuture() ?: ""
+                                                )
                                             },
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.secondary
@@ -1055,70 +1016,56 @@ fun GroupScreen(groupId: String) {
             }
 
             if (showPhotoDialog) {
-                LaunchedEffect(aiStyleMenu) {
-                    if (aiStyleMenu && allStyles.isEmpty()) {
-                        api.aiStyles {
-                            allStyles = it
-                        }
-                    }
-                }
-
-                if (aiStyleMenu && allStyles.isNotEmpty()) {
-                    Menu({
-                        aiStyleMenu = false
-                    }) {
-                        allStyles.forEach {
-                            menuItem(it.first) {
-                                aiStyleMenu = false
-                                selectedStyle = if (selectedStyle == it.second) {
-                                    null
-                                } else {
-                                    it.second
+                ChoosePhotoDialog(
+                    scope = scope,
+                    state = generatePhotoState,
+                    onDismissRequest = { showPhotoDialog = false },
+                    onIsGeneratingPhoto = { isGeneratingPhoto = it },
+                    onPhotos = { photos ->
+                        val localStageReply = stageReply
+                        scope.launch {
+                            api.sendMediaFromUri(
+                                context,
+                                groupId,
+                                photos,
+                                localStageReply?.id?.let {
+                                    Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
                                 }
+                            ) {
+                                reloadMessages()
                             }
                         }
-                    }
-                }
 
-                TextFieldDialog(
-                    {
-                        showPhotoDialog = false
+                        stageReply = null
                     },
-                    title = null,
-                    initialValue = aiPrompt,
-                    button = stringResource(R.string.generate_photo),
-                    requireNotBlank = true,
-                    requireModification = false,
-                    placeholder = stringResource(R.string.describe_photo),
-                    extraContent = {
-                        CardToolbar {
-                            item(Icons.Outlined.Photo, stringResource(R.string.set_photo)) {
-                                showPhotoDialog = false
-                                launcher.launch(PickVisualMediaRequest())
-                            }
+                    onVideos = { videos ->
+                        scope.launch {
+                            api.sendVideosFromUri(
+                                context,
+                                groupId,
+                                videos,
+                                stageReply?.id?.let {
+                                    Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
+                                },
+                                processingCallback = {
 
-                            item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {
-                                showPhotoDialog = false
-                                cameraLauncher.launch(cameraUri)
-                            }
+                                },
+                                uploadCallback = {
 
-                            item(Icons.Outlined.AutoAwesome, allStyles.firstOrNull { it.second == selectedStyle }?.first ?: stringResource(R.string.style), selected = selectedStyle != null) {
-                                aiStyleMenu = true
-                            }
+                                }
+                            )
+
+                            stageReply = null
                         }
-                    }
-                ) { prompt ->
-                    aiPrompt = prompt
-                    showPhotoDialog = false
-                    scope.launch {
-                        isGeneratingPhoto = true
-                        api.aiPhoto(AiPhotoRequest(prompt, selectedStyle)) { response ->
+                    },
+                    onGeneratedPhoto = { photo ->
+                        scope.launch {
                             api.sendMessage(
                                 groupId,
                                 Message(
                                     // todo let the user choose to include the prompt
                                     // text = prompt,
-                                    attachment = json.encodeToString(PhotosAttachment(photos = listOf(response.photo))),
+                                    attachment = json.encodeToString(PhotosAttachment(photos = listOf(photo))),
                                     attachments = stageReply?.id?.let {
                                         listOf(json.encodeToString(ReplyAttachment(it)))
                                     }
@@ -1127,9 +1074,8 @@ fun GroupScreen(groupId: String) {
                                 reloadMessages()
                             }
                         }
-                        isGeneratingPhoto = false
                     }
-                }
+                )
             }
 
             if (showCategoryDialog) {
@@ -1455,6 +1401,72 @@ fun GroupScreen(groupId: String) {
                         }) {
                             Text(stringResource(R.string.cancel))
                         }
+                    }
+                )
+            }
+
+            if (showSetPhotoDialog) {
+                ChoosePhotoDialog(
+                    scope = scope,
+                    state = setPhotoDialogState,
+                    onDismissRequest = { showSetPhotoDialog = false },
+                    onPhotos = { photos ->
+                        scope.launch {
+                            isGeneratingGroupPhoto = true
+                            api.uploadPhotosFromUris(context, photos) {
+                                val photo = it.urls.first()
+                                api.updateGroup(groupId, Group(photo = photo)) {
+                                    reload()
+                                }
+                            }
+                            isGeneratingGroupPhoto = false
+                        }
+                    },
+                    onVideos = {
+                        // not supported
+                    },
+                    onGeneratedPhoto = { photo ->
+                        scope.launch {
+                            api.updateGroup(groupId, Group(photo = photo)) {
+                                reload()
+                            }
+                        }
+                    },
+                    onIsGeneratingPhoto = {
+                        isGeneratingGroupPhoto = it
+                    }
+                )
+            }
+
+            if (showSetBackgroundDialog) {
+                ChoosePhotoDialog(
+                    scope = scope,
+                    state = setBackgroundDialogState,
+                    onDismissRequest = { showSetBackgroundDialog = false },
+                    onPhotos = { photos ->
+                        scope.launch {
+                            isGeneratingGroupBackground = true
+                            api.uploadPhotosFromUris(context, photos) {
+                                val photo = it.urls.first()
+                                api.updateGroup(groupId, Group(background = photo)) {
+                                    reload()
+                                }
+                            }
+                            isGeneratingGroupBackground = false
+                        }
+                    },
+                    onVideos = {
+                        // not supported
+                    },
+                    onGeneratedPhoto = { photo ->
+                        scope.launch {
+                            api.updateGroup(groupId, Group(background = photo)) {
+                                reload()
+                            }
+                        }
+                    },
+                    onIsGeneratingPhoto = {
+                        isGeneratingGroupBackground = it
                     }
                 )
             }

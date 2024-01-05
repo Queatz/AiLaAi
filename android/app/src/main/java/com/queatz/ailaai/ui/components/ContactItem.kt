@@ -2,10 +2,11 @@ package com.queatz.ailaai.ui.components
 
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Icon
@@ -16,13 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import app.ailaai.api.createGroup
 import app.ailaai.api.updateMember
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
@@ -49,7 +54,8 @@ enum class GroupInfo {
 fun ContactItem(
     item: SearchResult,
     onChange: () -> Unit,
-    info: GroupInfo
+    info: GroupInfo,
+    coverPhoto: Boolean = false
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -101,7 +107,8 @@ fun ContactItem(
             }
         },
         item,
-        info
+        info,
+        coverPhoto
     )
 }
 
@@ -110,7 +117,8 @@ fun ContactItem(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     item: SearchResult,
-    info: GroupInfo
+    info: GroupInfo,
+    coverPhoto: Boolean = false
 ) {
     val context = LocalContext.current
     val someone = stringResource(R.string.someone)
@@ -175,7 +183,8 @@ fun ContactItem(
                 isUnread = isUnread || joinRequestCount > 0,
                 joinRequestCount = joinRequestCount,
                 joined = myMember != null,
-                info = info
+                info = info,
+                coverPhoto = if (coverPhoto) groupExtended.group?.photo?.let(api::url) else null
             )
         }
     }
@@ -193,10 +202,12 @@ fun ContactResult(
     isUnread: Boolean = false,
     joinRequestCount: Int = 0,
     joined: Boolean = false,
-    info: GroupInfo = GroupInfo.LatestMessage
+    info: GroupInfo = GroupInfo.LatestMessage,
+    coverPhoto: String? = null
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+    Column(
+        verticalArrangement = Arrangement.spacedBy(1.pad),
+        modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .let {
                 if (onClick == null && onLongClick == null) {
@@ -211,53 +222,80 @@ fun ContactResult(
                 }
             }
     ) {
-        GroupPhoto(photos)
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
-            )
-            Text(
-                description,
-                style = MaterialTheme.typography.bodyMedium,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
-                color = MaterialTheme.colorScheme.secondary
+        if (coverPhoto != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverPhoto)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            MaterialTheme.shapes.large.topStart,
+                            MaterialTheme.shapes.large.topEnd,
+                            CornerSize(0.dp),
+                            CornerSize(0.dp)
+                        )
+                    )
+                    .background(MaterialTheme.colorScheme.background)
             )
         }
-        val bold = isUnread || (info == GroupInfo.Members && joined)
-        Text(
-            if (info == GroupInfo.Members && joined) {
-                stringResource(R.string.joined)
-            } else if (joinRequestCount > 0) pluralStringResource(
-                R.plurals.x_requests,
-                joinRequestCount,
-                joinRequestCount
-            ) else lastActive ?: "",
-            style = MaterialTheme.typography.labelMedium,
-            color = if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
-            modifier = Modifier
-                .padding(1.pad)
-                .let {
-                    if (bold) {
-                        it
-                    } else {
-                        it.alpha(.5f)
-                    }
-                }
-        )
-        if (info == GroupInfo.Members && joined) {
-            Icon(
-                Icons.Outlined.Check,
-                null,
-                tint = MaterialTheme.colorScheme.primary,
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            GroupPhoto(photos)
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
+                )
+                Text(
+                    description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+            val bold = isUnread || (info == GroupInfo.Members && joined)
+            Text(
+                if (info == GroupInfo.Members && joined) {
+                    stringResource(R.string.joined)
+                } else if (joinRequestCount > 0) pluralStringResource(
+                    R.plurals.x_requests,
+                    joinRequestCount,
+                    joinRequestCount
+                ) else lastActive ?: "",
+                style = MaterialTheme.typography.labelMedium,
+                color = if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier
-                    .padding(end = 1.pad)
+                    .padding(1.pad)
+                    .let {
+                        if (bold) {
+                            it
+                        } else {
+                            it.alpha(.5f)
+                        }
+                    }
             )
+            if (info == GroupInfo.Members && joined) {
+                Icon(
+                    Icons.Outlined.Check,
+                    null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(end = 1.pad)
+                )
+            }
         }
     }
 }

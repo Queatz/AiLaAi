@@ -13,6 +13,8 @@ fun GroupLayout(
         mutableStateOf(false)
     }
 
+    application.background(group.group?.background?.let { "$baseUrl$it" })
+
     LaunchedEffect(group.group?.id) {
         group.group?.id?.let { groupId ->
             // Mark group as read

@@ -137,6 +137,11 @@ data class TokenResponse (
 )
 
 @Serializable
+data class UploadResponse (
+    val urls: List<String>
+)
+
+@Serializable
 data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
 
 @Serializable

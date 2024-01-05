@@ -33,6 +33,7 @@ fun AppPage() {
     Style(WidgetStyles)
 
     val scope = rememberCoroutineScope()
+    val background by application.background.collectAsState(null)
 
     var nav by remember {
         mutableStateOf(application.navPage)
@@ -84,6 +85,12 @@ fun AppPage() {
 
     Div({
         classes(AppStyles.baseLayout)
+
+        style {
+            if (background != null) {
+                backgroundImage("url($background)")
+            }
+        }
     }) {
         Div({
             classes(AppStyles.sideLayout)

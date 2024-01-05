@@ -148,6 +148,10 @@ fun Route.meRoutes() {
                     profile.photo = null
                 }
 
+                if (update.background != null) {
+                    profile.background = update.background
+                }
+
                 if (update.content != null) {
                     profile.content = update.content
                 }

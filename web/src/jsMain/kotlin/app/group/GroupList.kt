@@ -9,6 +9,7 @@ import r
 fun GroupList(
     groups: List<GroupExtended>,
     onSurface: Boolean = false,
+    coverPhoto: Boolean = false,
     onSelected: (GroupExtended) -> Unit
 ) {
     groups.forEachIndexed { index, it ->
@@ -16,6 +17,7 @@ fun GroupList(
             it,
             selectable = onSurface,
             onSurface = onSurface,
+            coverPhoto = coverPhoto,
             onSelected = {
                 onSelected(it)
             },

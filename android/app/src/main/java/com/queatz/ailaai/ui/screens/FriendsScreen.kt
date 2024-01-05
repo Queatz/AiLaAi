@@ -432,7 +432,7 @@ fun FriendsScreen() {
                     } else {
                             item {
                                 Column {
-                                    AnimatedVisibility(searchText.isBlank() && selectedCategory == null) {
+                                    AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
                                         Friends(
                                             remember(allGroups) {
                                                 allGroups.people().filter { it.id != me?.id }
@@ -477,7 +477,8 @@ fun FriendsScreen() {
                                 when (tab) {
                                     MainTab.Friends -> GroupInfo.LatestMessage
                                     else -> GroupInfo.Members
-                                }
+                                },
+                                coverPhoto = tab == MainTab.Local
                             )
                         }
                     }

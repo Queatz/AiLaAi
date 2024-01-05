@@ -86,6 +86,9 @@ object AppStyles : StyleSheet() {
         overflow("hidden")
         display(DisplayStyle.Flex)
 
+        backgroundPosition("center")
+        backgroundSize("cover")
+
         dark(self) {
             backgroundColor(Color.black)
             color(Color.white)

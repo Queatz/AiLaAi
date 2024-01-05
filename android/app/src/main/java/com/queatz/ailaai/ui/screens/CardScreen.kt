@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -400,8 +401,8 @@ fun CardScreen(cardId: String) {
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
     ) {
-        TopAppBar(
-            {
+        AppBar(
+            title = {
                 Column {
                     Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
 
