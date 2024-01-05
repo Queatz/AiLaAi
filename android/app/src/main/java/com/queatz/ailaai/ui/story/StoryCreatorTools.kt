@@ -45,40 +45,76 @@ fun StoryCreatorTools(
     var showCardSelectorDialog by rememberStateOf(false)
     var showCardGroupSelectorDialog by rememberStateOf(false)
     var showWidgetsMenu by rememberStateOf(false)
+    var showPhotoDialog by rememberStateOf(false)
+    val photoState = remember {
+        ChoosePhotoDialogState(mutableStateOf(""))
+    }
 
-    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) {
-        if (it.isEmpty()) return@rememberLauncherForActivityResult
+    if (showPhotoDialog) {
+        ChoosePhotoDialog(
+            scope = scope,
+            onDismissRequest = { showPhotoDialog = false },
+            imagesOnly = true,
+            state = photoState,
+            onPhotos = { photoUrls ->
+                scope.launch {
+                    when (source) {
+                        is StorySource.Story -> {
+                            api.uploadStoryPhotosFromUri(context, source.id, photoUrls) { photoUrls ->
+                                addPart(StoryContent.Photos(photoUrls))
+                                addPart(
+                                    StoryContent.Text("")
+                                )
+                            }
+                        }
 
-        scope.launch {
-            when (source) {
-                is StorySource.Story -> {
-                    api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
-                        addPart(StoryContent.Photos(photoUrls))
-                        addPart(
-                            StoryContent.Text("")
-                        )
+                        is StorySource.Card -> {
+                            api.uploadCardContentPhotosFromUri(context, source.id, photoUrls) { photoUrls ->
+                                addPart(StoryContent.Photos(photoUrls))
+                                addPart(
+                                    StoryContent.Text("")
+                                )
+                            }
+                        }
+
+                        is StorySource.Profile -> {
+                            api.uploadProfileContentPhotosFromUri(context, source.id, photoUrls) { photoUrls ->
+                                addPart(StoryContent.Photos(photoUrls))
+                                addPart(
+                                    StoryContent.Text("")
+                                )
+                            }
+                        }
                     }
                 }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    when (source) {
+                        is StorySource.Story -> {
+                            addPart(StoryContent.Photos(listOf(photo)))
+                            addPart(
+                                StoryContent.Text("")
+                            )
+                        }
 
-                is StorySource.Card -> {
-                    api.uploadCardContentPhotosFromUri(context, source.id, it) { photoUrls ->
-                        addPart(StoryContent.Photos(photoUrls))
-                        addPart(
-                            StoryContent.Text("")
-                        )
-                    }
-                }
+                        is StorySource.Card -> {
+                            addPart(StoryContent.Photos(listOf(photo)))
+                            addPart(
+                                StoryContent.Text("")
+                            )
+                        }
 
-                is StorySource.Profile -> {
-                    api.uploadProfileContentPhotosFromUri(context, source.id, it) { photoUrls ->
-                        addPart(StoryContent.Photos(photoUrls))
-                        addPart(
-                            StoryContent.Text("")
-                        )
+                        is StorySource.Profile -> {
+                            addPart(StoryContent.Photos(listOf(photo)))
+                            addPart(
+                                StoryContent.Text("")
+                            )
+                        }
                     }
                 }
             }
-        }
+        )
     }
 
     val audioLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
@@ -217,7 +253,7 @@ fun StoryCreatorTools(
                     showCardGroupSelectorDialog = true
                 },
                 Icons.Outlined.Photo to {
-                    photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    showPhotoDialog = true
                 },
                 Icons.Outlined.PlayCircle to {
                     audioLauncher.launch("audio/*")

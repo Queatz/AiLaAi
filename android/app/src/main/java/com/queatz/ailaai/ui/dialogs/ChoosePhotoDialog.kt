@@ -21,8 +21,8 @@ import com.queatz.db.AiPhotoRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-private val allStyles = emptyList<Pair<String, String>>()
-private val selectedStyle: String? = null
+private var _allStyles = emptyList<Pair<String, String>>()
+private var _selectedStyle: String? = null
 
 class ChoosePhotoDialogState(
     var prompt: MutableState<String>
@@ -32,16 +32,18 @@ class ChoosePhotoDialogState(
 fun ChoosePhotoDialog(
     scope: CoroutineScope,
     state: ChoosePhotoDialogState = remember { ChoosePhotoDialogState(mutableStateOf("")) },
+    multiple: Boolean = true,
+    imagesOnly: Boolean = false,
     onDismissRequest: () -> Unit,
     onIsGeneratingPhoto: (Boolean) -> Unit = {},
     onPhotos: (List<Uri>) -> Unit,
-    onVideos: (List<Uri>) -> Unit,
+    onVideos: (List<Uri>) -> Unit = {},
     onGeneratedPhoto: (String) -> Unit,
 ) {
     var aiStyleMenu by rememberStateOf(false)
-    var aiPrompt by state::prompt
-    var allStyles by rememberStateOf(allStyles)
-    var selectedStyle by rememberStateOf(selectedStyle)
+    val aiPrompt by state::prompt
+    var allStyles by rememberStateOf(_allStyles)
+    var selectedStyle by rememberStateOf(_selectedStyle)
     val context = LocalContext.current
 
     val cameraUri = "photo.jpg".asCacheFileUri(context)
@@ -58,19 +60,36 @@ fun ChoosePhotoDialog(
         }
     )
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
-        if (uris.isNotEmpty()) {
-            onDismissRequest()
-            scope.launch {
-                val photos = uris.filter { it.isPhoto(context) }
-                val videos = uris.filter { it.isVideo(context) }
+    val launcher = when (multiple) {
+        true -> rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+            if (uris.isNotEmpty()) {
+                onDismissRequest()
+                scope.launch {
+                    val photos = uris.filter { it.isPhoto(context) }
+                    val videos = uris.filter { it.isVideo(context) }
 
-                if (photos.isNotEmpty()) {
-                    onPhotos(photos)
+                    if (photos.isNotEmpty()) {
+                        onPhotos(photos)
+                    }
+
+                    if (videos.isNotEmpty()) {
+                        onVideos(videos)
+                    }
                 }
+            }
+        }
 
-                if (videos.isNotEmpty()) {
-                    onVideos(videos)
+        false -> rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                onDismissRequest()
+                scope.launch {
+                    if (uri.isPhoto(context)) {
+                        onPhotos(uri.inList())
+                    }
+
+                    if (uri.isVideo(context)) {
+                        onVideos(uri.inList())
+                    }
                 }
             }
         }
@@ -80,6 +99,7 @@ fun ChoosePhotoDialog(
         if (aiStyleMenu && allStyles.isEmpty()) {
             api.aiStyles {
                 allStyles = it
+                _allStyles = allStyles
             }
         }
     }
@@ -96,6 +116,7 @@ fun ChoosePhotoDialog(
                     } else {
                         it.second
                     }
+                    _selectedStyle = selectedStyle
                 }
             }
         }
@@ -114,7 +135,7 @@ fun ChoosePhotoDialog(
         extraContent = {
             CardToolbar {
                 item(Icons.Outlined.Photo, stringResource(R.string.set_photo)) {
-                    launcher.launch(PickVisualMediaRequest())
+                    launcher.launch(PickVisualMediaRequest(if (imagesOnly) ActivityResultContracts.PickVisualMedia.ImageOnly else ActivityResultContracts.PickVisualMedia.ImageAndVideo))
                 }
 
                 item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {

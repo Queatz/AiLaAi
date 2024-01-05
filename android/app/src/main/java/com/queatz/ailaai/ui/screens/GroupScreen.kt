@@ -1410,6 +1410,8 @@ fun GroupScreen(groupId: String) {
                     scope = scope,
                     state = setPhotoDialogState,
                     onDismissRequest = { showSetPhotoDialog = false },
+                    multiple = false,
+                    imagesOnly = true,
                     onPhotos = { photos ->
                         scope.launch {
                             isGeneratingGroupPhoto = true
@@ -1421,9 +1423,6 @@ fun GroupScreen(groupId: String) {
                             }
                             isGeneratingGroupPhoto = false
                         }
-                    },
-                    onVideos = {
-                        // not supported
                     },
                     onGeneratedPhoto = { photo ->
                         scope.launch {
@@ -1443,6 +1442,8 @@ fun GroupScreen(groupId: String) {
                     scope = scope,
                     state = setBackgroundDialogState,
                     onDismissRequest = { showSetBackgroundDialog = false },
+                    multiple = false,
+                    imagesOnly = true,
                     onPhotos = { photos ->
                         scope.launch {
                             isGeneratingGroupBackground = true
@@ -1454,9 +1455,6 @@ fun GroupScreen(groupId: String) {
                             }
                             isGeneratingGroupBackground = false
                         }
-                    },
-                    onVideos = {
-                        // not supported
                     },
                     onGeneratedPhoto = { photo ->
                         scope.launch {

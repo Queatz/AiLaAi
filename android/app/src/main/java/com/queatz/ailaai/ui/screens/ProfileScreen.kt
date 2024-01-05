@@ -30,15 +30,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.createGroup
-import app.ailaai.api.createMember
-import app.ailaai.api.profile
-import app.ailaai.api.profileCards
+import app.ailaai.api.*
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
 import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
@@ -70,6 +68,8 @@ fun ProfileScreen(personId: String) {
     var showMenu by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
+    var showCoverPhotoDialog by rememberStateOf(false)
+    var showProfilePhotoDialog by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
     var isUploadingVideo by rememberStateOf(false)
@@ -155,44 +155,72 @@ fun ProfileScreen(personId: String) {
         ).awaitAll()
     }
 
-    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-        if (it == null) return@rememberLauncherForActivityResult
-
-        scope.launch {
-            api.updateMyPhotoFromUri(context, it) { reload() }
-        }
+    if (showProfilePhotoDialog) {
+        ChoosePhotoDialog(
+            scope = scope,
+            onDismissRequest = { showProfilePhotoDialog = false },
+            multiple = false,
+            imagesOnly = true,
+            onPhotos = { photos ->
+                scope.launch {
+                    api.updateMyPhotoFromUri(context, photos.first()) {
+                        reload()
+                    }
+                }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateMe(Person(photo = photo))
+                    reload()
+                }
+            }
+        )
     }
 
-    val profilePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-        if (it == null) return@rememberLauncherForActivityResult
-
-        uploadJob = scope.launch {
-            videoUploadProgress = 0f
-            if (it.isVideo(context)) {
-                isUploadingVideo = true
-                api.updateProfileVideoFromUri(
-                    context,
-                    it,
-                    context.contentResolver.getType(it) ?: "video/*",
-                    it.lastPathSegment ?: "video.${
-                        context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                    }",
-                    processingCallback = {
-                        videoUploadStage = ProcessingVideoStage.Processing
-                        videoUploadProgress = it
-                    },
-                    uploadCallback = {
-                        videoUploadStage = ProcessingVideoStage.Uploading
-                        videoUploadProgress = it
-                    }
-                )
-            } else if (it.isPhoto(context)) {
-                api.updateProfilePhotoFromUri(context, it)
+    if (showCoverPhotoDialog) {
+        ChoosePhotoDialog(
+            scope = scope,
+            onDismissRequest = { showCoverPhotoDialog = false },
+            multiple = false,
+            onPhotos = { photos ->
+                scope.launch {
+                    api.updateProfilePhotoFromUri(context, photos.first())
+                    reload()
+                }
+            },
+            onVideos = { videos ->
+                val it = videos.first()
+                uploadJob = scope.launch {
+                    videoUploadProgress = 0f
+                    isUploadingVideo = true
+                    api.updateProfileVideoFromUri(
+                        context,
+                        it,
+                        context.contentResolver.getType(it) ?: "video/*",
+                        it.lastPathSegment ?: "video.${
+                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                        }",
+                        processingCallback = {
+                            videoUploadStage = ProcessingVideoStage.Processing
+                            videoUploadProgress = it
+                        },
+                        uploadCallback = {
+                            videoUploadStage = ProcessingVideoStage.Uploading
+                            videoUploadProgress = it
+                        }
+                    )
+                    reload()
+                    isUploadingVideo = false
+                    uploadJob = null
+                }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateProfile(Profile(photo = photo))
+                    reload()
+                }
             }
-            reload()
-            isUploadingVideo = false
-            uploadJob = null
-        }
+        )
     }
 
     ResumeEffect {
@@ -308,7 +336,7 @@ fun ProfileScreen(personId: String) {
                                     .background(MaterialTheme.colorScheme.secondaryContainer)
                                     .clickable {
                                         if (isMe) {
-                                            profilePhotoLauncher.launch(PickVisualMediaRequest())
+                                            showCoverPhotoDialog = true
                                         } else {
                                             showMedia = Media.Video(video)
                                         }
@@ -341,7 +369,7 @@ fun ProfileScreen(personId: String) {
                                     .background(MaterialTheme.colorScheme.secondaryContainer)
                                     .clickable {
                                         if (isMe) {
-                                            profilePhotoLauncher.launch(PickVisualMediaRequest())
+                                            showCoverPhotoDialog = true
                                         } else {
                                             showMedia = profile?.photo?.let { Media.Photo(it) }
                                         }
@@ -479,7 +507,7 @@ fun ProfileScreen(personId: String) {
                                 modifier = Modifier
                                     .clickable {
                                         if (isMe) {
-                                            photoLauncher.launch(PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                            showProfilePhotoDialog = true
                                         } else {
                                             showMedia = person?.photo?.let { Media.Photo(it) }
                                         }

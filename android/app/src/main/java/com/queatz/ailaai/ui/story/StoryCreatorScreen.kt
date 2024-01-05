@@ -2,9 +2,6 @@ package com.queatz.ailaai.ui.story
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -88,6 +85,7 @@ fun StoryCreatorScreen(
                     recompose.invalidate()
                 }
             }
+
             is StorySource.Card -> {
                 api.card(source.id) {
                     card = it
@@ -95,6 +93,7 @@ fun StoryCreatorScreen(
                     recompose.invalidate()
                 }
             }
+
             is StorySource.Profile -> {
                 api.profile(source.id) {
                     profile = it
@@ -207,6 +206,7 @@ fun StoryCreatorScreen(
                     nav.popBackStackOrFinish()
                 }
             }
+
             else -> {}
         }
     }
@@ -376,6 +376,7 @@ fun StoryCreatorScreen(
                             Text(stringResource(R.string.post))
                         }
                     }
+
                     else -> {}
                 }
             }
@@ -762,39 +763,67 @@ fun StoryCreatorScreen(
                             var showPhotoMenu by rememberStateOf(false)
                             var showPhotoAspectMenu by rememberStateOf(false)
                             var showReorderDialog by rememberStateOf(false)
+                            var showPhotoDialog by rememberStateOf(false)
 
-                            val photoLauncher =
-                                rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) {
-                                    if (it.isEmpty()) return@rememberLauncherForActivityResult
+                            if (showPhotoDialog) {
+                                ChoosePhotoDialog(
+                                    scope = scope,
+                                    onDismissRequest = { showPhotoDialog = false },
+                                    imagesOnly = true,
+                                    onPhotos = {
+                                        scope.launch {
+                                            when (source) {
+                                                is StorySource.Story -> {
+                                                    api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
+                                                        part.edit {
+                                                            photos += photoUrls
+                                                        }
+                                                    }
+                                                }
 
-                                    scope.launch {
-                                        when (source) {
-                                            is StorySource.Story -> {
-                                                api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
+                                                is StorySource.Card -> {
+                                                    api.uploadCardContentPhotosFromUri(
+                                                        context,
+                                                        source.id,
+                                                        it
+                                                    ) { photoUrls ->
+                                                        part.edit {
+                                                            photos += photoUrls
+                                                        }
+                                                    }
+                                                }
+
+                                                is StorySource.Profile -> {
+                                                    api.uploadProfileContentPhotosFromUri(
+                                                        context,
+                                                        source.id,
+                                                        it
+                                                    ) { photoUrls ->
+                                                        part.edit {
+                                                            photos += photoUrls
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    onGeneratedPhoto = {
+                                        val photoUrls = listOf(it)
+                                        scope.launch {
+                                            when (source) {
+                                                is StorySource.Story -> {
                                                     part.edit {
                                                         photos += photoUrls
                                                     }
                                                 }
-                                            }
 
-                                            is StorySource.Card -> {
-                                                api.uploadCardContentPhotosFromUri(
-                                                    context,
-                                                    source.id,
-                                                    it
-                                                ) { photoUrls ->
+                                                is StorySource.Card -> {
                                                     part.edit {
                                                         photos += photoUrls
                                                     }
                                                 }
-                                            }
 
-                                            is StorySource.Profile -> {
-                                                api.uploadProfileContentPhotosFromUri(
-                                                    context,
-                                                    source.id,
-                                                    it
-                                                ) { photoUrls ->
+                                                is StorySource.Profile -> {
                                                     part.edit {
                                                         photos += photoUrls
                                                     }
@@ -802,7 +831,8 @@ fun StoryCreatorScreen(
                                             }
                                         }
                                     }
-                                }
+                                )
+                            }
 
                             if (showPhotoAspectMenu) {
                                 Menu(
@@ -867,7 +897,7 @@ fun StoryCreatorScreen(
                                 ) {
                                     menuItem(stringResource(R.string.add_photo)) {
                                         showPhotoMenu = false
-                                        photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                        showPhotoDialog = true
                                     }
                                     menuItem(stringResource(R.string.change_aspect_ratio)) {
                                         showPhotoMenu = false
@@ -953,9 +983,10 @@ fun StoryCreatorScreen(
     }
 }
 
-val Widgets.stringResource @Composable get() = stringResource(
-    when (this) {
-        Widgets.ImpactEffortTable -> R.string.impact_effort_table
-        else -> R.string.widget
-    }
-)
+val Widgets.stringResource
+    @Composable get() = stringResource(
+        when (this) {
+            Widgets.ImpactEffortTable -> R.string.impact_effort_table
+            else -> R.string.widget
+        }
+    )
