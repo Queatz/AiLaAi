@@ -60,6 +60,7 @@ fun ProfileScreen(personId: String) {
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
     var showMedia by remember { mutableStateOf<Media?>(null) }
     var isLoading by rememberStateOf(true)
+    var search by rememberStateOf("")
     var isError by rememberStateOf(false)
     var showEditName by rememberStateOf(false)
     var showEditAbout by rememberStateOf(false)
@@ -141,12 +142,27 @@ fun ProfileScreen(personId: String) {
         }
     }
 
+    suspend fun reloadCards() {
+        if (search.isBlank()) {
+            api.profileCards(personId) {
+                cards = it
+            }
+        } else {
+            api.activeCardsOfPerson(personId, search) {
+                cards = it
+            }
+        }
+    }
+
+    LaunchedEffect(search) {
+        cards = emptyList()
+        reloadCards()
+    }
+
     suspend fun reload() {
         listOf(
             scope.async {
-                api.profileCards(personId) {
-                    cards = it
-                }
+                reloadCards()
             },
             scope.async {
                 api.profile(personId, onError = { isError = true }) {
@@ -674,66 +690,77 @@ fun ProfileScreen(personId: String) {
                                 }
                             }
                         }
-                        Box(
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.large)
-                                .clickable {
-                                    if (isMe) {
-                                        showEditAbout = true
-                                    } else {
-                                        profile?.about?.copyToClipboard(context)
-                                        context.toast(copiedString)
+                        if (search.isBlank()) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.large)
+                                    .clickable {
+                                        if (isMe) {
+                                            showEditAbout = true
+                                        } else {
+                                            profile?.about?.copyToClipboard(context)
+                                            context.toast(copiedString)
+                                        }
                                     }
+                                    .padding(1.pad)
+                            ) {
+                                if (isMe || profile?.about?.isBlank() == false) {
+                                    LinkifyText(
+                                        profile?.about
+                                            ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
+                                        color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    )
                                 }
-                                .padding(1.pad)
-                        ) {
-                            if (isMe || profile?.about?.isBlank() == false) {
-                                LinkifyText(
-                                    profile?.about ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
-                                    color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                )
                             }
                         }
                     }
 
-                    profile?.content?.notBlank?.let { content ->
-                        Box(
-                            modifier = Modifier
-                                .padding(top = 1.pad)
-                                .heightIn(max = 2096.dp)
-                        ) {
-                            CardContent(
-                                StorySource.Profile(person!!.id!!),
-                                content
-                            )
-                        }
-                    }
-
-                    if (isMe) {
-                        OutlinedButton(
-                            onClick = {
-                                nav.navigate("profile/${person!!.id!!}/edit")
-                            }
-                        ) {
-                            Text(
-                                stringResource(
-                                    if (profile?.content.isNullOrBlank()) {
-                                        R.string.add_content
-                                    } else {
-                                        R.string.edit_content
-                                    }
+                    if (search.isBlank()) {
+                        profile?.content?.notBlank?.let { content ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 1.pad)
+                                    .heightIn(max = 2096.dp)
+                            ) {
+                                CardContent(
+                                    StorySource.Profile(person!!.id!!),
+                                    content
                                 )
-                            )
+                            }
+                        }
+
+                        if (isMe) {
+                            OutlinedButton(
+                                onClick = {
+                                    nav.navigate("profile/${person!!.id!!}/edit")
+                                }
+                            ) {
+                                Text(
+                                    stringResource(
+                                        if (profile?.content.isNullOrBlank()) {
+                                            R.string.add_content
+                                        } else {
+                                            R.string.edit_content
+                                        }
+                                    )
+                                )
+                            }
+                        }
+
+                        person?.let {
+                            ProfileGroups(it)
                         }
                     }
+                }
+            }
 
-                    person?.let {
-                        ProfileGroups(it)
-                    }
+            if (search.isNotBlank() && cards.isEmpty()) {
+                item {
+                    EmptyText(stringResource(R.string.no_cards_to_show))
                 }
             }
 
@@ -751,16 +778,22 @@ fun ProfileScreen(personId: String) {
             }
         }
 
-        FloatingActionButton(
-            onClick = {
+        SearchFieldAndAction(
+            value = search,
+            valueChange = { search = it },
+            placeholder = stringResource(R.string.search_cards_of_x, person?.name ?: stringResource(R.string.someone)),
+            action = {
+                Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
+
+            },
+            onAction = {
                 newCard = Card(equipped = true)
+
             },
             modifier = Modifier
-                .padding(2.pad)
+                .padding(bottom = 2.pad)
                 .align(Alignment.BottomEnd)
-        ) {
-            Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
-        }
+        )
     }
 
     if (showJoined) {

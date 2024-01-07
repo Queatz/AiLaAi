@@ -16,6 +16,7 @@ import com.queatz.ailaai.ui.theme.pad
 fun SearchFieldAndAction(
     value: String,
     valueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
     placeholder: String = stringResource(R.string.search),
     showClear: Boolean = true,
     action: (@Composable () -> Unit)? = null,
@@ -27,13 +28,13 @@ fun SearchFieldAndAction(
             onValueChange = valueChange,
             placeholder = placeholder,
             showClear = showClear,
-            modifier = Modifier
+            modifier = modifier
                 .padding(horizontal = 2.pad)
         )
     } else {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            modifier = modifier
                 .padding(horizontal = 2.pad)
         ) {
             Box(
