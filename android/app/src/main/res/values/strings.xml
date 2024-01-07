@@ -89,6 +89,7 @@
     <string name="delete_message_description">The message will be removed for everyone in the group.</string>
     <string name="code_expired">Code expired or doesn\'t exist</string>
     <string name="you_x">You: %1$s</string>
+    <string name="you">You</string>
     <string name="at_a_location">At a location</string>
     <string name="inside_another_card">In a page</string>
     <string name="search_cards">Search for a page</string>

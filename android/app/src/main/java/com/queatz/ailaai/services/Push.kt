@@ -86,11 +86,11 @@ class Push {
             }
         }
 
-    internal fun personNameOrYou(person: Person?): String {
+    internal fun personNameOrYou(person: Person?, inline: Boolean = true): String {
         return if (person?.id == meId) {
-            context.getString(R.string.inline_you)
+            context.getString(if (inline) R.string.inline_you else R.string.you)
         } else {
-            person?.name ?: context.getString(R.string.inline_someone)
+            person?.name ?: context.getString(if (inline) R.string.inline_someone else R.string.someone)
         }
     }
 

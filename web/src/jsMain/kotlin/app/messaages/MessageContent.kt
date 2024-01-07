@@ -297,7 +297,7 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
                                     onBackground = true,
                                     onSelected = {
                                         scope.launch {
-                                            appNav.navigate(AppNavigation.Group(group.group!!.id!!))
+                                            appNav.navigate(AppNavigation.Group(group.group!!.id!!, group))
                                         }
                                     },
                                     info = GroupInfo.LatestMessage

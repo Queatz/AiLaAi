@@ -7,6 +7,7 @@ import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.attachmentText
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.Push
@@ -38,12 +39,19 @@ fun Push.receive(data: MessagePushData) {
     )
 
     if (data.show != false) {
+        val groupName = data.group.name?.notBlank
+        val personName = personNameOrYou(data.person)
         send(
             intent = deeplinkIntent,
             channel = Notifications.Messages,
             groupKey = makeGroupKey(data.group.id!!),
-            title = data.person.name ?: context.getString(R.string.someone),
-            text = data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: ""
+            title = groupName ?: personName,
+            text = buildString {
+                if (groupName != null) {
+                    append("$personName: ")
+                }
+                append(data.message.text?.nullIfBlank ?: data.message.attachmentText(context) ?: "")
+            }
         )
     }
 }

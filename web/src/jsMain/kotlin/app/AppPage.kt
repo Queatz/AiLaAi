@@ -92,9 +92,14 @@ fun AppPage() {
         appNav.navigate.collectLatest {
             when (it) {
                 is AppNavigation.Group -> {
-                    api.group(it.group) {
+                    if (it.groupExtended == null) {
+                        api.group(it.group) {
+                            nav = NavPage.Groups
+                            group = GroupNav.Selected(it)
+                        }
+                    } else {
                         nav = NavPage.Groups
-                        group = GroupNav.Selected(it)
+                        group = GroupNav.Selected(it.groupExtended)
                     }
                 }
             }
