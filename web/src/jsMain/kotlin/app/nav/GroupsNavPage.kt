@@ -200,17 +200,15 @@ fun GroupsNavPage(
                     appText { noGroups }
                 }
             } else {
-                key(shownGroups, selected) { // todo remove after LazyColumn library is updated
-                    LazyColumn {
-                        items(shownGroups) { group ->
-                            GroupItem(
-                                group,
-                                selected = (selected as? GroupNav.Selected)?.group?.group?.id == group.group?.id,
-                                onSelected = {
-                                    onSelected(GroupNav.Selected(group))
-                                },
-                            )
-                        }
+                LazyColumn {
+                    items(shownGroups, key = { it.group!!.id!! }) { group ->
+                        GroupItem(
+                            group,
+                            selected = (selected as? GroupNav.Selected)?.group?.group?.id == group.group?.id,
+                            onSelected = {
+                                onSelected(GroupNav.Selected(group))
+                            },
+                        )
                     }
                 }
             }

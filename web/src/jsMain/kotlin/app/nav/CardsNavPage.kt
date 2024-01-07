@@ -238,38 +238,36 @@ fun CardsNavPage(cardUpdates: Flow<Card>, nav: CardNav, onSelected: (CardNav) ->
                 }
             } else {
                 val selected = (nav as? CardNav.Selected)?.let { it.subCard ?: it.card }
-                key(shownCards, selected) { // todo remove after LazyColumn library is updated
-                    LazyColumn {
-                        items(shownCards) {
-                            CardItem(
-                                it,
-                                (nav as? CardNav.Selected)?.subCard == null,
-                                selected == it,
-                                saved.any { save -> save.id == it.id },
-                                it.active == true
-                            ) { _ ->
-                                onSelected(CardNav.Selected(it))
-                            }
-                            if (it.id == cardId && childCards.isNotEmpty()) {
-                                Div({
-                                    style { marginLeft(1.r) }
-                                }) {
+                LazyColumn {
+                    items(shownCards, key = { it.id!! }) {
+                        CardItem(
+                            it,
+                            (nav as? CardNav.Selected)?.subCard == null,
+                            selected == it,
+                            saved.any { save -> save.id == it.id },
+                            it.active == true
+                        ) { _ ->
+                            onSelected(CardNav.Selected(it))
+                        }
+                        if (it.id == cardId && childCards.isNotEmpty()) {
+                            Div({
+                                style { marginLeft(1.r) }
+                            }) {
 //                    val selectedSubCard = (nav as? CardNav.Selected)?.let { it.subCard }
-                                    childCards.forEach {
-                                        CardItem(
-                                            it,
-                                            true,
-                                            selected == it,
-                                            saved.any { save -> save.id == it.id },
-                                            it.active == true
-                                        ) { navigate ->
-                                            val card = (nav as CardNav.Selected).card
+                                childCards.forEach {
+                                    CardItem(
+                                        it,
+                                        true,
+                                        selected == it,
+                                        saved.any { save -> save.id == it.id },
+                                        it.active == true
+                                    ) { navigate ->
+                                        val card = (nav as CardNav.Selected).card
 
-                                            if (navigate) {
-                                                onSelected(CardNav.Selected(it))
-                                            } else {
-                                                onSelected(CardNav.Selected(card, it))
-                                            }
+                                        if (navigate) {
+                                            onSelected(CardNav.Selected(it))
+                                        } else {
+                                            onSelected(CardNav.Selected(card, it))
                                         }
                                     }
                                 }

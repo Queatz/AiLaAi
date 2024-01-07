@@ -52,6 +52,9 @@ fun LinkifyText(text: String) {
                     }
                 }, {
                     target(ATarget.Blank)
+                    onClick {
+                        it.stopPropagation()
+                    }
                 }) {
                 Text(part.first)
             }

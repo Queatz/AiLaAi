@@ -30,10 +30,11 @@ val ScheduleView.range
 
 val ScheduleView.duration
     get() = when (this) {
-        ScheduleView.Daily -> 1.days * 7
-        ScheduleView.Weekly -> 7.days * 4
-        ScheduleView.Monthly -> 30.days * 3
-        ScheduleView.Yearly -> 365.days * 2
+        // todo load larger chunks when loading up is more fluid
+        ScheduleView.Daily -> 1.days// * 7
+        ScheduleView.Weekly -> 7.days// * 4
+        ScheduleView.Monthly -> 30.days// * 3
+        ScheduleView.Yearly -> 365.days// * 2
     }
 
 val ScheduleView.titleFormat

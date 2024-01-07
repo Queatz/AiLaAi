@@ -729,6 +729,10 @@ object Strings {
         "Connect",
         "Kết nối"
     )
+    val searchPagesOfPerson = Translation(
+        "Search %1\$s's pages",
+        "Tìm kiếm trang của %1\$s"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {
@@ -760,3 +764,6 @@ val LocalConfiguration = compositionLocalOf(
 ) {
     Configuration(application.language) {}
 }
+
+fun String.format(vararg values: String) =
+    values.foldIndexed(this) { index, acc, it -> acc.replace("%${index + 1}\$s", it) }

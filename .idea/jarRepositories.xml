@@ -31,5 +31,10 @@
       <option name="name" value="maven" />
       <option name="url" value="https://maven.pkg.jetbrains.space/public/p/compose/dev" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="https://gitlab.com/api/v4/projects/50844834/packages/maven" />
+    </remote-repository>
   </component>
 </project>

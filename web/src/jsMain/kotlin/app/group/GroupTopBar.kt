@@ -87,9 +87,10 @@ fun GroupTopBar(
     fun updateIntroduction() {
         scope.launch {
             val introduction = inputDialog(
-                application.appString { introduction },
-                "",
-                application.appString { update },
+                title = application.appString { introduction },
+                placeholder = "",
+                singleLine = false,
+                confirmButton = application.appString { update },
                 defaultValue = group.group?.description ?: ""
             )
 
@@ -253,6 +254,7 @@ fun GroupTopBar(
         }
     }
 
+    // todo
     if (false) {
         Div({
             classes(AppStyles.groupAppsBar)

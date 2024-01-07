@@ -16,6 +16,7 @@ import baseUrl
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.PersonProfile
+import format
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.css.*
@@ -335,7 +336,12 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                     }
                 }
 
-                TopBarSearch(search, { search = it }, focus = false) {
+                TopBarSearch(
+                    search,
+                    { search = it },
+                    focus = false,
+                    placeholder = appString { searchPagesOfPerson }.format(profile.person.name ?: appString { someone })
+                ) {
                     marginTop(2.r)
                     marginLeft(1.r)
                     marginRight(1.r)

@@ -253,13 +253,13 @@ fun FriendsScreen() {
             multiple = false,
             allowNone = true,
             confirmFormatter = { stringResource(R.string.close) },
-            infoFormatter = { it.seenText(context.getString(R.string.active), me) },
+            infoFormatter = { "${it.members?.size ?: 0} ${context.resources.getQuantityString(R.plurals.inline_members, it.members?.size ?: 0)}" },
             groups = {
                 showSharedGroupsDialog
             }
         ) { selected ->
             showSharedGroupsDialog = emptyList()
-            nav.navigate("group/${selected.first()!!.id!!}")
+            nav.navigate("group/${selected.first().id!!}")
         }
     }
 
@@ -442,9 +442,7 @@ fun FriendsScreen() {
                                             }
                                         ) { person ->
                                             scope.launch {
-                                                api.groupsWith(
-                                                    listOf(me!!.id!!, person.id!!)
-                                                ) {
+                                                api.groupsWith(listOf(me!!.id!!, person.id!!)) {
                                                     if (it.size == 1) {
                                                         nav.navigate("group/${it.first().group!!.id!!}")
                                                     } else {

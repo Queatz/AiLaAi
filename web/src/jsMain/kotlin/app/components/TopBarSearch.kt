@@ -12,6 +12,7 @@ fun TopBarSearch(
     value: String,
     onValue: (String) -> Unit,
     focus: Boolean = true,
+    placeholder: String? = null,
     styles: (StyleScope.() -> Unit)? = null
 ) {
     Div({
@@ -25,7 +26,7 @@ fun TopBarSearch(
     }) {
         SearchField(
             value,
-            appString { this.search },
+            placeholder ?: appString { this.search },
             focus = focus,
             styles = {
                 if (styles != null) {

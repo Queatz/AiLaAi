@@ -1,4 +1,5 @@
 package app.nav
+
 import androidx.compose.runtime.*
 import api
 import app.AppStyles
@@ -76,7 +77,8 @@ fun StoriesNavPage(
         }
 
         (selected as? StoryNav.Selected)?.story?.let { selected ->
-            onSelected(myStories.firstOrNull { it.id == selected.id }?.let { StoryNav.Selected(it) } ?: StoryNav.Friends)
+            onSelected(myStories.firstOrNull { it.id == selected.id }?.let { StoryNav.Selected(it) }
+                ?: StoryNav.Friends)
         }
 
         isLoading = false
@@ -154,16 +156,14 @@ fun StoriesNavPage(
                     appText { noStories }
                 }
             } else {
-                key(shownStories, selected) { // todo remove after LazyColumn library is updated
-                    LazyColumn {
-                        items(shownStories) {
-                            StoryItem(it, it == (selected as? StoryNav.Selected)?.story) {
-                                onSelected(
-                                    StoryNav.Selected(
-                                        it
-                                    )
+                LazyColumn {
+                    items(shownStories, key = { it.id!! }) {
+                        StoryItem(it, it == (selected as? StoryNav.Selected)?.story) {
+                            onSelected(
+                                StoryNav.Selected(
+                                    it
                                 )
-                            }
+                            )
                         }
                     }
                 }
