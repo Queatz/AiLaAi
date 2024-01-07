@@ -49,6 +49,7 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.group.GroupCards
 import com.queatz.ailaai.group.GroupJoinRequest
+import com.queatz.ailaai.group.SendGroupDialog
 import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.me
@@ -57,6 +58,7 @@ import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
+import com.queatz.ailaai.ui.story.editor.SendStoryDialog
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
@@ -111,6 +113,7 @@ fun GroupScreen(groupId: String) {
     val stickerPacks by stickers.rememberStickerPacks()
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
+    var showSendDialog by rememberStateOf(false)
     val nav = nav
     val me = me
 
@@ -423,6 +426,12 @@ fun GroupScreen(groupId: String) {
                         }, {
                             showMenu = false
                             showCards = !showCards
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.send))
+                        }, {
+                            showMenu = false
+                            showSendDialog = true
                         })
                         if (myMember != null) {
                             DropdownMenuItem({
@@ -1262,6 +1271,15 @@ fun GroupScreen(groupId: String) {
             }
 
             val recomposeScope = currentRecomposeScope
+
+            if (showSendDialog) {
+                SendGroupDialog(
+                    {
+                        showSendDialog = false
+                    },
+                    groupId
+                )
+            }
 
             if (showRenameGroup) {
                 RenameGroupDialog({

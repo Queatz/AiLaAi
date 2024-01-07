@@ -3,10 +3,15 @@ package app.messaages
 import Styles
 import androidx.compose.runtime.*
 import api
+import app.AppNavigation
 import app.AppStyles
 import app.StickerItem
+import app.ailaai.api.group
 import app.ailaai.api.message
+import app.appNav
 import app.dialog.photoDialog
+import app.group.GroupInfo
+import app.group.GroupItem
 import appString
 import baseUrl
 import com.queatz.ailaai.api.story
@@ -14,6 +19,7 @@ import com.queatz.db.*
 import components.CardItem
 import components.Icon
 import components.LinkifyText
+import components.LoadingText
 import ellipsize
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
@@ -24,6 +30,7 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLVideoElement
 import r
+import stories.StoryStyles
 import stories.textContent
 import kotlin.js.Date
 
@@ -261,6 +268,41 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
                             }
                         }) {
                             Text(story.textContent())
+                        }
+                    }
+                }
+            }
+
+            is GroupAttachment -> {
+                Div({
+                    classes(StoryStyles.contentGroups)
+                }) {
+                    attachment.group?.let { groupId ->
+                        var group by remember(groupId) {
+                            mutableStateOf<GroupExtended?>(null)
+                        }
+
+                        LaunchedEffect(groupId) {
+                            api.group(groupId) {
+                                group = it
+                            }
+                        }
+
+                        LoadingText(group != null, appString { loadingGroup }) {
+                            group?.let { group ->
+                                GroupItem(
+                                    group,
+                                    selectable = true,
+                                    selected = false,
+                                    onBackground = true,
+                                    onSelected = {
+                                        scope.launch {
+                                            appNav.navigate(AppNavigation.Group(group.group!!.id!!))
+                                        }
+                                    },
+                                    info = GroupInfo.LatestMessage
+                                )
+                            }
                         }
                     }
                 }

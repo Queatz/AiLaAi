@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmapOrNull
 import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
+import app.ailaai.api.group
 import app.ailaai.api.sticker
 import coil.compose.AsyncImage
 import coil.imageLoader
@@ -75,6 +76,7 @@ fun ColumnScope.MessageContent(
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
+    var attachedGroupId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
     var attachedVideos by remember { mutableStateOf<List<String>?>(null) }
     var attachedSticker by remember { mutableStateOf<Sticker?>(null) }
@@ -82,6 +84,8 @@ fun ColumnScope.MessageContent(
     var attachedReply by remember { mutableStateOf<Message?>(null) }
     var attachedStory by remember { mutableStateOf<Story?>(null) }
     var attachedStoryNotFound by remember { mutableStateOf(false) }
+    var attachedGroup by remember { mutableStateOf<GroupExtended?>(null) }
+    var attachedGroupNotFound by remember { mutableStateOf(false) }
     var attachedAudio by remember { mutableStateOf<String?>(null) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
     val nav = nav
@@ -123,6 +127,10 @@ fun ColumnScope.MessageContent(
 
             is StoryAttachment -> {
                 attachedStoryId = attachment.story
+            }
+
+            is GroupAttachment -> {
+                attachedGroupId = attachment.group
             }
 
             is StickerAttachment -> {
@@ -267,7 +275,7 @@ fun ColumnScope.MessageContent(
         )
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(attachedCardId) {
         attachedCardId?.let { cardId ->
             api.card(cardId, onError = {
                 // todo show failed to load
@@ -275,13 +283,13 @@ fun ColumnScope.MessageContent(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(attachedReplyId) {
         attachedReplyId?.let { messageId ->
             attachedReply = getMessage(messageId)
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(attachedStoryId) {
         attachedStoryId?.let { storyId ->
             api.story(
                 storyId,
@@ -292,6 +300,21 @@ fun ColumnScope.MessageContent(
                 }
             ) {
                 attachedStory = it
+            }
+        }
+    }
+
+    LaunchedEffect(attachedGroupId) {
+        attachedGroupId?.let { groupId ->
+            api.group(
+                groupId,
+                onError = {
+                    if (it.status == HttpStatusCode.NotFound) {
+                        attachedGroupNotFound = true
+                    }
+                }
+            ) {
+                attachedGroup = it
             }
         }
     }
@@ -560,6 +583,35 @@ fun ColumnScope.MessageContent(
         ) {
             scope.launch {
                 say.say(attachedSticker?.message)
+            }
+        }
+    }
+
+    attachedGroupId?.let { groupId ->
+        Box(
+            modifier = Modifier.padding(1.pad).then(
+                if (isReply) {
+                    Modifier
+                } else {
+                    when (isMe) {
+                        true -> Modifier.padding(start = 8.pad)
+                            .align(Alignment.End)
+
+                        false -> Modifier.padding(end = 8.pad)
+                            .align(Alignment.Start)
+                    }
+                }
+            )
+        ) {
+            LoadingText(
+                attachedGroup != null,
+                if (attachedGroupNotFound) stringResource(R.string.group_not_found) else stringResource(R.string.loading_group)
+            ) {
+                ContactItem(
+                    SearchResult.Group(attachedGroup!!),
+                    onChange = {},
+                    info = GroupInfo.LatestMessage,
+                )
             }
         }
     }

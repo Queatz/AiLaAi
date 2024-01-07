@@ -69,13 +69,13 @@ fun LinkifyText(
                 showLinkMenu = null
             }
         ) {
+            menuItem(stringResource(com.queatz.ailaai.R.string.open_link)) {
+                showLinkMenu?.launchUrl(context)
+                showLinkMenu = null
+            }
             menuItem(stringResource(com.queatz.ailaai.R.string.copy_link)) {
                 showLinkMenu?.copyToClipboard(context)
                 context.toast(com.queatz.ailaai.R.string.copied)
-                showLinkMenu = null
-            }
-            menuItem(stringResource(com.queatz.ailaai.R.string.open_link)) {
-                showLinkMenu?.launchUrl(context)
                 showLinkMenu = null
             }
         }

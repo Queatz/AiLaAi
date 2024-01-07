@@ -1,6 +1,8 @@
 package app
 
 import androidx.compose.runtime.*
+import api
+import app.ailaai.api.group
 import app.cards.CardsPage
 import app.group.GroupPage
 import app.nav.*
@@ -13,10 +15,12 @@ import com.queatz.db.Card
 import com.queatz.db.Reminder
 import com.queatz.db.Story
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import stories.StoryStyles
 
 @Serializable
 enum class NavPage {
@@ -31,6 +35,7 @@ enum class NavPage {
 fun AppPage() {
     Style(AppStyles)
     Style(WidgetStyles)
+    Style(StoryStyles)
 
     val scope = rememberCoroutineScope()
     val background by application.background.collectAsState(null)
@@ -81,6 +86,19 @@ fun AppPage() {
 
     LaunchedEffect(nav) {
         application.setNavPage(nav)
+    }
+
+    LaunchedEffect(Unit) {
+        appNav.navigate.collectLatest {
+            when (it) {
+                is AppNavigation.Group -> {
+                    api.group(it.group) {
+                        nav = NavPage.Groups
+                        group = GroupNav.Selected(it)
+                    }
+                }
+            }
+        }
     }
 
     Div({
@@ -143,6 +161,7 @@ fun AppPage() {
                     NavPage.Cards -> CardsNavPage(cardUpdates, card, { card = it }, {
                         nav = NavPage.Profile
                     })
+
                     NavPage.Stories -> StoriesNavPage(storyUpdates, story, { story = it }, { nav = NavPage.Profile })
                     NavPage.Profile -> ProfileNavPage {
                         nav = NavPage.Groups
@@ -157,7 +176,7 @@ fun AppPage() {
                 NavPage.Groups -> GroupPage(
                     group,
                     onGroup = {
-                              group = GroupNav.Selected(it)
+                        group = GroupNav.Selected(it)
                     },
                     onGroupUpdated = {
                         scope.launch {
@@ -188,6 +207,7 @@ fun AppPage() {
                         }
                     }
                 )
+
                 NavPage.Cards -> CardsPage(card, { card = it }) {
                     scope.launch {
                         cardUpdates.emit(it)
@@ -206,6 +226,7 @@ fun AppPage() {
                         nav = NavPage.Groups
                     }
                 )
+
                 NavPage.Profile -> {
 
                 }

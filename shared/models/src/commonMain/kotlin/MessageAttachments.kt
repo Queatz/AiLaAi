@@ -44,6 +44,13 @@ class StoryAttachment(
 }
 
 @Serializable
+class GroupAttachment(
+    var group: String? = null,
+) : MessageAttachment() {
+    override val type = "group"
+}
+
+@Serializable
 class StickerAttachment(
     var photo: String? = null,
     var sticker: String? = null,

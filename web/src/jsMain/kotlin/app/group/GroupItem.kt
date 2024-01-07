@@ -38,6 +38,7 @@ fun GroupItem(
     selectable: Boolean = true,
     selected: Boolean = false,
     onSurface: Boolean = false,
+    onBackground: Boolean = false,
     coverPhoto: Boolean = false,
     onSelected: () -> Unit,
     info: GroupInfo = GroupInfo.LatestMessage,
@@ -81,6 +82,9 @@ fun GroupItem(
                 }
                 if (!selectable) {
                     add(AppStyles.groupItemDefault)
+                }
+                if (onBackground) {
+                    add(AppStyles.groupItemOnBackground)
                 }
                 if (onSurface) {
                     add(AppStyles.groupItemOnSurface)

@@ -21,6 +21,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "audio" -> json.decodeFromJsonElement<AudioAttachment>(jsonElement)
             "videos" -> json.decodeFromJsonElement<VideosAttachment>(jsonElement)
             "story" -> json.decodeFromJsonElement<StoryAttachment>(jsonElement)
+            "group" -> json.decodeFromJsonElement<GroupAttachment>(jsonElement)
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
             else -> null
         }

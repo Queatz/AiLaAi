@@ -11,6 +11,10 @@ import r
 
 object AppStyles : StyleSheet() {
 
+    val groupAppsBar by style {
+        margin(0.r, 1.r, .5.r, 1.r)
+    }
+
     val groupDescription by style {
         borderRadius(1.r)
         margin(0.r, 1.r, .5.r, 1.r)
@@ -182,6 +186,10 @@ object AppStyles : StyleSheet() {
 
     }
 
+    val groupItemOnBackground by style {
+
+    }
+
     val groupItemDefault by style {
 
     }
@@ -221,6 +229,10 @@ object AppStyles : StyleSheet() {
                 self + hover style {
                     backgroundColor(Color.black)
                 }
+            }
+
+            self + className(groupItemOnBackground) style {
+                backgroundColor(Styles.colors.dark.background)
             }
 
             self + className(groupItemDefault) style {

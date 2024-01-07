@@ -23,6 +23,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "audio" -> json.decodeFromJsonElement<AudioAttachment>(jsonElement)
             "videos" -> json.decodeFromJsonElement<VideosAttachment>(jsonElement)
             "story" -> json.decodeFromJsonElement<StoryAttachment>(jsonElement)
+            "group" -> json.decodeFromJsonElement<GroupAttachment>(jsonElement)
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
             else -> null
         }
@@ -34,29 +35,38 @@ private fun String.asMessageAttachment(): MessageAttachment? {
 
 fun <T> T?.inList() = this?.let(::listOf) ?: emptyList<T>()
 
-// todo: translate
 @Composable
 fun Message.attachmentText(): String? = when (val attachment = getAttachment()) {
     is CardAttachment -> {
         if (attachment.card != null) {
+            // todo: translate
             "Sent a page"
         } else {
             null
         }
     }
     is PhotosAttachment -> {
+        // todo: translate
        "Sent a photo"
     }
     is AudioAttachment -> {
+        // todo: translate
         "Sent an audio message"
     }
     is VideosAttachment -> {
+        // todo: translate
         "Sent a video"
     }
     is StoryAttachment -> {
+        // todo: translate
         "Sent a story"
     }
+    is GroupAttachment -> {
+        // todo: translate
+        "Sent a group"
+    }
     is StickerAttachment -> {
+        // todo: translate
         "Sent a sticker"
     }
     else -> null

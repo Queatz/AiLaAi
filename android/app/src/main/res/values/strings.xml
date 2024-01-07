@@ -141,6 +141,10 @@
     <string name="send_card_to_group">Send page to %1$s</string>
     <string name="send_card_to_groups">Send page to %1$s and %2$s</string>
     <string name="send_card_to_x_groups">Send page to %1$s groups</string>
+    <string name="send_group">Send group</string>
+    <string name="send_group_to_group">Send group to %1$s</string>
+    <string name="send_group_to_groups">Send group to %1$s and %2$s</string>
+    <string name="send_group_to_x_groups">Send group to %1$s groups</string>
     <string name="sent">Sent!</string>
     <string name="app_feedback">❔ Send feedback</string>
     <string name="sent_a_card">Sent a page</string>
@@ -280,6 +284,7 @@
     <string name="choose_location">Choose location</string>
     <string name="reorder">Reorder</string>
     <string name="sent_a_story">Sent a story</string>
+    <string name="sent_a_group">Sent a group</string>
     <string name="save_changes">Save changes?</string>
     <string name="all_changes_will_be_lost">All changes will be lost.</string>
     <string name="remove_all">Remove all</string>

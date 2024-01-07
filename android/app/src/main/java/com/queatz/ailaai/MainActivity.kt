@@ -30,7 +30,6 @@ import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -46,7 +45,6 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LifecycleEffect
-import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
@@ -99,9 +97,6 @@ fun background(url: String?) {
 
 @OptIn(ExperimentalLayoutApi::class)
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var navController: NavHostController
-
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.Group),
@@ -117,7 +112,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             AiLaAiTheme {
-                navController = rememberNavController()
+                val navController = rememberNavController()
                 push.navController = navController
 
                 var newMessages by remember { mutableStateOf(0) }

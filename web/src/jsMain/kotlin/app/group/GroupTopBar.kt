@@ -22,7 +22,9 @@ import kotlinx.coroutines.launch
 import lib.formatDistanceToNow
 import notBlank
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
@@ -247,6 +249,18 @@ fun GroupTopBar(
                 title(application.appString { clickToHide })
             }) {
                 LinkifyText(description)
+            }
+        }
+    }
+
+    if (false) {
+        Div({
+            classes(AppStyles.groupAppsBar)
+        }) {
+            Button({
+                classes(Styles.button)
+            }) {
+                Text("Fund this project!")
             }
         }
     }

@@ -66,6 +66,9 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     is StoryAttachment -> {
         context.resources.getString(R.string.sent_a_story)
     }
+    is GroupAttachment -> {
+        context.resources.getString(R.string.sent_a_group)
+    }
     is StickerAttachment -> {
         context.resources.getString(R.string.sent_a_sticker)
     }
