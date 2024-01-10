@@ -53,10 +53,12 @@ class Push {
         private val gmsOAuthEndpoint = "https://oauth2.googleapis.com/token"
         private val hmsPushEndpoint = "https://push-api.cloud.huawei.com/v1/${secrets.hms.appId}/messages:send"
         private val gmsPushEndpoint = "https://fcm.googleapis.com/v1/projects/${secrets.gms.appId}/messages:send"
+        private val apnsPushEndpoint = "https://api.push.apple.com:443"
     }
 
     private var hmsToken: String? = null
     private var gmsToken: String? = null
+    private var apnsToken: String? = null
 
     private lateinit var coroutineScope: CoroutineScope
 
@@ -69,6 +71,7 @@ class Push {
 
     private suspend fun start() {
         withContext(Dispatchers.IO) {
+            // HMS token
             launch {
                 while (Thread.currentThread().isAlive) {
                     try {
@@ -99,6 +102,7 @@ class Push {
                 }
             }
 
+            // GMS token
             launch {
                 while (Thread.currentThread().isAlive) {
                     try {
@@ -133,6 +137,30 @@ class Push {
                         } else {
                             delay(1.minutes)
                         }
+                    } catch (throwable: Throwable) {
+                        throwable.printStackTrace()
+                        delay(15.seconds)
+                    }
+                }
+            }
+
+            // APNS token
+            launch {
+                while (Thread.currentThread().isAlive) {
+                    try {
+                        val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
+                        val privateKey = KeyFactory.getInstance("ES256").generatePrivate(keySpecPKCS8)
+                        val token = JWT.create()
+                            .withAudience(apnsPushEndpoint)
+                            .withIssuer(secrets.apns.teamId)
+                            .withKeyId(secrets.apns.privateKeyId)
+                            .withSubject(secrets.apns.teamId)
+                            .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
+                            .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
+                            .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
+
+                        apnsToken = token
+                        delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
                     } catch (throwable: Throwable) {
                         throwable.printStackTrace()
                         delay(15.seconds)
@@ -213,7 +241,24 @@ class Push {
                 events.emit(pushData to device)
             }
             DeviceType.Apns -> {
-                // Todo
+                try {
+                    val response = http.post("$apnsPushEndpoint/3/device/${device.token!!}") {
+                        contentType(ContentType.Application.Json)
+                        header(HttpHeaders.Authorization, "Bearer $apnsToken")
+                        header("apns-push-type", "alert")
+                        setBody(
+                            HmsPushBody(
+                                HmsPushBodyMessage(
+                                    data = json.encodeToString(pushData),
+                                    token = listOf(device.token!!)
+                                )
+                            )
+                        )
+                    }
+                    Logger.getAnonymousLogger().info(response.bodyAsText())
+                } catch (throwable: Throwable) {
+                    throwable.printStackTrace()
+                }
             }
         }
     }

@@ -34,7 +34,9 @@ data class SecretsJwt(
 
 @Serializable
 data class SecretsApns(
-    val key: String
+    val privateKey: String,
+    val privateKeyId: String,
+    val teamId: String,
 )
 
 @Serializable
