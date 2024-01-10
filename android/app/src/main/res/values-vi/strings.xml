@@ -499,7 +499,7 @@
     <string name="style">Kiểu</string>
     <string name="photo">Ảnh</string>
     <string name="describe_photo">Mô tả ảnh</string>
-    <string name="background">Background</string>
+    <string name="background">Nền</string>
     <string name="open_link">Mở liên kết</string>
     <string name="search_cards_of_x">Tìm kiếm trang của %1$s</string>
 </resources>

@@ -3,9 +3,6 @@ package com.queatz.ailaai.ui.screens
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
@@ -15,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -88,41 +84,66 @@ fun CardScreen(cardId: String) {
     var showPay by rememberStateOf(false)
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
+    var isGeneratingPhoto by rememberStateOf(false)
+    var showPhotoDialog by rememberStateOf(false)
     var oldPhoto by rememberStateOf<String?>(null)
     val me = me
     val nav = nav
+    val setPhotoState = remember(card?.name == null) {
+        ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
+    }
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
-        if (it == null) return@rememberLauncherForActivityResult
-
-        uploadJob = scope.launch {
-            videoUploadProgress = 0f
-            if (it.isVideo(context)) {
-                isUploadingVideo = true
-                api.uploadCardVideoFromUri(
-                    context,
-                    card!!.id!!,
-                    it,
-                    context.contentResolver.getType(it) ?: "video/*",
-                    it.lastPathSegment ?: "video.${
-                        context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
-                    }",
-                    processingCallback = {
-                        videoUploadStage = ProcessingVideoStage.Processing
-                        videoUploadProgress = it
-                    },
-                    uploadCallback = {
-                        videoUploadStage = ProcessingVideoStage.Uploading
-                        videoUploadProgress = it
+    if (showPhotoDialog) {
+        ChoosePhotoDialog(
+            scope = scope,
+            state = setPhotoState,
+            onDismissRequest = { showPhotoDialog = false },
+            multiple = false,
+            onPhotos = { photos ->
+                scope.launch {
+                    api.uploadCardPhotoFromUri(context, card!!.id!!, photos.firstOrNull() ?: return@launch) {
+                        api.card(cardId) { card = it }
                     }
-                )
-            } else if (it.isPhoto(context)) {
-                api.uploadCardPhotoFromUri(context, card!!.id!!, it)
+                }
+            },
+            onVideos = { videos ->
+                val it = videos.firstOrNull() ?: return@ChoosePhotoDialog
+                uploadJob = scope.launch {
+                    videoUploadProgress = 0f
+                    isUploadingVideo = true
+                    api.uploadCardVideoFromUri(
+                        context,
+                        card!!.id!!,
+                        it,
+                        context.contentResolver.getType(it) ?: "video/*",
+                        it.lastPathSegment ?: "video.${
+                            context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
+                        }",
+                        processingCallback = {
+                            videoUploadStage = ProcessingVideoStage.Processing
+                            videoUploadProgress = it
+                        },
+                        uploadCallback = {
+                            videoUploadStage = ProcessingVideoStage.Uploading
+                            videoUploadProgress = it
+                        }
+                    )
+                    api.card(cardId) { card = it }
+                    uploadJob = null
+                    isUploadingVideo = false
+                }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateCard(card!!.id!!, Card(photo = photo)) {
+                        api.card(cardId) { card = it }
+                    }
+                }
+            },
+            onIsGeneratingPhoto = {
+                isGeneratingPhoto = it
             }
-            api.card(cardId) { card = it }
-            uploadJob = null
-            isUploadingVideo = false
-        }
+        )
     }
 
     if (isUploadingVideo) {
@@ -613,10 +634,11 @@ fun CardScreen(cardId: String) {
                             }
 
                             item(
-                                Icons.Outlined.Photo,
+                                Icons.Outlined.CameraAlt,
                                 stringResource(R.string.set_photo),
+                                isLoading = isGeneratingPhoto
                             ) {
-                                launcher.launch(PickVisualMediaRequest())
+                                showPhotoDialog = true
                             }
 
                             item(
@@ -627,22 +649,6 @@ fun CardScreen(cardId: String) {
                                 regeneratePhoto()
                                 showMenu = false
                             }
-
-//                            item(
-//                                Icons.Outlined.AutoAwesome,
-//                                stringResource("Take photo or video")
-//                            ) {
-//                                regeneratePhoto()
-//                                showMenu = false
-//                            }
-//
-//                            item(
-//                                Icons.Outlined.AutoAwesome,
-//                                stringResource("Hire a photographer")
-//                            ) {
-//                                regeneratePhoto()
-//                                showMenu = false
-//                            }
 
                             val category = card.categories?.firstOrNull()
                             item(

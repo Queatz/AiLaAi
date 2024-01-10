@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -109,7 +110,7 @@ fun ChoosePhotoDialog(
             aiStyleMenu = false
         }) {
             allStyles.forEach {
-                menuItem(it.first) {
+                menuItem(it.first, icon = if (selectedStyle == it.second) Icons.Outlined.Check else null) {
                     aiStyleMenu = false
                     selectedStyle = if (selectedStyle == it.second) {
                         null
