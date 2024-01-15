@@ -42,6 +42,7 @@ fun ProfileGroups(person: Person?) {
                 ContactItem(
                     SearchResult.Group(group),
                     onChange = {},
+                    coverPhoto = true,
                     info = GroupInfo.Members
                 )
             }

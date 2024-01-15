@@ -13,6 +13,7 @@ import com.queatz.push.PushData
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
@@ -30,10 +31,12 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.security.KeyFactory
+import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 import java.util.logging.Logger
+import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -48,12 +51,21 @@ class Push {
         }
     }
 
+    private val http2 = HttpClient(Java) {
+        engine {
+            protocolVersion = java.net.http.HttpClient.Version.HTTP_2
+        }
+        install(ContentNegotiation) {
+            json(json)
+        }
+    }
+
     companion object {
         private val hmsOAuthEndpoint = "https://oauth-login.cloud.huawei.com/oauth2/v3/token"
         private val gmsOAuthEndpoint = "https://oauth2.googleapis.com/token"
         private val hmsPushEndpoint = "https://push-api.cloud.huawei.com/v1/${secrets.hms.appId}/messages:send"
         private val gmsPushEndpoint = "https://fcm.googleapis.com/v1/projects/${secrets.gms.appId}/messages:send"
-        private val apnsPushEndpoint = "https://api.push.apple.com:443"
+        private val apnsPushEndpoint = "https://api.sandbox.push.apple.com:443"
     }
 
     private var hmsToken: String? = null
@@ -149,7 +161,7 @@ class Push {
                 while (Thread.currentThread().isAlive) {
                     try {
                         val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
-                        val privateKey = KeyFactory.getInstance("ES256").generatePrivate(keySpecPKCS8)
+                        val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
                         val token = JWT.create()
                             .withAudience(apnsPushEndpoint)
                             .withIssuer(secrets.apns.teamId)
@@ -157,7 +169,7 @@ class Push {
                             .withSubject(secrets.apns.teamId)
                             .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
                             .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
-                            .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
+                            .sign(Algorithm.ECDSA256(null, privateKey as ECPrivateKey))
 
                         apnsToken = token
                         delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
@@ -188,7 +200,7 @@ class Push {
             DeviceType.Hms -> {
                 try {
                     val response = http.post(hmsPushEndpoint) {
-                        contentType(ContentType.Application.Json)
+                        contentType(ContentType.Application.Json.withCharset(UTF_8))
                         header(HttpHeaders.Authorization, "Bearer $hmsToken")
                         setBody(
                             HmsPushBody(
@@ -199,8 +211,9 @@ class Push {
                             )
                         )
                     }
-                    Logger.getAnonymousLogger().info(response.bodyAsText())
+                    Logger.getAnonymousLogger().info("HMS response: ${response.status} ${response.bodyAsText()}")
                 } catch (throwable: Throwable) {
+                    Logger.getAnonymousLogger().info("HMS error: $throwable")
                     throwable.printStackTrace()
                 }
             }
@@ -208,7 +221,7 @@ class Push {
             DeviceType.Gms -> {
                 try {
                     val response = http.post(gmsPushEndpoint) {
-                        contentType(ContentType.Application.Json)
+                        contentType(ContentType.Application.Json.withCharset(UTF_8))
                         header(HttpHeaders.Authorization, "Bearer $gmsToken")
                         setBody(
                             GmsPushBody(
@@ -234,6 +247,7 @@ class Push {
                     }
                     Logger.getAnonymousLogger().info("FCM response: ${response.status} ${response.bodyAsText()}")
                 } catch (throwable: Throwable) {
+                    Logger.getAnonymousLogger().info("FCM error: $throwable")
                     throwable.printStackTrace()
                 }
             }
@@ -242,21 +256,24 @@ class Push {
             }
             DeviceType.Apns -> {
                 try {
-                    val response = http.post("$apnsPushEndpoint/3/device/${device.token!!}") {
-                        contentType(ContentType.Application.Json)
+                    val response = http2.post("$apnsPushEndpoint/3/device/${device.token!!}") {
+                        contentType(ContentType.Application.Json.withCharset(UTF_8))
                         header(HttpHeaders.Authorization, "Bearer $apnsToken")
                         header("apns-push-type", "alert")
+                        header("apns-topic", "app.ailaai")//todo move to secrets.json
                         setBody(
-                            HmsPushBody(
-                                HmsPushBodyMessage(
-                                    data = json.encodeToString(pushData),
-                                    token = listOf(device.token!!)
+                            ApnsPushBody(
+                                ApsBody(
+                                    alert = ApsAlertBody(
+                                        title = json.encodeToString(pushData)
+                                    )
                                 )
                             )
                         )
                     }
-                    Logger.getAnonymousLogger().info(response.bodyAsText())
+                    Logger.getAnonymousLogger().info("APNS response: ${response.status} ${response.bodyAsText()}")
                 } catch (throwable: Throwable) {
+                    Logger.getAnonymousLogger().info("APNS error: $throwable")
                     throwable.printStackTrace()
                 }
             }
@@ -289,6 +306,24 @@ data class HmsPushBodyMessage(
 data class GmsPushBody(
     var message: GmsPushBodyMessage? = GmsPushBodyMessage(),
 )
+
+@Serializable
+data class ApnsPushBody(
+    var aps: ApsBody? = ApsBody(),
+)
+
+@Serializable
+data class ApsBody(
+    var alert: ApsAlertBody? = ApsAlertBody(),
+)
+
+@Serializable
+data class ApsAlertBody(
+    var title: String? = null,
+    var subtitle: String? = null,
+    var body: String? = null,
+)
+
 
 @Serializable
 data class GmsPushBodyMessage(

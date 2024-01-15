@@ -150,12 +150,20 @@ fun Route.groupRoutes() {
                         group.photo = groupUpdated.photo
                     }
 
+                    if (groupUpdated.video != null) {
+                        group.video = groupUpdated.video
+                    }
+
                     if (groupUpdated.background != null) {
                         group.background = groupUpdated.background
                     }
 
                     if (groupUpdated.categories != null) {
                         group.categories = groupUpdated.categories
+                    }
+
+                    if (groupUpdated.geo != null) {
+                        group.geo = groupUpdated.geo
                     }
 
                     if (member.host == true) {

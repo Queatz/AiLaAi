@@ -412,7 +412,7 @@ fun Db.openGroups(
         for group in ${Group::class.collection()}
             filter group.${f(Group::open)} == true
                 and (@search == null or contains(lower(group.${f(Group::name)}), @search) )
-            let d = ${groupGeo()}
+            let d = group.${f(Group::geo)} != null ? distance(@geo[0], @geo[1], group.${f(Group::geo)}[0], group.${f(Group::geo)}[1]) : ${groupGeo()}
             filter ${if (public) "(d != null and d <= @nearbyMaxDistance)" else isFriendGroup()}
             sort d == null, d, group.${f(Group::seen)} desc
             limit @offset, @limit

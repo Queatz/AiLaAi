@@ -53,182 +53,184 @@ fun GroupItem(
 
     val hasCover = coverPhoto && group.group?.photo != null
 
-    if (hasCover) {
-        Div({
-            style {
-                width(100.percent)
-                height(16.r)
-                background("url($baseUrl${group.group?.photo})")
-                backgroundSize("cover")
-                backgroundPosition("center")
-                borderRadius(1.r, 1.r, 0.r, 0.r)
-                cursor("pointer")
-            }
+    Div({
+        classes(AppStyles.groupItemCard)
+    }) {
+        if (hasCover) {
+            Div({
+                style {
+                    width(100.percent)
+                    height(16.r)
+                    background("url($baseUrl${group.group?.photo})")
+                    backgroundSize("cover")
+                    backgroundPosition("center")
+                    borderRadius(1.r, 1.r, 0.r, 0.r)
+                    cursor("pointer")
+                }
 
+                onClick {
+                    onSelected()
+                }
+            }) {}
+        }
+
+        Div({
+            classes(
+                buildList {
+                    add(AppStyles.groupItem)
+                    if (selected) {
+                        add(AppStyles.groupItemSelected)
+                    }
+                    if (!selectable) {
+                        add(AppStyles.groupItemDefault)
+                    }
+                    if (onBackground) {
+                        add(AppStyles.groupItemOnBackground)
+                    }
+                    if (onSurface) {
+                        add(AppStyles.groupItemOnSurface)
+                    }
+                }
+            )
+            style {
+                if (hasCover) {
+                    borderRadius(0.r, 0.r, 1.r, 1.r)
+                }
+
+                styles()
+            }
             onClick {
                 onSelected()
             }
+
+            focusable()
         }) {
-
-        }
-    }
-
-    Div({
-        classes(
-            buildList {
-                add(AppStyles.groupItem)
-                if (selected) {
-                    add(AppStyles.groupItemSelected)
-                }
-                if (!selectable) {
-                    add(AppStyles.groupItemDefault)
-                }
-                if (onBackground) {
-                    add(AppStyles.groupItemOnBackground)
-                }
-                if (onSurface) {
-                    add(AppStyles.groupItemOnSurface)
-                }
-            }
-        )
-        style {
-            if (hasCover) {
-                borderRadius(0.r, 0.r, 1.r, 1.r)
-            }
-
-            styles()
-        }
-        onClick {
-            onSelected()
-        }
-
-        focusable()
-    }) {
-        GroupPhoto(group, me)
-        Div({
-            style {
-                width(0.px)
-                flexGrow(1)
-            }
-        }) {
-            Div({
-                classes(AppStyles.groupItemName)
-
-                style {
-                    if (group.isUnread(myMember?.member)) {
-                        fontWeight("bold")
-                    }
-                }
-            }) {
-                Text(group.name(appString { someone }, appString { newGroup }, listOfNotNull(me?.id)))
-            }
-            Div({
-                classes(AppStyles.groupItemMessage)
-            }) {
-                when (info) {
-                    GroupInfo.LatestMessage -> {
-                        if (group.latestMessage?.member == myMember?.member?.id) {
-                            Text("${appString { you }}: ")
-                        } else if (group.members!!.size > 2 && group.latestMessage != null) {
-                            Text("${group.members?.find { it.member?.id == group.latestMessage?.member }?.person?.name ?: appString { someone }}: ")
-                        }
-                        Text(
-                            group.latestMessage?.preview() ?: "${appString { created }} ${
-                                formatDistanceToNow(
-                                    Date(group.group!!.createdAt!!.toEpochMilliseconds()),
-                                    js("{ addSuffix: true }")
-                                )
-                            }"
-                        )
-                    }
-
-                    GroupInfo.Members -> {
-                        Text(
-                            buildString {
-                                append(group.members!!.size.toLocaleString())
-                                append(" ")
-                                if (group.members!!.size == 1) {
-                                    append(appString { inlineMember })
-                                } else {
-                                    append(appString { inlineMembers })
-                                }
-                                if (group.group?.description.isNullOrBlank().not()) {
-                                    append(" • ")
-                                    append(group.group!!.description)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        }
-        if (info == GroupInfo.Members && myMember != null) {
+            GroupPhoto(group, me)
             Div({
                 style {
-                    marginLeft(.5.r)
-                    flexShrink(0)
-                    color(Styles.colors.primary)
-                    fontWeight("bold")
-                    fontSize(14.px)
-                    display(DisplayStyle.Flex)
-                    alignItems(AlignItems.Center)
+                    width(0.px)
+                    flexGrow(1)
                 }
             }) {
-                Span { appText { joined } }
-                Icon("check") {
-                    marginLeft(.5.r)
-                }
-            }
-        } else if (joinRequestCount > 0) {
-            Div({
-                style {
-                    marginLeft(.5.r)
-                    flexShrink(0)
-                }
-            }) {
-                Span({
+                Div({
+                    classes(AppStyles.groupItemName)
+
                     style {
+                        if (group.isUnread(myMember?.member)) {
+                            fontWeight("bold")
+                        }
+                    }
+                }) {
+                    Text(group.name(appString { someone }, appString { newGroup }, listOfNotNull(me?.id)))
+                }
+                Div({
+                    classes(AppStyles.groupItemMessage)
+                }) {
+                    when (info) {
+                        GroupInfo.LatestMessage -> {
+                            if (group.latestMessage?.member == myMember?.member?.id) {
+                                Text("${appString { you }}: ")
+                            } else if (group.members!!.size > 2 && group.latestMessage != null) {
+                                Text("${group.members?.find { it.member?.id == group.latestMessage?.member }?.person?.name ?: appString { someone }}: ")
+                            }
+                            Text(
+                                group.latestMessage?.preview() ?: "${appString { created }} ${
+                                    formatDistanceToNow(
+                                        Date(group.group!!.createdAt!!.toEpochMilliseconds()),
+                                        js("{ addSuffix: true }")
+                                    )
+                                }"
+                            )
+                        }
+
+                        GroupInfo.Members -> {
+                            Text(
+                                buildString {
+                                    append(group.members!!.size.toLocaleString())
+                                    append(" ")
+                                    if (group.members!!.size == 1) {
+                                        append(appString { inlineMember })
+                                    } else {
+                                        append(appString { inlineMembers })
+                                    }
+                                    if (group.group?.description.isNullOrBlank().not()) {
+                                        append(" • ")
+                                        append(group.group!!.description)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            if (info == GroupInfo.Members && myMember != null) {
+                Div({
+                    style {
+                        marginLeft(.5.r)
+                        flexShrink(0)
                         color(Styles.colors.primary)
                         fontWeight("bold")
                         fontSize(14.px)
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
                     }
                 }) {
-                    if (joinRequestCount == 1) {
-                        Text("$joinRequestCount ${appString { inlinePersonWaiting }}")
-                    } else {
-                        Text("$joinRequestCount ${appString { inlinePeopleWaiting }}")
+                    Span { appText { joined } }
+                    Icon("check") {
+                        marginLeft(.5.r)
                     }
                 }
-            }
-        } else if (group.latestMessage != null) {
-            Div({
-                style {
-                    marginLeft(.5.r)
-                    flexShrink(0)
-                }
-            }) {
-                Span({
+            } else if (joinRequestCount > 0) {
+                Div({
                     style {
-                        if (group.isUnread(myMember?.member)) {
+                        marginLeft(.5.r)
+                        flexShrink(0)
+                    }
+                }) {
+                    Span({
+                        style {
                             color(Styles.colors.primary)
                             fontWeight("bold")
-                        } else {
-                            color(Styles.colors.secondary)
-                            opacity(.5)
+                            fontSize(14.px)
                         }
-                        fontSize(14.px)
+                    }) {
+                        if (joinRequestCount == 1) {
+                            Text("$joinRequestCount ${appString { inlinePersonWaiting }}")
+                        } else {
+                            Text("$joinRequestCount ${appString { inlinePeopleWaiting }}")
+                        }
+                    }
+                }
+            } else if (group.latestMessage != null) {
+                Div({
+                    style {
+                        marginLeft(.5.r)
+                        flexShrink(0)
                     }
                 }) {
-                    Text(
-                        " ${
-                            group.group?.seen?.let {
-                                formatDistanceToNow(
-                                    Date(it.toEpochMilliseconds()),
-                                    js("{ addSuffix: true }")
-                                )
+                    Span({
+                        style {
+                            if (group.isUnread(myMember?.member)) {
+                                color(Styles.colors.primary)
+                                fontWeight("bold")
+                            } else {
+                                color(Styles.colors.secondary)
+                                opacity(.5)
                             }
-                        }"
-                    )
+                            fontSize(14.px)
+                        }
+                    }) {
+                        Text(
+                            " ${
+                                group.group?.seen?.let {
+                                    formatDistanceToNow(
+                                        Date(it.toEpochMilliseconds()),
+                                        js("{ addSuffix: true }")
+                                    )
+                                }
+                            }"
+                        )
+                    }
                 }
             }
         }

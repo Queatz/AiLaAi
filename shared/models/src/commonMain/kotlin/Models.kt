@@ -116,10 +116,12 @@ class Card(
 class Group(
     var name: String? = null,
     var photo: String? = null,
+    var video: String? = null,
     var background: String? = null,
     var seen: Instant? = null,
     var description: String? = null,
     var categories: List<String>? = null,
+    var geo: List<Double>? = null,
     var open: Boolean? = null
 ) : Model()
 

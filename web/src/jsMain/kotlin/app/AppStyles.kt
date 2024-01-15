@@ -196,6 +196,24 @@ object AppStyles : StyleSheet() {
 
     }
 
+    val groupItemCard by style {
+        width(100.percent)
+        maxWidth(32.r)
+    }
+
+    val groupList by style {
+        display(DisplayStyle.Flex)
+        flexWrap(FlexWrap.Wrap)
+        width(100.percent)
+
+        desktop(self) {
+            child(self, className(groupItemCard)) style  {
+                marginRight(1.r)
+                marginBottom(1.r)
+            }
+        }
+    }
+
     val groupItem by style {
         padding(.5.r, 1.r)
         borderRadius(1.r)

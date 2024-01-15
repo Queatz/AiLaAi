@@ -319,13 +319,9 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                         Text("${profile.person.name ?: appString { someone }} ${appString { inlineIsAMember }}")
                                     }
                                     Div({
-                                        style {
-                                            display(DisplayStyle.Flex)
-                                            flexDirection(FlexDirection.Column)
-                                            width(100.percent)
-                                        }
+                                        classes(AppStyles.groupList)
                                     }) {
-                                        GroupList(groups, onSurface = true) {
+                                        GroupList(groups, coverPhoto = true, onSurface = true) {
                                                 // todo navigate to group
                                             router.navigate("/signin")
                                         }

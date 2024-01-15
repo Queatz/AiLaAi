@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.ailaai.api.*
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.background
@@ -91,6 +92,7 @@ fun GroupScreen(groupId: String) {
     var showSetPhotoDialog by rememberStateOf(false)
     var showSetBackgroundDialog by rememberStateOf(false)
     var showCategoryDialog by rememberStateOf(false)
+    var showLocationDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
     var showGroupMembers by rememberStateOf(false)
     var showRemoveGroupMembers by rememberStateOf(false)
@@ -463,6 +465,12 @@ fun GroupScreen(groupId: String) {
                             }, {
                                 showMenu = false
                                 showCategoryDialog = true
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.move))
+                            }, {
+                                showMenu = false
+                                showLocationDialog = true
                             })
                             if (myMember.member?.host == true) {
                                 DropdownMenuItem({
@@ -1085,6 +1093,22 @@ fun GroupScreen(groupId: String) {
                         }
                     }
                 )
+            }
+
+            if (showLocationDialog) {
+                SetLocationDialog(
+                    {
+                        showLocationDialog = false
+                    },
+                    initialLocation = groupExtended?.group?.geo?.toLatLng() ?: LatLng(0.0, 0.0),
+                    initialZoom = groupExtended?.group?.geo?.let { 14f } ?: 5f,
+                ) {
+                    scope.launch {
+                        api.updateGroup(groupId, Group(geo = it.toList())) {
+                            reload()
+                        }
+                    }
+                }
             }
 
             if (showCategoryDialog) {
