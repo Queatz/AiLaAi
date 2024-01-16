@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.security.KeyFactory
@@ -315,6 +316,8 @@ data class ApnsPushBody(
 @Serializable
 data class ApsBody(
     var alert: ApsAlertBody? = ApsAlertBody(),
+    @SerialName("mutable-content")
+    var mutableContent: Int? = 1,
 )
 
 @Serializable
@@ -323,7 +326,6 @@ data class ApsAlertBody(
     var subtitle: String? = null,
     var body: String? = null,
 )
-
 
 @Serializable
 data class GmsPushBodyMessage(

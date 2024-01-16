@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.profile
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -29,7 +30,7 @@ fun ProfileGroups(person: Person?) {
     }
 
     if (groups.isNotEmpty()) {
-        Column(modifier = Modifier.padding(1.pad)) {
+        Column(modifier = Modifier.padding(1.pad), verticalArrangement = Arrangement.spacedBy(1.pad)) {
             Text(
                 stringResource(
                     R.string.x_is_a_member,
