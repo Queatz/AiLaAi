@@ -7,6 +7,24 @@ import com.queatz.push.*
 import kotlinx.datetime.Clock
 
 class Notify {
+    fun call(group: Group, from: Person) {
+        val pushData = PushData(
+            PushAction.Call,
+            CallPushData(
+                Group().apply {
+                    id = group.id
+                    name = group.name
+                },
+                Person().apply {
+                    name = from.name
+                    id = from.id
+                }
+            )
+        )
+
+        notifyGroupMembers(from, group, pushData)
+    }
+
     fun message(group: Group, from: Person, message: Message) {
         val pushData = PushData(
             PushAction.Message,
@@ -74,16 +92,14 @@ class Notify {
         notifyGroupMembers(invitor, group, pushData)
     }
 
-    private fun notifyGroupMembers(from: Person, group: Group, pushData: PushData) {
-        db.memberDevices(group.id!!).filter {
-            it.member?.from != from.id
-        }.apply {
+    private fun notifyGroupMembers(from: Person?, group: Group, pushData: PushData) {
+        db.memberDevices(group.id!!).apply {
             unhide()
 
             // Send push
             forEach {
                 it.devices?.forEach { device ->
-                    push.sendPush(device, pushData.show(it.member?.isSnoozedNow != true))
+                    push.sendPush(device, pushData.show(it.member?.from != from?.id?.asId(Person::class) && it.member?.isSnoozedNow != true))
                 }
             }
         }
@@ -103,6 +119,7 @@ fun PushData.show(show: Boolean) = PushData(
     data?.let {
         when (it) {
             is MessagePushData -> it.copy(show = show)
+            is CallPushData -> it.copy(show = show)
             else -> data
         }
     }

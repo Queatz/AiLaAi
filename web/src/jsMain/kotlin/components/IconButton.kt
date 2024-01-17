@@ -25,6 +25,7 @@ fun IconButton(
         }
         title(title)
         onClick {
+            it.stopPropagation()
             onClick(it)
         }
     }) {

@@ -1,6 +1,7 @@
 package com.queatz.plugins
 
 import com.queatz.api.*
+import com.queatz.groupCall
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -20,6 +21,7 @@ fun Application.configureRouting() {
     }
 
     push.start(this)
+    groupCall.start(this)
 
     routing {
         get("/hi") { call.respondText("{\"hi\": true}") }

@@ -1,5 +1,6 @@
 package app
 
+import Notification
 import androidx.compose.runtime.*
 import api
 import app.ailaai.api.group
@@ -10,16 +11,24 @@ import app.page.SchedulePage
 import app.page.ScheduleView
 import app.page.StoriesPage
 import app.widget.WidgetStyles
+import appString
 import application
+import call
 import com.queatz.db.Card
 import com.queatz.db.Reminder
 import com.queatz.db.Story
+import com.queatz.push.CallPushData
+import com.queatz.push.PushAction
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import notifications
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
+import push
 import stories.StoryStyles
 
 @Serializable
@@ -39,6 +48,7 @@ fun AppPage() {
 
     val scope = rememberCoroutineScope()
     val background by application.background.collectAsState(null)
+    val me by application.me.collectAsState()
 
     var nav by remember {
         mutableStateOf(application.navPage)
@@ -84,8 +94,38 @@ fun AppPage() {
         MutableSharedFlow<Unit>()
     }
 
+    var playCallSound by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(nav) {
         application.setNavPage(nav)
+    }
+
+    val someone = appString { someone }
+
+    LaunchedEffect(Unit) {
+        push.events.filter {
+            it.action == PushAction.Call
+        }.collect {
+            val data = it.data as? CallPushData
+            if (data?.show == true) {
+                playCallSound = true
+                notifications.add(Notification(
+                    "call",
+                    data.group.name ?: data.person.name ?: someone,
+                    // todo translate
+                    "Tap to answer"
+                ) {
+                    scope.launch {
+                        api.group(data.group.id!!) {
+                            call.join(me!!, it)
+                        }
+                    }
+                })
+            }
+
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -104,6 +144,32 @@ fun AppPage() {
                 }
             }
         }
+    }
+
+    if (playCallSound) {
+        Audio({
+            attr("playsinline", "true")
+            attr("autoplay", "true")
+
+            style {
+                display(DisplayStyle.None)
+            }
+
+            ref {
+                it.src = "/call.ogg"
+                it.currentTime = 0.0
+                it.onended = {
+                    playCallSound = false
+                    Unit
+                }
+                it.oncanplay = { _ ->
+                    it.play()
+                    Unit
+                }
+
+                onDispose { }
+            }
+        }) {}
     }
 
     Div({

@@ -142,6 +142,12 @@ data class UploadResponse (
 )
 
 @Serializable
+data class CallAndToken (
+    val call: Call,
+    val token: String
+)
+
+@Serializable
 data class CreateGroupBody(val people: List<String>, val reuse: Boolean)
 
 @Serializable

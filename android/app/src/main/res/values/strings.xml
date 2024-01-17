@@ -526,4 +526,5 @@
     <string name="background">Background</string>
     <string name="open_link">Open link</string>
     <string name="search_cards_of_x">Search %1$s\'s pages</string>
+    <string name="call">Call</string>
 </resources>

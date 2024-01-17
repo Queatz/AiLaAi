@@ -13,6 +13,12 @@ suspend fun Api.messages(
     onSuccess: SuccessBlock<List<Message>>,
 ) = get("groups/$group/messages", onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.groupCall(
+    group: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<CallAndToken>,
+) = post("groups/$group/call", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.groupCards(
     group: String,
     onError: ErrorBlock = null,

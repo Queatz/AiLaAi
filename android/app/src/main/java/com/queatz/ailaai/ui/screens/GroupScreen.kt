@@ -364,6 +364,20 @@ fun GroupScreen(groupId: String) {
                         }
                     }
 
+                    // todo: videosdk
+                    if (false) {
+                        IconButton(
+                            {
+                                // todo
+                            }
+                        ) {
+                            Icon(
+                                Icons.Outlined.Call,
+                                stringResource(R.string.call)
+                            )
+                        }
+                    }
+
                     if (isSnoozed) {
                         IconButton({
                             snooze(false)

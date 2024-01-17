@@ -45,6 +45,7 @@ kotlin {
                 implementation(npm("date-fns", "2.30.0"))
                 implementation(npm("date-fns-tz", "2.0.0"))
                 implementation(npm("@vvo/tzdb", "6.110.0"))
+                implementation(npm("@videosdk.live/js-sdk", "0.0.79"))
             }
         }
     }

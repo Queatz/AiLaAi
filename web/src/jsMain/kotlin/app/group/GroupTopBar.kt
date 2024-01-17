@@ -14,6 +14,7 @@ import app.nav.name
 import appString
 import appText
 import application
+import call
 import com.queatz.db.*
 import components.IconButton
 import components.LinkifyText
@@ -129,6 +130,10 @@ fun GroupTopBar(
                 onGroupUpdated()
             }
         }
+    }
+
+    fun startCall() {
+
     }
 
     if (menuTarget != null) {
@@ -254,7 +259,7 @@ fun GroupTopBar(
         }
     }
 
-    // todo
+    // todo: apps
     if (false) {
         Div({
             classes(AppStyles.groupAppsBar)
@@ -281,6 +286,20 @@ fun GroupTopBar(
             active
         },
         actions = {
+            IconButton(
+                name = "call",
+                title = appString { call },
+                styles = {
+                    marginRight(.5.r)
+                }
+            ) {
+                if (call.active.value?.group?.group?.id == group.group?.id) {
+                    call.end()
+                } else {
+                    call.join(me ?: return@IconButton, group)
+                }
+            }
+
             if (showCards) {
                 if (myMember != null) {
                     IconButton(

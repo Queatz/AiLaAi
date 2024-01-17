@@ -1,11 +1,9 @@
 package com.queatz.api
 
+import com.queatz.*
 import com.queatz.db.*
-import com.queatz.notBlank
-import com.queatz.parameter
+import com.queatz.db.Call
 import com.queatz.plugins.*
-import com.queatz.receiveFile
-import com.queatz.receiveFiles
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -15,6 +13,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
+import kotlin.time.Duration.Companion.days
 
 @Serializable
 data class CreateGroupBody(val people: List<String>, val reuse: Boolean = false)
@@ -124,6 +123,50 @@ fun Route.groupRoutes() {
                     } else {
                         db.groupsWith(people)
                     }
+                }
+            }
+        }
+
+        post("/groups/{id}/call") {
+            respond {
+                val groupId = parameter("id")
+                val member = db.member(me.id!!, groupId)
+
+                if (member == null) {
+                    HttpStatusCode.NotFound
+                } else {
+                    val call = db.call(groupId)?.takeIf {
+                        try {
+                            groupCall.validateRoom(it.room!!)
+                            true
+                        } catch (e: Throwable) {
+                            e.printStackTrace()
+                            db.delete(it)
+                            false
+                        }
+                    } ?: run {
+                        try {
+                            db.insert(
+                                Call(
+                                    groupId,
+                                    groupCall.createRoom().roomId
+                                )
+                            )
+                        } catch (e: Throwable) {
+                            e.printStackTrace()
+                            return@respond HttpStatusCode.InternalServerError.description("Create room failed")
+                        }
+                    }
+
+                    // send push when room call is initially started
+                    if (groupCall.activeRoomSession(call.room!!).data.firstOrNull()?.status != "ongoing") {
+                        notify.call(
+                            db.document(Group::class, groupId)!!,
+                            me
+                        )
+                    }
+
+                    CallAndToken(call, groupCall.jwt(7.days))
                 }
             }
         }

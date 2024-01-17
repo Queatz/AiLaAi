@@ -733,6 +733,10 @@ object Strings {
         "Search %1\$s's pages",
         "Tìm kiếm trang của %1\$s"
     )
+    val call = Translation(
+        "Call",
+        "Gọi"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

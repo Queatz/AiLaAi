@@ -256,6 +256,11 @@
   dependencies:
     "@types/node" "*"
 
+"@videosdk.live/js-sdk@0.0.79":
+  version "0.0.79"
+  resolved "https://registry.yarnpkg.com/@videosdk.live/js-sdk/-/js-sdk-0.0.79.tgz#d3feb66ba550f253763796c3a787fa47103ebce0"
+  integrity sha512-lX3vONZRI5DUX1UkZ5eRAiSIn96O2wdaFouTk3YUL4hX2SEJREXsZ2Q8PGu3MVTF7NH/w9QR39B91JGlDAcfZA==
+
 "@vvo/tzdb@6.110.0":
   version "6.110.0"
   resolved "https://registry.yarnpkg.com/@vvo/tzdb/-/tzdb-6.110.0.tgz#c5aa00b40321e0982282ca2195768e9adaee8ce3"

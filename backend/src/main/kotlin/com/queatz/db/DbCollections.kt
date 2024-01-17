@@ -114,5 +114,9 @@ fun collections() = listOf(
     },
     Item::class.db {
 
+    },
+    Call::class.db {
+        ensurePersistentIndex(listOf(Call::group.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Call::room.name), PersistentIndexOptions())
     }
 )

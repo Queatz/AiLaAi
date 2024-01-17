@@ -11,6 +11,58 @@ import r
 
 object AppStyles : StyleSheet() {
 
+    val notificationsLayout by style {
+        position(Position.Fixed)
+        left(0.r)
+        top(0.r)
+        right(0.r)
+        maxHeight(50.vh)
+        overflowY("auto")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Center)
+        maxWidth(32.r)
+        property("margin", "${1.r} auto")
+        property("z-index", "101")
+    }
+
+    val notification by style {
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        padding(1.r)
+        marginBottom(1.r)
+        backgroundColor(Color.white)
+        borderRadius(1.r)
+        cursor("pointer")
+        property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
+
+        dark(self) {
+            backgroundColor(Styles.colors.dark.background)
+        }
+    }
+
+    val notificationBody by style {
+        flex(1)
+        padding(0.r, .5.r)
+    }
+
+    val notificationActions by style {
+        flexShrink(0)
+    }
+
+    val notificationIcon by style {
+        flexShrink(0)
+        color(Styles.colors.tertiary)
+    }
+
+    val notificationTitle by style {
+        fontWeight("bold")
+    }
+
+    val notificationMessage by style {
+        opacity(.5)
+    }
+
     val groupAppsBar by style {
         margin(0.r, 1.r, .5.r, 1.r)
     }
@@ -198,7 +250,6 @@ object AppStyles : StyleSheet() {
 
     val groupItemCard by style {
         width(100.percent)
-        maxWidth(32.r)
     }
 
     val groupList by style {

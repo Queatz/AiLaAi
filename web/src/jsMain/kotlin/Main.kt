@@ -1,4 +1,7 @@
 import androidx.compose.runtime.*
+import app.AppStyles
+import app.call.CallLayout
+import app.call.CallStyles
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import app.widget.WidgetStyles
@@ -12,14 +15,18 @@ import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.forEach
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
 import org.w3c.dom.set
 
 const val baseUrl = "https://api.ailaai.app"
+
 //const val baseUrl = "http://0.0.0.0:8080"
 const val webBaseUrl = "https://ailaai.app"
 
@@ -41,6 +48,7 @@ fun main() {
     renderComposableInBody {
         Style(Styles)
         Style(WidgetStyles)
+        Style(CallStyles)
 
         var language by remember {
             mutableStateOf(
@@ -80,6 +88,7 @@ fun main() {
                 push.start(this)
                 saves.start(this)
                 joins.start(this)
+                call.init(this)
             }
 
             BrowserRouter("") {
@@ -213,6 +222,65 @@ fun main() {
 
                 noMatch {
                     MainPage()
+                }
+            }
+
+            val activeCall by call.active.collectAsState()
+
+            if (activeCall != null) {
+                CallLayout(activeCall!!)
+            }
+
+            val activeNotifications by notifications.notifications.collectAsState()
+
+            if (activeNotifications.isNotEmpty()) {
+                Div({
+                    classes(AppStyles.notificationsLayout)
+                }) {
+                    activeNotifications.forEach { notification ->
+                        Div({
+                            classes(AppStyles.notification)
+
+                            onClick {
+                                notifications.remove(notification)
+                                notification.onClick()
+                            }
+                        }) {
+                            Div({
+                                classes(AppStyles.notificationIcon)
+                            }) {
+                                // todo translate
+                                IconButton(notification.icon, "") {
+                                    notifications.remove(notification)
+                                    notification.onClick()
+                                }
+                            }
+                            Div({
+                                classes(AppStyles.notificationBody)
+                            }) {
+                                Div(
+                                    {
+                                        classes(AppStyles.notificationTitle)
+                                    }
+                                ) {
+                                    Text(notification.title)
+                                }
+                                Div({
+                                    classes(AppStyles.notificationMessage)
+                                }) {
+                                    Text(notification.message)
+                                }
+                            }
+                            Div({
+                                classes(AppStyles.notificationActions)
+                            }) {
+                                // todo translate
+                                IconButton("close", "Dismiss") {
+                                    notifications.remove(notification)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

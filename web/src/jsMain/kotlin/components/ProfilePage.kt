@@ -321,7 +321,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     Div({
                                         classes(AppStyles.groupList)
                                     }) {
-                                        GroupList(groups, coverPhoto = true, onSurface = true) {
+                                        GroupList(groups, coverPhoto = true, onSurface = true, maxWidth = 32.r) {
                                                 // todo navigate to group
                                             router.navigate("/signin")
                                         }

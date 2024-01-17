@@ -125,6 +125,12 @@ class Group(
     var open: Boolean? = null
 ) : Model()
 
+@Serializable
+class Call(
+    var group: String? = null,
+    var room: String? = null
+) : Model()
+
 enum class PayFrequency {
     Hourly,
     Daily,

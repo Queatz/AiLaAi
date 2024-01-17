@@ -40,6 +40,7 @@ fun GroupItem(
     onSurface: Boolean = false,
     onBackground: Boolean = false,
     coverPhoto: Boolean = false,
+    maxWidth: CSSSizeValue<CSSUnit.rem>? = null,
     onSelected: () -> Unit,
     info: GroupInfo = GroupInfo.LatestMessage,
     styles: StyleScope.() -> Unit = {}
@@ -55,6 +56,12 @@ fun GroupItem(
 
     Div({
         classes(AppStyles.groupItemCard)
+
+        maxWidth?.let {
+            style {
+                maxWidth(it)
+            }
+        }
     }) {
         if (hasCover) {
             Div({

@@ -68,11 +68,13 @@ class Push {
         val push = data["data"]!!
 
         try {
+            // todo isn't this automatic already?
             when (PushAction.valueOf(action)) {
                 PushAction.Message -> receive(parse<MessagePushData>(push))
                 PushAction.Collaboration -> receive(parse<CollaborationPushData>(push))
                 PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(push))
                 PushAction.Group -> receive(parse<GroupPushData>(push))
+                PushAction.Call -> receive(parse<CallPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()

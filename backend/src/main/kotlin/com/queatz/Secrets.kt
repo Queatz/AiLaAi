@@ -9,6 +9,13 @@ data class Secrets(
     val gms: SecretsGms,
     val apns: SecretsApns,
     val dezgo: SecretsDezgo,
+    val videoSdk: SecretsVideoSdk,
+)
+
+@Serializable
+data class SecretsVideoSdk(
+    val apiKey: String,
+    val secret: String
 )
 
 @Serializable

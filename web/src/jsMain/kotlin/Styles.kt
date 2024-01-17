@@ -8,6 +8,7 @@ object Styles : StyleSheet() {
         val primary = Color("#006689")
         val secondary = Color("#767676")
         val tertiary = Color("#2e8900")
+        val red = Color("#761c1c")
 
         object dark {
             val background = Color("#18191a")
