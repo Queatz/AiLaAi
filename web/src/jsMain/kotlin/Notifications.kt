@@ -8,6 +8,7 @@ class Notification(
     val icon: String,
     val title: String,
     val message: String,
+    val onDismiss: () -> Unit,
     val onClick: () -> Unit
 )
 

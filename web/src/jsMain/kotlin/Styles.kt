@@ -248,6 +248,7 @@ object Styles : StyleSheet() {
         justifyContent(JustifyContent.Stretch)
     }
 
+    @OptIn(ExperimentalComposeWebApi::class)
     val navContainer by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)
@@ -260,6 +261,9 @@ object Styles : StyleSheet() {
         borderRadius(1.r)
         marginLeft(1.r)
         marginRight(1.r)
+        transform {
+            translateZ(1.px)
+        }
         property("max-width", "calc(100vw - ${2.r})")
 
         dark(self) {

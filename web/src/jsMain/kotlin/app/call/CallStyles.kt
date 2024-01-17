@@ -1,6 +1,7 @@
 package app.call
 
 import app.AppStyles
+import app.dark
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import r
@@ -17,12 +18,18 @@ object CallStyles : StyleSheet() {
 
         child(self, className(AppStyles.iconButton)) style {
             opacity(0)
-            backgroundColor(Color("rgba(0 0 0 / 50%)"))
+            backgroundColor(Color("rgba(255 255 255 / 50%)"))
 
             transitions {
                 "opacity" {
                     duration = .5.s
                 }
+            }
+        }
+
+        dark(self) {
+            child(self, className(AppStyles.iconButton)) style {
+                backgroundColor(Color("rgba(0 0 0 / 50%)"))
             }
         }
 

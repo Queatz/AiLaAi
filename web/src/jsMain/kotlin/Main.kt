@@ -277,6 +277,7 @@ fun main() {
                                 // todo translate
                                 IconButton("close", "Dismiss") {
                                     notifications.remove(notification)
+                                    notification.onDismiss()
                                 }
                             }
                         }

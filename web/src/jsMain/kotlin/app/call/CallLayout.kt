@@ -177,16 +177,20 @@ fun CallLayout(activeCall: GroupCall) {
             }
         }) {
             // todo translate
-            IconButton(if (activeCall.localAudio != null) "mic" else "mic_off", "Microphone", styles = {
+            IconButton(if (activeCall.localAudio != null) "mic" else "mic_off", "Microphone", background = true, styles = {
                 marginRight(.5.r)
-                backgroundColor(if (activeCall.localAudio != null) Styles.colors.dark.background else Styles.colors.red)
+                if (activeCall.localAudio == null) {
+                backgroundColor(Styles.colors.red)
+                    }
             }) {
                 call.toggleMic()
             }
             // todo translate
-            IconButton(if (activeCall.localVideo != null) "videocam" else "videocam_off", "Camera", styles = {
+            IconButton(if (activeCall.localVideo != null) "videocam" else "videocam_off", "Camera", background = true, styles = {
                 marginRight(.5.r)
-                backgroundColor(if (activeCall.localVideo != null) Styles.colors.dark.background else Styles.colors.red)
+                if (activeCall.localVideo == null) {
+                    backgroundColor(Styles.colors.red)
+                }
             }) {
                 call.toggleCamera()
             }
@@ -194,9 +198,12 @@ fun CallLayout(activeCall: GroupCall) {
                 if (activeCall.localShare != null) "cancel_presentation" else "present_to_all",
                 // todo translate
                 "Share screen",
+                background = true,
                 styles = {
                     marginRight(.5.r)
-                    backgroundColor(if (activeCall.localShare != null) Styles.colors.primary else Styles.colors.dark.background)
+                    if (activeCall.localShare != null) {
+                        backgroundColor(Styles.colors.primary)
+                    }
                 }) {
                 call.toggleScreenShare()
             }

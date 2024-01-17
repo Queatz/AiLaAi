@@ -21,8 +21,9 @@ object AppStyles : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Center)
-        maxWidth(32.r)
-        property("margin", "${1.r} auto")
+        maxWidth(34.r)
+        padding(1.r)
+        property("margin", "auto")
         property("z-index", "101")
     }
 
@@ -440,6 +441,7 @@ object AppStyles : StyleSheet() {
         }
     }
 
+    @OptIn(ExperimentalComposeWebApi::class)
     val messageVideo by style {
         property("object-fit", "cover")
         width(100.percent)
@@ -447,6 +449,9 @@ object AppStyles : StyleSheet() {
         borderRadius(1.r)
         backgroundColor(Styles.colors.background)
         cursor("pointer")
+        transform {
+            translateZ(1.px)
+        }
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
@@ -462,6 +467,14 @@ object AppStyles : StyleSheet() {
         justifyContent(JustifyContent.Center)
         position(Position.Relative)
         property("user-select", "none")
+    }
+
+    val iconButtonBackground by style {
+        backgroundColor(Styles.colors.background)
+
+        dark(self) {
+            backgroundColor(Styles.colors.dark.background)
+        }
     }
 
     val iconButtonCount by style {

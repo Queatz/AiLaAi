@@ -111,18 +111,24 @@ fun AppPage() {
             val data = it.data as? CallPushData
             if (data?.show == true) {
                 playCallSound = true
-                notifications.add(Notification(
-                    "call",
-                    data.group.name ?: data.person.name ?: someone,
-                    // todo translate
-                    "Tap to answer"
-                ) {
-                    scope.launch {
-                        api.group(data.group.id!!) {
-                            call.join(me!!, it)
+                notifications.add(
+                    Notification(
+                        "call",
+                        data.group.name ?: data.person.name ?: someone,
+                        // todo translate
+                        "Tap to answer",
+                        onDismiss = {
+                            playCallSound = false
+                        }
+                    ) {
+                        playCallSound = false
+                        scope.launch {
+                            api.group(data.group.id!!) {
+                                call.join(me!!, it)
+                            }
                         }
                     }
-                })
+                )
             }
 
         }

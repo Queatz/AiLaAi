@@ -14,11 +14,17 @@ fun IconButton(
     name: String,
     title: String,
     count: Int = 0,
+    background: Boolean = false,
     styles: (StyleScope.() -> Unit)? = null,
     onClick: (SyntheticMouseEvent) -> Unit
 ) {
     Span({
         classes(AppStyles.iconButton)
+
+        if (background) {
+            classes(AppStyles.iconButtonBackground)
+        }
+
         focusable()
         style {
             styles?.invoke(this)
