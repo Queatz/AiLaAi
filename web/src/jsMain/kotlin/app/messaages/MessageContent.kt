@@ -71,6 +71,7 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
             } else {
                 alignItems(AlignItems.FlexStart)
             }
+            width(100.percent)
         }
         title(
             "${message.createdAt?.let { formatDistanceToNow(Date(it.toEpochMilliseconds()), js("{ addSuffix: true }")) }}\n${message.createdAt?.let { Date(it.toEpochMilliseconds()) }.toString()}"

@@ -74,6 +74,7 @@ object StoryStyles : StyleSheet() {
         flexDirection(FlexDirection.Column)
         position(Position.Relative)
         width(100.percent)
+        maxWidth(32.r)
 
         child(self, className(AppStyles.groupItem)) style {
             self style {

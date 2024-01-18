@@ -65,13 +65,32 @@ fun CallLayout(activeCall: GroupCall) {
                 }
             }
         } else {
-            activeCall.streams.forEach { participant ->
-                if (activeCall.pinnedStream != null && activeCall.pinnedStream != participant.stream) {
-                    return@forEach
-                }
+            activeCall.streams.filter { it.kind == "audio" }.forEach { participant ->
                 key(participant.stream) {
+                    Audio({
+                        attr("playsinline", "true")
+                        attr("autoplay", "false")
 
-                    if (participant.kind == "video" || participant.kind == "share") {
+                        style {
+                            display(DisplayStyle.None)
+                        }
+
+                        ref {
+                            it.srcObject = participant.stream
+                            it.play()
+
+                            onDispose { }
+                        }
+                    }) {}
+                }
+            }
+
+            activeCall.streams.filter {
+                it.kind == "video" || it.kind == "share"
+            }.filter {
+                activeCall.pinnedStream == null || activeCall.pinnedStream == it.stream
+            }.forEach { participant ->
+                key(participant.stream) {
                         Div({
                             style {
                                 width(0.r)
@@ -116,23 +135,6 @@ fun CallLayout(activeCall: GroupCall) {
                                 }
                             }
                         }
-                    } else {
-                        Audio({
-                            attr("playsinline", "true")
-                            attr("autoplay", "false")
-
-                            style {
-                                display(DisplayStyle.None)
-                            }
-
-                            ref {
-                                it.srcObject = participant.stream
-                                it.play()
-
-                                onDispose { }
-                            }
-                        }) {}
-                    }
                 }
             }
         }
@@ -177,21 +179,29 @@ fun CallLayout(activeCall: GroupCall) {
             }
         }) {
             // todo translate
-            IconButton(if (activeCall.localAudio != null) "mic" else "mic_off", "Microphone", background = true, styles = {
-                marginRight(.5.r)
-                if (activeCall.localAudio == null) {
-                backgroundColor(Styles.colors.red)
+            IconButton(
+                if (activeCall.localAudio != null) "mic" else "mic_off",
+                "Microphone",
+                background = true,
+                styles = {
+                    marginRight(.5.r)
+                    if (activeCall.localAudio == null) {
+                        backgroundColor(Styles.colors.red)
                     }
-            }) {
+                }) {
                 call.toggleMic()
             }
             // todo translate
-            IconButton(if (activeCall.localVideo != null) "videocam" else "videocam_off", "Camera", background = true, styles = {
-                marginRight(.5.r)
-                if (activeCall.localVideo == null) {
-                    backgroundColor(Styles.colors.red)
-                }
-            }) {
+            IconButton(
+                if (activeCall.localVideo != null) "videocam" else "videocam_off",
+                "Camera",
+                background = true,
+                styles = {
+                    marginRight(.5.r)
+                    if (activeCall.localVideo == null) {
+                        backgroundColor(Styles.colors.red)
+                    }
+                }) {
                 call.toggleCamera()
             }
             IconButton(
