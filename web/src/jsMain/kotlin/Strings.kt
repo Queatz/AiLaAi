@@ -737,6 +737,14 @@ object Strings {
         "Call",
         "Gọi"
     )
+    val minimize = Translation(
+        "Minimize",
+        "Thu gọn"
+    )
+    val maximize = Translation(
+        "Maximize",
+        "Mở rộng"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

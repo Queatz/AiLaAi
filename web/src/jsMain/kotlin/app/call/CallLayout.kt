@@ -3,6 +3,8 @@ package app.call
 import GroupCall
 import Styles
 import androidx.compose.runtime.*
+import app.AppNavigation
+import app.appNav
 import app.messaages.inList
 import app.nav.name
 import appString
@@ -10,6 +12,8 @@ import application
 import call
 import components.IconButton
 import ellipsize
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
@@ -17,9 +21,12 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.Video
 import r
 
+@OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun CallLayout(activeCall: GroupCall) {
     val me by application.me.collectAsState()
+    val scope = rememberCoroutineScope()
+//    val router = Router.current
 
     var fullscreen by remember {
         mutableStateOf(false)
@@ -40,49 +47,64 @@ fun CallLayout(activeCall: GroupCall) {
             it.kind == "video" || it.kind == "share"
         }
 
-        if (activeCall.streams.isEmpty()) {
-            if (activeCall.localShare != null || activeCall.localVideo != null) {
-                key(activeCall.localShare ?: activeCall.localVideo) {
-                    Video({
-                        attr("playsinline", "true")
-                        attr("disablePictureInPicture", "true")
-                        attr("controlsList", "nodownload")
+        if (activeCall.localShare != null || activeCall.localVideo != null) {
+            key(activeCall.localShare ?: activeCall.localVideo) {
+                Video({
+                    attr("playsinline", "true")
+                    attr("disablePictureInPicture", "true")
+                    attr("controlsList", "nodownload")
 
-                        style {
+                    style {
+                        if (activeCall.streams.isEmpty()) {
                             width(0.r)
                             height(100.percent)
                             flex(1)
+                        } else {
+                            position(Position.Absolute)
+                            height(15.percent)
+                            width(15.percent)
+                            bottom(1.r)
+                            right(1.r)
+                            borderRadius(1.r)
+                            overflow("hidden")
+                            transform {
+                                translateZ(1.px)
+                            }
+                            property("z-index", "1")
+                        }
+
+                        if (activeCall.localShare == null) {
                             property("object-fit", "cover")
                         }
+                    }
 
-                        ref {
-                            it.srcObject = activeCall.localShare ?: activeCall.localVideo
-                            it.play()
+                    ref {
+                        it.srcObject = activeCall.localShare ?: activeCall.localVideo
+                        it.play()
 
-                            onDispose { }
-                        }
-                    }) {}
-                }
+                        onDispose { }
+                    }
+                }) {}
             }
-        } else {
-            activeCall.streams.filter { it.kind == "audio" }.forEach { participant ->
-                key(participant.stream) {
-                    Audio({
-                        attr("playsinline", "true")
-                        attr("autoplay", "false")
+        }
 
-                        style {
-                            display(DisplayStyle.None)
-                        }
+        activeCall.streams.filter { it.kind == "audio" }.forEach { participant ->
+            key(participant.stream) {
+                Audio({
+                    attr("playsinline", "true")
+                    attr("autoplay", "false")
 
-                        ref {
-                            it.srcObject = participant.stream
-                            it.play()
+                    style {
+                        display(DisplayStyle.None)
+                    }
 
-                            onDispose { }
-                        }
-                    }) {}
-                }
+                    ref {
+                        it.srcObject = participant.stream
+                        it.play()
+
+                        onDispose { }
+                    }
+                }) {}
             }
 
             activeCall.streams.filter {
@@ -91,53 +113,55 @@ fun CallLayout(activeCall: GroupCall) {
                 activeCall.pinnedStream == null || activeCall.pinnedStream == it.stream
             }.forEach { participant ->
                 key(participant.stream) {
-                        Div({
+                    Div({
+                        style {
+                            width(0.r)
+                            height(100.percent)
+                            flex(1)
+                            position(Position.Relative)
+                        }
+                    }) {
+                        Video({
+                            attr("playsinline", "true")
+                            attr("disablePictureInPicture", "true")
+                            attr("controlsList", "nodownload")
+
                             style {
-                                width(0.r)
+                                width(100.percent)
                                 height(100.percent)
-                                flex(1)
-                                position(Position.Relative)
+
+                                if (participant.kind != "share") {
+                                    property("object-fit", "cover")
+                                }
                             }
-                        }) {
-                            Video({
-                                attr("playsinline", "true")
-                                attr("disablePictureInPicture", "true")
-                                attr("controlsList", "nodownload")
 
-                                style {
-                                    width(100.percent)
-                                    height(100.percent)
+                            ref {
+                                it.srcObject = participant.stream
+                                it.play()
 
-                                    if (participant.kind != "share") {
-                                        property("object-fit", "cover")
-                                    }
-                                }
+                                onDispose { }
+                            }
+                        }) {}
 
-                                ref {
-                                    it.srcObject = participant.stream
-                                    it.play()
-
-                                    onDispose { }
-                                }
-                            }) {}
-
-                            if (activeVideoStreams > 1) {
-                                Div({
-                                    classes(CallStyles.participantControls)
-                                }) {
-                                    // todo translate
-                                    IconButton(
-                                        if (activeCall.pinnedStream != null) "fullscreen_exit" else "fullscreen",
-                                        "Fullscreen"
-                                    ) {
-                                        call.togglePin(participant.stream)
-                                    }
+                        if (activeVideoStreams > 1) {
+                            Div({
+                                classes(CallStyles.participantControls)
+                            }) {
+                                // todo translate
+                                IconButton(
+                                    if (activeCall.pinnedStream != null) "fullscreen_exit" else "fullscreen",
+                                    "Fullscreen"
+                                ) {
+                                    call.togglePin(participant.stream)
                                 }
                             }
                         }
+                    }
                 }
             }
         }
+
+        val openGroup = appString { actionOpenGroup }
 
         Div({
             style {
@@ -149,6 +173,19 @@ fun CallLayout(activeCall: GroupCall) {
                 textAlign("center")
                 ellipsize()
                 fontWeight("bold")
+                cursor("pointer")
+            }
+
+            title(openGroup)
+
+            onClick {
+                it.stopPropagation()
+                scope.launch {
+                    appNav.navigate(
+                        AppNavigation.Group(activeCall.group.group!!.id!!, activeCall.group)
+                    )
+//                    router.navigate("/")
+                }
             }
         }) {
             Text(activeCall.group.name(
@@ -158,13 +195,17 @@ fun CallLayout(activeCall: GroupCall) {
             ))
         }
 
-        IconButton("close", appString { close }, styles = {
-            top(0.r)
-            right(0.r)
-            opacity(.5)
-            position(Position.Absolute)
-        }) {
-            call.end()
+        IconButton(
+            if (fullscreen) "collapse_content" else "expand_content",
+            if (fullscreen) appString { minimize } else appString { maximize },
+            styles = {
+                top(0.r)
+                right(0.r)
+                opacity(.5)
+                position(Position.Absolute)
+            }
+        ) {
+            fullscreen = !fullscreen
         }
 
         Div({
@@ -176,6 +217,7 @@ fun CallLayout(activeCall: GroupCall) {
                 display(DisplayStyle.Flex)
                 alignItems(AlignItems.Center)
                 justifyContent(JustifyContent.Center)
+                property("z-index", "2")
             }
         }) {
             // todo translate
@@ -216,6 +258,17 @@ fun CallLayout(activeCall: GroupCall) {
                     }
                 }) {
                 call.toggleScreenShare()
+            }
+            IconButton(
+                "call_end",
+                // todo translate
+                appString { leave },
+                background = true,
+                styles = {
+                    backgroundColor(Styles.colors.red)
+                }
+            ) {
+                call.end()
             }
         }
     }

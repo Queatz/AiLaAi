@@ -26,10 +26,13 @@ import notBlank
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
+import qr
 import r
+import webBaseUrl
 import kotlin.js.Date
 
 @Composable
@@ -211,6 +214,21 @@ fun GroupTopBar(
                                 myMember.member!!.id!!
                             ) {
                                 onGroupGone()
+                            }
+                        }
+                    }
+                }
+
+                item(appString { qrCode }) {
+                    scope.launch {
+                        dialog("", cancelButton = null) {
+                            val qrCode = remember {
+                                "$webBaseUrl/group/${group.group!!.id!!}".qr
+                            }
+                            Img(src = qrCode) {
+                                style {
+                                    borderRadius(1.r)
+                                }
                             }
                         }
                     }

@@ -41,6 +41,8 @@ class Call {
 
     private lateinit var scope: CoroutineScope
 
+    private var initializing = true
+
     val active = MutableStateFlow<GroupCall?>(null)
 
     fun init(scope: CoroutineScope) {
@@ -62,6 +64,16 @@ class Call {
                         )
                     )
                 )
+
+                meeting.on(
+                    "meeting-state-changed"
+                ) { data: dynamic ->
+                    if (data.data == "CONNECTED") {
+                        initializing = false
+                    } else {
+                        initializing = true
+                    }
+                }
 
                 meeting.localParticipant.on("stream-enabled") { stream: dynamic ->
                     if (stream.kind == "video") {
@@ -143,6 +155,9 @@ class Call {
     }
 
     fun enabled(stream: String): Boolean {
+        if (initializing) {
+            return true
+        }
         // used by js() below
         val meeting = active.value?.meeting ?: return false
         val streams = js("Array.from(meeting.localParticipant.streams.values())") as Array<dynamic>
@@ -152,6 +167,9 @@ class Call {
     }
 
     fun toggleCamera() {
+        if (initializing) {
+            return
+        }
         val meeting = active.value?.meeting ?: return
         if (enabled("video")) {
             meeting.disableWebcam()
@@ -161,6 +179,9 @@ class Call {
     }
 
     fun toggleMic() {
+        if (initializing) {
+            return
+        }
         val meeting = active.value?.meeting ?: return
         if (enabled("audio")) {
             meeting.muteMic()
@@ -170,6 +191,9 @@ class Call {
     }
 
     fun toggleScreenShare() {
+        if (initializing) {
+            return
+        }
         val meeting = active.value?.meeting ?: return
         if (enabled("share")) {
             meeting.disableScreenShare()

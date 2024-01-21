@@ -58,8 +58,7 @@ fun ProfileNavPage(onProfileClick: () -> Unit) {
     }
 
     NavTopBar(me, appString { this.profile }, onProfileClick = onProfileClick) {
-        IconButton("qr_code", appString { qrCode }, styles = {
-        }) {
+        IconButton("qr_code", appString { qrCode }) {
             scope.launch {
                 dialog("", cancelButton = null) {
                     val qrCode = remember {

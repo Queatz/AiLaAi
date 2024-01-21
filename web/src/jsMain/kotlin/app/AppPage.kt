@@ -116,7 +116,7 @@ fun AppPage() {
                         "call",
                         data.group.name ?: data.person.name ?: someone,
                         // todo translate
-                        "Tap to answer",
+                        if (call.active.value == null) "Tap to answer" else "Tap to switch",
                         onDismiss = {
                             playCallSound = false
                         }
