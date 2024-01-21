@@ -2,6 +2,8 @@ import androidx.compose.runtime.*
 import app.AppStyles
 import app.call.CallLayout
 import app.call.CallStyles
+import app.components.Background
+import app.group.GroupCoverPage
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import app.widget.WidgetStyles
@@ -110,6 +112,22 @@ fun main() {
                     )
                     SigninPage()
                     AppFooter()
+                }
+
+                route("group") {
+                    string { groupId ->
+                        Background {
+                            AppHeader(appName)
+                            GroupCoverPage(groupId) {
+                                title = it.group?.name ?: appName
+                            }
+                            AppFooter()
+                        }
+                    }
+
+                    noMatch {
+                        router.navigate("/")
+                    }
                 }
 
                 // Deprecated

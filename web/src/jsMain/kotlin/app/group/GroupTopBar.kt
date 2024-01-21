@@ -19,6 +19,7 @@ import com.queatz.db.*
 import components.IconButton
 import components.LinkifyText
 import joins
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import lib.formatDistanceToNow
 import notBlank
@@ -213,6 +214,10 @@ fun GroupTopBar(
                             }
                         }
                     }
+                }
+
+                item(appString { openInNewTab }, icon = "open_in_new") {
+                    window.open("/group/${group.group!!.id}", target = "_blank")
                 }
             }
         }

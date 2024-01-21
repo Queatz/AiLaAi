@@ -43,6 +43,14 @@ object Styles : StyleSheet() {
         }
     }
 
+    val background by style {
+        backgroundPosition("center")
+        backgroundSize("cover")
+        backgroundAttachment("fixed")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+    }
+
     val mobileRow by style {
         display(DisplayStyle.Flex)
 
@@ -56,6 +64,7 @@ object Styles : StyleSheet() {
     val textIcon by style {
         fontSize(24.px)
     }
+
     val modal by style {
         borderRadius(2.r)
         padding(1.5.r)

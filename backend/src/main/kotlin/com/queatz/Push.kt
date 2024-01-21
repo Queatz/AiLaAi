@@ -264,10 +264,8 @@ class Push {
                         header("apns-topic", "app.ailaai")//todo move to secrets.json
                         setBody(
                             ApnsPushBody(
-                                ApsBody(
-                                    alert = ApsAlertBody(
-                                        title = json.encodeToString(pushData)
-                                    )
+                                data = ApsDataBody(
+                                    data = json.encodeToString(pushData)
                                 )
                             )
                         )
@@ -310,7 +308,8 @@ data class GmsPushBody(
 
 @Serializable
 data class ApnsPushBody(
-    var aps: ApsBody? = ApsBody(),
+    var aps: ApsBody? = null,
+    var data: ApsDataBody? = null
 )
 
 @Serializable
@@ -318,6 +317,11 @@ data class ApsBody(
     var alert: ApsAlertBody? = ApsAlertBody(),
     @SerialName("mutable-content")
     var mutableContent: Int? = 1,
+)
+
+@Serializable
+data class ApsDataBody(
+    var data: String? = null,
 )
 
 @Serializable
