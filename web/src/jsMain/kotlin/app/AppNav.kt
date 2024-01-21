@@ -11,7 +11,7 @@ sealed interface AppNavigation {
 }
 
 class AppNav {
-    private val _navigate = MutableSharedFlow<AppNavigation>()
+    private val _navigate = MutableSharedFlow<AppNavigation>(replay = 1)
 
     val navigate = _navigate.asSharedFlow()
 

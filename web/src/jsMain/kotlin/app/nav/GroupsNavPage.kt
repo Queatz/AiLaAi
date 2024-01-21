@@ -93,9 +93,11 @@ fun GroupsNavPage(
         application.bearerToken.first { it != null }
         api.groups {
             groups = it
-            onSelected(groups.firstOrNull { it.group?.id == (selected as? GroupNav.Selected)?.group?.group?.id }?.let {
+            groups.firstOrNull { it.group?.id == (selected as? GroupNav.Selected)?.group?.group?.id }?.let {
                 GroupNav.Selected(it)
-            } ?: GroupNav.None)
+            }?.let { groupNav ->
+                onSelected(groupNav)
+            }
         }
         joins.reload()
     }
@@ -184,6 +186,7 @@ fun GroupsNavPage(
                 NavMenuItem("location_on", appString { local }, selected = selected is GroupNav.Local) {
                     onSelected(GroupNav.Local)
                 }
+
                 Spacer()
             }
 
