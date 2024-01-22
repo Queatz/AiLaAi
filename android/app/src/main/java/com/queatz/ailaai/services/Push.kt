@@ -75,6 +75,7 @@ class Push {
                 PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(push))
                 PushAction.Group -> receive(parse<GroupPushData>(push))
                 PushAction.Call -> receive(parse<CallPushData>(push))
+                PushAction.CallStatus -> receive(parse<CallStatusPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()

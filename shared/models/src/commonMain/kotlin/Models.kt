@@ -128,7 +128,8 @@ class Group(
 @Serializable
 class Call(
     var group: String? = null,
-    var room: String? = null
+    var room: String? = null,
+    var participants: Int? = null,
 ) : Model()
 
 enum class PayFrequency {

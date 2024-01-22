@@ -158,8 +158,10 @@ fun Route.groupRoutes() {
                         }
                     }
 
+                    val session = groupCall.activeRoomSession(call.room!!)
+
                     // send push when room call is initially started
-                    if (groupCall.activeRoomSession(call.room!!).data.firstOrNull()?.status != "ongoing") {
+                    if (session.data.firstOrNull()?.status != "ongoing") {
                         notify.call(
                             db.document(Group::class, groupId)!!,
                             me

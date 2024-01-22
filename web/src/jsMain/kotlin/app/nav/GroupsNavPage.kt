@@ -208,6 +208,7 @@ fun GroupsNavPage(
                         GroupItem(
                             group,
                             selected = (selected as? GroupNav.Selected)?.group?.group?.id == group.group?.id,
+                            showInCall = true,
                             onSelected = {
                                 onSelected(GroupNav.Selected(group))
                             },

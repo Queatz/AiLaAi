@@ -50,11 +50,17 @@ fun ScanQrCodeButton() {
                 ?.let {
                     it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
                         when {
+                            it.startsWith("/group/") -> {
+                                val groupId = it.split("/").getOrNull(2)
+                                nav.navigate("group/$groupId")
+                                true
+                            }
                             it.startsWith("/page/") -> {
                                 val cardId = it.split("/").getOrNull(2)
                                 nav.navigate("page/$cardId")
                                 true
                             }
+                            // Depreciated
                             it.startsWith("/card/") -> {
                                 val cardId = it.split("/").getOrNull(2)
                                 nav.navigate("card/$cardId")

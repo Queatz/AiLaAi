@@ -6,10 +6,7 @@ import com.queatz.db.*
 import com.queatz.plugins.db
 import com.queatz.plugins.json
 import com.queatz.plugins.secrets
-import com.queatz.push.CollaborationPushData
-import com.queatz.push.JoinRequestPushData
-import com.queatz.push.MessagePushData
-import com.queatz.push.PushData
+import com.queatz.push.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -230,10 +227,13 @@ class Push {
                                     data = mapOf(
                                         "action" to pushData.action!!.name,
                                         "data" to json.encodeToString(
+                                            // todo this is so hard to maintain
                                             when (val it = pushData.data) {
                                                 is CollaborationPushData -> it
                                                 is MessagePushData -> it
                                                 is JoinRequestPushData -> it
+                                                is CallPushData -> it
+                                                is CallStatusPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

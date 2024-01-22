@@ -50,6 +50,8 @@ fun Application.configureRouting() {
         widgetRoutes()
         aiRoutes()
         uploadRoutes()
+        videoSdkRoutes()
+        callRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {

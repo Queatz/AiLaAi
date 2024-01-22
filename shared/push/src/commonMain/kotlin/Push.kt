@@ -8,7 +8,8 @@ enum class PushAction {
     Collaboration,
     JoinRequest,
     Group,
-    Call
+    Call,
+    CallStatus,
 }
 
 enum class GroupEvent {
@@ -59,6 +60,11 @@ data class CallPushData(
     val group: Group,
     val person: Person,
     val show: Boolean? = null
+) : PushDataData()
+
+@Serializable
+data class CallStatusPushData(
+    val call: Call
 ) : PushDataData()
 
 @Serializable

@@ -1,13 +1,17 @@
-import androidx.compose.runtime.NoLiveLiterals
+import androidx.compose.runtime.*
+import app.ailaai.api.calls
 import app.ailaai.api.groupCall
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
+import com.queatz.push.PushAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.encodeToDynamic
-import kotlinx.serialization.json.encodeToJsonElement
 import lib.VideoSDK
 import org.w3c.dom.mediacapture.MediaStream
 
@@ -41,12 +45,29 @@ class Call {
 
     private lateinit var scope: CoroutineScope
 
-    private var initializing = true
-
     val active = MutableStateFlow<GroupCall?>(null)
+    val calls = MutableStateFlow<List<com.queatz.db.Call>>(emptyList())
+
+    private var enabledStreams = MutableStateFlow(emptySet<String>())
 
     fun init(scope: CoroutineScope) {
         this.scope = scope
+
+        scope.launch {
+            push.events.filter {
+                it.action == PushAction.CallStatus
+            }.collectLatest {
+                reload()
+            }
+        }
+    }
+
+    suspend fun reload() {
+        api.calls { calls ->
+            this.calls.update {
+                calls
+            }
+        }
     }
 
     // todo remove @NoLiveLiterals annotation
@@ -65,17 +86,10 @@ class Call {
                     )
                 )
 
-                meeting.on(
-                    "meeting-state-changed"
-                ) { data: dynamic ->
-                    if (data.data == "CONNECTED") {
-                        initializing = false
-                    } else {
-                        initializing = true
-                    }
-                }
-
                 meeting.localParticipant.on("stream-enabled") { stream: dynamic ->
+                    enabledStreams.update {
+                        it + (stream.kind as String)
+                    }
                     if (stream.kind == "video") {
                         val mediaStream = MediaStream()
                         mediaStream.addTrack(stream.track)
@@ -96,6 +110,9 @@ class Call {
                 }
 
                 meeting.localParticipant.on("stream-disabled") { stream: dynamic ->
+                    enabledStreams.update {
+                        it - (stream.kind as String)
+                    }
                     if (stream.kind == "video") {
                         active.value = active.value!!.copy(localVideo = null)
                     } else if (stream.kind == "audio") {
@@ -155,21 +172,15 @@ class Call {
     }
 
     fun enabled(stream: String): Boolean {
-        if (initializing) {
-            return true
-        }
         // used by js() below
         val meeting = active.value?.meeting ?: return false
         val streams = js("Array.from(meeting.localParticipant.streams.values())") as Array<dynamic>
         return streams.any {
             it.kind == stream
-        }
+        } || enabledStreams.value.contains(stream)
     }
 
     fun toggleCamera() {
-        if (initializing) {
-            return
-        }
         val meeting = active.value?.meeting ?: return
         if (enabled("video")) {
             meeting.disableWebcam()
@@ -179,9 +190,6 @@ class Call {
     }
 
     fun toggleMic() {
-        if (initializing) {
-            return
-        }
         val meeting = active.value?.meeting ?: return
         if (enabled("audio")) {
             meeting.muteMic()
@@ -191,9 +199,6 @@ class Call {
     }
 
     fun toggleScreenShare() {
-        if (initializing) {
-            return
-        }
         val meeting = active.value?.meeting ?: return
         if (enabled("share")) {
             meeting.disableScreenShare()

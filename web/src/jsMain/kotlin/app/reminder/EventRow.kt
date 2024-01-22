@@ -83,7 +83,6 @@ fun EventRow(
         scope.launch {
             var date by mutableStateOf(format(event.date, "yyyy-MM-dd"))
             var time by mutableStateOf(format(event.date, "HH:mm"))
-            console.log(date, time)
             val result = dialog("Reschedule occurrence", confirmButton = "Update") {
                 ReminderDateTime(
                     date,

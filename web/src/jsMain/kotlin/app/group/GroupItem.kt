@@ -12,6 +12,7 @@ import appString
 import appText
 import application
 import baseUrl
+import call
 import com.queatz.db.*
 import components.GroupPhoto
 import components.Icon
@@ -40,13 +41,16 @@ fun GroupItem(
     onSurface: Boolean = false,
     onBackground: Boolean = false,
     coverPhoto: Boolean = false,
+    showInCall: Boolean = false,
     maxWidth: CSSSizeValue<CSSUnit.rem>? = null,
     onSelected: () -> Unit,
     info: GroupInfo = GroupInfo.LatestMessage,
     styles: StyleScope.() -> Unit = {}
 ) {
     val me by application.me.collectAsState()
+    val calls by call.calls.collectAsState()
     val myMember = group.members?.takeIf { me != null }?.find { it.person?.id == me?.id }
+    val inCall = if (showInCall) (calls.firstOrNull { it.group == group.group!!.id }?.participants ?: 0) else 0
 
     val joinRequestCount by joins.joins
         .map { it.count { it.joinRequest?.group == group.group?.id } }
@@ -170,73 +174,96 @@ fun GroupItem(
                     }
                 }
             }
-            if (info == GroupInfo.Members && myMember != null) {
-                Div({
-                    style {
-                        marginLeft(.5.r)
-                        flexShrink(0)
-                        color(Styles.colors.primary)
-                        fontWeight("bold")
-                        fontSize(14.px)
-                        display(DisplayStyle.Flex)
-                        alignItems(AlignItems.Center)
-                    }
-                }) {
-                    Span { appText { joined } }
-                    Icon("check") {
-                        marginLeft(.5.r)
+            when {
+                inCall > 0 -> {
+                    Div({
+                        style {
+                            marginLeft(.5.r)
+                            flexShrink(0)
+                        }
+                    }) {
+                        Span({
+                            style {
+                                color(Styles.colors.tertiary)
+                                fontWeight("bold")
+                                fontSize(14.px)
+                            }
+                        }) {
+                            // todo translate
+                            Text("$inCall in call")
+                        }
                     }
                 }
-            } else if (joinRequestCount > 0) {
-                Div({
-                    style {
-                        marginLeft(.5.r)
-                        flexShrink(0)
-                    }
-                }) {
-                    Span({
+                info == GroupInfo.Members && myMember != null -> {
+                    Div({
                         style {
+                            marginLeft(.5.r)
+                            flexShrink(0)
                             color(Styles.colors.primary)
                             fontWeight("bold")
                             fontSize(14.px)
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
                         }
                     }) {
-                        if (joinRequestCount == 1) {
-                            Text("$joinRequestCount ${appString { inlinePersonWaiting }}")
-                        } else {
-                            Text("$joinRequestCount ${appString { inlinePeopleWaiting }}")
+                        Span { appText { joined } }
+                        Icon("check") {
+                            marginLeft(.5.r)
                         }
                     }
                 }
-            } else if (group.latestMessage != null) {
-                Div({
-                    style {
-                        marginLeft(.5.r)
-                        flexShrink(0)
-                    }
-                }) {
-                    Span({
+                joinRequestCount > 0 -> {
+                    Div({
                         style {
-                            if (group.isUnread(myMember?.member)) {
-                                color(Styles.colors.primary)
-                                fontWeight("bold")
-                            } else {
-                                color(Styles.colors.secondary)
-                                opacity(.5)
-                            }
-                            fontSize(14.px)
+                            marginLeft(.5.r)
+                            flexShrink(0)
                         }
                     }) {
-                        Text(
-                            " ${
-                                group.group?.seen?.let {
-                                    formatDistanceToNow(
-                                        Date(it.toEpochMilliseconds()),
-                                        js("{ addSuffix: true }")
-                                    )
+                        Span({
+                            style {
+                                color(Styles.colors.primary)
+                                fontWeight("bold")
+                                fontSize(14.px)
+                            }
+                        }) {
+                            if (joinRequestCount == 1) {
+                                Text("$joinRequestCount ${appString { inlinePersonWaiting }}")
+                            } else {
+                                Text("$joinRequestCount ${appString { inlinePeopleWaiting }}")
+                            }
+                        }
+                    }
+                }
+                group.latestMessage != null -> {
+                    Div({
+                        style {
+                            marginLeft(.5.r)
+                            flexShrink(0)
+                        }
+                    }) {
+                        Span({
+                            style {
+                                if (group.isUnread(myMember?.member)) {
+                                    color(Styles.colors.primary)
+                                    fontWeight("bold")
+                                } else {
+                                    color(Styles.colors.secondary)
+                                    opacity(.5)
                                 }
-                            }"
-                        )
+                                fontSize(14.px)
+                            }
+                        }) {
+                            Text(
+                                " ${
+                                    group.group?.seen?.let {
+                                        formatDistanceToNow(
+                                            Date(it.toEpochMilliseconds()),
+                                            js("{ addSuffix: true }")
+                                        )
+                                    }
+                                }"
+                            )
+                        }
                     }
                 }
             }

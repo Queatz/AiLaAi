@@ -1,12 +1,28 @@
 package com.queatz
 
 import com.queatz.db.*
+import com.queatz.db.Call
 import com.queatz.plugins.db
 import com.queatz.plugins.push
 import com.queatz.push.*
 import kotlinx.datetime.Clock
 
 class Notify {
+    fun callStatus(group: Group, call: Call) {
+        val pushData = PushData(
+            PushAction.CallStatus,
+            CallStatusPushData(
+                Call().apply {
+                    id = call.id
+                    this.group = call.group
+                    participants = call.participants
+                }
+            )
+        )
+
+        notifyGroupMembers(null, group, pushData)
+    }
+
     fun call(group: Group, from: Person) {
         val pushData = PushData(
             PushAction.Call,

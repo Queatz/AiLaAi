@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Secrets(
+    val config: SecretsConfig,
     val jwt: SecretsJwt,
     val hms: SecretsHms,
     val gms: SecretsGms,
@@ -13,9 +14,14 @@ data class Secrets(
 )
 
 @Serializable
+data class SecretsConfig(
+    val domain: String
+)
+
+@Serializable
 data class SecretsVideoSdk(
     val apiKey: String,
-    val secret: String
+    val secret: String,
 )
 
 @Serializable

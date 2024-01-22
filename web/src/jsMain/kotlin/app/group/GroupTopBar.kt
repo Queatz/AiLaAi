@@ -1,5 +1,6 @@
 package app.group
 
+import Styles
 import androidx.compose.runtime.*
 import api
 import app.AppStyles
@@ -46,6 +47,8 @@ fun GroupTopBar(
     val me by application.me.collectAsState()
     val myMember = group.members?.find { it.person?.id == me?.id }
     val scope = rememberCoroutineScope()
+    val calls by call.calls.collectAsState()
+    val callParticipants = calls.firstOrNull { it.group == group.group!!.id }?.participants ?: 0
 
     var menuTarget by remember {
         mutableStateOf<DOMRect?>(null)
@@ -312,6 +315,9 @@ fun GroupTopBar(
             IconButton(
                 name = "call",
                 title = appString { call },
+                // todo translate
+                text = if (callParticipants > 0) "$callParticipants in call" else null,
+                backgroundColor = if (callParticipants > 0) Styles.colors.tertiary else null,
                 styles = {
                     marginRight(.5.r)
                 }

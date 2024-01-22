@@ -4,17 +4,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.web.events.SyntheticMouseEvent
 import app.AppStyles
 import focusable
-import org.jetbrains.compose.web.css.StyleScope
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import r
 
 @Composable
 fun IconButton(
     name: String,
     title: String,
+    text: String? = null,
     count: Int = 0,
     background: Boolean = false,
+    backgroundColor: CSSColorValue? = null,
     styles: (StyleScope.() -> Unit)? = null,
     onClick: (SyntheticMouseEvent) -> Unit
 ) {
@@ -27,6 +30,15 @@ fun IconButton(
 
         focusable()
         style {
+            if (backgroundColor != null) {
+                backgroundColor(backgroundColor)
+            }
+
+            if (text != null) {
+                paddingLeft(1.r)
+                paddingRight(1.r)
+            }
+
             styles?.invoke(this)
         }
         title(title)
@@ -39,6 +51,15 @@ fun IconButton(
             classes("material-symbols-outlined")
         }) {
             Text(name)
+        }
+        if (text != null) {
+            Span({
+                style {
+                    marginLeft(.5.r)
+                }
+            }) {
+                Text(text)
+            }
         }
         if (count > 0) {
             Div({
