@@ -10,6 +10,7 @@ enum class PushAction {
     Group,
     Call,
     CallStatus,
+    Reminder,
 }
 
 enum class GroupEvent {
@@ -89,6 +90,13 @@ data class JoinRequestPushData(
     val group: Group,
     val joinRequest: JoinRequest,
     val event: JoinRequestEvent,
+) : PushDataData()
+
+@Serializable
+data class ReminderPushData(
+    val reminder: Reminder,
+    val occurrence: ReminderOccurrence?,
+    val show: Boolean? = null
 ) : PushDataData()
 
 @Serializable

@@ -2,6 +2,7 @@ package com.queatz.plugins
 
 import com.queatz.api.*
 import com.queatz.groupCall
+import com.queatz.remind
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -22,6 +23,7 @@ fun Application.configureRouting() {
 
     push.start(this)
     groupCall.start(this)
+    remind.start(this)
 
     routing {
         get("/hi") { call.respondText("{\"hi\": true}") }

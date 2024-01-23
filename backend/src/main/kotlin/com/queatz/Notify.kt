@@ -8,6 +8,37 @@ import com.queatz.push.*
 import kotlinx.datetime.Clock
 
 class Notify {
+    fun reminder(reminder: Reminder, occurrence: ReminderOccurrence?) {
+        val pushData = PushData(
+            PushAction.Reminder,
+            ReminderPushData(
+                Reminder().apply {
+                    id = reminder.id
+                    person = reminder.person
+                    attachment = reminder.attachment
+                    title = reminder.title
+                    note = reminder.note
+                    start = reminder.start
+                    end = reminder.end
+                    timezone = reminder.timezone
+                    utcOffset = reminder.utcOffset
+                    schedule = reminder.schedule
+                },
+                occurrence?.let { occurrence ->
+                    ReminderOccurrence(
+                        note = occurrence.note,
+                        done = occurrence.done
+                    ).apply {
+                        id = occurrence.id
+                    }
+                },
+                show = occurrence?.done != true
+            )
+        )
+
+        notifyPeople(listOf(reminder.person!!), pushData)
+    }
+
     fun callStatus(group: Group, call: Call) {
         val pushData = PushData(
             PushAction.CallStatus,
@@ -118,6 +149,12 @@ class Notify {
                     push.sendPush(device, pushData.show(it.member?.from != from?.id?.asId(Person::class) && it.member?.isSnoozedNow != true))
                 }
             }
+        }
+    }
+
+    private fun notifyPeople(people: List<String>, pushData: PushData) {
+        db.peopleDevices(people).forEach { device ->
+            push.sendPush(device, pushData)
         }
     }
 
