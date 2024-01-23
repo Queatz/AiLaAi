@@ -33,6 +33,7 @@ kotlin {
                 implementation("app.ailaai.shared:models")
                 implementation("app.ailaai.shared:api")
                 implementation("app.ailaai.shared:widgets")
+                implementation("app.ailaai.shared:reminders")
                 implementation(compose.runtime)
                 implementation(compose.html.core)
                 implementation("io.ktor:ktor-client-js:$ktorVersion")

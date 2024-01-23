@@ -1,9 +1,32 @@
-package app.reminder
-
-import app.page.ReminderEvent
-import app.page.ReminderEventType
+import com.queatz.db.Reminder
+import com.queatz.db.ReminderOccurrence
 import com.queatz.db.ReminderOccurrences
-import kotlin.js.Date
+import kotlinx.datetime.Instant
+
+enum class ReminderEventType {
+    Start,
+    Occur,
+    End
+}
+
+data class ReminderEvent(
+    /**
+     * The reminder that spawned this event
+     */
+    val reminder: Reminder,
+    /**
+     * The date of the event
+     */
+    val date: Instant,
+    /**
+     * The type of event.
+     */
+    val event: ReminderEventType,
+    /**
+     * The `ReminderOccurrence` associated with this event, if any.
+     */
+    val occurrence: ReminderOccurrence?
+)
 
 /**
  * Rules are:
@@ -11,7 +34,6 @@ import kotlin.js.Date
  * If reminder has a schedule -> Show occurrences
  * Else: Show start and end (if defined)
  */
-// todo move this list to :shared
 fun List<ReminderOccurrences>.toEvents() = buildList {
     this@toEvents.forEach {
         if (it.reminder.schedule == null) {
@@ -20,7 +42,7 @@ fun List<ReminderOccurrences>.toEvents() = buildList {
                 add(
                     ReminderEvent(
                         it.reminder,
-                        Date(it.reminder.start!!.toEpochMilliseconds()),
+                        it.reminder.start!!,
                         if (it.reminder.end == null) ReminderEventType.Occur else ReminderEventType.Start,
                         null
                     )
@@ -32,7 +54,7 @@ fun List<ReminderOccurrences>.toEvents() = buildList {
                     add(
                         ReminderEvent(
                             it.reminder,
-                            Date(it.reminder.end!!.toEpochMilliseconds()),
+                            it.reminder.end!!,
                             ReminderEventType.End,
                             null
                         )
@@ -46,7 +68,7 @@ fun List<ReminderOccurrences>.toEvents() = buildList {
                 add(
                     ReminderEvent(
                         it.reminder,
-                        Date((occurrence.date ?: occurrence.occurrence)!!.toEpochMilliseconds()),
+                        (occurrence.date ?: occurrence.occurrence)!!,
                         when {
                             it.reminder.schedule == null && it.reminder.end != null && it.reminder.start == occurrence.occurrence -> ReminderEventType.Start
                             it.reminder.schedule == null && it.reminder.end != null && it.reminder.end == occurrence.occurrence -> ReminderEventType.End
@@ -65,11 +87,11 @@ fun List<ReminderOccurrences>.toEvents() = buildList {
             add(
                 ReminderEvent(
                     it.reminder,
-                    Date(date.toEpochMilliseconds()),
+                    date,
                     ReminderEventType.Occur,
                     null
                 )
             )
         }
     }
-}.sortedBy { it.date.getTime() }
+}.sortedBy { it.date }

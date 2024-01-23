@@ -76,6 +76,7 @@ class Push {
                 PushAction.Group -> receive(parse<GroupPushData>(push))
                 PushAction.Call -> receive(parse<CallPushData>(push))
                 PushAction.CallStatus -> receive(parse<CallStatusPushData>(push))
+                PushAction.Reminder -> receive(parse<ReminderPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()
@@ -151,6 +152,7 @@ class Push {
 }
 
 enum class Notifications(@StringRes val channelName: Int, @StringRes val description: Int) {
+    Reminders(R.string.reminders, R.string.reminders_notification_channel_description),
     Messages(R.string.messages, R.string.messages_notification_channel_description),
     Host(R.string.host, R.string.host_notification_channel_description),
     Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description);

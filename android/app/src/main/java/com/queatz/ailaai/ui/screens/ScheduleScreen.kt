@@ -100,6 +100,7 @@ fun ScheduleScreen() {
             isLoading = false
             val scrollToTop = range.first != shownRange.first
             shownRange = range
+            // todo move this list to :shared
             events = buildList {
                 it.forEach {
                     if (it.reminder.schedule == null) {

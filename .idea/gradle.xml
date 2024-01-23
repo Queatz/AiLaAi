@@ -13,6 +13,7 @@
                   <project path="$PROJECT_DIR$/shared/api" />
                   <project path="$PROJECT_DIR$/shared/models" />
                   <project path="$PROJECT_DIR$/shared/push" />
+                  <project path="$PROJECT_DIR$/shared/reminders" />
                   <project path="$PROJECT_DIR$/shared/widgets" />
                 </projects>
               </build>
@@ -29,6 +30,7 @@
             <option value="$PROJECT_DIR$/shared/api" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
+            <option value="$PROJECT_DIR$/shared/reminders" />
             <option value="$PROJECT_DIR$/shared/widgets" />
           </set>
         </option>
@@ -43,6 +45,7 @@
                   <project path="$PROJECT_DIR$/shared/api" />
                   <project path="$PROJECT_DIR$/shared/models" />
                   <project path="$PROJECT_DIR$/shared/push" />
+                  <project path="$PROJECT_DIR$/shared/reminders" />
                   <project path="$PROJECT_DIR$/shared/widgets" />
                 </projects>
               </build>
@@ -58,6 +61,7 @@
             <option value="$PROJECT_DIR$/shared/api" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
+            <option value="$PROJECT_DIR$/shared/reminders" />
             <option value="$PROJECT_DIR$/shared/widgets" />
           </set>
         </option>
@@ -71,6 +75,7 @@
             <option value="$PROJECT_DIR$/shared/api" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
+            <option value="$PROJECT_DIR$/shared/reminders" />
             <option value="$PROJECT_DIR$/shared/widgets" />
           </set>
         </option>
@@ -85,6 +90,7 @@
                   <project path="$PROJECT_DIR$/shared/api" />
                   <project path="$PROJECT_DIR$/shared/models" />
                   <project path="$PROJECT_DIR$/shared/push" />
+                  <project path="$PROJECT_DIR$/shared/reminders" />
                   <project path="$PROJECT_DIR$/shared/widgets" />
                 </projects>
               </build>
@@ -99,6 +105,7 @@
             <option value="$PROJECT_DIR$/shared/api" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
+            <option value="$PROJECT_DIR$/shared/reminders" />
             <option value="$PROJECT_DIR$/shared/widgets" />
             <option value="$PROJECT_DIR$/web" />
           </set>

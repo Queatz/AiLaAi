@@ -2,19 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="Ai_La_Ai.app" target="17" />
-      <module name="ailaai-shared.api" target="17" />
-      <module name="ailaai-shared.api.main" target="17" />
-      <module name="ailaai-shared.api.test" target="17" />
-      <module name="ailaai-shared.models" target="17" />
-      <module name="ailaai-shared.models.main" target="17" />
-      <module name="ailaai-shared.models.test" target="17" />
-      <module name="ailaai-shared.push" target="17" />
-      <module name="ailaai-shared.push.main" target="17" />
-      <module name="ailaai-shared.push.test" target="17" />
-      <module name="ailaai-shared.widgets" target="17" />
-      <module name="ailaai-shared.widgets.main" target="17" />
-      <module name="ailaai-shared.widgets.test" target="17" />
+      <module name="ailaai-shared.reminder.main" target="17" />
+      <module name="ailaai-shared.reminder.test" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

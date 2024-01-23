@@ -391,7 +391,7 @@ fun FriendsScreen() {
                             }
 
                             is SwipeResult.Next -> {
-                                nav.navigate("schedule")
+                                nav.navigate("reminders")
                             }
 
                             is SwipeResult.Select<*> -> {

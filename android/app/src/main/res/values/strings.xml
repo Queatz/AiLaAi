@@ -52,6 +52,7 @@
     <string name="message">Message</string>
     <string name="someone">Someone</string>
     <string name="active">Active</string>
+    <string name="reminders_notification_channel_description">Your reminders</string>
     <string name="messages_notification_channel_description">Messages from people.</string>
     <string name="collaboration_notification_channel_description">Collaboration notifications.</string>
     <string name="host_notification_channel_description">Host notifications.</string>

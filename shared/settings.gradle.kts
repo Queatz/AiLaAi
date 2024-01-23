@@ -16,7 +16,8 @@ include(
     "models",
     "push",
     "api",
-    "widgets"
+    "widgets",
+    "reminders"
 )
 
 rootProject.name = "ailaai-shared"

@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.Group),
-            NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
+            NavButton("reminders", getString(R.string.reminders), Icons.Outlined.Schedule),
             NavButton("explore", getString(R.string.cards), Icons.Outlined.Home),
             NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
         )
@@ -508,7 +508,14 @@ class MainActivity : AppCompatActivity() {
                                                     it.arguments!!.getString("token")!!
                                                 )
                                             }
-                                            composable("schedule") {
+                                            composable(
+                                                "reminders",
+                                                deepLinks = listOf(
+                                                    navDeepLink {
+                                                        uriPattern = "$appDomain/reminders"
+                                                    }
+                                                )
+                                            ) {
                                                 ScheduleScreen()
                                             }
                                             composable("stories") {

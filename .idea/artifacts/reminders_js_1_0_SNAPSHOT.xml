@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="reminders-js-1.0-SNAPSHOT">
+    <output-path>$PROJECT_DIR$/shared/reminders/build/libs</output-path>
+    <root id="archive" name="reminders-js-1.0-SNAPSHOT.jar">
+      <element id="module-output" name="ailaai-shared.reminders.jsMain" />
+    </root>
+  </artifact>
+</component>

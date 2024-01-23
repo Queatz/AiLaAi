@@ -234,6 +234,7 @@ class Push {
                                                 is JoinRequestPushData -> it
                                                 is CallPushData -> it
                                                 is CallStatusPushData -> it
+                                                is ReminderPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )
