@@ -1,24 +1,27 @@
 package components
 
 import androidx.compose.runtime.*
+import app.AppNavigation
+import app.appNav
 import app.softwork.routingcompose.Router
 import com.queatz.db.Card
+import kotlinx.coroutines.launch
 import notEmpty
 import stories.StoryContents
 import stories.asStoryContents
 
 @Composable
 fun Content(content: String?) {
-    var storyContent by remember(content) { mutableStateOf(content?.asStoryContents()) }
-
-    val router = Router.current
+    val storyContent by remember(content) { mutableStateOf(content?.asStoryContents()) }
+    val scope = rememberCoroutineScope()
 
     if (storyContent?.notEmpty != null) {
         StoryContents(
             storyContent!!,
             onGroupClick = {
-                // todo if signed in, go to group
-                router.navigate("/signin")
+                scope.launch {
+                    appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                }
             }
         )
     }

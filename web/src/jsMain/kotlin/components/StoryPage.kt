@@ -3,10 +3,12 @@ package components
 import Styles
 import androidx.compose.runtime.*
 import api
-import app.softwork.routingcompose.Router
+import app.AppNavigation
+import app.appNav
 import appString
 import com.queatz.ailaai.api.storyByUrl
 import com.queatz.db.Story
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -20,6 +22,7 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
     var isLoading by remember { mutableStateOf(true) }
     var story by remember { mutableStateOf<Story?>(null) }
     var storyContent by remember { mutableStateOf<List<StoryContent>?>(null) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(storyUrl) {
         isLoading = true
@@ -71,12 +74,11 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
                         Div({
                             classes(Styles.cardContent)
                         }) {
-                            val router = Router.current
-
                             if (storyContent != null) {
                                 StoryContents(storyContent!!, onGroupClick = {
-                                    // todo if signed in, go to group
-                                    router.navigate("/signin")
+                                    scope.launch {
+                                        appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                                    }
                                 })
                             }
                         }

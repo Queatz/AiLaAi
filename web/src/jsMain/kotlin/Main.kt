@@ -1,5 +1,6 @@
 import androidx.compose.runtime.*
 import app.AppStyles
+import app.appNav
 import app.call.CallLayout
 import app.call.CallStyles
 import app.components.Background
@@ -17,7 +18,6 @@ import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.forEach
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.dom.Div
@@ -95,6 +95,12 @@ fun main() {
 
             BrowserRouter("") {
                 val router = Router.current
+
+                LaunchedEffect(Unit) {
+                    appNav.route.collectLatest {
+                        router.navigate(it)
+                    }
+                }
 
                 LaunchedEffect(router.currentPath) {
                     window.scrollTo(0.0, 0.0)
