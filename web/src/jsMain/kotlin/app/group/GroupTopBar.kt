@@ -139,12 +139,11 @@ fun GroupTopBar(
         }
     }
 
-    fun startCall() {
-
-    }
-
     if (menuTarget != null) {
         Menu({ menuTarget = null }, menuTarget!!) {
+            item(appString { openInNewTab }, icon = "open_in_new") {
+                window.open("/group/${group.group!!.id}", target = "_blank")
+            }
 //            item("Pin") {
 //
 //            }
@@ -235,10 +234,6 @@ fun GroupTopBar(
                             }
                         }
                     }
-                }
-
-                item(appString { openInNewTab }, icon = "open_in_new") {
-                    window.open("/group/${group.group!!.id}", target = "_blank")
                 }
             }
         }

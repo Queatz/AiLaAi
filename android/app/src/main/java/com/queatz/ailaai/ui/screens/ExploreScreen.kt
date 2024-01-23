@@ -16,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.cards
 import app.ailaai.api.myGeo
@@ -239,6 +242,8 @@ fun ExploreScreen() {
                 }
             }
 
+            var viewportHeight by remember { mutableIntStateOf(0) }
+
             MainTabs(tab, { tab = it })
             if (showAsMap) {
                 Box(
@@ -246,12 +251,13 @@ fun ExploreScreen() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    MapScreen(nav, cardsOfCategory) {
+                    MapScreen(nav, cardsOfCategory, viewportHeight) {
                         mapGeo = it
                     }
                     PageInput(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
+                            .onPlaced { viewportHeight = it.boundsInParent().size.height.toInt() }
                     ) {
                         SearchContent(
                             locationSelector,

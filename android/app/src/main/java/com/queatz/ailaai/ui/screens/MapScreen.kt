@@ -4,7 +4,6 @@ import android.graphics.Point
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -66,7 +65,8 @@ import kotlin.random.Random
 fun MapScreen(
     navController: NavController,
     cards: List<Card>,
-    onGeo: (LatLng) -> Unit
+    bottomPadding: Int,
+    onGeo: (LatLng) -> Unit,
 ) {
     val context = LocalContext.current
     var position by rememberSaveable(stateSaver = latLngSaver()) {
@@ -156,6 +156,14 @@ fun MapScreen(
         }
     }
 
+    fun repad() {
+        map?.setPadding(0, 0, 0, bottomPadding)
+    }
+
+    LaunchedEffect(map, bottomPadding) {
+        repad()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -178,8 +186,13 @@ fun MapScreen(
                 map?.apply {
                     clear()
 
-                    getUiSettings().isMapToolbarEnabled = true
-                    getUiSettings().isMyLocationButtonEnabled = true
+                    getUiSettings().apply {
+                        isMapToolbarEnabled = true
+                        isCompassEnabled = true
+                        isMyLocationButtonEnabled = true
+                    }
+
+                    isMyLocationEnabled = true
 
                     setOnMapClickListener {
                         showMapClickMenu = it

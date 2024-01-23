@@ -19,6 +19,7 @@ import components.IconButton
 import components.Loading
 import indicator
 import joins
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -29,6 +30,7 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import push
 import r
+import kotlin.time.Duration.Companion.seconds
 
 sealed class GroupNav {
     data object None : GroupNav()
@@ -88,15 +90,17 @@ fun GroupsNavPage(
         }
     }
 
-    suspend fun reload() {
+    suspend fun reload(emit: Boolean = true) {
         // todo is next line needed? it was added to wait for the token since groups are the first thing to appear after signing in
         application.bearerToken.first { it != null }
         api.groups {
             groups = it
-            groups.firstOrNull { it.group?.id == (selected as? GroupNav.Selected)?.group?.group?.id }?.let {
-                GroupNav.Selected(it)
-            }?.let { groupNav ->
-                onSelected(groupNav)
+            if (emit) {
+                groups.firstOrNull { it.group?.id == (selected as? GroupNav.Selected)?.group?.group?.id }?.let {
+                    GroupNav.Selected(it)
+                }?.let { groupNav ->
+                    onSelected(groupNav)
+                }
             }
         }
         joins.reload()
@@ -211,6 +215,9 @@ fun GroupsNavPage(
                             showInCall = true,
                             onSelected = {
                                 onSelected(GroupNav.Selected(group))
+                                scope.launch {
+                                    reload(emit = false)
+                                }
                             },
                         )
                     }

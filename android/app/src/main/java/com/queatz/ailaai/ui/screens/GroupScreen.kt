@@ -1483,6 +1483,7 @@ fun GroupScreen(groupId: String) {
                     onGeneratedPhoto = { photo ->
                         scope.launch {
                             api.updateGroup(groupId, Group(photo = photo)) {
+                                context.toast(R.string.photo_updated)
                                 reload()
                             }
                         }

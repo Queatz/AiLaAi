@@ -54,6 +54,7 @@ class Call {
         this.scope = scope
 
         scope.launch {
+            reload()
             push.events.filter {
                 it.action == PushAction.CallStatus
             }.collectLatest {

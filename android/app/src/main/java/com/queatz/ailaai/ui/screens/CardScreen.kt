@@ -52,7 +52,6 @@ import kotlin.time.Duration.Companion.seconds
 
 private val showGeneratingMessage = booleanPreferencesKey("ui.showGeneratingMessage")
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardScreen(cardId: String) {
     var isLoading by rememberStateOf(false)

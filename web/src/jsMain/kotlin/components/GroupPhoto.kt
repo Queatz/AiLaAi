@@ -13,7 +13,7 @@ fun GroupPhoto(group: GroupExtended, me: Person?) {
     val otherMembers = remember(group) {
         group.members
             ?.filter { it.person?.id != me?.id }
-            ?.sortedByDescending { it.member?.seen?.toEpochMilliseconds() ?: 0 } ?: emptyList()
+            ?: emptyList()
     }
 
     if (otherMembers.size > 1) {
