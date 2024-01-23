@@ -1,5 +1,4 @@
 import androidx.compose.runtime.*
-import app.AppStyles
 import app.appNav
 import app.call.CallLayout
 import app.call.CallStyles
@@ -20,8 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
@@ -255,59 +252,7 @@ fun main() {
                 CallLayout(activeCall!!)
             }
 
-            val activeNotifications by notifications.notifications.collectAsState()
-
-            if (activeNotifications.isNotEmpty()) {
-                Div({
-                    classes(AppStyles.notificationsLayout)
-                }) {
-                    activeNotifications.forEach { notification ->
-                        Div({
-                            classes(AppStyles.notification)
-
-                            onClick {
-                                notifications.remove(notification)
-                                notification.onClick()
-                            }
-                        }) {
-                            Div({
-                                classes(AppStyles.notificationIcon)
-                            }) {
-                                // todo translate
-                                IconButton(notification.icon, "") {
-                                    notifications.remove(notification)
-                                    notification.onClick()
-                                }
-                            }
-                            Div({
-                                classes(AppStyles.notificationBody)
-                            }) {
-                                Div(
-                                    {
-                                        classes(AppStyles.notificationTitle)
-                                    }
-                                ) {
-                                    Text(notification.title)
-                                }
-                                Div({
-                                    classes(AppStyles.notificationMessage)
-                                }) {
-                                    Text(notification.message)
-                                }
-                            }
-                            Div({
-                                classes(AppStyles.notificationActions)
-                            }) {
-                                // todo translate
-                                IconButton("close", "Dismiss") {
-                                    notifications.remove(notification)
-                                    notification.onDismiss()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            NotificationsLayout()
         }
     }
 }

@@ -19,6 +19,7 @@ import com.queatz.db.Reminder
 import com.queatz.db.Story
 import com.queatz.push.CallPushData
 import com.queatz.push.PushAction
+import com.queatz.push.ReminderPushData
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
@@ -98,6 +99,10 @@ fun AppPage() {
         mutableStateOf(false)
     }
 
+    var playNotificationSound by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(nav) {
         application.setNavPage(nav)
     }
@@ -130,7 +135,33 @@ fun AppPage() {
                     }
                 )
             }
+        }
+    }
 
+    val reminderString = appString { this.reminder }
+
+    LaunchedEffect(Unit) {
+        push.events.filter {
+            it.action == PushAction.Reminder
+        }.collect {
+            val data = it.data as? ReminderPushData
+            if (data?.show == true) {
+                playNotificationSound = true
+                notifications.add(
+                    Notification(
+                        null,
+                        data.reminder.title ?: reminderString,
+                        // todo translate
+                        data.occurrence?.note ?: data.reminder.note ?: "",
+                        onDismiss = {
+                            playNotificationSound = false
+                        }
+                    ) {
+                        playNotificationSound = false
+                        nav = NavPage.Schedule
+                    }
+                )
+            }
         }
     }
 
@@ -152,7 +183,7 @@ fun AppPage() {
         }
     }
 
-    if (playCallSound) {
+    if (playCallSound || playNotificationSound) {
         Audio({
             attr("playsinline", "true")
             attr("autoplay", "true")
@@ -162,7 +193,7 @@ fun AppPage() {
             }
 
             ref {
-                it.src = "/call.ogg"
+                it.src = if (playCallSound) "/call.ogg" else "/notify.ogg"
                 it.currentTime = 0.0
                 it.onended = {
                     playCallSound = false

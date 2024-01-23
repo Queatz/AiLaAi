@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.update
 val notifications = Notifications()
 
 class Notification(
-    val icon: String,
+    val icon: String?,
     val title: String,
     val message: String,
     val onDismiss: () -> Unit,

@@ -63,7 +63,7 @@ suspend fun Api.reminderOccurrences(
     onError: ErrorBlock = {},
     onSuccess: SuccessBlock<List<ReminderOccurrences>>
 ) = get(
-    url = "/reminders/$id/occurrences",
+    url = "reminders/$id/occurrences",
     onError = onError,
     onSuccess = onSuccess,
     parameters = mapOf(
