@@ -317,6 +317,8 @@ fun ProfileScreen(personId: String) {
         )
     }
 
+    val isMe = me?.id == personId
+
     Box {
         LazyVerticalGrid(
             state = state,
@@ -328,8 +330,6 @@ fun ProfileScreen(personId: String) {
             modifier = Modifier.fillMaxSize(),
             columns = GridCells.Adaptive(240.dp)
         ) {
-            val isMe = me?.id == personId
-
             item(span = { GridItemSpan(maxLineSpan) }) {
                 val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
                 Column(
@@ -782,9 +782,12 @@ fun ProfileScreen(personId: String) {
             value = search,
             valueChange = { search = it },
             placeholder = stringResource(R.string.search_cards_of_x, person?.name ?: stringResource(R.string.someone)),
-            action = {
-                Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
-
+            action = if (isMe) {
+                {
+                    Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
+                }
+            } else {
+                null
             },
             onAction = {
                 newCard = Card(equipped = true)

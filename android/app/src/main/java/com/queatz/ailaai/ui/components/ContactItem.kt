@@ -186,7 +186,8 @@ fun ContactItem(
                 joinRequestCount = joinRequestCount,
                 joined = myMember != null,
                 info = info,
-                coverPhoto = if (coverPhoto) groupExtended.group?.photo?.let(api::url) else null
+                coverPhoto = if (coverPhoto) groupExtended.group?.photo?.let(api::url) else null,
+                background = coverPhoto
             )
         }
     }
@@ -205,7 +206,8 @@ fun ContactResult(
     joinRequestCount: Int = 0,
     joined: Boolean = false,
     info: GroupInfo = GroupInfo.LatestMessage,
-    coverPhoto: String? = null
+    coverPhoto: String? = null,
+    background: Boolean = false
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(1.pad),
@@ -224,7 +226,7 @@ fun ContactResult(
                 }
             }
             .let {
-                if (coverPhoto == null) {
+                if (!background) {
                     it
                 } else {
                     it

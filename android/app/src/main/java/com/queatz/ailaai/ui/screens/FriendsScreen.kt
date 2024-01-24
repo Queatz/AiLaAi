@@ -591,7 +591,7 @@ fun GroupExtended.seenText(active: String, me: Person?): String? {
     val otherMemberLastSeen = members?.filter { it.person?.id != me?.id }?.maxByOrNull {
         it.person?.seen ?: Instant.fromEpochMilliseconds(0)
     }?.person?.seen
-    return (otherMemberLastSeen ?: group?.seen)?.timeAgo()?.lowercase()?.let { timeAgo ->
+    return otherMemberLastSeen?.timeAgo()?.lowercase()?.let { timeAgo ->
         "$active $timeAgo"
     }
 }

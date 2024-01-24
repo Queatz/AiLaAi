@@ -45,6 +45,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LifecycleEffect
+import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
@@ -75,10 +76,21 @@ val background = _background.map { it.lastOrNull()?.url }
 fun background(url: String?) {
     if (url != null) {
         val value = Background(url)
+        var stopped by rememberStateOf(false)
 
         StopEffect {
             _background.update {
                 it - value
+            }
+            stopped = true
+        }
+
+        StartEffect {
+            if (stopped) {
+                stopped = false
+                _background.update {
+                    it + value
+                }
             }
         }
 
