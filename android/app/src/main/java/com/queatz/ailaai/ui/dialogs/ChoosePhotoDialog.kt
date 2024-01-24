@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.dialogs
 
 import aiPhoto
 import aiStyles
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -14,10 +15,15 @@ import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.db.AiPhotoRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -29,6 +35,7 @@ class ChoosePhotoDialogState(
     var prompt: MutableState<String>
 )
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ChoosePhotoDialog(
     scope: CoroutineScope,
@@ -46,6 +53,8 @@ fun ChoosePhotoDialog(
     var allStyles by rememberStateOf(_allStyles)
     var selectedStyle by rememberStateOf(_selectedStyle)
     val context = LocalContext.current
+    val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
+    var showCameraRationale by rememberStateOf(false)
 
     val cameraUri = "photo.jpg".asCacheFileUri(context)
 
@@ -96,6 +105,16 @@ fun ChoosePhotoDialog(
         }
     }
 
+    fun camera() {
+        cameraPermissionRequester.use(
+            onPermanentlyDenied = {
+                showCameraRationale = true
+            }
+        ) {
+            cameraLauncher.launch(cameraUri)
+        }
+    }
+
     LaunchedEffect(aiStyleMenu) {
         if (aiStyleMenu && allStyles.isEmpty()) {
             api.aiStyles {
@@ -140,7 +159,7 @@ fun ChoosePhotoDialog(
                 }
 
                 item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {
-                    cameraLauncher.launch(cameraUri)
+                    camera()
                 }
 
                 item(
@@ -164,5 +183,14 @@ fun ChoosePhotoDialog(
             }
             onIsGeneratingPhoto(false)
         }
+    }
+
+    if (showCameraRationale) {
+        RationaleDialog(
+            {
+                showCameraRationale = false
+            },
+            stringResource(R.string.camera_disabled_description)
+        )
     }
 }

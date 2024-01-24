@@ -13,10 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import com.huawei.hms.hmsscankit.ScanKitActivity
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
@@ -27,20 +23,19 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
+import com.queatz.ailaai.ui.permission.permissionRequester
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 val qrCodeExplainedKey = booleanPreferencesKey("tutorial.qrCode.explained")
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ScanQrCodeButton() {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showQrCodeExplanationDialog by rememberStateOf(false)
     var showCameraRationale by rememberStateOf(false)
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
-    val initialCameraPermissionState by remember { mutableStateOf(cameraPermissionState.status.isGranted) }
+    val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
     val nav = nav
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -91,7 +86,11 @@ fun ScanQrCodeButton() {
     }
 
     fun scanQrCode() {
-        if (cameraPermissionState.status.isGranted) {
+        cameraPermissionRequester.use(
+            onPermanentlyDenied = {
+                showCameraRationale = true
+            }
+        ) {
             scanQrLauncher.launch(
                 // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
                 // Extracted from ScanUtil.java (startScan)
@@ -100,20 +99,6 @@ fun ScanQrCodeButton() {
                     putExtra("ScanViewValue", 1)
                 }
             )
-        } else {
-            if (cameraPermissionState.status.shouldShowRationale) {
-                showCameraRationale = true
-            } else {
-                cameraPermissionState.launchPermissionRequest()
-            }
-        }
-    }
-
-    if (!initialCameraPermissionState) {
-        LaunchedEffect(cameraPermissionState.status.isGranted) {
-            if (cameraPermissionState.status.isGranted) {
-                scanQrCode()
-            }
         }
     }
 

@@ -7,8 +7,7 @@ import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import com.queatz.ailaai.ui.permission.permissionRequester
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -17,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import java.io.File
 import java.io.IOException
-import java.lang.IllegalStateException
 
 internal enum class AudioRecorderControlEvent {
     Record,
@@ -52,8 +50,7 @@ fun audioRecorder(
 ): AudioRecorderControl {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val recordAudioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
-    val initialRecordAudioPermissionState by remember { mutableStateOf(recordAudioPermissionState.status.isGranted) }
+    val recordAudioPermissionRequester = permissionRequester(Manifest.permission.RECORD_AUDIO)
     var audioOutputFile by remember { mutableStateOf<File?>(null) }
     var audioRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
     var trackDurationJob by remember { mutableStateOf<Job?>(null) }
@@ -116,10 +113,9 @@ fun audioRecorder(
     }
 
     fun recordAudio() {
-        if (recordAudioPermissionState.status.isGranted.not()) {
-            recordAudioPermissionState.launchPermissionRequest()
-        } else {
+        recordAudioPermissionRequester.use {
             recordTheAudio()
+
         }
     }
 
@@ -152,14 +148,6 @@ fun audioRecorder(
     DisposableEffect(Unit) {
         onDispose {
             audioRecorder?.release()
-        }
-    }
-
-    if (!initialRecordAudioPermissionState) {
-        LaunchedEffect(recordAudioPermissionState.status.isGranted) {
-            if (recordAudioPermissionState.status.isGranted) {
-                recordTheAudio()
-            }
         }
     }
 

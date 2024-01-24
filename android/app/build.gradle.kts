@@ -50,7 +50,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
 
             // This is here because of just how slow Jetpack Compose is in debug mode
-            isDebuggable = false
+//            isDebuggable = false
         }
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -106,8 +106,8 @@ dependencies {
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
     implementation("androidx.navigation:navigation-compose:2.7.6")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
     implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
@@ -125,11 +125,11 @@ dependencies {
     implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
-    implementation("com.google.accompanist:accompanist-permissions:0.28.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("androidx.media3:media3-exoplayer:1.2.0")
-    implementation("androidx.media3:media3-ui:1.2.0")
+    implementation("androidx.media3:media3-exoplayer:1.2.1")
+    implementation("androidx.media3:media3-ui:1.2.1")
     implementation("com.otaliastudios:transcoder:0.10.5")
     implementation("ch.acra:acra-core:5.11.3")
     implementation("ch.acra:acra-toast:5.11.3")

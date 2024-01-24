@@ -29,7 +29,7 @@ class PermissionRequester(private val permission: String) {
 
         if (state.status == PermissionStatus.Granted) {
             onGranted()
-        } else if(!state.status.shouldShowRationale) {
+        } else if(state.status.shouldShowRationale) {
             onPermanentlyDenied()
         } else {
             this.onGranted = onGranted
