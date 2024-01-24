@@ -16,10 +16,17 @@ suspend fun Api.createStickerFromUri(
     context: Context,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Sticker>
-) = createSticker(
-    id,
-    photo.asInputProvider(context, maxSize = 500_000)!!,
-    context.contentResolver.getType(photo) ?: "image/png",
-    onError,
-    onSuccess
-)
+) {
+    createSticker(
+        id,
+        try {
+            photo.asInputProvider(context, maxSize = 500_000)!!
+        } catch (e: Throwable) {
+            onError?.invoke(e)
+            return
+        },
+        context.contentResolver.getType(photo) ?: "image/png",
+        onError,
+        onSuccess
+    )
+}
