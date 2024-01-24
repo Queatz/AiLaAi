@@ -62,6 +62,7 @@ class Push {
                     }
                 }
                 deferred.await()
+                sse.close()
                 delay(3.seconds)
             }
         }
