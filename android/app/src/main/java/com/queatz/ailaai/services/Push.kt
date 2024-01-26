@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
+import androidx.media3.common.util.NotificationUtil.Importance
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.json
@@ -116,6 +117,8 @@ class Push {
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setGroup(groupKey)
             .setAutoCancel(true)
+            .setPriority(channel.importance.priority)
+            .setCategory(channel.category)
             .setContentIntent(TaskStackBuilder.create(context).run {
                     addNextIntentWithParentStack(intent)
                     getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -142,7 +145,7 @@ class Push {
             val notificationChannel = NotificationChannel(
                 channel.key,
                 context.getString(channel.channelName),
-                NotificationManager.IMPORTANCE_DEFAULT
+                channel.importance
             )
             notificationChannel.description = context.getString(channel.description)
             val notificationManager = context.getSystemService(NotificationManager::class.java)
@@ -151,10 +154,21 @@ class Push {
     }
 }
 
-enum class Notifications(@StringRes val channelName: Int, @StringRes val description: Int) {
-    Reminders(R.string.reminders, R.string.reminders_notification_channel_description),
-    Messages(R.string.messages, R.string.messages_notification_channel_description),
-    Host(R.string.host, R.string.host_notification_channel_description),
-    Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description);
+enum class Notifications(
+    @StringRes val channelName: Int,
+    @StringRes val description: Int,
+    val importance: Int,
+    val category: String,
+) {
+    Reminders(R.string.reminders, R.string.reminders_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_REMINDER),
+    Messages(R.string.messages, R.string.messages_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_MESSAGE),
+    Host(R.string.host, R.string.host_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
+    Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL);
     val key get() = name.lowercase()
+}
+
+private val Int.priority: Int get() = when (this) {
+    NotificationManager.IMPORTANCE_HIGH -> NotificationCompat.PRIORITY_HIGH
+    NotificationManager.IMPORTANCE_LOW -> NotificationCompat.PRIORITY_LOW
+    else -> NotificationCompat.PRIORITY_DEFAULT
 }
