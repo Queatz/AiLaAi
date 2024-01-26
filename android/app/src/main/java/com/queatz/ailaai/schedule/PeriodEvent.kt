@@ -33,6 +33,7 @@ fun RowScope.PeriodEvent(
     val scope = rememberCoroutineScope()
     var expanded by rememberStateOf(false)
     var showEditNote by rememberStateOf(false)
+    var showReschedule by rememberStateOf(false)
     var showDelete by rememberStateOf(false)
     val done = event.occurrence?.done == true
 
@@ -91,6 +92,26 @@ fun RowScope.PeriodEvent(
             ) {
                 onUpdated(event)
                 showEditNote = false
+            }
+        }
+    }
+
+    if (showReschedule) {
+        RescheduleDialog(
+            {
+                showReschedule = false
+            },
+            event
+        ) {
+            scope.launch {
+                api.updateReminderOccurrence(
+                    event.reminder.id!!,
+                    event.date,
+                    ReminderOccurrence(date = it)
+                ) {
+                    onUpdated(event)
+                    showEditNote = false
+                }
             }
         }
     }
@@ -164,10 +185,13 @@ fun RowScope.PeriodEvent(
                     }
                 },
                 onOpen = {
-
+                    // todo navigate
                 },
                 onEdit = {
                     showEditNote = true
+                },
+                onReschedule = {
+                    showReschedule = true
                 },
                 onRemove = {
                     showDelete = true

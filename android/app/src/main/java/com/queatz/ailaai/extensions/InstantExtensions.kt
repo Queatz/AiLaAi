@@ -62,8 +62,20 @@ fun Instant.dayMonthYear() = DateTimeFormatter.ofPattern("MMMM d, yyyy")
 
 fun Instant.dayOfMonth() = MessageFormat.format("{0,ordinal}", toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth)!!
 fun Instant.day() = toLocalDateTime(TimeZone.currentSystemDefault()).dayOfMonth
+fun Instant.minute() = toLocalDateTime(TimeZone.currentSystemDefault()).minute
+fun Instant.hour() = toLocalDateTime(TimeZone.currentSystemDefault()).hour
 fun Instant.nameOfDayOfWeek() = DateTimeFormatter.ofPattern("EEE")
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!
+
+fun Instant.at(
+    hour: Int = 0,
+    minute: Int = 0,
+    second: Int = 0,
+    zone: TimeZone = TimeZone.currentSystemDefault()
+) = toLocalDateTime(zone)
+    .date
+    .atTime(LocalTime(hour, minute, second))
+    .toInstant(zone)
 
 fun Instant.format(pattern: String) = DateTimeFormatter.ofPattern(pattern)
     .format(toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime())!!

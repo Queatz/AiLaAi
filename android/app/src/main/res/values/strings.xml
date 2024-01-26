@@ -463,6 +463,9 @@
     <string name="inline_today">today</string>
     <string name="inline_tomorrow">tomorrow</string>
     <string name="inline_yesterday">yesterday</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="yesterday">Yesterday</string>
     <string name="create_page">Create a new page</string>
     <string name="add_group">Add a group</string>
     <string name="loading_group">Loading group…</string>

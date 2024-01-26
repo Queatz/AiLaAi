@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Done
-import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
@@ -23,6 +21,7 @@ fun ScheduleItemActions(
     onDone: () -> Unit,
     onOpen: () -> Unit,
     onEdit: () -> Unit,
+    onReschedule: () -> Unit,
     onRemove: () -> Unit
 ) {
     Row(
@@ -38,25 +37,42 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Done,
+                // todo translate
                 "Mark as done",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp)
             )
         }
-//        OutlinedIconButton(
-//            {
-//                onDismissRequest()
-//                onOpen()
-//            },
-//            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-//        ) {
-//            Icon(
-//                Icons.Outlined.OpenInNew,
-//                "Open",
-//                tint = MaterialTheme.colorScheme.primary,
-//                modifier = Modifier.size(18.dp)
-//            )
-//        }
+        OutlinedIconButton(
+            {
+                onDismissRequest()
+                onOpen()
+            },
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Icon(
+                Icons.Outlined.OpenInNew,
+                // todo translate
+                "Open",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        OutlinedIconButton(
+            {
+                onDismissRequest()
+                onReschedule()
+            },
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Icon(
+                Icons.Outlined.Update,
+                // todo translate
+                "Reschedule",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
         OutlinedIconButton(
             {
                 onDismissRequest()
@@ -66,6 +82,7 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Edit,
+                // todo translate
                 "Edit",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp)
@@ -80,6 +97,7 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Delete,
+                // todo translate
                 "Delete",
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(18.dp)

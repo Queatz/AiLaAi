@@ -1,7 +1,8 @@
 package com.queatz.ailaai.schedule
 
-import com.queatz.ailaai.extensions.format
-import com.queatz.ailaai.extensions.nameOfDayOfWeek
+import android.content.Context
+import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.*
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import kotlinx.datetime.Instant
@@ -59,7 +60,19 @@ val ScheduleView.dateTimeFormat
         ScheduleView.Yearly -> "d"
     }
 
-fun Instant.formatTitle(view: ScheduleView) = format(view.titleFormat)
+fun Instant.formatTitle(context: Context, view: ScheduleView) = format(view.titleFormat).let {
+    when (view == ScheduleView.Daily) {
+        true -> {
+            when {
+                isToday() -> "${context.getString(R.string.today)}, $it"
+                isTomorrow() -> "${context.getString(R.string.tomorrow)}, $it"
+                isYesterday() -> "${context.getString(R.string.yesterday)}, $it"
+                else -> it
+            }
+        }
+        else -> it
+    }
+}
 
 fun Instant.formatEvent(view: ScheduleView) = view.eventFormat?.let(::format)
 
