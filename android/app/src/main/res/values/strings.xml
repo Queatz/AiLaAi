@@ -409,6 +409,7 @@
     <string name="enable_anonymous_replies">Enable anonymous replies from the web</string>
     <string name="nothing_scheduled">Nothing scheduled</string>
     <string name="add_reminder">Add reminder</string>
+    <string name="new_reminder">New reminder</string>
     <string name="select_multiple">Select multiple</string>
     <string name="open_source">Open Source</string>
     <string name="no">No</string>
@@ -532,4 +533,6 @@
     <string name="search_cards_of_x">Search %1$s\'s pages</string>
     <string name="call">Call</string>
     <string name="photo_updated">Photo updated</string>
+    <string name="your_reminders">Your reminders</string>
+    <string name="inline_at">at</string>
 </resources>

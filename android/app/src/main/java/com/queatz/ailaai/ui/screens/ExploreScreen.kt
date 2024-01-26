@@ -312,7 +312,7 @@ fun ExploreScreen() {
                         .swipeMainTabs {
                             when (val it = MainTab.entries.swipe(tab, it)) {
                                 is SwipeResult.Previous -> {
-                                    nav.navigate("reminders")
+                                    nav.navigate("schedule")
                                 }
 
                                 is SwipeResult.Next -> {

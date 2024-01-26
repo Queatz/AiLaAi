@@ -47,6 +47,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LifecycleEffect
 import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
+import com.queatz.ailaai.schedule.RemindersScreen
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.*
@@ -112,7 +113,7 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.Group),
-            NavButton("reminders", getString(R.string.reminders), Icons.Outlined.Schedule),
+            NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
             NavButton("explore", getString(R.string.cards), Icons.Outlined.Home),
             NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
         )
@@ -521,14 +522,17 @@ class MainActivity : AppCompatActivity() {
                                                 )
                                             }
                                             composable(
-                                                "reminders",
+                                                "schedule",
                                                 deepLinks = listOf(
                                                     navDeepLink {
-                                                        uriPattern = "$appDomain/reminders"
+                                                        uriPattern = "$appDomain/schedule"
                                                     }
                                                 )
                                             ) {
                                                 ScheduleScreen()
+                                            }
+                                            composable("reminders") {
+                                                RemindersScreen()
                                             }
                                             composable("stories") {
                                                 StoriesScreen()

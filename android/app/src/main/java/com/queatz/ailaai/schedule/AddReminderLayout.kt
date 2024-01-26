@@ -21,6 +21,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfMinute
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
@@ -36,6 +37,7 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
     var value by rememberStateOf("")
     var isAdding by rememberStateOf(false)
     val keyboardController = LocalSoftwareKeyboardController.current!!
+    val nav = nav
 
     fun addReminder() {
         scope.launch {
@@ -85,7 +87,7 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
                 if (value.isNotBlank()) {
                     addReminder()
                 } else {
-                    // todo go to all reminders screen
+                    nav.navigate("reminders")
                 }
             },
             modifier = Modifier

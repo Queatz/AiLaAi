@@ -51,6 +51,13 @@ fun RescheduleDialog(onDismissRequest: () -> Unit, event: ReminderEvent, onUpdat
                 TextButton(
                     {
                         onDismissRequest()
+                    }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+                TextButton(
+                    {
+                        onDismissRequest()
                         onUpdate(
                             Instant.fromEpochMilliseconds(dateState.selectedDateMillis ?: 0)
                                 .at(timeState.hour, timeState.minute)

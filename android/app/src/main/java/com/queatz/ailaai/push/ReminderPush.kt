@@ -11,7 +11,7 @@ import com.queatz.push.ReminderPushData
 fun Push.receive(data: ReminderPushData) {
     val deeplinkIntent = Intent(
         Intent.ACTION_VIEW,
-        "$appDomain/reminders".toUri(),
+        "$appDomain/schedule".toUri(),
         context,
         MainActivity::class.java
     )

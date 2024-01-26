@@ -432,6 +432,7 @@
     <string name="action_close_group">Đóng nhóm</string>
     <string name="nothing_scheduled">Không có gì được lên lịch</string>
     <string name="add_reminder">Lời nhắc mới</string>
+    <string name="new_reminder">Lời nhắc mới</string>
     <string name="reminders">Lời nhắc</string>
     <string name="hourly">Theo giờ</string>
     <string name="daily">Theo ngày</string>
@@ -508,4 +509,6 @@
     <string name="search_cards_of_x">Tìm kiếm trang của %1$s</string>
     <string name="call">Gọi</string>
     <string name="photo_updated">Ảnh đã cập nhật</string>
+    <string name="your_reminders">Lời nhắc của bạn</string>
+    <string name="inline_at">lúc</string>
 </resources>

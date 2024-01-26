@@ -53,6 +53,7 @@ val EditSchedule.reminderSchedule get() = if (reoccurs) {
 val EditSchedule.start get() = parseDateTime(date, time).toKotlinInstant()
 val EditSchedule.end get() = if (until) parseDateTime(untilDate, untilTime).toKotlinInstant() else null
 
+// todo translate
 @Composable
 fun EditReminderSchedule(
     schedule: EditSchedule,

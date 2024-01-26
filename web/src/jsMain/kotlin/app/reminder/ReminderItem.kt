@@ -40,6 +40,7 @@ fun ReminderItem(reminder: Reminder, selected: Boolean, onSelected: () -> Unit) 
             Div({
                 classes(AppStyles.groupItemName)
             }) {
+                // todo translate
                 Text(reminder.title ?: "New reminder")
             }
             Div({
@@ -58,6 +59,7 @@ fun ReminderItem(reminder: Reminder, selected: Boolean, onSelected: () -> Unit) 
     }
 }
 
+// todo translate
 val Reminder.scheduleText @Composable get(): String = buildString {
     if (schedule == null) {
         if (end != null) {
