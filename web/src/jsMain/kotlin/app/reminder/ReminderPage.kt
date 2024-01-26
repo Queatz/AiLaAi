@@ -122,7 +122,8 @@ fun ReminderPage(
                             rawTimeZones.toList()
                         },
                         filter = { it, search ->
-                            it.name.replace("_", " ").contains(search, true)
+                            val hours = it.rawOffsetInMinutes.toDouble() / 60.0
+                            "${it.name.replace("_", " ")} ${if (hours < 0) "" else "+"}$hours".contains(search, true)
                         }
                     ) { timezone, resolve ->
                         Div({

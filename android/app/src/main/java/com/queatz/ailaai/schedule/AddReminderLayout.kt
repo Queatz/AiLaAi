@@ -31,7 +31,7 @@ import kotlinx.datetime.offsetAt
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
+fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Reminder) -> Unit) {
     val scope = rememberCoroutineScope()
     var value by rememberStateOf("")
     var isAdding by rememberStateOf(false)
@@ -58,11 +58,8 @@ fun BoxScope.AddReminderLayout(onReminder: suspend (Reminder) -> Unit) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(
-                2.pad,
-            )
+        modifier = modifier
+            .padding(2.pad)
     ) {
         Box(
             modifier = Modifier

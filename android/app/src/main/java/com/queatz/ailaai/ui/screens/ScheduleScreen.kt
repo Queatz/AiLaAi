@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -311,7 +312,10 @@ fun ScheduleScreen() {
                 }
             }
         }
-        AddReminderLayout {
+        AddReminderLayout(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+        ) {
             updates.emit(it)
         }
     }
