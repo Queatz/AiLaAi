@@ -1,5 +1,6 @@
 package com.queatz.ailaai.schedule
 
+import ReminderEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -59,12 +60,14 @@ fun LazyListScope.Period(
                                     bottomEnd = CornerSize(0.dp)
                                 )
                             )
+
                             index == events.lastIndex -> it.clip(
                                 MaterialTheme.shapes.large.copy(
                                     topStart = CornerSize(0.dp),
                                     topEnd = CornerSize(0.dp)
                                 )
                             )
+
                             else -> it
                         }
                     }
@@ -73,7 +76,16 @@ fun LazyListScope.Period(
                     )
             ) {
                 PeriodDateTime(view, event.date)
-                PeriodEvent(view, event, onExpand, onUpdated)
+                PeriodEvent(
+                    view,
+                    event,
+                    showOpen = true,
+                    showFullTime = false,
+                    onExpand,
+                    modifier = Modifier
+                        .weight(1f),
+                    onUpdated
+                )
             }
         }
     }

@@ -30,6 +30,7 @@ fun TextFieldDialog(
     initialValue: String = "",
     placeholder: String = "",
     showDismiss: Boolean = false,
+    dismissButtonText: String? = null,
     requireModification: Boolean = true,
     requireNotBlank: Boolean = false,
     extraContent: (@Composable ColumnScope.() -> Unit)? = null,
@@ -87,7 +88,7 @@ fun TextFieldDialog(
                     TextButton({
                         onDismissRequest()
                     }) {
-                        Text(stringResource(R.string.close), color = MaterialTheme.colorScheme.secondary)
+                        Text(dismissButtonText ?: stringResource(R.string.close), color = MaterialTheme.colorScheme.secondary)
                     }
                 }
                 TextButton(

@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -18,6 +19,7 @@ class CardToolbarScope internal constructor() {
     fun item(
         icon: ImageVector,
         name: String,
+        color: Color? = null,
         selected: Boolean = false,
         isLoading: Boolean = false,
         onClick: () -> Unit
@@ -39,7 +41,7 @@ class CardToolbarScope internal constructor() {
                     Icon(
                         icon,
                         "",
-                        tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (selected) MaterialTheme.colorScheme.primary else (color ?: MaterialTheme.colorScheme.onSurfaceVariant)
                     )
                 }
                 Text(

@@ -1,10 +1,10 @@
 package com.queatz.ailaai.schedule
 
+import ReminderEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +17,7 @@ import app.ailaai.api.updateReminderOccurrence
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReminderOccurrence
@@ -24,10 +25,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun RowScope.PeriodEvent(
+fun PeriodEvent(
     view: ScheduleView,
     event: ReminderEvent,
+    showOpen: Boolean,
+    showFullTime: Boolean,
     onExpand: MutableSharedFlow<Unit>,
+    modifier: Modifier = Modifier,
     onUpdated: (ReminderEvent) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -36,6 +40,7 @@ fun RowScope.PeriodEvent(
     var showReschedule by rememberStateOf(false)
     var showDelete by rememberStateOf(false)
     val done = event.occurrence?.done == true
+    val nav = nav
 
     LaunchedEffect(Unit) {
         onExpand.collect {
@@ -118,7 +123,7 @@ fun RowScope.PeriodEvent(
 
     Column(
         verticalArrangement = Arrangement.Top,
-        modifier = Modifier
+        modifier = modifier
             .clip(MaterialTheme.shapes.large)
             .clickable {
                 scope.launch {
@@ -129,7 +134,6 @@ fun RowScope.PeriodEvent(
                 }
             }
             .padding(1.pad)
-            .weight(1f)
     ) {
         Text(
             event.reminder.title ?: "",
@@ -150,7 +154,7 @@ fun RowScope.PeriodEvent(
         )
         Text(
             listOfNotNull(
-                event.date.formatEvent(view),
+                if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(view),
                 event.occurrence?.note ?: event.reminder.note
             ).joinToString(" • "),
             style = MaterialTheme.typography.labelSmall.let {
@@ -173,6 +177,7 @@ fun RowScope.PeriodEvent(
                 {
                     expanded = false
                 },
+                showOpen = showOpen,
                 onDone = {
                     scope.launch {
                         api.updateReminderOccurrence(
@@ -185,7 +190,7 @@ fun RowScope.PeriodEvent(
                     }
                 },
                 onOpen = {
-                    // todo navigate
+                    nav.navigate("reminder/${event.reminder.id!!}")
                 },
                 onEdit = {
                     showEditNote = true

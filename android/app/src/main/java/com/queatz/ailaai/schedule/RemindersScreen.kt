@@ -46,9 +46,6 @@ fun RemindersScreen() {
             },
             navigationIcon = {
                 BackButton()
-            },
-            actions = {
-
             }
         )
 

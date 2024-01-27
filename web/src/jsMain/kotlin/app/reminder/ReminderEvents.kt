@@ -45,6 +45,7 @@ fun ReminderEvents(reminder: Reminder) {
             Div({
                 classes(SchedulePageStyles.title)
             }) {
+                // todo translate
                 Text("History")
             }
             Div({

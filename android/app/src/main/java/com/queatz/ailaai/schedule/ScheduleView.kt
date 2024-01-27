@@ -15,12 +15,6 @@ enum class ScheduleView {
     Yearly
 }
 
-enum class ReminderEventType {
-    Start,
-    Occur,
-    End
-}
-
 val ScheduleView.range
     get() = when (this) {
         ScheduleView.Daily -> 7
@@ -52,6 +46,14 @@ val ScheduleView.eventFormat
         else -> "h:mm a"
     }
 
+val ScheduleView.eventFormatFull
+    get() = when (this) {
+        ScheduleView.Daily -> "h:mm a"
+        ScheduleView.Weekly -> "MMMM d, EEEE, h:mm a"
+        ScheduleView.Monthly -> "d, EEEE, h:mm a"
+        ScheduleView.Yearly -> "MMMM d, EEEE, h:mm a"
+    }
+
 val ScheduleView.dateTimeFormat
     get() = when (this) {
         ScheduleView.Daily -> "h:mm"
@@ -76,6 +78,8 @@ fun Instant.formatTitle(context: Context, view: ScheduleView) = format(view.titl
 
 fun Instant.formatEvent(view: ScheduleView) = view.eventFormat?.let(::format)
 
+fun Instant.formatEventFull(view: ScheduleView) = view.eventFormatFull.let(::format)
+
 fun Instant.formatDateTime(view: ScheduleView) = format(view.dateTimeFormat)
 
 fun Instant.formatDateTimeHint(view: ScheduleView) = when (view) {
@@ -84,22 +88,3 @@ fun Instant.formatDateTimeHint(view: ScheduleView) = when (view) {
     ScheduleView.Monthly -> nameOfDayOfWeek()
     ScheduleView.Yearly -> format("MMM")
 }
-
-data class ReminderEvent(
-    /**
-     * The reminder that spawned this event
-     */
-    val reminder: Reminder,
-    /**
-     * The date of the event
-     */
-    val date: Instant,
-    /**
-     * The type of event.
-     */
-    val event: ReminderEventType,
-    /**
-     * The `ReminderOccurrence` associated with this event, if any.
-     */
-    val occurrence: ReminderOccurrence?
-)

@@ -304,6 +304,7 @@
     <string name="you_cannot_undo_this_sticker_pack">Bạn không thể lấy lại gói hình dán này.</string>
     <string name="you_cannot_undo_this_sticker">Bạn không thể lấy lại hình dán này.</string>
     <string name="you_cannot_undo_this_story">Bạn không thể lấy lại bài viết này.</string>
+    <string name="you_cannot_undo_this_reminder">Bạn không thể lấy lại lời nhắc này.</string>
     <string name="add_name">Thêm tên</string>
     <string name="sticker_name">Tên của hình dán</string>
     <string name="use_stickers">Sử dụng hình dán</string>
@@ -346,6 +347,7 @@
     <string name="version_x_available">Có phiên bản %1$s nè\nBạn đang xài phiên bản %2$s</string>
     <string name="see_whats_new">Xem điểm mới</string>
     <string name="release_history">Lịch sử phát hành</string>
+    <string name="history">Lịch sử</string>
     <string name="updated_to_x">Đã cập nhật thành %1$s</string>
     <string name="you_are_using_the_latest_version">Bạn đang xài phiên bản mới nhất</string>
     <string name="made_with_love">Tạo với ♥ ở TP.HCM</string>
@@ -511,4 +513,6 @@
     <string name="photo_updated">Ảnh đã cập nhật</string>
     <string name="your_reminders">Lời nhắc của bạn</string>
     <string name="inline_at">lúc</string>
+    <string name="reschedule">Lên lịch lại</string>
+    <string name="delete_this_reminder">Xóa lời nhắc này?</string>
 </resources>

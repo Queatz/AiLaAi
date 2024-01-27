@@ -18,6 +18,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun ScheduleItemActions(
     onDismissRequest: () -> Unit,
+    showOpen: Boolean,
     onDone: () -> Unit,
     onOpen: () -> Unit,
     onEdit: () -> Unit,
@@ -43,21 +44,25 @@ fun ScheduleItemActions(
                 modifier = Modifier.size(18.dp)
             )
         }
-        OutlinedIconButton(
-            {
-                onDismissRequest()
-                onOpen()
-            },
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-        ) {
-            Icon(
-                Icons.Outlined.OpenInNew,
-                // todo translate
-                "Open",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
+
+        if (showOpen) {
+            OutlinedIconButton(
+                {
+                    onDismissRequest()
+                    onOpen()
+                },
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Icon(
+                    Icons.Outlined.OpenInNew,
+                    // todo translate
+                    "Open",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
+
         OutlinedIconButton(
             {
                 onDismissRequest()

@@ -52,11 +52,18 @@ fun EventRow(
 
     fun edit() {
         scope.launch {
-            val note = inputDialog("Edit note", "", confirmButton = "Update", defaultValue = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: "")
+            // todo translate
+            val note = inputDialog(
+                "Edit note",
+                "",
+                confirmButton = "Update",
+                defaultValue = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: ""
+            )
 
             if (note == null) return@launch
 
-            api.updateReminderOccurrence(event.reminder.id!!, event.date.toKotlinInstant(), ReminderOccurrence(
+            api.updateReminderOccurrence(
+                event.reminder.id!!, event.date.toKotlinInstant(), ReminderOccurrence(
                 note = note
             )) {
                 onUpdate()
@@ -66,6 +73,7 @@ fun EventRow(
 
     fun delete() {
         scope.launch {
+            // todo translate
             val result = dialog("Delete this occurrence?", confirmButton = "Yes, delete")
 
             if (result != true) return@launch
@@ -83,6 +91,7 @@ fun EventRow(
         scope.launch {
             var date by mutableStateOf(format(event.date, "yyyy-MM-dd"))
             var time by mutableStateOf(format(event.date, "HH:mm"))
+            // todo translate
             val result = dialog("Reschedule occurrence", confirmButton = "Update") {
                 ReminderDateTime(
                     date,

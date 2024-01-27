@@ -1,5 +1,6 @@
 package com.queatz.ailaai.schedule
 
+import ReminderEvent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,7 +16,6 @@ import com.queatz.ailaai.extensions.minute
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

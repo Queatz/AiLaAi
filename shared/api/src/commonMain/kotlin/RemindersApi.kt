@@ -56,6 +56,16 @@ suspend fun Api.updateReminder(
     onSuccess = onSuccess
 )
 
+suspend fun Api.reminder(
+    id: String,
+    onError: ErrorBlock = {},
+    onSuccess: SuccessBlock<Reminder> = {}
+) = get(
+    url = "reminders/$id",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.reminderOccurrences(
     id: String,
     start: Instant,

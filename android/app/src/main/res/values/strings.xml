@@ -311,6 +311,7 @@
     <string name="you_cannot_undo_this_sticker_pack">You cannot undo this.</string>
     <string name="you_cannot_undo_this_sticker">You cannot undo this.</string>
     <string name="you_cannot_undo_this_story">You cannot undo this.</string>
+    <string name="you_cannot_undo_this_reminder">You cannot undo this.</string>
     <string name="add_name">Add a name</string>
     <string name="sticker_name">Sticker name</string>
     <string name="use_stickers">Use stickers</string>
@@ -355,6 +356,7 @@
     <string name="version_x_available">Version %1$s available\nCurrently you have %2$s</string>
     <string name="see_whats_new">See what\'s new</string>
     <string name="release_history">Release history</string>
+    <string name="history">History</string>
     <string name="updated_to_x">Updated to %1$s</string>
     <string name="you_are_using_the_latest_version">You are using the latest version</string>
     <string name="made_with_love">Made with ♥ in HCMC</string>
@@ -535,4 +537,6 @@
     <string name="photo_updated">Photo updated</string>
     <string name="your_reminders">Your reminders</string>
     <string name="inline_at">at</string>
+    <string name="reschedule">Reschedule</string>
+    <string name="delete_this_reminder">Delete this reminder?</string>
 </resources>

@@ -30,7 +30,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     append(" ")
 
     val dayStrings = (schedule?.weekdays?.map {
-        DateFormatSymbols.getInstance().weekdays[it - 1]
+        DateFormatSymbols.getInstance().weekdays[it]
     } ?: emptyList()) + (schedule?.days?.map {
         if (it == -1) "last" else ordinalNumberFormat.format(it)
     } ?: emptyList())

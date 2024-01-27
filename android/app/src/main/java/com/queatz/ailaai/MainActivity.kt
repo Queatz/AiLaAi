@@ -47,6 +47,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LifecycleEffect
 import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
+import com.queatz.ailaai.schedule.ReminderScreen
 import com.queatz.ailaai.schedule.RemindersScreen
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
@@ -533,6 +534,9 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable("reminders") {
                                                 RemindersScreen()
+                                            }
+                                            composable("reminder/{id}") {
+                                                ReminderScreen(it.arguments!!.getString("id")!!)
                                             }
                                             composable("stories") {
                                                 StoriesScreen()

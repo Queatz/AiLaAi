@@ -11,17 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 
 @Composable
 fun ReminderItem(reminder: Reminder) {
+    val nav = nav
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .clickable {
-                // todo
+                nav.navigate("reminder/${reminder.id!!}")
             }
             .padding(1.pad)
     ) {

@@ -87,6 +87,7 @@ dependencies {
     implementation("app.ailaai.shared:push")
     implementation("app.ailaai.shared:api")
     implementation("app.ailaai.shared:widgets")
+    implementation("app.ailaai.shared:reminders")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
