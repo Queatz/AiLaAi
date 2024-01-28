@@ -434,6 +434,7 @@
     <string name="action_close_group">Đóng nhóm</string>
     <string name="nothing_scheduled">Không có gì được lên lịch</string>
     <string name="add_reminder">Lời nhắc mới</string>
+    <string name="schedule_reminder">Lên lịch lời nhắc mới</string>
     <string name="new_reminder">Lời nhắc mới</string>
     <string name="reminders">Lời nhắc</string>
     <string name="hourly">Theo giờ</string>

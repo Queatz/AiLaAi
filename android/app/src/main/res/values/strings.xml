@@ -411,6 +411,7 @@
     <string name="enable_anonymous_replies">Enable anonymous replies from the web</string>
     <string name="nothing_scheduled">Nothing scheduled</string>
     <string name="add_reminder">Add reminder</string>
+    <string name="schedule_reminder">Schedule reminder</string>
     <string name="new_reminder">New reminder</string>
     <string name="select_multiple">Select multiple</string>
     <string name="open_source">Open Source</string>

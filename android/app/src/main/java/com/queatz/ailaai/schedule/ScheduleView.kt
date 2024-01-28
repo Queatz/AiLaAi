@@ -56,7 +56,7 @@ val ScheduleView.eventFormatFull
 
 val ScheduleView.dateTimeFormat
     get() = when (this) {
-        ScheduleView.Daily -> "h:mm a"
+        ScheduleView.Daily -> "h:mm"
         ScheduleView.Weekly -> "d"
         ScheduleView.Monthly -> "d"
         ScheduleView.Yearly -> "d"

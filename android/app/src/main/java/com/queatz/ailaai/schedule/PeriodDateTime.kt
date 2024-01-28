@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.datetime.Instant
@@ -24,11 +25,13 @@ fun RowScope.PeriodDateTime(view: ScheduleView, date: Instant) {
     ) {
         Text(
             date.formatDateTime(view),
+            textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleMedium
         )
         Text(
             date.formatDateTimeHint(view),
+            textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.labelSmall
         )

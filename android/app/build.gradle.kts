@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("plugin.serialization") version "1.9.22"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
@@ -67,7 +67,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.6"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
@@ -82,7 +82,7 @@ android {
 dependencies {
     val ktorVersion = "2.3.6"
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.5.4"
+    val composeVersion = "1.6.0"
     implementation("app.ailaai.shared:models")
     implementation("app.ailaai.shared:push")
     implementation("app.ailaai.shared:api")
@@ -100,12 +100,13 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.1.2")
-    implementation("androidx.compose.material3:material3-window-size-class:1.1.2")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
-    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
+    implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
+    implementation("androidx.compose.material3:material3:1.2.0-rc01")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0-rc01")
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -123,7 +124,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
