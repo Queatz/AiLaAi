@@ -27,6 +27,7 @@ import kotlinx.datetime.Clock
 fun ScheduleReminderDialog(
     onDismissRequest: () -> Unit,
     initialReminder: Reminder,
+    confirmText: String? = null,
     onUpdate: suspend (Reminder) -> Unit
 ) {
     val reminder = remember(initialReminder) {
@@ -167,7 +168,7 @@ fun ScheduleReminderDialog(
                     },
                     enabled = !isLoading
                 ) {
-                    Text(stringResource(R.string.update))
+                    Text(confirmText ?: stringResource(R.string.update))
                 }
             }
         }

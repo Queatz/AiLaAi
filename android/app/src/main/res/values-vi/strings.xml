@@ -433,7 +433,7 @@
     <string name="action_open_group">Mở nhóm</string>
     <string name="action_close_group">Đóng nhóm</string>
     <string name="nothing_scheduled">Không có gì được lên lịch</string>
-    <string name="add_reminder">Lời nhắc mới</string>
+    <string name="add_reminder">Tạo lời nhắc</string>
     <string name="schedule_reminder">Lên lịch lời nhắc mới</string>
     <string name="new_reminder">Lời nhắc mới</string>
     <string name="reminders">Lời nhắc</string>

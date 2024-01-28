@@ -1,20 +1,16 @@
 package com.queatz.ailaai.schedule
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -45,13 +41,15 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
     val keyboardController = LocalSoftwareKeyboardController.current!!
     val nav = nav
 
-    fun addReminder() {
+    fun addReminder(reminder: Reminder? = null) {
         scope.launch {
             isAdding = true
             api.newReminder(
                 Reminder(
                     title = value.trim(),
-                    start = Clock.System.now().startOfMinute(),
+                    start = reminder?.start ?: Clock.System.now().startOfMinute(),
+                    end = reminder?.end,
+                    schedule = reminder?.schedule,
                     timezone = TimeZone.currentSystemDefault().id,
                     utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0),
                 )
@@ -121,6 +119,21 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
             } else {
                 Icon(Icons.Outlined.Edit, stringResource(R.string.edit_reminders))
             }
+        }
+    }
+
+    if (showScheduleReminder) {
+        ScheduleReminderDialog(
+            {
+                showScheduleReminder = false
+            },
+            initialReminder = Reminder(
+                start = Clock.System.now().startOfMinute()
+            ),
+            confirmText = stringResource(R.string.add_reminder)
+        ) {
+            addReminder(it)
+            showScheduleReminder = false
         }
     }
 }
