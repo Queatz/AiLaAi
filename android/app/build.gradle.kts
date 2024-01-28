@@ -25,8 +25,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 74
-        versionName = "0.9.74"
+        versionCode = 75
+        versionName = "0.9.75"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -50,7 +50,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
 
             // This is here because of just how slow Jetpack Compose is in debug mode
-//            isDebuggable = false
+            isDebuggable = false
         }
         release {
             signingConfig = signingConfigs.getByName("release")
