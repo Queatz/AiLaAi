@@ -265,6 +265,11 @@ class Push {
                         header("apns-topic", "app.ailaai")//todo move to secrets.json
                         setBody(
                             ApnsPushBody(
+                                aps = ApsBody(
+                                    alert = ApsAlertBody(
+                                        body = json.encodeToString(pushData)
+                                    )
+                                ),
                                 data = ApsDataBody(
                                     data = json.encodeToString(pushData)
                                 )

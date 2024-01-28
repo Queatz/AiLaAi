@@ -33,6 +33,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
@@ -51,7 +52,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(updateMe: () -> Unit) {
     val scope = rememberCoroutineScope()
@@ -62,8 +62,8 @@ fun SettingsScreen(updateMe: () -> Unit) {
     var urlDialog by rememberStateOf(false)
     var showReleaseNotes by rememberStateOf(false)
     var showRefreshDialog by rememberStateOf(false)
-    var profile by remember { mutableStateOf<PersonProfile?>(null) }
-    var transferCode by remember { mutableStateOf("") }
+    var profile by rememberSavableStateOf<PersonProfile?>(null)
+    var transferCode by rememberStateOf("")
     var isRefreshing by rememberStateOf(false)
     var showBiometrics by rememberStateOf(false)
     var biometricsSucceeded by rememberStateOf(false)
@@ -119,6 +119,12 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 profile = it
             }
             break
+        }
+    }
+
+    ResumeEffect {
+        api.profile(me?.id ?: return@ResumeEffect) {
+            profile = it
         }
     }
 
