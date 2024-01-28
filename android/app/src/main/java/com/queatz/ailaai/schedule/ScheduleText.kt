@@ -13,7 +13,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
 
     if (schedule == null) {
         if (end != null) {
-            append("From ${start!!.formatDateAndTime()} until ${end!!.formatDateAndTime()}")
+            append(stringResource(R.string.from_x_until_x, start!!.formatDateAndTime(), end!!.formatDateAndTime()))
         } else {
             append(start!!.formatDateAndTime())
         }
@@ -21,70 +21,70 @@ val Reminder.scheduleText @Composable get(): String = buildString {
         return@buildString
     }
 
-    append("Every")
+    append(stringResource(R.string.every))
     append(" ")
 
     val dayStrings = (schedule?.weekdays?.map {
         it.dayOfWeekName
     } ?: emptyList()) + (schedule?.days?.map {
-        if (it == -1) "last" else it.ordinal
+        if (it == -1) stringResource(R.string.inline_last) else it.ordinal
     } ?: emptyList())
 
     if (dayStrings.isNotEmpty()) {
         append(dayStrings.asNaturalList { it })
 
         if (schedule?.days?.ifNotEmpty != null) {
-            append(" day of the month")
+            append(" ${stringResource(R.string.inline_day_of_the_month)}")
         }
 
         append(" ")
     } else {
-        append("day ")
+        append("${stringResource(R.string.inline_day)} ")
     }
 
     schedule?.hours?.ifNotEmpty?.let { hours ->
         val mins = start!!.minute()
-        append("at ")
+        append("${stringResource(R.string.inline_at)} ")
         append(hours.asNaturalList { now.at(it, mins).format("h:mm a") })
         append(" ")
     }
 
-    var during = "during"
+    var during = stringResource(R.string.inline_during)
 
     schedule?.weeks?.ifNotEmpty?.let { weeks ->
-        append("$during the ")
-        during = "of"
+        append("$during${stringResource(R.string.inline_the).notBlank?.let { " $it" }} ")
+        during = stringResource(R.string.inline_of)
         append(weeks.asNaturalList { it.ordinal })
-        append(" week")
+        append(" ${stringResource(R.string.inline_week)}")
         append(" ")
 
         if (schedule?.months?.ifNotEmpty == null) {
-            append("of every month")
+            append(stringResource(R.string.inline_of_every_month))
             append(" ")
         }
     }
 
     schedule?.months?.ifNotEmpty?.let { months ->
         append("$during ")
-        during = "of"
+        during = stringResource(R.string.inline_of)
         append(months.asNaturalList { it.monthName })
         append(" ")
     }
 
     schedule?.years?.ifNotEmpty?.let { years ->
         append("$during ")
-        during = "of"
+        during = stringResource(R.string.inline_the)
         append(years.asNaturalList { "$it" })
         append(" ")
     }
 
     val start = start!!
     if (start > now) {
-        append("from ${ start.formatDateAndTime() } ")
+        append("${stringResource(R.string.inline_from)} ${ start.formatDateAndTime() } ")
     }
 
     end?.let { end ->
-        append("until ${ end.formatDateAndTime() } ")
+        append("${stringResource(R.string.inline_until)} ${ end.formatDateAndTime() } ")
     }
 }.trimEnd()
 

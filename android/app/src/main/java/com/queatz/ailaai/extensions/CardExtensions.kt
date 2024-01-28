@@ -32,11 +32,11 @@ val Card.hint @Composable get() = listOfNotNull(
 ).joinToString(" • ")
 
 val PayFrequency.appStringShort @Composable get() = when (this) {
-    PayFrequency.Hourly -> stringResource(R.string.inlineHour)
-    PayFrequency.Daily -> stringResource(R.string.inlineDay)
-    PayFrequency.Weekly -> stringResource(R.string.inlineWeekly)
-    PayFrequency.Monthly -> stringResource(R.string.inlineMonthly)
-    PayFrequency.Yearly -> stringResource(R.string.inlineYearly)
+    PayFrequency.Hourly -> stringResource(R.string.inline_hour)
+    PayFrequency.Daily -> stringResource(R.string.inline_day)
+    PayFrequency.Weekly -> stringResource(R.string.inline_weekly)
+    PayFrequency.Monthly -> stringResource(R.string.inline_monthly)
+    PayFrequency.Yearly -> stringResource(R.string.inline_yearly)
 }
 
 val PayFrequency.appString @Composable get() = when (this) {

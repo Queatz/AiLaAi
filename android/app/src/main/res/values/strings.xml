@@ -520,11 +520,11 @@
         <item quantity="one">member</item>
         <item quantity="other">members</item>
     </plurals>
-    <string name="inlineHour">hour</string>
-    <string name="inlineDay">day</string>
-    <string name="inlineWeekly">week</string>
-    <string name="inlineMonthly">month</string>
-    <string name="inlineYearly">year</string>
+    <string name="inline_hour">hour</string>
+    <string name="inline_day">day</string>
+    <string name="inline_weekly">week</string>
+    <string name="inline_monthly">month</string>
+    <string name="inline_yearly">year</string>
     <string name="x_is_a_member">%1$s is a member</string>
     <string name="profile">Profile</string>
     <string name="dont_show">Don\'t show again</string>
@@ -546,4 +546,18 @@
     <string name="every_day">Every day</string>
     <string name="every_week">Every week</string>
     <string name="every_month">Every month</string>
+    <string name="x_week">%1$s week</string>
+    <string name="last_day_of_the_month">Last day of the month</string>
+    <string name="day_of_the_month">%1$s day of the month</string>
+    <string name="every">Every</string>
+    <string name="from_x_until_x">From %1$s until %2$s</string>
+    <string name="inline_day_of_the_month">day of the month</string>
+    <string name="inline_during">during</string>
+    <string name="inline_of">of</string>
+    <string name="inline_of_every_month">of every month</string>
+    <string name="inline_week">week</string>
+    <string name="inline_the">the</string>
+    <string name="inline_from">from</string>
+    <string name="inline_until">until</string>
+    <string name="inline_last">last</string>
 </resources>

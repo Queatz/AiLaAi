@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
@@ -22,7 +23,6 @@ import com.queatz.db.ReminderSchedule
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-// todo translate
 @Composable
 fun ScheduleReminderDialog(
     onDismissRequest: () -> Unit,
@@ -58,6 +58,7 @@ fun ScheduleReminderDialog(
             reminder.schedule = reminder.schedule!!.copy(
                 hours = (reminder.schedule?.hours ?: emptyList()) + reminder.start!!.hour()
             )
+            recomposeScope.invalidate()
         }
     }
 
@@ -103,9 +104,9 @@ fun ScheduleReminderDialog(
                     ) {
                         val days = ((reminder.schedule?.weekdays?.map { it.dayOfWeekName } ?: emptyList()) + (reminder.schedule?.days?.map {
                             if (it == -1) {
-                                "Last day of the month"
+                                stringResource(R.string.last_day_of_the_month)
                             } else {
-                                "${it.ordinal} day of the month"
+                                stringResource(R.string.day_of_the_month, it.ordinal)
                             }
                         } ?: emptyList())).ifNotEmpty
                         Text(
@@ -118,9 +119,10 @@ fun ScheduleReminderDialog(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        val context = LocalContext.current
                         Text(
                             reminder.schedule?.weeks?.ifNotEmpty?.asNaturalList {
-                                "${it.ordinal} week"
+                                context.getString(R.string.x_week, it.ordinal)
                             } ?: stringResource(R.string.every_week)
                         )
                     }
@@ -241,7 +243,7 @@ fun ScheduleReminderDialog(
             (1..31).forEach {
                 val checked = reminder.schedule?.days?.contains(it) == true
                 menuItem(
-                    "${it.ordinal} day of the month",
+                    stringResource(R.string.day_of_the_month, it.ordinal),
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
@@ -264,7 +266,7 @@ fun ScheduleReminderDialog(
             run {
                 val checked = reminder.schedule?.days?.contains(-1) == true
                 menuItem(
-                    "Last day of the month",
+                    stringResource(R.string.last_day_of_the_month),
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
@@ -294,7 +296,7 @@ fun ScheduleReminderDialog(
             (1..5).forEach {
                 val checked = reminder.schedule?.weeks?.contains(it) == true
                 menuItem(
-                    "${it.ordinal} week",
+                    stringResource(R.string.x_week, it.ordinal),
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
