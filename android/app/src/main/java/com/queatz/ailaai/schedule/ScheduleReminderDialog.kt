@@ -50,6 +50,17 @@ fun ScheduleReminderDialog(
     var showMonths by rememberStateOf(false)
     val today = Clock.System.now().startOfDay()
 
+    LaunchedEffect(reminder.schedule?.hours?.isNotEmpty() != true) {
+        if (reminder.schedule?.hours?.isNotEmpty() != true) {
+            if (reminder.schedule == null) {
+                reminder.schedule = ReminderSchedule()
+            }
+            reminder.schedule = reminder.schedule!!.copy(
+                hours = (reminder.schedule?.hours ?: emptyList()) + reminder.start!!.hour()
+            )
+        }
+    }
+
     DialogBase(onDismissRequest) {
         Column(
             modifier = Modifier
