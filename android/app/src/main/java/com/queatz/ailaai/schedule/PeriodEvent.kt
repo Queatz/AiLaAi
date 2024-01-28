@@ -106,7 +106,7 @@ fun PeriodEvent(
             {
                 showReschedule = false
             },
-            event
+            event.date
         ) {
             scope.launch {
                 api.updateReminderOccurrence(

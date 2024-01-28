@@ -461,6 +461,7 @@
     <string name="for_a_month">Trong 1 tháng</string>
     <string name="indefinitely">Vô thời hạn</string>
     <string name="until_x">Tới %1$s</string>
+    <string name="until">Tới</string>
     <string name="inline_today">hôm nay</string>
     <string name="inline_tomorrow">ngày mai</string>
     <string name="inline_yesterday">hôm qua</string>
@@ -515,4 +516,5 @@
     <string name="inline_at">lúc</string>
     <string name="reschedule">Lên lịch lại</string>
     <string name="delete_this_reminder">Xóa lời nhắc này?</string>
+    <string name="reoccurs">Định kỳ</string>
 </resources>

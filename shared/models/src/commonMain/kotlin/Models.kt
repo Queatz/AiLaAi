@@ -263,7 +263,7 @@ class Widget(
 ) : Model()
 
 @Serializable
-class ReminderSchedule(
+data class ReminderSchedule(
     /**
      * 0 - 23 = hour of day
      *

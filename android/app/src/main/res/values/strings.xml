@@ -463,6 +463,7 @@
     <string name="for_a_month">For a month</string>
     <string name="indefinitely">Indefinitely</string>
     <string name="until_x">Until %1$s</string>
+    <string name="until">Until</string>
     <string name="inline_today">today</string>
     <string name="inline_tomorrow">tomorrow</string>
     <string name="inline_yesterday">yesterday</string>
@@ -539,4 +540,9 @@
     <string name="inline_at">at</string>
     <string name="reschedule">Reschedule</string>
     <string name="delete_this_reminder">Delete this reminder?</string>
+    <string name="reoccurs">Reoccurs</string>
+    <string name="every_hour">Every hour</string>
+    <string name="every_day">Every day</string>
+    <string name="every_week">Every week</string>
+    <string name="every_month">Every month</string>
 </resources>

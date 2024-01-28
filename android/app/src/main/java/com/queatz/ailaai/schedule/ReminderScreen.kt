@@ -99,8 +99,22 @@ fun ReminderScreen(reminderId: String) {
         }
     }
 
-    if (showReschedule) {
-        // todo
+    if (showReschedule && reminder != null) {
+        ScheduleReminderDialog(
+            {
+                showReschedule = false
+            },
+            initialReminder = reminder!!
+        ) {
+            api.updateReminder(reminderId, Reminder(
+                start = it.start,
+                end = it.end,
+                schedule = it.schedule
+            )) {
+                reload()
+                showReschedule = false
+            }
+        }
     }
 
     if (showEditTitle) {
@@ -174,12 +188,12 @@ fun ReminderScreen(reminderId: String) {
                 ) {
                     showEditNote = true
                 }
-//                item(
-//                    Icons.Outlined.Update,
-//                    stringResource(R.string.reschedule)
-//                ) {
-//                    showReschedule = true
-//                }
+                item(
+                    Icons.Outlined.Update,
+                    stringResource(R.string.reschedule)
+                ) {
+                    showReschedule = true
+                }
                 item(
                     Icons.Outlined.Edit,
                     stringResource(R.string.rename)

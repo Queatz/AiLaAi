@@ -56,7 +56,7 @@ val ScheduleView.eventFormatFull
 
 val ScheduleView.dateTimeFormat
     get() = when (this) {
-        ScheduleView.Daily -> "h:mm"
+        ScheduleView.Daily -> "h:mm a"
         ScheduleView.Weekly -> "d"
         ScheduleView.Monthly -> "d"
         ScheduleView.Yearly -> "d"
@@ -79,6 +79,8 @@ fun Instant.formatTitle(context: Context, view: ScheduleView) = format(view.titl
 fun Instant.formatEvent(view: ScheduleView) = view.eventFormat?.let(::format)
 
 fun Instant.formatEventFull(view: ScheduleView) = view.eventFormatFull.let(::format)
+
+fun Instant.formatFull() = format("MMMM d, YYYY, EEEE, h:mm a")
 
 fun Instant.formatDateTime(view: ScheduleView) = format(view.dateTimeFormat)
 

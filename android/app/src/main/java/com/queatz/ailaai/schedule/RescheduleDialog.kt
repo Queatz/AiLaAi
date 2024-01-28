@@ -19,14 +19,14 @@ import kotlinx.datetime.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RescheduleDialog(onDismissRequest: () -> Unit, event: ReminderEvent, onUpdate: (Instant) -> Unit) {
+fun RescheduleDialog(onDismissRequest: () -> Unit, date: Instant, onUpdate: (Instant) -> Unit) {
     val dateState = rememberDatePickerState(
-        initialSelectedDateMillis = event.date.toEpochMilliseconds(),
+        initialSelectedDateMillis = date.toEpochMilliseconds(),
         initialDisplayMode = DisplayMode.Input
     )
     val timeState = rememberTimePickerState(
-        initialHour = event.date.hour(),
-        initialMinute = event.date.minute(),
+        initialHour = date.hour(),
+        initialMinute = date.minute()
     )
 
     DialogBase(onDismissRequest) {
@@ -35,11 +35,7 @@ fun RescheduleDialog(onDismissRequest: () -> Unit, event: ReminderEvent, onUpdat
                 .padding(3.pad)
                 .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-//                modifier = Modifier
-//                    .weight(1f, fill = false)
-            ) {
+            Column {
                 DatePicker(dateState, title = null)
                 TimePicker(timeState)
             }
@@ -57,11 +53,11 @@ fun RescheduleDialog(onDismissRequest: () -> Unit, event: ReminderEvent, onUpdat
                 }
                 TextButton(
                     {
-                        onDismissRequest()
                         onUpdate(
                             Instant.fromEpochMilliseconds(dateState.selectedDateMillis ?: 0)
                                 .at(timeState.hour, timeState.minute)
                         )
+                        onDismissRequest()
                     }
                 ) {
                     Text(stringResource(R.string.update))

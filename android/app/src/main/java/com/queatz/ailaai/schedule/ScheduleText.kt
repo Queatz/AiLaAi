@@ -2,15 +2,10 @@ package com.queatz.ailaai.schedule
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.ibm.icu.text.DateFormatSymbols
-import com.ibm.icu.text.RuleBasedNumberFormat
-import com.ibm.icu.text.RuleBasedNumberFormat.ORDINAL
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.db.Reminder
 import kotlinx.datetime.Clock
-
-private val ordinalNumberFormat = RuleBasedNumberFormat(ORDINAL)
 
 // todo translate
 val Reminder.scheduleText @Composable get(): String = buildString {
@@ -30,9 +25,9 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     append(" ")
 
     val dayStrings = (schedule?.weekdays?.map {
-        DateFormatSymbols.getInstance().weekdays[it]
+        it.dayOfWeekName
     } ?: emptyList()) + (schedule?.days?.map {
-        if (it == -1) "last" else ordinalNumberFormat.format(it)
+        if (it == -1) "last" else it.ordinal
     } ?: emptyList())
 
     if (dayStrings.isNotEmpty()) {
@@ -59,7 +54,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     schedule?.weeks?.ifNotEmpty?.let { weeks ->
         append("$during the ")
         during = "of"
-        append(weeks.asNaturalList { ordinalNumberFormat.format(it) })
+        append(weeks.asNaturalList { it.ordinal })
         append(" week")
         append(" ")
 
@@ -72,7 +67,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     schedule?.months?.ifNotEmpty?.let { months ->
         append("$during ")
         during = "of"
-        append(months.asNaturalList { DateFormatSymbols.getInstance().months[it - 1] })
+        append(months.asNaturalList { it.monthName })
         append(" ")
     }
 
