@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,18 +42,19 @@ fun FloatingButton(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit,
 ) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.semantics { role = Role.Button },
-        shape = shape,
-        color = containerColor,
-        contentColor = contentColor,
-        interactionSource = interactionSource,
+    val absoluteElevation = LocalAbsoluteTonalElevation.current
+    CompositionLocalProvider(
+        LocalContentColor provides contentColor,
+        LocalAbsoluteTonalElevation provides absoluteElevation
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .minimumInteractiveComponentSize()
-                .graphicsLayer(shadowElevation = 1.elevation.px.toFloat(), shape = shape, clip = false)
+                .graphicsLayer(
+                    shadowElevation = LocalAbsoluteTonalElevation.current.px.toFloat() + 6.dp.px, // todo animate on press
+                    shape = shape,
+                    clip = false
+                )
                 .background(
                     color = containerColor,
                     shape = shape
