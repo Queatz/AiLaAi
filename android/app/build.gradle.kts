@@ -121,7 +121,7 @@ dependencies {
     implementation("com.huawei.hms:hianalytics:6.10.0.303")
     implementation("com.huawei.hms:hwid:6.11.0.300")
     implementation("com.huawei.hms:location:6.11.0.301")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
