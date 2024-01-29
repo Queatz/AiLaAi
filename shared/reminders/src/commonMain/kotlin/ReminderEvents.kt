@@ -28,6 +28,8 @@ data class ReminderEvent(
     val occurrence: ReminderOccurrence?
 )
 
+val ReminderEvent.updateDate get() = occurrence?.occurrence ?: date
+
 /**
  * Rules are:
  *

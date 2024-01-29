@@ -56,6 +56,8 @@ data class ReminderEvent(
     val occurrence: ReminderOccurrence?
 )
 
+val ReminderEvent.updateDate get() = occurrence?.occurrence ?: date.toKotlinInstant()
+
 @Composable
 fun SchedulePage(
     view: ScheduleView,

@@ -262,7 +262,7 @@ class Push {
                         contentType(ContentType.Application.Json.withCharset(UTF_8))
                         header(HttpHeaders.Authorization, "Bearer $apnsToken")
                         header("apns-push-type", "alert")
-                        header("apns-topic", "app.ailaai")//todo move to secrets.json
+                        header("apns-topic", secrets.apns.topic)//todo move to secrets.json
                         setBody(
                             ApnsPushBody(
                                 aps = ApsBody(

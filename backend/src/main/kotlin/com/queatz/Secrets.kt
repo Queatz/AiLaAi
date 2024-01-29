@@ -50,6 +50,7 @@ data class SecretsApns(
     val privateKey: String,
     val privateKeyId: String,
     val teamId: String,
+    val topic: String,
 )
 
 @Serializable

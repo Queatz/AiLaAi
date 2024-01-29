@@ -8,10 +8,7 @@ import app.ailaai.api.updateReminderOccurrence
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.Menu
-import app.page.ReminderEvent
-import app.page.ReminderEventType
-import app.page.SchedulePageStyles
-import app.page.ScheduleView
+import app.page.*
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
 import focusable
@@ -42,7 +39,7 @@ fun EventRow(
 
     fun markAsDone(done: Boolean) {
         scope.launch {
-            api.updateReminderOccurrence(event.reminder.id!!, event.date.toKotlinInstant(), ReminderOccurrence(
+            api.updateReminderOccurrence(event.reminder.id!!, event.updateDate, ReminderOccurrence(
                 done = done
             )) {
                 onUpdate()
@@ -63,7 +60,7 @@ fun EventRow(
             if (note == null) return@launch
 
             api.updateReminderOccurrence(
-                event.reminder.id!!, event.date.toKotlinInstant(), ReminderOccurrence(
+                event.reminder.id!!, event.updateDate, ReminderOccurrence(
                 note = note
             )) {
                 onUpdate()
@@ -105,7 +102,7 @@ fun EventRow(
 
             api.updateReminderOccurrence(
                 event.reminder.id!!,
-                event.date.toKotlinInstant(),
+                event.updateDate,
                 ReminderOccurrence(
                     date = parseDateTime(date, time, event.date).toKotlinInstant()
                 )

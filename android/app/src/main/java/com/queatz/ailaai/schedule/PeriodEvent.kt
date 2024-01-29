@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import app.ailaai.api.deleteReminderOccurrence
 import app.ailaai.api.updateReminderOccurrence
@@ -24,6 +23,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import updateDate
 
 @Composable
 fun PeriodEvent(
@@ -93,7 +93,7 @@ fun PeriodEvent(
         ) { note ->
             api.updateReminderOccurrence(
                 event.reminder.id!!,
-                event.date,
+                event.updateDate,
                 ReminderOccurrence(note = note)
             ) {
                 onUpdated(event)
@@ -112,7 +112,7 @@ fun PeriodEvent(
             scope.launch {
                 api.updateReminderOccurrence(
                     event.reminder.id!!,
-                    event.date,
+                    event.updateDate,
                     ReminderOccurrence(date = it)
                 ) {
                     onUpdated(event)
@@ -183,7 +183,7 @@ fun PeriodEvent(
                     scope.launch {
                         api.updateReminderOccurrence(
                             event.reminder.id!!,
-                            event.date,
+                            event.updateDate,
                             ReminderOccurrence(done = !done)
                         ) {
                             onUpdated(event)
