@@ -80,7 +80,7 @@ android {
 }
 
 dependencies {
-    val ktorVersion = "2.3.6"
+    val ktorVersion = "2.3.8"
     val choiceSdkVersion = "0.3.0"
     val composeVersion = "1.6.0"
     implementation("app.ailaai.shared:models")
@@ -122,8 +122,8 @@ dependencies {
     implementation("com.huawei.hms:hwid:6.11.0.300")
     implementation("com.huawei.hms:location:6.11.0.301")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")

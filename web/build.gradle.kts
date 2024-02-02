@@ -1,5 +1,5 @@
 
-val ktorVersion = "2.3.6"
+val ktorVersion = "2.3.8"
 
 plugins {
     kotlin("multiplatform") version "1.9.22"
