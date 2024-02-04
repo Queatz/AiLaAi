@@ -85,6 +85,7 @@ fun GroupScreen(groupId: String) {
     var isLoading by rememberStateOf(false)
     var showGroupNotFound by rememberStateOf(false)
     var showLeaveGroup by rememberStateOf(false)
+    var showQrCodeDialog by rememberStateOf(false)
     var showManageDialog by rememberStateOf(false)
     var showChangeGroupStatus by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
@@ -499,6 +500,12 @@ fun GroupScreen(groupId: String) {
                             }, {
                                 showMenu = false
                                 showLeaveGroup = true
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.qr_code))
+                            }, {
+                                showMenu = false
+                                showQrCodeDialog = true
                             })
                             val hidden = myMember.member?.hide == true
                             DropdownMenuItem({
@@ -1316,6 +1323,22 @@ fun GroupScreen(groupId: String) {
                         showSendDialog = false
                     },
                     groupId
+                )
+            }
+
+            if (showQrCodeDialog) {
+                val someone = stringResource(R.string.someone)
+                val emptyGroup = stringResource(R.string.empty_group_name)
+                QrCodeDialog(
+                    {
+                        showQrCodeDialog = false
+                    },
+                    groupUrl(groupId),
+                    groupExtended!!.name(
+                        someone,
+                        emptyGroup,
+                        me?.id?.let(::listOf) ?: emptyList()
+                    )
                 )
             }
 

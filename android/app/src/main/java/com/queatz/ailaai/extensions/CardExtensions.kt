@@ -20,6 +20,7 @@ val Card.url get() = "$appDomain/page/$id"
 fun cardUrl(id: String) = "$appDomain/page/$id"
 fun storyUrl(urlOrId: String) = "$appDomain/story/$urlOrId"
 fun profileUrl(id: String) = "$appDomain/profile/$id"
+fun groupUrl(id: String) = "$appDomain/group/$id"
 
 
 val Card.hint @Composable get() = listOfNotNull(
