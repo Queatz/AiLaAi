@@ -199,7 +199,7 @@ fun ScheduleScreen() {
                         nav.navigate("messages")
                     }
                     is SwipeResult.Next -> {
-                        nav.navigate("explore")
+                        nav.navigate("inventory")
                     }
                     is SwipeResult.Select<*> -> {
                         // Impossible

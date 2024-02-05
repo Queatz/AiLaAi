@@ -18,7 +18,6 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Story
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoryCard(
     story: Story?,

@@ -297,7 +297,7 @@ fun GroupScreen(groupId: String) {
                     Column(
                         modifier = Modifier
                             .clickable(
-                                interactionSource = MutableInteractionSource(),
+                                interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
                                 if (state.firstVisibleItemIndex > 2) {

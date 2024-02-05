@@ -11,6 +11,7 @@ val json = Json {
     isLenient = true
     allowSpecialFloatingPointValues = true
     ignoreUnknownKeys = true
+    explicitNulls = false
 }
 
 val secrets = try {

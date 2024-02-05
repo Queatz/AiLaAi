@@ -124,7 +124,7 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
                     onDismissRequest()

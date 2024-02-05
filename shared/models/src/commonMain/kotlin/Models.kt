@@ -149,8 +149,28 @@ data class Pay(
 @Serializable
 data class Item(
     var name: String? = null,
+    var photo: String? = null,
+    var description: String? = null,
     var creator: String? = null,
-    var description: String? = null
+    var divisible: Boolean? = null,
+    var lifespan: Int? = null,
+    var becomes: String? = null
+) : Model()
+
+@Serializable
+data class Inventory(
+    var person: String? = null,
+    var card: String? = null,
+    var group: String? = null,
+    var geo: List<Double>? = null
+) : Model()
+
+@Serializable
+data class InventoryItem(
+    var item: String? = null,
+    var inventory: String? = null,
+    var quantity: Double? = null,
+    var expiresAt: Instant? = null
 ) : Model()
 
 @Serializable

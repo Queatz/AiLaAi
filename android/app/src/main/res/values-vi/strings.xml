@@ -283,7 +283,8 @@
     <string name="all_changes_will_be_lost">Những thay đổi sẽ bị mất</string>
     <string name="remove_all">Bỏ tất cả</string>
     <string name="add_photo">Thêm ảnh</string>
-    <string name="change_aspect_ratio">Thay đổi tỷ lệ khung hình ảnh</string>
+    <string name="change_aspect_ratio">Thay đổi tỷ lệ khung ảnh</string>
+    <string name="change_photo">Thay đổi ảnh</string>
     <string name="portrait">Dọc</string>
     <string name="landscape">Ngang</string>
     <string name="square">Vuông</string>
@@ -536,4 +537,12 @@
     <string name="inline_from">từ</string>
     <string name="inline_until">tới</string>
     <string name="inline_last">cuối cùng</string>
+    <string name="inventory">Túi đồ</string>
+    <string name="trade">Buôn bán</string>
+    <string name="items">Đồ</string>
+    <string name="create_item">Create item</string>
+    <string name="divisible">Divisible</string>
+    <string name="divisible_description">Check if this item can be divided by fraction.</string>
+    <string name="expires_x">Expires %1$s</string>
+    <string name="x_remaining">Còn %1$s</string>
 </resources>

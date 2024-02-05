@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.ibm.icu.math.BigDecimal
 import com.queatz.ailaai.data.api
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,10 @@ import kotlinx.datetime.Clock
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+
+fun String.isNumericTextInput(allowDecimal: Boolean = true): Boolean {
+    return isEmpty() || if (allowDecimal) (this == "." || toDoubleOrNull() != null) else toIntOrNull() != null
+}
 
 fun String.wordCount() = if (isBlank()) 0 else trim().split("\\W+".toRegex()).size
 

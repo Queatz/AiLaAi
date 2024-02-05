@@ -2,7 +2,9 @@ package com.queatz.ailaai.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -12,7 +14,12 @@ import androidx.compose.ui.draw.clip
 import com.queatz.ailaai.ui.theme.pad
 
 @Composable
-fun Check(checked: Boolean, onCheckChanged: (Boolean) -> Unit, label: @Composable () -> Unit) {
+fun Check(
+    checked: Boolean,
+    onCheckChanged: (Boolean) -> Unit,
+    padding: PaddingValues = PaddingValues(end = 2.pad),
+    label: @Composable () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(1.pad),
@@ -20,7 +27,9 @@ fun Check(checked: Boolean, onCheckChanged: (Boolean) -> Unit, label: @Composabl
             .clip(MaterialTheme.shapes.large)
             .clickable {
                 onCheckChanged(!checked)
-            }) {
+            }
+            .padding(padding)
+    ) {
         Checkbox(checked, onCheckChanged)
         label()
     }

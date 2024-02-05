@@ -134,9 +134,22 @@ fun Route.stickerRoutes() {
                     if (update.message != null) {
                         sticker.message = update.message
                     }
+                    if (update.photo != null) {
+                        sticker.photo = update.photo
+                    }
                 }
 
                 db.update(sticker)
+            }
+        }
+
+        post("/sticker/{id}/delete") {
+            respond {
+                val sticker = mySticker(parameter("id"), me) ?: return@respond HttpStatusCode.NotFound
+
+                db.delete(sticker)
+
+                HttpStatusCode.NoContent
             }
         }
 

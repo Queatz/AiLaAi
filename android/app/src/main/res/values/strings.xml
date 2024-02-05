@@ -293,6 +293,7 @@
     <string name="add_photo">Add photo</string>
     <string name="add_card">Add page</string>
     <string name="change_aspect_ratio">Change photo aspect ratio</string>
+    <string name="change_photo">Change photo</string>
     <string name="portrait">Portrait</string>
     <string name="landscape">Landscape</string>
     <string name="square">Square</string>
@@ -560,4 +561,105 @@
     <string name="inline_from">from</string>
     <string name="inline_until">until</string>
     <string name="inline_last">last</string>
+    <string name="inventory">Inventory</string>
+    <string name="trade">Trade</string>
+    <string name="items">Items</string>
+    <string name="create_item">Create item</string>
+    <string name="divisible">Divisible</string>
+    <string name="divisible_description">Check if this item can be divided by a fraction.</string>
+    <string name="has_lifespan">Has lifespan</string>
+    <string name="describe_how_this_item_can_be_used">Describe how this item can be used.</string>
+    <string name="mint">Mint</string>
+    <string name="added_to_inventory">Items added to your inventory</string>
+    <string name="quantity">Quantity</string>
+    <string name="expires_x">Expires %1$s</string>
+    <string name="x_remaining">%1$s remaining</string>
+    <string name="expired">Expired</string>
+    <string name="inline_on">on</string>
+    <string name="creator">Creator</string>
+    <string name="never_expires">Never expires</string>
+    <plurals name="second">
+        <item quantity="one">Second</item>
+        <item quantity="other">Seconds</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minutes</item>
+    </plurals>
+    <plurals name="hour">
+        <item quantity="one">Hour</item>
+        <item quantity="other">Hours</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">Day</item>
+        <item quantity="other">Days</item>
+    </plurals>
+    <plurals name="week">
+        <item quantity="one">Week</item>
+        <item quantity="other">Weeks</item>
+    </plurals>
+    <plurals name="month">
+        <item quantity="one">Month</item>
+        <item quantity="other">Months</item>
+    </plurals>
+    <plurals name="year">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <plurals name="inline_second">
+        <item quantity="one">second</item>
+        <item quantity="other">seconds</item>
+    </plurals>
+    <plurals name="inline_minute">
+        <item quantity="one">minute</item>
+        <item quantity="other">minutes</item>
+    </plurals>
+    <plurals name="inline_hour">
+        <item quantity="one">hour</item>
+        <item quantity="other">hours</item>
+    </plurals>
+    <plurals name="inline_day">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="inline_week">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="inline_month">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="inline_year">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <plurals name="x_seconds">
+        <item quantity="one">%1$s second</item>
+        <item quantity="other">%1$s seconds</item>
+    </plurals>
+    <plurals name="x_minutes">
+        <item quantity="one">%1$s minute</item>
+        <item quantity="other">%1$s minutes</item>
+    </plurals>
+    <plurals name="x_hours">
+        <item quantity="one">%1$s hour</item>
+        <item quantity="other">%1$s hours</item>
+    </plurals>
+    <plurals name="x_days">
+        <item quantity="one">%1$s day</item>
+        <item quantity="other">%1$s days</item>
+    </plurals>
+    <plurals name="x_weeks">
+        <item quantity="one">%1$s week</item>
+        <item quantity="other">%1$s weeks</item>
+    </plurals>
+    <plurals name="x_months">
+        <item quantity="one">%1$s month</item>
+        <item quantity="other">%1$s months</item>
+    </plurals>
+    <plurals name="x_years">
+        <item quantity="one">%1$s year</item>
+        <item quantity="other">%1$s years</item>
+    </plurals>
 </resources>

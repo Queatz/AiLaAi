@@ -35,7 +35,6 @@ class ChoosePhotoDialogState(
     var prompt: MutableState<String>
 )
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ChoosePhotoDialog(
     scope: CoroutineScope,

@@ -41,11 +41,11 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.2")
-                implementation("app.softwork:routing-compose:0.2.12")
+                implementation("app.softwork:routing-compose:0.2.14-1.6.0-beta01")
                 implementation(npm("@paulmillr/qr", "0.1.1"))
-                implementation(npm("date-fns", "2.30.0"))
+                implementation(npm("date-fns", "2.30.0")) // todo updated to v3 breaks modules
                 implementation(npm("date-fns-tz", "2.0.0"))
-                implementation(npm("@vvo/tzdb", "6.110.0"))
+                implementation(npm("@vvo/tzdb", "6.125.0"))
                 implementation(npm("@videosdk.live/js-sdk", "0.0.80"))
             }
         }

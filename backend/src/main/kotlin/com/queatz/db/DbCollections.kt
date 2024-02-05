@@ -113,7 +113,20 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Widget::person.name), PersistentIndexOptions())
     },
     Item::class.db {
-
+        ensurePersistentIndex(listOf(Item::name.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Item::creator.name), PersistentIndexOptions())
+    },
+    Inventory::class.db {
+        ensurePersistentIndex(listOf(Inventory::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Inventory::group.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Inventory::card.name), PersistentIndexOptions())
+        ensureGeoIndex(listOf(Inventory::geo.name), GeoIndexOptions())
+    },
+    InventoryItem::class.db {
+        ensurePersistentIndex(listOf(InventoryItem::inventory.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(InventoryItem::item.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(InventoryItem::expiresAt.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(InventoryItem::quantity.name), PersistentIndexOptions())
     },
     Call::class.db {
         ensurePersistentIndex(listOf(Call::group.name), PersistentIndexOptions())

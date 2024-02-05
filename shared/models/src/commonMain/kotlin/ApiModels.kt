@@ -155,3 +155,22 @@ data class SearchGroupBody(val people: List<String>)
 
 @Serializable
 data class CreateWidgetBody(val widget: Widgets, val data: String? = null)
+
+@Serializable
+data class MintItemBody(
+    val quantity: Double
+)
+
+@Serializable
+data class InventoryItemExtended(
+    val item: Item? = null,
+    val inventoryItem: InventoryItem? = null
+)
+
+@Serializable
+data class ItemExtended(
+    val item: Item? = null,
+    val inventory: Double? = null,
+    val circulating: Double? = null,
+    val expired: Double? = null
+)

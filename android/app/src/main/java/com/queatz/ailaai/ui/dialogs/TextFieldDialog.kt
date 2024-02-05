@@ -33,7 +33,10 @@ fun TextFieldDialog(
     dismissButtonText: String? = null,
     requireModification: Boolean = true,
     requireNotBlank: Boolean = false,
+    valueFormatter: ((String) -> String?)? = null,
+    keyboardOptions: KeyboardOptions? = null,
     extraContent: (@Composable ColumnScope.() -> Unit)? = null,
+    bottomContent: (@Composable ColumnScope.() -> Unit)? = null,
     onSubmit: suspend (value: String) -> Unit,
 ) {
     var disableSubmit by remember { mutableStateOf(requireModification) }
@@ -63,14 +66,20 @@ fun TextFieldDialog(
             OutlinedTextField(
                 text,
                 onValueChange = {
-                    text = it
+                    if (valueFormatter == null) {
+                        text = it
+                    } else {
+                        valueFormatter(it)?.let {
+                            text = it
+                        }
+                    }
                     if (requireModification || requireNotBlank) {
                         disableSubmit = if (requireNotBlank) it.isBlank() else false
                     }
                 },
                 shape = MaterialTheme.shapes.large,
                 singleLine = singleLine,
-                keyboardOptions = KeyboardOptions(
+                keyboardOptions = keyboardOptions ?: KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences
                 ),
                 placeholder = { Text(placeholder, modifier = Modifier.alpha(0.5f)) },
@@ -79,6 +88,7 @@ fun TextFieldDialog(
                     .padding(bottom = 1.pad)
                     .focusRequester(focusRequester)
             )
+            bottomContent?.invoke(this)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,

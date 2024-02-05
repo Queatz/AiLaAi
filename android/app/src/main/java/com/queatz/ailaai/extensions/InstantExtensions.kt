@@ -5,8 +5,10 @@ import android.icu.text.RelativeDateTimeFormatter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
+import kotlinx.coroutines.delay
 import kotlinx.datetime.*
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.DayOfWeek
@@ -19,6 +21,10 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toKotlinDuration
+
+suspend fun delayUntilNextMinute() = delay(
+    now().let { now -> (now + 1.minutes).startOfMinute() - now }
+)
 
 fun LocalDate.previous(dayOfWeek: DayOfWeek) = this + DatePeriod(
     days = when {
@@ -152,7 +158,7 @@ fun Instant.timeAgo() = Duration.between(
         }
     } else {
         when {
-            it <1.minutes -> formatter.format(
+            it < 1.minutes -> formatter.format(
                 RelativeDateTimeFormatter.Direction.PLAIN,
                 RelativeDateTimeFormatter.AbsoluteUnit.NOW
             )
@@ -189,3 +195,96 @@ fun Instant.timeAgo() = Duration.between(
         }
     }
 }!!
+
+fun Instant.timeUntil() = Duration.between(
+    now().toJavaInstant(),
+    toJavaInstant()
+).toKotlinDuration().let {
+    val formatter = RelativeDateTimeFormatter.getInstance(AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault())
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        when {
+            it < 1.minutes -> formatter.format(
+                RelativeDateTimeFormatter.Direction.PLAIN,
+                RelativeDateTimeFormatter.AbsoluteUnit.NOW
+            )
+
+            it < 1.hours -> formatter.format(
+                it.inWholeMinutes.toDouble(),
+                RelativeDateTimeFormatter.RelativeDateTimeUnit.MINUTE
+            )
+
+            it < 1.days -> formatter.format(
+                it.inWholeHours.toDouble(),
+                RelativeDateTimeFormatter.RelativeDateTimeUnit.HOUR
+            )
+
+            it < 30.days -> formatter.format(
+                it.inWholeDays.toDouble(),
+                RelativeDateTimeFormatter.RelativeDateTimeUnit.DAY
+            )
+
+            it < 365.days -> formatter.format(
+                (it.inWholeDays / 30).toDouble(),
+                RelativeDateTimeFormatter.RelativeDateTimeUnit.MONTH
+            )
+
+            else -> formatter.format(
+                (it.inWholeDays / 365).toDouble(),
+                RelativeDateTimeFormatter.RelativeDateTimeUnit.YEAR
+            )
+        }
+    } else {
+        when {
+            it < 1.minutes -> formatter.format(
+                RelativeDateTimeFormatter.Direction.PLAIN,
+                RelativeDateTimeFormatter.AbsoluteUnit.NOW
+            )
+
+            it < 1.hours -> formatter.format(
+                it.inWholeMinutes.toDouble(),
+                RelativeDateTimeFormatter.Direction.NEXT,
+                RelativeDateTimeFormatter.RelativeUnit.MINUTES
+            )
+
+            it < 1.days -> formatter.format(
+                it.inWholeHours.toDouble(),
+                RelativeDateTimeFormatter.Direction.NEXT,
+                RelativeDateTimeFormatter.RelativeUnit.HOURS
+            )
+
+            it < 30.days -> formatter.format(
+                it.inWholeDays.toDouble(),
+                RelativeDateTimeFormatter.Direction.NEXT,
+                RelativeDateTimeFormatter.RelativeUnit.DAYS
+            )
+
+            it < 365.days -> formatter.format(
+                (it.inWholeDays / 30).toDouble(),
+                RelativeDateTimeFormatter.Direction.NEXT,
+                RelativeDateTimeFormatter.RelativeUnit.MONTHS
+            )
+
+            else -> formatter.format(
+                (it.inWholeDays / 365).toDouble(),
+                RelativeDateTimeFormatter.Direction.NEXT,
+                RelativeDateTimeFormatter.RelativeUnit.YEARS
+            )
+        }
+    }
+}!!
+
+@Composable
+fun Instant.formatDistance() = Duration.between(
+    now().toJavaInstant(),
+    toJavaInstant()
+).toKotlinDuration().let {
+    when {
+        it < 1.minutes -> it.inWholeSeconds.toInt().let { count -> pluralStringResource(R.plurals.x_seconds, count, count)  }
+        it < 1.hours -> it.inWholeMinutes.toInt().let { count -> pluralStringResource(R.plurals.x_minutes, count, count)  }
+        it < 1.days -> it.inWholeHours.toInt().let { count -> pluralStringResource(R.plurals.x_hours, count, count)  }
+        it < 30.days -> it.inWholeDays.toInt().let { count -> pluralStringResource(R.plurals.x_days, count, count)  }
+        it < 365.days -> (it.inWholeDays / 30).toInt().let { count ->pluralStringResource(R.plurals.x_months, count, count) }
+        else -> (it.inWholeDays / 365).toInt().let { count ->pluralStringResource(R.plurals.x_years, count, count) }
+    }
+}

@@ -277,7 +277,7 @@ fun MapScreen(
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .clickable(
-                                    MutableInteractionSource(),
+                                    remember { MutableInteractionSource() },
                                     null
                                 ) {
                                     tryNav(pos) {
@@ -297,7 +297,7 @@ fun MapScreen(
                                 modifier = Modifier
                                     .padding(bottom = 1.pad)
                                     .clickable(
-                                        MutableInteractionSource(),
+                                        remember { MutableInteractionSource() },
                                         null
                                     ) {
                                         tryNav(pos) {

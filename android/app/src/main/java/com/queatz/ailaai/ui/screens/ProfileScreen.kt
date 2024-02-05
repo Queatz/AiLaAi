@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -556,7 +557,7 @@ fun ProfileScreen(personId: String) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(
-                                    interactionSource = MutableInteractionSource(),
+                                    interactionSource = remember { MutableInteractionSource() },
                                     indication = null
                                 ) {
                                     if (isMe) {
@@ -567,8 +568,9 @@ fun ProfileScreen(personId: String) {
                                     }
                                 }
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .padding(horizontal = 1.pad)
                                     .align(Alignment.Center)
@@ -581,20 +583,32 @@ fun ProfileScreen(personId: String) {
                                     textAlign = TextAlign.Center
                                 )
                                 if (!isMe) {
-                                    IconButton(
-                                        {
-                                            scope.launch {
-                                                api.createGroup(listOf(me!!.id!!, personId), reuse = true) { group ->
-                                                    nav.navigate("group/${group.id!!}")
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedButton(
+                                            {
+                                                scope.launch {
+                                                    api.createGroup(
+                                                        listOf(me!!.id!!, personId),
+                                                        reuse = true
+                                                    ) { group ->
+                                                        nav.navigate("group/${group.id!!}")
+                                                    }
                                                 }
                                             }
-                                        },
-                                        colors = IconButtonDefaults.outlinedIconButtonColors(
-                                            contentColor = MaterialTheme.colorScheme.primary
-                                        ),
-                                        enabled = true
-                                    ) {
-                                        Icon(Icons.Outlined.Message, "")
+                                        ) {
+                                            Text(stringResource(R.string.message))
+                                        }
+                                        Button(
+                                            {
+                                                // todo: initiate trade
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.trade))
+                                        }
                                     }
                                 }
                             }

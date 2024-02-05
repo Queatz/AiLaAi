@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,7 @@ import com.queatz.ailaai.ui.components.BiometricPrompt
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AppFeedback
 import com.queatz.db.AppFeedbackType
@@ -62,11 +64,13 @@ fun SettingsScreen(updateMe: () -> Unit) {
     var urlDialog by rememberStateOf(false)
     var showReleaseNotes by rememberStateOf(false)
     var showRefreshDialog by rememberStateOf(false)
-    var profile by rememberSavableStateOf<PersonProfile?>(null)
     var transferCode by rememberStateOf("")
     var isRefreshing by rememberStateOf(false)
     var showBiometrics by rememberStateOf(false)
     var biometricsSucceeded by rememberStateOf(false)
+    var profile by rememberSaveable(stateSaver = jsonSaver<PersonProfile?>()) {
+        mutableStateOf(null)
+    }
     val me = me
 
     fun loadTransferCode() {

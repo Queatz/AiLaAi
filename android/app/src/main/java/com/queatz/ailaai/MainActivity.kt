@@ -9,10 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.Group
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,6 +44,8 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.LifecycleEffect
 import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
+import com.queatz.ailaai.item.InventoryScreen
+import com.queatz.ailaai.item.MyItemsScreen
 import com.queatz.ailaai.schedule.ReminderScreen
 import com.queatz.ailaai.schedule.RemindersScreen
 import com.queatz.ailaai.services.*
@@ -109,12 +108,12 @@ fun background(url: String?) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.talk), Icons.Outlined.Group),
             NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
+            NavButton("inventory", getString(R.string.inventory), Icons.Outlined.RocketLaunch),
             NavButton("explore", getString(R.string.cards), Icons.Outlined.Home),
             NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
         )
@@ -516,6 +515,12 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable("explore") {
                                                 ExploreScreen()
+                                            }
+                                            composable("inventory") {
+                                                InventoryScreen()
+                                            }
+                                            composable("items") {
+                                                MyItemsScreen()
                                             }
                                             composable("link-device/{token}") {
                                                 LinkDeviceScreen(

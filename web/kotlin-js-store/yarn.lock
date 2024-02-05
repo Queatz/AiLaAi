@@ -3,9 +3,9 @@
 
 
 "@babel/runtime@^7.21.0":
-  version "7.23.4"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.4.tgz#36fa1d2b36db873d25ec631dcc4923fdc1cf2e2e"
-  integrity sha512-2Yv65nlWnWlSpe3fXEyX5i7fx5kIKo4Qbcj+hMO0odwaneFjfXw5fdum+4yL20O0QiaHpia0cYQ9xpNMqrBwHg==
+  version "7.23.9"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.9.tgz#47791a15e4603bb5f905bc0753801cf21d6345f7"
+  integrity sha512-0CX6F+BI2s9dkUqr08KFrAIZgNFj75rdBU/DjCyYLIaV/quFjkk6T+EJ2LkZHyZTbEV4L5p97mNkUsHl2wLFAw==
   dependencies:
     regenerator-runtime "^0.14.0"
 
@@ -256,15 +256,15 @@
   dependencies:
     "@types/node" "*"
 
-"@videosdk.live/js-sdk@0.0.79":
-  version "0.0.79"
-  resolved "https://registry.yarnpkg.com/@videosdk.live/js-sdk/-/js-sdk-0.0.79.tgz#d3feb66ba550f253763796c3a787fa47103ebce0"
-  integrity sha512-lX3vONZRI5DUX1UkZ5eRAiSIn96O2wdaFouTk3YUL4hX2SEJREXsZ2Q8PGu3MVTF7NH/w9QR39B91JGlDAcfZA==
+"@videosdk.live/js-sdk@0.0.80":
+  version "0.0.80"
+  resolved "https://registry.yarnpkg.com/@videosdk.live/js-sdk/-/js-sdk-0.0.80.tgz#ebf179fb7ece41cd3416ae74e68bac45cace013d"
+  integrity sha512-9zZdnQES0RxhP38K0XdpCBzQ6PEzjXlDPETiWEIKDg4v+5fcywgLzisgb15I0EgqlO+ww6spIQs9QmJG5TC/zg==
 
-"@vvo/tzdb@6.110.0":
-  version "6.110.0"
-  resolved "https://registry.yarnpkg.com/@vvo/tzdb/-/tzdb-6.110.0.tgz#c5aa00b40321e0982282ca2195768e9adaee8ce3"
-  integrity sha512-LwodOX84sx9jRbhOA4wWE1+cwCfVJVazsp6ZUQcG+sHWeU0HUvHdQBOn6RBeXQdU7lAcZfLe1kWnlo8lccQjnA==
+"@vvo/tzdb@6.125.0":
+  version "6.125.0"
+  resolved "https://registry.yarnpkg.com/@vvo/tzdb/-/tzdb-6.125.0.tgz#c64cd4380b1590ad16fb517255be50b994b17afd"
+  integrity sha512-zxOP62q3CUYIIe6sL/IK6AhmhnPUuHPNx86qZTXuzQHo/QhQRTfXb331poUStTDdZgBoLc6BADUATbGGN/1d4A==
 
 "@webassemblyjs/ast@1.11.6", "@webassemblyjs/ast@^1.11.5":
   version "1.11.6"
@@ -2163,9 +2163,9 @@ rechoir@^0.8.0:
     resolve "^1.20.0"
 
 regenerator-runtime@^0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.0.tgz#5e19d68eb12d486f797e15a3c6a918f7cec5eb45"
-  integrity sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.1.tgz#356ade10263f685dda125100cd862c1db895327f"
+  integrity sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==
 
 require-directory@^2.1.1:
   version "2.1.1"

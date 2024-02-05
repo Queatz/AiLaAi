@@ -1,5 +1,6 @@
 package app.nav
 
+import IndicatorSource
 import androidx.compose.runtime.*
 import api
 import app.ailaai.api.createGroup
@@ -19,7 +20,6 @@ import components.IconButton
 import components.Loading
 import indicator
 import joins
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -30,7 +30,6 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import push
 import r
-import kotlin.time.Duration.Companion.seconds
 
 sealed class GroupNav {
     data object None : GroupNav()

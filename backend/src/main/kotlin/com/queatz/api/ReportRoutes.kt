@@ -16,6 +16,10 @@ fun Route.reportRoutes() {
     // todo only for admins
     get("/report") {
         respond {
+            if (parameter("password") != "letmein") {
+                return@respond HttpStatusCode.NotFound
+            }
+
             db.recentReports(call.parameters["limit"]?.toInt() ?: 20)
         }
     }
@@ -23,10 +27,6 @@ fun Route.reportRoutes() {
     authenticate {
         post("/report") {
             respond {
-                if (parameter("password") != "letmein") {
-                    return@respond HttpStatusCode.NotFound
-                }
-
                 call.receive<Report>().also { report ->
                     db.insert(
                         Report(
