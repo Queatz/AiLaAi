@@ -4,7 +4,9 @@ import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -12,7 +14,6 @@ import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.pluralStringResource
@@ -25,9 +26,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toggle
-import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.components.GroupMember
-import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
@@ -64,7 +63,6 @@ fun <T> defaultConfirmPluralFormatter(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun <T> ChooseDialog(
     onDismissRequest: () -> Unit,
@@ -86,6 +84,8 @@ fun <T> ChooseDialog(
     selected: List<T>,
     onSelectedChange: (List<T>) -> Unit,
     showSearch: (List<T>) -> Boolean = { it.size > 5 },
+    state: LazyListState = rememberLazyListState(),
+    onQrCodeScan: ((ScanQrCodeResult) -> Unit)? = null,
     onConfirm: suspend (List<T>) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
@@ -101,14 +101,26 @@ fun <T> ChooseDialog(
             modifier = Modifier
                 .padding(3.pad)
         ) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleLarge,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 3,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .padding(bottom = 1.pad)
-            )
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 3,
+                    modifier = Modifier
+                        .weight(1f)
+                )
+
+                if (onQrCodeScan != null) {
+                    ScanQrCodeButton(onQrCodeScan)
+                }
+            }
             if (searchText.isNotEmpty() || showSearch(items)) {
                 OutlinedTextField(
                     searchText,
@@ -129,6 +141,7 @@ fun <T> ChooseDialog(
                 )
             }
             LazyColumn(
+                state = state,
                 verticalArrangement = Arrangement.spacedBy(1.pad),
                 modifier = Modifier
                     .weight(1f, fill = items.size > 5)

@@ -29,8 +29,40 @@ import kotlinx.coroutines.launch
 
 val qrCodeExplainedKey = booleanPreferencesKey("tutorial.qrCode.explained")
 
+sealed class ScanQrCodeResult {
+    data class Group(val id: String) : ScanQrCodeResult()
+    data class Page(val id: String) : ScanQrCodeResult()
+    data class Story(val id: String) : ScanQrCodeResult()
+    data class Profile(val id: String) : ScanQrCodeResult()
+    data class LinkDevice(val token: String) : ScanQrCodeResult()
+}
+
 @Composable
 fun ScanQrCodeButton() {
+    val nav = nav
+    ScanQrCodeButton {
+        when (it) {
+            is ScanQrCodeResult.Group -> {
+                nav.navigate("group/${it.id}")
+            }
+            is ScanQrCodeResult.Page -> {
+                nav.navigate("page/${it.id}")
+            }
+            is ScanQrCodeResult.Story -> {
+                nav.navigate("story/${it.id}")
+            }
+            is ScanQrCodeResult.Profile -> {
+                nav.navigate("profile/${it.id}")
+            }
+            is ScanQrCodeResult.LinkDevice -> {
+                nav.navigate("link-device/${it.token}")
+            }
+        }
+    }
+}
+
+@Composable
+fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showQrCodeExplanationDialog by rememberStateOf(false)
@@ -46,34 +78,34 @@ fun ScanQrCodeButton() {
                     it.linkUrl?.linkValue?.takeIf { it.startsWith(appDomain) }?.drop(appDomain.length)?.let {
                         when {
                             it.startsWith("/group/") -> {
-                                val groupId = it.split("/").getOrNull(2)
-                                nav.navigate("group/$groupId")
+                                val groupId = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.Group(groupId))
                                 true
                             }
                             it.startsWith("/page/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                nav.navigate("page/$cardId")
+                                val cardId = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.Page(cardId))
                                 true
                             }
                             // Depreciated
                             it.startsWith("/card/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                nav.navigate("card/$cardId")
+                                val cardId = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.Page(cardId))
                                 true
                             }
                             it.startsWith("/story/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                nav.navigate("story/$cardId")
+                                val storyId = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.Story(storyId))
                                 true
                             }
                             it.startsWith("/profile/") -> {
-                                val cardId = it.split("/").getOrNull(2)
-                                nav.navigate("profile/$cardId")
+                                val personId = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.Profile(personId))
                                 true
                             }
                             it.startsWith("/link-device/") -> {
-                                val token = it.split("/").getOrNull(2)
-                                nav.navigate("link-device/$token")
+                                val token = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.LinkDevice(token))
                                 true
                             }
                             else -> null

@@ -1,18 +1,20 @@
 package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.groups
+import app.ailaai.api.profile
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.ui.components.ScanQrCodeResult
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import com.queatz.db.PersonSource
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChoosePeopleDialog(
@@ -26,12 +28,15 @@ fun ChoosePeopleDialog(
     extraButtons: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isLoading by rememberStateOf(false)
     var searchText by remember { mutableStateOf("") }
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
+    var scannedPeople by remember { mutableStateOf(listOf<Person>()) }
     var shownPeople by remember { mutableStateOf(listOf<Person>()) }
     var selected by remember { mutableStateOf(listOf<Person>()) }
+    val state = rememberLazyListState()
 
     if (people != null) {
         LaunchedEffect(Unit) {
@@ -46,16 +51,20 @@ fun ChoosePeopleDialog(
             isLoading = false
         }
 
-        LaunchedEffect(allGroups, selected, searchText) {
-            val allPeople = allGroups
+        LaunchedEffect(allGroups, scannedPeople, selected, searchText) {
+            val allPeople = scannedPeople + allGroups
                 .flatMap { it.members!!.map { it.person!! } }
-                .distinctBy { it.id!! }
                 .filter { it.source != PersonSource.Web }
                 .filter { !omit(it) }
             shownPeople = (if (searchText.isBlank()) allPeople else allPeople.filter {
                 it.name?.contains(searchText, true) ?: false
             })
+                .distinctBy { it.id!! }
         }
+    }
+
+    LaunchedEffect(scannedPeople) {
+        state.scrollToTop()
     }
 
     ChooseDialog(
@@ -83,6 +92,27 @@ fun ChoosePeopleDialog(
                 it
             } else {
                 it - selected
+            }
+        },
+        state = state,
+        onQrCodeScan = {
+            when (it) {
+                is ScanQrCodeResult.Profile -> {
+                    scope.launch {
+                        api.profile(it.id) {
+                            val person = it.person
+                            scannedPeople += person
+                            if (selected.none { it.id == person.id }) {
+                                selected = selected + it.person
+                                context.toast(context.getString(R.string.x_selected, person.name ?: context.getString(R.string.someone)))
+                            }
+                        }
+                    }
+                }
+
+                else -> {
+                    context.showDidntWork()
+                }
             }
         },
         onConfirm = onPeopleSelected

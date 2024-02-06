@@ -23,10 +23,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.format
-import com.queatz.ailaai.extensions.formatDateAndTime
-import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.timeUntil
+import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -39,9 +36,16 @@ import com.queatz.db.Person
 import kotlinx.datetime.Clock
 
 @Composable
-fun InventoryItemDialog(onDismissRequest: () -> Unit, inventoryItem: InventoryItemExtended) {
+fun InventoryItemDialog(
+    onDismissRequest: () -> Unit,
+    inventoryItem: InventoryItemExtended,
+    onDrop: () -> Unit,
+    onTrade: () -> Unit,
+) {
     var showPhotoDialog by rememberStateOf(false)
     var creator by rememberStateOf<Person?>(null)
+
+    val expired = inventoryItem.inventoryItem!!.isExpired
 
     LaunchedEffect(Unit) {
         creator = authors.person(inventoryItem.item!!.creator!!)
@@ -57,6 +61,7 @@ fun InventoryItemDialog(onDismissRequest: () -> Unit, inventoryItem: InventoryIt
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(bottom = 1.pad)
                 ) {
                     AsyncImage(
                         model = inventoryItem.item?.photo?.let { api.url(it) },
@@ -101,7 +106,7 @@ fun InventoryItemDialog(onDismissRequest: () -> Unit, inventoryItem: InventoryIt
 
                     inventoryItem.inventoryItem?.expiresAt?.let { expiration ->
                         Text(
-                            if (expiration < Clock.System.now()) {
+                            if (expired) {
                                 stringResource(R.string.expired)
                             } else {
                                 stringResource(
@@ -131,10 +136,19 @@ fun InventoryItemDialog(onDismissRequest: () -> Unit, inventoryItem: InventoryIt
                 ) {
                     Text(stringResource(R.string.close))
                 }
+                TextButton(
+                    {
+                        onDrop()
+                    },
+                    enabled = !expired
+                ) {
+                    Text(stringResource(R.string.drop))
+                }
                 Button(
                     {
-                        onDismissRequest()
-                    }
+                        onTrade()
+                    },
+                    enabled = !expired
                 ) {
                     Text(stringResource(R.string.trade))
                 }

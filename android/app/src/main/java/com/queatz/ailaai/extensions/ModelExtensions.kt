@@ -4,6 +4,7 @@ import android.content.Context
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.db.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 data class ContactPhoto(
@@ -73,3 +74,5 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     }
     else -> null
 }
+
+val InventoryItem.isExpired get() = expiresAt?.let { it < Clock.System.now() } ?: false

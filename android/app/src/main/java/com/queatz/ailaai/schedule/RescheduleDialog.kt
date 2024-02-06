@@ -35,7 +35,9 @@ fun RescheduleDialog(onDismissRequest: () -> Unit, date: Instant, onUpdate: (Ins
                 .padding(3.pad)
                 .verticalScroll(rememberScrollState())
         ) {
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 DatePicker(dateState, title = null)
                 TimePicker(timeState)
             }

@@ -341,7 +341,7 @@ fun FriendsScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppHeader(
-            stringResource(R.string.your_groups),
+            stringResource(R.string.groups),
             {
                 scope.launch {
                     state.scrollToTop()

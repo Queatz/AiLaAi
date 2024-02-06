@@ -200,7 +200,7 @@
     <string name="empty_story_name">New story</string>
     <string name="manage">Manage</string>
     <string name="x_removed">%1$s removed</string>
-    <string name="your_groups">Groups</string>
+    <string name="groups">Groups</string>
     <string name="introduction">Introduction</string>
     <string name="update">Update</string>
     <string name="send">Send</string>
@@ -578,6 +578,8 @@
     <string name="inline_on">on</string>
     <string name="creator">Creator</string>
     <string name="never_expires">Never expires</string>
+    <string name="drop">Drop</string>
+    <string name="x_selected">%1$s selected</string>
     <plurals name="second">
         <item quantity="one">Second</item>
         <item quantity="other">Seconds</item>
@@ -603,8 +605,8 @@
         <item quantity="other">Months</item>
     </plurals>
     <plurals name="year">
-        <item quantity="one">year</item>
-        <item quantity="other">years</item>
+        <item quantity="one">Year</item>
+        <item quantity="other">Years</item>
     </plurals>
     <plurals name="inline_second">
         <item quantity="one">second</item>

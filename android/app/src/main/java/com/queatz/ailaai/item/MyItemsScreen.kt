@@ -108,6 +108,13 @@ fun MyItemsScreen() {
                     if (it.isNumericTextInput(allowDecimal = false)) it else null
                 }
             },
+            extraContent = {
+                Text(
+                    showMintItem?.description ?: "",
+                    modifier = Modifier
+                        .padding(bottom = 1.pad)
+                )
+            },
             bottomContent = {
                 if (showMintItem?.lifespan != null) {
                     var expiration = Clock.System.now() + (showMintItem!!.lifespan!!.seconds)
@@ -118,7 +125,10 @@ fun MyItemsScreen() {
                     }
 
                     Text(
-                        stringResource(R.string.expires_x, "${expiration.timeUntil()} ${stringResource(R.string.inline_on)} ${expiration.formatDateAndTime()}"),
+                        stringResource(
+                            R.string.expires_x,
+                            "${expiration.timeUntil()} ${stringResource(R.string.inline_on)} ${expiration.formatDateAndTime()}"
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .padding(top = 1.pad)
@@ -168,7 +178,7 @@ fun MyItemsScreen() {
                         bottom = 1.pad + 80.dp
                     )
                 ) {
-                    items(items) {
+                    items(items, key = { it.item!!.id!! }) {
                         ItemLayout(it) {
                             showMintItem = it.item
                         }

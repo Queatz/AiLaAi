@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -16,15 +17,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastJoinToString
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatDistance
+import com.queatz.ailaai.extensions.isExpired
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
 import kotlinx.datetime.Clock
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun InventoryItemLayout(inventoryItem: InventoryItemExtended, onClick: () -> Unit) {
@@ -33,6 +34,7 @@ fun InventoryItemLayout(inventoryItem: InventoryItemExtended, onClick: () -> Uni
         verticalArrangement = Arrangement.spacedBy(1.pad),
         modifier = Modifier
             .aspectRatio(.75f)
+            .alpha(if (inventoryItem.inventoryItem!!.isExpired) 0.5f else 1.0f)
             .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.secondaryContainer)
