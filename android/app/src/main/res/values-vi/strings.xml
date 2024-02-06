@@ -539,11 +539,87 @@
     <string name="inline_last">cuối cùng</string>
     <string name="inventory">Túi đồ</string>
     <string name="trade">Buôn bán</string>
+    <string name="trade_with_x">Buôn bán với %1$s</string>
+    <string name="trade_with_x_and_x">Buôn bán với %1$s và %2$s</string>
+    <string name="trade_with_x_people">Buôn bán với %1$s người</string>
     <string name="items">Đồ</string>
     <string name="create_item">Create item</string>
     <string name="divisible">Divisible</string>
     <string name="divisible_description">Check if this item can be divided by fraction.</string>
+    <string name="has_lifespan">Có tuổi thọ</string>
+    <string name="describe_how_this_item_can_be_used">Mô tả cách sử dụng đồ</string>
+    <string name="mint">Đúc</string>
+    <string name="added_to_inventory">Đồ được thêm vào túi đồ của bạn</string>
+    <string name="quantity">Số lượng</string>
     <string name="expires_x">Expires %1$s</string>
     <string name="x_remaining">Còn %1$s</string>
+    <string name="expired">Hết hạn</string>
+    <string name="inline_on">trong</string>
+    <string name="creator">Người tạo</string>
+    <string name="never_expires">Không bao giờ hết hạn</string>
+    <string name="drop">Thả</string>
     <string name="x_selected">%1$s đã chọn</string>
+    <plurals name="second">
+        <item quantity="other">Giây</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="other">Phút</item>
+    </plurals>
+    <plurals name="hour">
+        <item quantity="other">Giờ</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="other">Ngày</item>
+    </plurals>
+    <plurals name="week">
+        <item quantity="other">Tuần</item>
+    </plurals>
+    <plurals name="month">
+        <item quantity="other">Tháng</item>
+    </plurals>
+    <plurals name="year">
+        <item quantity="other">Năm</item>
+    </plurals>
+    <plurals name="inline_second">
+        <item quantity="other">giây</item>
+    </plurals>
+    <plurals name="inline_minute">
+        <item quantity="other">phút</item>
+    </plurals>
+    <plurals name="inline_hour">
+        <item quantity="other">giờ</item>
+    </plurals>
+    <plurals name="inline_day">
+        <item quantity="other">ngày</item>
+    </plurals>
+    <plurals name="inline_week">
+        <item quantity="other">tuần</item>
+    </plurals>
+    <plurals name="inline_month">
+        <item quantity="other">tháng</item>
+    </plurals>
+    <plurals name="inline_year">
+        <item quantity="other">năm</item>
+    </plurals>
+    <plurals name="x_seconds">
+        <item quantity="other">%1$s giây</item>
+    </plurals>
+    <plurals name="x_minutes">
+        <item quantity="other">%1$s phút</item>
+    </plurals>
+    <plurals name="x_hours">
+        <item quantity="other">%1$s giờ</item>
+    </plurals>
+    <plurals name="x_days">
+        <item quantity="other">%1$s ngày</item>
+    </plurals>
+    <plurals name="x_weeks">
+        <item quantity="other">%1$s tuần</item>
+    </plurals>
+    <plurals name="x_months">
+        <item quantity="other">%1$s tháng</item>
+    </plurals>
+    <plurals name="x_years">
+        <item quantity="other">%1$s năm</item>
+    </plurals>
 </resources>

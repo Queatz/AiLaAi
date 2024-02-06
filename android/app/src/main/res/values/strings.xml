@@ -563,6 +563,9 @@
     <string name="inline_last">last</string>
     <string name="inventory">Inventory</string>
     <string name="trade">Trade</string>
+    <string name="trade_with_x">Trade with %1$s</string>
+    <string name="trade_with_x_and_x">Trade with %1$s and %2$s</string>
+    <string name="trade_with_x_people">Trade with %1$s people</string>
     <string name="items">Items</string>
     <string name="create_item">Create item</string>
     <string name="divisible">Divisible</string>
