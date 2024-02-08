@@ -162,6 +162,11 @@ data class MintItemBody(
 )
 
 @Serializable
+data class DropItemBody(
+    val quantity: Double
+)
+
+@Serializable
 data class InventoryItemExtended(
     val item: Item? = null,
     val inventoryItem: InventoryItem? = null

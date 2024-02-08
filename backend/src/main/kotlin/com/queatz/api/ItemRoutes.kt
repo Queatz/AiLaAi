@@ -22,6 +22,52 @@ fun Route.itemRoutes() {
             }
         }
 
+        post("/inventory/{id}/drop") {
+            respond {
+                call.receive<DropItemBody>().let { drop ->
+                    val inventoryItem = db.document(InventoryItem::class, parameter("id")) ?:
+                        return@respond HttpStatusCode.NotFound
+
+                    val inventory = db.inventoryOfPerson(me.id!!)
+
+                    if (inventoryItem.inventory != inventory.id) {
+                        return@respond HttpStatusCode.BadRequest.description("Item not in inventory")
+                    }
+
+                    if (drop.quantity <= 0.0 || drop.quantity > inventoryItem.quantity!!) {
+                        return@respond HttpStatusCode.BadRequest.description("Quantity not in inventory")
+                    }
+
+                    if (drop.quantity == inventoryItem.quantity) {
+                        // Drop all
+                        // todo: add to history
+                        db.update(
+                            inventoryItem.also {
+                                it.inventory = null
+                                it.expiresAt = Clock.System.now()
+                            }
+                        )
+                    } else {
+                        // Drop some
+                        // todo: add to history
+                        db.update(
+                            inventoryItem.also {
+                                it.quantity = it.quantity!! - drop.quantity
+                            }
+                        )
+                        db.insert(
+                            InventoryItem(
+                                inventory = null,
+                                item = inventoryItem.item!!,
+                                quantity = drop.quantity,
+                                expiresAt = Clock.System.now()
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
         get("/items") {
             respond {
                 db.myItems(me.id!!, db.inventoryOfPerson(me.id!!).id!!)
