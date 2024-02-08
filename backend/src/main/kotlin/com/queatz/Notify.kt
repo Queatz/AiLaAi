@@ -8,6 +8,26 @@ import com.queatz.push.*
 import kotlinx.datetime.Clock
 
 class Notify {
+    fun trade(trade: Trade, initiator: Person? = null, event: TradeEvent) {
+        val pushData = PushData(
+            PushAction.Trade,
+            TradePushData(
+                trade = Trade().apply {
+                    id = trade.id
+                },
+                initiator = initiator?.let {
+                    Person().apply {
+                        id = it.id
+                        name = it.name
+                    }
+                },
+                event = event
+            )
+        )
+
+        notifyPeople(trade.people!!, pushData)
+    }
+
     fun reminder(reminder: Reminder, occurrence: ReminderOccurrence?) {
         val pushData = PushData(
             PushAction.Reminder,

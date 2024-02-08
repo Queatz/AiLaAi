@@ -131,5 +131,10 @@ fun collections() = listOf(
     Call::class.db {
         ensurePersistentIndex(listOf(Call::group.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Call::room.name), PersistentIndexOptions())
+    },
+    Trade::class.db {
+        ensurePersistentIndex(listOf(Trade::people.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Trade::completedAt.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Trade::cancelledAt.name), PersistentIndexOptions())
     }
 )

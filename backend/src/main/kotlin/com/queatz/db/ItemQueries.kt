@@ -42,10 +42,7 @@ fun Db.inventoryItems(inventory: String) = query(
         for x in `${InventoryItem::class.collection()}`
             filter x.${f(InventoryItem::inventory)} == @inventory
             sort x.${f(InventoryItem::createdAt)} desc
-            return {
-                ${f(InventoryItemExtended::inventoryItem)}: x,
-                ${f(InventoryItemExtended::item)}: first(for item in `${Item::class.collection()}` filter item._key == x.${f(InventoryItem::item)} return item)
-            }
+            return ${inventoryItemExtended()}
     """.trimIndent(),
     mapOf(
         "inventory" to inventory
@@ -68,3 +65,10 @@ fun Db.inventoryOfPerson(person: String) = one(
         "person" to person
     )
 )!!
+
+fun Db.inventoryItemExtended(inventoryItemVar: String = "x") = """
+    {
+        ${f(InventoryItemExtended::inventoryItem)}: $inventoryItemVar,
+        ${f(InventoryItemExtended::item)}: first(for item in `${Item::class.collection()}` filter item._key == $inventoryItemVar.${f(InventoryItem::item)} return item)
+    }
+""".trimIndent()

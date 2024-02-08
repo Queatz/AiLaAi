@@ -55,6 +55,7 @@ fun Application.configureRouting() {
         videoSdkRoutes()
         callRoutes()
         itemRoutes()
+        tradeRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {

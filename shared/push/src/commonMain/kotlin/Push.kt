@@ -11,11 +11,19 @@ enum class PushAction {
     Call,
     CallStatus,
     Reminder,
+    Trade,
 }
 
 enum class GroupEvent {
     Join,
     Leave
+}
+
+enum class TradeEvent {
+    Started,
+    Updated,
+    Completed,
+    Cancelled
 }
 
 enum class CollaborationEvent {
@@ -97,6 +105,13 @@ data class ReminderPushData(
     val reminder: Reminder,
     val occurrence: ReminderOccurrence?,
     val show: Boolean? = null
+) : PushDataData()
+
+@Serializable
+data class TradePushData(
+    val trade: Trade,
+    val initiator: Person? = null,
+    val event: TradeEvent
 ) : PushDataData()
 
 @Serializable

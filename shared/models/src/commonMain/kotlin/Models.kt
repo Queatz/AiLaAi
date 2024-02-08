@@ -147,6 +147,30 @@ data class Pay(
 )
 
 @Serializable
+data class Trade(
+    var people: List<String>? = null,
+    var members: List<TradeMember>? = null,
+    var note: String? = null,
+    var initiator: String? = null,
+    var completedAt: Instant? = null,
+    var cancelledAt: Instant? = null
+) : Model()
+
+@Serializable
+data class TradeMember(
+    var person: String? = null,
+    var confirmed: Boolean? = null,
+    var items: List<TradeItem>? = null
+)
+
+@Serializable
+data class TradeItem(
+    var inventoryItem: String? = null,
+    var quantity: Double? = null,
+    var to: String? = null
+)
+
+@Serializable
 data class Item(
     var name: String? = null,
     var photo: String? = null,

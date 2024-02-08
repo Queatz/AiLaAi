@@ -174,3 +174,10 @@ data class ItemExtended(
     val circulating: Double? = null,
     val expired: Double? = null
 )
+
+@Serializable
+data class TradeExtended(
+    val trade: Trade? = null,
+    val people: List<Person>? = null,
+    val inventoryItems: List<InventoryItemExtended>? = null
+)
