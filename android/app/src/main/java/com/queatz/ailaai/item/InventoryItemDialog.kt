@@ -139,8 +139,7 @@ fun InventoryItemDialog(
                 TextButton(
                     {
                         onDrop()
-                    },
-                    enabled = !expired
+                    }
                 ) {
                     Text(stringResource(R.string.drop))
                 }

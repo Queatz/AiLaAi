@@ -25,6 +25,10 @@ fun Route.tradeRoutes() {
                 val people = newTrade.people?.takeIf { it.size >= 2 }
                     ?: return@respond HttpStatusCode.BadRequest.description("Trade must have 2 or more people")
 
+                if (!people.contains(me.id!!)) {
+                    return@respond HttpStatusCode.BadRequest.description("Must include yourself in the trade")
+                }
+
                 db.insert(
                     Trade(
                         people = people,

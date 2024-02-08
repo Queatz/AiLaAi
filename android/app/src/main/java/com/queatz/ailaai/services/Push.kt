@@ -78,6 +78,7 @@ class Push {
                 PushAction.Call -> receive(parse<CallPushData>(push))
                 PushAction.CallStatus -> receive(parse<CallStatusPushData>(push))
                 PushAction.Reminder -> receive(parse<ReminderPushData>(push))
+                PushAction.Trade -> receive(parse<TradePushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()

@@ -65,6 +65,8 @@ fun Route.itemRoutes() {
                         )
                     }
                 }
+
+                HttpStatusCode.OK
             }
         }
 

@@ -583,6 +583,9 @@
     <string name="never_expires">Never expires</string>
     <string name="drop">Drop</string>
     <string name="x_selected">%1$s selected</string>
+    <string name="items_dropped">Items dropped</string>
+    <string name="confirm">Confirm</string>
+    <string name="unconfirm">Unconfirm</string>
     <plurals name="second">
         <item quantity="one">Second</item>
         <item quantity="other">Seconds</item>
