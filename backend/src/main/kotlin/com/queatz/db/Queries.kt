@@ -176,6 +176,17 @@ val Db.totalReminders
         """
     ).first()!!
 
+val Db.totalItems
+    get() = query(
+        Int::class,
+        """
+            return count(
+                for x in `${Item::class.collection()}`
+                    return true
+            )
+        """
+    ).first()!!
+
 /**
  * @code The code of the invite to fetch
  */

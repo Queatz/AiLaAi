@@ -586,6 +586,7 @@
     <string name="items_dropped">Items dropped</string>
     <string name="confirm">Confirm</string>
     <string name="unconfirm">Unconfirm</string>
+    <string name="your_items">Your items</string>
     <plurals name="second">
         <item quantity="one">Second</item>
         <item quantity="other">Seconds</item>

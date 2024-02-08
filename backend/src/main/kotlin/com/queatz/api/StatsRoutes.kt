@@ -22,7 +22,8 @@ data class AppStats(
     val totalPublishedStories: Int,
     val totalClosedGroups: Int,
     val totalOpenGroups: Int,
-    val totalReminders: Int
+    val totalReminders: Int,
+    val totalItems: Int
 )
 
 fun Route.statsRoutes() {
@@ -42,7 +43,8 @@ fun Route.statsRoutes() {
                 totalPublishedStories = db.totalPublishedStories,
                 totalClosedGroups = db.totalClosedGroups,
                 totalOpenGroups = db.totalOpenGroups,
-                totalReminders = db.totalReminders
+                totalReminders = db.totalReminders,
+                totalItems = db.totalItems,
             )
         }
     }

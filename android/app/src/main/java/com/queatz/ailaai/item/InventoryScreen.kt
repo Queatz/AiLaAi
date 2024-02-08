@@ -55,9 +55,16 @@ fun InventoryScreen() {
         }
     }
 
+    suspend fun reload() {
+        api.myInventory {
+            inventory = it
+        }
+    }
+
     fun drop(inventoryItem: InventoryItem, quantity: Double) {
         scope.launch {
             api.dropItem(inventoryItem.id!!, DropItemBody(quantity))
+            reload()
             context.toast(R.string.items_dropped)
         }
     }
@@ -76,9 +83,7 @@ fun InventoryScreen() {
 
     LaunchedEffect(Unit) {
         isLoading = true
-        api.myInventory {
-            inventory = it
-        }
+        reload()
         isLoading = false
     }
 
@@ -121,6 +126,7 @@ fun InventoryScreen() {
                 showDropInventoryItem!!.inventoryItem!!.quantity!!.format()
             },
             requireNotBlank = true,
+            requireModification = false,
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (showDropInventoryItem?.item?.divisible == true) {
                     KeyboardType.Decimal
@@ -129,11 +135,10 @@ fun InventoryScreen() {
                 }
             ),
             valueFormatter = {
-                if (showDropInventoryItem?.item?.divisible == true) {
-                    if (it.isNumericTextInput()) it else null
-                } else {
-                    if (it.isNumericTextInput(allowDecimal = false)) it else null
-                }
+                if (it.isNumericTextInput(allowDecimal = showDropInventoryItem?.item?.divisible == true))
+                    it.upTo(showDropInventoryItem!!.inventoryItem!!.quantity!!)
+                else
+                    null
             }
         ) {
             it.toDoubleOrNull()?.let {
@@ -232,3 +237,11 @@ fun InventoryScreen() {
         }
     }
 }
+
+fun String.upTo(maximumValue: Double) = toDoubleOrNull()?.let {
+    if (it > maximumValue) {
+        maximumValue.format()
+    } else {
+        null
+    }
+} ?: this

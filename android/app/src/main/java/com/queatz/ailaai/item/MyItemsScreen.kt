@@ -158,7 +158,7 @@ fun MyItemsScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
             AppHeader(
-                stringResource(R.string.items),
+                stringResource(R.string.your_items),
                 {
                     scrollToTop()
                 },

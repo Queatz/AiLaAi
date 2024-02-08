@@ -27,7 +27,8 @@ fun Db.trade(
     TradeExtended::class,
     """
         for x in `${Trade::class.collection()}`
-            filter @person in x.${f(Trade::people)}
+            filter x._key == @trade
+                and @person in x.${f(Trade::people)}
             return ${tradeExtended()}
     """.trimIndent(),
     mapOf(

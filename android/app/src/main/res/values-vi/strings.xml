@@ -560,6 +560,7 @@
     <string name="drop">Thả</string>
     <string name="x_selected">%1$s đã chọn</string>
     <string name="items_dropped">Đồ bị thả</string>
+    <string name="your_items">Đồ của bạn</string>
     <plurals name="second">
         <item quantity="other">Giây</item>
     </plurals>
