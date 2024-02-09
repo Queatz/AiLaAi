@@ -1,14 +1,18 @@
 package com.queatz.ailaai.trade
 
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import cancelTrade
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -26,7 +30,9 @@ fun TradeDialog(
 ) {
     val scope = rememberCoroutineScope()
     var trade by rememberStateOf<TradeExtended?>(null)
+    var showCancelDialog by rememberStateOf(false)
     val me = me ?: return
+    val context = LocalContext.current
 
     val confirmedByMe = trade?.trade?.members?.any { it.person == me.id!! && it.confirmed == true } == true
     val enableConfirm = confirmedByMe || trade?.trade?.members?.any { it.items!!.isNotEmpty() } == true
@@ -35,6 +41,15 @@ fun TradeDialog(
         scope.launch {
             api.trade(tradeId) {
                 trade = it
+            }
+        }
+    }
+
+    fun cancel() {
+        scope.launch {
+            api.cancelTrade(tradeId) {
+                context.toast(R.string.trade_cancelled)
+                onDismissRequest()
             }
         }
     }
@@ -75,6 +90,13 @@ fun TradeDialog(
                 ) {
                     Text(stringResource(R.string.close))
                 }
+                TextButton(
+                    {
+                        showCancelDialog = true
+                    }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
                 Button(
                     {
                         confirmUnconfirm()
@@ -90,6 +112,36 @@ fun TradeDialog(
                             }
                         )
                     )
+                }
+            }
+        )
+    }
+
+    if (showCancelDialog) {
+        AlertDialog(
+            {
+                showCancelDialog = false
+            },
+            title = {
+                Text(stringResource(R.string.cancel_this_trade))
+            },
+            confirmButton = {
+                TextButton(
+                    {
+                        cancel()
+                        showCancelDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.cancel_trade))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    {
+                        showCancelDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.close))
                 }
             }
         )

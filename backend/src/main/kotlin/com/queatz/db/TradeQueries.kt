@@ -54,12 +54,12 @@ fun Db.activeTrades(
     )
 )
 
-private fun Db.tradeExtended(tradeVar: String = "x") {
+private fun Db.tradeExtended(tradeVar: String = "x") =
     """
         {
             ${f(TradeExtended::trade)}: $tradeVar,
             ${f(TradeExtended::inventoryItems)}: (
-                for inventoryItem in ${InventoryItem::class.collection()}
+                for inventoryItem in `${InventoryItem::class.collection()}`
                     filter inventoryItem._key in (
                         for member in $tradeVar.${f(Trade::members)}
                             for memberItem in member.${f(TradeMember::items)}
@@ -68,10 +68,9 @@ private fun Db.tradeExtended(tradeVar: String = "x") {
                     return ${inventoryItemExtended("inventoryItem")}
             ),
             ${f(TradeExtended::people)}: (
-                for person in ${Person::class.collection()}
+                for person in `${Person::class.collection()}`
                     filter person._key in $tradeVar.${f(Trade::people)}
                     return person
             )
         }
     """.trimIndent()
-}

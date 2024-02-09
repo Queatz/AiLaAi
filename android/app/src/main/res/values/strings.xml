@@ -587,6 +587,9 @@
     <string name="confirm">Confirm</string>
     <string name="unconfirm">Unconfirm</string>
     <string name="your_items">Your items</string>
+    <string name="cancel_trade">Cancel trade</string>
+    <string name="cancel_this_trade">Cancel this trade?</string>
+    <string name="trade_cancelled">Trade cancelled</string>
     <plurals name="second">
         <item quantity="one">Second</item>
         <item quantity="other">Seconds</item>

@@ -80,7 +80,7 @@ class Db {
     internal fun <T : Model> one(klass: KClass<T>, query: String, parameters: Map<String, Any?> = mapOf()) =
         synchronized(db) {
             db.query(
-                query,
+                query,//.also(::println),
                 klass.java,
                 if (query.contains("@@collection")) mutableMapOf("@collection" to klass.collection()) + parameters else parameters,
             )
@@ -89,7 +89,7 @@ class Db {
     internal fun <T : Model> list(klass: KClass<T>, query: String, parameters: Map<String, Any?> = mapOf()) =
         synchronized(db) {
             db.query(
-                query,
+                query,//.also(::println),
                 klass.java,
                 if (query.contains("@@collection")) mutableMapOf("@collection" to klass.collection()) + parameters else parameters
             )
@@ -98,7 +98,7 @@ class Db {
     internal fun <T : Any> query(klass: KClass<T>, query: String, parameters: Map<String, Any?> = mapOf()) =
         synchronized(db) {
             db.query(
-                query,
+                query,//.also(::println),
                 klass.java,
                 parameters
             ).asListRemaining()

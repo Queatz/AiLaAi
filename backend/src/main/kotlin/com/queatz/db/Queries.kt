@@ -352,7 +352,7 @@ fun Db.presenceOfPerson(person: String) = one(
 
 fun Db.groupExtended(groupVar: String = "group") = """{
     $groupVar,
-    members: (
+    ${f(GroupExtended::members)}: (
         for person, member in inbound $groupVar graph `${Member::class.graph()}`
             filter member.${f(Member::gone)} != true
             sort member.${f(Member::seen)} desc
@@ -361,14 +361,14 @@ fun Db.groupExtended(groupVar: String = "group") = """{
                 member
             }
     ),
-    latestMessage: first(
+    ${f(GroupExtended::latestMessage)}: first(
         for message in `${Message::class.collection()}`
             filter message.${f(Message::group)} == $groupVar._key
             sort message.${f(Message::createdAt)} desc
             limit 1
             return message
     ),
-    cardCount: count(for groupCard in `${Card::class.collection()}` filter groupCard.${f(Card::active)} == true and groupCard.${f(Card::group)} == $groupVar._key return true)
+    ${f(GroupExtended::cardCount)}: count(for groupCard in `${Card::class.collection()}` filter groupCard.${f(Card::active)} == true and groupCard.${f(Card::group)} == $groupVar._key return true)
 }"""
 
 /**

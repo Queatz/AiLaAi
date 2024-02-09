@@ -69,6 +69,10 @@ fun Db.inventoryOfPerson(person: String) = one(
 fun Db.inventoryItemExtended(inventoryItemVar: String = "x") = """
     {
         ${f(InventoryItemExtended::inventoryItem)}: $inventoryItemVar,
-        ${f(InventoryItemExtended::item)}: first(for item in `${Item::class.collection()}` filter item._key == $inventoryItemVar.${f(InventoryItem::item)} return item)
+        ${f(InventoryItemExtended::item)}: first(
+            for item in `${Item::class.collection()}`
+                filter item._key == $inventoryItemVar.${f(InventoryItem::item)}
+                return item
+        )
     }
 """.trimIndent()
