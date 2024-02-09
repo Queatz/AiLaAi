@@ -235,7 +235,7 @@ private fun PipelineContext<*, ApplicationCall>.updateTrade(
     return db.trade(me.id!!, trade.id!!)!!
 }
 
-// By the time we get here, we can assume the state of the trade is entirely ok
+// todo, ensure all quantities are still good (i.e. no other trades have happened)
 private fun performTrade(trade: Trade) {
     trade.members!!.forEach { member ->
         member.items!!.forEach { tradeItem ->

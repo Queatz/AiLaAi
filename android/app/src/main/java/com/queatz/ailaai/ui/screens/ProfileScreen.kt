@@ -42,6 +42,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.profile.ProfileGroups
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.*
@@ -50,6 +51,7 @@ import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
+import createTrade
 import kotlinx.coroutines.*
 
 @Composable
@@ -74,6 +76,7 @@ fun ProfileScreen(personId: String) {
     var showQrCodeDialog by rememberStateOf(false)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
     var isUploadingVideo by rememberStateOf(false)
+    var showTradeDialog by rememberStateOf<Trade?>(null)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
     val me = me
@@ -140,6 +143,18 @@ fun ProfileScreen(personId: String) {
     if (showReportDialog) {
         ReportDialog("person/$personId") {
             showReportDialog = false
+        }
+    }
+
+    fun trade() {
+        scope.launch {
+            api.createTrade(
+                Trade().apply {
+                    people = listOf(me!!.id!!, personId)
+                }
+            ) {
+                showTradeDialog = it
+            }
         }
     }
 
@@ -604,7 +619,7 @@ fun ProfileScreen(personId: String) {
                                         }
                                         Button(
                                             {
-                                                // todo: initiate trade
+                                                trade()
                                             }
                                         ) {
                                             Text(stringResource(R.string.trade))
@@ -833,6 +848,15 @@ fun ProfileScreen(personId: String) {
                     Text(stringResource(R.string.close))
                 }
             }
+        )
+    }
+
+    showTradeDialog?.let {
+        TradeDialog(
+            {
+                showTradeDialog = null
+            },
+            it.id!!
         )
     }
 }

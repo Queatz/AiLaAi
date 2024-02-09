@@ -7,8 +7,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +34,7 @@ import createTrade
 import dropItem
 import kotlinx.coroutines.launch
 import myInventory
+import updateTradeItems
 
 @Composable
 fun InventoryScreen() {
@@ -45,7 +48,8 @@ fun InventoryScreen() {
     var isLoading by rememberStateOf(false)
     var showInventoryItem by rememberStateOf<InventoryItemExtended?>(null)
     var showDropInventoryItem by rememberStateOf<InventoryItemExtended?>(null)
-    var showStartTradeDialog by rememberStateOf<InventoryItemExtended?>(null)
+    var showStartTradeDialog by rememberStateOf(false)
+    var showStartTradeDialogItem by rememberStateOf<InventoryItemExtended?>(null)
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
 
@@ -69,14 +73,26 @@ fun InventoryScreen() {
         }
     }
 
-    fun tradeWith(people: List<Person>) {
+    fun tradeWith(people: List<String> = emptyList(), items: List<InventoryItemExtended> = emptyList()) {
         scope.launch {
             api.createTrade(
                 Trade().apply {
-                    this.people = (people.map { it.id!! } + me!!.id!!).distinct()
+                    this.people = (listOf(me!!.id!!) + people).distinct()
                 }
             ) {
-                showTradeDialog = it
+                api.updateTradeItems(
+                    it.id!!,
+                    items.map {
+                        TradeItem(
+                            inventoryItem = it.inventoryItem!!.id!!,
+                            quantity = it.inventoryItem!!.quantity!!.coerceAtMost(1.0),
+                            to = people.first()
+                        )
+                    }
+                ) {
+                    showTradeDialog = it.trade
+                }
+
             }
         }
     }
@@ -107,7 +123,8 @@ fun InventoryScreen() {
                 showInventoryItem = null
             }
         ) {
-            showStartTradeDialog = showInventoryItem
+            showStartTradeDialog = true
+            showStartTradeDialogItem = showInventoryItem
             showInventoryItem = null
         }
     }
@@ -148,11 +165,13 @@ fun InventoryScreen() {
         }
     }
 
-    if (showStartTradeDialog != null) {
+    if (showStartTradeDialog) {
         val someone = stringResource(R.string.someone)
+        val item = showStartTradeDialogItem
         ChoosePeopleDialog(
             {
-                showStartTradeDialog = null
+                showStartTradeDialog = false
+                showStartTradeDialogItem = null
             },
             title = stringResource(R.string.trade),
             confirmFormatter = defaultConfirmFormatter(
@@ -162,9 +181,9 @@ fun InventoryScreen() {
                 R.string.trade_with_x_people
             ) { it.name ?: someone },
             omit = { it.id == me?.id },
-            multiple = true,
+            multiple = showStartTradeDialogItem == null,
             onPeopleSelected = {
-                tradeWith(it)
+                tradeWith(it.map { it.id!! }, item?.inList() ?: emptyList())
             }
         )
     }
@@ -195,7 +214,22 @@ fun InventoryScreen() {
                     scrollToTop()
                 },
             ) {
-                // actions
+                IconButton(
+                    {
+                        showStartTradeDialogItem = null
+                        showStartTradeDialog = true
+                    }
+                ) {
+                    Icon(Icons.Outlined.Add, stringResource(R.string.trade))
+                }
+                ScanQrCodeButton {
+                    when (it) {
+                        is ScanQrCodeResult.Profile -> {
+                            tradeWith(listOf(it.id))
+                        }
+                        else -> context.showDidntWork()
+                    }
+                }
             }
             if (isLoading) {
                 Loading()

@@ -10,13 +10,14 @@ import com.queatz.ailaai.ui.theme.pad
 
 @Composable
 fun DialogLayout(
-    content: @Composable () -> Unit,
-    actions: @Composable () -> Unit
+    scrollable: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit,
+    actions: @Composable RowScope.() -> Unit
 ) {
     Column(
         modifier = Modifier
             .padding(3.pad)
-            .verticalScroll(rememberScrollState())
+            .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
     ) {
         content()
         Row(

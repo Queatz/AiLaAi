@@ -34,7 +34,7 @@ suspend fun Api.updateTradeItems(
     tradeItems: List<TradeItem>,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<TradeExtended> = {}
-) = post("trades/$tradeId", tradeItems, onError = onError, onSuccess = onSuccess)
+) = post("trades/$tradeId/items", tradeItems, onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.confirmTrade(
     tradeId: String,

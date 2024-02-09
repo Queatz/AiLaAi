@@ -28,7 +28,7 @@ import com.queatz.db.InventoryItemExtended
 import kotlinx.datetime.Clock
 
 @Composable
-fun InventoryItemLayout(inventoryItem: InventoryItemExtended, onClick: () -> Unit) {
+fun InventoryItemLayout(inventoryItem: InventoryItemExtended, quantity: Double? = null, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(1.pad),
@@ -60,7 +60,7 @@ fun InventoryItemLayout(inventoryItem: InventoryItemExtended, onClick: () -> Uni
             Text(
                 listOfNotNull(
                     inventoryItem.item?.name ?: "",
-                    (inventoryItem.inventoryItem!!.quantity?.format() ?: "0").let { "x$it" },
+                    ((quantity ?: inventoryItem.inventoryItem!!.quantity)?.format() ?: "0").let { "x$it" },
                     inventoryItem.inventoryItem?.expiresAt?.let {
                         val now = Clock.System.now()
 
