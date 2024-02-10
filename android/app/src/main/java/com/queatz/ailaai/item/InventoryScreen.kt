@@ -1,5 +1,6 @@
 package com.queatz.ailaai.item
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -13,23 +14,29 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeDialog
+import com.queatz.ailaai.trade.TradesDialog
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import createTrade
 import dropItem
 import kotlinx.coroutines.launch
 import myInventory
+import trades
 import updateTradeItems
 
 @Composable
@@ -45,9 +52,11 @@ fun InventoryScreen() {
     var showInventoryItem by rememberStateOf<InventoryItemExtended?>(null)
     var showDropInventoryItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var showStartTradeDialog by rememberStateOf(false)
+    var showActiveTradesDialog by rememberStateOf(false)
     var showStartTradeDialogItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
+    var activeTrades by rememberStateOf<List<TradeExtended>?>(null)
 
     fun scrollToTop() {
         scope.launch {
@@ -103,6 +112,12 @@ fun InventoryScreen() {
         isLoading = false
     }
 
+    ResumeEffect {
+        api.trades {
+            activeTrades = it
+        }
+    }
+
     showTradeDialog?.let {
         TradeDialog(
             {
@@ -110,6 +125,20 @@ fun InventoryScreen() {
             },
             it.id!!
         )
+    }
+
+    if (showActiveTradesDialog) {
+        activeTrades?.let {
+            TradesDialog(
+                {
+                    showActiveTradesDialog = false
+                },
+                it
+            ) {
+                showTradeDialog = it.trade
+                showActiveTradesDialog = false
+            }
+        }
     }
 
     if (showInventoryItem != null) {
@@ -128,7 +157,7 @@ fun InventoryScreen() {
         }
     }
 
-    if (showDropInventoryItem != null) {    
+    if (showDropInventoryItem != null) {
         AlertDialog(
             {
                 showDropInventoryItem = null
@@ -231,6 +260,27 @@ fun InventoryScreen() {
             if (isLoading) {
                 Loading()
             } else {
+                AnimatedVisibility(activeTrades?.isNotEmpty() == true) {
+                    OutlinedCard(
+                        onClick = {
+                            showActiveTradesDialog = true
+                        },
+                        shape = MaterialTheme.shapes.large,
+                        elevation = CardDefaults.elevatedCardElevation(1.elevation),
+                        modifier = Modifier
+                            .padding(horizontal = 1.pad)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            pluralStringResource(R.plurals.x_active_trades, activeTrades!!.size, activeTrades!!.size),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(1.pad)
+                                .fillMaxWidth()
+                        )
+                    }
+                }
+
                 LazyVerticalGrid(
                     state = state,
                     columns = GridCells.Adaptive(96.dp),

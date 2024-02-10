@@ -593,6 +593,14 @@
     <string name="confirmed">Confirmed</string>
     <string name="no_items">No items.</string>
     <string name="drop_x">Drop %1$s?</string>
+    <plurals name="x_active_trades">
+        <item quantity="one">%1$s active trade</item>
+        <item quantity="other">%1$s active trades</item>
+    </plurals>
+    <plurals name="x_items">
+        <item quantity="one">%1$s item</item>
+        <item quantity="other">%1$s items</item>
+    </plurals>
     <plurals name="second">
         <item quantity="one">Second</item>
         <item quantity="other">Seconds</item>
