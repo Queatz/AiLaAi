@@ -74,7 +74,6 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
@@ -103,6 +102,7 @@ fun GroupScreen(groupId: String) {
     var isGeneratingGroupBackground by rememberStateOf(false)
     var isGeneratingGroupPhoto by rememberStateOf(false)
     var showJoinDialog by rememberStateOf(false)
+    var showAudioRationale by rememberStateOf(false)
     var showSnoozeDialog by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var stageReply by remember { mutableStateOf<Message?>(null) }
@@ -159,8 +159,11 @@ fun GroupScreen(groupId: String) {
     }
 
     val audioRecorder = audioRecorder(
-        { isRecordingAudio = it },
-        { recordingAudioDuration = it },
+        onIsRecordingAudio = { isRecordingAudio = it },
+        onRecordingAudioDuration = { recordingAudioDuration = it },
+        onPermissionDenied = {
+            showAudioRationale = true
+        }
     ) { file ->
         api.sendAudioFromUri(groupId, file, stageReply?.id?.let {
             Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
@@ -1546,6 +1549,15 @@ fun GroupScreen(groupId: String) {
                     onIsGeneratingPhoto = {
                         isGeneratingGroupBackground = it
                     }
+                )
+            }
+
+            if (showAudioRationale) {
+                RationaleDialog(
+                    {
+                        showAudioRationale = false
+                    },
+                    stringResource(R.string.permission_request)
                 )
             }
         }

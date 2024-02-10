@@ -5,18 +5,15 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
@@ -26,7 +23,6 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
-import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
@@ -47,9 +43,9 @@ fun InventoryScreen() {
     var search by rememberSavableStateOf("")
     var isLoading by rememberStateOf(false)
     var showInventoryItem by rememberStateOf<InventoryItemExtended?>(null)
-    var showDropInventoryItem by rememberStateOf<InventoryItemExtended?>(null)
+    var showDropInventoryItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var showStartTradeDialog by rememberStateOf(false)
-    var showStartTradeDialogItem by rememberStateOf<InventoryItemExtended?>(null)
+    var showStartTradeDialogItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
 
@@ -62,6 +58,10 @@ fun InventoryScreen() {
     suspend fun reload() {
         api.myInventory {
             inventory = it
+
+            if (showInventoryItem != null) {
+                showInventoryItem = inventory.firstOrNull { showInventoryItem?.inventoryItem?.id == it.inventoryItem?.id }
+            }
         }
     }
 
@@ -73,7 +73,7 @@ fun InventoryScreen() {
         }
     }
 
-    fun tradeWith(people: List<String> = emptyList(), items: List<InventoryItemExtended> = emptyList()) {
+    fun tradeWith(people: List<String> = emptyList(), items: List<Pair<InventoryItemExtended, Double>> = emptyList()) {
         scope.launch {
             api.createTrade(
                 Trade().apply {
@@ -84,8 +84,8 @@ fun InventoryScreen() {
                     it.id!!,
                     items.map {
                         TradeItem(
-                            inventoryItem = it.inventoryItem!!.id!!,
-                            quantity = it.inventoryItem!!.quantity!!.coerceAtMost(1.0),
+                            inventoryItem = it.first.inventoryItem!!.id!!,
+                            quantity = it.second,
                             to = people.first()
                         )
                     }
@@ -119,50 +119,47 @@ fun InventoryScreen() {
             },
             showInventoryItem!!,
             onDrop = {
-                showDropInventoryItem = showInventoryItem
-                showInventoryItem = null
+                showDropInventoryItem = showInventoryItem!! to it
             }
         ) {
             showStartTradeDialog = true
-            showStartTradeDialogItem = showInventoryItem
+            showStartTradeDialogItem = showInventoryItem!! to it
             showInventoryItem = null
         }
     }
 
-    if (showDropInventoryItem != null) {
-        TextFieldDialog(
-            onDismissRequest = {
+    if (showDropInventoryItem != null) {    
+        AlertDialog(
+            {
                 showDropInventoryItem = null
             },
-            title = showDropInventoryItem?.item?.name,
-            button = stringResource(R.string.drop),
-            placeholder = stringResource(R.string.quantity),
-            initialValue = if (showDropInventoryItem?.item?.divisible == true) {
-                showDropInventoryItem!!.inventoryItem!!.quantity!!.toString()
-            } else {
-                showDropInventoryItem!!.inventoryItem!!.quantity!!.format()
+            title = {
+                Text(stringResource(R.string.drop_x, showDropInventoryItem!!.second.format()))
             },
-            requireNotBlank = true,
-            requireModification = false,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = if (showDropInventoryItem?.item?.divisible == true) {
-                    KeyboardType.Decimal
-                } else {
-                    KeyboardType.Number
+            confirmButton = {
+                Button(
+                    {
+                        showDropInventoryItem?.let { drop ->
+                            drop.second.let {
+                                drop(drop.first.inventoryItem!!, it)
+                                showDropInventoryItem = null
+                            }
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.drop))
                 }
-            ),
-            valueFormatter = {
-                if (it.isNumericTextInput(allowDecimal = showDropInventoryItem?.item?.divisible == true))
-                    it.upTo(showDropInventoryItem!!.inventoryItem!!.quantity!!)
-                else
-                    null
+            },
+            dismissButton = {
+                TextButton(
+                    {
+                        showDropInventoryItem = null
+                    }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
-        ) {
-            it.toDoubleOrNull()?.let {
-                drop(showDropInventoryItem!!.inventoryItem!!, it)
-                showDropInventoryItem = null
-            } ?: context.showDidntWork()
-        }
+        )
     }
 
     if (showStartTradeDialog) {

@@ -14,8 +14,8 @@ class PermissionRequester(private val permission: String) {
     private var onGranted: (() -> Unit)? = null
 
     fun use(onPermanentlyDenied: () -> Unit = {}, onGranted: () -> Unit) {
-        require(this.onPermanentlyDenied == null)
-        require(this.onGranted == null)
+        this.onPermanentlyDenied = null
+        this.onGranted = null
 
         // Special cases for retired permissions
         when (permission) {
@@ -29,7 +29,7 @@ class PermissionRequester(private val permission: String) {
 
         if (state.status == PermissionStatus.Granted) {
             onGranted()
-        } else if(state.status.shouldShowRationale) {
+        } else if (state.status.shouldShowRationale) {
             onPermanentlyDenied()
         } else {
             this.onGranted = onGranted

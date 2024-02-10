@@ -6,7 +6,6 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.queatz.ailaai.ui.permission.permissionRequester
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -41,11 +40,11 @@ class AudioRecorderControl internal constructor(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun audioRecorder(
     onIsRecordingAudio: (Boolean) -> Unit,
     onRecordingAudioDuration: (Long) -> Unit,
+    onPermissionDenied: () -> Unit,
     onAudio: suspend (File) -> Unit,
 ): AudioRecorderControl {
     val scope = rememberCoroutineScope()
@@ -113,9 +112,12 @@ fun audioRecorder(
     }
 
     fun recordAudio() {
-        recordAudioPermissionRequester.use {
+        recordAudioPermissionRequester.use(
+            onPermanentlyDenied = {
+                onPermissionDenied()
+            }
+        ) {
             recordTheAudio()
-
         }
     }
 

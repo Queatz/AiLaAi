@@ -1,6 +1,9 @@
 package com.queatz.ailaai.trade
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -190,7 +193,7 @@ fun TradeDialog(
                                         }
                                     }
                                 } else {
-                                    items(member.items, key = { it.inventoryItem.inventoryItem!!.id!! }) { item ->
+                                    items(member.items) { item ->
                                         InventoryItemLayout(item.inventoryItem, quantity = item.quantity) {
                                             editItemDialog = item
                                         }
@@ -260,7 +263,7 @@ fun TradeDialog(
             {
                 addInventoryItemDialog = null
             },
-            omit = myTradeMember?.items?.map { it.inventoryItem!! } ?: emptyList()
+            omit = myTradeMember?.items?.filter { it.to == person.id }?.map { it.inventoryItem!! } ?: emptyList()
         ) { item ->
             val quantity = 1.0.coerceAtMost(item.inventoryItem!!.quantity!!)
 
@@ -321,7 +324,7 @@ fun TradeDialog(
                         inventoryItem = item.inventoryItem.inventoryItem!!.id!!,
                         quantity = newQuantity,
                         to = item.to.id!!
-                    )).distinctBy { it.inventoryItem!! }
+                    )).distinctBy { it.inventoryItem!! to it.to }
                     scope.launch {
                         api.updateTradeItems(tradeId, items) {
                             trade = it

@@ -28,13 +28,19 @@ fun String.isNumericTextInput(allowDecimal: Boolean = true): Boolean {
 
 fun String.wordCount() = if (isBlank()) 0 else trim().split("\\W+".toRegex()).size
 
+val String.ensureScheme get() = if (contains("://")) this else "https://$this"
+
 fun String.launchUrl(context: Context) {
-    context.startActivity(
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse(this)
+    try {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(ensureScheme)
+            )
         )
-    )
+    } catch (t: Throwable) {
+        context.showDidntWork()
+    }
 }
 
 val String.nullIfBlank get() = takeIf { it.isNotBlank() }

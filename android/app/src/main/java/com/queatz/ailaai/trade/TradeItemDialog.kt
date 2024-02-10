@@ -64,10 +64,9 @@ fun TradeItemDialog(
                                 quantity = it.upTo(inventoryItem.inventoryItem!!.quantity!!)
                             }
                         },
-                        placeholder = {
+                        label = {
                             Text(
-                                stringResource(R.string.quantity),
-                                modifier = Modifier.alpha(.5f)
+                                stringResource(R.string.quantity)
                             )
                         },
                         keyboardOptions = KeyboardOptions(

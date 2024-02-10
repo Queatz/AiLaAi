@@ -592,6 +592,7 @@
     <string name="trade_cancelled">Trade cancelled</string>
     <string name="confirmed">Confirmed</string>
     <string name="no_items">No items.</string>
+    <string name="drop_x">Drop %1$s?</string>
     <plurals name="second">
         <item quantity="one">Second</item>
         <item quantity="other">Seconds</item>
