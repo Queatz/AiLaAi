@@ -403,7 +403,9 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         },
-                        snackbarHost = { SnackbarHost(snackbarHostState) }
+                        snackbarHost = { SnackbarHost(snackbarHostState) },
+                        modifier = Modifier
+                            .then(if (showNavigation) Modifier.safeGesturesPadding() else Modifier)
                     ) {
                         PermanentNavigationDrawer(
                             drawerContent = {
@@ -497,6 +499,11 @@ class MainActivity : AppCompatActivity() {
                                             modifier = Modifier
                                                 .padding(it)
                                                 .fillMaxSize()
+                                                .then(
+                                                    if (showNavigation) Modifier else Modifier.windowInsetsPadding(
+                                                        WindowInsets.safeGestures.only(WindowInsetsSides.Bottom)
+                                                    )
+                                                )
                                         ) {
                                             composable(
                                                 "profile/{id}",
