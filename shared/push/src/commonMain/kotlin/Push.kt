@@ -111,6 +111,7 @@ data class ReminderPushData(
 data class TradePushData(
     val trade: Trade,
     val people: List<Person>? = null,
+    val person: Person,
     val event: TradeEvent
 ) : PushDataData()
 

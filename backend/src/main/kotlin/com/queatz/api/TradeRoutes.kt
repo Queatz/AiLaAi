@@ -42,7 +42,7 @@ fun Route.tradeRoutes() {
                         initiator = me.id!!
                     )
                 ).also {
-                    notify.trade(it, people = db.people(people), TradeEvent.Started)
+                    notify.trade(it, me, people = db.people(people), TradeEvent.Started)
                 }
             }
         }
@@ -221,13 +221,13 @@ private fun PipelineContext<*, ApplicationCall>.updateTrade(
     trade.apply(block)
 
     if (trade.cancelledAt != null) {
-        notify.trade(trade, people = db.people(trade.people!!), event = TradeEvent.Cancelled)
+        notify.trade(trade, me, people = db.people(trade.people!!), event = TradeEvent.Cancelled)
     } else if (trade.completedAt == null && trade.members!!.all { it.confirmed == true }) {
         performTrade(trade)
         trade.completedAt = Clock.System.now()
-        notify.trade(trade, people = db.people(trade.people!!), event = TradeEvent.Completed)
+        notify.trade(trade, me, people = db.people(trade.people!!), event = TradeEvent.Completed)
     } else {
-        notify.trade(trade, people = db.people(trade.people!!), event = TradeEvent.Updated)
+        notify.trade(trade, me, people = db.people(trade.people!!), event = TradeEvent.Updated)
     }
 
     db.update(trade)

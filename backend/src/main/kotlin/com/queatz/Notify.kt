@@ -8,7 +8,7 @@ import com.queatz.push.*
 import kotlinx.datetime.Clock
 
 class Notify {
-    fun trade(trade: Trade, people: List<Person>? = null, event: TradeEvent) {
+    fun trade(trade: Trade, person: Person, people: List<Person>? = null, event: TradeEvent) {
         val pushData = PushData(
             PushAction.Trade,
             TradePushData(
@@ -20,6 +20,9 @@ class Notify {
                         id = it.id
                         name = it.name
                     }
+                },
+                person = Person().apply {
+                    id = person.id
                 },
                 event = event
             )
@@ -166,7 +169,10 @@ class Notify {
             // Send push
             forEach {
                 it.devices?.forEach { device ->
-                    push.sendPush(device, pushData.show(it.member?.from != from?.id?.asId(Person::class) && it.member?.isSnoozedNow != true))
+                    push.sendPush(
+                        device,
+                        pushData.show(it.member?.from != from?.id?.asId(Person::class) && it.member?.isSnoozedNow != true)
+                    )
                 }
             }
         }
