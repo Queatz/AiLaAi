@@ -20,6 +20,7 @@ fun Push.receive(data: MessagePushData) {
         navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
         navController?.currentBackStackEntry?.arguments?.getString("id") == data.group.id
     ) {
+        // todo switch to push.events
         scope.launch {
             latestMessageFlow.emit(data.group.id)
         }

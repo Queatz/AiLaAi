@@ -24,6 +24,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.services.push
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.trade.TradesDialog
 import com.queatz.ailaai.ui.components.*
@@ -32,8 +33,13 @@ import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
+import com.queatz.push.TradePushData
 import createTrade
 import dropItem
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import myInventory
 import trades
@@ -55,8 +61,16 @@ fun InventoryScreen() {
     var showActiveTradesDialog by rememberStateOf(false)
     var showStartTradeDialogItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
+    var shownInventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
     var activeTrades by rememberStateOf<List<TradeExtended>?>(null)
+
+    LaunchedEffect(inventory, search) {
+        shownInventory = if (search.isBlank()) inventory else inventory.filter {
+            it.item!!.name!!.contains(search, ignoreCase = true) ||
+                    it.item!!.description!!.contains(search, ignoreCase = true)
+        }
+    }
 
     fun scrollToTop() {
         scope.launch {
@@ -74,6 +88,12 @@ fun InventoryScreen() {
         }
     }
 
+    suspend fun reloadTrades() {
+        api.trades {
+            activeTrades = it
+        }
+    }
+
     fun drop(inventoryItem: InventoryItem, quantity: Double) {
         scope.launch {
             api.dropItem(inventoryItem.id!!, DropItemBody(quantity))
@@ -82,27 +102,34 @@ fun InventoryScreen() {
         }
     }
 
-    fun tradeWith(people: List<String> = emptyList(), items: List<Pair<InventoryItemExtended, Double>> = emptyList()) {
+    fun tradeWith(
+        people: List<String> = emptyList(),
+        items: List<Pair<InventoryItemExtended, Double>> = emptyList()
+    ) {
         scope.launch {
             api.createTrade(
                 Trade().apply {
                     this.people = (listOf(me!!.id!!) + people).distinct()
                 }
             ) {
-                api.updateTradeItems(
-                    it.id!!,
-                    items.map {
-                        TradeItem(
-                            inventoryItem = it.first.inventoryItem!!.id!!,
-                            quantity = it.second,
-                            to = people.first()
-                        )
+                if (items.isEmpty()) {
+                    showTradeDialog = it
+                } else {
+                    api.updateTradeItems(
+                        it.id!!,
+                        items.map {
+                            TradeItem(
+                                inventoryItem = it.first.inventoryItem!!.id!!,
+                                quantity = it.second,
+                                to = people.first()
+                            )
+                        }
+                    ) {
+                        showTradeDialog = it.trade
                     }
-                ) {
-                    showTradeDialog = it.trade
                 }
-
             }
+            reloadTrades()
         }
     }
 
@@ -113,9 +140,16 @@ fun InventoryScreen() {
     }
 
     ResumeEffect {
-        api.trades {
-            activeTrades = it
-        }
+        reloadTrades()
+    }
+
+    LaunchedEffect(Unit) {
+        push.events
+            .mapNotNull { it as? TradePushData }
+            .catch { it.printStackTrace() }
+            .collectLatest {
+                reloadTrades()
+            }
     }
 
     showTradeDialog?.let {
@@ -123,7 +157,17 @@ fun InventoryScreen() {
             {
                 showTradeDialog = null
             },
-            it.id!!
+            it.id!!,
+            onTradeCancelled = {
+                scope.launch {
+                    reloadTrades()
+                }
+            },
+            onTradeCompleted = {
+                scope.launch {
+                    reloadTrades()
+                }
+            }
         )
     }
 
@@ -253,6 +297,7 @@ fun InventoryScreen() {
                         is ScanQrCodeResult.Profile -> {
                             tradeWith(listOf(it.id))
                         }
+
                         else -> context.showDidntWork()
                     }
                 }
@@ -281,22 +326,26 @@ fun InventoryScreen() {
                     }
                 }
 
-                LazyVerticalGrid(
-                    state = state,
-                    columns = GridCells.Adaptive(96.dp),
-                    horizontalArrangement = Arrangement.spacedBy(1.pad),
-                    verticalArrangement = Arrangement.spacedBy(1.pad),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 1.pad,
-                        end = 1.pad,
-                        top = 1.pad,
-                        bottom = 1.pad + 80.dp
-                    )
-                ) {
-                    items(inventory, key = { it.inventoryItem!!.id!! }) {
-                        InventoryItemLayout(it) {
-                            showInventoryItem = it
+                if (shownInventory.isEmpty()) {
+                    EmptyText(stringResource(R.string.no_items))
+                } else {
+                    LazyVerticalGrid(
+                        state = state,
+                        columns = GridCells.Adaptive(96.dp),
+                        horizontalArrangement = Arrangement.spacedBy(1.pad),
+                        verticalArrangement = Arrangement.spacedBy(1.pad),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 1.pad,
+                            end = 1.pad,
+                            top = 1.pad,
+                            bottom = 1.pad + 80.dp
+                        )
+                    ) {
+                        items(shownInventory, key = { it.inventoryItem!!.id!! }) {
+                            InventoryItemLayout(it) {
+                                showInventoryItem = it
+                            }
                         }
                     }
                 }

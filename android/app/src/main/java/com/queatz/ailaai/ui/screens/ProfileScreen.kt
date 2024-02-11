@@ -856,7 +856,9 @@ fun ProfileScreen(personId: String) {
             {
                 showTradeDialog = null
             },
-            it.id!!
+            it.id!!,
+            onTradeCancelled = {},
+            onTradeCompleted = {},
         )
     }
 }

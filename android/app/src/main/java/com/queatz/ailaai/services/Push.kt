@@ -164,7 +164,8 @@ enum class Notifications(
     Reminders(R.string.reminders, R.string.reminders_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_REMINDER),
     Messages(R.string.messages, R.string.messages_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_MESSAGE),
     Host(R.string.host, R.string.host_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
-    Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL);
+    Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
+    Trade(R.string.trade, R.string.trade_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_SOCIAL);
     val key get() = name.lowercase()
 }
 

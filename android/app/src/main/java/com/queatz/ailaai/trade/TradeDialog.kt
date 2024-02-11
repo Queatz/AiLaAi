@@ -18,16 +18,21 @@ import cancelTrade
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.item.InventoryItemLayout
 import com.queatz.ailaai.me
+import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
+import com.queatz.push.TradePushData
 import confirmTrade
+import io.ktor.http.*
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import trade
 import unconfirmTrade
@@ -54,7 +59,9 @@ data class TradeMemberState(
 @Composable
 fun TradeDialog(
     onDismissRequest: () -> Unit,
-    tradeId: String
+    tradeId: String,
+    onTradeCancelled: () -> Unit,
+    onTradeCompleted: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     var trade by rememberStateOf<TradeExtended?>(null)
@@ -108,8 +115,7 @@ fun TradeDialog(
     fun cancel() {
         scope.launch {
             api.cancelTrade(tradeId) {
-                context.toast(R.string.trade_cancelled)
-                onDismissRequest()
+                trade = it
             }
         }
     }
@@ -123,7 +129,16 @@ fun TradeDialog(
             }
         } else {
             scope.launch {
-                api.confirmTrade(tradeId, trade!!.trade!!) {
+                api.confirmTrade(
+                    tradeId,
+                    trade!!.trade!!,
+                    onError = {
+                        if (it.status == HttpStatusCode.BadRequest) {
+                            reload()
+                            context.toast(R.string.trade_updated)
+                        }
+                    }
+                ) {
                     trade = it
                 }
             }
@@ -135,6 +150,28 @@ fun TradeDialog(
         isLoading = true
         reload()
         isLoading = false
+    }
+
+    LaunchedEffect(Unit) {
+        push.events
+            .mapNotNull { it as? TradePushData }
+            .filter { it.trade.id == tradeId }
+            .catch { it.printStackTrace() }
+            .collectLatest {
+                reload()
+            }
+    }
+
+    LaunchedEffect(trade) {
+        if (trade?.trade?.completedAt != null) {
+            onTradeCompleted()
+            context.toast(R.string.trade_completed)
+            onDismissRequest()
+        } else if (trade?.trade?.cancelledAt != null) {
+            onTradeCancelled()
+            context.toast(R.string.trade_cancelled)
+            onDismissRequest()
+        }
     }
 
     DialogBase(

@@ -110,7 +110,7 @@ data class ReminderPushData(
 @Serializable
 data class TradePushData(
     val trade: Trade,
-    val initiator: Person? = null,
+    val people: List<Person>? = null,
     val event: TradeEvent
 ) : PushDataData()
 

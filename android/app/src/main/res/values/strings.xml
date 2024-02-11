@@ -56,6 +56,7 @@
     <string name="messages_notification_channel_description">Messages from people.</string>
     <string name="collaboration_notification_channel_description">Collaboration notifications.</string>
     <string name="host_notification_channel_description">Host notifications.</string>
+    <string name="trade_notification_channel_description">Trade notifications.</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
@@ -593,6 +594,8 @@
     <string name="confirmed">Confirmed</string>
     <string name="no_items">No items.</string>
     <string name="drop_x">Drop %1$s?</string>
+    <string name="trade_updated">Trade updated</string>
+    <string name="trade_completed">Trade completed</string>
     <plurals name="x_active_trades">
         <item quantity="one">%1$s active trade</item>
         <item quantity="other">%1$s active trades</item>

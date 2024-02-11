@@ -20,10 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.PageInput
-import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Item
@@ -45,7 +42,15 @@ fun MyItemsScreen() {
     var showMintItem by rememberStateOf<Item?>(null)
     var showCreateItemDialog by rememberStateOf(false)
     var items by rememberStateOf<List<ItemExtended>>(emptyList())
+    var shownItems by rememberStateOf<List<ItemExtended>>(emptyList())
     val context = LocalContext.current
+
+    LaunchedEffect(items, search) {
+        shownItems = if (search.isBlank()) items else items.filter {
+            it.item!!.name!!.contains(search, ignoreCase = true) ||
+                    it.item!!.description!!.contains(search, ignoreCase = true)
+        }
+    }
 
     fun scrollToTop() {
         scope.launch {
@@ -81,6 +86,7 @@ fun MyItemsScreen() {
             showCreateItemDialog = false
         }) {
             reload()
+            scrollToTop()
             showCreateItemDialog = false
         }
     }
@@ -168,19 +174,23 @@ fun MyItemsScreen() {
             if (isLoading) {
                 Loading()
             } else {
-                LazyColumn(
-                    state = state,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 1.pad,
-                        end = 1.pad,
-                        top = 1.pad,
-                        bottom = 1.pad + 80.dp
-                    )
-                ) {
-                    items(items, key = { it.item!!.id!! }) {
-                        ItemLayout(it) {
-                            showMintItem = it.item
+                if (shownItems.isEmpty()) {
+                    EmptyText(stringResource(R.string.no_items))
+                } else {
+                    LazyColumn(
+                        state = state,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 1.pad,
+                            end = 1.pad,
+                            top = 1.pad,
+                            bottom = 1.pad + 80.dp
+                        )
+                    ) {
+                        items(shownItems, key = { it.item!!.id!! }) {
+                            ItemLayout(it) {
+                                showMintItem = it.item
+                            }
                         }
                     }
                 }

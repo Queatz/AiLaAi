@@ -523,7 +523,13 @@ class MainActivity : AppCompatActivity() {
                                             composable("explore") {
                                                 ExploreScreen()
                                             }
-                                            composable("inventory") {
+                                            composable(
+                                                "inventory",
+                                                deepLinks = listOf(navDeepLink {
+                                                    uriPattern = "$appDomain/inventory"
+                                                }
+                                                )
+                                            ) {
                                                 InventoryScreen()
                                             }
                                             composable("items") {
