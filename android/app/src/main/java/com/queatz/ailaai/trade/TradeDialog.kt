@@ -295,6 +295,12 @@ fun TradeDialog(
         )
     }
 
+    fun maxQuantity(item: InventoryItemExtended, to: String? = null) = item.inventoryItem!!.quantity!! - trade!!.trade!!.members!!
+        .flatMap { it.items!! }
+        .filter { it.inventoryItem == item.inventoryItem!!.id!! && it.to != to }
+        .sumOf { it.quantity!! }
+        .coerceAtLeast(0.0)
+
     addInventoryItemDialog?.let { person ->
         AddInventoryItemDialog(
             {
@@ -302,7 +308,7 @@ fun TradeDialog(
             },
             omit = myTradeMember?.items?.filter { it.to == person.id }?.map { it.inventoryItem!! } ?: emptyList()
         ) { item ->
-            val quantity = 1.0.coerceAtMost(item.inventoryItem!!.quantity!!)
+            val quantity = 1.0.coerceAtMost(maxQuantity(item))
 
             addItemDialog = TradeMemberItem(
                 item,
@@ -321,11 +327,12 @@ fun TradeDialog(
             },
             item.inventoryItem,
             initialQuantity = item.quantity,
+            maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isMine = item.from.id == me.id,
             enabled = !anyConfirmed,
             onQuantity = { newQuantity ->
                 val items = myTradeMember!!.items!!.mapNotNull {
-                    if (it.inventoryItem == editItemDialog!!.inventoryItem.inventoryItem!!.id!!) {
+                    if (it.inventoryItem == editItemDialog!!.inventoryItem.inventoryItem!!.id!! && it.to == editItemDialog!!.to.id!!) {
                         if (newQuantity > 0.0) {
                             it.copy(quantity = newQuantity)
                         } else {
@@ -352,6 +359,7 @@ fun TradeDialog(
             },
             item.inventoryItem,
             initialQuantity = item.quantity,
+            maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isAdd = true,
             isMine = item.from.id == me.id,
             enabled = !anyConfirmed,

@@ -72,7 +72,7 @@ fun Route.tradeRoutes() {
                 if (updatedTrade.note != null) {
                     updateTrade(trade) {
                         note = updatedTrade.note
-                    }
+                    } ?: HttpStatusCode.BadRequest.description("Update failed")
                 } else {
                     HttpStatusCode.BadRequest.description("Nothing to update")
                 }
@@ -110,9 +110,10 @@ fun Route.tradeRoutes() {
 
                 // Check quantity is in inventory
                 if (
-                    items.any { item ->
-                        val inventoryItem = myInventoryItems.first { it.id == item.inventoryItem!! }
-                        item.quantity!! <= 0.0 || item.quantity!! > inventoryItem.quantity!!
+                    items.map { it.inventoryItem }.distinct().any { inventoryItem ->
+                        myInventoryItems.first { it.id == inventoryItem }.quantity!! !in 0.0..items
+                            .filter { it.inventoryItem == inventoryItem }
+                            .sumOf { it.quantity!! }
                     }
                 ) {
                     return@respond HttpStatusCode.BadRequest.description("Item(s) succeed quantity in inventory")
@@ -133,7 +134,7 @@ fun Route.tradeRoutes() {
 
                 updateTrade(trade) {
                     myMember.items = items
-                }
+                } ?: HttpStatusCode.BadRequest.description("Update failed")
             }
         }
 
@@ -163,7 +164,7 @@ fun Route.tradeRoutes() {
 
                 updateTrade(trade) {
                     myMember.confirmed = true
-                }
+                } ?: HttpStatusCode.BadRequest.description("Update failed")
             }
         }
 
@@ -187,7 +188,7 @@ fun Route.tradeRoutes() {
 
                 updateTrade(trade) {
                     myMember.confirmed = false
-                }
+                } ?: HttpStatusCode.BadRequest.description("Update failed")
             }
         }
 
@@ -203,7 +204,7 @@ fun Route.tradeRoutes() {
 
                 updateTrade(trade) {
                     cancelledAt = Clock.System.now()
-                }
+                } ?: HttpStatusCode.BadRequest.description("Update failed")
             }
         }
     }
@@ -217,13 +218,13 @@ private fun Trade.isSame(trade: Trade): Boolean = note == trade.note &&
 private fun PipelineContext<*, ApplicationCall>.updateTrade(
     trade: Trade,
     block: Trade.() -> Unit
-): TradeExtended {
+): TradeExtended? {
     trade.apply(block)
 
     if (trade.cancelledAt != null) {
         notify.trade(trade, me, people = db.people(trade.people!!), event = TradeEvent.Cancelled)
     } else if (trade.completedAt == null && trade.members!!.all { it.confirmed == true }) {
-        performTrade(trade)
+        if (!performTrade(trade)) return null
         trade.completedAt = Clock.System.now()
         notify.trade(trade, me, people = db.people(trade.people!!), event = TradeEvent.Completed)
     } else {
@@ -236,16 +237,39 @@ private fun PipelineContext<*, ApplicationCall>.updateTrade(
 }
 
 // todo, ensure all quantities are still good (i.e. no other trades have happened)
-private fun performTrade(trade: Trade) {
+private fun performTrade(trade: Trade): Boolean {
+    val inventoryItems = trade.members!!.flatMap { it.items!! }.map { it.inventoryItem!! }.distinct().map {
+        db.document(InventoryItem::class, it)!!
+    }
+    val toInventories = trade.members!!.map { it.person!! }.map {
+        db.inventoryOfPerson(it)
+    }
+    val allTradeItems = trade.members!!.flatMap { it.items!! }
+
+    // Quantity check
+    if (
+        inventoryItems.any { inventoryItem ->
+            allTradeItems
+                .filter { it.inventoryItem!! == inventoryItem.id!! }
+                .sumOf { it.quantity!! } > inventoryItem.quantity!!
+        }
+    ) {
+        return false
+    }
+
     trade.members!!.forEach { member ->
         member.items!!.forEach { tradeItem ->
-            val inventoryItem = db.document(InventoryItem::class, tradeItem.inventoryItem!!)!!
-            val toPersonInventory = db.inventoryOfPerson(tradeItem.to!!)
+            val inventoryItem = inventoryItems.first { it.id!! == tradeItem.inventoryItem!! }
+            val toPersonInventory = toInventories.first { it.person!! == tradeItem.to!! }
 
             if (tradeItem.quantity == inventoryItem.quantity) {
                 // Give all (move items)
                 // todo: add movement to history
-                inventoryItem.inventory = toPersonInventory.id!!
+                db.update(
+                    inventoryItem.apply {
+                        inventory = toPersonInventory.id!!
+                    }
+                )
             } else {
                 // Give some (split items)
                 // todo: add split to history
@@ -265,6 +289,8 @@ private fun performTrade(trade: Trade) {
             }
         }
     }
+
+    return true
 }
 
 private fun alreadyConfirmedResponse(trade: Trade): HttpStatusCode? =

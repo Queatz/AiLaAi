@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
@@ -27,6 +26,7 @@ fun TradeItemDialog(
     onDismissRequest: () -> Unit,
     inventoryItem: InventoryItemExtended,
     initialQuantity: Double,
+    maxQuantity: Double,
     isMine: Boolean,
     isAdd: Boolean = false,
     enabled: Boolean = true,
@@ -61,7 +61,7 @@ fun TradeItemDialog(
                         shape = MaterialTheme.shapes.large,
                         onValueChange = {
                             if (it.isNumericTextInput(allowDecimal = inventoryItem.item?.divisible == true)) {
-                                quantity = it.upTo(inventoryItem.inventoryItem!!.quantity!!)
+                                quantity = it.upTo(maxQuantity)
                             }
                         },
                         label = {
