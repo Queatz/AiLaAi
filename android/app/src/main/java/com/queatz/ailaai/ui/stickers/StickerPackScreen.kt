@@ -24,7 +24,6 @@ import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.db.StickerPack
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StickerPackScreen(stickerPackId: String) {
     val scope = rememberCoroutineScope()

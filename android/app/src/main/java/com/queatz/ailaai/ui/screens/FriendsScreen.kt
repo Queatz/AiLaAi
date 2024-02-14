@@ -37,10 +37,8 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
-import com.queatz.ailaai.ui.Friends
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
-import com.queatz.ailaai.ui.people
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended

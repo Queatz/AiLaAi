@@ -26,6 +26,7 @@ import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
+import kotlinx.datetime.Clock
 import myInventory
 
 @Composable
@@ -52,8 +53,9 @@ fun AddInventoryItemDialog(
     LaunchedEffect(Unit) {
         isLoading = true
         api.myInventory {
+            val now = Clock.System.now()
             items = it.filter {
-                it.inventoryItem!!.id !in omit
+                it.inventoryItem!!.id !in omit && it.inventoryItem!!.expiresAt?.let { it <= now } != true
             }
         }
         isLoading = false

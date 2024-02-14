@@ -27,7 +27,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +41,10 @@ import androidx.compose.ui.zIndex
 import app.ailaai.api.*
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
+import com.queatz.ailaai.api.sendAudioFromUri
+import com.queatz.ailaai.api.sendMediaFromUri
+import com.queatz.ailaai.api.sendVideosFromUri
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
@@ -59,7 +61,6 @@ import com.queatz.ailaai.services.*
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
-import com.queatz.ailaai.ui.story.editor.SendStoryDialog
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
@@ -1039,7 +1040,7 @@ fun GroupScreen(groupId: String) {
                                     .padding(bottom = 2.pad, end = 2.pad)
                                     .size(32.dp + 1.pad)
                             ) {
-                                Icon(Icons.Outlined.Add, null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Outlined.Edit, null, modifier = Modifier.size(16.dp))
                             }
                         }
                     }

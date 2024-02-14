@@ -4,7 +4,7 @@ val ktorVersion = "2.3.8"
 plugins {
     kotlin("multiplatform") version "1.9.22"
     kotlin("plugin.serialization") version "1.9.22"
-    id("org.jetbrains.compose") version "1.6.0-beta01"
+    id("org.jetbrains.compose") version "1.5.12"
 }
 
 group = "app.ailaai"
@@ -40,8 +40,8 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-                implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.2")
-                implementation("app.softwork:routing-compose:0.2.14-1.6.0-beta01")
+                implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.3")
+                implementation("app.softwork:routing-compose:0.2.13")
                 implementation(npm("@paulmillr/qr", "0.1.1"))
                 implementation(npm("date-fns", "2.30.0")) // todo updated to v3 breaks modules
                 implementation(npm("date-fns-tz", "2.0.0"))

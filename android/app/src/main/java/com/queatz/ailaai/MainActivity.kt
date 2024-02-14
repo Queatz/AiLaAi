@@ -128,7 +128,8 @@ class MainActivity : AppCompatActivity() {
                 val navController = rememberNavController()
                 push.navController = navController
 
-                var newMessages by remember { mutableStateOf(0) }
+                var newMessages by rememberStateOf(0)
+                var activeTrades by rememberStateOf(0)
                 val presence by mePresence.rememberPresence()
 
                 LifecycleEffect {
@@ -236,10 +237,17 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     LaunchedEffect(me) {
+                        trading.activeTrades.collectLatest {
+                            activeTrades = it.size
+                        }
+                    }
+
+                    LaunchedEffect(me) {
                         if (me != null) {
                             saves.reload()
                             joins.reload()
                             mePresence.reload()
+                            trading.reload()
                         }
                     }
 
@@ -357,6 +365,21 @@ class MainActivity : AppCompatActivity() {
                                                     Box {
                                                         Icon(item.icon, contentDescription = null)
                                                         // todo reusable icon IconAndCount
+                                                        if (item.route == "inventory" && activeTrades > 0) {
+                                                            Text(
+                                                                activeTrades.toString(),
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                fontWeight = FontWeight.Bold,
+                                                                modifier = Modifier
+                                                                    .offset(2.pad, -2.pad)
+                                                                    .align(Alignment.TopEnd)
+                                                                    .clip(CircleShape)
+                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                                    .padding(1.pad, .25f.pad)
+                                                            )
+                                                        }
+                                                        // todo reusable icon IconAndCount
                                                         if (item.route == "messages" && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
@@ -404,8 +427,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         },
                         snackbarHost = { SnackbarHost(snackbarHostState) },
-                        modifier = Modifier
-                            .then(if (showNavigation) Modifier.safeGesturesPadding() else Modifier)
+                        modifier = Modifier.safePadding(showNavigation)
                     ) {
                         PermanentNavigationDrawer(
                             drawerContent = {
@@ -429,6 +451,12 @@ class MainActivity : AppCompatActivity() {
                                                         if (item.route == "messages" && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+                                                        if (item.route == "inventory" && activeTrades > 0) {
+                                                            Text(
+                                                                activeTrades.toString(),
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
@@ -499,11 +527,7 @@ class MainActivity : AppCompatActivity() {
                                             modifier = Modifier
                                                 .padding(it)
                                                 .fillMaxSize()
-                                                .then(
-                                                    if (showNavigation) Modifier else Modifier.windowInsetsPadding(
-                                                        WindowInsets.safeGestures.only(WindowInsetsSides.Bottom)
-                                                    )
-                                                )
+                                                .safePadding(!showNavigation)
                                         ) {
                                             composable(
                                                 "profile/{id}",
@@ -680,6 +704,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+@Composable
+private fun Modifier.safePadding(enabled: Boolean) = then(
+    if (!enabled) Modifier else Modifier.windowInsetsPadding(
+        WindowInsets.safeContent.only(WindowInsetsSides.Bottom)
+    )
+)
 
 data class NavButton(
     val route: String,

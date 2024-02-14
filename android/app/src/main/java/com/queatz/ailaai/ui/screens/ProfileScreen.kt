@@ -603,7 +603,7 @@ fun ProfileScreen(personId: String) {
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        OutlinedButton(
+                                        Button(
                                             {
                                                 scope.launch {
                                                     api.createGroup(
@@ -624,6 +624,17 @@ fun ProfileScreen(personId: String) {
                                         ) {
                                             Text(stringResource(R.string.trade))
                                         }
+//                                        var subscribed by rememberStateOf(false)
+//                                        OutlinedIconButton(
+//                                            {
+//                                                subscribed = !subscribed
+//                                            }
+//                                        ) {
+//                                            Icon(
+//                                                if (subscribed) Icons.Outlined.Notifications else Icons.Outlined.NotificationsOff,
+//                                                stringResource(R.string.subscribe)
+//                                            )
+//                                        }
                                     }
                                 }
                             }

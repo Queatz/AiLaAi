@@ -24,7 +24,7 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.services.push
+import com.queatz.ailaai.services.trading
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.trade.TradesDialog
 import com.queatz.ailaai.ui.components.*
@@ -33,16 +33,10 @@ import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
-import com.queatz.push.TradePushData
 import createTrade
 import dropItem
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import myInventory
-import trades
 import updateTradeItems
 
 @Composable
@@ -63,7 +57,7 @@ fun InventoryScreen() {
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var shownInventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
-    var activeTrades by rememberStateOf<List<TradeExtended>?>(null)
+    val activeTrades by trading.activeTrades.collectAsState()
 
     LaunchedEffect(inventory, search) {
         shownInventory = if (search.isBlank()) inventory else inventory.filter {
@@ -85,12 +79,6 @@ fun InventoryScreen() {
             if (showInventoryItem != null) {
                 showInventoryItem = inventory.firstOrNull { showInventoryItem?.inventoryItem?.id == it.inventoryItem?.id }
             }
-        }
-    }
-
-    suspend fun reloadTrades() {
-        api.trades {
-            activeTrades = it
         }
     }
 
@@ -129,7 +117,7 @@ fun InventoryScreen() {
                     }
                 }
             }
-            reloadTrades()
+            trading.reload()
         }
     }
 
@@ -140,16 +128,7 @@ fun InventoryScreen() {
     }
 
     ResumeEffect {
-        reloadTrades()
-    }
-
-    LaunchedEffect(Unit) {
-        push.events
-            .mapNotNull { it as? TradePushData }
-            .catch { it.printStackTrace() }
-            .collectLatest {
-                reloadTrades()
-            }
+        trading.reload()
     }
 
     showTradeDialog?.let {
@@ -160,12 +139,12 @@ fun InventoryScreen() {
             it.id!!,
             onTradeCancelled = {
                 scope.launch {
-                    reloadTrades()
+                    trading.reload()
                 }
             },
             onTradeCompleted = {
                 scope.launch {
-                    reloadTrades()
+                    trading.reload()
                 }
             }
         )
