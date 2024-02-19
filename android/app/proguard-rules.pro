@@ -16,3 +16,6 @@
 -keepattributes InnerClasses
 -keepattributes Signature
 -keepattributes SourceFile,LineNumberTable
+
+# VideoSDK
+-dontwarn kotlin.jvm.internal.SourceDebugExtension

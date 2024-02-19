@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 
@@ -62,6 +63,7 @@
                 <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/link-device/.*" />
             </intent-filter>
         </activity>
+
         <activity
                 android:name=".ShareActivity"
                 android:exported="true"
@@ -71,17 +73,29 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="text/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
+                <data android:mimeType="video/*"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".CallActivity"
+                android:exported="true"
+                android:supportsPictureInPicture="true"
+                android:windowSoftInputMode="adjustResize"
+                android:launchMode="singleInstance"
+                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+                android:theme="@style/Theme.AiLaAi.Translucent">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.CALL"/>
             </intent-filter>
         </activity>
 

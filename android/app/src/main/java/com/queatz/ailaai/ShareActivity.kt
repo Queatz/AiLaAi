@@ -124,10 +124,12 @@ class ShareActivity : AppCompatActivity() {
     private fun getIntentContent(): SharedContent? {
         return when(intent?.action) {
             Intent.ACTION_SEND -> {
-                if ("text/plain" == intent.type) {
+                if (intent.type?.startsWith("text/") == true) {
                     return handleSendText(intent)
                 } else if (intent.type?.startsWith("image/") == true) {
                     return handleSendImage(intent)
+                } else if (intent.type?.startsWith("video/") == true) {
+                    null // todo video
                 } else {
                     null
                 }
@@ -135,6 +137,8 @@ class ShareActivity : AppCompatActivity() {
             Intent.ACTION_SEND_MULTIPLE -> {
                 if (intent.type?.startsWith("image/") == true) {
                     return handleSendMultipleImages(intent)
+                } else if (intent.type?.startsWith("video/") == true) {
+                    null // todo video
                 } else {
                     null
                 }

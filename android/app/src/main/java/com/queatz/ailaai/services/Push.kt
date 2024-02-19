@@ -6,7 +6,9 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.datastore.preferences.core.edit
@@ -104,7 +106,8 @@ class Push {
         channel: Notifications,
         groupKey: String,
         title: String,
-        text: String
+        text: String,
+        sound: Uri? = null
     ) {
         if (!notificationManager.areNotificationsEnabled()) {
             return
@@ -119,11 +122,18 @@ class Push {
             .setAutoCancel(true)
             .setPriority(channel.importance.priority)
             .setCategory(channel.category)
-            .setContentIntent(TaskStackBuilder.create(context).run {
+            .setContentIntent(
+                TaskStackBuilder.create(context).run {
                     addNextIntentWithParentStack(intent)
                     getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 }
-            )
+            ).let {
+                if (sound != null) {
+                    it.setSound(sound)
+                } else {
+                    it
+                }
+            }
 
         notificationManager.notify(groupKey, 1, builder.build())
     }
@@ -160,6 +170,7 @@ enum class Notifications(
     val importance: Int,
     val category: String,
 ) {
+    Calls(R.string.calls, R.string.calls_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_CALL),
     Reminders(R.string.reminders, R.string.reminders_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_REMINDER),
     Messages(R.string.messages, R.string.messages_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_MESSAGE),
     Host(R.string.host, R.string.host_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),

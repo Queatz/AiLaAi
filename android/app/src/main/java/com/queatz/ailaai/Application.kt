@@ -16,6 +16,7 @@ import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.ui
 import com.queatz.db.DeviceType
@@ -25,6 +26,7 @@ import io.reactivex.rxjava3.observers.DisposableObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import live.videosdk.rtc.android.VideoSDK
 import org.acra.config.CoreConfiguration
 import org.acra.config.toast
 import org.acra.data.CrashReportData
@@ -43,10 +45,13 @@ class Application : android.app.Application() {
     override fun onCreate() {
         super.onCreate()
 
+        VideoSDK.initialize(applicationContext)
+
         ChoiceSdk.init(this)
         api.init(this)
         push.init(this)
         ui.init(this)
+        calls.init(this)
 
         val scope = CoroutineScope(Dispatchers.IO)
 

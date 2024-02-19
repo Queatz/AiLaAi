@@ -65,7 +65,7 @@ fun ExploreScreen() {
         { geo = it },
         nav.context as Activity
     )
-    var tab by rememberSavableStateOf(MainTab.Friends)
+    var tab by rememberSavableStateOf(MainTab.Local)
     var shownTab by rememberSavableStateOf(tab)
     var cards by remember { mutableStateOf(cache[tab] ?: emptyList()) }
     var isLoading by rememberStateOf(cards.isEmpty())

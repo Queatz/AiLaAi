@@ -82,7 +82,7 @@ android {
 dependencies {
     val ktorVersion = "2.3.8"
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.6.0"
+    val composeVersion = "1.6.1"
 
     // Ai là ai
     implementation("app.ailaai.shared:models")
@@ -99,18 +99,18 @@ dependencies {
 
     // Compose
     implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.navigation:navigation-compose:2.7.6")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
     implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.2.0-rc01")
-    implementation("androidx.compose.material3:material3-window-size-class:1.2.0-rc01")
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
@@ -151,6 +151,12 @@ dependencies {
     implementation("com.ibm.icu:icu4j:73.2")
     ksp("dev.zacsweers.autoservice:auto-service-ksp:1.1.0")
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
+
+    // VideoSDK
+    implementation("live.videosdk:rtc-android-sdk:0.1.26") {
+        exclude("androidx.core")
+        exclude("com.android.support")
+    }
 
     // Development
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")

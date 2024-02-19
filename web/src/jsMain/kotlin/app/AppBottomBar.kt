@@ -42,7 +42,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
 //        }) {
 //            onNavClick(NavPage.Schedule)
 //        }
-        IconButton("home", appString { cards }, styles = {
+        IconButton("map", appString { cards }, styles = {
             if (nav == NavPage.Cards) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)

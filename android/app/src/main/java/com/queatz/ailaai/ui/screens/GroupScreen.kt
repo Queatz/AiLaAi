@@ -369,18 +369,16 @@ fun GroupScreen(groupId: String) {
                         }
                     }
 
-                    // todo: videosdk
-                    if (false) {
-                        IconButton(
-                            {
-                                // todo
-                            }
-                        ) {
-                            Icon(
-                                Icons.Outlined.Call,
-                                stringResource(R.string.call)
-                            )
+                    IconButton(
+                        {
+                            calls.join(groupId)
                         }
+                    ) {
+                        // todo show number of participants
+                        Icon(
+                            Icons.Outlined.Call,
+                            stringResource(R.string.call)
+                        )
                     }
 
                     if (isSnoozed) {
@@ -405,7 +403,7 @@ fun GroupScreen(groupId: String) {
                         } else {
                             IconAndCount(
                                 {
-                                    Icon(Icons.Outlined.Home, stringResource(R.string.cards))
+                                    Icon(Icons.Outlined.Map, stringResource(R.string.cards))
                                 },
                                 groupExtended?.cardCount ?: 0
                             ) {

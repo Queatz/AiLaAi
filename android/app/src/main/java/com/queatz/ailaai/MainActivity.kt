@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
             NavButton("messages", getString(R.string.groups), Icons.Outlined.Group),
             NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
             NavButton("inventory", getString(R.string.inventory), Icons.Outlined.RocketLaunch),
-            NavButton("explore", getString(R.string.cards), Icons.Outlined.Home),
+            NavButton("explore", getString(R.string.cards), Icons.Outlined.Map),
             NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
         )
     }
