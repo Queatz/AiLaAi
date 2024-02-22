@@ -1,8 +1,5 @@
 package com.queatz.ailaai.ui.screens
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +10,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,10 +39,10 @@ import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeDialog
-import com.queatz.ailaai.ui.profile.ProfileGroups
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.profile.ProfileGroups
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
@@ -61,8 +57,10 @@ fun ProfileScreen(personId: String) {
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
+    var subscribed by rememberStateOf(true)
     var showMedia by remember { mutableStateOf<Media?>(null) }
     var isLoading by rememberStateOf(true)
+    var isSubscribing by rememberStateOf(false)
     var search by rememberStateOf("")
     var isError by rememberStateOf(false)
     var showEditName by rememberStateOf(false)
@@ -185,6 +183,7 @@ fun ProfileScreen(personId: String) {
                     person = it.person
                     profile = it.profile
                     stats = it.stats
+                    subscribed = it.subscription != null
                 }
             }
         ).awaitAll()
@@ -603,7 +602,7 @@ fun ProfileScreen(personId: String) {
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Button(
+                                        OutlinedButton(
                                             {
                                                 scope.launch {
                                                     api.createGroup(
@@ -617,24 +616,37 @@ fun ProfileScreen(personId: String) {
                                         ) {
                                             Text(stringResource(R.string.message))
                                         }
-                                        Button(
+                                        OutlinedButton(
                                             {
                                                 trade()
                                             }
                                         ) {
                                             Text(stringResource(R.string.trade))
                                         }
-//                                        var subscribed by rememberStateOf(false)
-//                                        OutlinedIconButton(
-//                                            {
-//                                                subscribed = !subscribed
-//                                            }
-//                                        ) {
-//                                            Icon(
-//                                                if (subscribed) Icons.Outlined.Notifications else Icons.Outlined.NotificationsOff,
-//                                                stringResource(R.string.subscribe)
-//                                            )
-//                                        }
+                                        OutlinedButton(
+                                            {
+                                                scope.launch {
+                                                    isSubscribing = true
+                                                    if (subscribed) {
+                                                        api.unsubscribe(person!!.id!!) {
+                                                            reload()
+                                                        }
+                                                    } else {
+                                                        api.subscribe(person!!.id!!) {
+                                                            reload()
+                                                        }
+                                                    }
+                                                    isSubscribing = false
+                                                }
+                                            },
+                                            enabled = !isSubscribing
+                                        ) {
+                                            if (subscribed) {
+                                                Text(stringResource(R.string.unsubscribe))
+                                            } else {
+                                                Text(stringResource(R.string.subscribe))
+                                            }
+                                        }
                                     }
                                 }
                             }

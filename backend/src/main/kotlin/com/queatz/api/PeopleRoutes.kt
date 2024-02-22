@@ -25,7 +25,8 @@ fun Route.peopleRoutes() {
                 ProfileStats(
                     friendsCount = db.friendsCount(person.id!!),
                     cardCount = db.cardsCount(person.id!!),
-                )
+                ),
+                meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
             )
         }
     }
@@ -34,15 +35,17 @@ fun Route.peopleRoutes() {
         respond {
             val profile = db.profileByUrl(parameter("url"))
                 ?: return@respond HttpStatusCode.NotFound.description("Profile not found")
+            val person = db.document(Person::class, profile.person!!)
 
             PersonProfile(
-                db.document(Person::class, profile.person!!)
+                person
                     ?: return@respond HttpStatusCode.NotFound.description("Person not found"),
                 profile,
                 ProfileStats(
                     friendsCount = db.friendsCount(profile.person!!),
                     cardCount = db.cardsCount(profile.person!!),
-                )
+                ),
+                meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
             )
         }
     }
@@ -84,6 +87,19 @@ fun Route.peopleRoutes() {
                     call.parameters["search"]?.notBlank ?: return@respond HttpStatusCode.BadRequest.description("Missing 'search' parameter"),
                     me.geo
                 ).forApi()
+            }
+        }
+
+        post("/people/{id}/subscribe") {
+            respond {
+                db.subscribe(me.id!!, parameter("id"))
+            }
+        }
+
+        post("/people/{id}/unsubscribe") {
+            respond {
+                db.unsubscribe(me.id!!, parameter("id"))
+                HttpStatusCode.NoContent
             }
         }
     }

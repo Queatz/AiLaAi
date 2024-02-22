@@ -111,9 +111,11 @@ fun Route.tradeRoutes() {
                 // Check quantity is in inventory
                 if (
                     items.map { it.inventoryItem }.distinct().any { inventoryItem ->
-                        myInventoryItems.first { it.id == inventoryItem }.quantity!! !in 0.0..items
+                        items
                             .filter { it.inventoryItem == inventoryItem }
-                            .sumOf { it.quantity!! }
+                            .sumOf { it.quantity!! } !in 0.0..myInventoryItems
+                                .first { it.id == inventoryItem }
+                                .quantity!!
                     }
                 ) {
                     return@respond HttpStatusCode.BadRequest.description("Item(s) succeed quantity in inventory")

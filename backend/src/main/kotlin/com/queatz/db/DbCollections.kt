@@ -136,5 +136,7 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Trade::people.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Trade::completedAt.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Trade::cancelledAt.name), PersistentIndexOptions())
+    },
+    Subscription::class.db {
     }
 )

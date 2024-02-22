@@ -215,6 +215,10 @@ class Member(
 ) : Edge()
 
 @Serializable
+class Subscription(
+) : Edge()
+
+@Serializable
 class Message(
     var group: String? = null,
     var member: String? = null,

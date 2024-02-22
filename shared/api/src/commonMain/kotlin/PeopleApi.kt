@@ -1,9 +1,6 @@
 package app.ailaai.api
 
-import com.queatz.db.Card
-import com.queatz.db.GroupExtended
-import com.queatz.db.Person
-import com.queatz.db.PersonProfile
+import com.queatz.db.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 
@@ -47,3 +44,15 @@ suspend fun Api.profileByUrl(
     onError = onError,
     onSuccess = onSuccess
 )
+
+suspend fun Api.subscribe(
+    personId: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<Subscription>,
+) = get("people/$personId/subscribe", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.unsubscribe(
+    personId: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode>,
+) = get("people/$personId/unsubscribe", onError = onError, onSuccess = onSuccess)

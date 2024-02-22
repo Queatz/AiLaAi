@@ -203,18 +203,28 @@ fun TradeDialog(
                             members.forEach { member ->
                                 item(span = { GridItemSpan(maxLineSpan) }) {
                                     Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(1.pad)
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
                                             member.person.name ?: stringResource(R.string.someone)
                                         )
-                                        if (member.confirmed) {
-                                            Icon(
-                                                Icons.Outlined.Check,
-                                                stringResource(R.string.confirmed),
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
+                                        if (anyConfirmed) {
+                                            Text(" • ")
+                                            if (member.confirmed) {
+                                                Text(
+                                                    stringResource(R.string.confirmed),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Icon(
+                                                    Icons.Outlined.Check,
+                                                    stringResource(R.string.confirmed),
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier
+                                                        .padding(start = .5f.pad)
+                                                )
+                                            } else {
+                                                Text(stringResource(R.string.waiting))
+                                            }
                                         }
                                     }
                                 }
