@@ -12,6 +12,11 @@ enum class PushAction {
     CallStatus,
     Reminder,
     Trade,
+    Story,
+}
+
+enum class StoryEvent {
+    Posted
 }
 
 enum class GroupEvent {
@@ -113,6 +118,13 @@ data class TradePushData(
     val people: List<Person>? = null,
     val person: Person,
     val event: TradeEvent
+) : PushDataData()
+
+@Serializable
+data class StoryPushData(
+    val authors: List<Person>,
+    val story: Story,
+    val event: StoryEvent
 ) : PushDataData()
 
 @Serializable

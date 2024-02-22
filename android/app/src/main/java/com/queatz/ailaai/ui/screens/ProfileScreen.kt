@@ -57,7 +57,7 @@ fun ProfileScreen(personId: String) {
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
-    var subscribed by rememberStateOf(true)
+    var subscribed by rememberStateOf(false)
     var showMedia by remember { mutableStateOf<Media?>(null) }
     var isLoading by rememberStateOf(true)
     var isSubscribing by rememberStateOf(false)

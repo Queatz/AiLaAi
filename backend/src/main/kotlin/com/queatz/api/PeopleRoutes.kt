@@ -13,44 +13,43 @@ import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 
 fun Route.peopleRoutes() {
-
-    get("/people/{id}/profile") {
-        respond {
-            val person = db.document(Person::class, parameter("id"))
-                ?: return@respond HttpStatusCode.NotFound
-
-            PersonProfile(
-                person,
-                db.profile(person.id!!),
-                ProfileStats(
-                    friendsCount = db.friendsCount(person.id!!),
-                    cardCount = db.cardsCount(person.id!!),
-                ),
-                meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
-            )
-        }
-    }
-
-    get("/profile/url/{url}") {
-        respond {
-            val profile = db.profileByUrl(parameter("url"))
-                ?: return@respond HttpStatusCode.NotFound.description("Profile not found")
-            val person = db.document(Person::class, profile.person!!)
-
-            PersonProfile(
-                person
-                    ?: return@respond HttpStatusCode.NotFound.description("Person not found"),
-                profile,
-                ProfileStats(
-                    friendsCount = db.friendsCount(profile.person!!),
-                    cardCount = db.cardsCount(profile.person!!),
-                ),
-                meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
-            )
-        }
-    }
-
     authenticate(optional = true) {
+        get("/people/{id}/profile") {
+            respond {
+                val person = db.document(Person::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                PersonProfile(
+                    person,
+                    db.profile(person.id!!),
+                    ProfileStats(
+                        friendsCount = db.friendsCount(person.id!!),
+                        cardCount = db.cardsCount(person.id!!),
+                    ),
+                    meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
+                )
+            }
+        }
+
+        get("/profile/url/{url}") {
+            respond {
+                val profile = db.profileByUrl(parameter("url"))
+                    ?: return@respond HttpStatusCode.NotFound.description("Profile not found")
+                val person = db.document(Person::class, profile.person!!)
+                    ?: return@respond HttpStatusCode.NotFound.description("Person not found")
+
+                PersonProfile(
+                    person,
+                    profile,
+                    ProfileStats(
+                        friendsCount = db.friendsCount(profile.person!!),
+                        cardCount = db.cardsCount(profile.person!!),
+                    ),
+                    meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
+                )
+            }
+        }
+
         get("/people/{id}/profile/cards") {
             respond {
                 val person = db.document(Person::class, parameter("id"))

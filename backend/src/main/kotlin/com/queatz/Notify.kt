@@ -95,6 +95,27 @@ class Notify {
         notifyGroupMembers(from, group, pushData)
     }
 
+    fun story(story: Story, authors: List<Person>, event: StoryEvent, subscribers: List<Person>) {
+        val pushData = PushData(
+            PushAction.Story,
+            StoryPushData(
+                story = Story().apply {
+                    id = story.id
+                    title = story.title
+                },
+                authors = authors.map { person ->
+                    Person().apply {
+                        id = person.id
+                        name = person.name
+                    }
+                },
+                event = event
+            )
+        )
+
+        notifyPeople(subscribers.map { it.id!! }, pushData)
+    }
+
     fun message(group: Group, from: Person, message: Message) {
         val pushData = PushData(
             PushAction.Message,

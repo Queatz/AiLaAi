@@ -3,6 +3,7 @@ package com.queatz.api
 import com.queatz.db.*
 import com.queatz.parameter
 import com.queatz.plugins.*
+import com.queatz.push.StoryEvent
 import com.queatz.receiveFile
 import com.queatz.receiveFiles
 import io.ktor.http.*
@@ -105,6 +106,16 @@ fun Route.storyRoutes() {
                             group.seen = Clock.System.now()
                             db.update(group)
                         }
+                    }
+
+                    // Share to subscribers
+                    story.authors?.let { authors ->
+                        notify.story(
+                            story = story,
+                            authors = authors,
+                            subscribers = db.subscribersOf(authors.map { it.id!! }),
+                            event = StoryEvent.Posted
+                        )
                     }
                 } else if (story.published != true) {
                     if (update.title != null) {

@@ -17,32 +17,32 @@ fun Db.openGroupsOfPerson(person: String, offset: Int = 0, limit: Int = 20) = qu
     )
 )
 
-fun Db.subscribe(from: String, to: String) = query(
+fun Db.subscribe(from: String, to: String) = one(
     Subscription::class,
     """
         upsert { _from: @from, _to: @to }
             insert { _from: @from, _to: @to, ${f(Subscription::createdAt)}: DATE_ISO8601(DATE_NOW()) }
             update { _from: @from, _to: @to }
-            in `${Subscription::class.collection()}`
+            in @@collection
             return NEW || OLD
     """.trimIndent(),
     mapOf(
-        "from" to from,
-        "to" to to
+        "from" to from.asId(Person::class),
+        "to" to to.asId(Person::class)
     )
-).first()!!
+)!!
 
 fun Db.unsubscribe(from: String, to: String) = query(
     Subscription::class,
     """
-        upsert { _from: @from, _to: @to }
-            insert { _from: @from, _to: @to, ${f(Subscription::createdAt)}: DATE_ISO8601(DATE_NOW()) }
-            update { _from: @from, _to: @to }
+        for x in `${Subscription::class.collection()}`
+            filter x._from == @from
+                and x._to == @to
             remove x in `${Subscription::class.collection()}`
     """.trimIndent(),
     mapOf(
-        "from" to from,
-        "to" to to
+        "from" to from.asId(Person::class),
+        "to" to to.asId(Person::class)
     )
 )
 
@@ -55,7 +55,21 @@ fun Db.subscription(from: String, to: String) = one(
             return x
     """.trimIndent(),
     mapOf(
-        "from" to from,
-        "to" to to
+        "from" to from.asId(Person::class),
+        "to" to to.asId(Person::class)
+    )
+)
+
+fun Db.subscribersOf(people: List<String>) = query(
+    Person::class,
+    """
+        for x in `${Subscription::class.collection()}`
+            filter x._to in @people
+            for person in `${Person::class.collection()}`
+                filter person._id == x._to
+                return distinct person
+    """.trimIndent(),
+    mapOf(
+        "people" to people.map { it.asId(Person::class) }
     )
 )

@@ -1,5 +1,6 @@
 package com.queatz.ailaai.schedule
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
@@ -95,5 +96,14 @@ fun <T> List<T>.asNaturalList(transform: (T) -> String) = when (size) {
     2 -> "${transform(first())} ${stringResource(R.string.inline_and)} ${transform(last())}"
     else -> {
         "${dropLast(1).joinToString(", ", transform = transform)} ${stringResource(R.string.inline_and)} ${transform(last())}"
+    }
+}
+
+fun <T> List<T>.asNaturalList(context: Context, transform: (T) -> String) = when (size) {
+    0 -> ""
+    1 -> transform(first())
+    2 -> "${transform(first())} ${context.getString(R.string.inline_and)} ${transform(last())}"
+    else -> {
+        "${dropLast(1).joinToString(", ", transform = transform)} ${context.getString(R.string.inline_and)} ${transform(last())}"
     }
 }

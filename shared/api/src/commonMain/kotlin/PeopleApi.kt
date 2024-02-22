@@ -49,10 +49,10 @@ suspend fun Api.subscribe(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Subscription>,
-) = get("people/$personId/subscribe", onError = onError, onSuccess = onSuccess)
+) = post("people/$personId/subscribe", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.unsubscribe(
     personId: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode>,
-) = get("people/$personId/unsubscribe", onError = onError, onSuccess = onSuccess)
+) = post("people/$personId/unsubscribe", onError = onError, onSuccess = onSuccess)

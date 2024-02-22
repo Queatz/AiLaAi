@@ -137,6 +137,6 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Trade::completedAt.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Trade::cancelledAt.name), PersistentIndexOptions())
     },
-    Subscription::class.db {
+    Subscription::class.db(CollectionType.EDGES, listOf(Person::class)) {
     }
 )
