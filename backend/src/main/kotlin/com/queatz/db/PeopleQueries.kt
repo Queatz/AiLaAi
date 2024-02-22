@@ -63,11 +63,11 @@ fun Db.subscription(from: String, to: String) = one(
 fun Db.subscribersOf(people: List<String>) = query(
     Person::class,
     """
-        for x in `${Subscription::class.collection()}`
-            filter x._to in @people
-            for person in `${Person::class.collection()}`
-                filter person._id == x._to
-                return distinct person
+        for subscriber in `${Person::class.collection()}`
+            for subscription in `${Subscription::class.collection()}`
+                filter subscription._from == subscriber._id
+                    and subscription._to in @people
+                return distinct subscriber
     """.trimIndent(),
     mapOf(
         "people" to people.map { it.asId(Person::class) }

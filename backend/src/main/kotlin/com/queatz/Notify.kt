@@ -6,6 +6,7 @@ import com.queatz.plugins.db
 import com.queatz.plugins.push
 import com.queatz.push.*
 import kotlinx.datetime.Clock
+import java.util.logging.Logger
 
 class Notify {
     fun trade(trade: Trade, person: Person, people: List<Person>? = null, event: TradeEvent) {

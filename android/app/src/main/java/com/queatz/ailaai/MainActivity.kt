@@ -372,7 +372,7 @@ class MainActivity : AppCompatActivity() {
                                                                 style = MaterialTheme.typography.labelSmall,
                                                                 fontWeight = FontWeight.Bold,
                                                                 modifier = Modifier
-                                                                    .offset(2.pad, -2.pad)
+                                                                    .offset(2.pad, -.5f.pad)
                                                                     .align(Alignment.TopEnd)
                                                                     .clip(CircleShape)
                                                                     .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -387,7 +387,7 @@ class MainActivity : AppCompatActivity() {
                                                                 style = MaterialTheme.typography.labelSmall,
                                                                 fontWeight = FontWeight.Bold,
                                                                 modifier = Modifier
-                                                                    .offset(2.pad, -2.pad)
+                                                                    .offset(2.pad, -.5f.pad)
                                                                     .align(Alignment.TopEnd)
                                                                     .clip(CircleShape)
                                                                     .background(MaterialTheme.colorScheme.surfaceVariant)

@@ -109,14 +109,15 @@ fun Route.storyRoutes() {
                     }
 
                     // Share to subscribers
-                    story.authors?.let { authors ->
-                        notify.story(
-                            story = story,
-                            authors = authors,
-                            subscribers = db.subscribersOf(authors.map { it.id!! }),
-                            event = StoryEvent.Posted
-                        )
-                    }
+                    val authors = listOf(
+                        db.document(Person::class, story.person!!)!!
+                    )
+                    notify.story(
+                        story = story,
+                        authors = authors,
+                        subscribers = db.subscribersOf(authors.map { it.id!! }),
+                        event = StoryEvent.Posted
+                    )
                 } else if (story.published != true) {
                     if (update.title != null) {
                         story.title = update.title

@@ -604,7 +604,7 @@
     <string name="waiting">Waiting</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="subscriptions">Subscriptions</string>
-    <string name="by_x">By %1$s</string>
+    <string name="story_by_x">%1$s posted a story</string>
     <plurals name="x_active_trades">
         <item quantity="one">%1$s active trade</item>
         <item quantity="other">%1$s active trades</item>

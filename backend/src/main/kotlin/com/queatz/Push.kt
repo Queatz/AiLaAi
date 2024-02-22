@@ -228,6 +228,7 @@ class Push {
                                         "action" to pushData.action!!.name,
                                         "data" to json.encodeToString(
                                             // todo this is so hard to maintain
+                                            // todo can it just be json.encodeToString(pushData.data) ?
                                             when (val it = pushData.data) {
                                                 is CollaborationPushData -> it
                                                 is MessagePushData -> it
@@ -235,6 +236,8 @@ class Push {
                                                 is CallPushData -> it
                                                 is CallStatusPushData -> it
                                                 is ReminderPushData -> it
+                                                is StoryPushData -> it
+                                                is TradePushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

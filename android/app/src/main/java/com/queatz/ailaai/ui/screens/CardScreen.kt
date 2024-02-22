@@ -926,6 +926,7 @@ fun CardScreen(cardId: String) {
                 openCollaboratorsDialog = false
             } else {
                 scope.launch {
+                    // todo open conversations dialog
                     api.createGroup(listOf(me!!.id!!, person.id!!), reuse = true) {
                         nav.navigate("group/${it.id!!}")
                         openCollaboratorsDialog = false

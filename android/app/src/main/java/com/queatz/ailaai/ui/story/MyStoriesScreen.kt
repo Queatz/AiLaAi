@@ -57,7 +57,13 @@ fun MyStoriesScreen() {
             if (isLoading) {
                 Loading()
             } else if (stories.isEmpty()) {
-                EmptyText(stringResource(R.string.you_havent_written))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    EmptyText(stringResource(R.string.you_havent_written))
+                }
             } else {
                 val shownStories = remember(stories, search) {
                     stories.filter {

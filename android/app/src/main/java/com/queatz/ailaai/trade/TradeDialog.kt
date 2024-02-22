@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,11 +23,13 @@ import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.item.InventoryItemLayout
 import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.push
-import com.queatz.ailaai.ui.components.DialogBase
-import com.queatz.ailaai.ui.components.DialogLayout
-import com.queatz.ailaai.ui.components.EmptyText
-import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.PeopleDialog
+import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.ailaai.ui.screens.seenText
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import com.queatz.push.TradePushData
@@ -67,11 +70,14 @@ fun TradeDialog(
     var trade by rememberStateOf<TradeExtended?>(null)
     var isLoading by rememberStateOf(false)
     var showCancelDialog by rememberStateOf(false)
+    var showMenu by rememberStateOf(false)
+    var showMembers by rememberStateOf(false)
     var editItemDialog by rememberStateOf<TradeMemberItem?>(null)
     var addItemDialog by rememberStateOf<TradeMemberItem?>(null)
     var addInventoryItemDialog by rememberStateOf<Person?>(null)
     val me = me ?: return
     val context = LocalContext.current
+    val nav = nav
 
     val anyConfirmed = trade?.trade?.members?.any { it.confirmed == true } == true
     val confirmedByMe = trade?.trade?.members?.any { it.person == me.id!! && it.confirmed == true } == true
@@ -180,12 +186,51 @@ fun TradeDialog(
         DialogLayout(
             scrollable = false,
             content = {
-                Text(
-                    stringResource(R.string.trade),
-                    style = MaterialTheme.typography.titleLarge,
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(bottom = 1.pad)
-                )
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        stringResource(R.string.trade),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .padding(bottom = 1.pad)
+                    )
+
+                    IconButton(
+                        {
+                            showMenu = true
+                        }
+                    ) {
+                        Icon(Icons.Outlined.MoreVert, null)
+
+                        Dropdown(
+                            showMenu,
+                            { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                {
+                                    Text(stringResource(R.string.members))
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    showMembers = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                {
+                                    Text(stringResource(R.string.cancel))
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    showCancelDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
                 if (isLoading) {
                     Loading()
                 } else {
@@ -267,13 +312,6 @@ fun TradeDialog(
                 ) {
                     Text(stringResource(R.string.close))
                 }
-                TextButton(
-                    {
-                        showCancelDialog = true
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
                 if (confirmedByMe) {
                     OutlinedButton(
                         {
@@ -288,7 +326,7 @@ fun TradeDialog(
                         )
                     }
                 } else {
-                    Button(
+                    OutlinedButton(
                         {
                             confirmUnconfirm()
                         },
@@ -305,11 +343,12 @@ fun TradeDialog(
         )
     }
 
-    fun maxQuantity(item: InventoryItemExtended, to: String? = null) = item.inventoryItem!!.quantity!! - trade!!.trade!!.members!!
-        .flatMap { it.items!! }
-        .filter { it.inventoryItem == item.inventoryItem!!.id!! && it.to != to }
-        .sumOf { it.quantity!! }
-        .coerceAtLeast(0.0)
+    fun maxQuantity(item: InventoryItemExtended, to: String? = null) =
+        item.inventoryItem!!.quantity!! - trade!!.trade!!.members!!
+            .flatMap { it.items!! }
+            .filter { it.inventoryItem == item.inventoryItem!!.id!! && it.to != to }
+            .sumOf { it.quantity!! }
+            .coerceAtLeast(0.0)
 
     addInventoryItemDialog?.let { person ->
         AddInventoryItemDialog(
@@ -389,6 +428,22 @@ fun TradeDialog(
                 addItemDialog = null
             }
         )
+    }
+
+    if (showMembers) {
+        PeopleDialog(
+            stringResource(R.string.members),
+            {
+                showMembers = false
+            },
+            people = trade!!.people!!,
+            infoFormatter = { person ->
+                person.seenText(context.getString(R.string.active))
+            }
+        ) {
+            showMembers = false
+            nav.navigate("profile/${it.id!!}")
+        }
     }
 
     if (showCancelDialog) {

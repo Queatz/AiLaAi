@@ -25,6 +25,6 @@ fun Push.receive(data: StoryPushData) {
         channel = Notifications.Subscriptions,
         groupKey = "story/${data.story.id!!}",
         title = title,
-        text = context.getString(R.string.by_x, authors.asNaturalList(context) { it })
+        text = context.getString(R.string.story_by_x, authors.asNaturalList(context) { it })
     )
 }
