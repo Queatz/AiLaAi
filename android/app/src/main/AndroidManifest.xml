@@ -128,6 +128,16 @@
 
         <receiver android:name="com.huawei.hms.support.api.push.PushMsgReceiver" android:exported="true" tools:node="merge" />
         <receiver android:name="com.huawei.hms.support.api.push.PushReceiver" android:exported="true" tools:node="merge" />
+
+        <!-- VideoSDK -->
+
+        <meta-data
+                android:name="notificationTitle"
+                android:value="@string/app_is_sharing_your_screen" />
+        <meta-data
+                android:name="notificationContent"
+                android:value="@string/app_is_sharing_your_screen_description" />
+
     </application>
 
 </manifest>

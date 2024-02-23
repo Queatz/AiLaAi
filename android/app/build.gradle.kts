@@ -139,7 +139,7 @@ dependencies {
 
     // Media
     implementation("androidx.exifinterface:exifinterface:1.3.7")
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
@@ -148,7 +148,7 @@ dependencies {
     // Logging & Crash Reporting
     implementation("ch.acra:acra-core:5.11.3")
     implementation("ch.acra:acra-toast:5.11.3")
-    implementation("com.ibm.icu:icu4j:73.2")
+    implementation("com.ibm.icu:icu4j:74.1")
     ksp("dev.zacsweers.autoservice:auto-service-ksp:1.1.0")
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 

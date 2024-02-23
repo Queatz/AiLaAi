@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Rational
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
@@ -26,6 +27,7 @@ import com.queatz.ailaai.call.CallScreen
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberIsInPipMode
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
@@ -64,9 +66,22 @@ class CallActivity : AppCompatActivity() {
     private var enabledStreams = MutableStateFlow(emptySet<String>())
     private val active = MutableStateFlow<GroupCall?>(null)
     private val group = MutableStateFlow<GroupExtended?>(null)
+    private lateinit var startMediaProjection: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        VideoSDK.setActivityForLifeCycle(this)
+
+        startMediaProjection = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                meeting?.enableScreenShare(result.data)
+            } else {
+                applicationContext.showDidntWork()
+            }
+        }
 
         enterPip()
 
@@ -79,6 +94,8 @@ class CallActivity : AppCompatActivity() {
                 var me by rememberStateOf<Person?>(null)
                 val isInPipMode = rememberIsInPipMode()
                 val context = LocalContext.current
+                val active by active.collectAsState()
+                val group by group.collectAsState()
 
                 val groupId = remember {
                     when (intent?.action) {
@@ -88,29 +105,29 @@ class CallActivity : AppCompatActivity() {
 
                         else -> null
                     }
-
                 }
 
-                // todo used cached me for sharing
+                if (groupId == null) {
+                    context.showDidntWork()
+                    finish()
+                    return@AiLaAiTheme
+                }
+
+                // todo used cached me for calls
                 LaunchedEffect(Unit) {
                     api.me {
                         me = it
                     }
                 }
 
-                if (groupId == null) {
-                    finish()
-                    return@AiLaAiTheme
-                }
-
                 LaunchedEffect(groupId) {
                     api.group(groupId) {
-                        group.value = it
+                        this@CallActivity.group.value = it
                     }
                 }
 
                 LaunchedEffect(me, group) {
-                    if (me != null && group.value != null) {
+                    if (me != null && group != null) {
                         join(context, me!!, groupId)
                     }
                 }
@@ -122,16 +139,33 @@ class CallActivity : AppCompatActivity() {
                             .then(if (isInPipMode) Modifier.clip(MaterialTheme.shapes.large) else Modifier)
                             .background(MaterialTheme.colorScheme.background)
                     ) {
-                        if (me != null) {
-                            CallScreen(
-                                groupId,
-                                isInPipMode = isInPipMode,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                        group?.let {
+                            active?.let { active ->
+                                CallScreen(
+                                    it,
+                                    active,
+                                    isInPipMode = isInPipMode,
+                                    cameraEnabled = enabled("video"),
+                                    micEnabled = enabled("audio"),
+                                    screenShareEnabled = enabled("share"),
+                                    onToggleCamera = {
+                                        toggleCamera()
+                                    },
+                                    onToggleMic = {
+                                        toggleMic()
+                                    },
+                                    onToggleScreenShare = {
+                                        toggleScreenShare()
+                                    },
+                                    onEndCall = {
+                                        end()
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
                     }
                 }
-
             }
         }
     }
@@ -164,14 +198,14 @@ class CallActivity : AppCompatActivity() {
                     enabledStreams.update {
                         it + (stream!!.kind as String)
                     }
+
+                    active.value ?: return
+
                     if (stream!!.kind == "video") {
-                        // todo: set stream kind?
                         active.value = active.value!!.copy(localVideo = stream.track as VideoTrack)
                     } else if (stream.kind == "audio") {
-                        // todo: set stream kind?
                         active.value = active.value!!.copy(localAudio = stream.track as AudioTrack)
                     } else if (stream.kind == "share") {
-                        // todo: set stream kind?
                         active.value = active.value!!.copy(localShare = stream.track as VideoTrack)
                     }
                 }
@@ -180,6 +214,9 @@ class CallActivity : AppCompatActivity() {
                     enabledStreams.update {
                         it - (stream!!.kind as String)
                     }
+
+                    active.value ?: return
+
                     if (stream!!.kind == "video") {
                         active.value = active.value!!.copy(localVideo = null)
                     } else if (stream.kind == "audio") {
@@ -202,6 +239,8 @@ class CallActivity : AppCompatActivity() {
                 override fun onParticipantJoined(participant: Participant) {
                     participant.addEventListener(object : ParticipantEventListener() {
                         override fun onStreamEnabled(stream: Stream?) {
+                            active.value ?: return
+
                             active.value = active.value!!.copy(
                                 streams = active.value!!.streams + GroupCallParticipant(
                                     participant,
@@ -212,6 +251,8 @@ class CallActivity : AppCompatActivity() {
                         }
 
                         override fun onStreamDisabled(stream: Stream?) {
+                            active.value ?: return
+
                             active.value = active.value!!.copy(
                                 streams = active.value!!.streams.filter {
                                     it.stream != stream!!.track
@@ -222,6 +263,8 @@ class CallActivity : AppCompatActivity() {
                 }
 
                 override fun onParticipantLeft(participant: Participant) {
+                    active.value ?: return
+
                     active.value = active.value!!.copy(
                         streams = active.value!!.streams.filter {
                             it.participant != participant
@@ -266,22 +309,16 @@ class CallActivity : AppCompatActivity() {
         if (enabled("share")) {
             meeting.disableScreenShare()
         } else {
-            val mediaProjectionManager = getSystemService(MediaProjectionManager::class.java)
-            val startMediaProjection = registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    meeting.enableScreenShare(result.data)
-                } else {
-                    // todo show error
-                }
-            }
-
-            startMediaProjection.launch(mediaProjectionManager.createScreenCaptureIntent())
+            startMediaProjection.launch(
+                getSystemService(MediaProjectionManager::class.java)
+                    .createScreenCaptureIntent()
+            )
         }
     }
 
     fun togglePin(stream: VideoTrack?) {
+        active.value ?: return
+
         active.value = active.value!!.copy(
             pinnedStream = stream.takeIf { active.value!!.pinnedStream != stream }
         )
@@ -291,6 +328,7 @@ class CallActivity : AppCompatActivity() {
         meeting?.leave()
         meeting = null
         active.value = null
+        finish()
     }
 
 

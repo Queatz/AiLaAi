@@ -12,7 +12,6 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
-import com.queatz.db.Person
 
 
 @Composable
