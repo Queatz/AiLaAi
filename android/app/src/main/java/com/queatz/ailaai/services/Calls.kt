@@ -11,10 +11,7 @@ import com.queatz.db.Call
 import com.queatz.push.CallStatusPushData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 val calls by lazy {
@@ -28,6 +25,12 @@ class Calls {
     val calls = MutableStateFlow<List<Call>>(emptyList())
 
     val scope = CoroutineScope(Dispatchers.Default)
+
+    fun inCallCount(groupId: String) = calls.mapNotNull {
+        it.firstOrNull { it.group == groupId }
+    }.map {
+        it.participants ?: 0
+    }
 
     fun init(context: Context) {
         this.context = context

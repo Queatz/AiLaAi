@@ -63,6 +63,7 @@ import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.ailaai.ui.theme.theme_call
 import com.queatz.db.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
@@ -118,6 +119,7 @@ fun GroupScreen(groupId: String) {
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
     var showSendDialog by rememberStateOf(false)
+    val inCallCount by calls.inCallCount(groupId).collectAsState(0)
     val nav = nav
     val me = me
 
@@ -369,16 +371,36 @@ fun GroupScreen(groupId: String) {
                         }
                     }
 
-                    IconButton(
-                        {
-                            calls.join(groupId)
+                    if (inCallCount > 0) {
+                        Button(
+                            onClick = {
+                                calls.join(groupId)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = theme_call
+                            )
+                        ) {
+                            Icon(
+                                Icons.Outlined.Call,
+                                stringResource(R.string.call)
+                            )
+                            Text(
+                                stringResource(R.string.x_in_call, inCallCount),
+                                modifier = Modifier
+                                    .padding(start = 1.pad)
+                            )
                         }
-                    ) {
-                        // todo show number of participants
-                        Icon(
-                            Icons.Outlined.Call,
-                            stringResource(R.string.call)
-                        )
+                    } else {
+                        IconButton(
+                            {
+                                calls.join(groupId)
+                            }
+                        ) {
+                            Icon(
+                                Icons.Outlined.Call,
+                                stringResource(R.string.call)
+                            )
+                        }
                     }
 
                     if (isSnoozed) {

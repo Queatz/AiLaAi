@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -35,15 +34,19 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.ailaai.ui.theme.theme_call
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -140,6 +143,7 @@ fun ContactItem(
         }
 
         is SearchResult.Group -> {
+            val inCallCount by calls.inCallCount(item.groupExtended.group!!.id!!).collectAsState(0)
             val joinRequestCount by joins.joins
                 .map { it.count { it.joinRequest?.group == item.groupExtended.group?.id } }
                 .collectAsState(0)
@@ -183,6 +187,7 @@ fun ContactItem(
                 photos = groupExtended.photos(me?.let(::listOf) ?: emptyList(), ifEmpty = me?.let(::listOf)),
                 lastActive = groupExtended.latestMessage?.createdAt?.timeAgo(),
                 isUnread = isUnread || joinRequestCount > 0,
+                inCallCount = inCallCount,
                 joinRequestCount = joinRequestCount,
                 joined = myMember != null,
                 info = info,
@@ -203,6 +208,7 @@ fun ContactResult(
     photos: List<ContactPhoto>,
     lastActive: String? = null,
     isUnread: Boolean = false,
+    inCallCount: Int = 0,
     joinRequestCount: Int = 0,
     joined: Boolean = false,
     info: GroupInfo = GroupInfo.LatestMessage,
@@ -283,17 +289,20 @@ fun ContactResult(
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-            val bold = isUnread || (info == GroupInfo.Members && joined)
+            val bold = inCallCount > 0 || isUnread || (info == GroupInfo.Members && joined)
             Text(
                 if (info == GroupInfo.Members && joined) {
                     stringResource(R.string.joined)
-                } else if (joinRequestCount > 0) pluralStringResource(
+                } else if (inCallCount > 0) stringResource(
+                    R.string.x_in_call,
+                    inCallCount
+                ) else if (joinRequestCount > 0) pluralStringResource(
                     R.plurals.x_requests,
                     joinRequestCount,
                     joinRequestCount
                 ) else lastActive ?: "",
                 style = MaterialTheme.typography.labelMedium,
-                color = if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                color = if (inCallCount > 0) theme_call else if (bold) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                 fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier
                     .padding(1.pad)

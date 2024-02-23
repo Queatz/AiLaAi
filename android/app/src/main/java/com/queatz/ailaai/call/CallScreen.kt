@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import com.queatz.ailaai.GroupCall
 import com.queatz.ailaai.R
@@ -40,6 +41,7 @@ fun CallScreen(
     onSwitchCamera: () -> Unit,
     onToggleMic: () -> Unit,
     onToggleScreenShare: () -> Unit,
+    onTogglePictureInPicture: () -> Unit,
     onEndCall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -112,30 +114,58 @@ fun CallScreen(
                 }
             }
 
-            Text(
-                group.name(
-                    stringResource(R.string.someone),
-                    stringResource(R.string.empty_group_name),
-                    omit = me.id!!.inList()
-                ),
-                modifier = Modifier
-                    .padding(1.pad)
-                    .align(Alignment.TopCenter)
-            )
-
-            if (!isInPipMode) {
-                FilledIconButton(
-                    {
-                        onSwitchCamera()
-                    },
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+            if (isInPipMode) {
+                Text(
+                    group.name(
+                        stringResource(R.string.someone),
+                        stringResource(R.string.empty_group_name),
+                        omit = me.id!!.inList()
                     ),
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
+                        .padding(1.pad)
+                        .align(Alignment.TopCenter)
+                )
+            } else {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
                         .padding(2.pad)
                 ) {
-                    Icon(Icons.Outlined.Sync, null)
+                    FilledIconButton(
+                        {
+                            onSwitchCamera()
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                        enabled = cameraEnabled
+                    ) {
+                        Icon(Icons.Outlined.Sync, null)
+                    }
+                    Text(
+                        group.name(
+                            stringResource(R.string.someone),
+                            stringResource(R.string.empty_group_name),
+                            omit = me.id!!.inList()
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(1.pad)
+                    )
+                    FilledIconButton(
+                        {
+                            onTogglePictureInPicture()
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
+                        )
+                    ) {
+                        Icon(Icons.Outlined.FullscreenExit, null)
+                    }
                 }
 
                 Row(

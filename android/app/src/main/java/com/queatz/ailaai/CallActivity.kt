@@ -163,6 +163,9 @@ class CallActivity : AppCompatActivity() {
                                     onEndCall = {
                                         end()
                                     },
+                                    onTogglePictureInPicture = {
+                                        enterPip()
+                                    },
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

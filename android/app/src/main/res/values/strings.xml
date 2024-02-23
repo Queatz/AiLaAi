@@ -607,6 +607,7 @@
     <string name="story_by_x">%1$s posted a story</string>
     <string name="app_is_sharing_your_screen">Hi Town is sharing your screen</string>
     <string name="app_is_sharing_your_screen_description">Call is active</string>
+    <string name="x_in_call">%1$s in call</string>
     <plurals name="x_active_trades">
         <item quantity="one">%1$s active trade</item>
         <item quantity="other">%1$s active trades</item>
