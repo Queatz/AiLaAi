@@ -151,6 +151,9 @@ class CallActivity : AppCompatActivity() {
                                     onToggleCamera = {
                                         toggleCamera()
                                     },
+                                    onSwitchCamera = {
+                                         switchCamera()
+                                    },
                                     onToggleMic = {
                                         toggleMic()
                                     },
@@ -284,6 +287,10 @@ class CallActivity : AppCompatActivity() {
                 meeting
             )
         }
+    }
+
+    fun switchCamera() {
+        meeting?.changeWebcam()
     }
 
     fun toggleCamera() {

@@ -443,7 +443,7 @@ object AppStyles : StyleSheet() {
 
     @OptIn(ExperimentalComposeWebApi::class)
     val messageVideo by style {
-        property("object-fit", "cover")
+        property("object-fit", "contain")
         width(100.percent)
         maxHeight(66.vh) // Approx max in viewable area
         borderRadius(1.r)
@@ -521,7 +521,7 @@ object AppStyles : StyleSheet() {
         borderRadius(1.r)
         border(3.px, LineStyle.Solid, Color.white)
         cursor("pointer")
-        property("object-fit", "cover")
+        property("object-fit", "contain")
 
         dark(self) {
             backgroundColor(Color.black)

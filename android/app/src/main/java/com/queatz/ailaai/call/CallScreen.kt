@@ -1,5 +1,6 @@
 package com.queatz.ailaai.call
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.material.icons.Icons
@@ -11,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
@@ -21,6 +23,7 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
+import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
 import org.webrtc.VideoTrack
@@ -34,6 +37,7 @@ fun CallScreen(
     micEnabled: Boolean,
     screenShareEnabled: Boolean,
     onToggleCamera: () -> Unit,
+    onSwitchCamera: () -> Unit,
     onToggleMic: () -> Unit,
     onToggleScreenShare: () -> Unit,
     onEndCall: () -> Unit,
@@ -91,14 +95,20 @@ fun CallScreen(
         ) {
             if (activeVideoStreams > 0) {
                 (active.localShare ?: active.localVideo)?.let { track ->
-                    VideoSdkView(
-                        track = track,
+                    Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(1.pad)
-                            .size(size.width.inDp(), size.height.inDp())
-                            .clip(MaterialTheme.shapes.medium)
-                    )
+                            .padding(2.pad)
+                            .size(size.width.inDp() * .15f, size.height.inDp() * .15f)
+                    ) {
+                        VideoSdkView(
+                            track = track,
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.elevation), MaterialTheme.shapes.medium)
+                                .shadow(1.elevation, MaterialTheme.shapes.medium)
+                                .clip(MaterialTheme.shapes.medium)
+                        )
+                    }
                 }
             }
 
@@ -114,6 +124,20 @@ fun CallScreen(
             )
 
             if (!isInPipMode) {
+                FilledIconButton(
+                    {
+                        onSwitchCamera()
+                    },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(2.pad)
+                ) {
+                    Icon(Icons.Outlined.Sync, null)
+                }
+
                 Row(
                     horizontalArrangement = spacedBy(1.pad),
                     modifier = Modifier
