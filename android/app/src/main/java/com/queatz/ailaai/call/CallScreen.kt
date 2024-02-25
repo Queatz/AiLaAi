@@ -27,6 +27,7 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
+import org.webrtc.RendererCommon
 import org.webrtc.VideoTrack
 
 @Composable
@@ -63,6 +64,7 @@ fun CallScreen(
                 }.forEach {
                     VideoSdkView(
                         track = it.stream as VideoTrack,
+                        scaleType = if (it.kind == "video") RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
                         modifier = Modifier
                             .weight(1f)
                     )
@@ -70,6 +72,7 @@ fun CallScreen(
             } else if (active.localShare != null || active.localVideo != null) {
                 VideoSdkView(
                     track = active.localShare ?: active.localVideo as VideoTrack,
+                    scaleType = if (active.localShare == null) RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
                     modifier = Modifier
                         .weight(1f)
                 )
@@ -105,6 +108,7 @@ fun CallScreen(
                     ) {
                         VideoSdkView(
                             track = track,
+                            scaleType = RendererCommon.ScalingType.SCALE_ASPECT_FILL,
                             modifier = Modifier
                                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.elevation), MaterialTheme.shapes.medium)
                                 .shadow(1.elevation, MaterialTheme.shapes.medium)

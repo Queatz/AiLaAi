@@ -141,7 +141,7 @@ class Call {
                     participant.on("stream-disabled") { stream: dynamic ->
                         active.value = active.value!!.copy(
                             streams = active.value!!.streams.filter {
-                                it.stream.getTracks().firstOrNull() != stream.track
+                                it.stream.getTracks().firstOrNull() != stream.track || it.kind != stream.kind
                             }
                         )
                         Unit

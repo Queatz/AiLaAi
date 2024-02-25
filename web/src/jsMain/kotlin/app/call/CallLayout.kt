@@ -88,8 +88,20 @@ fun CallLayout(activeCall: GroupCall) {
             }
         }
 
-        activeCall.streams.filter { it.kind == "audio" }.forEach { participant ->
-            key(participant.stream) {
+        val audioStreams = remember(activeCall) {
+            activeCall.streams.filter { it.kind == "audio" }
+        }
+
+        val videoStreams = remember(activeCall) {
+            activeCall.streams.filter {
+                it.kind == "video" || it.kind == "share"
+            }.filter {
+                activeCall.pinnedStream == null || activeCall.pinnedStream == it.stream
+            }
+        }
+
+        audioStreams.forEach { participant ->
+            key(participant.stream to participant.kind) {
                 Audio({
                     attr("playsinline", "true")
                     attr("autoplay", "false")
@@ -107,12 +119,8 @@ fun CallLayout(activeCall: GroupCall) {
                 }) {}
             }
 
-            activeCall.streams.filter {
-                it.kind == "video" || it.kind == "share"
-            }.filter {
-                activeCall.pinnedStream == null || activeCall.pinnedStream == it.stream
-            }.forEach { participant ->
-                key(participant.stream) {
+            videoStreams.forEach { participant ->
+                key(participant.stream to participant.kind) {
                     Div({
                         style {
                             width(0.r)
