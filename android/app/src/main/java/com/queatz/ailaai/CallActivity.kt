@@ -1,5 +1,6 @@
 package com.queatz.ailaai
 
+import android.Manifest
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -20,14 +21,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import app.ailaai.api.group
 import app.ailaai.api.groupCall
 import app.ailaai.api.me
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.queatz.ailaai.call.CallScreen
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberIsInPipMode
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.ui.dialogs.RationaleDialog
+import com.queatz.ailaai.ui.permission.permissionRequester
+import com.queatz.ailaai.ui.permission.rememberState
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
@@ -68,6 +75,7 @@ class CallActivity : AppCompatActivity() {
     private val group = MutableStateFlow<GroupExtended?>(null)
     private lateinit var startMediaProjection: ActivityResultLauncher<Intent>
 
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -96,6 +104,9 @@ class CallActivity : AppCompatActivity() {
                 val context = LocalContext.current
                 val active by active.collectAsState()
                 val group by group.collectAsState()
+                val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
+                val micPermissionRequester = permissionRequester(Manifest.permission.RECORD_AUDIO)
+                var showPermissionDialog by rememberStateOf(false)
 
                 val groupId = remember {
                     when (intent?.action) {
@@ -128,7 +139,28 @@ class CallActivity : AppCompatActivity() {
 
                 LaunchedEffect(me, group) {
                     if (me != null && group != null) {
-                        join(context, me!!, groupId)
+                        join(
+                            context,
+                            me!!,
+                            groupId,
+                            micEnabled = cameraPermissionRequester.state.status.isGranted,
+                            cameraEnabled = micPermissionRequester.state.status.isGranted
+                        )
+                    }
+                }
+
+                LaunchedEffect(
+                    micPermissionRequester.rememberState(),
+                    cameraPermissionRequester.rememberState()
+                ) {
+                    if (!micPermissionRequester.state.status.isGranted) {
+                        micPermissionRequester.use {
+                            toggleMic()
+                        }
+                    } else if (!cameraPermissionRequester.state.status.isGranted) {
+                        cameraPermissionRequester.use {
+                            toggleCamera()
+                        }
                     }
                 }
 
@@ -139,6 +171,15 @@ class CallActivity : AppCompatActivity() {
                             .then(if (isInPipMode) Modifier.clip(MaterialTheme.shapes.large) else Modifier)
                             .background(MaterialTheme.colorScheme.background)
                     ) {
+                        if (showPermissionDialog) {
+                            RationaleDialog(
+                                {
+                                    showPermissionDialog = false
+                                },
+                                stringResource(R.string.permission_request)
+                            )
+                        }
+
                         group?.let {
                             active?.let { active ->
                                 CallScreen(
@@ -149,13 +190,31 @@ class CallActivity : AppCompatActivity() {
                                     micEnabled = enabled("audio"),
                                     screenShareEnabled = enabled("share"),
                                     onToggleCamera = {
-                                        toggleCamera()
+                                        cameraPermissionRequester.use(
+                                            onPermanentlyDenied = {
+                                                showPermissionDialog = true
+                                            }
+                                        ) {
+                                            toggleCamera()
+                                        }
                                     },
                                     onSwitchCamera = {
-                                         switchCamera()
+                                        cameraPermissionRequester.use(
+                                            onPermanentlyDenied = {
+                                                showPermissionDialog = true
+                                            }
+                                        ) {
+                                            switchCamera()
+                                        }
                                     },
                                     onToggleMic = {
-                                        toggleMic()
+                                        micPermissionRequester.use(
+                                            onPermanentlyDenied = {
+                                                showPermissionDialog = true
+                                            }
+                                        ) {
+                                            toggleMic()
+                                        }
                                     },
                                     onToggleScreenShare = {
                                         toggleScreenShare()
@@ -181,15 +240,21 @@ class CallActivity : AppCompatActivity() {
         finish()
     }
 
-    private suspend fun join(context: Context, me: Person, groupId: String) {
+    private suspend fun join(
+        context: Context,
+        me: Person,
+        groupId: String,
+        micEnabled: Boolean,
+        cameraEnabled: Boolean
+    ) {
         api.groupCall(groupId) {
             VideoSDK.config(it.token)
             meeting = VideoSDK.initMeeting(
                 context,
                 it.call.room!!,
                 me.name ?: context.getString(R.string.someone),
-                true,
-                true,
+                micEnabled,
+                cameraEnabled,
                 null,
                 null,
                 true,

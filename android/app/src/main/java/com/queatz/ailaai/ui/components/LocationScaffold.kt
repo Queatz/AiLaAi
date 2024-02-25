@@ -52,7 +52,7 @@ fun LocationScaffold(
                         .fillMaxSize()
                         .padding(1.pad)
                 ) {
-                    val showOpenSettings = locationSelector.shouldShowPermissionRationale
+                    val showOpenSettings = !locationSelector.shouldShowPermissionRationale
                     Button(
                         {
                             if (showOpenSettings) {

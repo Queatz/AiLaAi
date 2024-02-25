@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.compose.runtime.Composable
 import com.google.accompanist.permissions.*
 
-class PermissionRequester(private val permission: String) {
+class PermissionRequester(val permission: String) {
 
     internal lateinit var state: PermissionState
     private var onPermanentlyDenied: (() -> Unit)? = null
@@ -29,7 +29,7 @@ class PermissionRequester(private val permission: String) {
 
         if (state.status == PermissionStatus.Granted) {
             onGranted()
-        } else if (state.status.shouldShowRationale) {
+        } else if (!state.status.shouldShowRationale) {
             onPermanentlyDenied()
         } else {
             this.onGranted = onGranted
@@ -41,7 +41,7 @@ class PermissionRequester(private val permission: String) {
     internal fun resolve(isGranted: Boolean) {
         if (isGranted) {
             onGranted?.invoke()
-        } else if (state.status.shouldShowRationale) {
+        } else if (!state.status.shouldShowRationale) {
             onPermanentlyDenied?.invoke()
         }
 
@@ -60,3 +60,7 @@ fun permissionRequester(permission: String): PermissionRequester {
 
     return requester
 }
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun PermissionRequester.rememberState() = rememberPermissionState(permission)

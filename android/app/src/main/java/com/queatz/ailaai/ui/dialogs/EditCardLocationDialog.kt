@@ -99,7 +99,7 @@ fun EditCardLocationDialog(
 
     when (permissionState.status) {
         is PermissionStatus.Denied -> {
-            if (!permissionState.status.shouldShowRationale) {
+            if (permissionState.status.shouldShowRationale) {
                 LaunchedEffect(permissionState) {
                     permissionState.launchPermissionRequest()
                 }

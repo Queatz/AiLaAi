@@ -189,9 +189,9 @@ fun FriendsScreen() {
         if (!notificationManager.areNotificationsEnabled()) {
             if (!notificationPermissionState.status.isGranted) {
                 if (notificationPermissionState.status.shouldShowRationale) {
-                    showPushPermissionDialog = true
-                } else {
                     notificationPermissionState.launchPermissionRequest()
+                } else {
+                    showPushPermissionDialog = true
                 }
             }
         }
