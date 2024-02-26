@@ -2,7 +2,6 @@ package com.queatz.ailaai.ui.screens
 
 import android.Manifest
 import android.app.Activity
-import android.app.NotificationManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import app.ailaai.api.*
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -185,7 +185,7 @@ fun FriendsScreen() {
     }
 
     LaunchedEffect(Unit) {
-        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        val notificationManager = NotificationManagerCompat.from(context)
         if (!notificationManager.areNotificationsEnabled()) {
             if (!notificationPermissionState.status.isGranted) {
                 if (notificationPermissionState.status.shouldShowRationale) {

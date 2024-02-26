@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -40,6 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.ailaai.api.*
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
 import com.queatz.ailaai.api.sendMediaFromUri
@@ -76,6 +80,7 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
@@ -248,6 +253,9 @@ fun GroupScreen(groupId: String) {
             .launchIn(scope)
     }
 
+    val micEnabled = rememberPermissionState(Manifest.permission.RECORD_AUDIO).status.isGranted
+    val cameraEnabled = rememberPermissionState(Manifest.permission.CAMERA).status.isGranted
+
     Column(
         verticalArrangement = Arrangement.Bottom,
         modifier = Modifier.fillMaxSize()
@@ -265,6 +273,9 @@ fun GroupScreen(groupId: String) {
             val state = rememberLazyListState()
 
             var latestMessage by remember { mutableStateOf<Instant?>(null) }
+
+            val someone = stringResource(R.string.someone)
+            val emptyGroup = stringResource(R.string.empty_group_name)
 
             LaunchedEffect(messages) {
                 val latest = messages.firstOrNull()?.createdAt
@@ -371,10 +382,21 @@ fun GroupScreen(groupId: String) {
                         }
                     }
 
+                    fun startCall() {
+                        calls.start(
+                            groupId = groupId,
+                            groupName = groupExtended!!.name(
+                                someone,
+                                emptyGroup,
+                                me?.id?.let(::listOf) ?: emptyList()
+                            )
+                        )
+                    }
+
                     if (inCallCount > 0) {
                         Button(
                             onClick = {
-                                calls.join(groupId)
+                                startCall()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = theme_call
@@ -393,7 +415,7 @@ fun GroupScreen(groupId: String) {
                     } else {
                         IconButton(
                             {
-                                calls.join(groupId)
+                                startCall()
                             }
                         ) {
                             Icon(
@@ -1206,8 +1228,7 @@ fun GroupScreen(groupId: String) {
             }
 
             if (showRemoveGroupMembers) {
-                val someone = stringResource(R.string.someone)
-                val members = groupExtended!!.members!!
+                 val members = groupExtended!!.members!!
                     .mapNotNull { it.person?.id }
                     .filter { it != me?.id }
                 ChoosePeopleDialog(
@@ -1351,8 +1372,6 @@ fun GroupScreen(groupId: String) {
             }
 
             if (showQrCodeDialog) {
-                val someone = stringResource(R.string.someone)
-                val emptyGroup = stringResource(R.string.empty_group_name)
                 QrCodeDialog(
                     {
                         showQrCodeDialog = false

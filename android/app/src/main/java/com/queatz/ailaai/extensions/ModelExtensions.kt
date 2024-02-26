@@ -21,6 +21,7 @@ fun Person.contactPhoto() = ContactPhoto(
 
 fun GroupExtended.isGroupLike(omitGroupsWith: Person? = null) = group?.name?.isNotBlank() == true && members?.none { it.person?.id == omitGroupsWith?.id } == true
 
+// todo make this @Composable and autofull strings
 fun GroupExtended.name(someone: String, emptyGroup: String, omit: List<String>) =
     group?.name?.nullIfBlank
         ?: members

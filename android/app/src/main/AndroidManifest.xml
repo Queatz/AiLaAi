@@ -4,18 +4,21 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL"/>
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
 
     <application
             android:name=".Application"
@@ -32,38 +35,38 @@
                 android:configChanges="orientation|screenSize"
                 android:theme="@style/Theme.AiLaAi.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/card/.*" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/card/.*"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/page/.*" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/page/.*"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/story/.*" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/story/.*"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/profile/.*" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/profile/.*"/>
             </intent-filter>
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/link-device/.*" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="ailaai.app" android:pathPattern="/link-device/.*"/>
             </intent-filter>
         </activity>
 
@@ -74,16 +77,16 @@
                 android:configChanges="orientation|screenSize"
                 android:theme="@style/Theme.AiLaAi.Translucent">
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-                <data android:mimeType="video/*" />
-                <data android:mimeType="text/*" />
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="text/*"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
                 <data android:mimeType="video/*"/>
             </intent-filter>
         </activity>
@@ -95,7 +98,7 @@
                 android:windowSoftInputMode="adjustResize"
                 android:launchMode="singleInstance"
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-                android:theme="@style/Theme.AiLaAi.Translucent">
+                android:theme="@style/Theme.AiLaAi.NoActionBar">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <action android:name="android.intent.action.CALL"/>
@@ -103,12 +106,27 @@
         </activity>
 
         <service
+                android:name=".CallService"
+                android:foregroundServiceType="phoneCall"
+                android:exported="false">
+        </service>
+
+        <service
+                android:name=".IncomingCallService"
+                android:foregroundServiceType="phoneCall"
+                android:exported="false">
+        </service>
+
+        <receiver android:name=".CallReceiver"
+                  android:exported="false" />
+
+        <service
                 android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
                 android:enabled="false"
                 android:exported="false">
             <meta-data
                     android:name="autoStoreLocales"
-                    android:value="true" />
+                    android:value="true"/>
         </service>
 
         <provider
@@ -118,7 +136,7 @@
                 android:exported="false">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/filepaths" />
+                    android:resource="@xml/filepaths"/>
         </provider>
 
         <meta-data
@@ -129,17 +147,20 @@
                 android:name="com.huawei.hms.client.appid"
                 android:value="appid=${HMS_APP_ID}"/>
 
-        <receiver android:name="com.huawei.hms.support.api.push.PushMsgReceiver" android:exported="true" tools:node="merge" />
-        <receiver android:name="com.huawei.hms.support.api.push.PushReceiver" android:exported="true" tools:node="merge" />
+        <receiver android:name="com.huawei.hms.support.api.push.PushMsgReceiver" android:exported="true"
+                  tools:node="merge"/>
+
+        <receiver android:name="com.huawei.hms.support.api.push.PushReceiver" android:exported="true"
+                  tools:node="merge"/>
 
         <!-- VideoSDK -->
 
         <meta-data
                 android:name="notificationTitle"
-                android:value="@string/app_is_sharing_your_screen" />
+                android:value="@string/app_is_sharing_your_screen"/>
         <meta-data
                 android:name="notificationContent"
-                android:value="@string/app_is_sharing_your_screen_description" />
+                android:value="@string/call_is_active"/>
 
     </application>
 

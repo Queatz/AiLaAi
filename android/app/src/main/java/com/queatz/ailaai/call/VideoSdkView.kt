@@ -6,7 +6,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import live.videosdk.rtc.android.VideoView
-import org.webrtc.RendererCommon
 import org.webrtc.RendererCommon.ScalingType
 import org.webrtc.VideoTrack
 
@@ -17,6 +16,8 @@ fun VideoSdkView(track: VideoTrack, scaleType: ScalingType, modifier: Modifier =
         AndroidView(
             factory = {
                 VideoView(it).apply {
+                    setEnableHardwareScaler(true)
+                    setScalingType(scaleType)
                     addTrack(track)
                     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
                 }

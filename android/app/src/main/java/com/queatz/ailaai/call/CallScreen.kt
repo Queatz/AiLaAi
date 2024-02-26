@@ -1,6 +1,7 @@
 package com.queatz.ailaai.call
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.material.icons.Icons
@@ -17,13 +18,14 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
-import com.queatz.ailaai.GroupCall
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
+import com.queatz.ailaai.services.GroupCall
+import com.queatz.ailaai.services.GroupCallParticipant
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
@@ -43,6 +45,7 @@ fun CallScreen(
     onToggleMic: () -> Unit,
     onToggleScreenShare: () -> Unit,
     onTogglePictureInPicture: () -> Unit,
+    onTogglePin: (GroupCallParticipant) -> Unit,
     onEndCall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -61,12 +64,17 @@ fun CallScreen(
             if (activeVideoStreams > 0) {
                 active.streams.filter {
                     it.kind == "video" || it.kind == "share"
+                }.filter {
+                    active.pinnedStream == null || active.pinnedStream == it.stream
                 }.forEach {
                     VideoSdkView(
                         track = it.stream as VideoTrack,
                         scaleType = if (it.kind == "video") RendererCommon.ScalingType.SCALE_ASPECT_FILL else RendererCommon.ScalingType.SCALE_ASPECT_FIT,
                         modifier = Modifier
                             .weight(1f)
+                            .clickable {
+                                onTogglePin(it)
+                            }
                     )
                 }
             } else if (active.localShare != null || active.localVideo != null) {

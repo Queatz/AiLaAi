@@ -1,5 +1,6 @@
 package com.queatz.ailaai.services
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,9 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
@@ -48,7 +49,7 @@ class Push {
     val events: Flow<PushDataData> = eventsFlow
 
     private val notificationManager by lazy {
-        context.getSystemService(NotificationManager::class.java)
+        NotificationManagerCompat.from(context)
     }
 
     suspend fun setMe(id: String) {
@@ -102,12 +103,14 @@ class Push {
         }
     }
 
+    @SuppressLint("MissingPermission")
     internal fun send(
         intent: Intent,
         channel: Notifications,
         groupKey: String,
         title: String,
         text: String,
+        style: NotificationCompat.Style? = null,
         sound: Uri? = null
     ) {
         if (!notificationManager.areNotificationsEnabled()) {
@@ -118,7 +121,7 @@ class Push {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setStyle(style ?: NotificationCompat.BigTextStyle().bigText(text))
             .setGroup(groupKey)
             .setAutoCancel(true)
             .setPriority(channel.importance.priority)
@@ -159,7 +162,6 @@ class Push {
                 channel.importance
             )
             notificationChannel.description = context.getString(channel.description)
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(notificationChannel)
         }
     }
@@ -172,6 +174,7 @@ enum class Notifications(
     val category: String,
 ) {
     Calls(R.string.calls, R.string.calls_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_CALL),
+    OngoingCalls(R.string.ongoing_calls, R.string.calls_notification_channel_description, NotificationManager.IMPORTANCE_LOW, NotificationCompat.CATEGORY_CALL),
     Reminders(R.string.reminders, R.string.reminders_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_REMINDER),
     Messages(R.string.messages, R.string.messages_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_MESSAGE),
     Host(R.string.host, R.string.host_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
@@ -182,7 +185,7 @@ enum class Notifications(
     val key get() = name.lowercase()
 }
 
-private val Int.priority: Int get() = when (this) {
+val Int.priority: Int get() = when (this) {
     NotificationManager.IMPORTANCE_HIGH -> NotificationCompat.PRIORITY_HIGH
     NotificationManager.IMPORTANCE_LOW -> NotificationCompat.PRIORITY_LOW
     else -> NotificationCompat.PRIORITY_DEFAULT

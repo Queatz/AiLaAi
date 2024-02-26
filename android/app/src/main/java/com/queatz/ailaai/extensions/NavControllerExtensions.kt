@@ -1,6 +1,7 @@
 package com.queatz.ailaai.extensions
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -12,10 +13,14 @@ fun NavController.popBackStackOrFinish() {
     }
 }
 
-fun NavController.goToSettings() {
+fun Context.goToSettings() {
     val intent = Intent(
         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-        Uri.parse("package:${context.packageName}")
+        Uri.parse("package:$packageName")
     )
-    (context as Activity).startActivity(intent)
+    (this as Activity).startActivity(intent)
+}
+
+fun NavController.goToSettings() {
+    context.goToSettings()
 }

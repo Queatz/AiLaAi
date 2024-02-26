@@ -58,6 +58,7 @@
     <string name="host_notification_channel_description">Host notifications.</string>
     <string name="trade_notification_channel_description">Trade notifications.</string>
     <string name="calls_notification_channel_description">Answer incoming calls</string>
+    <string name="ongoing_calls_notification_channel_description">Manage ongoing calls</string>
     <string name="subscription_notification_channel_description">Your subscriptions</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
@@ -606,8 +607,10 @@
     <string name="subscriptions">Subscriptions</string>
     <string name="story_by_x">%1$s posted a story</string>
     <string name="app_is_sharing_your_screen">Hi Town is sharing your screen</string>
-    <string name="app_is_sharing_your_screen_description">Call is active</string>
+    <string name="call_is_active">Call is active</string>
     <string name="x_in_call">%1$s in call</string>
+    <string name="tap_to_return_to_call">Tap to return to call</string>
+    <string name="ongoing_calls">Ongoing calls</string>
     <plurals name="x_active_trades">
         <item quantity="one">%1$s active trade</item>
         <item quantity="other">%1$s active trades</item>
