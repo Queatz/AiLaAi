@@ -68,10 +68,8 @@ class Calls {
 
     val scope = CoroutineScope(Dispatchers.Default)
 
-    fun inCallCount(groupId: String) = calls.mapNotNull {
-        it.firstOrNull { it.group == groupId }
-    }.map {
-        it.participants ?: 0
+    fun inCallCount(groupId: String) = calls.map {
+        it.firstOrNull { it.group == groupId }?.participants ?: 0
     }
 
     fun init(context: Context) {

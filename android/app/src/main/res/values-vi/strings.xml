@@ -47,6 +47,7 @@
     <string name="messages_notification_channel_description">Tin nhắn từ người.</string>
     <string name="collaboration_notification_channel_description">Thông báo hợp tác.</string>
     <string name="host_notification_channel_description">Thông báo chủ trì nhóm.</string>
+    <string name="subscription_notification_channel_description">Các đăng ký của bạn</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa</string>
     <string name="connected">Đã kết nối</string>
@@ -560,6 +561,8 @@
     <string name="drop">Thả</string>
     <string name="x_selected">%1$s đã chọn</string>
     <string name="items_dropped">Đồ bị thả</string>
+    <string name="confirm">Xác nhật</string>
+    <string name="unconfirm">Hủy xác nhận</string>
     <string name="your_items">Đồ của bạn</string>
     <plurals name="second">
         <item quantity="other">Giây</item>
@@ -624,4 +627,6 @@
     <plurals name="x_years">
         <item quantity="other">%1$s năm</item>
     </plurals>
+    <string name="subscribe">Đăng ký</string>
+    <string name="unsubscribe">Hủy đăng ký</string>
 </resources>

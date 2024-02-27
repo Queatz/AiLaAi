@@ -281,14 +281,14 @@ fun GroupTopBar(
     }
 
     // todo: apps
-    if (false) {
+    if (false && !showCards) {
         Div({
             classes(AppStyles.groupAppsBar)
         }) {
             Button({
                 classes(Styles.button)
             }) {
-                Text("Fund this project!")
+                Text("\uD83C\uDF75 Free Matcha 7am - 8am")
             }
         }
     }
@@ -307,20 +307,22 @@ fun GroupTopBar(
             active
         },
         actions = {
-            IconButton(
-                name = "call",
-                title = appString { call },
-                // todo translate
-                text = if (callParticipants > 0) "$callParticipants in call" else null,
-                backgroundColor = if (callParticipants > 0) Styles.colors.tertiary else null,
-                styles = {
-                    marginRight(.5.r)
-                }
-            ) {
-                if (call.active.value?.group?.group?.id == group.group?.id) {
-                    call.end()
-                } else {
-                    call.join(me ?: return@IconButton, group)
+            if (!showCards) {
+                IconButton(
+                    name = "call",
+                    title = appString { call },
+                    // todo translate
+                    text = if (callParticipants > 0) "$callParticipants in call" else null,
+                    backgroundColor = if (callParticipants > 0) Styles.colors.tertiary else null,
+                    styles = {
+                        marginRight(.5.r)
+                    }
+                ) {
+                    if (call.active.value?.group?.group?.id == group.group?.id) {
+                        call.end()
+                    } else {
+                        call.join(me ?: return@IconButton, group)
+                    }
                 }
             }
 

@@ -153,7 +153,7 @@ fun CardReply(
                 }
             }
         }
-        if (cardConversation?.items.isNullOrEmpty() && cardOptions?.enableAnonymousReplies != false) {
+        if (cardConversation?.items.isNullOrEmpty() && (me != null || cardOptions?.enableAnonymousReplies != false)) {
             Button({
                 classes(Styles.button)
                 onClick {

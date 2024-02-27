@@ -256,6 +256,14 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
 //                                    }) {
 //                                        Text("Trade")
 //                                    }
+//                                    Button({
+//                                        classes(Styles.button)
+//                                    style {
+//                                        marginLeft(1.r)
+//                                    }
+//                                    }) {
+//                                        Text("Un/Subscribe")
+//                                    }
                                 }
                                 Div({
                                     style {

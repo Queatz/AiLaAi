@@ -393,47 +393,49 @@ fun GroupScreen(groupId: String) {
                         )
                     }
 
-                    if (inCallCount > 0) {
-                        Button(
-                            onClick = {
-                                startCall()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = theme_call
-                            )
-                        ) {
-                            Icon(
-                                Icons.Outlined.Call,
-                                stringResource(R.string.call)
-                            )
-                            Text(
-                                stringResource(R.string.x_in_call, inCallCount),
-                                modifier = Modifier
-                                    .padding(start = 1.pad)
-                            )
-                        }
-                    } else {
-                        IconButton(
-                            {
-                                startCall()
+                    if (!showCards) {
+                        if (inCallCount > 0) {
+                            Button(
+                                onClick = {
+                                    startCall()
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = theme_call
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Call,
+                                    stringResource(R.string.call)
+                                )
+                                Text(
+                                    stringResource(R.string.x_in_call, inCallCount),
+                                    modifier = Modifier
+                                        .padding(start = 1.pad)
+                                )
                             }
-                        ) {
-                            Icon(
-                                Icons.Outlined.Call,
-                                stringResource(R.string.call)
-                            )
+                        } else {
+                            IconButton(
+                                {
+                                    startCall()
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Call,
+                                    stringResource(R.string.call)
+                                )
+                            }
                         }
-                    }
 
-                    if (isSnoozed) {
-                        IconButton({
-                            snooze(false)
-                        }) {
-                            Icon(
-                                Icons.Outlined.NotificationsPaused,
-                                stringResource(R.string.unsnooze),
-                                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = .5f)
-                            )
+                        if (isSnoozed) {
+                            IconButton({
+                                snooze(false)
+                            }) {
+                                Icon(
+                                    Icons.Outlined.NotificationsPaused,
+                                    stringResource(R.string.unsnooze),
+                                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = .5f)
+                                )
+                            }
                         }
                     }
 
@@ -1228,7 +1230,7 @@ fun GroupScreen(groupId: String) {
             }
 
             if (showRemoveGroupMembers) {
-                 val members = groupExtended!!.members!!
+                val members = groupExtended!!.members!!
                     .mapNotNull { it.person?.id }
                     .filter { it != me?.id }
                 ChoosePeopleDialog(
