@@ -98,6 +98,8 @@ object ProfileStyles : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Stretch)
+        minWidth(8.r)
+        marginBottom(1.r)
 
         child(self, selector("div")) style {
             ellipsize()
@@ -134,7 +136,6 @@ object ProfileStyles : StyleSheet() {
     val infoAbout by style {
         whiteSpace("pre-wrap")
         lineHeight("1.25")
-
 
         media(mediaMaxWidth(640.px)) {
             self style {

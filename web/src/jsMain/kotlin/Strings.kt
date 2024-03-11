@@ -745,6 +745,10 @@ object Strings {
         "Maximize",
         "Mở rộng"
     )
+    val subscribers = Translation(
+        "Subscribers",
+        "Người đăng ký"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

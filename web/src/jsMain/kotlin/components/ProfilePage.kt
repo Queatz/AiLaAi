@@ -269,6 +269,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     style {
                                         display(DisplayStyle.Flex)
                                         alignItems(AlignItems.Stretch)
+                                        flexWrap(FlexWrap.Wrap)
                                         width(100.percent)
                                     }
                                 }) {
@@ -294,6 +295,18 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                             }
                                         ) { Text("${Date(profile.person.createdAt!!.toEpochMilliseconds()).getFullYear()}") }
                                         Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { joined }) }
+                                    }
+                                    Div({
+                                        classes(ProfileStyles.infoCard)
+                                    }) {
+                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats.storiesCount}") }
+                                        Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { stories }) }
+                                    }
+                                    Div({
+                                        classes(ProfileStyles.infoCard)
+                                    }) {
+                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats.subscriberCount}") }
+                                        Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { subscribers }) }
                                     }
                                 }
                                 if (profile.profile.about != null) {
