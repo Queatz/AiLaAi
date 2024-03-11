@@ -50,6 +50,7 @@ import com.queatz.db.*
 import createTrade
 import kotlinx.coroutines.*
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(personId: String) {
     val scope = rememberCoroutineScope()
@@ -652,23 +653,23 @@ fun ProfileScreen(personId: String) {
                             }
                         }
                         stats?.let { stats ->
-                            Row(
+                            FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(
                                     2.pad,
                                     Alignment.CenterHorizontally
                                 ),
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalArrangement = Arrangement.spacedBy(2.pad, Alignment.CenterVertically),
                                 modifier = Modifier
-                                    .padding(1.pad)
-                                    .widthIn(max = 360.dp) // todo what size
+                                    .padding(2.pad)
+                                    .fillMaxWidth()
                             ) {
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier
                                         .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                                         .clip(MaterialTheme.shapes.large)
-//                                .clickable {  }
                                         .weight(1f)
+                                        .widthIn(min = 120.dp)
                                         .padding(2.pad)
                                 ) {
                                     Text(
@@ -695,8 +696,8 @@ fun ProfileScreen(personId: String) {
                                     modifier = Modifier
                                         .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
                                         .clip(MaterialTheme.shapes.large)
-//                                .clickable {  }
                                         .weight(1f)
+                                        .widthIn(min = 120.dp)
                                         .padding(2.pad)
                                 ) {
                                     Text(
@@ -723,6 +724,7 @@ fun ProfileScreen(personId: String) {
                                             showJoined = true
                                         }
                                         .weight(1f)
+                                        .widthIn(min = 120.dp)
                                         .padding(2.pad)
                                 ) {
                                     Text(
@@ -734,6 +736,54 @@ fun ProfileScreen(personId: String) {
                                     )
                                     Text(
                                         stringResource(R.string.joined),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                        .clip(MaterialTheme.shapes.large)
+                                        .weight(1f)
+                                        .widthIn(min = 120.dp)
+                                        .padding(2.pad)
+                                ) {
+                                    Text(
+                                        stats.storiesCount.toString(),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        pluralStringResource(R.plurals.stories_plural, stats.storiesCount, stats.storiesCount),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
+                                        .clip(MaterialTheme.shapes.large)
+                                        .weight(1f)
+                                        .widthIn(min = 120.dp)
+                                        .padding(2.pad)
+                                ) {
+                                    Text(
+                                        stats.subscriberCount.toString(),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        pluralStringResource(R.plurals.subscribers_plural, stats.subscriberCount, stats.subscriberCount),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         color = MaterialTheme.colorScheme.secondary,

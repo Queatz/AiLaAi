@@ -274,7 +274,7 @@ fun Db.subscriberCount(person: String) = query(
             )
         """,
     mapOf(
-        "person" to person
+        "person" to person.asId(Person::class)
     )
 ).first()!!
 

@@ -253,6 +253,12 @@
     <plurals name="cards_plural">
         <item quantity="other">Trang</item>
     </plurals>
+    <plurals name="subscribers_plural">
+        <item quantity="other">Người đăng ký</item>
+    </plurals>
+    <plurals name="stories_plural">
+        <item quantity="other">Bài viết</item>
+    </plurals>
     <plurals name="x_words">
         <item quantity="other">%1$s từ</item>
     </plurals>

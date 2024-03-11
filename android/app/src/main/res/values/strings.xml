@@ -268,6 +268,14 @@
         <item quantity="one">Page</item>
         <item quantity="other">Pages</item>
     </plurals>
+    <plurals name="subscribers_plural">
+        <item quantity="one">Subscriber</item>
+        <item quantity="other">Subscribers</item>
+    </plurals>
+    <plurals name="stories_plural">
+        <item quantity="one">Story</item>
+        <item quantity="other">Stories</item>
+    </plurals>
     <plurals name="x_words">
         <item quantity="one">%1$s word</item>
         <item quantity="other">%1$s words</item>
