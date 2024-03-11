@@ -22,10 +22,7 @@ fun Route.peopleRoutes() {
                 PersonProfile(
                     person,
                     db.profile(person.id!!),
-                    ProfileStats(
-                        friendsCount = db.friendsCount(person.id!!),
-                        cardCount = db.cardsCount(person.id!!),
-                    ),
+                    person.stats(),
                     meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
                 )
             }
@@ -41,10 +38,7 @@ fun Route.peopleRoutes() {
                 PersonProfile(
                     person,
                     profile,
-                    ProfileStats(
-                        friendsCount = db.friendsCount(profile.person!!),
-                        cardCount = db.cardsCount(profile.person!!),
-                    ),
+                    person.stats(),
                     meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
                 )
             }
@@ -111,3 +105,10 @@ private fun List<Person>.forApi() = onEach {
 private fun Person.forApi() {
     geo = null
 }
+
+private fun Person.stats() = ProfileStats(
+    friendsCount = db.friendsCount(id!!),
+    cardCount = db.cardsCount(id!!),
+    storiesCount = db.storiesCount(id!!),
+    subscriberCount = db.subscriberCount(id!!)
+)

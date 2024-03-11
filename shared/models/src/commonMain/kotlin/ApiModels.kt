@@ -80,7 +80,9 @@ enum class ConversationAction {
 @Serializable
 data class ProfileStats(
     val friendsCount: Int,
-    val cardCount: Int
+    val cardCount: Int,
+    val storiesCount: Int,
+    val subscriberCount: Int,
 )
 
 @Serializable

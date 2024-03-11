@@ -249,6 +249,35 @@ fun Db.cardsCount(person: String) = query(
     )
 ).first()!!
 
+fun Db.storiesCount(person: String) = query(
+    Int::class,
+    """
+            return count(
+                for story in `${Story::class.collection()}`
+                    filter story.${f(Story::person)} == @person
+                        and story.${f(Story::published)} == true
+                    return distinct story
+            )
+        """,
+    mapOf(
+        "person" to person
+    )
+).first()!!
+
+fun Db.subscriberCount(person: String) = query(
+    Int::class,
+    """
+            return count(
+                for subscription in `${Subscription::class.collection()}`
+                    filter subscription._to == @person
+                    return distinct subscription
+            )
+        """,
+    mapOf(
+        "person" to person
+    )
+).first()!!
+
 /**
  * Find people matching @name that are not connected with @person sorted by distance from @geo.
  */

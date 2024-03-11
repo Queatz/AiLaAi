@@ -34,7 +34,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Schedule)
         }
-//        IconButton("rocket", "Play", styles = {
+//        IconButton("rocket", "Inventory", styles = {
 //            if (nav == NavPage.Schedule) {
 //                backgroundColor(Styles.colors.primary)
 //                color(Color.white)
