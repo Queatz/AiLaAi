@@ -45,6 +45,7 @@ fun CardConversation(
     onTitleClick: () -> Unit = {},
     showDistance: LatLng? = null,
     showTitle: Boolean = true,
+    hideCreators: List<String>? = null,
     selectingText: ((Boolean) -> Unit)? = null,
     conversationChange: ((List<ConversationItem>) -> Unit)? = null,
     onCategoryClick: ((String) -> Unit)? = null
@@ -164,7 +165,9 @@ fun CardConversation(
         }
 
         if (stack.isEmpty()) {
-            cardAuthors?.let { authors ->
+            cardAuthors?.takeIf {
+                hideCreators == null || it.any { it.id!! !in hideCreators }
+            }?.let { authors ->
                 CardAuthor(
                     authors,
                     interactable = interactable

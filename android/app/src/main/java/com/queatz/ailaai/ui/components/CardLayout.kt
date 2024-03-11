@@ -42,6 +42,7 @@ fun CardLayout(
     elevation: Int = 1,
     showDistance: LatLng? = null,
     playVideo: Boolean = false,
+    hideCreators: List<String>? = null,
 ) {
     val nav = nav
 
@@ -94,6 +95,7 @@ fun CardLayout(
                 card,
                 interactable = true,
                 showTitle = showTitle,
+                hideCreators = hideCreators,
                 showDistance = showDistance,
                 onCategoryClick = {
                     exploreInitialCategory = it

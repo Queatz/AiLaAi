@@ -774,7 +774,7 @@ fun GroupScreen(groupId: String) {
                     }
                 }
 
-                if (myMember == null) {
+                if (myMember == null && groupExtended?.group?.open == true) {
                     val joinRequestId = myJoinRequests.find { it.joinRequest?.group == groupId }?.joinRequest?.id
 
                     Row(

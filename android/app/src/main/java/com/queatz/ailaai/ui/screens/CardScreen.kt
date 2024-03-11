@@ -780,6 +780,7 @@ fun CardScreen(cardId: String) {
                                 CardLayout(
                                     card = it,
                                     showTitle = true,
+                                    hideCreators = card?.person?.inList()?.let { it + (card?.collaborators ?: emptyList()) },
                                     onClick = {
                                         nav.navigate("card/${it.id!!}")
                                     },
