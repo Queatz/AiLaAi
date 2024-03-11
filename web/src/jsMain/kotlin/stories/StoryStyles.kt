@@ -35,9 +35,6 @@ object StoryStyles : StyleSheet() {
 
     val contentText by style {
         boxSizing("border-box")
-        display(DisplayStyle.Flex)
-        alignItems(AlignItems.Stretch)
-        justifyContent(JustifyContent.Stretch)
         whiteSpace("pre-wrap")
         fontSize(16.px)
         textAlign("justify")

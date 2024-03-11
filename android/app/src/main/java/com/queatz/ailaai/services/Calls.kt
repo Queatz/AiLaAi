@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import live.videosdk.rtc.android.CustomStreamTrack
 import live.videosdk.rtc.android.Meeting
 import live.videosdk.rtc.android.Participant
 import live.videosdk.rtc.android.Stream
@@ -31,6 +32,7 @@ import org.json.JSONObject
 import org.webrtc.AudioTrack
 import org.webrtc.MediaStreamTrack
 import org.webrtc.VideoTrack
+import java.util.HashMap
 
 val calls by lazy {
     Calls()
@@ -147,6 +149,20 @@ class Calls {
 
         end()
 
+        val customTracks: MutableMap<String, CustomStreamTrack> = HashMap()
+
+        val videoCustomTrack = VideoSDK.createCameraVideoTrack(
+            "h720p_w960p",
+            "front",
+            CustomStreamTrack.VideoMode.DETAIL,
+            true,
+            context
+        )
+        customTracks["video"] = videoCustomTrack
+
+        val audioCustomTrack = VideoSDK.createAudioTrack("high_quality", context)
+        customTracks["mic"] = audioCustomTrack
+
         api.groupCall(groupId) {
             VideoSDK.config(it.token)
             meeting = VideoSDK.initMeeting(
@@ -158,7 +174,7 @@ class Calls {
                 null,
                 null,
                 true,
-                emptyMap(),
+                customTracks,
                 JSONObject()
             )
 
@@ -266,7 +282,14 @@ class Calls {
         if (enabled("video")) {
             meeting.disableWebcam()
         } else {
-            meeting.enableWebcam()
+            val videoCustomTrack = VideoSDK.createCameraVideoTrack(
+                "h720p_w960p",
+                "front",
+                CustomStreamTrack.VideoMode.DETAIL,
+                true,
+                context
+            )
+            meeting.enableWebcam(videoCustomTrack)
         }
     }
 

@@ -82,7 +82,7 @@ android {
 dependencies {
     val ktorVersion = "2.3.8"
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.6.1"
+    val composeVersion = "1.6.2"
 
     // Ai là ai
     implementation("app.ailaai.shared:models")
