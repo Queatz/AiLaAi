@@ -69,7 +69,7 @@ class CallActivity : AppCompatActivity() {
             AiLaAiTheme {
                 var me by rememberStateOf<Person?>(null)
                 val isInPipMode = rememberIsInPipMode()
-                val active by calls.active.collectAsState()
+                val activeCall by calls.active.collectAsState()
                 val group by calls.group.collectAsState()
                 val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
                 val micPermissionRequester = permissionRequester(Manifest.permission.RECORD_AUDIO)
@@ -84,7 +84,9 @@ class CallActivity : AppCompatActivity() {
 
                 LaunchedEffect(Unit) {
                     calls.onEndCall.collectLatest {
-                        finish()
+                        if (it == group?.group?.id) {
+                            finish()
+                        }
                     }
                 }
 
@@ -128,10 +130,10 @@ class CallActivity : AppCompatActivity() {
                             )
                         }
 
-                        group?.let {
-                            active?.let { active ->
+                        group?.let { group ->
+                            activeCall?.let { active ->
                                 CallScreen(
-                                    it,
+                                    group,
                                     active,
                                     isInPipMode = isInPipMode,
                                     cameraEnabled = calls.enabled("video"),
@@ -168,7 +170,7 @@ class CallActivity : AppCompatActivity() {
                                         calls.toggleScreenShare()
                                     },
                                     onEndCall = {
-                                        calls.end()
+                                        calls.end(group.group?.id)
                                     },
                                     onTogglePictureInPicture = {
                                         enterPip()

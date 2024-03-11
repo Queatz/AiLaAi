@@ -188,12 +188,16 @@ class Calls {
 
                     active.value ?: return
 
-                    if (stream!!.kind == "video") {
-                        active.value = active.value!!.copy(localVideo = stream.track as VideoTrack)
-                    } else if (stream.kind == "audio") {
-                        active.value = active.value!!.copy(localAudio = stream.track as AudioTrack)
-                    } else if (stream.kind == "share") {
-                        active.value = active.value!!.copy(localShare = stream.track as VideoTrack)
+                    when {
+                        stream!!.kind == "video" -> {
+                            active.value = active.value!!.copy(localVideo = stream.track as VideoTrack)
+                        }
+                        stream.kind == "audio" -> {
+                            active.value = active.value!!.copy(localAudio = stream.track as AudioTrack)
+                        }
+                        stream.kind == "share" -> {
+                            active.value = active.value!!.copy(localShare = stream.track as VideoTrack)
+                        }
                     }
                 }
 
@@ -204,12 +208,16 @@ class Calls {
 
                     active.value ?: return
 
-                    if (stream!!.kind == "video") {
-                        active.value = active.value!!.copy(localVideo = null)
-                    } else if (stream.kind == "audio") {
-                        active.value = active.value!!.copy(localAudio = null)
-                    } else if (stream.kind == "share") {
-                        active.value = active.value!!.copy(localShare = null)
+                    when {
+                        stream!!.kind == "video" -> {
+                            active.value = active.value!!.copy(localVideo = null)
+                        }
+                        stream.kind == "audio" -> {
+                            active.value = active.value!!.copy(localAudio = null)
+                        }
+                        stream.kind == "share" -> {
+                            active.value = active.value!!.copy(localShare = null)
+                        }
                     }
                 }
             })
