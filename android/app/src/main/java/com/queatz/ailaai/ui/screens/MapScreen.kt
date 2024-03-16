@@ -247,7 +247,7 @@ fun MapScreen(
             cardPositions.forEach {
                 key(it.card.id) {
                     val (card, pos) = it
-                    val s = (map.cameraPosition.zoom / 16f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0)
+                    val s = (map.cameraPosition.zoom / 18f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0)
                         .toFloat()
                     var size by remember { mutableStateOf(IntSize(0, 0)) }
                     var placed by remember(card.name) { mutableStateOf(false) }
@@ -335,6 +335,7 @@ fun MapScreen(
                             model = remember(photo) {
                                 ImageRequest.Builder(context)
                                     .data(photo)
+                                    .crossfade(true)
                                     .size(64)
                                     .build()
                             },

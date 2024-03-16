@@ -1,0 +1,12 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.ailaai.app",
+    "sha256_cert_fingerprints":
+    [
+      "F5:2E:21:79:CA:37:79:1C:83:13:6C:CE:03:C3:26:15:82:C0:86:B9:D4:0E:38:22:1D:E3:C5:D1:E0:8A:44:23",
+      "85:26:93:74:E9:D0:80:E9:EE:68:60:88:9F:73:10:F4:13:3A:F6:36:30:D5:30:FE:C2:8A:9F:88:7B:CE:4D:5D"
+    ]
+  }
+}]
