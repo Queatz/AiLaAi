@@ -21,11 +21,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.*
 import coil.compose.AsyncImage
@@ -43,6 +40,7 @@ import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.profile.ProfileGroups
+import com.queatz.ailaai.ui.profile.Stats
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
@@ -50,7 +48,6 @@ import com.queatz.db.*
 import createTrade
 import kotlinx.coroutines.*
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(personId: String) {
     val scope = rememberCoroutineScope()
@@ -66,7 +63,6 @@ fun ProfileScreen(personId: String) {
     var isError by rememberStateOf(false)
     var showEditName by rememberStateOf(false)
     var showEditAbout by rememberStateOf(false)
-    var showJoined by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
@@ -652,147 +648,10 @@ fun ProfileScreen(personId: String) {
                                 }
                             }
                         }
-                        stats?.let { stats ->
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(
-                                    2.pad,
-                                    Alignment.CenterHorizontally
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(2.pad, Alignment.CenterVertically),
-                                modifier = Modifier
-                                    .padding(2.pad)
-                                    .fillMaxWidth()
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .weight(1f)
-                                        .widthIn(min = 120.dp)
-                                        .padding(2.pad)
-                                ) {
-                                    Text(
-                                        stats.friendsCount.toString(),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        pluralStringResource(
-                                            R.plurals.friends_plural,
-                                            stats.friendsCount,
-                                            stats.friendsCount
-                                        ),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .weight(1f)
-                                        .widthIn(min = 120.dp)
-                                        .padding(2.pad)
-                                ) {
-                                    Text(
-                                        stats.cardCount.toString(),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        pluralStringResource(R.plurals.cards_plural, stats.cardCount, stats.cardCount),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .clickable {
-                                            showJoined = true
-                                        }
-                                        .weight(1f)
-                                        .widthIn(min = 120.dp)
-                                        .padding(2.pad)
-                                ) {
-                                    Text(
-                                        person?.createdAt?.monthYear() ?: "?",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        stringResource(R.string.joined),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .weight(1f)
-                                        .widthIn(min = 120.dp)
-                                        .padding(2.pad)
-                                ) {
-                                    Text(
-                                        stats.storiesCount.toString(),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        pluralStringResource(R.plurals.stories_plural, stats.storiesCount, stats.storiesCount),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .weight(1f)
-                                        .widthIn(min = 120.dp)
-                                        .padding(2.pad)
-                                ) {
-                                    Text(
-                                        stats.subscriberCount.toString(),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        pluralStringResource(R.plurals.subscribers_plural, stats.subscriberCount, stats.subscriberCount),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                        }
                         if (search.isBlank()) {
+                            stats?.let { stats ->
+                                Stats(stats, person)
+                            }
                             Box(
                                 modifier = Modifier
                                     .clip(MaterialTheme.shapes.large)
@@ -898,29 +757,6 @@ fun ProfileScreen(personId: String) {
             modifier = Modifier
                 .padding(bottom = 2.pad)
                 .align(Alignment.BottomEnd)
-        )
-    }
-
-    if (showJoined) {
-        AlertDialog(
-            {
-                showJoined = false
-            },
-            title = {
-                Text(stringResource(R.string.joined))
-            },
-            text = {
-                Text(person?.createdAt?.dayMonthYear() ?: "?")
-            },
-            confirmButton = {
-                TextButton(
-                    {
-                        showJoined = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
-            }
         )
     }
 

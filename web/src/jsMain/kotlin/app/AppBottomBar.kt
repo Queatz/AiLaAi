@@ -26,7 +26,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Groups)
         }
-        IconButton("schedule", appString { reminders }, styles = {
+        IconButton("calendar_month", appString { reminders }, styles = {
             if (nav == NavPage.Schedule) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)

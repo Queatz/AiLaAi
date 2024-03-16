@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -112,9 +116,9 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton("messages", getString(R.string.groups), Icons.Outlined.Group),
-            NavButton("schedule", getString(R.string.reminders), Icons.Outlined.Schedule),
-            NavButton("inventory", getString(R.string.inventory), Icons.Outlined.RocketLaunch),
+            NavButton("schedule", getString(R.string.reminders), Icons.Outlined.CalendarMonth),
             NavButton("explore", getString(R.string.cards), Icons.Outlined.Map),
+            NavButton("inventory", getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
         )
     }
@@ -360,10 +364,20 @@ class MainActivity : AppCompatActivity() {
                                         modifier = Modifier.height(54.dp)
                                     ) {
                                         menuItems.forEach { item ->
+                                            val selected = navController.currentDestination?.route == item.route
+                                            val scale by animateFloatAsState(
+                                                if (selected) 1.25f else 1f,
+                                                spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)
+                                            )
                                             NavigationBarItem(
                                                 icon = {
                                                     Box {
-                                                        Icon(item.icon, contentDescription = null)
+                                                        Icon(
+                                                            if (selected) item.selectedIcon ?: item.icon else item.icon,
+                                                            contentDescription = null,
+                                                            modifier = Modifier
+                                                                .scale(scale)
+                                                        )
                                                         // todo reusable icon IconAndCount
                                                         if (item.route == "inventory" && activeTrades > 0) {
                                                             Text(
@@ -415,7 +429,7 @@ class MainActivity : AppCompatActivity() {
                                                 },
                                                 alwaysShowLabel = false,
                                                 label = null,
-                                                selected = navController.currentDestination?.route == item.route,
+                                                selected = selected,
                                                 onClick = {
                                                     navController.popBackStack()
                                                     navController.navigate(item.route)
@@ -716,4 +730,5 @@ data class NavButton(
     val route: String,
     val text: String,
     val icon: ImageVector,
+    val selectedIcon: ImageVector? = null
 )
