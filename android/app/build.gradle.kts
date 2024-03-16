@@ -80,9 +80,9 @@ android {
 }
 
 dependencies {
-    val ktorVersion = "2.3.8"
+    val ktorVersion = "2.3.9"
     val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.6.2"
+    val composeVersion = "1.6.3"
 
     // Ai là ai
     implementation("app.ailaai.shared:models")
@@ -105,15 +105,15 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
     implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.2.0")
-    implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
@@ -141,14 +141,14 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
-    implementation("androidx.media3:media3-exoplayer:1.2.1")
-    implementation("androidx.media3:media3-ui:1.2.1")
+    implementation("androidx.media3:media3-exoplayer:1.3.0")
+    implementation("androidx.media3:media3-ui:1.3.0")
     implementation("com.otaliastudios:transcoder:0.10.5")
 
     // Logging & Crash Reporting
     implementation("ch.acra:acra-core:5.11.3")
     implementation("ch.acra:acra-toast:5.11.3")
-    implementation("com.ibm.icu:icu4j:74.1")
+    implementation("com.ibm.icu:icu4j:74.2")
     ksp("dev.zacsweers.autoservice:auto-service-ksp:1.1.0")
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 
