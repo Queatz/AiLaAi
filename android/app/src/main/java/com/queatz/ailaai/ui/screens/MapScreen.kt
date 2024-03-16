@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
@@ -82,6 +83,7 @@ fun MapScreen(
     var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
     val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
     var showMapClickMenu by remember { mutableStateOf<LatLng?>(null) }
+    var viewport by rememberStateOf(IntSize(0, 0))
 
     LaunchedEffect(Unit) {
         if (position == null) {
@@ -146,7 +148,7 @@ fun MapScreen(
         renderedCards = renderedCards.filter { it !in goneCards }
     }
 
-    LaunchedEffect(map, cameraPosition, renderedCards) {
+    LaunchedEffect(map, viewport, cameraPosition, renderedCards) {
         map ?: return@LaunchedEffect
         cardPositions = renderedCards.map { card ->
             Pin(
@@ -174,6 +176,9 @@ fun MapScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .clipToBounds()
+                .onPlaced {
+                    viewport = it.size
+                }
         ) {
             mapView = this
             if (composed) return@AndroidViewBinding else composed = true
@@ -307,8 +312,16 @@ fun MapScreen(
                                     .widthIn(max = 120.dp)
                             )
                         }
+
+                        val photo = card.photo?.let(api::url)
+
                         AsyncImage(
-                            model = card.photo?.let(api::url),
+                            model = remember(photo) {
+                                ImageRequest.Builder(context)
+                                    .data(photo)
+                                    .size(64)
+                                    .build()
+                            },
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             alignment = Alignment.Center,
