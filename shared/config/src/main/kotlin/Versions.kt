@@ -4,7 +4,7 @@ open class Versions {
     val kotlin = "1.9.22"
     val ktor = "2.3.9"
     val choiceSdk = "0.3.0"
-    val compose = "1.6.3"
+    val compose = "1.6.2"
     val serialization = "1.6.3"
     val datetime = "0.5.0"
     val logback = "1.4.12"

@@ -39,7 +39,7 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
                 implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.4")
-                implementation("app.softwork:routing-compose:0.2.14")
+                implementation("app.softwork:routing-compose:0.2.13")
                 implementation(npm("@paulmillr/qr", "0.1.1"))
                 implementation(npm("date-fns", "2.30.0")) // todo updated to v3 breaks modules
                 implementation(npm("date-fns-tz", "2.0.0"))
