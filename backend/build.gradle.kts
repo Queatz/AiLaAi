@@ -1,12 +1,9 @@
-val ktor_version: String by project
-val kotlin_version: String by project
-val logback_version: String by project
-
 plugins {
     application
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.serialization") version "1.9.22"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.ailaai.shared.config")
 }
 
 group = "com.queatz"
@@ -42,29 +39,29 @@ dependencies {
     } else {
         implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final")
     }
-    implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
-    implementation("com.arangodb:arangodb-java-driver:7.5.1")
-    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-compression-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-cors-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-default-headers-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-call-logging:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
-    implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
-    implementation("io.ktor:ktor-client-cio-jvm:$ktor_version")
-    implementation("io.ktor:ktor-client-java:$ktor_version")
-    implementation("io.ktor:ktor-server-caching-headers-jvm:$ktor_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
+    implementation("ch.qos.logback:logback-classic:${versions.logback}")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${versions.jackson}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
+    implementation("com.arangodb:arangodb-java-driver:${versions.arango}")
+    implementation("io.ktor:ktor-server-core-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-compression-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-cors-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-default-headers-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-call-logging:${versions.ktor}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-auth-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-host-common-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-server-netty-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
+    implementation("io.ktor:ktor-client-core-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-cio-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-java:${versions.ktor}")
+    implementation("io.ktor:ktor-server-caching-headers-jvm:${versions.ktor}")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}")
+    testImplementation("io.ktor:ktor-server-tests-jvm:${versions.ktor}")
 }

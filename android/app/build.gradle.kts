@@ -9,6 +9,7 @@ plugins {
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
+    id("com.ailaai.shared.config")
 }
 
 val properties = Properties()
@@ -67,7 +68,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
@@ -80,10 +81,6 @@ android {
 }
 
 dependencies {
-    val ktorVersion = "2.3.9"
-    val choiceSdkVersion = "0.3.0"
-    val composeVersion = "1.6.3"
-
     // Ai là ai
     implementation("app.ailaai.shared:models")
     implementation("app.ailaai.shared:push")
@@ -92,30 +89,30 @@ dependencies {
     implementation("app.ailaai.shared:reminders")
 
     // Ktor
-    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-okhttp-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-core-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-okhttp-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:${versions.ktor}")
 
     // Compose
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-    implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
-    runtimeOnly("androidx.compose.runtime:runtime-rxjava3:$composeVersion")
-    implementation("androidx.compose.ui:ui-viewbinding:$composeVersion")
+    implementation("androidx.compose.ui:ui:${versions.compose}")
+    implementation("androidx.compose.material:material-icons-extended:${versions.compose}")
+    implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
+    runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
+    implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
     implementation("androidx.compose.material3:material3:1.2.1")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -126,9 +123,9 @@ dependencies {
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
 
     // HMS Support
-    implementation("at.bluesource.choicesdk:choicesdk-location:$choiceSdkVersion")
-    implementation("at.bluesource.choicesdk:choicesdk-maps:$choiceSdkVersion")
-    implementation("at.bluesource.choicesdk:choicesdk-messaging:$choiceSdkVersion")
+    implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
+    implementation("at.bluesource.choicesdk:choicesdk-maps:${versions.choiceSdk}")
+    implementation("at.bluesource.choicesdk:choicesdk-messaging:${versions.choiceSdk}")
     implementation("com.huawei.hms:base:6.11.0.301")
     implementation("com.huawei.hms:maps:6.11.0.304")
     implementation("com.huawei.hms:push:6.11.0.300")
@@ -159,5 +156,5 @@ dependencies {
     }
 
     // Development
-    debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    debugImplementation("androidx.compose.ui:ui-tooling:${versions.compose}")
 }

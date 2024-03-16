@@ -12,6 +12,8 @@ dependencyResolutionManagement {
     }
 }
 
+includeBuild("config")
+
 include(
     "models",
     "push",

@@ -4,6 +4,11 @@
     <bytecodeTargetLevel>
       <module name="ailaai-shared.reminder.main" target="17" />
       <module name="ailaai-shared.reminder.test" target="17" />
+      <module name="config.versions.main" target="17" />
+      <module name="config.versions.test" target="17" />
+      <module name="versions" target="17" />
+      <module name="versions.main" target="17" />
+      <module name="versions.test" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,10 +1,8 @@
-
-val ktorVersion = "2.3.9"
-
 plugins {
     kotlin("multiplatform") version "1.9.22"
     kotlin("plugin.serialization") version "1.9.22"
     id("org.jetbrains.compose") version "1.5.12"
+    id("com.ailaai.shared.config")
 }
 
 group = "app.ailaai"
@@ -36,10 +34,10 @@ kotlin {
                 implementation("app.ailaai.shared:reminders")
                 implementation(compose.runtime)
                 implementation(compose.html.core)
-                implementation("io.ktor:ktor-client-js:$ktorVersion")
-                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+                implementation("io.ktor:ktor-client-js:${versions.ktor}")
+                implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
                 implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.4")
                 implementation("app.softwork:routing-compose:0.2.14")
                 implementation(npm("@paulmillr/qr", "0.1.1"))

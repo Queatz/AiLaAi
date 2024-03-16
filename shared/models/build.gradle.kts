@@ -1,6 +1,7 @@
 plugins {
-    kotlin("multiplatform") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("multiplatform")
+    kotlin("plugin.serialization")
+    id("com.ailaai.shared.config")
 }
 
 group = "app.ailaai.shared"
@@ -24,17 +25,17 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":widgets"))
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
             }
         }
         val jvmMain by getting {
             dependencies {
-                implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
-                implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
-                implementation("com.arangodb:jackson-serde-json:7.5.1")
+                implementation("com.fasterxml.jackson.core:jackson-core:${versions.jackson}")
+                implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
+                implementation("com.arangodb:jackson-serde-json:${versions.arango}")
             }
         }
         val jsMain by getting

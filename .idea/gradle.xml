@@ -17,6 +17,11 @@
                   <project path="$PROJECT_DIR$/shared/widgets" />
                 </projects>
               </build>
+              <build path="$PROJECT_DIR$/shared/config" name="config">
+                <projects>
+                  <project path="$PROJECT_DIR$/shared/config" />
+                </projects>
+              </build>
             </builds>
           </compositeBuild>
         </compositeConfiguration>
@@ -28,6 +33,7 @@
             <option value="$PROJECT_DIR$/android/app" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/api" />
+            <option value="$PROJECT_DIR$/shared/config" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
             <option value="$PROJECT_DIR$/shared/reminders" />
@@ -47,6 +53,11 @@
                   <project path="$PROJECT_DIR$/shared/push" />
                   <project path="$PROJECT_DIR$/shared/reminders" />
                   <project path="$PROJECT_DIR$/shared/widgets" />
+                </projects>
+              </build>
+              <build path="$PROJECT_DIR$/shared/config" name="config">
+                <projects>
+                  <project path="$PROJECT_DIR$/shared/config" />
                 </projects>
               </build>
             </builds>
@@ -59,6 +70,7 @@
             <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/api" />
+            <option value="$PROJECT_DIR$/shared/config" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
             <option value="$PROJECT_DIR$/shared/reminders" />
@@ -67,12 +79,24 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/shared/config" name="config">
+                <projects>
+                  <project path="$PROJECT_DIR$/shared/config" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$/shared" />
         <option name="gradleJvm" value="17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/api" />
+            <option value="$PROJECT_DIR$/shared/config" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
             <option value="$PROJECT_DIR$/shared/reminders" />
@@ -94,6 +118,11 @@
                   <project path="$PROJECT_DIR$/shared/widgets" />
                 </projects>
               </build>
+              <build path="$PROJECT_DIR$/shared/config" name="config">
+                <projects>
+                  <project path="$PROJECT_DIR$/shared/config" />
+                </projects>
+              </build>
             </builds>
           </compositeBuild>
         </compositeConfiguration>
@@ -103,6 +132,7 @@
           <set>
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/api" />
+            <option value="$PROJECT_DIR$/shared/config" />
             <option value="$PROJECT_DIR$/shared/models" />
             <option value="$PROJECT_DIR$/shared/push" />
             <option value="$PROJECT_DIR$/shared/reminders" />
