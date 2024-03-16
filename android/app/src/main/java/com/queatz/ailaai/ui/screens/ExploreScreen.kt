@@ -54,7 +54,7 @@ fun ExploreScreen() {
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var isError by rememberStateOf(false)
-    var showAsMap by rememberSavableStateOf(false)
+    var showAsMap by rememberSavableStateOf(true)
     var offset by remember { mutableIntStateOf(0) }
     val limit = 20
     var hasMore by rememberStateOf(true)
@@ -73,15 +73,19 @@ fun ExploreScreen() {
         mutableStateOf(
             when (tab) {
                 MainTab.Local, MainTab.Friends -> {
-                    listOf(
-                        SearchFilter(
-                            paidString,
-                            Icons.Outlined.Payments,
-                            filterPaid
-                        ) {
-                            filterPaid = !filterPaid
-                        }
-                    )
+                    if (cards.any { it.pay != null }) {
+                        listOf(
+                            SearchFilter(
+                                paidString,
+                                Icons.Outlined.Payments,
+                                filterPaid
+                            ) {
+                                filterPaid = !filterPaid
+                            }
+                        )
+                    } else {
+                        emptyList()
+                    }
                 }
 
                 else -> emptyList()
@@ -99,6 +103,12 @@ fun ExploreScreen() {
         cache[tab] = cards
     }
 
+    LaunchedEffect(showAsMap) {
+        if (showAsMap) {
+            tab = MainTab.Local
+        }
+    }
+
     fun updateCategories() {
         selectedCategory = selectedCategory ?: exploreInitialCategory
         categories = ((exploreInitialCategory.inList() + cards
@@ -107,21 +117,28 @@ fun ExploreScreen() {
         exploreInitialCategory = null
     }
 
-    fun onNewPage(page: List<Card>, clear: Boolean) {
+    fun onNewPage(page: List<Card>, clear: Boolean, reload: Boolean) {
         val oldSize = if (clear) 0 else cards.size
-        cards = if (clear) {
+        cards = if (clear || reload) {
             page
         } else {
             (cards + page).distinctBy { it.id }
         }
-        updateCategories()
-        offset = cards.size
-        hasMore = cards.size > oldSize
+
+        if (reload) {
+            offset = 0
+            hasMore = true
+        } else {
+            offset = cards.size
+            hasMore = cards.size > oldSize
+        }
         isError = false
         isLoading = false
         shownGeo = geo
         shownValue = value
         shownTab = tab
+
+        updateCategories()
 
         if (clear) {
             scope.launch {
@@ -130,7 +147,7 @@ fun ExploreScreen() {
         }
     }
 
-    suspend fun loadMore(clear: Boolean = false) {
+    suspend fun loadMore(clear: Boolean = false, reload: Boolean = false) {
         val geo = (mapGeo?.takeIf { showAsMap } ?: geo) ?: return
         if (clear) {
             offset = 0
@@ -157,7 +174,7 @@ fun ExploreScreen() {
                         }
                     }
                 ) {
-                    onNewPage(it, clear)
+                    onNewPage(it, clear, reload)
                 }
             }
 
@@ -174,7 +191,7 @@ fun ExploreScreen() {
                             isError = true
                         }
                     }) {
-                    onNewPage(it.mapNotNull { it.card }, clear)
+                    onNewPage(it.mapNotNull { it.card }, clear, reload)
                 }
             }
         }
@@ -189,14 +206,20 @@ fun ExploreScreen() {
             return@LaunchedEffect
         }
 
+        val moveUnder100 = shownGeo?.let { shownGeo ->
+            (mapGeo?.takeIf { showAsMap } ?: geo)?.distance(shownGeo)?.let { it < 100 }
+        } ?: true
+
         // Don't reload if moving < 100m
-        if (shownGeo != null && (mapGeo?.takeIf { showAsMap }
-                ?: geo ?: return@LaunchedEffect).distance(shownGeo!!) < 100 && shownValue == value && shownTab == tab) {
+        if (shownGeo != null && moveUnder100 && shownValue == value && shownTab == tab) {
             return@LaunchedEffect
         }
 
         // The map doesn't clear for geo updates, but should for value and tab changes
-        loadMore(clear = shownValue != value || shownTab != tab)
+        loadMore(
+            clear = shownValue != value || shownTab != tab,
+            reload = !moveUnder100
+        )
     }
 
     ResumeEffect {
@@ -208,7 +231,7 @@ fun ExploreScreen() {
         locationSelector,
         appHeader = {
             AppHeader(
-                stringResource(R.string.explore),
+                if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
                 {},
             ) {
                 ScanQrCodeButton()
@@ -219,7 +242,7 @@ fun ExploreScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AppHeader(
-                stringResource(R.string.cards),
+                if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
                 {
                     scope.launch {
                         state.scrollToTop()
@@ -244,7 +267,6 @@ fun ExploreScreen() {
 
             var viewportHeight by remember { mutableIntStateOf(0) }
 
-            MainTabs(tab, { tab = it })
             if (showAsMap) {
                 Box(
                     contentAlignment = Alignment.BottomCenter,
@@ -283,6 +305,7 @@ fun ExploreScreen() {
                 }
             } else {
                 val me = me
+                MainTabs(tab, { tab = it })
                 CardList(
                     state = state,
                     cards = cardsOfCategory,
