@@ -252,6 +252,13 @@ fun MapScreen(
                     val shown = cards.any { c -> c.id == card.id }
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
 
+                    val tooClose = cardPositions.any { it.card != card && it.position.near(pos, 100) }
+                    val prox = remember { Animatable(if (tooClose) .5f else 1f) }
+
+                    LaunchedEffect(card.id, tooClose) {
+                        scale.animateTo(if (tooClose) .5f else 1f, spring(dampingRatio = Spring.DampingRatioLowBouncy))
+                    }
+
                     LaunchedEffect(card.id, shown) {
                         if (shown) delay((100L * Random.nextFloat()).toLong())
                         scale.animateTo(if (shown) 1f else 0f, spring(dampingRatio = Spring.DampingRatioLowBouncy))
@@ -268,8 +275,8 @@ fun MapScreen(
                             .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
                             .zIndex(1f + pos.y)
                             .graphicsLayer(
-                                scaleX = s * scale.value,
-                                scaleY = s * scale.value,
+                                scaleX = s * scale.value * prox.value,
+                                scaleY = s * scale.value * prox.value,
                                 alpha = if (!placed) 0f else scale.value,
                                 transformOrigin = TransformOrigin(.5f, 1f)
                             )

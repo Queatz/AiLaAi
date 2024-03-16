@@ -117,21 +117,16 @@ fun ExploreScreen() {
         exploreInitialCategory = null
     }
 
-    fun onNewPage(page: List<Card>, clear: Boolean, reload: Boolean) {
+    fun onNewPage(page: List<Card>, clear: Boolean) {
         val oldSize = if (clear) 0 else cards.size
-        cards = if (clear || reload) {
+        cards = if (clear) {
             page
         } else {
             (cards + page).distinctBy { it.id }
         }
 
-        if (reload) {
-            offset = 0
-            hasMore = true
-        } else {
-            offset = cards.size
-            hasMore = cards.size > oldSize
-        }
+        offset = cards.size
+        hasMore = cards.size > oldSize
         isError = false
         isLoading = false
         shownGeo = geo
@@ -154,6 +149,9 @@ fun ExploreScreen() {
             hasMore = true
             isLoading = true
             cards = emptyList()
+        } else if (reload) {
+            offset = 0
+            hasMore = true
         }
         when (tab) {
             MainTab.Friends,
@@ -174,7 +172,7 @@ fun ExploreScreen() {
                         }
                     }
                 ) {
-                    onNewPage(it, clear, reload)
+                    onNewPage(it, clear)
                 }
             }
 
@@ -191,7 +189,7 @@ fun ExploreScreen() {
                             isError = true
                         }
                     }) {
-                    onNewPage(it.mapNotNull { it.card }, clear, reload)
+                    onNewPage(it.mapNotNull { it.card }, clear)
                 }
             }
         }
