@@ -224,6 +224,8 @@ fun MapScreen(
             }.let(disposable::add)
         }
         map?.let { map ->
+            val nearDistance = 32.dp.px
+
             fun Point.near(other: Point, distance: Int) =
                 abs(x - other.x) <= distance && abs(y - other.y) <= distance
 
@@ -232,7 +234,7 @@ fun MapScreen(
             }
 
             fun tryNav(position: Point, block: () -> Unit) {
-                val nearby = cardPositions.filter { it.position != position && (it.position.near(position, 100)) }
+                val nearby = cardPositions.filter { it.position != position && (it.position.near(position, nearDistance)) }
                     .map { it.position } + position
                 if (nearby.size == 1) {
                     block()
@@ -252,11 +254,18 @@ fun MapScreen(
                     val shown = cards.any { c -> c.id == card.id }
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
 
-                    val tooClose = cardPositions.any { it.card != card && it.position.near(pos, 100) }
-                    val prox = remember { Animatable(if (tooClose) .5f else 1f) }
+                    val nearScale = if (cardPositions.any { it.card != card && it.position.near(pos, nearDistance / 4) }) {
+                        .25f
+                    } else if (cardPositions.any { it.card != card && it.position.near(pos, nearDistance) }) {
+                        .5f
+                    } else {
+                        1f
+                    }
 
-                    LaunchedEffect(card.id, tooClose) {
-                        scale.animateTo(if (tooClose) .5f else 1f, spring(dampingRatio = Spring.DampingRatioLowBouncy))
+                    val near = remember { Animatable(nearScale) }
+
+                    LaunchedEffect(card.id, nearScale) {
+                        near.animateTo(nearScale, spring(dampingRatio = Spring.DampingRatioLowBouncy))
                     }
 
                     LaunchedEffect(card.id, shown) {
@@ -275,8 +284,8 @@ fun MapScreen(
                             .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
                             .zIndex(1f + pos.y)
                             .graphicsLayer(
-                                scaleX = s * scale.value * prox.value,
-                                scaleY = s * scale.value * prox.value,
+                                scaleX = s * scale.value * near.value,
+                                scaleY = s * scale.value * near.value,
                                 alpha = if (!placed) 0f else scale.value,
                                 transformOrigin = TransformOrigin(.5f, 1f)
                             )
