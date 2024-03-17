@@ -33,3 +33,38 @@ suspend fun Api.myInventory(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<InventoryItemExtended>>
 ) = get("me/inventory", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.inventoriesNear(
+    geo: Geo,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<Inventory>>
+) = get(
+    "/inventory/explore", mapOf(
+        "geo" to geo.toString()
+    ),
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.inventory(
+    inventory: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<Inventory>
+) = get(
+    "/inventory/$inventory",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.takeInventory(
+    inventory: String,
+    items: List<TakeInventoryItem>,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
+) = post(
+    "/inventory/$inventory/take",
+    TakeInventoryBody(items),
+    onError = onError,
+    onSuccess = onSuccess
+)
+

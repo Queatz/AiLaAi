@@ -172,11 +172,11 @@ data class DropItemBody(
 
 @Serializable
 data class TakeInventoryBody(
-    val items: List<TakeInventoryItemBody>
+    val items: List<TakeInventoryItem>
 )
 
 @Serializable
-data class TakeInventoryItemBody(
+data class TakeInventoryItem(
     val item: String,
     val quantity: Double
 )
