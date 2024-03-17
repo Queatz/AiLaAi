@@ -156,6 +156,7 @@ fun EventRow(
                 flex(1)
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Column)
+                property("word-break", "break-word")
             }
         }) {
             Div({

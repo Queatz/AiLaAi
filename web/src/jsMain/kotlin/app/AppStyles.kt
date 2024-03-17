@@ -58,10 +58,12 @@ object AppStyles : StyleSheet() {
 
     val notificationTitle by style {
         fontWeight("bold")
+        property("word-break", "break-word")
     }
 
     val notificationMessage by style {
         opacity(.5)
+        property("word-break", "break-word")
     }
 
     val groupAppsBar by style {

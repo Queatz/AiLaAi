@@ -1,5 +1,7 @@
 package com.queatz.db
 
+import com.queatz.plugins.defaultInventoriesNearbyMaxDistanceInMeters
+
 fun Db.myItems(person: String, personInventory: String) = query(
     ItemExtended::class,
     """
@@ -65,6 +67,45 @@ fun Db.inventoryOfPerson(person: String) = one(
         "person" to person
     )
 )!!
+
+fun Db.inventoryOfGeo(geo: List<Double>, nearbyMaxDistance: Double = 1.0) = one(
+    Inventory::class,
+    """
+        for x in @@collection
+            filter x.geo != null
+            let d = distance(x.${f(Inventory::geo)}[0], x.${f(Inventory::geo)}[1], @geo[0], @geo[1])
+            filter d < $nearbyMaxDistance
+            sort d
+            limit 1
+            return x
+    """.trimIndent(),
+    mapOf(
+        "geo" to geo
+    )
+)
+
+fun Db.inventoriesNearGeo(
+    geo: List<Double>,
+    offset: Int = 0,
+    limit: Int = 20,
+    nearbyMaxDistance: Double = defaultInventoriesNearbyMaxDistanceInMeters
+) = list(
+    Inventory::class,
+    """
+        for x in @@collection
+            filter x.geo != null
+            let d = distance(x.${f(Inventory::geo)}[0], x.${f(Inventory::geo)}[1], @geo[0], @geo[1])
+            filter d < $nearbyMaxDistance
+            sort d
+            limit @offset, @limit
+            return x
+    """.trimIndent(),
+    mapOf(
+        "geo" to geo,
+        "offset" to offset,
+        "limit" to limit,
+    )
+)
 
 fun Db.inventoryItemExtended(inventoryItemVar: String = "x") = """
     {

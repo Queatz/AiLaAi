@@ -31,11 +31,15 @@ fun Route.itemRoutes() {
                     val inventory = db.inventoryOfPerson(me.id!!)
 
                     if (inventoryItem.inventory != inventory.id) {
-                        return@respond HttpStatusCode.BadRequest.description("Item not in inventory")
+                        return@respond HttpStatusCode.BadRequest.description("Item is not in inventory")
                     }
 
                     if (drop.quantity <= 0.0 || drop.quantity > inventoryItem.quantity!!) {
-                        return@respond HttpStatusCode.BadRequest.description("Quantity not in inventory")
+                        return@respond HttpStatusCode.BadRequest.description("Quantity is not in inventory")
+                    }
+
+                    val dropInventory = drop.geo?.let { geo ->
+                        db.inventoryOfGeo(geo) ?: db.insert(Inventory(geo = geo))
                     }
 
                     if (drop.quantity == inventoryItem.quantity) {
@@ -43,7 +47,7 @@ fun Route.itemRoutes() {
                         // todo: add to history
                         db.update(
                             inventoryItem.also {
-                                it.inventory = null
+                                it.inventory = dropInventory?.id
                                 it.expiresAt = Clock.System.now()
                             }
                         )
@@ -57,7 +61,7 @@ fun Route.itemRoutes() {
                         )
                         db.insert(
                             InventoryItem(
-                                inventory = null,
+                                inventory = dropInventory?.id,
                                 item = inventoryItem.item!!,
                                 quantity = drop.quantity,
                                 expiresAt = Clock.System.now()
@@ -119,6 +123,33 @@ fun Route.itemRoutes() {
                         )
                     )
                 }
+            }
+        }
+
+        get("/inventory/explore") {
+            respond {
+                val geo = parameter("geo").split(",").map { it.toDouble() }
+
+                if (geo.size != 2) {
+                    return@respond HttpStatusCode.BadRequest.description("'geo' must be an array of size 2")
+                }
+
+                db.inventoriesNearGeo(geo)
+            }
+        }
+
+        get("/inventory/{id}") {
+            respond {
+                db.inventoryItems(parameter("id"))
+            }
+        }
+
+        post("/inventory/{id}/take") {
+            respond {
+                val inventory = db.document(Inventory::class, parameter("id"))
+                val take = call.receive<TakeInventoryBody>()
+                // Take items from inventory with geo
+
             }
         }
     }

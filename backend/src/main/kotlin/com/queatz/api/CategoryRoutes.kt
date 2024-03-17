@@ -4,6 +4,7 @@ import com.queatz.db.cardsOfPerson
 import com.queatz.db.explore
 import com.queatz.db.groupsPlain
 import com.queatz.notBlank
+import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.defaultNearbyMaxDistanceInMeters
 import com.queatz.plugins.me
@@ -17,7 +18,7 @@ fun Route.categoryRoutes() {
     authenticate {
         get("/categories") {
             respond {
-                val geo = call.parameters["geo"]!!.split(",").map { it.toDouble() }
+                val geo = parameter("geo").split(",").map { it.toDouble() }
 
                 if (geo.size != 2) {
                     return@respond HttpStatusCode.BadRequest.description("'geo' must be an array of size 2")

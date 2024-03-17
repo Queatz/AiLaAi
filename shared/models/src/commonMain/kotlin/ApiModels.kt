@@ -166,6 +166,18 @@ data class MintItemBody(
 
 @Serializable
 data class DropItemBody(
+    val quantity: Double,
+    val geo: List<Double>? = null,
+)
+
+@Serializable
+data class TakeInventoryBody(
+    val items: List<TakeInventoryItemBody>
+)
+
+@Serializable
+data class TakeInventoryItemBody(
+    val item: String,
     val quantity: Double
 )
 

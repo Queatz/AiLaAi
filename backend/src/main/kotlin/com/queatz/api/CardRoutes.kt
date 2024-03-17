@@ -44,7 +44,7 @@ fun Route.cardRoutes() {
 
         get("/cards") {
             respond {
-                val geo = call.parameters["geo"]!!.split(",").map { it.toDouble() }
+                val geo = parameter("geo").split(",").map { it.toDouble() }
 
                 if (geo.size != 2) {
                     return@respond HttpStatusCode.BadRequest.description("'geo' must be an array of size 2")
