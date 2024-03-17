@@ -18,7 +18,6 @@ import com.queatz.db.Reminder
 import focusable
 import kotlinx.coroutines.launch
 import lib.RawTimeZone
-import lib.getTimezoneOffset
 import lib.rawTimeZones
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div

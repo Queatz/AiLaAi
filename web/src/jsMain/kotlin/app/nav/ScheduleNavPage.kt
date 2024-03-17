@@ -17,7 +17,7 @@ import components.Loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import lib.getTimezoneOffset
+import lib.rawTimeZones
 import lib.systemTimezone
 import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.attributes.autoFocus
@@ -122,7 +122,7 @@ fun ScheduleNavPage(
                     start = schedule.start,
                     end = schedule.end,
                     timezone = timezone,
-                    utcOffset = getTimezoneOffset(timezone) / (60.0 * 60.0 * 1000.0),
+                    utcOffset = rawTimeZones.toList().firstOrNull { it.name == timezone }?.rawOffsetInMinutes?.toDouble()?.div(60.0) ?: 0.0,
                     schedule = schedule.reminderSchedule
                 )
             ) {
