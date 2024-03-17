@@ -1,5 +1,6 @@
 package com.queatz.ailaai.item
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -18,10 +19,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
+import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.trading
@@ -29,6 +32,7 @@ import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.trade.TradesDialog
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
@@ -58,6 +62,16 @@ fun InventoryScreen() {
     var shownInventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
     val activeTrades by trading.activeTrades.collectAsState()
+    var geo by rememberStateOf<LatLng?>(null)
+    val locationSelector = locationSelector(
+        geo,
+        { geo = it },
+        context as Activity
+    )
+
+    LaunchedEffect(Unit) {
+        locationSelector.start()
+    }
 
     LaunchedEffect(inventory, search) {
         shownInventory = if (search.isBlank()) inventory else inventory.filter {
@@ -82,9 +96,9 @@ fun InventoryScreen() {
         }
     }
 
-    fun drop(inventoryItem: InventoryItem, quantity: Double) {
+    fun drop(inventoryItem: InventoryItem, quantity: Double, geo: LatLng? = null) {
         scope.launch {
-            api.dropItem(inventoryItem.id!!, DropItemBody(quantity))
+            api.dropItem(inventoryItem.id!!, DropItemBody(quantity, geo?.toList()))
             reload()
             context.toast(R.string.items_dropped)
         }
@@ -181,37 +195,21 @@ fun InventoryScreen() {
     }
 
     if (showDropInventoryItem != null) {
-        AlertDialog(
+        SetLocationDialog(
             {
                 showDropInventoryItem = null
             },
-            title = {
-                Text(stringResource(R.string.drop_x, showDropInventoryItem!!.second.format()))
-            },
-            confirmButton = {
-                Button(
-                    {
-                        showDropInventoryItem?.let { drop ->
-                            drop.second.let {
-                                drop(drop.first.inventoryItem!!, it)
-                                showDropInventoryItem = null
-                            }
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.drop))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    {
-                        showDropInventoryItem = null
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
+            confirmButton = stringResource(R.string.drop),
+            initialLocation = geo ?: LatLng(0.0, 0.0),
+            initialZoom = 18f
+        ) { geo ->
+            showDropInventoryItem?.let { drop ->
+                drop.second.let {
+                    drop(drop.first.inventoryItem!!, it, geo)
+                    showDropInventoryItem = null
                 }
             }
-        )
+        }
     }
 
     if (showStartTradeDialog) {

@@ -61,11 +61,16 @@ fun MapWithMarker(zoomLevel: Float, position: LatLng, modifier: Modifier = Modif
         val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
 
         mapFragment.getMapObservable().subscribe {
-            map = it
-            map?.clear()
+            map = it.apply {
+                clear()
+                getUiSettings().apply {
+                    isMapToolbarEnabled = true
+                    isCompassEnabled = true
+                    isMyLocationButtonEnabled = true
+                }
 
-            map?.getUiSettings()?.isMapToolbarEnabled = true
-            map?.getUiSettings()?.isMyLocationButtonEnabled = true
+                isMyLocationEnabled = true
+            }
 
             marker = map!!.addMarker(
                 MarkerOptions
