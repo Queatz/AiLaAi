@@ -30,6 +30,7 @@ fun TradeItemDialog(
     isMine: Boolean,
     isAdd: Boolean = false,
     enabled: Boolean = true,
+    confirmButton: String = stringResource(R.string.add),
     onQuantity: (quantity: Double) -> Unit
 ) {
     var quantity by rememberStateOf(
@@ -100,7 +101,7 @@ fun TradeItemDialog(
                         },
                         enabled = enabled && quantity > 0.0
                     ) {
-                        Text(stringResource(R.string.add))
+                        Text(confirmButton)
                     }
                 } else if (isMine) {
                     Button(

@@ -165,7 +165,7 @@ fun InventoryScreen() {
     }
 
     if (showActiveTradesDialog) {
-        activeTrades?.let {
+        activeTrades.let {
             TradesDialog(
                 {
                     showActiveTradesDialog = false
@@ -282,7 +282,7 @@ fun InventoryScreen() {
             if (isLoading) {
                 Loading()
             } else {
-                AnimatedVisibility(activeTrades?.isNotEmpty() == true) {
+                AnimatedVisibility(activeTrades.isNotEmpty()) {
                     OutlinedCard(
                         onClick = {
                             showActiveTradesDialog = true
@@ -294,7 +294,7 @@ fun InventoryScreen() {
                             .fillMaxWidth()
                     ) {
                         Text(
-                            pluralStringResource(R.plurals.x_active_trades, activeTrades!!.size, activeTrades!!.size),
+                            pluralStringResource(R.plurals.x_active_trades, activeTrades.size, activeTrades.size),
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .padding(1.pad)
@@ -306,24 +306,8 @@ fun InventoryScreen() {
                 if (shownInventory.isEmpty()) {
                     EmptyText(stringResource(R.string.no_items))
                 } else {
-                    LazyVerticalGrid(
-                        state = state,
-                        columns = GridCells.Adaptive(96.dp),
-                        horizontalArrangement = Arrangement.spacedBy(1.pad),
-                        verticalArrangement = Arrangement.spacedBy(1.pad),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 1.pad,
-                            end = 1.pad,
-                            top = 1.pad,
-                            bottom = 1.pad + 80.dp
-                        )
-                    ) {
-                        items(shownInventory, key = { it.inventoryItem!!.id!! }) {
-                            InventoryItemLayout(it) {
-                                showInventoryItem = it
-                            }
-                        }
+                    InventoryItems(state = state, items = shownInventory, modifier = Modifier.fillMaxSize()) {
+                        showInventoryItem = it
                     }
                 }
             }

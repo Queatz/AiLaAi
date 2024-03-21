@@ -177,7 +177,7 @@ data class TakeInventoryBody(
 
 @Serializable
 data class TakeInventoryItem(
-    val item: String,
+    val inventoryItem: String,
     val quantity: Double
 )
 

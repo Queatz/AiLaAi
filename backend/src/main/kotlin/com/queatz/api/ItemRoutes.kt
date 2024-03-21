@@ -48,7 +48,6 @@ fun Route.itemRoutes() {
                         db.update(
                             inventoryItem.also {
                                 it.inventory = dropInventory?.id
-                                it.expiresAt = Clock.System.now()
                             }
                         )
                     } else {
@@ -64,7 +63,7 @@ fun Route.itemRoutes() {
                                 inventory = dropInventory?.id,
                                 item = inventoryItem.item!!,
                                 quantity = drop.quantity,
-                                expiresAt = Clock.System.now()
+                                expiresAt = inventoryItem.expiresAt
                             )
                         )
                     }
@@ -147,9 +146,55 @@ fun Route.itemRoutes() {
         post("/inventory/{id}/take") {
             respond {
                 val inventory = db.document(Inventory::class, parameter("id"))
-                val take = call.receive<TakeInventoryBody>()
-                // Take items from inventory with geo
+                    ?: return@respond HttpStatusCode.NotFound
 
+                if (inventory.geo == null) {
+                    return@respond HttpStatusCode.BadRequest.description("Inventory is not dropped")
+                }
+
+                val droppedItems = db.inventoryItems(inventory.id!!)
+                val take = call.receive<TakeInventoryBody>()
+
+                if (!take.items.all { takeItem ->
+                        droppedItems.any { it.inventoryItem!!.id!! == takeItem.inventoryItem && takeItem.quantity <= it.inventoryItem!!.quantity!! }
+                    }) {
+                    return@respond HttpStatusCode.BadRequest.description("Item(s) not in inventory")
+                }
+
+                val myInventory = db.inventoryOfPerson(me.id!!).id!!
+
+                take.items.forEach { takeItem ->
+                    val droppedInventoryItem = droppedItems.first { it.inventoryItem!!.id!! == takeItem.inventoryItem }.inventoryItem!!
+
+                    if (takeItem.quantity == droppedInventoryItem.quantity!!) {
+                        db.update(
+                            droppedInventoryItem.also {
+                                it.inventory = myInventory
+                            }
+                        )
+                    } else {
+                        db.update(
+                            droppedInventoryItem.also {
+                                it.quantity = it.quantity!! - takeItem.quantity
+                            }
+                        )
+                        db.insert(
+                            InventoryItem(
+                                inventory = myInventory,
+                                item = droppedInventoryItem.item!!,
+                                quantity = takeItem.quantity,
+                                expiresAt = droppedInventoryItem.expiresAt
+                            )
+                        )
+                    }
+                }
+
+                // Remove dropped inventory if there are no more items
+                if (db.inventoryItems(inventory.id!!).isEmpty()) {
+                    db.delete(inventory)
+                }
+
+                HttpStatusCode.OK
             }
         }
     }

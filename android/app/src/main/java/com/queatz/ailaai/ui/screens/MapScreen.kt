@@ -36,7 +36,6 @@ import androidx.core.graphics.div
 import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
-import androidx.navigation.NavController
 import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import coil.compose.AsyncImage
@@ -53,6 +52,7 @@ import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
+import com.queatz.db.Inventory
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -64,10 +64,12 @@ import kotlin.random.Random
 
 @Composable
 fun MapScreen(
-    navController: NavController,
     cards: List<Card>,
+    inventories: List<Inventory>,
     bottomPadding: Int,
-    onGeo: (LatLng) -> Unit,
+    onCard: (String) -> Unit,
+    onInventory: (String) -> Unit,
+    onGeo: (LatLng) -> Unit
 ) {
     val context = LocalContext.current
     var position by rememberSaveable(stateSaver = latLngSaver()) {
@@ -158,12 +160,8 @@ fun MapScreen(
         }
     }
 
-    fun repad() {
-        map?.setPadding(0, 0, 0, bottomPadding)
-    }
-
     LaunchedEffect(map, bottomPadding) {
-        repad()
+        map?.setPadding(0, 0, 0, bottomPadding)
     }
 
     Box(
@@ -244,11 +242,49 @@ fun MapScreen(
                 }
             }
 
+            val s = (map.cameraPosition.zoom / 18f)
+                .pow(10.0f)
+                .coerceIn(.75f, 2.0f)
+
+            inventories.forEach { inventory ->
+                key(inventory.id) {
+                    var size by remember { mutableStateOf(IntSize(0, 0)) }
+                    val pos = map.getProjection().toScreenLocation(inventory.geo!!.toLatLng()!!)
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .wrapContentSize(unbounded = true)
+                            .onPlaced {
+                                size = it.size
+                            }
+                            .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
+                            .zIndex(1f + pos.y)
+                            .graphicsLayer(
+                                scaleX = s,
+                                scaleY = s,
+                                transformOrigin = TransformOrigin(.5f, 1f)
+                            )
+                    ) {
+                        AsyncImage(
+                            model = "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.pngall.com%2Fwp-content%2Fuploads%2F2016%2F07%2FTreasure-PNG.png&f=1&nofb=1&ipt=f2c697ceed26e03b6b1042a54c28d97df70960ea94f6713f1231c08c49d7daee&ipo=images",
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    null
+                                ) {
+                                    onInventory(inventory.id!!)
+                                }
+                        )
+                    }
+                }
+            }
+
             cardPositions.forEach {
                 key(it.card.id) {
                     val (card, pos) = it
-                    val s = (map.cameraPosition.zoom / 18f).toDouble().pow(10.0).coerceAtLeast(.75).coerceAtMost(2.0)
-                        .toFloat()
                     var size by remember { mutableStateOf(IntSize(0, 0)) }
                     var placed by remember(card.name) { mutableStateOf(false) }
                     val shown = cards.any { c -> c.id == card.id }
@@ -302,7 +338,7 @@ fun MapScreen(
                                     null
                                 ) {
                                     tryNav(pos) {
-                                        navController.navigate("card/${card.id!!}")
+                                        onCard(card.id!!)
                                     }
                                 }
                                 .widthIn(max = 120.dp)
@@ -322,7 +358,7 @@ fun MapScreen(
                                         null
                                     ) {
                                         tryNav(pos) {
-                                            navController.navigate("card/${card.id!!}")
+                                            onCard(card.id!!)
                                         }
                                     }
                                     .widthIn(max = 120.dp)
@@ -352,7 +388,7 @@ fun MapScreen(
                                 .clip(CircleShape)
                                 .clickable {
                                     tryNav(pos) {
-                                        navController.navigate("card/${card.id!!}")
+                                        onCard(card.id!!)
                                     }
                                 }
                         )
@@ -372,7 +408,7 @@ fun MapScreen(
             },
             create = true
         ) {
-            navController.navigate("card/${it.id!!}")
+            onCard(it.id!!)
         }
     }
 

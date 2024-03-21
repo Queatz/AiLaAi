@@ -12,11 +12,17 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
@@ -26,16 +32,41 @@ import app.ailaai.api.savedCards
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.SwipeResult
+import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.rememberSavableStateOf
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.sortedDistinct
+import com.queatz.ailaai.extensions.swipe
+import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.item.InventoryDialog
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.trade.TradeItemDialog
+import com.queatz.ailaai.ui.components.AppHeader
+import com.queatz.ailaai.ui.components.CardList
+import com.queatz.ailaai.ui.components.LocationScaffold
+import com.queatz.ailaai.ui.components.MainTab
+import com.queatz.ailaai.ui.components.MainTabs
+import com.queatz.ailaai.ui.components.PageInput
+import com.queatz.ailaai.ui.components.ScanQrCodeButton
+import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.db.Card
-import io.ktor.utils.io.*
+import com.queatz.db.Inventory
+import com.queatz.db.InventoryItemExtended
+import com.queatz.db.TakeInventoryItem
+import inventoriesNear
+import inventory
+import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.launch
+import takeInventory
 
 var exploreInitialCategory: String? = null
 
@@ -92,6 +123,10 @@ fun ExploreScreen() {
             }
         )
     }
+    var inventories by rememberStateOf(emptyList<Inventory>())
+    var showInventory by rememberStateOf<String?>(null)
+    var showInventoryDialog by rememberStateOf<List<InventoryItemExtended>?>(null)
+    var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -106,6 +141,36 @@ fun ExploreScreen() {
     LaunchedEffect(showAsMap) {
         if (showAsMap) {
             tab = MainTab.Local
+        }
+    }
+
+    LaunchedEffect(showAsMap, geo) {
+        if (showAsMap && geo != null) {
+            api.inventoriesNear(geo!!.toGeo()) {
+                inventories = it
+            }
+        } else {
+            inventories = emptyList()
+        }
+    }
+
+    LaunchedEffect(showInventory) {
+        showInventory?.let {
+            api.inventory(it) {
+                showInventoryDialog = it
+            }
+        }
+    }
+
+    showInventoryDialog?.let { items ->
+        InventoryDialog(
+            {
+                showInventory = null
+                showInventoryDialog = null
+            },
+            items = items
+        ) {
+            showInventoryItemDialog = it
         }
     }
 
@@ -220,6 +285,45 @@ fun ExploreScreen() {
         )
     }
 
+
+    showInventoryItemDialog?.let { item ->
+        val quantity = item.inventoryItem?.quantity ?: 0.0
+        TradeItemDialog(
+            {
+                showInventoryItemDialog = null
+            },
+            item,
+            initialQuantity = quantity,
+            maxQuantity = quantity,
+            isAdd = true,
+            isMine = true,
+            enabled = true,
+            confirmButton = stringResource(R.string.pick_up),
+            onQuantity = {
+                scope.launch {
+                    api.takeInventory(
+                        item.inventoryItem!!.inventory!!,
+                        listOf(TakeInventoryItem(item.inventoryItem!!.id!!, it))
+                    ) {
+                        showInventory?.let {
+                            api.inventory(it) {
+                                if (it.isEmpty()) {
+                                    showInventory = null
+                                    showInventoryDialog = null
+                                } else {
+                                    showInventoryDialog = it
+                                }
+                            }
+                        }
+                        showInventoryItemDialog = null
+                        loadMore(reload = true)
+                    }
+                }
+            }
+        )
+    }
+
+
     ResumeEffect {
         loadMore()
     }
@@ -271,7 +375,17 @@ fun ExploreScreen() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    MapScreen(nav, cardsOfCategory, viewportHeight) {
+                    MapScreen(
+                        cards = cardsOfCategory,
+                        inventories = inventories,
+                        bottomPadding = viewportHeight,
+                        onCard = {
+                            nav.navigate("card/$it")
+                        },
+                        onInventory = {
+                            showInventory = it
+                        }
+                    ) {
                         mapGeo = it
                     }
                     PageInput(
