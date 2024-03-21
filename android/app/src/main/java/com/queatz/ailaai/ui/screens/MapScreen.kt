@@ -1,9 +1,11 @@
 package com.queatz.ailaai.ui.screens
 
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +26,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -248,6 +252,7 @@ fun MapScreen(
 
             inventories.forEach { inventory ->
                 key(inventory.id) {
+                    var placed by remember(inventory) { mutableStateOf(false) }
                     var size by remember { mutableStateOf(IntSize(0, 0)) }
                     val pos = map.getProjection().toScreenLocation(inventory.geo!!.toLatLng()!!)
 
@@ -256,6 +261,7 @@ fun MapScreen(
                         modifier = Modifier
                             .wrapContentSize(unbounded = true)
                             .onPlaced {
+                                placed = true
                                 size = it.size
                             }
                             .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
@@ -263,14 +269,15 @@ fun MapScreen(
                             .graphicsLayer(
                                 scaleX = s,
                                 scaleY = s,
-                                transformOrigin = TransformOrigin(.5f, 1f)
+
+                                transformOrigin = TransformOrigin(.5f, .75f)
                             )
                     ) {
-                        AsyncImage(
-                            model = "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.pngall.com%2Fwp-content%2Fuploads%2F2016%2F07%2FTreasure-PNG.png&f=1&nofb=1&ipt=f2c697ceed26e03b6b1042a54c28d97df70960ea94f6713f1231c08c49d7daee&ipo=images",
+                        Image(
+                            painterResource(R.drawable.chest),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(32.dp)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     null
@@ -425,7 +432,7 @@ fun MapScreen(
             menuItem(stringResource(R.string.go_here)) {
                 showMapClickMenu = null
                 scope.launch {
-                    recenter.emit(clickGeo to null)
+                    recenter.emit(clickGeo to map?.cameraPosition?.zoom?.plus(1f)?.coerceAtLeast(14f))
                 }
             }
         }

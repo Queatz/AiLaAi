@@ -207,6 +207,9 @@ fun InventoryScreen() {
                 drop.second.let {
                     drop(drop.first.inventoryItem!!, it, geo)
                     showDropInventoryItem = null
+                    scope.launch {
+                        reload()
+                    }
                 }
             }
         }

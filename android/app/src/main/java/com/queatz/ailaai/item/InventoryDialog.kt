@@ -22,6 +22,7 @@ import com.queatz.db.InventoryItemExtended
 fun InventoryDialog(
     onDismissRequest: () -> Unit,
     items: List<InventoryItemExtended>,
+    title: String = stringResource(R.string.treasure_chest),
     onInventoryItem: (InventoryItemExtended) -> Unit
 ) {
     DialogBase(onDismissRequest) {
@@ -35,7 +36,7 @@ fun InventoryDialog(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        stringResource(R.string.inventory),
+                        title,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(bottom = 1.pad)

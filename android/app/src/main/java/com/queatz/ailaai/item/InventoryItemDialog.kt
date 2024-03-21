@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,6 +46,10 @@ fun InventoryItemDialog(
         FocusRequester()
     }
     val enabled = quantity.toDoubleOrNull()?.let { it > 0.0 } == true
+
+    LaunchedEffect(inventoryItem) {
+        quantity = quantity.upTo(inventoryItem.inventoryItem!!.quantity!!)
+    }
 
     DialogBase(
         onDismissRequest
