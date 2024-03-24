@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.group
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
@@ -240,7 +241,10 @@ fun StoryContents(
                         ) { index, it ->
                             DisableSelection {
                                 AsyncImage(
-                                    model = api.url(it),
+                                    ImageRequest.Builder(LocalContext.current)
+                                        .data(api.url(it))
+                                        .crossfade(true)
+                                        .build(),
                                     contentDescription = "",
                                     contentScale = ContentScale.Crop,
                                     alignment = Alignment.Center,
