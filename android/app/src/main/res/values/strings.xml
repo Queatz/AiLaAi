@@ -621,6 +621,11 @@
     <string name="ongoing_calls">Ongoing calls</string>
     <string name="pick_up">Pick up</string>
     <string name="treasure_chest">Treasure chest</string>
+    <string name="discard_items">Discard items</string>
+    <plurals name="drop_x_items">
+        <item quantity="one">Drop %1$s item</item>
+        <item quantity="other">Drop %1$s items</item>
+    </plurals>
     <plurals name="x_active_trades">
         <item quantity="one">%1$s active trade</item>
         <item quantity="other">%1$s active trades</item>

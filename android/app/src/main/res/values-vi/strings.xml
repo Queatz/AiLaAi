@@ -633,6 +633,9 @@
     <plurals name="x_years">
         <item quantity="other">%1$s năm</item>
     </plurals>
+    <plurals name="drop_x_items">
+        <item quantity="other">Thả %1$s món đồ</item>
+    </plurals>
     <string name="subscribe">Đăng ký</string>
     <string name="unsubscribe">Hủy đăng ký</string>
     <string name="pick_up">Vớt</string>

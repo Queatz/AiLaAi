@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.graphics.Point
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -10,23 +9,42 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -40,15 +58,22 @@ import androidx.core.graphics.div
 import androidx.core.graphics.plus
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnDetach
-import at.bluesource.choicesdk.maps.common.*
+import at.bluesource.choicesdk.maps.common.CameraPosition
+import at.bluesource.choicesdk.maps.common.CameraUpdateFactory
+import at.bluesource.choicesdk.maps.common.LatLng
 import at.bluesource.choicesdk.maps.common.Map
+import at.bluesource.choicesdk.maps.common.MapFragment
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.extensions.rememberSavableStateOf
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toLatLng
+import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.helpers.geoKey
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.Menu
@@ -269,7 +294,7 @@ fun MapScreen(
                             .graphicsLayer(
                                 scaleX = s,
                                 scaleY = s,
-
+                                alpha = if (placed) 1f else 0f,
                                 transformOrigin = TransformOrigin(.5f, .75f)
                             )
                     ) {

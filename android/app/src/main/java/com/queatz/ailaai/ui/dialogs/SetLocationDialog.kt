@@ -10,11 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import at.bluesource.choicesdk.maps.common.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.MapWithMarker
+import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.pad
 
 
@@ -25,6 +27,8 @@ fun SetLocationDialog(
     confirmButton: String = stringResource(R.string.choose_location),
     initialLocation: LatLng = LatLng(0.0, 0.0),
     initialZoom: Float = 5f,
+    title: String? = null,
+    actions: @Composable () -> Unit = {},
     onLocation: (LatLng) -> Unit,
 ) {
     var position by remember { mutableStateOf(initialLocation) }
@@ -34,6 +38,26 @@ fun SetLocationDialog(
             modifier = Modifier
                 .padding(3.pad)
         ) {
+            title?.let { title ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .padding(bottom = 1.pad)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleLarge,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 3,
+                        modifier = Modifier
+                            .weight(1f)
+                    )
+
+                    actions()
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()

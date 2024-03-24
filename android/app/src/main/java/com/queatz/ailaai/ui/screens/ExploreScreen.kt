@@ -87,7 +87,6 @@ fun ExploreScreen() {
     var isError by rememberStateOf(false)
     var showAsMap by rememberSavableStateOf(true)
     var offset by remember { mutableIntStateOf(0) }
-    val limit = 20
     var hasMore by rememberStateOf(true)
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
@@ -229,7 +228,6 @@ fun ExploreScreen() {
                 api.cards(
                     geo.toGeo(),
                     offset = offset,
-                    limit = limit,
                     paid = filterPaid,
                     search = value.notBlank,
                     public = tab == MainTab.Local,
@@ -248,9 +246,8 @@ fun ExploreScreen() {
 
             MainTab.Saved -> {
                 api.savedCards(
-                    offset,
-                    limit,
-                    value.notBlank,
+                    offset = offset,
+                    search = value.notBlank,
                     onError = { ex ->
                         if (ex is CancellationException || ex is InterruptedException) {
                             // Ignore, probably geo or search value changed, keep isLoading = true
