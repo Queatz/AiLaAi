@@ -129,8 +129,8 @@ fun ExploreScreen() {
     var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
 
     suspend fun reloadInventories() {
-        if (showAsMap && geo != null) {
-            api.inventoriesNear(geo!!.toGeo()) {
+        if (showAsMap && (mapGeo ?: geo) != null) {
+            api.inventoriesNear((mapGeo ?: geo)!!.toGeo()) {
                 inventories = it
             }
         } else {
@@ -155,7 +155,7 @@ fun ExploreScreen() {
         }
     }
 
-    LaunchedEffect(showAsMap, geo) {
+    LaunchedEffect(showAsMap, mapGeo, geo) {
         reloadInventories()
     }
 
