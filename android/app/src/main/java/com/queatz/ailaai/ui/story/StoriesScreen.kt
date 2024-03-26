@@ -50,7 +50,12 @@ fun StoriesScreen() {
     )
     var tab by rememberSavableStateOf(MainTab.Friends)
     var stories by remember { mutableStateOf(cache[tab] ?: emptyList()) }
-    var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
+    val storyContents = remember(stories) {
+        stories.flatMapIndexed { index, story ->
+            (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
+                    story.asContents()
+        }
+    }
     var isLoading by rememberStateOf(stories.isEmpty())
     val nav = nav
     val tabs = listOf(MainTab.Friends, MainTab.Local)
@@ -85,10 +90,6 @@ fun StoriesScreen() {
                 }
             ) {
                 stories = it
-                storyContents = it.flatMapIndexed { index, story ->
-                    (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
-                            story.asContents()
-                }
                 isLoading = false
             }
         }
@@ -192,7 +193,6 @@ fun StoriesScreen() {
                         },
                     )
                 }
-//                }
                 if (locationSelector.isManual) {
                     ElevatedButton(
                         elevation = ButtonDefaults.elevatedButtonElevation(2.pad),
