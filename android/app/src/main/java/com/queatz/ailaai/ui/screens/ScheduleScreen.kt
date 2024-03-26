@@ -243,6 +243,7 @@ fun ScheduleScreen() {
                 }
                 ScanQrCodeButton()
             }
+            NotificationsDisabledBanner()
             if (isLoading) {
                 Loading()
             } else {
