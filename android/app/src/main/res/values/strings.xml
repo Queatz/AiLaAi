@@ -622,6 +622,7 @@
     <string name="pick_up">Pick up</string>
     <string name="treasure_chest">Treasure chest</string>
     <string name="discard_items">Discard items</string>
+    <string name="search_groups">Search groups</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

@@ -346,7 +346,7 @@ fun EditCardLocationDialog(
                                 OutlinedTextField(
                                     searchGroupsValue,
                                     onValueChange = { searchGroupsValue = it },
-                                    label = { Text(stringResource(R.string.search_people_and_groups)) },
+                                    label = { Text(stringResource(R.string.search_groups)) },
                                     shape = MaterialTheme.shapes.large,
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
