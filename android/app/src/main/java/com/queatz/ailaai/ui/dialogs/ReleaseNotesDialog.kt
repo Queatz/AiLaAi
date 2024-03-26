@@ -22,8 +22,10 @@ import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.VersionInfo
+import kotlinx.coroutines.delay
 
 @Composable
 fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
@@ -79,7 +81,11 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                Text(releaseNotes)
+                if (releaseNotes.isEmpty()) {
+                    Loading()
+                } else {
+                    Text(releaseNotes)
+                }
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
