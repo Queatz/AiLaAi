@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.screens
 import android.graphics.Point
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -275,6 +276,8 @@ fun MapScreen(
                 .pow(10.0f)
                 .coerceIn(.75f, 2.0f)
 
+            val inventoriesScale by animateFloatAsState(if ((zoom ?: 0f) < 16f) .5f else 1f)
+
             inventories.forEach { inventory ->
                 key(inventory.id) {
                     var placed by remember(inventory) { mutableStateOf(false) }
@@ -292,8 +295,8 @@ fun MapScreen(
                             .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
                             .zIndex(1f + pos.y)
                             .graphicsLayer(
-                                scaleX = s,
-                                scaleY = s,
+                                scaleX = s * inventoriesScale,
+                                scaleY = s * inventoriesScale,
                                 alpha = if (placed) 1f else 0f,
                                 transformOrigin = TransformOrigin(.5f, .75f)
                             )
