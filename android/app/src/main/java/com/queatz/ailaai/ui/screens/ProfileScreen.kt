@@ -801,7 +801,7 @@ fun ProfileScreen(personId: String) {
             }
 
             if (cards.isNotEmpty()) {
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         stringResource(
                             R.string.pages_of_x,
@@ -855,9 +855,7 @@ fun ProfileScreen(personId: String) {
             {
                 showTradeDialog = null
             },
-            it.id!!,
-            onTradeCancelled = {},
-            onTradeCompleted = {},
+            it.id!!
         )
     }
 }

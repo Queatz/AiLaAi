@@ -89,8 +89,8 @@ data class TradeMemberState(
 fun TradeDialog(
     onDismissRequest: () -> Unit,
     tradeId: String,
-    onTradeCancelled: () -> Unit,
-    onTradeCompleted: () -> Unit
+    onTradeCancelled: () -> Unit = {},
+    onTradeCompleted: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     var trade by rememberStateOf<TradeExtended?>(null)
