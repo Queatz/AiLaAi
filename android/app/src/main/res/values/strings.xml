@@ -548,6 +548,7 @@
     <string name="background">Background</string>
     <string name="open_link">Open link</string>
     <string name="search_cards_of_x">Search %1$s\'s pages</string>
+    <string name="pages_of_x">%1$s\'s pages</string>
     <string name="call">Call</string>
     <string name="photo_updated">Photo updated</string>
     <string name="your_reminders">Your reminders</string>

@@ -519,6 +519,7 @@
     <string name="background">Nền</string>
     <string name="open_link">Mở liên kết</string>
     <string name="search_cards_of_x">Tìm kiếm trang của %1$s</string>
+    <string name="pages_of_x">Trang của %1$s</string>
     <string name="call">Gọi</string>
     <string name="photo_updated">Ảnh đã cập nhật</string>
     <string name="your_reminders">Lời nhắc của bạn</string>

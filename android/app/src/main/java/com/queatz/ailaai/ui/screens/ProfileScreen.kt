@@ -1,19 +1,49 @@
 package com.queatz.ailaai.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,29 +54,74 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.*
+import app.ailaai.api.activeCardsOfPerson
+import app.ailaai.api.createGroup
+import app.ailaai.api.createMember
+import app.ailaai.api.profile
+import app.ailaai.api.profileCards
+import app.ailaai.api.subscribe
+import app.ailaai.api.unsubscribe
+import app.ailaai.api.updateMe
+import app.ailaai.api.updateProfile
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
 import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.isAtTop
+import com.queatz.ailaai.extensions.isGroupLike
+import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.profileUrl
+import com.queatz.ailaai.extensions.rememberAutoplayIndex
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.shareAsUrl
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.card.CardContent
-import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.components.CardLayout
+import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.components.EmptyText
+import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.components.Video
+import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
+import com.queatz.ailaai.ui.dialogs.EditCardDialog
+import com.queatz.ailaai.ui.dialogs.EditProfileAboutDialog
+import com.queatz.ailaai.ui.dialogs.EditProfileNameDialog
+import com.queatz.ailaai.ui.dialogs.Media
+import com.queatz.ailaai.ui.dialogs.PhotoDialog
+import com.queatz.ailaai.ui.dialogs.ProcessingVideoDialog
+import com.queatz.ailaai.ui.dialogs.ProcessingVideoStage
+import com.queatz.ailaai.ui.dialogs.QrCodeDialog
+import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.profile.ProfileGroups
 import com.queatz.ailaai.ui.profile.Stats
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.Member
+import com.queatz.db.Person
+import com.queatz.db.Profile
+import com.queatz.db.ProfileStats
+import com.queatz.db.Trade
 import createTrade
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(personId: String) {
@@ -722,6 +797,21 @@ fun ProfileScreen(personId: String) {
             if (search.isNotBlank() && cards.isEmpty()) {
                 item {
                     EmptyText(stringResource(R.string.no_cards_to_show))
+                }
+            }
+
+            if (cards.isNotEmpty()) {
+                item {
+                    Text(
+                        stringResource(
+                            R.string.pages_of_x,
+                            person?.name ?: stringResource(R.string.someone)
+                        ),
+                        modifier = Modifier.padding(
+                            horizontal = 2.pad,
+                            vertical = 1.pad,
+                        )
+                    )
                 }
             }
 
