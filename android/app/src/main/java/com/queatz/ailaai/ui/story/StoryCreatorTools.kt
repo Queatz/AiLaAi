@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.story
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -160,6 +159,7 @@ fun StoryCreatorTools(
         Menu({
             showWidgetsMenu = false
         }) {
+            // todo add search here
             menuItem(stringResource(R.string.impact_effort_table)) {
                 scope.launch {
                     api.createWidget(
@@ -262,7 +262,7 @@ fun StoryCreatorTools(
                     showCardSelectorDialog = true
                 }
             ) {
-                Icon(Icons.Outlined.Style, null)
+                Icon(Icons.Outlined.Map, null)
             }
             IconButton(
                 onClick = {

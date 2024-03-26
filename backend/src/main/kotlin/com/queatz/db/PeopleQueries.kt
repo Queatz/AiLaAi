@@ -5,6 +5,7 @@ fun Db.openGroupsOfPerson(person: String, offset: Int = 0, limit: Int = 20) = qu
     """
         for group, x in outbound @person graph `${Member::class.graph()}`
             filter x.${f(Member::gone)} != true
+                and x.${f(Member::hide)} != true
                 and group.${f(Group::open)} == true
             sort x.${f(Member::seen)} desc
             limit @offset, @limit

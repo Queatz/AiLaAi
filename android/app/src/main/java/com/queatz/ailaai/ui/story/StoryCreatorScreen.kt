@@ -552,7 +552,9 @@ fun StoryCreatorScreen(
                                     }
                                 ) {
                                     part.edit {
-                                        groups += it.mapNotNull { it.id }
+                                        groups += it
+                                            .mapNotNull { it.id }
+                                            .distinctBy { it }
                                     }
                                 }
                             }
@@ -661,7 +663,7 @@ fun StoryCreatorScreen(
                                     },
                                 ) {
                                     part.edit {
-                                        cards = cards + it
+                                        cards = (cards + it).distinctBy { it }
                                     }
                                 }
                             }
