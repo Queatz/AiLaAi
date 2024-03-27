@@ -9,6 +9,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -33,7 +35,7 @@ import com.queatz.ailaai.ui.theme.pad
 fun ColumnScope.NotificationsDisabledBanner(show: Boolean = true) {
     val context = LocalContext.current
     val notificationManager = NotificationManagerCompat.from(context)
-    var areNotificationsEnabled by rememberStateOf(!notificationManager.areNotificationsEnabled())
+    var areNotificationsEnabled by rememberStateOf(notificationManager.areNotificationsEnabled())
     val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     var showPushPermissionDialog by rememberStateOf(false)
 
@@ -67,7 +69,7 @@ fun ColumnScope.NotificationsDisabledBanner(show: Boolean = true) {
                 requestNotifications()
             },
             shape = MaterialTheme.shapes.large,
-            elevation = CardDefaults.elevatedCardElevation(1.elevation),
+            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)),
             modifier = Modifier
                 .fillMaxWidth()
         ) {
