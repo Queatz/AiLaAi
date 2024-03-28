@@ -154,6 +154,8 @@ fun PageTreeWidget(widgetId: String) {
                             flexGrow(1)
                         }
 
+                        title("Open page")
+
                         onClick { event ->
                             event.stopPropagation()
 
