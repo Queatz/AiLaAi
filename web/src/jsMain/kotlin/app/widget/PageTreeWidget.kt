@@ -30,6 +30,7 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.dom.Button
@@ -97,10 +98,6 @@ fun PageTreeWidget(widgetId: String) {
                         Button({
                             classes(Styles.outlineButton)
 
-                            style {
-                                marginBottom(.5.r)
-                            }
-
                             title("+1 vote")
 
                             onClick {
@@ -120,36 +117,39 @@ fun PageTreeWidget(widgetId: String) {
                             // todo: translate
                             Text("Vote")
                         }
-                        Div({
-                            style {
-                                cursor("pointer")
-                            }
-
-                            // todo: translate
-                            title("Edit votes")
-
-                            onClick {
-                                it.stopPropagation()
-
-                                scope.launch {
-                                    val result = inputDialog(
-                                        "Votes",
-                                        confirmButton = application.appString { update },
-                                        defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
-                                    )
-
-                                    save(
-                                        data!!.copy(
-                                            votes = data!!.votes.toMutableMap().apply {
-                                                put(card.id!!, result?.toIntOrNull() ?: 0)
-                                            }
-                                        )
-                                    )
+                        if (votes != 0) {
+                            Div({
+                                style {
+                                    cursor("pointer")
+                                    marginTop(.5.r)
                                 }
+
+                                // todo: translate
+                                title("Edit votes")
+
+                                onClick {
+                                    it.stopPropagation()
+
+                                    scope.launch {
+                                        val result = inputDialog(
+                                            "Votes",
+                                            confirmButton = application.appString { update },
+                                            defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
+                                        )
+
+                                        save(
+                                            data!!.copy(
+                                                votes = data!!.votes.toMutableMap().apply {
+                                                    put(card.id!!, result?.toIntOrNull() ?: 0)
+                                                }
+                                            )
+                                        )
+                                    }
+                                }
+                            }) {
+                                // todo: translate
+                                Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
                             }
-                        }) {
-                            // todo: translate
-                            Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
                         }
                     }
                     Div({
