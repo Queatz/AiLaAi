@@ -95,33 +95,38 @@ fun PageTreeWidget(widgetId: String) {
                             marginRight(1.r)
                         }
                     }) {
-                        Button({
-                            classes(Styles.outlineButton)
+                        if (me != null) {
+                            Button({
+                                classes(Styles.outlineButton)
 
-                            title("+1 vote")
+                                title("+1 vote")
 
-                            onClick {
-                                it.stopPropagation()
+                                onClick {
+                                    it.stopPropagation()
 
-                                scope.launch {
-                                    save(
-                                        data!!.copy(
-                                            votes = data!!.votes.toMutableMap().apply {
-                                                put(card.id!!, (data!!.votes[card.id!!] ?: 0) + 1)
-                                            }
+                                    scope.launch {
+                                        save(
+                                            data!!.copy(
+                                                votes = data!!.votes.toMutableMap().apply {
+                                                    put(card.id!!, (data!!.votes[card.id!!] ?: 0) + 1)
+                                                }
+                                            )
                                         )
-                                    )
+                                    }
                                 }
+                            }) {
+                                // todo: translate
+                                Text("Vote")
                             }
-                        }) {
-                            // todo: translate
-                            Text("Vote")
                         }
+
                         if (votes != 0) {
                             Div({
                                 style {
                                     cursor("pointer")
-                                    marginTop(.5.r)
+                                    if (me != null) {
+                                        marginTop(.5.r)
+                                    }
                                 }
 
                                 // todo: translate
