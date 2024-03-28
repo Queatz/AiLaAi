@@ -8,6 +8,7 @@ import com.queatz.db.Story
 import com.queatz.widgets.Widgets
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
 import kotlin.random.Random
 
@@ -16,13 +17,20 @@ sealed class StoryContent(val key: Long = Random.nextLong()) {
     object Divider : StoryContent()
     class Title(var title: String, val id: String) : StoryContent()
     class Authors(var publishDate: Instant?, var authors: List<Person>) : StoryContent()
-    @Serializable class Section(var section: String) : StoryContent()
-    @Serializable class Text(var text: String) : StoryContent()
-    @Serializable class Cards(var cards: List<String>) : StoryContent()
-    @Serializable class Groups(var groups: List<String>) : StoryContent()
-    @Serializable class Photos(var photos: List<String>, var aspect: Float = 0.75f) : StoryContent()
-    @Serializable class Audio(var audio: String) : StoryContent()
-    @Serializable class Widget(var widget: Widgets, var id: String) : StoryContent()
+    @Serializable
+    class Section(var section: String) : StoryContent()
+    @Serializable
+    class Text(var text: String) : StoryContent()
+    @Serializable
+    class Cards(var cards: List<String>) : StoryContent()
+    @Serializable
+    class Groups(var groups: List<String>) : StoryContent()
+    @Serializable
+    class Photos(var photos: List<String>, var aspect: Float = 0.75f) : StoryContent()
+    @Serializable
+    class Audio(var audio: String) : StoryContent()
+    @Serializable
+    class Widget(var widget: Widgets, var id: String) : StoryContent()
 }
 
 @Serializable
@@ -65,7 +73,15 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "groups" -> json.decodeFromJsonElement<StoryContent.Groups>(content)
         "photos" -> json.decodeFromJsonElement<StoryContent.Photos>(content)
         "audio" -> json.decodeFromJsonElement<StoryContent.Audio>(content)
-        "widget" -> json.decodeFromJsonElement<StoryContent.Widget>(content)
+        "widget" -> try {
+            json.decodeFromJsonElement<StoryContent.Widget>(content)
+        } catch (e: SerializationException) {
+            // Widget type unsupported
+            // todo: show that app needs to be updated
+            e.printStackTrace()
+            null
+        }
+
         else -> null
     }
 }

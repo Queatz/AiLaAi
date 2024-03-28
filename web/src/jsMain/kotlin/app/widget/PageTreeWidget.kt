@@ -23,6 +23,7 @@ import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
+import lib.toLocaleString
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.fontSize
@@ -116,6 +117,7 @@ fun PageTreeWidget(widgetId: String) {
                                 }
                             }
                         }) {
+                            // todo: translate
                             Text("Vote")
                         }
                         Div({
@@ -123,6 +125,7 @@ fun PageTreeWidget(widgetId: String) {
                                 cursor("pointer")
                             }
 
+                            // todo: translate
                             title("Edit votes")
 
                             onClick {
@@ -145,7 +148,8 @@ fun PageTreeWidget(widgetId: String) {
                                 }
                             }
                         }) {
-                            Text("$votes ${if (votes == 1) "vote" else "votes"}")
+                            // todo: translate
+                            Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
                         }
                     }
                     Div({
@@ -154,6 +158,7 @@ fun PageTreeWidget(widgetId: String) {
                             flexGrow(1)
                         }
 
+                        // todo: translate
                         title("Open page")
 
                         onClick { event ->

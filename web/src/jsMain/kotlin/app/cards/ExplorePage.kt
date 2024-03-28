@@ -159,6 +159,7 @@ fun ExplorePage(
                                         fontSize(14.px)
                                     }
                                 }) {
+                                    // todo: translate
                                     Text("Don't show this again")
                                 }
                             }
@@ -488,7 +489,9 @@ fun ExplorePage(
                         generatePhoto()
                     } else {
                         scope.launch {
+                            // todo: translate
                             val result = dialog("Generate a new photo?") {
+                                // todo: translate
                                 Text("This will replace the current photo.")
                             }
 
@@ -527,10 +530,12 @@ fun ExplorePage(
 
             item(appString { delete }) {
                 scope.launch {
+                    // todo: translate
                     val result = dialog(
                         "Delete this page?",
                         "Yes, delete"
                     ) {
+                        // todo: translate
                         Text("You cannot undo this.")
                     }
 
@@ -651,6 +656,7 @@ fun ExplorePage(
                 }
             }
 
+            // todo: translate
             IconButton(if (publishNow) "toggle_on" else "toggle_off", "Publish now", onClick = {
                 publishNow = !publishNow
             }, styles = {

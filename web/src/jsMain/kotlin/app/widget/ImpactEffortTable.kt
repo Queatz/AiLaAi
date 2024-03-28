@@ -21,6 +21,7 @@ import org.jetbrains.compose.web.dom.*
 import updateWidget
 import widget
 
+// todo: translate
 @Composable
 fun ImpactEffortTable(widgetId: String) {
     val me by application.me.collectAsState()
