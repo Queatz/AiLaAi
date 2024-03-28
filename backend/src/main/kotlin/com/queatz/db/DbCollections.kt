@@ -138,5 +138,9 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Trade::cancelledAt.name), PersistentIndexOptions())
     },
     Subscription::class.db(CollectionType.EDGES, listOf(Person::class)) {
+    },
+    Reaction::class.db(CollectionType.EDGES, listOf(Person::class, Card::class, Story::class, Message::class)) {
+        ensurePersistentIndex(listOf(Reaction::reaction.name), PersistentIndexOptions())
+        ensureFulltextIndex(listOf(Reaction::comment.name), FulltextIndexOptions())
     }
 )

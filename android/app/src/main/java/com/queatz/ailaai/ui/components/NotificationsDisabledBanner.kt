@@ -59,6 +59,7 @@ fun ColumnScope.NotificationsDisabledBanner(show: Boolean = true) {
             }
         }
     }
+
     ResumeEffect {
         areNotificationsEnabled = notificationManager.areNotificationsEnabled()
     }

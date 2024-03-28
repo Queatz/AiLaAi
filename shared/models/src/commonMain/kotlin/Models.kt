@@ -113,6 +113,12 @@ class Card(
 ) : Model()
 
 @Serializable
+class Reaction(
+    var reaction: String? = null,
+    var comment: String? = null
+) : Edge()
+
+@Serializable
 class Group(
     var name: String? = null,
     var photo: String? = null,
