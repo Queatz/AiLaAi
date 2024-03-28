@@ -11,6 +11,32 @@ object WidgetStyles : StyleSheet() {
     val columnSelected by style {
     }
 
+    val pageTreeItem by style {
+        display(DisplayStyle.Flex)
+
+        child(self, selector("div")) style {
+            padding(1.r)
+            borderRadius(.5.r)
+            border(2.px, LineStyle.Solid, Styles.colors.background)
+            whiteSpace("pre-wrap")
+        }
+
+        dark(self) {
+            child(self, selector("div")) style {
+                border(2.px, LineStyle.Solid, Color.black)
+            }
+        }
+    }
+
+    val pageTree by style {
+        overflowX("hidden")
+        width(100.percent)
+
+        child(self, not(lastChild)) style {
+            marginBottom(1.r)
+        }
+    }
+
     val table by style {
         property("border-spacing", "${.5.r}")
         property("border", "none")

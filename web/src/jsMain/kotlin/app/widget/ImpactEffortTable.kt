@@ -24,6 +24,7 @@ import widget
 @Composable
 fun ImpactEffortTable(widgetId: String) {
     val me by application.me.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var widget by remember(widgetId) {
         mutableStateOf<Widget?>(null)
@@ -75,8 +76,6 @@ fun ImpactEffortTable(widgetId: String) {
             }.let { if (desc) it.asReversed() else it }
         )
     }
-
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(widgetId) {
         // todo loading
