@@ -6,6 +6,7 @@ import com.queatz.widgets.Widgets
 import json
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
 import notBlank
 
@@ -40,7 +41,14 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "cards" -> json.decodeFromJsonElement<StoryContent.Cards>(content)
         "photos" -> json.decodeFromJsonElement<StoryContent.Photos>(content)
         "audio" -> json.decodeFromJsonElement<StoryContent.Audio>(content)
-        "widget" -> json.decodeFromJsonElement<StoryContent.Widget>(content)
+        "widget" -> try {
+            json.decodeFromJsonElement<StoryContent.Widget>(content)
+        } catch (e: SerializationException) {
+            // Widget type unsupported
+            // todo: show that app needs to be updated
+            e.printStackTrace()
+            null
+        }
         else -> null
     }
 }
