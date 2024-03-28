@@ -120,7 +120,7 @@ fun PageTreeWidget(widgetId: String) {
                             }
                         }
 
-                        if (votes != 0) {
+                        if (votes != 0 || me == null) {
                             Div({
                                 style {
                                     cursor("pointer")
@@ -129,26 +129,28 @@ fun PageTreeWidget(widgetId: String) {
                                     }
                                 }
 
-                                // todo: translate
-                                title("Edit votes")
+                                if (me != null) {
+                                    // todo: translate
+                                    title("Edit votes")
 
-                                onClick {
-                                    it.stopPropagation()
+                                    onClick {
+                                        it.stopPropagation()
 
-                                    scope.launch {
-                                        val result = inputDialog(
-                                            "Votes",
-                                            confirmButton = application.appString { update },
-                                            defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
-                                        )
-
-                                        save(
-                                            data!!.copy(
-                                                votes = data!!.votes.toMutableMap().apply {
-                                                    put(card.id!!, result?.toIntOrNull() ?: 0)
-                                                }
+                                        scope.launch {
+                                            val result = inputDialog(
+                                                "Votes",
+                                                confirmButton = application.appString { update },
+                                                defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
                                             )
-                                        )
+
+                                            save(
+                                                data!!.copy(
+                                                    votes = data!!.votes.toMutableMap().apply {
+                                                        put(card.id!!, result?.toIntOrNull() ?: 0)
+                                                    }
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }) {
