@@ -665,6 +665,7 @@ fun StoryCreatorScreen(
                                     part.edit {
                                         cards = (cards + it).distinctBy { it }
                                     }
+                                    showAddCardDialog = false
                                 }
                             }
 
@@ -989,6 +990,7 @@ val Widgets.stringResource
     @Composable get() = stringResource(
         when (this) {
             Widgets.ImpactEffortTable -> R.string.impact_effort_table
+            Widgets.PageTree -> R.string.page_tree
             else -> R.string.widget
         }
     )

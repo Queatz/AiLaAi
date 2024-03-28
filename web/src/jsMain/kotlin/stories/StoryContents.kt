@@ -9,6 +9,7 @@ import app.dialog.photoDialog
 import app.group.GroupInfo
 import app.group.GroupItem
 import app.widget.ImpactEffortTable
+import app.widget.PageTreeWidget
 import appString
 import baseUrl
 import com.queatz.db.GroupExtended
@@ -188,6 +189,9 @@ fun StoryContents(
                 when (part.widget) {
                     Widgets.ImpactEffortTable -> {
                         ImpactEffortTable(part.id)
+                    }
+                    Widgets.PageTree -> {
+                        PageTreeWidget(part.id)
                     }
                 }
             }

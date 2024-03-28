@@ -43,7 +43,6 @@ fun ChooseCardDialog(
             ChooseCardSelector(
                 modifier = Modifier.weight(1f)
             ) {
-                onDismissRequest()
                 onCard(it)
             }
             Row(
@@ -63,7 +62,6 @@ fun ChooseCardDialog(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChooseCardSelector(
     modifier: Modifier = Modifier,

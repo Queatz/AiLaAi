@@ -28,6 +28,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.ailaai.ui.widget.AddWidgetDialog
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
 import createWidget
@@ -48,6 +49,16 @@ fun StoryCreatorTools(
     var isGeneratingPhoto by rememberStateOf(false)
     val photoState = remember {
         ChoosePhotoDialogState(mutableStateOf(""))
+    }
+    var addWidget by rememberStateOf<Widgets?>(null)
+
+    addWidget?.let {
+        AddWidgetDialog({
+            addWidget = null
+        }, it) { widget ->
+            addPart(StoryContent.Widget(widget.widget!!, widget.id!!))
+            addWidget = null
+        }
     }
 
     if (showPhotoDialog) {
@@ -171,6 +182,10 @@ fun StoryCreatorTools(
                 }
                 showWidgetsMenu = false
             }
+            menuItem(stringResource(R.string.page_tree)) {
+                addWidget = Widgets.PageTree
+                showWidgetsMenu = false
+            }
         }
     }
 
@@ -186,6 +201,7 @@ fun StoryCreatorTools(
             addPart(
                 StoryContent.Text("")
             )
+            showCardSelectorDialog = false
         }
     }
 
