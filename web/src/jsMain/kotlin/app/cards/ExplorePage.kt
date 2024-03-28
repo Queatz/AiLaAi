@@ -62,6 +62,8 @@ fun ExplorePage(
         mutableStateOf("")
     }
 
+    var publishNow by remember { mutableStateOf(false) }
+
     var cards by remember(card.id) {
         mutableStateOf(listOf<Card>())
     }
@@ -103,9 +105,9 @@ fun ExplorePage(
         }
     }
 
-    fun newSubCard(inCard: Card, name: String) {
+    fun newSubCard(inCard: Card, name: String, active: Boolean) {
         scope.launch {
-            api.newCard(Card(name = name, parent = inCard.id!!)) {
+            api.newCard(Card(name = name, parent = inCard.id!!, active = active)) {
                 reload()
                 onCardUpdated(it)
             }
@@ -169,7 +171,10 @@ fun ExplorePage(
 
     fun moveToPage(cardId: String) {
         scope.launch {
-            api.updateCard(card.id!!, Card(offline = false, parent = cardId, group = null, equipped = false, geo = null)) {
+            api.updateCard(
+                card.id!!,
+                Card(offline = false, parent = cardId, group = null, equipped = false, geo = null)
+            ) {
                 onCardUpdated(it)
             }
         }
@@ -177,7 +182,10 @@ fun ExplorePage(
 
     fun moveToGroup(groupId: String) {
         scope.launch {
-            api.updateCard(card.id!!, Card(offline = false, parent = null, group = groupId, equipped = false, geo = null)) {
+            api.updateCard(
+                card.id!!,
+                Card(offline = false, parent = null, group = groupId, equipped = false, geo = null)
+            ) {
                 onCardUpdated(it)
             }
         }
@@ -189,7 +197,7 @@ fun ExplorePage(
 
     fun moveToGroup() {
         scope.launch {
-            val result =  searchDialog(
+            val result = searchDialog(
                 configuration = configuration,
                 title = application.appString { inAGroup },
                 confirmButton = cancel,
@@ -220,7 +228,7 @@ fun ExplorePage(
 
     fun moveToPage() {
         scope.launch {
-            val result =  searchDialog(
+            val result = searchDialog(
                 configuration = configuration,
                 title = inAPage,
                 confirmButton = cancel,
@@ -328,15 +336,26 @@ fun ExplorePage(
                         }) {
                             item(appString { onProfile }, selected = card.equipped == true, "account_circle") {
                                 scope.launch {
-                                    api.updateCard(card.id!!, Card(offline = false, parent = null, equipped = true, geo = null)) {
+                                    api.updateCard(
+                                        card.id!!,
+                                        Card(offline = false, parent = null, equipped = true, geo = null)
+                                    ) {
                                         onCardUpdated(it)
                                     }
                                 }
                             }
-                            item(appString { inAGroup }, selected = card.parent == null && card.offline != true && card.equipped != true && card.group != null, "group") {
+                            item(
+                                appString { inAGroup },
+                                selected = card.parent == null && card.offline != true && card.equipped != true && card.group != null,
+                                "group"
+                            ) {
                                 moveToGroup()
                             }
-                            item(appString { atALocation }, selected = card.parent == null && card.offline != true && card.equipped != true && card.geo != null, "location_on") {
+                            item(
+                                appString { atALocation },
+                                selected = card.parent == null && card.offline != true && card.equipped != true && card.geo != null,
+                                "location_on"
+                            ) {
                                 // todo: needs map
                             }
                             item(inAPage, selected = card.parent != null, "description") {
@@ -344,7 +363,10 @@ fun ExplorePage(
                             }
                             item(appString { none }, selected = card.offline == true) {
                                 scope.launch {
-                                    api.updateCard(card.id!!, Card(offline = true, parent = null, equipped = false, geo = null)) {
+                                    api.updateCard(
+                                        card.id!!,
+                                        Card(offline = true, parent = null, equipped = false, geo = null)
+                                    ) {
                                         onCardUpdated(it)
                                     }
                                 }
@@ -606,11 +628,41 @@ fun ExplorePage(
             saveConversation(it)
         }
 
-        NavSearchInput(newCardTitle, { newCardTitle = it }, placeholder = appString { newCard }, autoFocus = false) {
-            if (newCardTitle.isNotBlank()) {
-                newSubCard(card, it)
-                newCardTitle = ""
+        Div({
+            style {
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Row)
+                flexShrink(0)
+                alignItems("center")
             }
+        }) {
+            NavSearchInput(
+                newCardTitle,
+                { newCardTitle = it },
+                placeholder = appString { newCard },
+                autoFocus = false,
+                styles = {
+                    flexGrow(1)
+                }
+            ) {
+                if (newCardTitle.isNotBlank()) {
+                    newSubCard(card, it, publishNow)
+                    newCardTitle = ""
+                }
+            }
+
+            IconButton(if (publishNow) "toggle_on" else "toggle_off", "Publish now", onClick = {
+                publishNow = !publishNow
+            }, styles = {
+                if (publishNow) {
+                    color(Styles.colors.primary)
+                } else {
+                    color(Styles.colors.secondary)
+                }
+
+                marginTop(.5.r)
+                marginRight(2.r)
+            })
         }
 
         if (isLoading) {

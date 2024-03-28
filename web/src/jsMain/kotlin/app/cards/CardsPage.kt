@@ -1,5 +1,6 @@
 package app.cards
 
+import Styles.card
 import androidx.compose.runtime.*
 import api
 import app.FullPageLayout
@@ -114,8 +115,8 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
                 }
             } else {
                 ExplorePage(
-                    nav.subCard ?: nav.card,
-                    {
+                    card = nav.subCard ?: nav.card,
+                    onCard = {
                         onCard(CardNav.Selected(it))
                     },
                     onCardUpdated = {
