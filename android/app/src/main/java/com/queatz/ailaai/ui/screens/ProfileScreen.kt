@@ -71,6 +71,7 @@ import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.isGroupLike
 import com.queatz.ailaai.extensions.name
@@ -824,6 +825,7 @@ fun ProfileScreen(personId: String) {
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,
+                    hideCreators = personId.inList(),
                     modifier = Modifier.padding(horizontal = 1.pad)
                 )
             }

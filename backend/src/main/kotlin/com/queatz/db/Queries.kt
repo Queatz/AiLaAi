@@ -483,7 +483,7 @@ fun Db.groupGeo() = """first(
         filter member.${f(Member::gone)} != true
             and person.${f(Person::geo)} != null
             // and person._id != @person
-            and member.${f(Member::seen)} >= date_subtract(DATE_NOW(), 30, 'day') // Only include active members
+            and member.${f(Member::seen)} >= date_subtract(DATE_NOW(), 180, 'day') // Only include active members
         let memberDistance = distance(person.${f(Person::geo)}[0], person.${f(Person::geo)}[1], @geo[0], @geo[1])
         sort memberDistance == null, memberDistance, member.${f(Member::seen)} desc
         limit 1
