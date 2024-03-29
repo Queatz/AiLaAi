@@ -125,7 +125,7 @@ fun StoriesScreen() {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                nav.navigate("explore")
+                                nav.navigate("inventory")
                             }
                             is SwipeResult.Next -> {
                                 nav.navigate("messages")

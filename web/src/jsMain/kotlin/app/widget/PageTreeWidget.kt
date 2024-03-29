@@ -138,10 +138,13 @@ fun PageTreeWidget(widgetId: String) {
 
                                         scope.launch {
                                             val result = inputDialog(
+                                                // todo: translate
                                                 "Votes",
                                                 confirmButton = application.appString { update },
                                                 defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
                                             )
+
+                                            result ?: return@launch
 
                                             save(
                                                 data!!.copy(

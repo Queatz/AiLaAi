@@ -303,11 +303,11 @@ fun InventoryScreen() {
             .swipeMainTabs {
                 when (emptyList<Unit>().swipe(Unit, it)) {
                     is SwipeResult.Previous -> {
-                        nav.navigate("schedule")
+                        nav.navigate("explore")
                     }
 
                     is SwipeResult.Next -> {
-                        nav.navigate("explore")
+                        nav.navigate("stories")
                     }
 
                     is SwipeResult.Select<*> -> {

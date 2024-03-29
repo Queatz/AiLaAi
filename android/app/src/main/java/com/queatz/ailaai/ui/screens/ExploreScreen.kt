@@ -449,11 +449,11 @@ fun ExploreScreen() {
                         .swipeMainTabs {
                             when (val it = MainTab.entries.swipe(tab, it)) {
                                 is SwipeResult.Previous -> {
-                                    nav.navigate("inventory")
+                                    nav.navigate("schedule")
                                 }
 
                                 is SwipeResult.Next -> {
-                                    nav.navigate("stories")
+                                    nav.navigate("inventory")
                                 }
 
                                 is SwipeResult.Select<*> -> {
