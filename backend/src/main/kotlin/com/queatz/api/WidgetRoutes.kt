@@ -7,6 +7,7 @@ import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.respond
+import com.queatz.widgets.Widgets
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -48,7 +49,7 @@ fun Route.widgetRoutes() {
 
         post("/widgets/{id}") {
             respond {
-                val widget = db.widget(me.id!!, parameter("id"))
+                val widget = db.document(Widget::class, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
                 val update = call.receive<Widget>()
