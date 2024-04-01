@@ -13,8 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.groupCards
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.isAtTop
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
@@ -23,7 +25,6 @@ import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
-import kotlinx.coroutines.launch
 
 @Composable
 fun GroupCards(group: GroupExtended) {
@@ -70,7 +71,7 @@ fun GroupCards(group: GroupExtended) {
                     card = card,
                     showTitle = true,
                     onClick = {
-                        nav.navigate("card/${card.id!!}")
+                        nav.navigate(AppNav.Page(card.id!!))
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,

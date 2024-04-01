@@ -6,13 +6,14 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import app.ailaai.api.stickerPack
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
@@ -77,7 +78,7 @@ fun StickerPackScreen(stickerPackId: String) {
                                 Text(stringResource(R.string.view_creator))
                             }, {
                                 showMenu = false
-                                nav.navigate("profile/${stickerPack.person!!}")
+                                nav.navigate(AppNav.Profile(stickerPack.person!!))
                             })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.report))

@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
@@ -23,7 +25,7 @@ fun ReminderItem(reminder: Reminder) {
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .clickable {
-                nav.navigate("reminder/${reminder.id!!}")
+                nav.navigate(AppNav.Reminder(reminder.id!!))
             }
             .padding(1.pad)
     ) {

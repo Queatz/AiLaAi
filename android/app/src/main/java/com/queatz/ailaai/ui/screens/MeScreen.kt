@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import app.ailaai.api.myCards
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
@@ -138,7 +139,7 @@ fun MeScreen() {
             },
             create = true
         ) {
-            nav.navigate("card/${it.id!!}")
+            nav.navigate(AppNav.Page(it.id!!))
         }
     }
 
@@ -191,7 +192,7 @@ fun MeScreen() {
                             card = card,
                             showTitle = true,
                             onClick = {
-                                nav.navigate("card/${card.id!!}")
+                                nav.navigate(AppNav.Page(card.id!!))
                             },
                             scope = scope,
                             playVideo = playingVideo == card

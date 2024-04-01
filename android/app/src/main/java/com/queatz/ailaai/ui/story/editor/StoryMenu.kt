@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.data.api
@@ -106,12 +107,12 @@ fun StoryMenu(
         if (showOpen) {
             DropdownMenuItem({ Text(stringResource(R.string.open_story)) }, {
                 onDismissRequest()
-                nav.navigate("story/$storyId")
+                nav.navigate(AppNav.Story(storyId))
             })
         } else if (!edited && editing) {
             DropdownMenuItem({ Text(stringResource(R.string.preview)) }, {
                 onDismissRequest()
-                nav.navigate("story/$storyId")
+                nav.navigate(AppNav.Story(storyId))
             })
         }
         if (editing) {

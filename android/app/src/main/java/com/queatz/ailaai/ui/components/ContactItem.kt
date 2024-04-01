@@ -29,6 +29,7 @@ import app.ailaai.api.createGroup
 import app.ailaai.api.updateMember
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
@@ -44,9 +45,7 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -94,13 +93,13 @@ fun ContactItem(
                 when (item) {
                     is SearchResult.Connect -> {
                         api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true) { group ->
-                            nav.navigate("group/${group.id!!}")
+                            nav.navigate(AppNav.Group(group.id!!))
                         }
                     }
 
                     is SearchResult.Group -> {
                         val groupExtended = item.groupExtended
-                        nav.navigate("group/${groupExtended.group!!.id!!}")
+                        nav.navigate(AppNav.Group(groupExtended.group!!.id!!))
 
                     }
                 }

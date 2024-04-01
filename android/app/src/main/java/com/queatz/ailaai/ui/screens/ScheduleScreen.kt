@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import app.ailaai.api.occurrences
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
@@ -196,10 +197,10 @@ fun ScheduleScreen() {
             .swipeMainTabs {
                 when (emptyList<Unit>().swipe(Unit, it)) {
                     is SwipeResult.Previous -> {
-                        nav.navigate("messages")
+                        nav.navigate(AppNav.Messages)
                     }
                     is SwipeResult.Next -> {
-                        nav.navigate("explore")
+                        nav.navigate(AppNav.Explore)
                     }
                     is SwipeResult.Select<*> -> {
                         // Impossible

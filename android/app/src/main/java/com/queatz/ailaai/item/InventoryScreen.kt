@@ -32,11 +32,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
@@ -303,11 +305,11 @@ fun InventoryScreen() {
             .swipeMainTabs {
                 when (emptyList<Unit>().swipe(Unit, it)) {
                     is SwipeResult.Previous -> {
-                        nav.navigate("explore")
+                        nav.navigate(AppNav.Explore)
                     }
 
                     is SwipeResult.Next -> {
-                        nav.navigate("stories")
+                        nav.navigate(AppNav.Stories)
                     }
 
                     is SwipeResult.Select<*> -> {
@@ -385,7 +387,7 @@ fun InventoryScreen() {
                     Icon(Icons.Outlined.Edit, "")
                 }
             ) {
-                nav.navigate("items")
+                nav.navigate(AppNav.Items)
             }
         }
     }

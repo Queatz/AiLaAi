@@ -13,9 +13,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import app.ailaai.api.createGroup
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -90,7 +92,7 @@ fun StoryActions(
             onPeopleSelected = { authors ->
                 scope.launch {
                     api.createGroup(authors.map { it.id!! } + me!!.id!!, reuse = true) {
-                        nav.navigate("group/${it.id!!}")
+                        nav.navigate(AppNav.Group(it.id!!))
                     }
                 }
                 showMessageDialog = false

@@ -13,8 +13,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import app.ailaai.api.createStickerPack
 import app.ailaai.api.myStickerPacks
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
@@ -57,7 +59,7 @@ fun StickerPacksScreen() {
             api.createStickerPack(StickerPack(name = value)) {
                 stickers.reload()
                 showCreateStickerPackDialog = false
-                nav.navigate("sticker-pack/${it.id}/edit")
+                nav.navigate(AppNav.EditStickerPack(it.id!!))
             }
         }
     }
@@ -90,7 +92,7 @@ fun StickerPacksScreen() {
                     stickerPacks,
                     edit = true,
                     onEdit = {
-                        nav.navigate("sticker-pack/${it.id}/edit")
+                        nav.navigate(AppNav.EditStickerPack(it.id!!))
                     },
                     onStickerLongClick = {
                         scope.launch {
@@ -98,7 +100,7 @@ fun StickerPacksScreen() {
                         }
                     }
                 ) {
-                    nav.navigate("sticker-pack/${it.pack}/edit")
+                    nav.navigate(AppNav.EditStickerPack(it.pack!!))
                 }
             }
             FloatingActionButton(

@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.*
 import coil.compose.AsyncImage
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
@@ -602,7 +603,7 @@ fun StoryCreatorScreen(
                                     }
                                     menuItem(stringResource(R.string.open_group)) {
                                         showGroupMenu = false
-                                        nav.navigate("group/$groupId")
+                                        nav.navigate(AppNav.Group(groupId))
                                     }
                                     if (part.groups.size > 1) {
                                         menuItem(stringResource(R.string.reorder)) {
@@ -713,7 +714,7 @@ fun StoryCreatorScreen(
                                     }
                                     menuItem(stringResource(R.string.open_card)) {
                                         showCardMenu = false
-                                        nav.navigate("card/$cardId")
+                                        nav.navigate(AppNav.Page(cardId))
                                     }
                                     if (part.cards.size > 1) {
                                         menuItem(stringResource(R.string.reorder)) {

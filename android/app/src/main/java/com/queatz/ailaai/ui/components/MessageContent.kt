@@ -31,6 +31,7 @@ import app.ailaai.api.sticker
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
@@ -425,11 +426,11 @@ fun ColumnScope.MessageContent(
         ) {
             CardItem(
                 {
-                    nav.navigate("card/$it")
+                    nav.navigate(AppNav.Page(it))
                 },
                 onCategoryClick = {
                     exploreInitialCategory = it
-                    nav.navigate("explore")
+                    nav.navigate(AppNav.Explore)
                 },
                 card = attachedCard,
                 isChoosing = true
@@ -575,8 +576,7 @@ fun ColumnScope.MessageContent(
                             }
                         }
                     ) {
-                        val id = it.pack!!
-                        nav.navigate("sticker-pack/$id")
+                        nav.navigate(AppNav.StickerPack(it.pack!!))
                     }
                 }
             }
@@ -635,7 +635,7 @@ fun ColumnScope.MessageContent(
             )
         ) {
             if (!attachedStoryNotFound) {
-                nav.navigate("story/$storyId")
+                nav.navigate(AppNav.Story(storyId))
             }
         }
     }

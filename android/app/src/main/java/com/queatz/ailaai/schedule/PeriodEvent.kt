@@ -14,8 +14,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import app.ailaai.api.deleteReminderOccurrence
 import app.ailaai.api.updateReminderOccurrence
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -191,7 +193,7 @@ fun PeriodEvent(
                     }
                 },
                 onOpen = {
-                    nav.navigate("reminder/${event.reminder.id!!}")
+                    nav.navigate(AppNav.Reminder(event.reminder.id!!))
                 },
                 onEdit = {
                     showEditNote = true

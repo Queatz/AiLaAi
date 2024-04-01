@@ -44,6 +44,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
 import com.queatz.ailaai.api.sendMediaFromUri
@@ -232,7 +233,7 @@ fun GroupScreen(groupId: String) {
         ) {
             scope.launch {
                 reload()
-                nav.navigate("card/${it.id}")
+                nav.navigate(AppNav.Page(it.id!!))
             }
         }
     }
@@ -323,7 +324,7 @@ fun GroupScreen(groupId: String) {
                                     }
                                 } else {
                                     if (otherMembers.size == 1) {
-                                        nav.navigate("profile/${otherMembers.first().person!!.id!!}")
+                                        nav.navigate(AppNav.Profile(otherMembers.first().person!!.id!!))
                                     } else {
                                         showGroupMembers = true
                                     }
@@ -1067,7 +1068,7 @@ fun GroupScreen(groupId: String) {
                                     }
                                 },
                                 onStickerPack = {
-                                    nav.navigate("sticker-pack/${it.id!!}")
+                                    nav.navigate(AppNav.StickerPack(it.id!!))
                                 },
                                 modifier = Modifier.fillMaxSize()
                             ) { sticker ->
@@ -1077,7 +1078,7 @@ fun GroupScreen(groupId: String) {
                             }
                             FloatingActionButton(
                                 onClick = {
-                                    nav.navigate("sticker-packs")
+                                    nav.navigate(AppNav.StickerPacks)
                                 },
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
@@ -1225,7 +1226,7 @@ fun GroupScreen(groupId: String) {
                     }
                 ) {
                     showGroupMembers = false
-                    nav.navigate("profile/${it.id!!}")
+                    nav.navigate(AppNav.Profile(it.id!!))
                 }
             }
 

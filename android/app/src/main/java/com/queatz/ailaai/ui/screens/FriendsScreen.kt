@@ -49,10 +49,12 @@ import app.ailaai.api.removeMember
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -300,7 +302,7 @@ fun FriendsScreen() {
             }
         ) { selected ->
             showSharedGroupsDialog = emptyList()
-            nav.navigate("group/${selected.first().id!!}")
+            nav.navigate(AppNav.Group(selected.first().id!!))
         }
     }
 
@@ -428,11 +430,11 @@ fun FriendsScreen() {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                nav.navigate("stories")
+                                nav.navigate(AppNav.Stories)
                             }
 
                             is SwipeResult.Next -> {
-                                nav.navigate("schedule")
+                                nav.navigate(AppNav.Schedule)
                             }
 
                             is SwipeResult.Select<*> -> {
@@ -483,13 +485,13 @@ fun FriendsScreen() {
                                                 allGroups.people().filter { it.id != me?.id }
                                             },
                                             {
-                                                nav.navigate("profile/${it.id!!}")
+                                                nav.navigate(AppNav.Profile(it.id!!))
                                             }
                                         ) { person ->
                                             scope.launch {
                                                 api.groupsWith(listOf(me!!.id!!, person.id!!)) {
                                                     if (it.size == 1) {
-                                                        nav.navigate("group/${it.first().group!!.id!!}")
+                                                        nav.navigate(AppNav.Group(it.first().group!!.id!!))
                                                     } else {
                                                         showSharedGroupsDialogPerson = person
                                                         showSharedGroupsDialog = it
@@ -615,7 +617,7 @@ fun FriendsScreen() {
                     if (createGroupName.isNotBlank()) {
                         api.updateGroup(group.id!!, Group(name = createGroupName))
                     }
-                    nav.navigate("group/${group.id!!}")
+                    nav.navigate(AppNav.Group(group.id!!))
                 }
             },
             omit = { it.id == me?.id }

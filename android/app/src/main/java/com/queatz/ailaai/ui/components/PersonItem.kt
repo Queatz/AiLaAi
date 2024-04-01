@@ -21,8 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
@@ -43,7 +45,7 @@ fun PersonItem(person: Person, interactable: Boolean = true) {
                         remember { MutableInteractionSource() },
                         null
                     ) {
-                        nav.navigate("profile/${person.id}")
+                        nav.navigate(AppNav.Profile(person.id!!))
                     }
                 } else {
                     it
@@ -62,7 +64,7 @@ fun PersonItem(person: Person, interactable: Boolean = true) {
                                 remember { MutableInteractionSource() },
                                 null
                             ) {
-                                nav.navigate("profile/${person.id}")
+                                nav.navigate(AppNav.Profile(person.id!!))
                             }
                         } else {
                             it
@@ -71,7 +73,7 @@ fun PersonItem(person: Person, interactable: Boolean = true) {
             )
         } else {
             IconButton({
-                nav.navigate("profile/${person.id}")
+                nav.navigate(AppNav.Profile(person.id!!))
             }) {
                 Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
             }

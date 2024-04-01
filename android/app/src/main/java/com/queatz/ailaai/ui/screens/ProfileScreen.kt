@@ -64,6 +64,7 @@ import app.ailaai.api.unsubscribe
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
 import coil.compose.AsyncImage
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
 import com.queatz.ailaai.api.updateProfilePhotoFromUri
@@ -75,6 +76,7 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.isGroupLike
 import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
@@ -363,7 +365,7 @@ fun ProfileScreen(personId: String) {
             },
             create = true
         ) {
-            nav.navigate("card/${it.id!!}")
+            nav.navigate(AppNav.Page(it.id!!))
         }
     }
 
@@ -544,7 +546,7 @@ fun ProfileScreen(personId: String) {
                                 }
                                 IconButton(
                                     {
-                                        nav.navigate("settings")
+                                        nav.navigate(AppNav.Settings)
                                     },
                                     Modifier
                                         .size(42.dp)
@@ -682,7 +684,7 @@ fun ProfileScreen(personId: String) {
                                                         listOf(me!!.id!!, personId),
                                                         reuse = true
                                                     ) { group ->
-                                                        nav.navigate("group/${group.id!!}")
+                                                        nav.navigate(AppNav.Group(group.id!!))
                                                     }
                                                 }
                                             }
@@ -773,7 +775,7 @@ fun ProfileScreen(personId: String) {
                         if (isMe) {
                             OutlinedButton(
                                 onClick = {
-                                    nav.navigate("profile/${person!!.id!!}/edit")
+                                    nav.navigate(AppNav.EditProfile(person!!.id!!))
                                 }
                             ) {
                                 Text(
@@ -821,7 +823,7 @@ fun ProfileScreen(personId: String) {
                     card = card,
                     showTitle = true,
                     onClick = {
-                        nav.navigate("card/${card.id!!}")
+                        nav.navigate(AppNav.Page(card.id!!))
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,

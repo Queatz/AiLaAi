@@ -26,6 +26,7 @@ import app.ailaai.api.card
 import app.ailaai.api.group
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
@@ -142,7 +143,7 @@ fun StoryContents(
                                                         remember { MutableInteractionSource() },
                                                         indication = null
                                                     ) {
-                                                        nav.navigate("story/${content.id}")
+                                                        nav.navigate(AppNav.Story(content.id))
                                                     }
                                             }
                                         }
@@ -216,11 +217,11 @@ fun StoryContents(
                                 }
                                 CardItem(
                                     {
-                                        nav.navigate("card/$it")
+                                        nav.navigate(AppNav.Page(it))
                                     },
                                     onCategoryClick = {
                                         exploreInitialCategory = it
-                                        nav.navigate("explore")
+                                        nav.navigate(AppNav.Explore)
                                     },
                                     card = card,
                                     isChoosing = true,

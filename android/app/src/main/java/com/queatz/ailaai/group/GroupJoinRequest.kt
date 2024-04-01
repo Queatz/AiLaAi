@@ -19,9 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
@@ -41,7 +43,7 @@ fun GroupJoinRequest(joinRequest: JoinRequestAndPerson, onChange: () -> Unit) {
         modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .clickable {
-                nav.navigate("profile/${joinRequest.joinRequest!!.person!!}")
+                nav.navigate(AppNav.Profile(joinRequest.joinRequest!!.person!!))
             }
             .padding(1.pad)
     ) {

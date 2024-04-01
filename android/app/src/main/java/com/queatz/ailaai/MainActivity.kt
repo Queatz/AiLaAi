@@ -115,11 +115,11 @@ fun background(url: String?) {
 class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
-            NavButton("messages", getString(R.string.groups), Icons.Outlined.Group),
-            NavButton("schedule", getString(R.string.reminders), Icons.Outlined.CalendarMonth),
-            NavButton("explore", getString(R.string.cards), Icons.Outlined.Map),
-            NavButton("inventory", getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
-            NavButton("stories", getString(R.string.explore), Icons.Outlined.Explore),
+            NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.Group),
+            NavButton(AppNav.Schedule, getString(R.string.reminders), Icons.Outlined.CalendarMonth),
+            NavButton(AppNav.Explore, getString(R.string.cards), Icons.Outlined.Map),
+            NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
+            NavButton(AppNav.Stories, getString(R.string.explore), Icons.Outlined.Explore),
         )
     }
 
@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                     LaunchedEffect(Unit) {
                         navController.currentBackStackEntryFlow.collectLatest { entry ->
                             val route = entry.destination.route
-                            if (route != null && menuItems.any { it.route == route }) {
+                            if (route != null && menuItems.any { it.route.route == route }) {
                                 context.dataStore.edit {
                                     it[appTabKey] = route
                                 }
@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity() {
                             push.setMe(me!!.id!!)
                             updateAppLanguage(me)
                             if (!wasKnown) {
-                                navController.navigate("profile/${me!!.id!!}")
+                                navController.navigate(AppNav.Profile(me!!.id!!))
                                 wasKnown = true
                             }
                         }
@@ -364,7 +364,7 @@ class MainActivity : AppCompatActivity() {
                                         modifier = Modifier.height(54.dp)
                                     ) {
                                         menuItems.forEach { item ->
-                                            val selected = navController.currentDestination?.route == item.route
+                                            val selected = navController.currentDestination?.route == item.route.route
                                             val scale by animateFloatAsState(
                                                 if (selected) 1.25f else 1f,
                                                 spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)
@@ -379,7 +379,7 @@ class MainActivity : AppCompatActivity() {
                                                                 .scale(scale)
                                                         )
                                                         // todo reusable icon IconAndCount
-                                                        if (item.route == "inventory" && activeTrades > 0) {
+                                                        if (item.route == AppNav.Inventory && activeTrades > 0) {
                                                             Text(
                                                                 activeTrades.toString(),
                                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -394,7 +394,7 @@ class MainActivity : AppCompatActivity() {
                                                             )
                                                         }
                                                         // todo reusable icon IconAndCount
-                                                        if (item.route == "messages" && newMessages > 0) {
+                                                        if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
                                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -408,7 +408,7 @@ class MainActivity : AppCompatActivity() {
                                                                     .padding(1.pad, .25f.pad)
                                                             )
                                                         }
-                                                        if (item.route == "stories" && (presence?.unreadStoriesCount
+                                                        if (item.route == AppNav.Stories && (presence?.unreadStoriesCount
                                                                 ?: 0) > 0
                                                         ) {
                                                             // todo reusable icon IconAndCount
@@ -462,19 +462,19 @@ class MainActivity : AppCompatActivity() {
                                                             .fillMaxWidth()
                                                     ) {
                                                         Text(item.text)
-                                                        if (item.route == "messages" && newMessages > 0) {
+                                                        if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
-                                                        if (item.route == "inventory" && activeTrades > 0) {
+                                                        if (item.route == AppNav.Inventory && activeTrades > 0) {
                                                             Text(
                                                                 activeTrades.toString(),
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
-                                                        if (item.route == "stories" && (presence?.unreadStoriesCount
+                                                        if (item.route == AppNav.Stories && (presence?.unreadStoriesCount
                                                                 ?: 0) > 0
                                                         ) {
                                                             Text(
@@ -484,7 +484,7 @@ class MainActivity : AppCompatActivity() {
                                                         }
                                                     }
                                                 },
-                                                selected = navController.currentDestination?.route == item.route,
+                                                selected = navController.currentDestination?.route == item.route.route,
                                                 onClick = {
                                                     navController.popBackStack()
                                                     navController.navigate(item.route)
@@ -727,7 +727,7 @@ private fun Modifier.safePadding(enabled: Boolean) = then(
 )
 
 data class NavButton(
-    val route: String,
+    val route: AppNav,
     val text: String,
     val icon: ImageVector,
     val selectedIcon: ImageVector? = null

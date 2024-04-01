@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.queatz.ailaai.AppNav
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
@@ -53,7 +55,7 @@ fun MessageItem(
                     getPerson(message.member!!),
                     PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
                 ) { person ->
-                    nav.navigate("profile/${person.id!!}")
+                    nav.navigate(AppNav.Profile(person.id!!))
                 }
             } else {
                 Box(Modifier.requiredSize(32.dp + 1.pad))

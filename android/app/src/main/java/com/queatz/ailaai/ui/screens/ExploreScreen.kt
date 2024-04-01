@@ -30,11 +30,13 @@ import app.ailaai.api.cards
 import app.ailaai.api.myGeo
 import app.ailaai.api.savedCards
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -382,7 +384,7 @@ fun ExploreScreen() {
                         inventories = inventories,
                         bottomPadding = viewportHeight,
                         onCard = {
-                            nav.navigate("card/$it")
+                            nav.navigate(AppNav.Page(it))
                         },
                         onInventory = {
                             showInventory = it
@@ -412,7 +414,7 @@ fun ExploreScreen() {
                                 Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                             },
                             onAction = {
-                                nav.navigate("me")
+                                nav.navigate(AppNav.Me)
                             },
                         )
                     }
@@ -443,17 +445,17 @@ fun ExploreScreen() {
                         Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                     },
                     onAction = {
-                        nav.navigate("me")
+                        nav.navigate(AppNav.Me)
                     },
                     modifier = Modifier
                         .swipeMainTabs {
                             when (val it = MainTab.entries.swipe(tab, it)) {
                                 is SwipeResult.Previous -> {
-                                    nav.navigate("schedule")
+                                    nav.navigate(AppNav.Schedule)
                                 }
 
                                 is SwipeResult.Next -> {
-                                    nav.navigate("inventory")
+                                    nav.navigate(AppNav.Inventory)
                                 }
 
                                 is SwipeResult.Select<*> -> {

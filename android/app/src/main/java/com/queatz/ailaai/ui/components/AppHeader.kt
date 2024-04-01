@@ -8,12 +8,14 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
@@ -39,7 +41,7 @@ fun AppHeader(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .clickable(
-                                interactionSource = MutableInteractionSource(),
+                                interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
                                 onTitleClick()
@@ -56,18 +58,17 @@ fun AppHeader(
                     actions()
                     me?.let { me ->
                         if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
-                            val nav = nav
                             GroupPhoto(
                                 listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),
                                 size = 40.dp,
                                 modifier = Modifier
                                     .clickable {
-                                        nav.navigate("profile/${me.id}")
+                                        nav.navigate(AppNav.Profile(me.id!!))
                                     }
                             )
                         } else {
                             IconButton({
-                                nav.navigate("profile/${me.id}")
+                                nav.navigate(AppNav.Profile(me.id!!))
                             }) {
                                 Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                             }

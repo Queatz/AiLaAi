@@ -12,10 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.nav
@@ -91,9 +93,9 @@ fun MyStoriesScreen() {
                                 .fillMaxWidth()
                         ) {
                             if (story.published == true) {
-                                nav.navigate("story/${story.id}")
+                                nav.navigate(AppNav.Story(story.id!!))
                             } else {
-                                nav.navigate("write/${story.id}")
+                                nav.navigate(AppNav.WriteStory(story.id!!))
                             }
                         }
                     }
@@ -110,7 +112,7 @@ fun MyStoriesScreen() {
                     onAction = {
                         scope.launch {
                             api.createStory(Story()) {
-                                nav.navigate("write/${it.id}")
+                                nav.navigate(AppNav.WriteStory(it.id!!))
                             }
                         }
                     }

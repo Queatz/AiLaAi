@@ -1,0 +1,26 @@
+package com.queatz.ailaai
+
+sealed class AppNav private constructor(val route: String) {
+    object Schedule : AppNav("schedule")
+    object Reminders : AppNav("reminders")
+    object Explore : AppNav("explore")
+    object Write : AppNav("write")
+    object Messages : AppNav("messages")
+    object Stories : AppNav("stories")
+    object Inventory : AppNav("inventory")
+    object Items : AppNav("items")
+    object StickerPacks : AppNav("sticker-packs")
+    object Me : AppNav("me")
+    object Settings : AppNav("settings")
+    class Profile(id: String) : AppNav("profile/$id")
+    class EditProfile(id: String) : AppNav("profile/$id/edit")
+    class Group(id: String) : AppNav("group/$id")
+    class Page(id: String) : AppNav("card/$id")
+    class Story(id: String) : AppNav("story/$id")
+    class WriteStory(id: String) : AppNav("write/$id")
+    class Reminder(id: String) : AppNav("reminder/$id")
+    class EditCard(id: String) : AppNav("card/$id/edit")
+    class StickerPack(id: String) : AppNav("sticker-pack/$id")
+    class EditStickerPack(id: String) : AppNav("sticker-pack/$id/edit")
+    class LinkDevice(token: String) : AppNav("link-device/$token")
+}

@@ -22,6 +22,7 @@ import androidx.compose.ui.zIndex
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import app.ailaai.api.*
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadCardPhotoFromUri
 import com.queatz.ailaai.api.uploadCardVideoFromUri
@@ -355,7 +356,7 @@ fun CardScreen(cardId: String) {
             create = true
         ) {
             reloadCards()
-            nav.navigate("card/${it.id}")
+            nav.navigate(AppNav.Page(it.id!!))
         }
     }
 
@@ -504,14 +505,14 @@ fun CardScreen(cardId: String) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.view_profile))
                         }, {
-                            nav.navigate("profile/${card.person!!}")
+                            nav.navigate(AppNav.Profile(card.person!!))
                             showMenu = false
                         })
                         if (card.parent != null) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.open_enclosing_card))
                             }, {
-                                nav.navigate("card/${card.parent!!}")
+                                nav.navigate(AppNav.Page(card.parent!!))
                                 showMenu = false
                             })
                         }
@@ -673,7 +674,7 @@ fun CardScreen(cardId: String) {
                                 stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
                                 selected = card.content?.notBlank != null
                             ) {
-                                nav.navigate("card/${card.id!!}/edit")
+                                nav.navigate(AppNav.EditCard(card.id!!))
                             }
                         }
                     }
@@ -782,7 +783,7 @@ fun CardScreen(cardId: String) {
                                     showTitle = true,
                                     hideCreators = card?.person?.inList()?.let { it + (card?.collaborators ?: emptyList()) },
                                     onClick = {
-                                        nav.navigate("card/${it.id!!}")
+                                        nav.navigate(AppNav.Page(it.id!!))
                                     },
                                     scope = scope,
                                     playVideo = playingVideo == it && !isAtTop,
@@ -929,7 +930,7 @@ fun CardScreen(cardId: String) {
                 scope.launch {
                     // todo open conversations dialog
                     api.createGroup(listOf(me!!.id!!, person.id!!), reuse = true) {
-                        nav.navigate("group/${it.id!!}")
+                        nav.navigate(AppNav.Group(it.id!!))
                         openCollaboratorsDialog = false
                     }
                 }

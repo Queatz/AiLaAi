@@ -7,7 +7,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.db.Person
 import kotlinx.datetime.Instant
@@ -49,7 +51,7 @@ fun StoryAuthors(navController: NavController, publishDate: Instant?, authors: L
         )
     ) {
         authorsText.getStringAnnotations(it, it).firstOrNull()?.tag?.let { id ->
-            navController.navigate("profile/$id")
+            navController.navigate(AppNav.Profile(id))
         }
     }
 }

@@ -16,9 +16,11 @@ import androidx.datastore.preferences.core.edit
 import com.huawei.hms.hmsscankit.ScanKitActivity
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.nav
@@ -43,19 +45,19 @@ fun ScanQrCodeButton() {
     ScanQrCodeButton {
         when (it) {
             is ScanQrCodeResult.Group -> {
-                nav.navigate("group/${it.id}")
+                nav.navigate(AppNav.Group(it.id))
             }
             is ScanQrCodeResult.Page -> {
-                nav.navigate("page/${it.id}")
+                nav.navigate(AppNav.Page(it.id))
             }
             is ScanQrCodeResult.Story -> {
-                nav.navigate("story/${it.id}")
+                nav.navigate(AppNav.Story(it.id))
             }
             is ScanQrCodeResult.Profile -> {
-                nav.navigate("profile/${it.id}")
+                nav.navigate(AppNav.Profile(it.id))
             }
             is ScanQrCodeResult.LinkDevice -> {
-                nav.navigate("link-device/${it.token}")
+                nav.navigate(AppNav.LinkDevice(it.token))
             }
         }
     }

@@ -6,6 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.navigation.NavController
+import com.queatz.ailaai.AppNav
+
+fun NavController.navigate(route: AppNav) = navigate(route.route)
 
 fun NavController.popBackStackOrFinish() {
     if (!popBackStack()) {

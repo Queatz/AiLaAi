@@ -33,8 +33,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cancelTrade
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.toast
@@ -468,7 +470,7 @@ fun TradeDialog(
             }
         ) {
             showMembers = false
-            nav.navigate("profile/${it.id!!}")
+            nav.navigate(AppNav.Profile(it.id!!))
         }
     }
 

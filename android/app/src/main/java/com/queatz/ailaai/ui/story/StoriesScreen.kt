@@ -14,22 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import app.ailaai.api.myGeo
 import at.bluesource.choicesdk.maps.common.LatLng
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
-import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -125,10 +123,10 @@ fun StoriesScreen() {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                nav.navigate("inventory")
+                                nav.navigate(AppNav.Inventory)
                             }
                             is SwipeResult.Next -> {
-                                nav.navigate("messages")
+                                nav.navigate(AppNav.Messages)
                             }
                             is SwipeResult.Select<*> -> {
                                 tab = it.item as MainTab
@@ -182,11 +180,11 @@ fun StoriesScreen() {
                         },
                         onAction = {
                             if (thought.isBlank()) {
-                                nav.navigate("write")
+                                nav.navigate(AppNav.Write)
                             } else {
                                 scope.launch {
                                     api.createStory(Story(title = thought)) {
-                                        nav.navigate("write/${it.id}")
+                                        nav.navigate(AppNav.WriteStory(it.id!!))
                                     }
                                 }
                             }

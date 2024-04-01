@@ -18,8 +18,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.newReminder
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.nav
@@ -91,7 +93,7 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
                 if (value.isNotBlank()) {
                     addReminder()
                 } else {
-                    nav.navigate("reminders")
+                    nav.navigate(AppNav.Reminders)
                 }
             },
             onLongClick = {
