@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.ailaai.api.activeCardsOfPerson
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
@@ -82,6 +83,7 @@ import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.shareAsUrl
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
@@ -670,6 +672,15 @@ fun ProfileScreen(personId: String) {
                                     color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
                                     style = MaterialTheme.typography.titleLarge,
                                     textAlign = TextAlign.Center
+                                )
+                                Text(person?.seen?.timeAgo()?.let { timeAgo ->
+                                    "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                                } ?: "",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
+                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
                                 )
                                 if (!isMe) {
                                     Row(
