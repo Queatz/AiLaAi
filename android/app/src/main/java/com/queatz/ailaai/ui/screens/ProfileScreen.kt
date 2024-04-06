@@ -681,6 +681,7 @@ fun ProfileScreen(personId: String) {
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .padding(bottom = .5f.pad)
                                 )
                                 if (!isMe) {
                                     Row(

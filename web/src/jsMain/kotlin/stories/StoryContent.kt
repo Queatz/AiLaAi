@@ -1,36 +1,15 @@
 package stories
 
-import com.queatz.db.Person
 import com.queatz.db.Story
-import com.queatz.widgets.Widgets
+import com.queatz.db.StoryContent
 import json
-import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import notBlank
-
-// todo move these to ailaai-shared
-@Serializable
-sealed class StoryContent {
-    object Divider : StoryContent()
-    class Title(var title: String, val id: String) : StoryContent()
-    class Authors(var publishDate: Instant?, var authors: List<Person>) : StoryContent()
-    @Serializable
-    class Section(var section: String) : StoryContent()
-    @Serializable
-    class Text(var text: String) : StoryContent()
-    @Serializable
-    class Groups(var groups: List<String>) : StoryContent()
-    @Serializable
-    class Cards(var cards: List<String>) : StoryContent()
-    @Serializable
-    class Photos(var photos: List<String>, var aspect: Float = 0.75f) : StoryContent()
-    @Serializable
-    class Audio(var audio: String) : StoryContent()
-    @Serializable
-    class Widget(var widget: Widgets, var id: String) : StoryContent()
-}
 
 // todo move these to ailaai-shared
 fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let { content ->
@@ -49,6 +28,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
             e.printStackTrace()
             null
         }
+        "button" -> json.decodeFromJsonElement<StoryContent.Button>(content)
         else -> null
     }
 }

@@ -201,3 +201,13 @@ data class TradeExtended(
     val people: List<Person>? = null,
     val inventoryItems: List<InventoryItemExtended>? = null
 )
+
+@Serializable
+data class RunScriptBody(
+    val data: String? = null
+)
+
+@Serializable
+data class ScriptResult(
+    val content: List<StoryContent>? = null
+)

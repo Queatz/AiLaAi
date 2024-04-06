@@ -1,7 +1,6 @@
 package app.ailaai.api
 
 import com.queatz.db.*
-import io.ktor.client.request.forms.*
 import io.ktor.http.*
 
 suspend fun Api.people(

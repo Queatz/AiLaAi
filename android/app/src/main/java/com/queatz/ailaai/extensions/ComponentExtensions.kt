@@ -72,16 +72,16 @@ fun LazyGridState.isAtTop() = remember {
     }
 }
 
-fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
+fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState, factor: Float = 3f) = then(
     Modifier
         .graphicsLayer(alpha = 0.99f)
         .drawWithContent {
             drawContent()
 
-            val h = scrollState.value.toFloat().coerceAtMost(viewport.height / 3f)
+            val h = scrollState.value.toFloat().coerceAtMost(viewport.height / factor)
             val h2 = (
                     scrollState.maxValue.toFloat() - scrollState.value.toFloat()
-                    ).coerceAtMost(viewport.height / 3f)
+                    ).coerceAtMost(viewport.height / factor)
 
             if (scrollState.value != 0) {
                 drawRect(
@@ -107,16 +107,16 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState) = then(
         }
 )
 
-fun Modifier.horizontalFadingEdge(viewport: Size, scrollState: ScrollState) = then(
+fun Modifier.horizontalFadingEdge(viewport: Size, scrollState: ScrollState, factor: Float = 6f) = then(
     Modifier
         .graphicsLayer(alpha = 0.99f)
         .drawWithContent {
             drawContent()
 
-            val w = scrollState.value.toFloat().coerceAtMost(viewport.width / 6f)
+            val w = scrollState.value.toFloat().coerceAtMost(viewport.width / factor)
             val w2 = (
                     scrollState.maxValue.toFloat() - scrollState.value.toFloat()
-                    ).coerceAtMost(viewport.width / 6f)
+                    ).coerceAtMost(viewport.width / factor)
 
             if (scrollState.value != 0) {
                 drawRect(

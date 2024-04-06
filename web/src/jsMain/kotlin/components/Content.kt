@@ -1,10 +1,12 @@
 package components
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import app.AppNavigation
 import app.appNav
-import app.softwork.routingcompose.Router
-import com.queatz.db.Card
 import kotlinx.coroutines.launch
 import notEmpty
 import stories.StoryContents

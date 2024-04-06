@@ -1,55 +1,27 @@
 plugins {
-    application
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.22"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("jvm")
     id("com.ailaai.shared.config")
 }
 
 group = "com.queatz"
 version = "0.0.1"
 
-application {
-    mainClass.set("com.queatz.ApplicationKt")
-
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
-}
-
 repositories {
     mavenCentral()
 }
 
-val osName = System.getProperty("os.name").lowercase()
-val tcnative_classifier = when {
-    osName.contains("win") -> "windows-x86_64"
-    osName.contains("linux") -> ""
-    osName.contains("mac") -> "osx-x86_64"
-    else -> null
-}
-
 dependencies {
-    api(project(":scripts"))
-    implementation("app.ailaai.shared:push")
     implementation("app.ailaai.shared:models")
-    implementation("app.ailaai.shared:widgets")
-    implementation("app.ailaai.shared:reminders")
-
-    if (tcnative_classifier != null) {
-        implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-x86_64")
-    } else {
-        implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final")
-    }
-    implementation("ch.qos.logback:logback-classic:${versions.logback}")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-common:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:${versions.kotlin}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${versions.jackson}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${versions.jackson}")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${versions.jackson}")
-    implementation("com.arangodb:arangodb-java-driver:${versions.arango}")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies:${versions.kotlin}")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven:${versions.kotlin}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${versions.serialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
+    runtimeOnly("org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable:${versions.kotlin}")
     implementation("io.ktor:ktor-server-core-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-compression-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:${versions.ktor}")

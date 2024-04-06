@@ -8,12 +8,12 @@ import app.appNav
 import appString
 import com.queatz.ailaai.api.storyByUrl
 import com.queatz.db.Story
+import com.queatz.db.StoryContent
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
-import stories.StoryContent
 import stories.StoryContents
 import stories.full
 

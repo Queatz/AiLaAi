@@ -13,6 +13,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.db.Story
+import com.queatz.db.StoryContent
 
 @Composable
 fun StoryScreen(storyId: String) {

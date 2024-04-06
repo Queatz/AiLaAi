@@ -5,11 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.navigation.NavController
 import com.queatz.ailaai.ui.story.StoryContents
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.story.asStoryContents
-import com.queatz.db.Person
 
 @Composable
 fun CardContent(

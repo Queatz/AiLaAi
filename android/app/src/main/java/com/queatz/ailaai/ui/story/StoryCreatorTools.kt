@@ -29,6 +29,7 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.widget.AddWidgetDialog
+import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
 import createWidget
@@ -96,6 +97,8 @@ fun StoryCreatorTools(
                                 )
                             }
                         }
+
+                        else -> {}
                     }
                 }
             },
@@ -122,6 +125,8 @@ fun StoryCreatorTools(
                                 StoryContent.Text("")
                             )
                         }
+
+                        else -> {}
                     }
                 }
             },
@@ -162,6 +167,8 @@ fun StoryCreatorTools(
                         )
                     }
                 }
+
+                else -> {}
             }
         }
     }
@@ -171,6 +178,10 @@ fun StoryCreatorTools(
             showWidgetsMenu = false
         }) {
             // todo add search here
+            menuItem(stringResource(R.string.script)) {
+                addWidget = Widgets.Script
+                showWidgetsMenu = false
+            }
             menuItem(stringResource(R.string.impact_effort_table)) {
                 scope.launch {
                     api.createWidget(

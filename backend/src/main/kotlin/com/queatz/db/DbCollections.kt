@@ -112,6 +112,10 @@ fun collections() = listOf(
     Widget::class.db {
         ensurePersistentIndex(listOf(Widget::person.name), PersistentIndexOptions())
     },
+    Script::class.db {
+        ensurePersistentIndex(listOf(Script::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Script::name.name), PersistentIndexOptions())
+    },
     Item::class.db {
         ensurePersistentIndex(listOf(Item::name.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Item::creator.name), PersistentIndexOptions())

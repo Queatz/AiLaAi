@@ -1,6 +1,5 @@
 package app.widget
 
-import PageTreeData
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +17,7 @@ import app.softwork.routingcompose.Router
 import application
 import com.queatz.db.Card
 import com.queatz.db.Widget
+import com.queatz.widgets.widgets.PageTreeData
 import components.getConversation
 import json
 import kotlinx.browser.window
@@ -28,7 +28,6 @@ import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.px

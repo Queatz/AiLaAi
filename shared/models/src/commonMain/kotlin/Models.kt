@@ -317,6 +317,13 @@ class Widget(
 ) : Model()
 
 @Serializable
+class Script(
+    var person: String? = null,
+    var name: String? = null,
+    var source: String? = null
+) : Model()
+
+@Serializable
 data class ReminderSchedule(
     /**
      * 0 - 23 = hour of day

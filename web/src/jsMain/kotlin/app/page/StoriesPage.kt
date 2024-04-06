@@ -17,6 +17,7 @@ import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.api.updateStory
 import com.queatz.db.GroupExtended
 import com.queatz.db.Story
+import com.queatz.db.StoryContent
 import com.queatz.db.asGeo
 import components.Loading
 import defaultGeo

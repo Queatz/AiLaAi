@@ -626,6 +626,17 @@
     <string name="search_groups">Search groups</string>
     <string name="show_more">Show more</string>
     <string name="page_tree">Page tree</string>
+    <string name="script">Script</string>
+    <string name="new_script">New script</string>
+    <string name="scripts">Scripts</string>
+    <string name="script_name">Script name</string>
+    <string name="create_script">Create script</string>
+    <string name="source">Source</string>
+    <string name="search_scripts">Search scripts</string>
+    <string name="script_source">Script source</string>
+    <string name="choose_this_script">Choose this script</string>
+    <string name="script_data">Script data</string>
+    <string name="templates">Templates</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

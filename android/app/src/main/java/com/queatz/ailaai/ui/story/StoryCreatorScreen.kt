@@ -46,6 +46,7 @@ sealed class StorySource {
     data class Card(val id: String) : StorySource()
     data class Story(val id: String) : StorySource()
     data class Profile(val id: String) : StorySource()
+    data class Script(val id: String) : StorySource()
 }
 
 @Composable
@@ -102,6 +103,7 @@ fun StoryCreatorScreen(
                     recompose.invalidate()
                 }
             }
+            else -> {}
         }
         isLoading = false
     }
@@ -182,6 +184,8 @@ fun StoryCreatorScreen(
                     edited = false
                 }
             }
+
+            else -> {}
         }
 
         return !hasError
@@ -351,6 +355,8 @@ fun StoryCreatorScreen(
                             })
                         }
                     }
+
+                    else -> {}
                 }
             }
 
@@ -398,7 +404,7 @@ fun StoryCreatorScreen(
             storyContents.forEachIndexed { partIndex, part ->
                 when (part) {
                     is StoryContent.Title -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
                             val focusRequester = remember { FocusRequester() }
                             LaunchedEffect(currentFocus) {
                                 if (currentFocus == partIndex) {
@@ -425,7 +431,7 @@ fun StoryCreatorScreen(
                     }
 
                     is StoryContent.Section -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
                             val focusRequester = remember { FocusRequester() }
                             LaunchedEffect(currentFocus) {
                                 if (currentFocus == partIndex) {
@@ -455,7 +461,7 @@ fun StoryCreatorScreen(
                     }
 
                     is StoryContent.Text -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
                             val focusRequester = remember { FocusRequester() }
                             LaunchedEffect(currentFocus) {
                                 if (currentFocus == partIndex) {
@@ -483,7 +489,7 @@ fun StoryCreatorScreen(
                     }
 
                     is StoryContent.Audio -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.key) {
+                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
                             Card(
                                 shape = MaterialTheme.shapes.large,
                                 modifier = Modifier
@@ -515,7 +521,7 @@ fun StoryCreatorScreen(
                         itemsIndexed(
                             part.groups,
                             span = { _, _ -> GridItemSpan(maxLineSpan) },
-                            key = { index, it -> "${part.key}.$it" }
+                            key = { index, it -> "${part.hashCode()}.$it" }
                         ) { index, groupId ->
                             var group by remember { mutableStateOf<GroupExtended?>(null) }
                             var showGroupMenu by rememberStateOf(false)
@@ -651,7 +657,7 @@ fun StoryCreatorScreen(
                     }
 
                     is StoryContent.Cards -> {
-                        itemsIndexed(part.cards, key = { index, it -> "${part.key}.$it" }) { index, cardId ->
+                        itemsIndexed(part.cards, key = { index, it -> "${part.hashCode()}.$it" }) { index, cardId ->
                             var showCardMenu by rememberStateOf(false)
                             var showAddCardDialog by rememberStateOf(false)
                             var showReorderDialog by rememberStateOf(false)
@@ -762,7 +768,7 @@ fun StoryCreatorScreen(
                             span = { index, item ->
                                 GridItemSpan(if (index == 0) maxLineSpan else if (index % 3 == 1) 1 else maxCurrentLineSpan)
                             },
-                            key = { index, it -> "${part.key}.$it" }
+                            key = { index, it -> "${part.hashCode()}.$it" }
                         ) { index, it ->
                             var showPhotoMenu by rememberStateOf(false)
                             var showPhotoAspectMenu by rememberStateOf(false)
@@ -808,6 +814,8 @@ fun StoryCreatorScreen(
                                                         }
                                                     }
                                                 }
+
+                                                else -> {}
                                             }
                                         }
                                     },
@@ -832,6 +840,8 @@ fun StoryCreatorScreen(
                                                         photos += photoUrls
                                                     }
                                                 }
+
+                                                else -> {}
                                             }
                                         }
                                     }
@@ -965,11 +975,37 @@ fun StoryCreatorScreen(
                                         showWidgetMenu = false
                                         removePartAt(partIndex)
                                     }
+                                    // todo edit (same-ish as AddWidgetDialog)
                                 }
                             }
 
                             Stub(part.widget.stringResource) {
                                 showWidgetMenu = true
+                            }
+                        }
+                    }
+
+                    is StoryContent.Button -> {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            var showButtonMenu by rememberStateOf(false)
+
+                            if (showButtonMenu) {
+                                Menu({
+                                    showButtonMenu = false
+                                }) {
+                                    menuItem(stringResource(R.string.remove)) {
+                                        showButtonMenu = false
+                                        removePartAt(partIndex)
+                                    }
+                                }
+                            }
+
+                            Button(
+                                onClick = {
+                                    showButtonMenu = true
+                                }
+                            ) {
+                                Text(part.text)
                             }
                         }
                     }
@@ -992,6 +1028,7 @@ val Widgets.stringResource
         when (this) {
             Widgets.ImpactEffortTable -> R.string.impact_effort_table
             Widgets.PageTree -> R.string.page_tree
+            Widgets.Script -> R.string.script
             else -> R.string.widget
         }
     )

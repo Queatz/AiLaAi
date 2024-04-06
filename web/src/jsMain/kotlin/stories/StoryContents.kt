@@ -10,9 +10,11 @@ import app.group.GroupInfo
 import app.group.GroupItem
 import app.widget.ImpactEffortTable
 import app.widget.PageTreeWidget
+import app.widget.ScriptWidget
 import appString
 import baseUrl
 import com.queatz.db.GroupExtended
+import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import components.CardItem
 import components.Icon
@@ -37,6 +39,7 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
 fun StoryContents(
     storyContent: List<StoryContent>,
     onGroupClick: (GroupExtended) -> Unit,
+    onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     openInNewWindow: Boolean = false
 ) {
     Style(StoryStyles)
@@ -193,6 +196,21 @@ fun StoryContents(
                     Widgets.PageTree -> {
                         PageTreeWidget(part.id)
                     }
+                    Widgets.Script -> {
+                        ScriptWidget(part.id)
+                    }
+                }
+            }
+
+            is StoryContent.Button -> {
+                Div({
+                    classes(Styles.button)
+
+                    onClick {
+                        onButtonClick?.invoke(part.script, part.data)
+                    }
+                }) {
+                    Text(part.text)
                 }
             }
         }

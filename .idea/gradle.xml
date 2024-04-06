@@ -68,6 +68,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/backend" />
+            <option value="$PROJECT_DIR$/backend/scripts" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/api" />
             <option value="$PROJECT_DIR$/shared/config" />

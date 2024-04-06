@@ -23,12 +23,12 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
-import com.queatz.ailaai.ui.story.StoryContent
 import com.queatz.ailaai.ui.story.Stub
 import com.queatz.ailaai.ui.story.stringResource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
+import com.queatz.db.StoryContent
 
 @Composable
 fun ReorderStoryContentsDialog(
@@ -45,7 +45,7 @@ fun ReorderStoryContentsDialog(
         },
         list = true,
         items = currentStoryContents,
-        key = { it.key },
+        key = { it.hashCode().toString() },
         onMove = { from, to ->
             onStoryContents(
                 currentStoryContents.toMutableList().apply {
@@ -187,6 +187,10 @@ fun ReorderStoryContentsDialog(
 
             is StoryContent.Widget -> {
                 Stub(it.widget.stringResource)
+            }
+
+            is StoryContent.Button -> {
+                Stub(it.text)
             }
 
             else -> {

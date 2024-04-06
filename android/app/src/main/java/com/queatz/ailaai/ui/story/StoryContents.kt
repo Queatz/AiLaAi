@@ -33,9 +33,12 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
+import com.queatz.ailaai.ui.script.ScriptContent
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
+import com.queatz.db.StoryContent
+import com.queatz.widgets.Widgets
 
 @Composable
 fun StoryContents(
@@ -45,6 +48,7 @@ fun StoryContents(
     modifier: Modifier = Modifier,
     bottomContentPadding: Dp = 0.dp,
     fade: Boolean = false,
+    onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
@@ -60,7 +64,7 @@ fun StoryContents(
             },
             text = {
                 // todo translate
-               Text("Widgets are currently only interactable on web.")
+               Text("This widget is currently only interactable on web.")
             },
             dismissButton = {
                 TextButton(
@@ -279,13 +283,32 @@ fun StoryContents(
                     }
 
                     is StoryContent.Widget -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            DisableSelection {
-                                Stub(content.widget.stringResource) {
-                                    if (source is StorySource.Card) {
-                                        showOpenWidgetDialog = true
+                        when (content.widget) {
+                            Widgets.Script -> {
+                                ScriptContent(content.id)
+                            }
+                            else -> {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    DisableSelection {
+                                        Stub(content.widget.stringResource) {
+                                            if (source is StorySource.Card) {
+                                                showOpenWidgetDialog = true
+                                            }
+                                        }
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    is StoryContent.Button -> {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Button(
+                                onClick = {
+                                    onButtonClick?.invoke(content.script, content.data)
+                                }
+                            ) {
+                                Text(content.text)
                             }
                         }
                     }

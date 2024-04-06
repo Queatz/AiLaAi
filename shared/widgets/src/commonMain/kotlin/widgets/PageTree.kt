@@ -1,3 +1,5 @@
+package com.queatz.widgets.widgets
+
 import kotlinx.serialization.Serializable
 
 @Serializable
