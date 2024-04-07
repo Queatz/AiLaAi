@@ -61,12 +61,13 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
         if (scriptUi.isNotEmpty()) {
             Box(
                 modifier = Modifier
-                    .heightIn(max = 2096.dp)
+                    .heightIn(max = 512.dp)
             ) {
                 StoryContents(
                     null,
                     scriptUi,
                     rememberLazyGridState(),
+                    fade = true,
                     onButtonClick = { script, data ->
                         scope.launch {
                             api.runScript(

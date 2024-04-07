@@ -12,6 +12,8 @@ repositories {
 
 dependencies {
     implementation("app.ailaai.shared:models")
+    implementation("org.apache.maven.resolver:maven-resolver-connector-basic:1.9.18")
+    implementation("org.apache.maven.resolver:maven-resolver-transport-http:1.9.18")
     implementation("org.jetbrains.kotlin:kotlin-scripting-common:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:${versions.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:${versions.kotlin}")

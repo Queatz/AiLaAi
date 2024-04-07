@@ -22,7 +22,7 @@ class RunScript(private val script: Script, private val data: String?) {
         var content: List<StoryContent>? = null
 
         val result = BasicJvmScriptingHost().eval(
-            script.source!!.replace("@Serializable", "@Suppress(\"PROVIDED_RUNTIME_TOO_LOW\") @Serializable").toScriptSource(),
+            "@file:Suppress(\"PROVIDED_RUNTIME_TOO_LOW\")\n\n${script.source!!}".toScriptSource(),
             createJvmCompilationConfigurationFromTemplate<ScriptWithMavenDeps> {
                 providedProperties(
                     "me" to Person::class.createType(nullable = true),
@@ -46,8 +46,6 @@ class RunScript(private val script: Script, private val data: String?) {
                 )
             }
         )
-
-        println(result.toString())
 
         return if (result.isError() || (result as? ResultWithDiagnostics.Success)?.value?.returnValue is ResultValue.Error) {
             ScriptResult(

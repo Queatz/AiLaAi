@@ -15,9 +15,15 @@ import com.queatz.db.RunScriptBody
 import com.queatz.db.ScriptResult
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.ScriptData
+import components.Loading
 import json
 import kotlinx.coroutines.launch
 import notEmpty
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Div
+import r
 import stories.StoryContents
 import widget
 
@@ -66,5 +72,15 @@ fun ScriptWidget(widgetId: String) {
                 }
             }
         )
+    } ?: run {
+        Div({
+            style {
+                width(100.percent)
+                padding(1.r)
+            }
+        }) {
+            Loading()
+        }
+        // todo error state
     }
 }

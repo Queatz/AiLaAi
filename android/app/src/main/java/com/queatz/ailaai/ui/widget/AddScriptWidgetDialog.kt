@@ -97,7 +97,7 @@ private val templates = listOf(
         name = "Import a library",
         source = """
             @file:Repository("https://jitpack.io")
-            @file:DependsOn("com.github.cosinekitty:astronomy")
+            @file:DependsOn("com.github.cosinekitty:astronomy:v2.1.19")
             
             import io.github.cosinekitty.astronomy.*
             import java.lang.System.*
@@ -432,9 +432,9 @@ fun AddScriptWidgetDialog(
                 
                 The following variables are passed to into scripts:
                 
-                me: Person // The current user
                 self: String // The id of this script
-                data: String // Data passed to the script
+                me: Person? // The current user, if signed in, null if signed out
+                data: String? // Data passed to the script, if any
                 
                 Person has the following fields: id, name, photo
                 
@@ -478,7 +478,7 @@ fun AddScriptWidgetDialog(
                 You can depend on packages from Maven Repositories.
                 
                 @file:Repository("<maven url>")
-                @file:DependsOn("<package>:<version>")
+                @file:DependsOn("<package>")
                 
                 Learn more at kotlinlang.org
             """.trimIndent(),
