@@ -68,6 +68,7 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
                     scriptUi,
                     rememberLazyGridState(),
                     fade = true,
+                    horizontalPadding = 0.dp,
                     onButtonClick = { script, data ->
                         scope.launch {
                             api.runScript(

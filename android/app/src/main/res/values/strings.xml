@@ -637,6 +637,7 @@
     <string name="choose_this_script">Choose this script</string>
     <string name="script_data">Script data</string>
     <string name="templates">Templates</string>
+    <string name="fork">Fork</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

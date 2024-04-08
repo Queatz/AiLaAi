@@ -15,6 +15,7 @@ fun Db.allScripts(offset: Int = 0, limit: Int = 20) = list(
     Script::class,
     """
         for script in @@collection
+            sort script.${f(Script::createdAt)} desc
             limit @offset, @limit
             return script
     """.trimIndent(),
@@ -28,7 +29,7 @@ fun Db.searchScripts(search: String, offset: Int = 0, limit: Int = 20) = list(
     Script::class,
     """
         for script in @@collection
-            filter contains(lower(x.${f(Script::name)}), @search)
+            filter contains(lower(script.${f(Script::name)}), @search)
             sort script.${f(Script::createdAt)} desc
             limit @offset, @limit
             return script

@@ -46,7 +46,8 @@ fun StoryContents(
     content: List<StoryContent>,
     state: LazyGridState,
     modifier: Modifier = Modifier,
-    bottomContentPadding: Dp = 0.dp,
+    bottomContentPadding: Dp = 0.pad,
+    horizontalPadding: Dp = 2.pad,
     fade: Boolean = false,
     onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null
@@ -93,9 +94,9 @@ fun StoryContents(
             state = state,
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(
-                2.pad,
+                horizontalPadding,
                 0.dp,
-                2.pad,
+                horizontalPadding,
                 2.pad + bottomContentPadding
             ),
             horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),

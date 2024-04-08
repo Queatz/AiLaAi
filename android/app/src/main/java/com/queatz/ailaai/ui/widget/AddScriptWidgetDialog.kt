@@ -3,12 +3,15 @@ package com.queatz.ailaai.ui.widget
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Add
@@ -32,6 +35,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import app.ailaai.api.createScript
@@ -56,10 +60,11 @@ import kotlinx.serialization.encodeToString
 
 private sealed class AddScriptWidgetDialogState {
     data object Select : AddScriptWidgetDialogState()
-    data object Script : AddScriptWidgetDialogState()
+    data object EditScript : AddScriptWidgetDialogState()
     data object Templates : AddScriptWidgetDialogState()
     data object Search : AddScriptWidgetDialogState()
-    data class AddData(val script: com.queatz.db.Script) : AddScriptWidgetDialogState()
+    data class Preview(val script: Script) : AddScriptWidgetDialogState()
+    data class AddData(val script: Script) : AddScriptWidgetDialogState()
 }
 
 private val templates = listOf(
@@ -230,7 +235,7 @@ fun AddScriptWidgetDialog(
                                 Icons.Outlined.Add,
                                 stringResource(R.string.new_script)
                             ) {
-                                state = AddScriptWidgetDialogState.Script
+                                state = AddScriptWidgetDialogState.EditScript
                             }
                             item(
                                 Icons.Outlined.Description,
@@ -246,7 +251,8 @@ fun AddScriptWidgetDialog(
                             }
                         }
                     }
-                    is AddScriptWidgetDialogState.Script -> {
+
+                    is AddScriptWidgetDialogState.EditScript -> {
                         val focusRequester = remember { FocusRequester() }
 
                         LaunchedEffect(Unit) {
@@ -274,6 +280,11 @@ fun AddScriptWidgetDialog(
                             label = { Text(stringResource(R.string.script_source)) },
                             shape = MaterialTheme.shapes.large,
                             singleLine = false,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                autoCorrect = false,
+                                keyboardType = KeyboardType.Ascii,
+                                capitalization = KeyboardCapitalization.None
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f, fill = false)
@@ -281,6 +292,7 @@ fun AddScriptWidgetDialog(
                                 .heightIn(min = 48.dp)
                         )
                     }
+
                     is AddScriptWidgetDialogState.Search -> {
                         val focusRequester = remember { FocusRequester() }
                         var search by rememberStateOf("")
@@ -290,7 +302,7 @@ fun AddScriptWidgetDialog(
                             focusRequester.requestFocus()
                         }
 
-                        LaunchedEffect(Unit) {
+                        LaunchedEffect(search) {
                             api.scripts(search.notBlank) {
                                 scripts = it
                             }
@@ -318,18 +330,19 @@ fun AddScriptWidgetDialog(
                         ) {
                             items(scripts) {
                                 Text(
-                                    it.name ?: stringResource(R.string.new_script),
+                                    it.name?.notBlank ?: stringResource(R.string.new_script),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(MaterialTheme.shapes.large)
                                         .clickable {
-                                            state = AddScriptWidgetDialogState.AddData(it)
+                                            state = AddScriptWidgetDialogState.Preview(it)
                                         }
                                         .padding(1.pad)
                                 )
                             }
                         }
                     }
+
                     is AddScriptWidgetDialogState.Templates -> {
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(1.pad),
@@ -338,20 +351,21 @@ fun AddScriptWidgetDialog(
                         ) {
                             items(templates) {
                                 Text(
-                                    it.name ?: stringResource(R.string.new_script),
+                                    it.name?.notBlank ?: stringResource(R.string.new_script),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(MaterialTheme.shapes.large)
                                         .clickable {
                                             newScriptName = it.name ?: ""
                                             newScriptSource = it.source ?: ""
-                                            state = AddScriptWidgetDialogState.Script
+                                            state = AddScriptWidgetDialogState.EditScript
                                         }
                                         .padding(1.pad)
                                 )
                             }
                         }
                     }
+
                     is AddScriptWidgetDialogState.AddData -> {
                         OutlinedTextField(
                             scriptData,
@@ -364,10 +378,27 @@ fun AddScriptWidgetDialog(
                                 .heightIn(min = 48.dp)
                         )
                     }
+
+                    is AddScriptWidgetDialogState.Preview -> {
+                        val script = (state as AddScriptWidgetDialogState.Preview).script
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Text(
+                                script.name?.notBlank ?: stringResource(R.string.new_script),
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier
+                                    .padding(bottom = 1.pad)
+                            )
+                            Text(script.source ?: "")
+                        }
+                    }
                 }
             },
             actions = {
-                if (state is AddScriptWidgetDialogState.Script) {
+                if (state is AddScriptWidgetDialogState.EditScript) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -381,15 +412,46 @@ fun AddScriptWidgetDialog(
                         }
                     }
                 }
-                TextButton(
-                    {
-                        onDismissRequest()
+                when (state) {
+                    is AddScriptWidgetDialogState.Preview -> {
+                        TextButton(
+                            {
+                                state = AddScriptWidgetDialogState.Search
+                            }
+                        ) {
+                            Text(stringResource(R.string.go_back))
+                        }
                     }
-                ) {
-                    Text(stringResource(R.string.close))
+                    is AddScriptWidgetDialogState.Templates -> {
+                        TextButton(
+                            {
+                                state = AddScriptWidgetDialogState.Select
+                            }
+                        ) {
+                            Text(stringResource(R.string.go_back))
+                        }
+                    }
+                    is AddScriptWidgetDialogState.Search -> {
+                        TextButton(
+                            {
+                                state = AddScriptWidgetDialogState.Select
+                            }
+                        ) {
+                            Text(stringResource(R.string.go_back))
+                        }
+                    }
+                    else -> {
+                        TextButton(
+                            {
+                                onDismissRequest()
+                            }
+                        ) {
+                            Text(stringResource(R.string.close))
+                        }
+                    }
                 }
                 when (state) {
-                    is AddScriptWidgetDialogState.Script -> {
+                    is AddScriptWidgetDialogState.EditScript -> {
                         TextButton(
                             {
                                 createScript(
@@ -402,6 +464,7 @@ fun AddScriptWidgetDialog(
                             Text(stringResource(R.string.create_script))
                         }
                     }
+
                     is AddScriptWidgetDialogState.AddData -> {
                         TextButton(
                             {
@@ -415,6 +478,28 @@ fun AddScriptWidgetDialog(
                             Text(stringResource(R.string.choose_this_script))
                         }
                     }
+
+                    is AddScriptWidgetDialogState.Preview -> {
+                        TextButton(
+                            {
+                                newScriptName = (state as AddScriptWidgetDialogState.Preview).script.name ?: ""
+                                newScriptSource = (state as AddScriptWidgetDialogState.Preview).script.source ?: ""
+                                state = AddScriptWidgetDialogState.EditScript
+                            },
+                            enabled = !isLoading
+                        ) {
+                            Text(stringResource(R.string.fork))
+                        }
+                        TextButton(
+                            {
+                                state = AddScriptWidgetDialogState.AddData((state as AddScriptWidgetDialogState.Preview).script)
+                            },
+                            enabled = !isLoading
+                        ) {
+                            Text(stringResource(R.string.choose_this_script))
+                        }
+                    }
+
                     else -> {}
                 }
             }
