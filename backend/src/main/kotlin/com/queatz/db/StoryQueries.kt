@@ -88,9 +88,17 @@ fun Db.storiesOfPerson(person: String) = list(
 
 /**
  * @geo The geolocation bias
+ * @public Local or friends stories
  * @person The current user
  */
-fun Db.stories(geo: List<Double>, person: String, nearbyMaxDistance: Double, offset: Int, limit: Int, public: Boolean = false) = list(
+fun Db.stories(
+    geo: List<Double>,
+    person: String,
+    nearbyMaxDistance: Double,
+    offset: Int,
+    limit: Int,
+    public: Boolean
+) = list(
     Story::class,
     """
         for x in @@collection
@@ -119,6 +127,49 @@ fun Db.stories(geo: List<Double>, person: String, nearbyMaxDistance: Double, off
         "offset" to offset,
         "limit" to limit,
         "public" to public
+    )
+)
+
+/**
+ * Combines local and friends stories
+ *
+ * @geo The geolocation bias
+ * @person The current user
+ */
+fun Db.stories(
+    geo: List<Double>,
+    person: String,
+    nearbyMaxDistance: Double,
+    offset: Int,
+    limit: Int
+) = list(
+    Story::class,
+    """
+        for x in @@collection
+            filter x.${f(Story::published)} == true
+            let d = x.${f(Story::geo)} == null ? null : distance(x.${f(Story::geo)}[0], x.${f(Story::geo)}[1], @geo[0], @geo[1])
+            filter (
+                (d != null and d <= @nearbyMaxDistance) or (x.${f(Story::person)} == @personKey or first(
+                    for group, myMember in outbound @person graph `${Member::class.graph()}`
+                        filter myMember.${f(Member::gone)} != true
+                        for friend, member in inbound group graph `${Member::class.graph()}`
+                            filter member.${f(Member::gone)} != true
+                                and friend._key == x.${f(Story::person)}
+                            limit 1
+                            return true
+                ) == true)
+            )
+            sort x.${f(Story::publishDate)} desc, x.${f(Story::createdAt)} desc
+            limit @offset, @limit
+            return ${withAuthors("x")}
+    """.trimIndent(),
+    mapOf(
+        "person" to person.asId(Person::class),
+        "personKey" to person,
+        "geo" to geo,
+        "nearbyMaxDistance" to nearbyMaxDistance,
+        "offset" to offset,
+        "limit" to limit
     )
 )
 

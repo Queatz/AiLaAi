@@ -13,7 +13,7 @@ suspend fun Api.stories(
     geo: Geo,
     offset: Int = 0,
     limit: Int = 20,
-    public: Boolean = false,
+    public: Boolean? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Story>>
 ) = get(
@@ -22,7 +22,7 @@ suspend fun Api.stories(
         "geo" to geo.toString(),
         "offset" to offset.toString(),
         "limit" to limit.toString(),
-        "public" to public.toString()
+        "public" to public?.toString()
     ),
     onError = onError,
     onSuccess = onSuccess

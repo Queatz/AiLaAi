@@ -37,6 +37,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
     implementation("io.ktor:ktor-client-core-jvm:${versions.ktor}")
+    implementation("io.ktor:ktor-client-cio-jvm:${versions.ktor}")
     implementation("io.ktor:ktor-client-java:${versions.ktor}")
     implementation("io.ktor:ktor-server-caching-headers-jvm:${versions.ktor}")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}")
