@@ -47,6 +47,8 @@ class RunScript(private val script: Script, private val data: String?) {
             }
         )
 
+        println(result.toString())
+
         return if (result.isError() || (result as? ResultWithDiagnostics.Success)?.value?.returnValue is ResultValue.Error) {
             ScriptResult(
                 content = listOf(

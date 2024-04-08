@@ -107,9 +107,14 @@ fun ProfileNavPage(onProfileClick: () -> Unit) {
         }
 
         if (profile != null) {
-            EditField(profile?.profile?.about ?: "", placeholder = appString { introduceYourself }, styles = {
-                margin(.5.r)
-            }) {
+            EditField(
+                profile?.profile?.about ?: "",
+                placeholder = appString { introduceYourself },
+                styles = {
+                    margin(.5.r)
+                    textAlign("center")
+                }
+            ) {
                 saveAbout(it)
             }
         }
@@ -140,7 +145,6 @@ fun ProfileNavPage(onProfileClick: () -> Unit) {
 
         val signOut = appString { signOut }
         val signOutQuestion = appString { signOutQuestion }
-
 
         NavMenuItem("logout", signOut) {
             scope.launch {

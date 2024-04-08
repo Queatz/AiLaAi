@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.components
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

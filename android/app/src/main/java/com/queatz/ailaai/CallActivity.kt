@@ -7,6 +7,7 @@ import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Rational
+import android.view.WindowManager
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -46,6 +47,8 @@ class CallActivity : AppCompatActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         VideoSDK.setActivityForLifeCycle(this)
 
