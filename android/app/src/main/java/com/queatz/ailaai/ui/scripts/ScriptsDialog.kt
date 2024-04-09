@@ -624,7 +624,7 @@ fun ScriptsDialog(
                 @Serializable
                 data class Response(val data: String)
                 
-                val post = http.post<Response>("<url>", body = Request(""))
+                val post = http.post<Response, Request>("<url>", body = Request(""))
                 val get = http<Response>("<url>")
                 val get: Response = http("<url>") // or this
                 

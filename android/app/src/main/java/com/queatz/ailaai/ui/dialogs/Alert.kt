@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -44,7 +45,9 @@ fun Alert(
                     .onPlaced { viewport = it.boundsInParent().size }
                     .fadingEdge(viewport, state, factor = 10f)
             ) {
-                Text(text)
+                SelectionContainer {
+                    Text(text)
+                }
             }
         },
         dismissButton = dismissButton?.let {

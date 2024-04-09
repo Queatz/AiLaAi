@@ -770,8 +770,11 @@ fun GroupScreen(groupId: String) {
                                 it.attachments =
                                     stagedReply?.id?.let { listOf(json.encodeToString(ReplyAttachment(it))) }
                             }
-                        )
-                        reloadMessages()
+                        ) {
+                            reloadMessages()
+                        }
+
+                        stageReply = null
                     }
                 }
 
