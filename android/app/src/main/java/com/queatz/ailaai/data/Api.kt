@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import java.io.FileOutputStream
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 val json = Json {
@@ -56,7 +57,8 @@ class Api : app.ailaai.api.Api() {
         }
 
         install(HttpTimeout) {
-            requestTimeoutMillis = 30.seconds.inWholeMilliseconds
+            socketTimeoutMillis = 1.minutes.inWholeMilliseconds
+            requestTimeoutMillis = 1.minutes.inWholeMilliseconds
         }
 
         install(ResponseObserver) {
@@ -76,6 +78,7 @@ class Api : app.ailaai.api.Api() {
         }
 
         install(HttpTimeout) {
+            socketTimeoutMillis = 120.seconds.inWholeMilliseconds
             requestTimeoutMillis = 120.seconds.inWholeMilliseconds
         }
     }
