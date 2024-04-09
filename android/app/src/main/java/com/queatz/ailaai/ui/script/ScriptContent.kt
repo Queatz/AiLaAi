@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.script
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -18,7 +19,9 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.StoryContents
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.RunScriptBody
 import com.queatz.db.StoryContent
 import com.queatz.db.Widget
@@ -40,6 +43,10 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
             mutableStateOf<ScriptData?>(null)
         }
 
+        var isLoading by remember(widgetId) {
+            mutableStateOf(true)
+        }
+
         LaunchedEffect(widgetId) {
             // todo loading
             api.widget(widgetId) {
@@ -49,16 +56,22 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
             }
         }
 
-        LaunchedEffect(data) {
+        LaunchedEffect(widgetId, data) {
             api.runScript(
                 data?.script ?: return@LaunchedEffect,
                 RunScriptBody(data?.data)
             ) {
                 scriptUi = it.content ?: emptyList()
             }
+            isLoading = false
         }
 
-        if (scriptUi.isNotEmpty()) {
+        if (isLoading) {
+          Loading(
+              modifier = Modifier
+                  .padding(vertical = 1.pad)
+          )
+        } else if (scriptUi.isNotEmpty()) {
             Box(
                 modifier = Modifier
                     .heightIn(max = 512.dp)
