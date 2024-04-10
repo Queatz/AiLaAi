@@ -564,10 +564,13 @@ fun GroupScreen(groupId: String) {
                                     )
                                 )
                             }, {
+                                val hide = !hidden
                                 scope.launch {
-                                    api.updateMember(myMember.member!!.id!!, Member(hide = !hidden)) {
-                                        context.toast(R.string.group_hidden)
-                                        nav.popBackStack()
+                                    api.updateMember(myMember.member!!.id!!, Member(hide = hide)) {
+                                        if (hide) {
+                                            context.toast(R.string.group_hidden)
+                                            nav.popBackStack()
+                                        }
                                     }
                                 }
                                 showMenu = false

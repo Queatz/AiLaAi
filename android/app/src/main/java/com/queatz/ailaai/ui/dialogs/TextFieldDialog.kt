@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
@@ -35,6 +37,7 @@ fun TextFieldDialog(
     requireNotBlank: Boolean = false,
     valueFormatter: ((String) -> String?)? = null,
     keyboardOptions: KeyboardOptions? = null,
+    align: TextAlign = TextAlign.Start,
     extraContent: (@Composable ColumnScope.() -> Unit)? = null,
     bottomContent: (@Composable ColumnScope.() -> Unit)? = null,
     onSubmit: suspend (value: String) -> Unit,
@@ -83,6 +86,7 @@ fun TextFieldDialog(
                     capitalization = KeyboardCapitalization.Sentences
                 ),
                 placeholder = { Text(placeholder, modifier = Modifier.alpha(0.5f)) },
+                textStyle = LocalTextStyle.current.copy(textAlign = align),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 1.pad)

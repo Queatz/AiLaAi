@@ -627,6 +627,7 @@ fun ScriptsDialog(
                 val post = http.post<Response, Request>("<url>", body = Request(""))
                 val get = http<Response>("<url>")
                 val get: Response = http("<url>") // or this
+                val get: Response = http("<url>", headers = mapOf("Authorization" to "<token>")) // set headers
                 
                 Other common response types are: String, HttpStatusCode, JsonObject
                 

@@ -92,22 +92,16 @@ object ProfileStyles : StyleSheet() {
 
     val infoCard by style {
         padding(1.r)
-        border(1.px, LineStyle.Solid, Styles.colors.background)
         borderRadius(1.r)
         overflow("hidden")
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Stretch)
-        minWidth(8.r)
-        marginBottom(1.r)
+        minWidth(4.r)
 
         child(self, selector("div")) style {
             ellipsize()
             textAlign("center")
-        }
-
-        self + not(lastChild) style {
-            marginRight(1.r)
         }
 
         media(mediaMaxWidth(640.px)) {

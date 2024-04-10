@@ -63,7 +63,7 @@ class Push {
         private val gmsOAuthEndpoint = "https://oauth2.googleapis.com/token"
         private val hmsPushEndpoint = "https://push-api.cloud.huawei.com/v1/${secrets.hms.appId}/messages:send"
         private val gmsPushEndpoint = "https://fcm.googleapis.com/v1/projects/${secrets.gms.appId}/messages:send"
-        private val apnsPushEndpoint = "https://api.sandbox.push.apple.com:443"
+        private val apnsPushEndpoint = "https://api.push.apple.com:443"
     }
 
     private var hmsToken: String? = null
