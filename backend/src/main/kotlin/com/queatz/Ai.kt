@@ -22,6 +22,15 @@ class Ai {
 
     companion object {
         val styles = listOf(
+            "Dreaming (HD)" to "dreamshaperxl_lightning_1024px",
+            "Starlight (HD)" to "envy_starlight_xl_01_lightning_1024px",
+            "Juggernaut 9 (HD)" to "juggernautxl_9_lightning_1024px",
+            "Blue Pencil (HD)" to "bluepencilxl_1024px",
+            "Dreamshaper (HD)" to "dreamshaperxl_1024px",
+            "Juggernaut (HD)" to "juggernautxl_1024px",
+            "Juggernaut 8 (HD)" to "juggernautxl_rundiffusion_8_1024px",
+            "Sdxl (HD)" to "sdxl_1024px",
+            "T-Shirt (HD)" to "tshirtdesignredmond_1024px",
             "Absolute Reality" to "absolute_reality_1_8_1",
             "Anything" to "anything_5_0",
             "Niji" to "openniji",
@@ -42,16 +51,11 @@ class Ai {
             "Something" to "something_2",
             "Basil" to "basil_mix",
             "Kids" to "kidsmix",
-            "Blue Pencil (HD)" to "bluepencilxl_1024px",
-            "Dreamshaper (HD)" to "dreamshaperxl_1024px",
-            "Juggernaut (HD)" to "juggernautxl_1024px",
-            "Juggernaut 8 (HD)" to "juggernautxl_rundiffusion_8_1024px",
-            "Sdxl (HD)" to "sdxl_1024px",
-            "T-Shirt (HD)" to "tshirtdesignredmond_1024px",
         )
         private val defaultStylePresets = styles.map { it.second }
         private const val endpoint = "https://api.dezgo.com/text2image"
         private const val endpointXl = "https://api.dezgo.com/text2image_sdxl"
+        private const val endpointXlLightning = "https://api.dezgo.com/text2image_sdxl_lightning"
         private const val height = 416
         private const val width = 608
         private const val heightXl = 832
@@ -73,6 +77,7 @@ class Ai {
     suspend fun photo(prefix: String, prompts: List<TextPrompt>, style: String? = null): String {
         val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.random()
 
+        val isXlLightning = model.endsWith("_lightning_1024px")
         val isXl = model.endsWith("_1024px")
 
         val body = json.encodeToString(
@@ -80,7 +85,9 @@ class Ai {
                 prompt = (prompts + basePrompt).joinToString { it.text },
                 negativePrompt = negativePrompt,
                 model = model,
-                refiner = true,
+                steps = 25.takeIf { !isXlLightning },
+                refiner = true.takeIf { !isXlLightning },
+                guidance = if (isXlLightning) 1.2f else 7f,
                 height = if (isXl) heightXl else height,
                 width = if (isXl) widthXl else width,
             )
@@ -88,7 +95,7 @@ class Ai {
 
         Logger.getAnonymousLogger().info("Sending text-to-image prompt: $body")
 
-        return http.post(if (isXl) endpointXl else endpoint) {
+        return http.post(if (isXlLightning) endpointXlLightning else if (isXl) endpointXl else endpoint) {
             header("X-Dezgo-Key", secrets.dezgo.key)
             accept(ContentType.Image.JPEG)
             contentType(ContentType.Application.Json.withCharset(UTF_8))
@@ -125,9 +132,9 @@ data class DezgoPrompt(
     val height: Int,
     val width: Int,
     val sampler: String? = "dpmpp_2m_karras",
-    val steps: Int = 25,
+    val steps: Int? = null,
     val refiner: Boolean? = null,
-    val guidance: Int = 7,
+    val guidance: Float = 7f,
     val format: String = "jpg",
 )
 
