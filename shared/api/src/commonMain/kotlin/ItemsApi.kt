@@ -24,6 +24,20 @@ suspend fun Api.dropItem(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("inventory/$inventoryItem/drop", body, onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.equipItem(
+    inventoryItem: String,
+    body: EquipItemBody,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
+) = post("inventory/$inventoryItem/equip", body, onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.unequipItem(
+    inventoryItem: String,
+    body: UnequipItemBody,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
+) = post("inventory/$inventoryItem/unequip", body, onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.myItems(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ItemExtended>>
@@ -67,4 +81,3 @@ suspend fun Api.takeInventory(
     onError = onError,
     onSuccess = onSuccess
 )
-

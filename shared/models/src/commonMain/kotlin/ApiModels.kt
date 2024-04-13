@@ -171,6 +171,16 @@ data class DropItemBody(
 )
 
 @Serializable
+data class EquipItemBody(
+    val quantity: Double
+)
+
+@Serializable
+data class UnequipItemBody(
+    val quantity: Double
+)
+
+@Serializable
 data class TakeInventoryBody(
     val items: List<TakeInventoryItem>
 )

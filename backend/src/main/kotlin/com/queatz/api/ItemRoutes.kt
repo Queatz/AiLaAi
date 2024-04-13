@@ -48,6 +48,7 @@ fun Route.itemRoutes() {
                         db.update(
                             inventoryItem.also {
                                 it.inventory = dropInventory?.id
+                                it.equipped = false
                             }
                         )
                     } else {
@@ -63,6 +64,101 @@ fun Route.itemRoutes() {
                                 inventory = dropInventory?.id,
                                 item = inventoryItem.item!!,
                                 quantity = drop.quantity,
+                                expiresAt = inventoryItem.expiresAt
+                            )
+                        )
+                    }
+                }
+
+                HttpStatusCode.OK
+            }
+        }
+
+        post("/inventory/{id}/equip") {
+            respond {
+                call.receive<EquipItemBody>().let { equip ->
+                    val inventoryItem = db.document(InventoryItem::class, parameter("id")) ?:
+                        return@respond HttpStatusCode.NotFound
+
+                    val inventory = db.inventoryOfPerson(me.id!!)
+
+                    if (inventoryItem.inventory != inventory.id) {
+                        return@respond HttpStatusCode.BadRequest.description("Item is not in inventory")
+                    }
+
+                    if (equip.quantity <= 0.0 || equip.quantity > inventoryItem.quantity!!) {
+                        return@respond HttpStatusCode.BadRequest.description("Quantity is not in inventory")
+                    }
+
+                    if (equip.quantity == inventoryItem.quantity) {
+                        // Drop all
+                        // todo: add to history
+                        db.update(
+                            inventoryItem.also {
+                                it.equipped = true
+                            }
+                        )
+                    } else {
+                        // Drop some
+                        // todo: add to history
+                        db.update(
+                            inventoryItem.also {
+                                it.quantity = it.quantity!! - equip.quantity
+                            }
+                        )
+                        db.insert(
+                            InventoryItem(
+                                inventory = inventory.id!!,
+                                item = inventoryItem.item!!,
+                                equipped = true,
+                                quantity = equip.quantity,
+                                expiresAt = inventoryItem.expiresAt
+                            )
+                        )
+                    }
+                }
+
+                HttpStatusCode.OK
+            }
+        }
+
+        post("/inventory/{id}/unequip") {
+            respond {
+                call.receive<UnequipItemBody>().let { equip ->
+                    val inventoryItem = db.document(InventoryItem::class, parameter("id")) ?:
+                    return@respond HttpStatusCode.NotFound
+
+                    val inventory = db.inventoryOfPerson(me.id!!)
+
+                    if (inventoryItem.inventory != inventory.id) {
+                        return@respond HttpStatusCode.BadRequest.description("Item is not in inventory")
+                    }
+
+                    if (equip.quantity <= 0.0 || equip.quantity > inventoryItem.quantity!!) {
+                        return@respond HttpStatusCode.BadRequest.description("Quantity is not in inventory")
+                    }
+
+                    if (equip.quantity == inventoryItem.quantity) {
+                        // Drop all
+                        // todo: add to history
+                        db.update(
+                            inventoryItem.also {
+                                it.equipped = false
+                            }
+                        )
+                    } else {
+                        // Drop some
+                        // todo: add to history
+                        db.update(
+                            inventoryItem.also {
+                                it.quantity = it.quantity!! - equip.quantity
+                            }
+                        )
+                        db.insert(
+                            InventoryItem(
+                                inventory = inventory.id!!,
+                                item = inventoryItem.item!!,
+                                quantity = equip.quantity,
                                 expiresAt = inventoryItem.expiresAt
                             )
                         )

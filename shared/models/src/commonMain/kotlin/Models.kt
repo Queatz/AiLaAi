@@ -200,6 +200,7 @@ data class InventoryItem(
     var item: String? = null,
     var inventory: String? = null,
     var quantity: Double? = null,
+    var equipped: Boolean? = null,
     var expiresAt: Instant? = null
 ) : Model()
 

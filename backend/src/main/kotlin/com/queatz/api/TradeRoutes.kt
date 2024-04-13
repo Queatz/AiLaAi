@@ -270,6 +270,7 @@ private fun performTrade(trade: Trade): Boolean {
                 db.update(
                     inventoryItem.apply {
                         inventory = toPersonInventory.id!!
+                        equipped = false
                     }
                 )
             } else {
