@@ -3,11 +3,11 @@ package com.queatz.db
 fun Db.openGroupsOfPerson(person: String, offset: Int = 0, limit: Int = 20) = query(
     GroupExtended::class,
     """
-        for group, member in outbound @person graph `${Member::class.graph()}`
-            filter member.${f(Member::gone)} != true
-                and member.${f(Member::hide)} != true
+        for group, groupMember in outbound @person graph `${Member::class.graph()}`
+            filter groupMember.${f(Member::gone)} != true
+                and groupMember.${f(Member::hide)} != true
                 and group.${f(Group::open)} == true
-            sort member.${f(Member::seen)} desc
+            sort groupMember.${f(Member::seen)} desc
             limit @offset, @limit
             return ${groupExtended()}
     """.trimIndent(),

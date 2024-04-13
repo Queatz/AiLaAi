@@ -78,7 +78,7 @@ fun main() {
                 indicator.hasIndicator.collectLatest {
                     val faviconElement = document.querySelector("link[rel*='icon']") as HTMLLinkElement
 
-                    faviconElement.href = if (it) "/icon-new.png" else "icon.png"
+                    faviconElement.href = if (it) "/icon-new.png" else "/icon.png"
                 }
             }
 

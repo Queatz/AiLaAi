@@ -46,7 +46,7 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
                 "models", // :models
                 "kotlin-scripting-dependencies", // DependsOn and Repository annotation
                 wholeClasspath = true,
-                //unpackJarCollections = true
+                unpackJarCollections = true
             )
             compilerOptions.append("-Xadd-modules=ALL-MODULE-PATH")
             compilerOptions.append("-Xplugin=kotlin-serialization-compiler-plugin-embeddable-1.9.22.jar")
