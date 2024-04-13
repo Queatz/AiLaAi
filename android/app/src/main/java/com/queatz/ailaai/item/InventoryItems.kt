@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.pad
@@ -21,6 +22,7 @@ import com.queatz.db.InventoryItemExtended
 fun InventoryItems(
     modifier: Modifier = Modifier,
     state: LazyGridState = rememberLazyGridState(),
+    bottomContentPadding: Dp = 0.dp,
     items: List<InventoryItemExtended>,
     onItem: (item: InventoryItemExtended) -> Unit
 ) {
@@ -34,27 +36,27 @@ fun InventoryItems(
             start = 1.pad,
             end = 1.pad,
             top = 1.pad,
-            bottom = 1.pad + 80.dp
+            bottom = 1.pad + bottomContentPadding
         )
     ) {
         if (items.any { it.inventoryItem?.equipped == true }) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(stringResource(R.string.equipped))
+                Text(stringResource(R.string.equipped_items))
             }
-        }
-        items(items.filter { it.inventoryItem?.equipped == true }, key = { it.inventoryItem!!.id!! }) {
-            InventoryItemLayout(it) {
-                onItem(it)
+            items(items.filter { it.inventoryItem?.equipped == true }, key = { it.inventoryItem!!.id!! }) {
+                InventoryItemLayout(it) {
+                    onItem(it)
+                }
             }
         }
         if (items.any { it.inventoryItem?.equipped != true }) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(stringResource(R.string.inventory))
             }
-        }
-        items(items.filter { it.inventoryItem?.equipped != true }, key = { it.inventoryItem!!.id!! }) {
-            InventoryItemLayout(it) {
-                onItem(it)
+            items(items.filter { it.inventoryItem?.equipped != true }, key = { it.inventoryItem!!.id!! }) {
+                InventoryItemLayout(it) {
+                    onItem(it)
+                }
             }
         }
     }

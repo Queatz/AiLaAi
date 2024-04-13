@@ -48,7 +48,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -58,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import app.ailaai.api.activeCardsOfPerson
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
+import app.ailaai.api.equippedItems
 import app.ailaai.api.profile
 import app.ailaai.api.profileCards
 import app.ailaai.api.subscribe
@@ -73,6 +77,7 @@ import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.isGroupLike
@@ -86,9 +91,11 @@ import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
+import com.queatz.ailaai.item.InventoryItems
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeDialog
+import com.queatz.ailaai.trade.TradeItemDialog
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.CardLayout
 import com.queatz.ailaai.ui.components.Dropdown
@@ -116,6 +123,7 @@ import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
+import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.db.Profile
@@ -132,6 +140,7 @@ import kotlinx.coroutines.launch
 fun ProfileScreen(personId: String) {
     val scope = rememberCoroutineScope()
     var cards by remember { mutableStateOf(emptyList<Card>()) }
+    var items by remember { mutableStateOf(emptyList<InventoryItemExtended>()) }
     var person by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Person?>(null) }
     var profile by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<Profile?>(null) }
     var stats by rememberSaveable(stateSaver = jsonSaver()) { mutableStateOf<ProfileStats?>(null) }
@@ -154,6 +163,7 @@ fun ProfileScreen(personId: String) {
     var showTradeDialog by rememberStateOf<Trade?>(null)
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
+    var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
     val me = me
     val nav = nav
 
@@ -245,9 +255,19 @@ fun ProfileScreen(personId: String) {
         }
     }
 
+    suspend fun reloadItems() {
+        api.equippedItems(personId) {
+            items = it
+        }
+    }
+
     LaunchedEffect(search) {
         cards = emptyList()
         reloadCards()
+    }
+    
+    LaunchedEffect(Unit) {
+        reloadItems()
     }
 
     suspend fun reload() {
@@ -262,6 +282,9 @@ fun ProfileScreen(personId: String) {
                     stats = it.stats
                     subscribed = it.subscription != null
                 }
+            },
+            scope.async {
+                reloadItems()
             }
         ).awaitAll()
     }
@@ -406,6 +429,24 @@ fun ProfileScreen(personId: String) {
             },
             showMedia!!,
             listOf(showMedia!!)
+        )
+    }
+
+    showInventoryItemDialog?.let { item ->
+        val quantity = item.inventoryItem?.quantity ?: 0.0
+        TradeItemDialog(
+            {
+                showInventoryItemDialog = null
+            },
+            item,
+            initialQuantity = quantity,
+            maxQuantity = quantity,
+            isMine = false,
+            enabled = false,
+            confirmButton = stringResource(R.string.close),
+            onQuantity = {
+                showInventoryItemDialog = null
+            }
         )
     }
 
@@ -741,6 +782,22 @@ fun ProfileScreen(personId: String) {
                         if (search.isBlank()) {
                             stats?.let { stats ->
                                 Stats(stats, person)
+                            }
+                            if (items.isNotEmpty()) {
+                                val itemsState = rememberLazyGridState()
+                                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+
+                                InventoryItems(
+                                    items = items,
+                                    state = itemsState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 512.dp)
+                                        .onPlaced { viewport = it.boundsInParent().size }
+                                        .fadingEdge(viewport, itemsState)
+                                ) {
+                                    showInventoryItemDialog = it
+                                }
                             }
                             Box(
                                 modifier = Modifier

@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -399,6 +400,7 @@ fun InventoryScreen() {
                     InventoryItems(
                         state = state,
                         items = shownInventory,
+                        bottomContentPadding = 80.dp,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         showInventoryItem = it
