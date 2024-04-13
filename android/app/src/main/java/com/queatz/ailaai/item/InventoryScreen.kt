@@ -68,14 +68,18 @@ import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.DropItemBody
+import com.queatz.db.EquipItemBody
 import com.queatz.db.InventoryItem
 import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Trade
 import com.queatz.db.TradeItem
+import com.queatz.db.UnequipItemBody
 import createTrade
 import dropItem
+import equipItem
 import kotlinx.coroutines.launch
 import myInventory
+import unequipItem
 import updateTradeItems
 
 @Composable
@@ -137,6 +141,22 @@ fun InventoryScreen() {
             api.dropItem(inventoryItem.id!!, DropItemBody(quantity, geo?.toList()))
             reload()
             context.toast(R.string.items_dropped)
+        }
+    }
+
+    fun equip(inventoryItem: InventoryItem, quantity: Double) {
+        scope.launch {
+            api.equipItem(inventoryItem.id!!, EquipItemBody(quantity))
+            reload()
+            context.toast(R.string.items_equipped)
+        }
+    }
+
+    fun unequip(inventoryItem: InventoryItem, quantity: Double) {
+        scope.launch {
+            api.unequipItem(inventoryItem.id!!, UnequipItemBody(quantity))
+            reload()
+            context.toast(R.string.items_unequipped)
         }
     }
 
@@ -222,6 +242,12 @@ fun InventoryScreen() {
             showInventoryItem!!,
             onDrop = {
                 showDropInventoryItem = showInventoryItem!! to it
+            },
+            onEquip = {
+                equip(showInventoryItem!!.inventoryItem!!, it)
+            },
+            onUnequip = {
+                unequip(showInventoryItem!!.inventoryItem!!, it)
             }
         ) {
             showStartTradeDialog = true
@@ -320,7 +346,7 @@ fun InventoryScreen() {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
-                stringResource(R.string.inventory),
+                stringResource(R.string.items),
                 {
                     scrollToTop()
                 },
@@ -370,7 +396,11 @@ fun InventoryScreen() {
                 if (shownInventory.isEmpty()) {
                     EmptyText(stringResource(R.string.no_items))
                 } else {
-                    InventoryItems(state = state, items = shownInventory, modifier = Modifier.fillMaxSize()) {
+                    InventoryItems(
+                        state = state,
+                        items = shownInventory,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
                         showInventoryItem = it
                     }
                 }

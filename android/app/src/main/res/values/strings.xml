@@ -639,6 +639,11 @@
     <string name="templates">Templates</string>
     <string name="fork">Fork</string>
     <string name="my_scripts">My scripts</string>
+    <string name="unequip">Unequip</string>
+    <string name="equip">Equip</string>
+    <string name="equipped">Equipped</string>
+    <string name="items_equipped">Items equipped</string>
+    <string name="items_unequipped">Item unequipped</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

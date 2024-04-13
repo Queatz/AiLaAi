@@ -30,6 +30,8 @@ fun InventoryItemDialog(
     inventoryItem: InventoryItemExtended,
     initialQuantity: Double = 1.0,
     onDrop: (quantity: Double) -> Unit,
+    onEquip: (quantity: Double) -> Unit,
+    onUnequip: (quantity: Double) -> Unit,
     onTrade: (quantity: Double) -> Unit
 ) {
     val expired = inventoryItem.inventoryItem!!.isExpired
@@ -98,6 +100,25 @@ fun InventoryItemDialog(
                     enabled = enabled
                 ) {
                     Text(stringResource(R.string.drop))
+                }
+                if (inventoryItem.inventoryItem?.equipped == true) {
+                    TextButton(
+                        {
+                            quantity.toDoubleOrNull()?.let(onUnequip)
+                        },
+                        enabled = enabled
+                    ) {
+                        Text(stringResource(R.string.unequip))
+                    }
+                } else {
+                    TextButton(
+                        {
+                            quantity.toDoubleOrNull()?.let(onEquip)
+                        },
+                        enabled = enabled
+                    ) {
+                        Text(stringResource(R.string.equip))
+                    }
                 }
                 Button(
                     {
