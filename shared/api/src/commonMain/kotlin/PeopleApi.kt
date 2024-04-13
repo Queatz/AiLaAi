@@ -34,6 +34,12 @@ suspend fun Api.activeCardsOfPerson(
     onSuccess: SuccessBlock<List<Card>>,
 ) = get("people/$personId/profile/cards", mapOf("search" to search), onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.equippedItems(
+    personId: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<InventoryItemExtended>>,
+) = get("people/$personId/items/equipped", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.profileByUrl(
     url: String,
     onError: ErrorBlock = {},

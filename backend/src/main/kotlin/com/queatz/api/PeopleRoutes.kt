@@ -59,6 +59,19 @@ fun Route.peopleRoutes() {
             }
         }
 
+        get("/people/{id}/items/equipped") {
+            respond {
+                val person = db.document(Person::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                // todo support search
+                val search = call.parameters["search"]
+
+                val inventory = db.inventoryOfPerson(person.id!!)
+                db.equippedItemsOfInventory(inventory.id!!)
+            }
+        }
+
         get("/people/{id}/groups") {
             respond {
                 val person = db.document(Person::class, parameter("id"))

@@ -51,6 +51,20 @@ fun Db.inventoryItems(inventory: String) = query(
     )
 )
 
+fun Db.equippedItemsOfInventory(inventory: String) = query(
+    InventoryItemExtended::class,
+    """
+        for x in `${InventoryItem::class.collection()}`
+            filter x.${f(InventoryItem::inventory)} == @inventory
+                and x.${f(InventoryItem::equipped)} == true
+            sort x.${f(InventoryItem::createdAt)} desc
+            return ${inventoryItemExtended()}
+    """.trimIndent(),
+    mapOf(
+        "inventory" to inventory
+    )
+)
+
 fun Db.inventoryOfPerson(person: String) = one(
     Inventory::class,
     """
