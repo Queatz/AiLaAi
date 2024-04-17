@@ -2,6 +2,7 @@ package app.group
 
 import app.AppStyles
 import app.dialog.dialog
+import appString
 import application
 import com.queatz.db.GroupExtended
 import components.ProfilePhoto
@@ -52,14 +53,13 @@ suspend fun groupMembersDialog(group: GroupExtended) = dialog(
                             classes(AppStyles.groupItemMessage)
                         }) {
                             Text(
-                                "${application.appString { active }} ${
+                                "${if (member.member?.host == true) "${appString { host }} • " else ""}${appString { active }} ${
                                     formatDistanceToNow(
                                         Date(member.person!!.seen?.toEpochMilliseconds() ?: member.person!!.createdAt!!.toEpochMilliseconds()),
                                         js("{ addSuffix: true }")
                                     )
                                 }"
                             )
-
                         }
                     }
                 }

@@ -749,6 +749,10 @@ object Strings {
         "Subscribers",
         "Người đăng ký"
     )
+    val host = Translation(
+        "Host",
+        "Chủ nhóm"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {
