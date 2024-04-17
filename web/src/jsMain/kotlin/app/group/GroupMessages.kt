@@ -12,6 +12,8 @@ import com.queatz.db.Message
 import components.Loading
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun GroupMessages(group: GroupExtended) {
@@ -84,8 +86,16 @@ fun GroupMessages(group: GroupExtended) {
         Loading()
     } else {
         if (myMember != null) {
-            GroupMessageBar(group) {
-                reloadMessages()
+            if (group.group?.config?.messages == null || myMember.member?.host == true) {
+                GroupMessageBar(group) {
+                    reloadMessages()
+                }
+            } else {
+                Div({
+                    style {
+                        height(1.r)
+                    }
+                }) { }
             }
         } else {
             JoinGroupLayout(group)

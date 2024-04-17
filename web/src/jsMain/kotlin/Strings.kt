@@ -753,6 +753,10 @@ object Strings {
         "Host",
         "Chủ nhóm"
     )
+    val settings = Translation(
+        "Settings",
+        "Cài đặt"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

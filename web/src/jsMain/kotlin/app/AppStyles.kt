@@ -80,6 +80,7 @@ object AppStyles : StyleSheet() {
         overflow("hidden auto")
         whiteSpace("pre-wrap")
         maxHeight(6.r)
+        flexShrink(0)
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)

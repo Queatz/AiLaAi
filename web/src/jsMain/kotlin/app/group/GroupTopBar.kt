@@ -50,6 +50,8 @@ fun GroupTopBar(
     val calls by call.calls.collectAsState()
     val callParticipants = calls.firstOrNull { it.group == group.group!!.id }?.participants ?: 0
 
+    val closeStr = appString { close }
+
     var menuTarget by remember {
         mutableStateOf<DOMRect?>(null)
     }
@@ -88,6 +90,93 @@ fun GroupTopBar(
 
             api.updateGroup(group.group!!.id!!, Group(open = open)) {
                 onGroupUpdated()
+            }
+        }
+    }
+
+    fun showSettings() {
+        scope.launch {
+            val groupConfig = group.group?.config ?: GroupConfig()
+
+            val result = dialog(
+                application.appString { settings },
+                application.appString { update },
+                closeStr
+            ) {
+                var messagesConfig by remember { mutableStateOf(group.group?.config?.messages) }
+                var editsConfig by remember { mutableStateOf(group.group?.config?.edits) }
+
+                LaunchedEffect(messagesConfig) {
+                    groupConfig.messages = messagesConfig
+                }
+
+                LaunchedEffect(editsConfig) {
+                    groupConfig.edits = editsConfig
+                }
+
+                Div(
+                    {
+                        style {
+                            fontSize(18.px)
+                            fontWeight("bold")
+                            marginBottom(1.r)
+                        }
+                    }
+                ) {
+                    // todo translate
+                    Text("Who sends messages to this group?")
+                }
+                InlineMenu({}) {
+                    // todo translate
+                    item("Hosts", selected = messagesConfig == GroupMessagesConfig.Hosts) {
+                        messagesConfig = GroupMessagesConfig.Hosts
+                    }
+                    // todo translate
+                    item("Everyone", selected = messagesConfig == null) {
+                        messagesConfig = null
+                    }
+                }
+                Div(
+                    {
+                        style {
+                            fontSize(18.px)
+                            fontWeight("bold")
+                            marginTop(1.r)
+                        }
+                    }
+                ) {
+                    // todo translate
+                    Text("Who edits this group?")
+                }
+                Div(
+                    {
+                        style {
+                            fontSize(14.px)
+                            opacity(.5f)
+                            marginBottom(1.r)
+                        }
+                    }
+                ) {
+                    // todo translate
+                    Text("Name, introduction, photo")
+                }
+                InlineMenu({}) {
+                    // todo translate
+                    item("Hosts", selected = editsConfig == GroupEditsConfig.Hosts) {
+                        editsConfig = GroupEditsConfig.Hosts
+
+                    }
+                    // todo translate
+                    item("Everyone", selected = editsConfig == null) {
+                        editsConfig = null
+                    }
+                }
+            }
+
+            if (result == true) {
+                api.updateGroup(group.group!!.id!!, Group(config = groupConfig)) {
+                    onGroupUpdated()
+                }
             }
         }
     }
@@ -165,14 +254,15 @@ fun GroupTopBar(
                 onShowCards()
             }
             if (myMember != null) {
-                item(appString { rename }) {
-                    renameGroup()
-                }
-                item(appString { introduction }) {
-                    updateIntroduction()
+                if (group.group?.config?.edits == null || myMember.member?.host == true) {
+                    item(appString { rename }) {
+                        renameGroup()
+                    }
+                    item(appString { introduction }) {
+                        updateIntroduction()
+                    }
                 }
                 if (myMember.member?.host == true) {
-                    val closeStr = appString { close }
                     item(appString { manage }) {
                         scope.launch {
                             dialog(
@@ -191,6 +281,9 @@ fun GroupTopBar(
                                         item(appString { makeOpenGroup }) {
                                             makeOpen(true)
                                         }
+                                    }
+                                    item(appString { settings }) {
+                                        showSettings()
                                     }
                                 }
                             }

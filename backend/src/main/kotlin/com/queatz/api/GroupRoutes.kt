@@ -183,6 +183,10 @@ fun Route.groupRoutes() {
                 } else {
                     val group = db.document(Group::class, member.to!!) ?: return@respond HttpStatusCode.NotFound
 
+                    if (group.config?.edits == GroupEditsConfig.Hosts && member.host != true) {
+                        return@respond HttpStatusCode.BadRequest.description("Member is not host")
+                    }
+
                     if (groupUpdated.name != null) {
                         group.name = groupUpdated.name
                     }
@@ -215,6 +219,10 @@ fun Route.groupRoutes() {
                         if (groupUpdated.open != null) {
                             group.open = groupUpdated.open
                         }
+
+                        if (groupUpdated.config != null) {
+                            group.config = groupUpdated.config
+                        }
                     }
 
                     db.update(group)
@@ -240,8 +248,13 @@ fun Route.groupRoutes() {
                 if (member == null) {
                     HttpStatusCode.NotFound
                 } else {
+                    val group = db.document(Group::class, member.to!!) ?: return@respond HttpStatusCode.NotFound
+
+                    if (group.config?.messages == GroupMessagesConfig.Hosts && member.host != true) {
+                        return@respond HttpStatusCode.BadRequest.description("Member is not host")
+                    }
+
                     db.insert(Message(member.to?.asKey(), member.id, message.text, message.attachment, message.attachments))
-                    val group = db.document(Group::class, member.to!!)!!
 
                     updateSeen(me, member, group)
                     notifyMessage(me, group, message)
@@ -260,6 +273,11 @@ fun Route.groupRoutes() {
                     HttpStatusCode.NotFound
                 } else {
                     val group = db.document(Group::class, member.to!!)!!
+
+                    if (group.config?.messages == GroupMessagesConfig.Hosts && member.host != true) {
+                        return@respond HttpStatusCode.BadRequest.description("Member is not host")
+                    }
+
                     call.receiveFiles("photo", "group-${group.id}") { photosUrls, params ->
                         val message = db.insert(
                             Message(
@@ -291,6 +309,11 @@ fun Route.groupRoutes() {
                     HttpStatusCode.NotFound
                 } else {
                     val group = db.document(Group::class, member.to!!)!!
+
+                    if (group.config?.messages == GroupMessagesConfig.Hosts && member.host != true) {
+                        return@respond HttpStatusCode.BadRequest.description("Member is not host")
+                    }
+
                     call.receiveFiles("photo", "group-${group.id}") { urls, params ->
                         val message = db.insert(
                             Message(
@@ -322,6 +345,11 @@ fun Route.groupRoutes() {
                     HttpStatusCode.NotFound
                 } else {
                     val group = db.document(Group::class, member.to!!)!!
+
+                    if (group.config?.messages == GroupMessagesConfig.Hosts && member.host != true) {
+                        return@respond HttpStatusCode.BadRequest.description("Member is not host")
+                    }
+
                     call.receiveFile("audio", "group-${group.id}") { url, params ->
                         val message = db.insert(
                             Message(

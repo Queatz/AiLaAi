@@ -128,8 +128,23 @@ class Group(
     var description: String? = null,
     var categories: List<String>? = null,
     var geo: List<Double>? = null,
-    var open: Boolean? = null
+    var open: Boolean? = null,
+    var config: GroupConfig? = null
 ) : Model()
+
+@Serializable
+data class GroupConfig(
+    var messages: GroupMessagesConfig? = null,
+    var edits: GroupEditsConfig? = null
+)
+
+enum class GroupMessagesConfig {
+    Hosts
+}
+
+enum class GroupEditsConfig {
+    Hosts
+}
 
 @Serializable
 class Call(
