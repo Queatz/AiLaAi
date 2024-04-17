@@ -18,13 +18,16 @@ import com.queatz.db.Card
 import com.queatz.db.Reminder
 import com.queatz.db.Story
 import com.queatz.push.CallPushData
+import com.queatz.push.MessagePushData
 import com.queatz.push.PushAction
 import com.queatz.push.ReminderPushData
+import kotlinx.browser.document
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import lib.hidden
 import notifications
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Audio
@@ -103,6 +106,10 @@ fun AppPage() {
         mutableStateOf(false)
     }
 
+    var playMessageSound by remember {
+        mutableStateOf(false)
+    }
+
     LaunchedEffect(nav) {
         application.setNavPage(nav)
     }
@@ -165,6 +172,19 @@ fun AppPage() {
         }
     }
 
+
+    LaunchedEffect(Unit) {
+        push.events.filter {
+            it.action == PushAction.Message
+        }.collect {
+            if (document.hidden) {
+                if ((it.data as? MessagePushData)?.person?.id != me?.id) {
+                    playMessageSound = true
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         appNav.navigate.collectLatest {
             when (it) {
@@ -183,7 +203,7 @@ fun AppPage() {
         }
     }
 
-    if (playCallSound || playNotificationSound) {
+    if (playCallSound || playNotificationSound || playMessageSound) {
         Audio({
             attr("playsinline", "true")
             attr("autoplay", "true")
@@ -193,10 +213,12 @@ fun AppPage() {
             }
 
             ref {
-                it.src = if (playCallSound) "/call.ogg" else "/notify.ogg"
+                it.src = if (playCallSound) "/call.ogg" else if (playMessageSound) "/message.ogg" else "/notify.ogg"
                 it.currentTime = 0.0
                 it.onended = {
                     playCallSound = false
+                    playNotificationSound = false
+                    playMessageSound = false
                     Unit
                 }
                 it.oncanplay = { _ ->
