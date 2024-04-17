@@ -1216,7 +1216,8 @@ fun GroupScreen(groupId: String) {
                     },
                     people = allMembers.map { it.person!! },
                     infoFormatter = { person ->
-                        person.seenText(context.getString(R.string.active))
+                        val member = allMembers.firstOrNull { it.person?.id == person.id }
+                        "${if (member?.member?.host == true) "${stringResource(R.string.host)} • " else ""}${person.seenText(context.getString(R.string.active))}"
                     },
                     extraButtons = {
                         if (myMember?.member?.host == true) {

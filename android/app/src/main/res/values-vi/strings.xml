@@ -427,7 +427,7 @@
     <string name="cancel_join_request">Hủy yêu cầu tham gia</string>
     <string name="send_request">Giử yêu cầu</string>
     <string name="x_requested_x">%1$s đã yêu cầu tham gia %2$s</string>
-    <string name="host">Chủ trì nhóm</string>
+    <string name="host">Chủ nhóm</string>
     <string name="accept">Chấp nhận</string>
     <string name="x_added_x">%1$s đã thêm %2$s</string>
     <string name="open_group">Nhóm mở</string>
