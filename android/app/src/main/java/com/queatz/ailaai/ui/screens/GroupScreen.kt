@@ -95,6 +95,7 @@ fun GroupScreen(groupId: String) {
     var showQrCodeDialog by rememberStateOf(false)
     var showManageDialog by rememberStateOf(false)
     var showChangeGroupStatus by rememberStateOf(false)
+    var showSettingsDialog by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showDescriptionDialog by rememberStateOf(false)
     var showSetPhotoDialog by rememberStateOf(false)
@@ -500,42 +501,44 @@ fun GroupScreen(groupId: String) {
                             showSendDialog = true
                         })
                         if (myMember != null) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.rename))
-                            }, {
-                                showMenu = false
-                                showRenameGroup = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.introduction))
-                            }, {
-                                showMenu = false
-                                showDescriptionDialog = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.photo))
-                            }, {
-                                showMenu = false
-                                showSetPhotoDialog = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.background))
-                            }, {
-                                showMenu = false
-                                showSetBackgroundDialog = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.set_category))
-                            }, {
-                                showMenu = false
-                                showCategoryDialog = true
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.move))
-                            }, {
-                                showMenu = false
-                                showLocationDialog = true
-                            })
+                            if (groupExtended?.group?.config?.edits == null || myMember.member?.host == true) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.rename))
+                                }, {
+                                    showMenu = false
+                                    showRenameGroup = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.introduction))
+                                }, {
+                                    showMenu = false
+                                    showDescriptionDialog = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.photo))
+                                }, {
+                                    showMenu = false
+                                    showSetPhotoDialog = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.background))
+                                }, {
+                                    showMenu = false
+                                    showSetBackgroundDialog = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.set_category))
+                                }, {
+                                    showMenu = false
+                                    showCategoryDialog = true
+                                })
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.move))
+                                }, {
+                                    showMenu = false
+                                    showLocationDialog = true
+                                })
+                            }
                             if (myMember.member?.host == true) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.manage))
@@ -811,6 +814,8 @@ fun GroupScreen(groupId: String) {
                             }
                         }
                     }
+                } else if (groupExtended?.group?.config?.messages == GroupMessagesConfig.Hosts && myMember?.member?.host != true) {
+
                 } else {
                     AnimatedVisibility(stageReply != null) {
                         var stagedReply by remember { mutableStateOf(stageReply) }
@@ -1217,7 +1222,7 @@ fun GroupScreen(groupId: String) {
                     people = allMembers.map { it.person!! },
                     infoFormatter = { person ->
                         val member = allMembers.firstOrNull { it.person?.id == person.id }
-                        "${if (member?.member?.host == true) "${stringResource(R.string.host)} • " else ""}${person.seenText(context.getString(R.string.active))}"
+                        "${if (member?.member?.host == true) "${context.getString(R.string.host)} • " else ""}${person.seenText(context.getString(R.string.active))}"
                     },
                     extraButtons = {
                         if (myMember?.member?.host == true) {
@@ -1496,6 +1501,10 @@ fun GroupScreen(groupId: String) {
                             showManageDialog = false
                             showChangeGroupStatus = true
                         }
+                    }
+                    menuItem(stringResource(R.string.settings)) {
+                        showManageDialog = false
+                        showSettingsDialog = true
                     }
                 }
             }
