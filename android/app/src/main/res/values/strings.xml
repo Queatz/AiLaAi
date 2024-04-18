@@ -644,6 +644,11 @@
     <string name="equipped_items">Equipped items</string>
     <string name="items_equipped">Items equipped</string>
     <string name="items_unequipped">Item unequipped</string>
+    <string name="everyone">Everyone</string>
+    <string name="who_edits_this_group">Who edits this group?</string>
+    <string name="name_introduction_photo">Name, introduction, photo</string>
+    <string name="hosts">Hosts</string>
+    <string name="who_sends_messages_to_this_group">Who sends messages to this group?</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

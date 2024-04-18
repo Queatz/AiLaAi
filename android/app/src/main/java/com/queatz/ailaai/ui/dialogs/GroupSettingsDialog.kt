@@ -66,7 +66,7 @@ fun GroupSettingsDialog(
                         )
                     }
                     Text(
-                        "Who sends messages to this group?",
+                        stringResource(R.string.who_sends_messages_to_this_group),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Row(
@@ -88,7 +88,7 @@ fun GroupSettingsDialog(
                                 recomposeScope.invalidate()
                             }
                         ) {
-                            Text("Hosts")
+                            Text(stringResource(R.string.hosts))
                         }
                     }
                     Row(
@@ -110,16 +110,16 @@ fun GroupSettingsDialog(
                                 recomposeScope.invalidate()
                             }
                         ) {
-                            Text("Everyone")
+                            Text(stringResource(R.string.everyone))
                         }
                     }
                     Column {
                         Text(
-                            "Who edits this group?",
+                            stringResource(R.string.who_edits_this_group),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            "Name, introduction, photo",
+                            stringResource(R.string.name_introduction_photo),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -143,7 +143,7 @@ fun GroupSettingsDialog(
                                 recomposeScope.invalidate()
                             }
                         ) {
-                            Text("Hosts")
+                            Text(stringResource(R.string.hosts))
                         }
                     }
                     Row(
@@ -165,7 +165,7 @@ fun GroupSettingsDialog(
                                 recomposeScope.invalidate()
                             }
                         ) {
-                            Text("Everyone")
+                            Text(stringResource(R.string.everyone))
                         }
                     }
                 }
