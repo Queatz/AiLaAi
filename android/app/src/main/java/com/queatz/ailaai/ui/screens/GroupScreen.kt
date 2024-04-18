@@ -1509,6 +1509,15 @@ fun GroupScreen(groupId: String) {
                 }
             }
 
+            if (showSettingsDialog && groupExtended?.group != null) {
+                GroupSettingsDialog(
+                    {
+                        showSettingsDialog = false
+                    },
+                    groupExtended!!.group!!
+                )
+            }
+
             if (showChangeGroupStatus) {
                 val open = groupExtended?.group?.open == true
                 AlertDialog(
