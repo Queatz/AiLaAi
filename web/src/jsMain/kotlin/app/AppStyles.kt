@@ -558,4 +558,20 @@ object AppStyles : StyleSheet() {
             backgroundColor(Styles.colors.dark.background)
         }
     }
+
+    val urlPreview by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Stretch)
+        overflow("hidden")
+        borderRadius(1.r)
+        backgroundColor(Styles.colors.background)
+        cursor("pointer")
+        marginBottom(1.r)
+        maxWidth(480.px)
+
+        dark(self) {
+            backgroundColor(Styles.colors.dark.background)
+        }
+    }
 }

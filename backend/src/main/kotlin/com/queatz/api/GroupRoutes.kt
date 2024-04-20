@@ -254,10 +254,20 @@ fun Route.groupRoutes() {
                         return@respond HttpStatusCode.BadRequest.description("Member is not host")
                     }
 
-                    db.insert(Message(member.to?.asKey(), member.id, message.text, message.attachment, message.attachments))
+                    val newMessage = db.insert(
+                        Message(
+                            member.to?.asKey(),
+                            member.id,
+                            message.text,
+                            message.attachment,
+                            message.attachments
+                        )
+                    )
+
+                    urlAttachmentFetcher.handle(newMessage)
 
                     updateSeen(me, member, group)
-                    notifyMessage(me, group, message)
+                    notifyMessage(me, group, newMessage)
 
                     HttpStatusCode.OK
                 }
@@ -353,12 +363,16 @@ fun Route.groupRoutes() {
                     call.receiveFile("audio", "group-${group.id}") { url, params ->
                         val message = db.insert(
                             Message(
-                                member.to?.asKey(), member.id, null, json.encodeToString(
+                                member.to?.asKey(),
+                                member.id,
+                                null,
+                                json.encodeToString(
                                     AudioAttachment(
                                         audio = url
                                     )
                                 ),
-                                attachments = params.get("message")?.let { json.decodeFromString<Message>(it) }?.attachments
+                                attachments = params["message"]
+                                    ?.let { json.decodeFromString<Message>(it) }?.attachments
                             )
                         )
 

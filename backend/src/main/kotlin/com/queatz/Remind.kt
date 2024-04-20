@@ -11,14 +11,12 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import toEvents
 import java.util.logging.Logger
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 val remind = Remind()
 
 class Remind {
-    lateinit var scope: CoroutineScope
+    private lateinit var scope: CoroutineScope
 
     fun start(scope: CoroutineScope) {
         this.scope = scope

@@ -40,18 +40,18 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
     val scope = rememberCoroutineScope()
     val isMe = message.member == myMember?.member?.id
 
-    val attachment = remember(message) {
-        message.getAttachment()
+    val attachments = remember(message) {
+        message.getAllAttachments()
     }
 
     var reply by remember(message) {
         mutableStateOf<Message?>(null)
     }
 
-    LaunchedEffect(attachment) {
+    LaunchedEffect(attachments) {
         reply = null
 
-        val replyAttachment = message.getAllAttachments().firstNotNullOfOrNull { it as? ReplyAttachment }
+        val replyAttachment = attachments.firstNotNullOfOrNull { it as? ReplyAttachment }
 
         if (isReply || replyAttachment == null) {
             return@LaunchedEffect
@@ -108,214 +108,220 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
             }
         }
 
-        when (attachment) {
-            is PhotosAttachment -> {
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        flexWrap(FlexWrap.Wrap)
-
-                        if (isMe) {
-                            justifyContent(JustifyContent.FlexEnd)
-                        }
-                    }
-                }) {
-                    attachment.photos?.forEach { photo ->
-                        Img(src = "$baseUrl$photo") {
-                            classes(AppStyles.messageItemPhoto)
-                            onClick {
-                                scope.launch {
-                                    photoDialog("$baseUrl$photo")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            is AudioAttachment -> {
-                Audio({
-                    attr("controls", "")
-                    style {
-                        borderRadius(1.r)
-                    }
-                }) {
-                    Source({
-                        attr("src", "$baseUrl${attachment.audio}")
-                        attr("type", "audio/mp4")
-                    })
-                }
-            }
-
-            is VideosAttachment -> {
-                attachment.videos?.forEach {
-                    var isPlaying by remember {
-                        mutableStateOf(false)
-                    }
-//                    var videoElement by remember { mutableStateOf<HTMLVideoElement?>(null) }
+        attachments.forEach { attachment ->
+            when (attachment) {
+                is PhotosAttachment -> {
                     Div({
                         style {
-                            position(Position.Relative)
+                            display(DisplayStyle.Flex)
+                            flexWrap(FlexWrap.Wrap)
+
+                            if (isMe) {
+                                justifyContent(JustifyContent.FlexEnd)
+                            }
                         }
                     }) {
-                        Video({
-//                    attr("autoplay", "")
-                            attr("loop", "")
-                            attr("playsinline", "")
-//                        attr("muted", "")
-                            classes(AppStyles.messageVideo)
-                            onClick {
-                                (it.target as? HTMLVideoElement)?.apply {
-                                    if (paused) {
-                                        play()
-                                        isPlaying = true
-                                    } else {
-                                        pause()
-                                        isPlaying = false
+                        attachment.photos?.forEach { photo ->
+                            Img(src = "$baseUrl$photo") {
+                                classes(AppStyles.messageItemPhoto)
+                                onClick {
+                                    scope.launch {
+                                        photoDialog("$baseUrl$photo")
                                     }
-                                    muted = false
-                                }
-                            }
-//                        // Do this so that auto-play works on page load, but unmute on page navigation
-//                        ref { videoEl ->
-//                            videoEl.onloadedmetadata = {
-//                                videoEl.muted = true
-//                                videoElement = videoEl
-//                                it
-//                            }
-//                            onDispose { }
-//                        }
-                        }) {
-                            Source({
-                                attr("src", "$baseUrl$it")
-                                attr("type", "video/webm")
-                            })
-                        }
-                        if (!isPlaying) {
-                            Icon("play_arrow", null) {
-                                position(Position.Absolute)
-                                borderRadius(100.percent)
-                                backgroundColor(rgba(0, 0, 0, .5))
-                                padding(.5.r)
-                                top(50.percent)
-                                left(50.percent)
-                                property("pointer-events", "none")
-
-                                transform {
-                                    translateX(-50.percent)
-                                    translateY(-50.percent)
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            is CardAttachment -> {
-                CardItem(attachment.card!!, openInNewWindow = true) {
-                    maxWidth(320.px)
-
-                    if (message.text.isNullOrBlank().not()) {
-                        marginBottom(1.r)
-                    }
-                }
-            }
-
-            is ReplyAttachment -> {
-
-            }
-
-            is StoryAttachment -> {
-                var story by remember(message) {
-                    mutableStateOf<Story?>(null)
-                }
-
-                LaunchedEffect(Unit) {
-                    api.story(attachment.story!!) {
-                        story = it
-                    }
-                }
-
-                story?.let { story ->
-                    Div({
-                        classes(AppStyles.messageItemStory)
-
-                        onClick {
-                            window.open("/story/${story.url ?: story.id}", target = "_blank")
+                is AudioAttachment -> {
+                    Audio({
+                        attr("controls", "")
+                        style {
+                            borderRadius(1.r)
                         }
                     }) {
-                        Div({
-                            style {
-                                marginBottom(.5.r)
-                                fontSize(24.px)
-                            }
-                        }) {
-                            Text(story.title ?: appString { createStory })
-                        }
-                        Div({
-                            style {
-                                marginBottom(.5.r)
-                                color(Styles.colors.secondary)
-                                fontSize(16.px)
-                            }
-                        }) {
-                            val someone = appString { someone }
-                            Text("${if (story.publishDate != null) appString { published } else appString { draft }} ${appString { inlineBy }} ${story.authors?.joinToString { it.name ?: someone }}")
-                        }
-                        Div({
-                            style {
-                                marginBottom(.5.r)
-                                ellipsize()
-                            }
-                        }) {
-                            Text(story.textContent())
-                        }
+                        Source({
+                            attr("src", "$baseUrl${attachment.audio}")
+                            attr("type", "audio/mp4")
+                        })
                     }
                 }
-            }
 
-            is GroupAttachment -> {
-                Div({
-                    classes(StoryStyles.contentGroups)
-                }) {
-                    attachment.group?.let { groupId ->
-                        var group by remember(groupId) {
-                            mutableStateOf<GroupExtended?>(null)
+                is VideosAttachment -> {
+                    attachment.videos?.forEach {
+                        var isPlaying by remember {
+                            mutableStateOf(false)
                         }
-
-                        LaunchedEffect(groupId) {
-                            api.group(groupId) {
-                                group = it
+                        //                    var videoElement by remember { mutableStateOf<HTMLVideoElement?>(null) }
+                        Div({
+                            style {
+                                position(Position.Relative)
                             }
-                        }
-
-                        LoadingText(group != null, appString { loadingGroup }) {
-                            group?.let { group ->
-                                GroupItem(
-                                    group,
-                                    selectable = true,
-                                    selected = false,
-                                    onBackground = true,
-                                    onSelected = {
-                                        scope.launch {
-                                            appNav.navigate(AppNavigation.Group(group.group!!.id!!, group))
+                        }) {
+                            Video({
+                                //                    attr("autoplay", "")
+                                attr("loop", "")
+                                attr("playsinline", "")
+                                //                        attr("muted", "")
+                                classes(AppStyles.messageVideo)
+                                onClick {
+                                    (it.target as? HTMLVideoElement)?.apply {
+                                        if (paused) {
+                                            play()
+                                            isPlaying = true
+                                        } else {
+                                            pause()
+                                            isPlaying = false
                                         }
-                                    },
-                                    info = GroupInfo.LatestMessage
-                                )
+                                        muted = false
+                                    }
+                                }
+                                //                        // Do this so that auto-play works on page load, but unmute on page navigation
+                                //                        ref { videoEl ->
+                                //                            videoEl.onloadedmetadata = {
+                                //                                videoEl.muted = true
+                                //                                videoElement = videoEl
+                                //                                it
+                                //                            }
+                                //                            onDispose { }
+                                //                        }
+                            }) {
+                                Source({
+                                    attr("src", "$baseUrl$it")
+                                    attr("type", "video/webm")
+                                })
+                            }
+                            if (!isPlaying) {
+                                Icon("play_arrow", null) {
+                                    position(Position.Absolute)
+                                    borderRadius(100.percent)
+                                    backgroundColor(rgba(0, 0, 0, .5))
+                                    padding(.5.r)
+                                    top(50.percent)
+                                    left(50.percent)
+                                    property("pointer-events", "none")
+
+                                    transform {
+                                        translateX(-50.percent)
+                                        translateY(-50.percent)
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            is StickerAttachment -> {
-                StickerItem(
-                    attachment.photo!!,
-                    attachment.message,
-                    96.px,
-                    messageAlign = if (isMe) AlignItems.Start else AlignItems.End
-                ) {}
+                is CardAttachment -> {
+                    CardItem(attachment.card!!, openInNewWindow = true) {
+                        maxWidth(320.px)
+
+                        if (message.text.isNullOrBlank().not()) {
+                            marginBottom(1.r)
+                        }
+                    }
+                }
+
+                is ReplyAttachment -> {
+
+                }
+
+                is StoryAttachment -> {
+                    var story by remember(message) {
+                        mutableStateOf<Story?>(null)
+                    }
+
+                    LaunchedEffect(Unit) {
+                        api.story(attachment.story!!) {
+                            story = it
+                        }
+                    }
+
+                    story?.let { story ->
+                        Div({
+                            classes(AppStyles.messageItemStory)
+
+                            onClick {
+                                window.open("/story/${story.url ?: story.id}", target = "_blank")
+                            }
+                        }) {
+                            Div({
+                                style {
+                                    marginBottom(.5.r)
+                                    fontSize(24.px)
+                                }
+                            }) {
+                                Text(story.title ?: appString { createStory })
+                            }
+                            Div({
+                                style {
+                                    marginBottom(.5.r)
+                                    color(Styles.colors.secondary)
+                                    fontSize(16.px)
+                                }
+                            }) {
+                                val someone = appString { someone }
+                                Text("${if (story.publishDate != null) appString { published } else appString { draft }} ${appString { inlineBy }} ${story.authors?.joinToString { it.name ?: someone }}")
+                            }
+                            Div({
+                                style {
+                                    marginBottom(.5.r)
+                                    ellipsize()
+                                }
+                            }) {
+                                Text(story.textContent())
+                            }
+                        }
+                    }
+                }
+
+                is GroupAttachment -> {
+                    Div({
+                        classes(StoryStyles.contentGroups)
+                    }) {
+                        attachment.group?.let { groupId ->
+                            var group by remember(groupId) {
+                                mutableStateOf<GroupExtended?>(null)
+                            }
+
+                            LaunchedEffect(groupId) {
+                                api.group(groupId) {
+                                    group = it
+                                }
+                            }
+
+                            LoadingText(group != null, appString { loadingGroup }) {
+                                group?.let { group ->
+                                    GroupItem(
+                                        group,
+                                        selectable = true,
+                                        selected = false,
+                                        onBackground = true,
+                                        onSelected = {
+                                            scope.launch {
+                                                appNav.navigate(AppNavigation.Group(group.group!!.id!!, group))
+                                            }
+                                        },
+                                        info = GroupInfo.LatestMessage
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is StickerAttachment -> {
+                    StickerItem(
+                        attachment.photo!!,
+                        attachment.message,
+                        96.px,
+                        messageAlign = if (isMe) AlignItems.Start else AlignItems.End
+                    ) {}
+                }
+
+                is UrlAttachment -> {
+                    UrlPreview(attachment)
+                }
             }
         }
 

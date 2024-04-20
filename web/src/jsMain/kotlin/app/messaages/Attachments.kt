@@ -25,6 +25,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "story" -> json.decodeFromJsonElement<StoryAttachment>(jsonElement)
             "group" -> json.decodeFromJsonElement<GroupAttachment>(jsonElement)
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
+            "url" -> json.decodeFromJsonElement<UrlAttachment>(jsonElement)
             else -> null
         }
     } catch (e: Throwable) {

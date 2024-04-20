@@ -88,6 +88,7 @@ fun ColumnScope.MessageContent(
     var attachedGroup by remember { mutableStateOf<GroupExtended?>(null) }
     var attachedGroupNotFound by remember { mutableStateOf(false) }
     var attachedAudio by remember { mutableStateOf<String?>(null) }
+    var attachedUrls by remember { mutableStateOf<List<UrlAttachment>>(emptyList()) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
     val nav = nav
     val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -141,6 +142,9 @@ fun ColumnScope.MessageContent(
                 ).apply {
                     id = attachment.sticker
                 }
+            }
+            is UrlAttachment -> {
+                attachedUrls += attachment
             }
         }
     }

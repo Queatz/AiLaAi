@@ -8,6 +8,7 @@ class CardAttachment(
 ) : MessageAttachment() {
     override val type = "card"
 }
+
 @Serializable
 class PhotosAttachment(
     var photos: List<String>? = null
@@ -57,6 +58,16 @@ class StickerAttachment(
     var message: String? = null,
 ) : MessageAttachment() {
     override val type = "sticker"
+}
+
+@Serializable
+class UrlAttachment(
+    var url: String? = null,
+    var image: String? = null,
+    var title: String? = null,
+    var description: String? = null,
+) : MessageAttachment() {
+    override val type = "url"
 }
 
 @Serializable

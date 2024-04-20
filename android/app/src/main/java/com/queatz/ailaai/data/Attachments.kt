@@ -3,7 +3,6 @@ package com.queatz.ailaai.data
 import com.queatz.ailaai.extensions.inList
 import com.queatz.db.*
 import kotlinx.serialization.json.*
-import java.util.Collections.emptyList
 
 fun Message.getAttachment() = attachment?.asMessageAttachment()
 
@@ -23,6 +22,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "story" -> json.decodeFromJsonElement<StoryAttachment>(jsonElement)
             "group" -> json.decodeFromJsonElement<GroupAttachment>(jsonElement)
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
+            "url" -> json.decodeFromJsonElement<UrlAttachment>(jsonElement)
             else -> null
         }
     } catch (e: Exception) {
