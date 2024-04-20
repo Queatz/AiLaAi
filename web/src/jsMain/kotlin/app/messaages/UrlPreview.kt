@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import app.AppStyles
 import com.queatz.db.UrlAttachment
 import kotlinx.browser.window
+import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -45,7 +46,7 @@ fun UrlPreview(url: UrlAttachment) {
             }
         }
     ) {
-        url.image?.let { image ->
+        url.image?.notBlank?.let { image ->
             Img(image) {
                 style {
                     width(100.percent)
@@ -58,7 +59,7 @@ fun UrlPreview(url: UrlAttachment) {
                 padding(1.r)
             }
         }) {
-            url.title?.let { title ->
+            url.title?.notBlank?.let { title ->
                 Div({
                     style {
                         fontWeight("bold")
@@ -68,7 +69,7 @@ fun UrlPreview(url: UrlAttachment) {
                     Text(title)
                 }
             }
-            url.description?.let { description ->
+            url.description?.notBlank?.let { description ->
                 Div({
                     style {
                         if (url.image != null || url.title != null) {

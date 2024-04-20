@@ -88,7 +88,7 @@ fun ColumnScope.MessageContent(
     var attachedGroup by remember { mutableStateOf<GroupExtended?>(null) }
     var attachedGroupNotFound by remember { mutableStateOf(false) }
     var attachedAudio by remember { mutableStateOf<String?>(null) }
-    var attachedUrls by remember { mutableStateOf<List<UrlAttachment>>(emptyList()) }
+    var attachedUrls by remember(message) { mutableStateOf<List<UrlAttachment>>(emptyList()) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
     val nav = nav
     val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -105,46 +105,48 @@ fun ColumnScope.MessageContent(
 
     // todo: support multiple attachments of the same type
     // todo: right now the only possibility for 2 attachments is with message replies
-    message.getAllAttachments().forEach { attachment ->
-        when (attachment) {
-            is CardAttachment -> {
-                attachedCardId = attachment.card
-            }
-
-            is PhotosAttachment -> {
-                attachedPhotos = attachment.photos
-            }
-
-            is VideosAttachment -> {
-                attachedVideos = attachment.videos
-            }
-
-            is AudioAttachment -> {
-                attachedAudio = attachment.audio
-            }
-
-            is ReplyAttachment -> {
-                attachedReplyId = attachment.message
-            }
-
-            is StoryAttachment -> {
-                attachedStoryId = attachment.story
-            }
-
-            is GroupAttachment -> {
-                attachedGroupId = attachment.group
-            }
-
-            is StickerAttachment -> {
-                attachedSticker = Sticker(
-                    photo = attachment.photo,
-                    message = attachment.message,
-                ).apply {
-                    id = attachment.sticker
+    LaunchedEffect(message) {
+        message.getAllAttachments().forEach { attachment ->
+            when (attachment) {
+                is CardAttachment -> {
+                    attachedCardId = attachment.card
                 }
-            }
-            is UrlAttachment -> {
-                attachedUrls += attachment
+
+                is PhotosAttachment -> {
+                    attachedPhotos = attachment.photos
+                }
+
+                is VideosAttachment -> {
+                    attachedVideos = attachment.videos
+                }
+
+                is AudioAttachment -> {
+                    attachedAudio = attachment.audio
+                }
+
+                is ReplyAttachment -> {
+                    attachedReplyId = attachment.message
+                }
+
+                is StoryAttachment -> {
+                    attachedStoryId = attachment.story
+                }
+
+                is GroupAttachment -> {
+                    attachedGroupId = attachment.group
+                }
+
+                is StickerAttachment -> {
+                    attachedSticker = Sticker(
+                        photo = attachment.photo,
+                        message = attachment.message,
+                    ).apply {
+                        id = attachment.sticker
+                    }
+                }
+                is UrlAttachment -> {
+                    attachedUrls += attachment
+                }
             }
         }
     }
@@ -640,6 +642,29 @@ fun ColumnScope.MessageContent(
         ) {
             if (!attachedStoryNotFound) {
                 nav.navigate(AppNav.Story(storyId))
+            }
+        }
+    }
+
+    attachedUrls.ifNotEmpty?.let { urls ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(1.pad),
+            modifier = Modifier
+                .padding(1.pad)
+                .let {
+                    if (isReply) {
+                        it
+                    } else {
+                        if (isMe) {
+                            it.padding(start = 8.pad)
+                        } else {
+                            it.padding(end = 8.pad)
+                        }
+                    }
+                }
+        ) {
+            urls.forEach {
+                UrlPreview(it)
             }
         }
     }
