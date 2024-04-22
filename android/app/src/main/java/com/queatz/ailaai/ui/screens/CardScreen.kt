@@ -575,7 +575,6 @@ fun CardScreen(cardId: String) {
             card: Card?,
             isMine: Boolean,
             aspect: Float,
-            onClick: () -> Unit,
             scope: CoroutineScope,
             elevation: Int = 1,
             playVideo: Boolean = false
@@ -682,10 +681,9 @@ fun CardScreen(cardId: String) {
                         card = card,
                         showTitle = false,
                         aspect = aspect,
-                        onClick = onClick,
                         scope = scope,
                         elevation = elevation,
-                        playVideo = playVideo,
+                        playVideo = playVideo
                     )
                 }
             }
@@ -731,11 +729,6 @@ fun CardScreen(cardId: String) {
                                 card,
                                 isMine,
                                 1.5f,
-                                onClick = {
-                                    if (isMine) {
-                                        openEditDialog = true
-                                    }
-                                },
                                 scope,
                                 elevation = 2,
                                 playVideo = isAtTop
@@ -756,11 +749,6 @@ fun CardScreen(cardId: String) {
                                 card,
                                 isMine,
                                 1.5f,
-                                onClick = {
-                                    if (isMine) {
-                                        openEditDialog = true
-                                    }
-                                },
                                 scope,
                                 playVideo = isAtTop
                             )

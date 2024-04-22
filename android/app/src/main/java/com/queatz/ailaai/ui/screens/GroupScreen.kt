@@ -704,7 +704,7 @@ fun GroupScreen(groupId: String) {
                                 message
                             },
                             me = myMember?.member?.id,
-                            onDeleted = {
+                            onUpdated = {
                                 scope.launch {
                                     reloadMessages()
                                 }

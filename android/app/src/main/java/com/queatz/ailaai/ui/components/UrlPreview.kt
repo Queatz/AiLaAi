@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -35,6 +36,7 @@ fun UrlPreview(attachment: UrlAttachment) {
                 attachment.url!!.launchUrl(context)
             }
             .padding(bottom = 1.pad)
+            .widthIn(max = 480.dp)
     ) {
         attachment.image?.notBlank?.let {
             AsyncImage(

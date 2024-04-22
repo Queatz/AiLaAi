@@ -13,6 +13,18 @@ suspend fun Api.message(
     onSuccess = onSuccess
 )
 
+suspend fun Api.updateMessage(
+    id: String,
+    messageUpdate: Message,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode>,
+) = post(
+    "messages/$id",
+    messageUpdate,
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.deleteMessage(
     message: String,
     onError: ErrorBlock = null,

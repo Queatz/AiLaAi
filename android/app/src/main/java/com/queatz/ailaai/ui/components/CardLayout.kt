@@ -37,7 +37,7 @@ fun CardLayout(
     showTitle: Boolean,
     modifier: Modifier = Modifier,
     aspect: Float = 1.5f,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     scope: CoroutineScope,
     elevation: Int = 1,
     showDistance: LatLng? = null,
@@ -51,9 +51,6 @@ fun CardLayout(
             .shadow(1.dp, MaterialTheme.shapes.large)
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.background)
-            .clickable {
-                onClick()
-            }
     ) {
         val video = card?.video
         if (video != null) {

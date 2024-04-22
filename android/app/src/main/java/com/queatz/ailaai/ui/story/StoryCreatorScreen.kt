@@ -38,9 +38,11 @@ import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.ScriptData
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
+import widget
 
 sealed class StorySource {
     data class Card(val id: String) : StorySource()
@@ -979,7 +981,9 @@ fun StoryCreatorScreen(
                                 }
                             }
 
-                            Stub(part.widget.stringResource) {
+                            WidgetStub(
+                                part
+                            ) {
                                 showWidgetMenu = true
                             }
                         }

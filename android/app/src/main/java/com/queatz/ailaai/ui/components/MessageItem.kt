@@ -28,7 +28,7 @@ fun MessageItem(
     getPerson: (String) -> Person?,
     getMessage: suspend (String) -> Message?,
     me: String?,
-    onDeleted: () -> Unit,
+    onUpdated: () -> Unit,
     onReply: (Message) -> Unit,
     onShowPhoto: (String) -> Unit
 ) {
@@ -64,24 +64,24 @@ fun MessageItem(
 
         Column(modifier = Modifier.weight(1f)) {
             MessageContent(
-                message,
-                isMe,
-                me,
-                showTime,
-                {
+                message = message,
+                isMe = isMe,
+                me = me,
+                showTime = showTime,
+                onShowTime = {
                     if (selectedMessages.isEmpty()) {
                         showTime = it
                     } else {
                         onSelectedChange(message, message !in selectedMessages)
                     }
                 },
-                showMessageDialog,
-                { showMessageDialog = it },
-                getPerson,
-                getMessage,
-                onReply,
-                onDeleted,
-                onShowPhoto,
+                showMessageDialog = showMessageDialog,
+                onShowMessageDialog = { showMessageDialog = it },
+                getPerson = getPerson,
+                getMessage = getMessage,
+                onReply = onReply,
+                onUpdated = onUpdated,
+                onShowPhoto = onShowPhoto,
                 selected = message in selectedMessages,
                 onSelectedChange = {
                     onSelectedChange(message, it)

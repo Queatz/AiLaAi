@@ -649,6 +649,8 @@
     <string name="name_introduction_photo">Name, introduction, photo</string>
     <string name="hosts">Hosts</string>
     <string name="who_sends_messages_to_this_group">Who sends messages to this group?</string>
+    <string name="edit_message">Edit message</string>
+    <string name="no_data">No data</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

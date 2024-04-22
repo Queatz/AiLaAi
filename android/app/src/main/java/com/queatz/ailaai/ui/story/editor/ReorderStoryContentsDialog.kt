@@ -24,6 +24,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.Stub
+import com.queatz.ailaai.ui.story.WidgetStub
 import com.queatz.ailaai.ui.story.stringResource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
@@ -186,7 +187,7 @@ fun ReorderStoryContentsDialog(
             }
 
             is StoryContent.Widget -> {
-                Stub(it.widget.stringResource)
+                WidgetStub(it)
             }
 
             is StoryContent.Button -> {

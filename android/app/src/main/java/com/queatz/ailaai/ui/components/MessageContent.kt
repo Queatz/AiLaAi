@@ -28,6 +28,8 @@ import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
 import app.ailaai.api.sticker
+import app.ailaai.api.updateMe
+import app.ailaai.api.updateMessage
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -41,6 +43,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
@@ -64,7 +67,7 @@ fun ColumnScope.MessageContent(
     getPerson: (String) -> Person?,
     getMessage: suspend (String) -> Message?,
     onReply: (Message) -> Unit,
-    onDeleted: () -> Unit,
+    onUpdated: () -> Unit,
     onShowPhoto: (String) -> Unit,
     isReply: Boolean = false,
     selected: Boolean = false,
@@ -74,6 +77,7 @@ fun ColumnScope.MessageContent(
     val scope = rememberCoroutineScope()
     val isMeActual = me == message.member
     var showDeleteMessageDialog by rememberStateOf(false)
+    var showEditMessageDialog by rememberStateOf(false)
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
@@ -234,10 +238,32 @@ fun ColumnScope.MessageContent(
             }
 
             if (isMe && !isReply) {
+                menuItem(stringResource(R.string.edit)) {
+                    showEditMessageDialog = true
+                    onShowMessageDialog(false)
+                }
                 menuItem(stringResource(R.string.delete)) {
                     showDeleteMessageDialog = true
                     onShowMessageDialog(false)
                 }
+            }
+        }
+    }
+
+    if (showEditMessageDialog) {
+        TextFieldDialog(
+            onDismissRequest = {
+                showEditMessageDialog = false
+            },
+            title = stringResource(R.string.edit_message),
+            button = stringResource(R.string.update),
+            singleLine = false,
+            showDismiss = true,
+            initialValue = message.text.orEmpty(),
+        ) { value ->
+            api.updateMessage(message.id!!, Message(text = value.trim())) {
+                onUpdated()
+                showEditMessageDialog = false
             }
         }
     }
@@ -260,7 +286,7 @@ fun ColumnScope.MessageContent(
                         scope.launch {
                             disableSubmit = true
                             api.deleteMessage(message.id!!) {
-                                onDeleted()
+                                onUpdated()
                                 showDeleteMessageDialog = false
                             }
                             disableSubmit = false
