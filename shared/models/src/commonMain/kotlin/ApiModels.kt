@@ -221,3 +221,9 @@ data class RunScriptBody(
 data class ScriptResult(
     val content: List<StoryContent>? = null
 )
+
+@Serializable
+data class ReactBody(
+    val reaction: Reaction,
+    val remove: Boolean? = null
+)

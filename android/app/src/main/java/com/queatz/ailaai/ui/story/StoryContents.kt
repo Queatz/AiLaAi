@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material.icons.outlined.Flare
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
@@ -28,18 +30,24 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.reactToStory
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.dialogs.AddReactionDialog
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.script.ScriptContent
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
+import com.queatz.db.ReactBody
+import com.queatz.db.Reaction
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StoryContents(
     source: StorySource?,
@@ -56,6 +64,7 @@ fun StoryContents(
     var showOpenWidgetDialog by rememberStateOf(false)
     var size by rememberStateOf(Size.Zero)
     val nav = nav
+    val scope = rememberCoroutineScope()
 
     if (showOpenWidgetDialog) {
         val context = LocalContext.current
@@ -124,6 +133,110 @@ fun StoryContents(
                                     null,
                                     modifier = Modifier.padding(2.pad)
                                 )
+                            }
+                        }
+                    }
+
+                    is StoryContent.Reactions -> {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            DisableSelection {
+                                var showAddReactionDialog by rememberStateOf(false)
+
+                                if (showAddReactionDialog) {
+                                    AddReactionDialog(
+                                        {
+                                            showAddReactionDialog = false
+                                        }
+                                    ) { reaction ->
+                                        scope.launch {
+                                            api.reactToStory(
+                                                content.story,
+                                                ReactBody(Reaction(reaction = reaction, comment = null))
+                                            ) {
+
+                                            }
+                                        }
+                                        showAddReactionDialog = false
+                                    }
+                                }
+
+                                FlowRow(
+                                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
+                                    horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    if (content.reactions?.all.isNullOrEmpty()) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    api.reactToStory(
+                                                        content.story,
+                                                        ReactBody(Reaction(reaction = "❤", comment = null))
+                                                    ) {
+
+                                                    }
+                                                }
+                                            }
+                                        ) {
+                                            Text("❤", style = MaterialTheme.typography.bodyLarge)
+                                            Text(
+                                                "0",
+                                                modifier = Modifier
+                                                    .padding(start = .5f.pad)
+                                            )
+                                        }
+                                    } else {
+                                        content.reactions!!.all.forEach { reaction ->
+                                            val mine = content.reactions!!.mine?.any { it.reaction == reaction.reaction} == true
+
+                                            OutlinedButton(
+                                                onClick = {
+                                                    scope.launch {
+                                                        api.reactToStory(
+                                                            content.story,
+                                                            ReactBody(
+                                                                Reaction(
+                                                                    reaction = reaction.reaction
+                                                                ),
+                                                                remove = true
+                                                            )
+                                                        ) {
+
+                                                        }
+                                                    }
+                                                },
+                                                colors = if (mine) ButtonDefaults.outlinedButtonColors(
+                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                                ) else ButtonDefaults.outlinedButtonColors()
+                                            ) {
+                                                Text(reaction.reaction, style = MaterialTheme.typography.bodyLarge)
+                                                Text(
+                                                    reaction.count.formatMini(),
+                                                    style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
+                                                    modifier = Modifier
+                                                        .padding(start = .5f.pad)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            showAddReactionDialog = true
+                                        },
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.AddReaction,
+                                            null,
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

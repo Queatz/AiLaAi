@@ -18,14 +18,14 @@ fun Route.storyRoutes() {
     authenticate(optional = true) {
         get("/stories/{id}") {
             respond {
-                db.story(parameter("id"))
+                db.story(meOrNull?.id?.asId(Person::class), parameter("id"))
                     //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
                     ?: HttpStatusCode.NotFound
             }
         }
         get("/urls/stories/{url}") {
             respond {
-                db.storyByUrl(parameter("url"))
+                db.storyByUrl(meOrNull?.id?.asId(Person::class), parameter("url"))
                     //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
                     ?: HttpStatusCode.NotFound
             }
@@ -106,8 +106,8 @@ fun Route.storyRoutes() {
                         val groups = db.groups(me.id!!, groupIds)
                         val attachment = json.encodeToString(StoryAttachment(story.id!!))
                         groups.forEach { group ->
-                            val myMember = db.member(group.id!!, me.id!!) ?: return@forEach
-                            db.insert(Message(group.id, myMember.id, text = null, attachment))
+                            val myMember = db.member(me.id!!, group.id!!) ?: return@forEach
+                            db.insert(Message(group.id, myMember.id, text = null, attachment = attachment))
 
                             notify.message(
                                 group = group,
@@ -179,6 +179,35 @@ fun Route.storyRoutes() {
                 } else {
                     HttpStatusCode.Forbidden
                 }
+            }
+        }
+
+        post("/stories/{id}/react") {
+            respond {
+                val story = db.document(Story::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                if (story.published != true) {
+                    return@respond HttpStatusCode.BadRequest.description("Story is not yet published")
+                }
+
+                val react = call.receive<ReactBody>()
+
+                if (react.remove == true) {
+                    db.unreact(
+                        from = me.id!!.asId(Person::class),
+                        to = story.id!!.asId(Story::class),
+                        reaction = react.reaction.reaction!!
+                    )
+                } else {
+                    db.react(
+                        from = me.id!!.asId(Person::class),
+                        to = story.id!!.asId(Story::class),
+                        reaction = react.reaction.reaction!!,
+                        comment = react.reaction.comment
+                    )
+                }
+
+                HttpStatusCode.NoContent
             }
         }
 

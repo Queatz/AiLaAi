@@ -90,7 +90,8 @@ fun StoriesScreen() {
     val storyContents = remember(stories) {
         stories.flatMapIndexed { index, story ->
             (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
-                    story.asContents()
+                    story.asContents() +
+                    listOf(StoryContent.Reactions(story.id!!, story.reactions))
         }
     }
     var isLoading by rememberStateOf(stories.isEmpty())
@@ -177,7 +178,7 @@ fun StoriesScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .swipeMainTabs {
-                        when (val it = tabs.swipe(Unit, it)) {
+                        when (tabs.swipe(Unit, it)) {
                             is SwipeResult.Previous -> {
                                 nav.navigate(AppNav.Inventory)
                             }
@@ -190,7 +191,6 @@ fun StoriesScreen() {
                         }
                     }
             ) {
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -198,7 +198,7 @@ fun StoriesScreen() {
                 ) {
                     AnimatedVisibility(myScripts.isNotEmpty() && isAtTop) {
                         ButtonBar(
-                            listOf(Unit),
+                            items = listOf(Unit),
                             onClick = {
                                 showScriptsDialog = true
                             },

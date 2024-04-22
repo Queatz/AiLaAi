@@ -4,6 +4,7 @@ import app.ailaai.api.Api
 import app.ailaai.api.ErrorBlock
 import app.ailaai.api.SuccessBlock
 import com.queatz.db.Geo
+import com.queatz.db.ReactBody
 import com.queatz.db.Story
 import com.queatz.db.StoryDraft
 import io.ktor.client.request.forms.*
@@ -111,6 +112,13 @@ suspend fun Api.deleteStory(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("stories/$id/delete", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.reactToStory(
+    id: String,
+    react: ReactBody,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
+) = post("stories/$id/react", react, onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyDraft(
     id: String,

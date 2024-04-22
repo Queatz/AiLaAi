@@ -138,6 +138,18 @@ data class GroupConfig(
     var edits: GroupEditsConfig? = null
 )
 
+@Serializable
+data class ReactionSummary(
+    val all: List<ReactionCount>,
+    val mine: List<Reaction>? = null
+)
+
+@Serializable
+data class ReactionCount(
+    val reaction: String,
+    val count: Int
+)
+
 enum class GroupMessagesConfig {
     Hosts
 }
@@ -291,7 +303,8 @@ class Story(
     var publishDate: Instant? = null,
     var published: Boolean? = null,
     var content: String? = null,
-    var authors: List<Person>? = null
+    var authors: List<Person>? = null,
+    var reactions: ReactionSummary? = null
 ) : Model()
 
 @Serializable
@@ -408,6 +421,7 @@ enum class ReportType {
     Spam,
     Other
 }
+
 @Serializable
 expect open class Model() {
     var id: String?

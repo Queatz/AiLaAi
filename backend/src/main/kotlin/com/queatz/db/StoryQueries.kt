@@ -2,7 +2,7 @@ package com.queatz.db
 
 import kotlinx.datetime.Instant
 
-fun Db.withAuthors(storyVal: String) = """
+fun Db.storyExtended(person: String?, storyVal: String) = """
     merge(
         $storyVal,
         {
@@ -10,7 +10,8 @@ fun Db.withAuthors(storyVal: String) = """
                 for author in ${Person::class.collection()}
                     filter author._key == $storyVal.${f(Story::person)}
                     return author
-                )
+            ),
+            ${f(Story::reactions)}: ${reactions("\"$person\"", "$storyVal._id")}
         }
     )
 """.trimIndent()
@@ -18,13 +19,13 @@ fun Db.withAuthors(storyVal: String) = """
 /**
  * @story The story id
  */
-fun Db.story(story: String) = one(
+fun Db.story(person: String?, story: String) = one(
     Story::class,
     """
         for x in @@collection
             filter x._key == @story
             limit 1
-            return ${withAuthors("x")}
+            return ${storyExtended(person, "x")}
     """.trimIndent(),
     mapOf(
         "story" to story
@@ -34,14 +35,14 @@ fun Db.story(story: String) = one(
 /**
  * @story The story id
  */
-fun Db.storyByUrl(url: String) = one(
+fun Db.storyByUrl(person: String?, url: String) = one(
     Story::class,
     """
         for x in @@collection
             filter x._key == @url
                 or x.${f(Story::url)} == @url
             limit 1
-            return ${withAuthors("x")}
+            return ${storyExtended(person, "x")}
     """.trimIndent(),
     mapOf(
         "url" to url
@@ -79,7 +80,7 @@ fun Db.storiesOfPerson(person: String) = list(
         for x in @@collection
             filter x.${f(Story::person)} == @person
             sort x.${f(Story::createdAt)} desc
-            return ${withAuthors("x")}
+            return ${storyExtended(person.asId(Person::class), "x")}
     """.trimIndent(),
     mapOf(
         "person" to person
@@ -117,7 +118,7 @@ fun Db.stories(
             )
             sort x.${f(Story::publishDate)} desc, x.${f(Story::createdAt)} desc
             limit @offset, @limit
-            return ${withAuthors("x")}
+            return ${storyExtended(person.asId(Person::class), "x")}
     """.trimIndent(),
     mapOf(
         "person" to person.asId(Person::class),
@@ -161,7 +162,7 @@ fun Db.stories(
             )
             sort x.${f(Story::publishDate)} desc, x.${f(Story::createdAt)} desc
             limit @offset, @limit
-            return ${withAuthors("x")}
+            return ${storyExtended(person.asId(Person::class), "x")}
     """.trimIndent(),
     mapOf(
         "person" to person.asId(Person::class),

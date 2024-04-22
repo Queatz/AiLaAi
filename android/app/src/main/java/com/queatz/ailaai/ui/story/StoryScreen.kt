@@ -30,7 +30,10 @@ fun StoryScreen(storyId: String) {
     }
 
     LaunchedEffect(story) {
-        contents = story?.asContents() ?: emptyList()
+        contents = story?.let {
+            it.asContents() +
+                    listOf(StoryContent.Reactions(it.id!!, it.reactions))
+        } ?: emptyList()
     }
 
     // todo use a loading/error/empty scaffold
