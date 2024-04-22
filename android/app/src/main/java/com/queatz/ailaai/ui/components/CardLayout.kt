@@ -51,6 +51,9 @@ fun CardLayout(
             .shadow(1.dp, MaterialTheme.shapes.large)
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.background)
+            .clickable {
+                onClick()
+            }
     ) {
         val video = card?.video
         if (video != null) {

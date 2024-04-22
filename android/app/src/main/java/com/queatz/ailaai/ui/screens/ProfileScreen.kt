@@ -116,6 +116,7 @@ import com.queatz.ailaai.ui.dialogs.ProcessingVideoDialog
 import com.queatz.ailaai.ui.dialogs.ProcessingVideoStage
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.profile.ProfileGroups
 import com.queatz.ailaai.ui.profile.Stats
@@ -154,6 +155,7 @@ fun ProfileScreen(personId: String) {
     var showEditAbout by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
+    var showSourceDialog by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
     var showCoverPhotoDialog by rememberStateOf(false)
     var showProfilePhotoDialog by rememberStateOf(false)
@@ -229,6 +231,10 @@ fun ProfileScreen(personId: String) {
         ReportDialog("person/$personId") {
             showReportDialog = false
         }
+    }
+
+    if (showSourceDialog) {
+        ViewSourceDialog({ showSourceDialog = false }, profile?.content)
     }
 
     fun trade() {
@@ -634,6 +640,12 @@ fun ProfileScreen(personId: String) {
                                             showMenu = false
                                         })
                                     }
+                                    DropdownMenuItem({
+                                        Text(stringResource(R.string.view_source))
+                                    }, {
+                                        showMenu = false
+                                        showSourceDialog = true
+                                    })
                                     DropdownMenuItem({
                                         Text(stringResource(R.string.report))
                                     }, {

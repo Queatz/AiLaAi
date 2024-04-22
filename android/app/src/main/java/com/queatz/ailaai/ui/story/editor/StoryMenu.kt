@@ -20,6 +20,7 @@ import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
@@ -43,9 +44,15 @@ fun StoryMenu(
     var showSendDialog by rememberStateOf(false)
     var showQrCode by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
+    var showSourceDialog by rememberStateOf(false)
+
     val textCopied = stringResource(R.string.copied)
     val storyString = stringResource(R.string.story)
     val nav = nav
+
+    if (showSourceDialog) {
+        ViewSourceDialog({ showSourceDialog = false }, story?.content)
+    }
 
     if (showDeleteDialog) {
         DeleteStoryDialog(
@@ -156,6 +163,13 @@ fun StoryMenu(
             context.toast(textCopied)
             onDismissRequest()
         })
+
+                                    DropdownMenuItem({
+                                        Text(stringResource(R.string.view_source))
+                                    }, {
+                                        showSourceDialog = true
+                                        onDismissRequest()
+                                    })
         DropdownMenuItem({ Text(stringResource(R.string.report)) }, {
             showReportDialog = true
             onDismissRequest()

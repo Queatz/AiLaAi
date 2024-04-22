@@ -92,6 +92,7 @@ fun CardScreen(cardId: String) {
     val setPhotoState = remember(card?.name == null) {
         ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
     }
+    var showSourceDialog by rememberStateOf(false)
 
     if (showPhotoDialog) {
         ChoosePhotoDialog(
@@ -329,6 +330,10 @@ fun CardScreen(cardId: String) {
         }
     }
 
+    if (showSourceDialog) {
+        ViewSourceDialog({ showSourceDialog = false }, card?.content)
+    }
+
     if (openLocationDialog) {
         EditCardLocationDialog(card!!, nav.context as Activity, {
             openLocationDialog = false
@@ -558,6 +563,13 @@ fun CardScreen(cardId: String) {
                         cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
                         context.toast(textCopied)
                         showMenu = false
+                    })
+
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.view_source))
+                    }, {
+                        showMenu = false
+                        showSourceDialog = true
                     })
                     DropdownMenuItem({
                         Text(stringResource(R.string.report))
