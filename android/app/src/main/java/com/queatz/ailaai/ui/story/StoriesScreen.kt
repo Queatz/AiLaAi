@@ -121,7 +121,7 @@ fun StoriesScreen() {
         mePresence.readStoriesUntilNow()
     }
 
-    LaunchedEffect(geo) {
+    suspend fun reload() {
         if (geo != null) {
             api.stories(
                 geo!!.toGeo(),
@@ -138,6 +138,10 @@ fun StoriesScreen() {
                 isLoading = false
             }
         }
+    }
+
+    LaunchedEffect(geo) {
+        reload()
     }
 
     LocationScaffold(
@@ -228,7 +232,12 @@ fun StoriesScreen() {
                             null,
                             storyContents,
                             state,
-                            Modifier
+                            onReactionChange = {
+                                scope.launch {
+                                    reload()
+                                }
+                            },
+                            modifier = Modifier
                                 .widthIn(max = 640.dp)
                                 .fillMaxWidth()
                                 .weight(1f),

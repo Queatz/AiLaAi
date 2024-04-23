@@ -657,6 +657,9 @@
     <string name="x_thousands_mini">%1$sk</string>
     <string name="x_millions_mini">%1$sm</string>
     <string name="custom">Custom</string>
+    <string name="reactions">Reactions</string>
+    <string name="tap_to_remove">Tap to remove</string>
+    <string name="reaction_removed">Reaction removed</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

@@ -21,7 +21,12 @@ import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 
-@Composable fun PersonMember(person: Person, selected: Boolean = false, infoFormatter: (Person) -> String? = { null }, onClick: () -> Unit) {
+@Composable fun PersonMember(
+    person: Person,
+    selected: Boolean = false,
+    infoFormatter: (Person) -> String? = { null },
+    onClick: () -> Unit
+) {
     GroupMember(
         listOf(ContactPhoto(person.name ?: "", person.photo, person.seen)),
         person.name ?: stringResource(R.string.someone),

@@ -23,11 +23,18 @@ fun Route.storyRoutes() {
                     ?: HttpStatusCode.NotFound
             }
         }
+
         get("/urls/stories/{url}") {
             respond {
                 db.storyByUrl(meOrNull?.id?.asId(Person::class), parameter("url"))
                     //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
                     ?: HttpStatusCode.NotFound
+            }
+        }
+
+        get("/stories/{id}/reactions") {
+            respond {
+                db.reactionsOf(parameter("id").asId(Story::class))
             }
         }
     }

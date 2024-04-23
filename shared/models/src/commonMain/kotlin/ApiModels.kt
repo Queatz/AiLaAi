@@ -227,3 +227,9 @@ data class ReactBody(
     val reaction: Reaction,
     val remove: Boolean? = null
 )
+
+@Serializable
+data class ReactionAndPerson(
+    val reaction: Reaction? = null,
+    val person: Person? = null
+)

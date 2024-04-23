@@ -22,6 +22,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 @Composable
 fun TextFieldDialog(
@@ -38,6 +39,7 @@ fun TextFieldDialog(
     valueFormatter: ((String) -> String?)? = null,
     keyboardOptions: KeyboardOptions? = null,
     align: TextAlign = TextAlign.Start,
+    maxLength: Int? = null,
     extraContent: (@Composable ColumnScope.() -> Unit)? = null,
     bottomContent: (@Composable ColumnScope.() -> Unit)? = null,
     onSubmit: suspend (value: String) -> Unit,
@@ -70,10 +72,18 @@ fun TextFieldDialog(
                 text,
                 onValueChange = {
                     if (valueFormatter == null) {
-                        text = it
+                        if (maxLength == null || it.length < maxLength) {
+                            text = it
+                        } else {
+                            text = it.take(maxLength)
+                        }
                     } else {
                         valueFormatter(it)?.let {
-                            text = it
+                            if (maxLength == null || it.length < maxLength) {
+                                text = it
+                            } else {
+                                text = it.take(maxLength)
+                            }
                         }
                     }
                     if (requireModification || requireNotBlank) {

@@ -14,6 +14,7 @@ import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
+import kotlinx.coroutines.launch
 
 @Composable
 fun StoryScreen(storyId: String) {
@@ -22,10 +23,15 @@ fun StoryScreen(storyId: String) {
     var isLoading by rememberStateOf(true)
     var story by remember { mutableStateOf<Story?>(null) }
     var contents by remember { mutableStateOf(emptyList<StoryContent>()) }
+    val scope = rememberCoroutineScope()
+
+    suspend fun reload() {
+        api.story(storyId) { story = it }
+    }
 
     LaunchedEffect(Unit) {
         isLoading = true
-        api.story(storyId) { story = it }
+        reload()
         isLoading = false
     }
 
@@ -58,6 +64,11 @@ fun StoryScreen(storyId: String) {
             StorySource.Story(storyId),
             contents,
             state,
+            onReactionChange = {
+                scope.launch {
+                    reload()
+                }
+            },
             modifier = Modifier.widthIn(max = 640.dp).fillMaxSize(),
         )
     }

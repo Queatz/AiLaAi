@@ -39,6 +39,21 @@ fun Db.unreact(from: String, to: String, reaction: String) = query(
     )
 )
 
+fun Db.reactionsOf(to: String) = query(
+    ReactionAndPerson::class,
+    """
+        for person, reaction in inbound @to graph `${Reaction::class.graph()}`
+            sort reaction.${f(Reaction::createdAt)} desc
+            return {
+                ${f(ReactionAndPerson::reaction)}: reaction,
+                ${f(ReactionAndPerson::person)}: keep(person, "_key", "${f(Person::name)}", "${f(Person::photo)}", "${f(Person::seen)}")
+            }
+    """.trimIndent(),
+    mapOf(
+        "to" to to
+    )
+)
+
 fun Db.reactions(person: String?, to: String) = """
     {
         "${f(ReactionSummary::all)}": ${allReactions(to)},
@@ -59,7 +74,7 @@ fun Db.allReactions(to: String) = """
     (
         for entity, reaction in inbound $to graph `${Reaction::class.graph()}`
             collect text = reaction.${f(Reaction::reaction)} with count into count
-            sort count desc
+            sort count desc, text
             return { ${f(ReactionCount::reaction)}: text, ${f(ReactionCount::count)}: count }
     )
 """.trimIndent()

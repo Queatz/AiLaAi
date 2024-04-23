@@ -28,6 +28,8 @@ fun String.isNumericTextInput(allowDecimal: Boolean = true): Boolean {
 
 fun String.wordCount() = if (isBlank()) 0 else trim().split("\\W+".toRegex()).size
 
+fun bulletedString(vararg items: String?) = items.filterNotNull().joinToString(" • ")
+
 val String.ensureScheme get() = if (contains("://")) this else "https://$this"
 
 fun String.launchUrl(context: Context) {

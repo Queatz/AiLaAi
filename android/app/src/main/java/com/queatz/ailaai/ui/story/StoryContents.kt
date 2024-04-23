@@ -3,15 +3,45 @@ package com.queatz.ailaai.ui.story
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material.icons.outlined.Flare
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,11 +61,30 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.reactToStory
+import com.queatz.ailaai.api.storyReactions
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.fadingEdge
+import com.queatz.ailaai.extensions.formatMini
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.launchUrl
+import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.shortAgo
+import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.extensions.url
+import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.components.*
+import com.queatz.ailaai.ui.components.Audio
+import com.queatz.ailaai.ui.components.CardItem
+import com.queatz.ailaai.ui.components.ContactItem
+import com.queatz.ailaai.ui.components.GroupInfo
+import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.LoadingText
+import com.queatz.ailaai.ui.components.SearchResult
+import com.queatz.ailaai.ui.components.rememberLongClickInteractionSource
 import com.queatz.ailaai.ui.dialogs.AddReactionDialog
+import com.queatz.ailaai.ui.dialogs.ItemsPeopleDialog
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.script.ScriptContent
 import com.queatz.ailaai.ui.theme.pad
@@ -43,6 +92,7 @@ import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
+import com.queatz.db.ReactionAndPerson
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import kotlinx.coroutines.launch
@@ -57,6 +107,7 @@ fun StoryContents(
     bottomContentPadding: Dp = 0.pad,
     horizontalPadding: Dp = 2.pad,
     fade: Boolean = false,
+    onReactionChange: () -> Unit = {},
     onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
@@ -64,10 +115,11 @@ fun StoryContents(
     var showOpenWidgetDialog by rememberStateOf(false)
     var size by rememberStateOf(Size.Zero)
     val nav = nav
+    val me = me
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     if (showOpenWidgetDialog) {
-        val context = LocalContext.current
         AlertDialog(
             {
                 showOpenWidgetDialog = false
@@ -141,6 +193,7 @@ fun StoryContents(
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             DisableSelection {
                                 var showAddReactionDialog by rememberStateOf(false)
+                                var showReactions by rememberStateOf<List<ReactionAndPerson>?>(null)
 
                                 if (showAddReactionDialog) {
                                     AddReactionDialog(
@@ -153,10 +206,50 @@ fun StoryContents(
                                                 content.story,
                                                 ReactBody(Reaction(reaction = reaction, comment = null))
                                             ) {
-
+                                                onReactionChange()
                                             }
                                         }
                                         showAddReactionDialog = false
+                                    }
+                                }
+
+                                showReactions?.let { reactions ->
+                                    ItemsPeopleDialog(
+                                        title = stringResource(id = R.string.reactions),
+                                        onDismissRequest = {
+                                            showReactions = null
+                                        },
+                                        items = reactions,
+                                        key = { it.reaction!!.id!! },
+                                        people = { it.person!! },
+                                        infoFormatter = { reaction ->
+                                            bulletedString(
+                                                reaction.reaction!!.reaction!!,
+                                                reaction.reaction!!.createdAt!!.shortAgo(context),
+                                                reaction.reaction!!.comment,
+                                                if (reaction.person?.id == me?.id) { context.getString(R.string.tap_to_remove) } else { null }
+                                            )
+                                        }
+                                    ) { reaction ->
+                                        showReactions = null
+                                        if (reaction.person?.id == me?.id) {
+                                            scope.launch {
+                                                api.reactToStory(
+                                                    content.story,
+                                                    ReactBody(
+                                                        Reaction(
+                                                            reaction = reaction.reaction!!.reaction!!
+                                                        ),
+                                                        remove = true
+                                                    )
+                                                ) {
+                                                    context.toast(R.string.reaction_removed)
+                                                    onReactionChange()
+                                                }
+                                            }
+                                        } else {
+                                            nav.navigate(AppNav.Profile(reaction.person!!.id!!))
+                                        }
                                     }
                                 }
 
@@ -174,7 +267,7 @@ fun StoryContents(
                                                         content.story,
                                                         ReactBody(Reaction(reaction = "❤", comment = null))
                                                     ) {
-
+                                                        onReactionChange()
                                                     }
                                                 }
                                             }
@@ -188,29 +281,63 @@ fun StoryContents(
                                         }
                                     } else {
                                         content.reactions!!.all.forEach { reaction ->
-                                            val mine = content.reactions!!.mine?.any { it.reaction == reaction.reaction} == true
+                                            val mine = content.reactions!!.mine?.any { it.reaction == reaction.reaction } == true
 
                                             OutlinedButton(
-                                                onClick = {
-                                                    scope.launch {
-                                                        api.reactToStory(
-                                                            content.story,
-                                                            ReactBody(
-                                                                Reaction(
-                                                                    reaction = reaction.reaction
-                                                                ),
-                                                                remove = true
-                                                            )
-                                                        ) {
-
-                                                        }
-                                                    }
-                                                },
+                                                onClick = {},
                                                 colors = if (mine) ButtonDefaults.outlinedButtonColors(
                                                     containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                                ) else ButtonDefaults.outlinedButtonColors()
+                                                ) else ButtonDefaults.outlinedButtonColors(),
+                                                interactionSource = rememberLongClickInteractionSource(
+                                                    onClick = {
+                                                        scope.launch {
+                                                            if (mine) {
+                                                                api.storyReactions(content.story) {
+                                                                    showReactions = it
+                                                                }
+                                                            } else {
+                                                                api.reactToStory(
+                                                                    content.story,
+                                                                    ReactBody(
+                                                                        Reaction(
+                                                                            reaction = reaction.reaction
+                                                                        )
+                                                                    )
+                                                                ) {
+                                                                    onReactionChange()
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ) {
+                                                    scope.launch {
+                                                        if (mine) {
+                                                            api.reactToStory(
+                                                                content.story,
+                                                                ReactBody(
+                                                                    Reaction(
+                                                                        reaction = reaction.reaction
+                                                                    ),
+                                                                    remove = true
+                                                                )
+                                                            ) {
+                                                                context.toast(R.string.reaction_removed)
+                                                                onReactionChange()
+                                                            }
+                                                        } else {
+                                                            api.storyReactions(content.story) {
+                                                                showReactions = it
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             ) {
-                                                Text(reaction.reaction, style = MaterialTheme.typography.bodyLarge)
+                                                Text(
+                                                    reaction.reaction,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    modifier = Modifier
+                                                        .weight(1f, fill = false)
+                                                )
                                                 Text(
                                                     reaction.count.formatMini(),
                                                     style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),

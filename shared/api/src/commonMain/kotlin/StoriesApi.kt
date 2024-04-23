@@ -5,6 +5,7 @@ import app.ailaai.api.ErrorBlock
 import app.ailaai.api.SuccessBlock
 import com.queatz.db.Geo
 import com.queatz.db.ReactBody
+import com.queatz.db.ReactionAndPerson
 import com.queatz.db.Story
 import com.queatz.db.StoryDraft
 import io.ktor.client.request.forms.*
@@ -119,6 +120,12 @@ suspend fun Api.reactToStory(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("stories/$id/react", react, onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.storyReactions(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<ReactionAndPerson>> = {}
+) = get("stories/$id/reactions", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyDraft(
     id: String,

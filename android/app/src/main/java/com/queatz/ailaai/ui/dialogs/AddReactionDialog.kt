@@ -31,6 +31,7 @@ fun AddReactionDialog(onDismissRequest: () -> Unit, onReaction: (String) -> Unit
         button = stringResource(R.string.add),
         requireNotBlank = true,
         placeholder = stringResource(R.string.custom),
+        maxLength = 64,
         extraContent = {
             var viewport by remember { mutableStateOf(Size(0f, 0f)) }
             val scrollState = rememberScrollState()

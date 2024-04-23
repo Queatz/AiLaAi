@@ -1,5 +1,6 @@
 package com.queatz.ailaai.extensions
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -29,5 +30,17 @@ fun Instant.shortAgo() = (Clock.System.now() - this).let {
         it.inWholeHours >= 1 -> pluralStringResource(R.plurals.time_x_hours, it.inWholeHours.toInt(), it.inWholeHours.toInt())
         it.inWholeMinutes > 0 -> pluralStringResource(R.plurals.time_x_minutes, it.inWholeMinutes.toInt(), it.inWholeMinutes.toInt())
         else -> stringResource(R.string.now)
+    }
+}
+
+fun Instant.shortAgo(context: Context) = (Clock.System.now() - this).let {
+    when {
+        it.inWholeDays >= 365 -> context.resources.getQuantityString(R.plurals.time_x_years, (it.inWholeDays / 365).toInt(), (it.inWholeDays / 365).toInt())
+        it.inWholeDays >= 30 -> context.resources.getQuantityString(R.plurals.time_x_months, (it.inWholeDays / 30).toInt(), (it.inWholeDays / 30).toInt())
+        it.inWholeDays >= 7 -> context.resources.getQuantityString(R.plurals.time_x_weeks, (it.inWholeDays / 7).toInt(), (it.inWholeDays / 7).toInt())
+        it.inWholeDays >= 1 -> context.resources.getQuantityString(R.plurals.time_x_days, it.inWholeDays.toInt(), it.inWholeDays.toInt())
+        it.inWholeHours >= 1 -> context.resources.getQuantityString(R.plurals.time_x_hours, it.inWholeHours.toInt(), it.inWholeHours.toInt())
+        it.inWholeMinutes > 0 -> context.resources.getQuantityString(R.plurals.time_x_minutes, it.inWholeMinutes.toInt(), it.inWholeMinutes.toInt())
+        else -> context.resources.getString(R.string.now)
     }
 }
