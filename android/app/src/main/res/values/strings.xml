@@ -660,6 +660,9 @@
     <string name="reactions">Reactions</string>
     <string name="tap_to_remove">Tap to remove</string>
     <string name="reaction_removed">Reaction removed</string>
+    <string name="comment">Comment</string>
+    <string name="tap_to_edit">Tap to edit</string>
+    <string name="add_a_comment_to_your_reaction">Add a comment to your reaction</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

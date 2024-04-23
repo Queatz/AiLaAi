@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import com.queatz.db.Person
     person: Person,
     selected: Boolean = false,
     infoFormatter: (Person) -> String? = { null },
+    action: (@Composable RowScope.() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     GroupMember(
@@ -32,6 +34,7 @@ import com.queatz.db.Person
         person.name ?: stringResource(R.string.someone),
         infoFormatter(person),
         selected,
+        action,
         onClick
     )
 }
@@ -42,6 +45,7 @@ fun GroupMember(
     name: String,
     info: String?,
     selected: Boolean = false,
+    action: (@Composable RowScope.() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val backgroundColor by animateColorAsState(
@@ -72,6 +76,7 @@ fun GroupMember(
                     vertical = 1.pad,
                     horizontal = if (photos == null) 2.pad else 1.pad
                 )
+                .weight(1f)
         ) {
             Text(
                 name,
@@ -85,5 +90,6 @@ fun GroupMember(
                 )
             }
         }
+        action?.invoke(this)
     }
 }

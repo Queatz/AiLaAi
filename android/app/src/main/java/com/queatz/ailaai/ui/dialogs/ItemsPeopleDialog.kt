@@ -25,6 +25,7 @@ fun <T> ItemsPeopleDialog(
     key: (T) -> Any,
     showCountInTitle: Boolean = true,
     infoFormatter: (T) -> String? = { null },
+    itemAction: (@Composable RowScope.(T) -> Unit)? = null,
     extraButtons: @Composable RowScope.() -> Unit = {},
     onClick: (T) -> Unit,
 ) {
@@ -43,7 +44,17 @@ fun <T> ItemsPeopleDialog(
                     .weight(1f, fill = false)
             ) {
                 items(items, key = key) {
-                    PersonMember(people(it), infoFormatter = { _ -> infoFormatter(it) }) { onClick(it) }
+                    PersonMember(
+                        people(it),
+                        infoFormatter = { _ -> infoFormatter(it) },
+                        action = if (itemAction == null) {
+                            null
+                        } else {
+                            @Composable {
+                                itemAction(it)
+                            }
+                        }
+                    ) { onClick(it) }
                 }
             }
             Row(

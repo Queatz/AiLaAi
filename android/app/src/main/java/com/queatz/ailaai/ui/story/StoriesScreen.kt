@@ -99,6 +99,7 @@ fun StoriesScreen() {
     val tabs = listOf(MainTab.Friends, MainTab.Local)
     var myScripts by rememberStateOf(emptyList<Script>())
     var showScriptsDialog by rememberStateOf(false)
+    var showShareAThought by rememberStateOf(true)
 
     LaunchedEffect(Unit) {
         api.myScripts {
@@ -229,13 +230,16 @@ fun StoriesScreen() {
                         EmptyText(stringResource(R.string.no_stories_to_read))
                     } else {
                         StoryContents(
-                            null,
-                            storyContents,
-                            state,
+                            source = null,
+                            content = storyContents,
+                            state = state,
                             onReactionChange = {
                                 scope.launch {
                                     reload()
                                 }
+                            },
+                            onCommentFocused = {
+                                showShareAThought = !it
                             },
                             modifier = Modifier
                                 .widthIn(max = 640.dp)
@@ -254,34 +258,37 @@ fun StoriesScreen() {
                     }
                 }
                 var thought by rememberStateOf("")
-                PageInput(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                ) {
-                    SearchFieldAndAction(
-                        thought,
-                        { thought = it },
-                        placeholder = stringResource(R.string.share_a_thought),
-                        showClear = false,
-                        action = {
-                            if (thought.isBlank()) {
-                                Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
-                            } else {
-                                Icon(Icons.Outlined.Add, stringResource(R.string.write_a_story))
-                            }
-                        },
-                        onAction = {
-                            if (thought.isBlank()) {
-                                nav.navigate(AppNav.Write)
-                            } else {
-                                scope.launch {
-                                    api.createStory(Story(title = thought)) {
-                                        nav.navigate(AppNav.WriteStory(it.id!!))
+
+                if (showShareAThought) {
+                    PageInput(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                    ) {
+                        SearchFieldAndAction(
+                            thought,
+                            { thought = it },
+                            placeholder = stringResource(R.string.share_a_thought),
+                            showClear = false,
+                            action = {
+                                if (thought.isBlank()) {
+                                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
+                                } else {
+                                    Icon(Icons.Outlined.Add, stringResource(R.string.write_a_story))
+                                }
+                            },
+                            onAction = {
+                                if (thought.isBlank()) {
+                                    nav.navigate(AppNav.Write)
+                                } else {
+                                    scope.launch {
+                                        api.createStory(Story(title = thought)) {
+                                            nav.navigate(AppNav.WriteStory(it.id!!))
+                                        }
                                     }
                                 }
-                            }
-                        },
-                    )
+                            },
+                        )
+                    }
                 }
                 if (locationSelector.isManual) {
                     ElevatedButton(

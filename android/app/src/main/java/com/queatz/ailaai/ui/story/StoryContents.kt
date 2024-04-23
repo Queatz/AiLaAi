@@ -1,9 +1,12 @@
 package com.queatz.ailaai.ui.story
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,38 +23,57 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.AddReaction
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Flare
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
@@ -108,6 +130,7 @@ fun StoryContents(
     horizontalPadding: Dp = 2.pad,
     fade: Boolean = false,
     onReactionChange: () -> Unit = {},
+    onCommentFocused: (Boolean) -> Unit = {},
     onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null
 ) {
@@ -194,6 +217,23 @@ fun StoryContents(
                             DisableSelection {
                                 var showAddReactionDialog by rememberStateOf(false)
                                 var showReactions by rememberStateOf<List<ReactionAndPerson>?>(null)
+                                var commentOnReaction by rememberStateOf<String?>(null)
+                                var sendComment by rememberStateOf("")
+                                var isSendingComment by rememberStateOf(false)
+
+                                fun sendComment() {
+                                    if (sendComment.isNotBlank()) {
+                                        isSendingComment = true
+                                        scope.launch {
+                                            api.reactToStory(content.story, ReactBody(Reaction(reaction = commentOnReaction!!, comment = sendComment.trim()))) {
+                                                commentOnReaction = null
+                                                sendComment = ""
+                                                onReactionChange()
+                                            }
+                                            isSendingComment = false
+                                        }
+                                    }
+                                }
 
                                 if (showAddReactionDialog) {
                                     AddReactionDialog(
@@ -204,8 +244,9 @@ fun StoryContents(
                                         scope.launch {
                                             api.reactToStory(
                                                 content.story,
-                                                ReactBody(Reaction(reaction = reaction, comment = null))
+                                                ReactBody(Reaction(reaction = reaction))
                                             ) {
+                                                commentOnReaction = reaction
                                                 onReactionChange()
                                             }
                                         }
@@ -227,144 +268,247 @@ fun StoryContents(
                                                 reaction.reaction!!.reaction!!,
                                                 reaction.reaction!!.createdAt!!.shortAgo(context),
                                                 reaction.reaction!!.comment,
-                                                if (reaction.person?.id == me?.id) { context.getString(R.string.tap_to_remove) } else { null }
+                                                if (reaction.person?.id == me?.id) { context.getString(R.string.tap_to_edit) } else { null }
                                             )
+                                        },
+                                        itemAction = { reaction ->
+                                            if (reaction.person?.id == me?.id) {
+                                                IconButton(
+                                                    onClick = {
+                                                        showReactions = null
+                                                        scope.launch {
+                                                            api.reactToStory(
+                                                                content.story,
+                                                                ReactBody(
+                                                                    Reaction(
+                                                                        reaction = reaction.reaction!!.reaction!!
+                                                                    ),
+                                                                    remove = true
+                                                                )
+                                                            ) {
+                                                                commentOnReaction = null
+                                                                sendComment = ""
+                                                                context.toast(R.string.reaction_removed)
+                                                                onReactionChange()
+                                                            }
+                                                        }
+                                                    }
+                                                ) {
+                                                    Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error)
+                                                }
+                                            }
                                         }
                                     ) { reaction ->
                                         showReactions = null
                                         if (reaction.person?.id == me?.id) {
-                                            scope.launch {
-                                                api.reactToStory(
-                                                    content.story,
-                                                    ReactBody(
-                                                        Reaction(
-                                                            reaction = reaction.reaction!!.reaction!!
-                                                        ),
-                                                        remove = true
-                                                    )
-                                                ) {
-                                                    context.toast(R.string.reaction_removed)
-                                                    onReactionChange()
-                                                }
-                                            }
+                                            commentOnReaction = reaction.reaction!!.reaction!!
+                                            sendComment = reaction.reaction!!.comment.orEmpty()
                                         } else {
                                             nav.navigate(AppNav.Profile(reaction.person!!.id!!))
                                         }
                                     }
                                 }
 
-                                FlowRow(
-                                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
-                                    horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(1.pad)
                                 ) {
-                                    if (content.reactions?.all.isNullOrEmpty()) {
-                                        OutlinedButton(
-                                            onClick = {
-                                                scope.launch {
-                                                    api.reactToStory(
-                                                        content.story,
-                                                        ReactBody(Reaction(reaction = "❤", comment = null))
-                                                    ) {
-                                                        onReactionChange()
-                                                    }
-                                                }
-                                            }
-                                        ) {
-                                            Text("❤", style = MaterialTheme.typography.bodyLarge)
-                                            Text(
-                                                "0",
-                                                modifier = Modifier
-                                                    .padding(start = .5f.pad)
-                                            )
-                                        }
-                                    } else {
-                                        content.reactions!!.all.forEach { reaction ->
-                                            val mine = content.reactions!!.mine?.any { it.reaction == reaction.reaction } == true
-
+                                    FlowRow(
+                                        verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
+                                        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        if (content.reactions?.all.isNullOrEmpty()) {
+                                            val reaction = "❤"
                                             OutlinedButton(
-                                                onClick = {},
-                                                colors = if (mine) ButtonDefaults.outlinedButtonColors(
-                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                                ) else ButtonDefaults.outlinedButtonColors(),
-                                                interactionSource = rememberLongClickInteractionSource(
-                                                    onClick = {
-                                                        scope.launch {
-                                                            if (mine) {
-                                                                api.storyReactions(content.story) {
-                                                                    showReactions = it
-                                                                }
-                                                            } else {
-                                                                api.reactToStory(
-                                                                    content.story,
-                                                                    ReactBody(
-                                                                        Reaction(
-                                                                            reaction = reaction.reaction
-                                                                        )
-                                                                    )
-                                                                ) {
-                                                                    onReactionChange()
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                ) {
+                                                onClick = {
                                                     scope.launch {
-                                                        if (mine) {
-                                                            api.reactToStory(
-                                                                content.story,
-                                                                ReactBody(
-                                                                    Reaction(
-                                                                        reaction = reaction.reaction
-                                                                    ),
-                                                                    remove = true
-                                                                )
-                                                            ) {
-                                                                context.toast(R.string.reaction_removed)
-                                                                onReactionChange()
-                                                            }
-                                                        } else {
-                                                            api.storyReactions(content.story) {
-                                                                showReactions = it
-                                                            }
+                                                        api.reactToStory(
+                                                            content.story,
+                                                            ReactBody(Reaction(reaction = reaction))
+                                                        ) {
+                                                            commentOnReaction = reaction
+                                                            onReactionChange()
                                                         }
                                                     }
                                                 }
                                             ) {
+                                                Text(reaction, style = MaterialTheme.typography.bodyLarge)
                                                 Text(
-                                                    reaction.reaction,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    modifier = Modifier
-                                                        .weight(1f, fill = false)
-                                                )
-                                                Text(
-                                                    reaction.count.formatMini(),
-                                                    style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
+                                                    "0",
                                                     modifier = Modifier
                                                         .padding(start = .5f.pad)
                                                 )
                                             }
+                                        } else {
+                                            content.reactions!!.all.forEach { reaction ->
+                                                val mine = content.reactions!!.mine?.any {
+                                                    it.reaction == reaction.reaction
+                                                } == true
+
+                                                key(reaction.reaction, reaction.count, mine) {
+                                                    OutlinedButton(
+                                                        onClick = {},
+                                                        colors = if (mine) ButtonDefaults.outlinedButtonColors(
+                                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                                        ) else ButtonDefaults.outlinedButtonColors(),
+                                                        border = if (commentOnReaction == reaction.reaction) {
+                                                            ButtonDefaults.outlinedButtonBorder.copy(width = 2.dp, brush = SolidColor(MaterialTheme.colorScheme.primary))
+                                                        } else {
+                                                            ButtonDefaults.outlinedButtonBorder
+                                                        },
+                                                        interactionSource = rememberLongClickInteractionSource(
+                                                            onClick = {
+                                                                scope.launch {
+                                                                    if (mine) {
+                                                                        api.storyReactions(content.story) {
+                                                                            showReactions = it.sortedByDescending { it.person?.id == me?.id }
+                                                                        }
+                                                                    } else {
+                                                                        api.reactToStory(
+                                                                            content.story,
+                                                                            ReactBody(
+                                                                                Reaction(
+                                                                                    reaction = reaction.reaction
+                                                                                )
+                                                                            )
+                                                                        ) {
+                                                                            commentOnReaction = reaction.reaction
+                                                                            onReactionChange()
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        ) {
+                                                            scope.launch {
+                                                                if (mine) {
+                                                                    api.reactToStory(
+                                                                        content.story,
+                                                                        ReactBody(
+                                                                            Reaction(
+                                                                                reaction = reaction.reaction
+                                                                            ),
+                                                                            remove = true
+                                                                        )
+                                                                    ) {
+                                                                        commentOnReaction = null
+                                                                        sendComment = ""
+                                                                        context.toast(R.string.reaction_removed)
+                                                                        onReactionChange()
+                                                                    }
+                                                                } else {
+                                                                    api.storyReactions(content.story) {
+                                                                        showReactions = it.sortedByDescending { it.person?.id == me?.id }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ) {
+                                                        Text(
+                                                            reaction.reaction,
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            modifier = Modifier
+                                                                .weight(1f, fill = false)
+                                                        )
+                                                        Text(
+                                                            reaction.count.formatMini(),
+                                                            style = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
+                                                            modifier = Modifier
+                                                                .padding(start = .5f.pad)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        OutlinedButton(
+                                            onClick = {
+                                                showAddReactionDialog = true
+                                            },
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.AddReaction,
+                                                null,
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                            )
                                         }
                                     }
 
-                                    OutlinedButton(
-                                        onClick = {
-                                            showAddReactionDialog = true
-                                        },
-                                        colors = ButtonDefaults.outlinedButtonColors(
-                                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    ) {
-                                        Icon(
-                                            Icons.Outlined.AddReaction,
-                                            null,
+                                    val focusRequester = remember { FocusRequester() }
+
+                                    LaunchedEffect(commentOnReaction) {
+                                        if (commentOnReaction != null) {
+                                            focusRequester.requestFocus()
+                                        }
+                                    }
+
+                                    DisposableEffect(Unit) {
+                                        onDispose {
+                                            onCommentFocused(false)
+                                        }
+                                    }
+
+                                    AnimatedVisibility(commentOnReaction != null) {
+                                        OutlinedTextField(
+                                            value = sendComment,
+                                            onValueChange = {
+                                                sendComment = it
+                                            },
+                                            trailingIcon = {
+                                                Crossfade(targetState = sendComment.isNotBlank()) { show ->
+                                                    when (show) {
+                                                        true -> IconButton({ sendComment() }) {
+                                                            Icon(
+                                                                Icons.Default.Send,
+                                                                Icons.Default.Send.name,
+                                                                tint = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        }
+
+                                                        false -> {}
+                                                    }
+                                                }
+                                            },
+                                            placeholder = {
+                                                Text(
+                                                    stringResource(R.string.add_a_comment_to_your_reaction),
+                                                    modifier = Modifier.alpha(.5f)
+                                                )
+                                            },
+                                            keyboardOptions = KeyboardOptions(
+                                                capitalization = KeyboardCapitalization.Sentences,
+                                                imeAction = ImeAction.Default
+                                            ),
+                                            keyboardActions = KeyboardActions(
+                                                onSend = {
+                                                    sendComment()
+                                                }
+                                            ),
+                                            shape = MaterialTheme.shapes.large,
+                                            enabled = !isSendingComment,
                                             modifier = Modifier
-                                                .fillMaxHeight()
+                                                .fillMaxWidth()
+                                                .heightIn(max = 128.dp)
+                                                .focusRequester(focusRequester)
+                                                .onFocusChanged {
+                                                    onCommentFocused(it.isFocused)
+                                                }
+                                                .onKeyEvent { keyEvent ->
+                                                    if (sendComment.isEmpty() && keyEvent.key == Key.Backspace) {
+                                                        commentOnReaction = null
+                                                        true
+                                                    } else {
+                                                        false
+                                                    }
+                                                }
                                         )
                                     }
                                 }
-                            }
+                           }
                         }
                     }
 
