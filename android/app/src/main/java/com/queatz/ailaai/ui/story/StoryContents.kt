@@ -229,6 +229,7 @@ fun StoryContents(
                                                 commentOnReaction = null
                                                 sendComment = ""
                                                 onReactionChange()
+                                                context.toast(R.string.comment_added)
                                             }
                                             isSendingComment = false
                                         }
@@ -247,6 +248,7 @@ fun StoryContents(
                                                 ReactBody(Reaction(reaction = reaction))
                                             ) {
                                                 commentOnReaction = reaction
+                                                sendComment = ""
                                                 onReactionChange()
                                             }
                                         }
@@ -328,6 +330,7 @@ fun StoryContents(
                                                             ReactBody(Reaction(reaction = reaction))
                                                         ) {
                                                             commentOnReaction = reaction
+                                                            sendComment = ""
                                                             onReactionChange()
                                                         }
                                                     }
@@ -374,6 +377,7 @@ fun StoryContents(
                                                                             )
                                                                         ) {
                                                                             commentOnReaction = reaction.reaction
+                                                                            sendComment = ""
                                                                             onReactionChange()
                                                                         }
                                                                     }
@@ -500,6 +504,7 @@ fun StoryContents(
                                                 .onKeyEvent { keyEvent ->
                                                     if (sendComment.isEmpty() && keyEvent.key == Key.Backspace) {
                                                         commentOnReaction = null
+                                                        sendComment = ""
                                                         true
                                                     } else {
                                                         false
