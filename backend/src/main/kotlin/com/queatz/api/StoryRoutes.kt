@@ -73,8 +73,8 @@ fun Route.storyRoutes() {
 
         post("/stories") {
             respond {
-                val title = call.receive<Story>().title
-                db.insert(Story(title = title, person = me.id!!))
+                val story = call.receive<Story>()
+                db.insert(Story(title = story.title, content = story.content, person = me.id!!))
             }
         }
 

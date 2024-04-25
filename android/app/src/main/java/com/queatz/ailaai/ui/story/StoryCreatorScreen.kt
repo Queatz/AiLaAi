@@ -145,11 +145,7 @@ fun StoryCreatorScreen(
                     Story(
                         // todo only send title if it was edited
                         title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title,
-                        content = json.encodeToString(buildJsonArray {
-                            storyContents.filter { it.isPart() }.forEach { part ->
-                                add(part.toJsonStoryPart())
-                            }
-                        })
+                        content = storyContents.toJsonStoryContent(json)
                     ),
                     onError = {
                         hasError = true

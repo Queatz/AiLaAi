@@ -1,8 +1,14 @@
 package app.page
 
-import Strings.save
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.FullPageLayout
 import app.PageTopBar
@@ -20,16 +26,24 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import com.queatz.db.asGeo
-import com.queatz.db.isPart
-import com.queatz.db.toJsonStoryPart
+import com.queatz.db.toJsonStoryContent
 import components.Loading
 import defaultGeo
 import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.buildJsonArray
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -38,7 +52,9 @@ import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import qr
 import r
-import stories.*
+import stories.StoryContents
+import stories.asTextContent
+import stories.full
 import webBaseUrl
 
 @Composable
@@ -67,17 +83,7 @@ fun StoriesPage(
         scope.launch {
             api.updateStory(
                 story.id!!,
-                Story(
-                    content = json.encodeToString(
-                        buildJsonArray {
-                            storyContent
-                                .filter { it.isPart() }
-                                .forEach { part ->
-                                    add(part.toJsonStoryPart(json))
-                                }
-                        }
-                    )
-                )
+                Story(content = storyContent.toJsonStoryContent(json))
             ) {
                 edited = false
 //                onStoryUpdated(it)

@@ -12,9 +12,12 @@ import application
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.db.Story
+import com.queatz.db.StoryContent
+import com.queatz.db.toJsonStoryContent
 import components.IconButton
 import components.Loading
 import focusable
+import json
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -115,7 +118,7 @@ fun StoriesNavPage(
                     create
                 )
                 if (title == null) return@launch
-                api.createStory(Story(title = title)) {
+                api.createStory(Story(title = title, content = listOf(StoryContent.Section(""), StoryContent.Text("")).toJsonStoryContent(json))) {
                     reload()
                 }
             }

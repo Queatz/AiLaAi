@@ -3,8 +3,10 @@ package com.queatz.db
 import com.queatz.widgets.Widgets
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
@@ -44,6 +46,14 @@ inline fun <reified T : @Serializable StoryContent> T.toJsonStoryPart(json: Json
         partType(),
         json.encodeToJsonElement(this).jsonObject
     )
+)
+
+inline fun <reified T : @Serializable StoryContent> List<T>.toJsonStoryContent(json: Json) = json.encodeToString(
+    buildJsonArray {
+        filter { it.isPart() }.forEach { part ->
+            add(part.toJsonStoryPart(json))
+        }
+    }
 )
 
 fun StoryContent.partType() = when (this) {
