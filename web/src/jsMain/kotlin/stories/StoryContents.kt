@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import api
 import app.AppStyles
 import app.ailaai.api.group
+import app.components.TextBox
 import app.dialog.photoDialog
 import app.group.GroupInfo
 import app.group.GroupItem
@@ -28,6 +29,7 @@ import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
+import r
 import kotlin.js.Date
 
 @Composable
@@ -40,12 +42,16 @@ fun StoryContents(
     storyContent: List<StoryContent>,
     onGroupClick: (GroupExtended) -> Unit,
     onButtonClick: ((script: String, data: String?) -> Unit)? = null,
-    openInNewWindow: Boolean = false
+    openInNewWindow: Boolean = false,
+    editable: Boolean = false,
+    onEdited: (() -> Unit)? = null,
+    onSave: ((List<StoryContent>) -> Unit)? = {}
 ) {
     Style(StoryStyles)
     Style(AppStyles)
 
     val scope = rememberCoroutineScope()
+    val currentRecomposeScope = currentRecomposeScope
 
     storyContent.forEach { part ->
         when (part) {
@@ -83,19 +89,58 @@ fun StoryContents(
                 }
             }
 
+            is StoryContent.Reactions -> {
+
+            }
+
             is StoryContent.Section -> {
-                Div({
-                    classes(StoryStyles.contentSection)
-                }) {
-                    Text(part.section)
+                if (editable) {
+                    TextBox(
+                        part.section,
+                        onValue = { part.section = it; currentRecomposeScope.invalidate(); onEdited?.invoke() },
+                        inline = true,
+                        // todo translate
+                        placeholder = "Section",
+                        styles = {
+                            margin(0.r)
+                            width(100.percent)
+                            fontSize(24.px)
+                            fontWeight("bold")
+                        }
+                    ) {
+                        onSave?.invoke(storyContent)
+                    }
+                } else {
+                    Div({
+                        classes(StoryStyles.contentSection)
+                    }) {
+                        Text(part.section)
+                    }
                 }
             }
 
             is StoryContent.Text -> {
-                Div({
-                    classes(StoryStyles.contentText)
-                }) {
-                    LinkifyText(part.text)
+                if (editable) {
+                    TextBox(
+                        part.text,
+                        onValue = { part.text = it; currentRecomposeScope.invalidate(); onEdited?.invoke() },
+                        inline = true,
+                        // todo translate
+                        placeholder = "Text",
+                        styles = {
+                            margin(0.r)
+                            width(100.percent)
+                            fontSize(16.px)
+                        }
+                    ) {
+                        onSave?.invoke(storyContent)
+                    }
+                } else {
+                    Div({
+                        classes(StoryStyles.contentText)
+                    }) {
+                        LinkifyText(part.text)
+                    }
                 }
             }
 

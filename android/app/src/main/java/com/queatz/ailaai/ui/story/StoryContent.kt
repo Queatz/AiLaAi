@@ -5,48 +5,16 @@ import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.wordCount
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
+import com.queatz.db.toJsonStoryPart
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-@Serializable
-data class StoryPart(val type: String, val content: JsonObject)
-
-fun StoryContent.partType() = when (this) {
-    is StoryContent.Section -> "section"
-    is StoryContent.Text -> "text"
-    is StoryContent.Cards -> "cards"
-    is StoryContent.Groups -> "groups"
-    is StoryContent.Photos -> "photos"
-    is StoryContent.Audio -> "audio"
-    is StoryContent.Widget -> "widget"
-    is StoryContent.Button -> "button"
-    else -> throw NotImplementedError("$this is not a valid story part")
-}
-
-fun StoryContent.isPart() = when (this) {
-    is StoryContent.Section -> true
-    is StoryContent.Text -> true
-    is StoryContent.Cards -> true
-    is StoryContent.Groups -> true
-    is StoryContent.Photos -> true
-    is StoryContent.Audio -> true
-    is StoryContent.Widget -> true
-    is StoryContent.Button -> true
-    else -> false
-}
-
-inline fun <reified T : @Serializable StoryContent> T.toJsonStoryPart() = json.encodeToJsonElement(
-    StoryPart(
-        partType(),
-        json.encodeToJsonElement(this).jsonObject
-    )
-)
+inline fun <reified T : @Serializable StoryContent> T.toJsonStoryPart() = toJsonStoryPart(json)
 
 fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let { content ->
     when (get("type")?.jsonPrimitive?.content) {

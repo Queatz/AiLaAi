@@ -136,9 +136,13 @@ fun CardItem(
                 property("z-index", "1")
             }
         }) {
+            val message = remember(card) { card.getConversation().message.notBlank }
+
             Div({
                 style {
-                    marginBottom(1.r)
+                    if (message != null) {
+                        marginBottom(1.r)
+                    }
                 }
             }) {
                 NameAndLocation(card.name, card.hint)
@@ -154,16 +158,15 @@ fun CardItem(
                 }
             }
 
-            card.getConversation().message.notBlank
-                ?.let { conversationMessage ->
-                    Div({
-                        style {
-                            whiteSpace("pre-wrap")
-                        }
-                    }) {
-                        Text(conversationMessage)
+            message?.let { conversationMessage ->
+                Div({
+                    style {
+                        whiteSpace("pre-wrap")
                     }
+                }) {
+                    Text(conversationMessage)
                 }
+            }
         }
     }
 }

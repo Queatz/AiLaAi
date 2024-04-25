@@ -75,11 +75,14 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
                             classes(Styles.cardContent)
                         }) {
                             if (storyContent != null) {
-                                StoryContents(storyContent!!, onGroupClick = {
-                                    scope.launch {
-                                        appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                                StoryContents(
+                                    storyContent!!,
+                                    onGroupClick = {
+                                        scope.launch {
+                                            appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                                        }
                                     }
-                                })
+                                )
                             }
                         }
                     }

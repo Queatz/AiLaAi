@@ -1,5 +1,6 @@
 package app.page
 
+import Strings.save
 import Styles
 import androidx.compose.runtime.*
 import api
@@ -19,13 +20,20 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import com.queatz.db.asGeo
+import com.queatz.db.isPart
+import com.queatz.db.toJsonStoryPart
 import components.Loading
 import defaultGeo
+import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.buildJsonArray
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import qr
@@ -41,15 +49,40 @@ fun StoriesPage(
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
-    var storyContent by remember { mutableStateOf<List<StoryContent>>(emptyList()) }
+    var storyContent by remember(selected) { mutableStateOf<List<StoryContent>>(emptyList()) }
     var isLoading by remember {
         mutableStateOf(true)
+    }
+    var edited by remember(selected) {
+        mutableStateOf(false)
     }
     var menuTarget by remember {
         mutableStateOf<DOMRect?>(null)
     }
     var search by remember {
         mutableStateOf("")
+    }
+
+    fun save(story: Story) {
+        scope.launch {
+            api.updateStory(
+                story.id!!,
+                Story(
+                    content = json.encodeToString(
+                        buildJsonArray {
+                            storyContent
+                                .filter { it.isPart() }
+                                .forEach { part ->
+                                    add(part.toJsonStoryPart(json))
+                                }
+                        }
+                    )
+                )
+            ) {
+                edited = false
+//                onStoryUpdated(it)
+            }
+        }
     }
 
     LaunchedEffect(selected, search) {
@@ -88,7 +121,7 @@ fun StoriesPage(
         menuTarget?.let { target ->
             Menu({ menuTarget = null }, target) {
                 item(appString { openInNewTab }, icon = "open_in_new") {
-                    window.open("/story/${story!!.id}", target = "_blank")
+                    window.open("/story/${story.id!!}", target = "_blank")
                 }
 
                 val titleString = appString { title }
@@ -158,15 +191,44 @@ fun StoriesPage(
                         appText { noStories }
                     }
                 } else {
-                    StoryContents(storyContent, onGroupClick, openInNewWindow = true)
+                    StoryContents(
+                        storyContent,
+                        onGroupClick,
+                        openInNewWindow = true,
+                        editable = (selected as? StoryNav.Selected)?.story?.let {
+                            it.person == me?.id && it.published != true
+                        } ?: false,
+                        onEdited = { edited = true }
+                    ) {
+                        (selected as? StoryNav.Selected)?.story?.let { story ->
+                            save(story)
+                        }
+                    }
                 }
             }
         }
     }
     if (selected is StoryNav.Selected) {
         PageTopBar(
-            ""
+            "",
 //                story.title?.notBlank ?: "New story"
+            actions = {
+                if (edited) {
+                    Button({
+                        classes(Styles.button)
+
+                        style {
+                            height(100.percent)
+                        }
+
+                        onClick {
+                            save(selected.story)
+                        }
+                    }) {
+                        Text(appString { save })
+                    }
+                }
+            }
         ) {
             menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
         }

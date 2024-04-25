@@ -479,6 +479,8 @@ object Styles : StyleSheet() {
         }
     }
 
+    val textareaInline by style { }
+
     val textarea by style {
         borderRadius(1.r)
         border(1.px, LineStyle.Solid, colors.background)
@@ -500,6 +502,12 @@ object Styles : StyleSheet() {
                     opacity(.5)
                 }
             }
+        }
+
+        self + className(textareaInline) style {
+            property("border", "none")
+            padding(.5.r, 0.r)
+            borderRadius(.5.r)
         }
     }
 

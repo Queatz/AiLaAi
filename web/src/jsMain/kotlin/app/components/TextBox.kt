@@ -13,6 +13,7 @@ fun TextBox(
     onValue: (String) -> Unit,
     placeholder: String = "",
     selectAll: Boolean = false,
+    inline: Boolean = false,
     styles: StyleScope.() -> Unit = {},
     onConfirm: () -> Unit = {}
 ) {
@@ -23,10 +24,16 @@ fun TextBox(
     }
 
     TextArea(value) {
-        classes(Styles.textarea)
+        if (inline) {
+            classes(Styles.textarea, Styles.textareaInline)
+        } else {
+            classes(Styles.textarea)
+        }
         style {
             height(3.5.r)
-            maxHeight(18.r)
+            if (!inline) {
+                maxHeight(18.r)
+            }
             flexShrink(0)
             backgroundColor(Color.transparent)
             styles()

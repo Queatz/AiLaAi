@@ -3,6 +3,10 @@ package com.queatz.db
 import com.queatz.widgets.Widgets
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
 @Serializable
 sealed class StoryContent {
@@ -30,4 +34,38 @@ sealed class StoryContent {
     class Widget(var widget: Widgets, var id: String) : StoryContent()
     @Serializable
     class Button(var text: String, var script: String, var data: String?) : StoryContent()
+}
+
+@Serializable
+data class StoryPart(val type: String, val content: JsonObject)
+
+inline fun <reified T : @Serializable StoryContent> T.toJsonStoryPart(json: Json) = json.encodeToJsonElement(
+    StoryPart(
+        partType(),
+        json.encodeToJsonElement(this).jsonObject
+    )
+)
+
+fun StoryContent.partType() = when (this) {
+    is StoryContent.Section -> "section"
+    is StoryContent.Text -> "text"
+    is StoryContent.Cards -> "cards"
+    is StoryContent.Groups -> "groups"
+    is StoryContent.Photos -> "photos"
+    is StoryContent.Audio -> "audio"
+    is StoryContent.Widget -> "widget"
+    is StoryContent.Button -> "button"
+    else -> throw NotImplementedError("$this is not a valid story part")
+}
+
+fun StoryContent.isPart() = when (this) {
+    is StoryContent.Section -> true
+    is StoryContent.Text -> true
+    is StoryContent.Cards -> true
+    is StoryContent.Groups -> true
+    is StoryContent.Photos -> true
+    is StoryContent.Audio -> true
+    is StoryContent.Widget -> true
+    is StoryContent.Button -> true
+    else -> false
 }

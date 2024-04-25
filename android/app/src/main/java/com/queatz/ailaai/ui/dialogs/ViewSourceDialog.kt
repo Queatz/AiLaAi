@@ -68,43 +68,51 @@ fun ViewSourceDialog(onDismissRequest: () -> Unit, content: String?) {
                 if (scriptsWidgets.isNullOrEmpty()) {
                     EmptyText(stringResource(R.string.this_page_has_no_scripts))
                 } else {
-                    SelectionContainer {
-                        scriptsWidgets.forEach { widget ->
-                            val id = (widget as StoryContent.Widget).id
-                            key(id) {
-                                var script by rememberStateOf<Script?>(null)
+                    SelectionContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            scriptsWidgets.forEach { widget ->
+                                val id = (widget as StoryContent.Widget).id
+                                key(id) {
+                                    var script by rememberStateOf<Script?>(null)
 
-                                LaunchedEffect(widget) {
-                                    api.widget(id) { widget ->
-                                        try {
-                                            val data = json.decodeFromString<ScriptData>(widget.data!!)
-                                            api.script(data.script!!) {
-                                                script = it
+                                    LaunchedEffect(widget) {
+                                        api.widget(id) { widget ->
+                                            try {
+                                                val data = json.decodeFromString<ScriptData>(widget.data!!)
+                                                api.script(data.script!!) {
+                                                    script = it
+                                                }
+                                            } catch (_: Throwable) {
+                                                // Ignored
                                             }
-                                        } catch (_: Throwable) {
-                                            // Ignored
                                         }
                                     }
-                                }
 
-                                script?.let { script ->
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(1.pad),
-                                        modifier = Modifier
-                                            .padding(bottom = 1.pad)
-                                    ) {
-                                        Text(
-                                            script.name ?: stringResource(R.string.new_script),
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                        Text(
-                                            script.source ?: "",
+                                    script?.let { script ->
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(1.pad),
                                             modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(MaterialTheme.shapes.large)
-                                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                                                .padding(1.5f.pad)
-                                        )
+                                                .padding(bottom = 1.pad)
+                                        ) {
+                                            Text(
+                                                script.name ?: stringResource(R.string.new_script),
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(
+                                                script.source ?: "",
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(MaterialTheme.shapes.large)
+                                                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                                                    .padding(1.5f.pad)
+                                            )
+                                        }
                                     }
                                 }
                             }
