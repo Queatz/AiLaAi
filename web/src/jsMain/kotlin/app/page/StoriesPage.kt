@@ -65,7 +65,7 @@ fun StoriesPage(
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
-    var storyContent by remember(selected) { mutableStateOf<List<StoryContent>>(emptyList()) }
+    var storyContent by remember { mutableStateOf<List<StoryContent>>(emptyList()) }
     var isLoading by remember {
         mutableStateOf(true)
     }
