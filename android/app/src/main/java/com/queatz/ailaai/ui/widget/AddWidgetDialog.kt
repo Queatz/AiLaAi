@@ -32,7 +32,7 @@ fun AddWidgetDialog(
             TextFieldDialog(
                 onDismissRequest,
                 title = stringResource(R.string.url),
-                button = stringResource(R.string.update),
+                button = stringResource(R.string.add),
                 singleLine = true,
                 requireModification = false,
                 requireNotBlank = true

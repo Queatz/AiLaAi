@@ -46,7 +46,7 @@ fun WebWidget(widgetId: String) {
                 }
                 attr("allowfullscreen", "true")
                 attr("allow", "autoplay; fullscreen")
-                attr("src", "https://musescore.com/user/4609986/scores/1749181/embed")
+                attr("src", url)
             }
         )
     }
