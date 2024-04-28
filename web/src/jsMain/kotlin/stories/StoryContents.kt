@@ -126,7 +126,7 @@ fun StoryContents(
                         onValue = { part.text = it; currentRecomposeScope.invalidate(); onEdited?.invoke() },
                         inline = true,
                         // todo translate
-                        placeholder = "Text",
+                        placeholder = "Write",
                         styles = {
                             margin(0.r)
                             width(100.percent)

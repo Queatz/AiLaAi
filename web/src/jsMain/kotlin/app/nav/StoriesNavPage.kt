@@ -6,6 +6,7 @@ import app.AppStyles
 import app.components.Empty
 import app.components.Spacer
 import app.dialog.inputDialog
+import app.menu.Menu
 import appString
 import appText
 import application
@@ -26,6 +27,8 @@ import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import r
 import stories.storyStatus
 import stories.textContent
@@ -35,6 +38,11 @@ sealed class StoryNav {
     data object Local : StoryNav()
     data object Saved : StoryNav()
     data class Selected(val story: Story) : StoryNav()
+}
+
+enum class StoryFilter {
+    Published,
+    Draft
 }
 
 @Composable
@@ -58,18 +66,64 @@ fun StoriesNavPage(
         mutableStateOf("")
     }
 
+    var filterMenuTarget by remember {
+        mutableStateOf<DOMRect?>(null)
+    }
+    var filters by remember {
+        mutableStateOf(emptySet<StoryFilter>())
+    }
+    if (filterMenuTarget != null) {
+        Menu(
+            {
+                filterMenuTarget = null
+            },
+            filterMenuTarget!!
+        ) {
+            item(appString { published }, icon = if (StoryFilter.Published in filters) "check" else null) {
+                if (StoryFilter.Published in filters) {
+                    filters -= StoryFilter.Published
+                } else {
+                    filters -= StoryFilter.Draft
+                    filters += StoryFilter.Published
+                }
+            }
+            item(appString { draft }, icon = if (StoryFilter.Draft in filters) "check" else null) {
+                if (StoryFilter.Draft in filters) {
+                    filters -= StoryFilter.Draft
+                } else {
+                    filters -= StoryFilter.Published
+                    filters += StoryFilter.Draft
+                }
+            }
+
+        }
+    }
+
     LaunchedEffect(selected) {
         searchText = ""
         showSearch = false
     }
 
-    val shownStories = remember(myStories, searchText) {
+    val shownStories = remember(myStories, searchText, filters) {
         val search = searchText.trim()
         if (searchText.isBlank()) {
             myStories
         } else {
             myStories.filter {
                 (it.title?.contains(search, true) ?: false)
+            }
+        }.let {
+            if (filters.isEmpty()) {
+                it
+            } else {
+                it.filter { story ->
+                    filters.all { filter ->
+                        when (filter) {
+                            StoryFilter.Published -> story.published == true
+                            StoryFilter.Draft -> story.published != true
+                        }
+                    }
+                }
             }
         }
     }
@@ -102,6 +156,12 @@ fun StoriesNavPage(
         IconButton("search", appString { search }, styles = {
         }) {
             showSearch = !showSearch
+        }
+
+        IconButton("filter_list", appString { filter }, count = filters.size, styles = {
+        }) {
+            filterMenuTarget =
+                if (filterMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
         }
 
         val createStory = appString { createStory }
@@ -199,7 +259,7 @@ fun StoryItem(story: Story, selected: Boolean, onSelected: () -> Unit) {
             Div({
                 classes(AppStyles.groupItemName)
             }) {
-                Text(story.title?.notBlank ?: appString { createStory })
+                Text(story.title?.notBlank ?: appString { newStory })
             }
             Div({
                 classes(AppStyles.groupItemMessage)

@@ -37,7 +37,6 @@ suspend fun ApplicationCall.receiveFiles(param: String, prefix: String, onFileNa
             File(folder).mkdirs()
         }
 
-
         val urls = withContext(Dispatchers.IO) {
             fileItems.map { fileItem ->
                 val fileName = "$prefix-${Random.nextInt(10000000, 99999999)}-${fileItem.originalFileName}"
