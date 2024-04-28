@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.story
 
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.animation.AnimatedVisibility
@@ -58,6 +59,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -69,6 +71,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.pointer.RequestDisallowInterceptTouchEvent
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
@@ -128,7 +132,7 @@ import com.queatz.widgets.widgets.WebData
 import kotlinx.coroutines.launch
 import widget
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun StoryContents(
     source: StorySource?,
@@ -711,20 +715,53 @@ fun StoryContents(
                                                 .aspectRatio(1.5f)
                                                 .clip(MaterialTheme.shapes.medium)
                                                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+
                                         ) {
+                                            val disallowIntercept = remember {
+                                                RequestDisallowInterceptTouchEvent()
+                                            }
+                                            var webView by remember { mutableStateOf<WebView?>(null) }
+
                                             AndroidView(
-                                                modifier = modifier,
+                                                modifier = Modifier
+                                                    .pointerInteropFilter(disallowIntercept) { event ->
+                                                        webView?.dispatchTouchEvent(event)
+                                                        when (event.action) {
+                                                            MotionEvent.ACTION_DOWN -> {
+                                                                disallowIntercept(true)
+                                                                true
+                                                            }
+
+                                                            MotionEvent.ACTION_CANCEL,
+                                                            MotionEvent.ACTION_UP -> {
+                                                                disallowIntercept(false)
+                                                                true
+                                                            }
+                                                            else -> true
+                                                        }
+                                                    },
                                                 factory = { context ->
                                                     WebView(context).apply {
                                                         layoutParams = ViewGroup.LayoutParams(
                                                             ViewGroup.LayoutParams.MATCH_PARENT,
                                                             ViewGroup.LayoutParams.MATCH_PARENT
                                                         )
+
                                                         settings.javaScriptEnabled = true
+                                                        settings.domStorageEnabled = true
+                                                        settings.databaseEnabled = true
+                                                        settings.allowFileAccess = true
+                                                        settings.allowFileAccessFromFileURLs = true
+                                                        settings.allowUniversalAccessFromFileURLs = true
+                                                        settings.mediaPlaybackRequiresUserGesture = false
+                                                        settings.allowContentAccess = true
+
                                                         loadUrl(url)
+                                                        webView = this
                                                     }
                                                 }, update = {
                                                     it.loadUrl(url)
+                                                    webView = it
                                                 }
                                             )
                                         }
