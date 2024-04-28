@@ -182,6 +182,10 @@ fun StoryCreatorTools(
                 addWidget = Widgets.Script
                 showWidgetsMenu = false
             }
+            menuItem(stringResource(R.string.website)) {
+                addWidget = Widgets.Web
+                showWidgetsMenu = false
+            }
             menuItem(stringResource(R.string.impact_effort_table)) {
                 scope.launch {
                     api.createWidget(

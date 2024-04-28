@@ -1,11 +1,14 @@
 package com.queatz.ailaai.ui.story
 
+import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -28,7 +31,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material.icons.outlined.Delete
@@ -45,6 +47,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -76,6 +79,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import app.ailaai.api.card
 import app.ailaai.api.group
 import coil.compose.AsyncImage
@@ -85,6 +89,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.reactToStory
 import com.queatz.ailaai.api.storyReactions
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.formatMini
@@ -116,8 +121,12 @@ import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
 import com.queatz.db.ReactionAndPerson
 import com.queatz.db.StoryContent
+import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.ScriptData
+import com.queatz.widgets.widgets.WebData
 import kotlinx.coroutines.launch
+import widget
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -676,6 +685,51 @@ fun StoryContents(
                         when (content.widget) {
                             Widgets.Script -> {
                                 ScriptContent(content.id)
+                            }
+                            Widgets.Web -> {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    var widget by remember(content.id) {
+                                        mutableStateOf<Widget?>(null)
+                                    }
+
+                                    var data by remember(content.id) {
+                                        mutableStateOf<WebData?>(null)
+                                    }
+                                    LaunchedEffect(content.id) {
+                                        // todo loading
+                                        api.widget(content.id) {
+                                            it.data ?: return@widget
+                                            widget = it
+                                            data = json.decodeFromString<WebData>(it.data!!)
+                                        }
+                                    }
+
+                                    data?.url?.let { url ->
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .aspectRatio(1.5f)
+                                                .clip(MaterialTheme.shapes.medium)
+                                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                                        ) {
+                                            AndroidView(
+                                                modifier = modifier,
+                                                factory = { context ->
+                                                    WebView(context).apply {
+                                                        layoutParams = ViewGroup.LayoutParams(
+                                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                                            ViewGroup.LayoutParams.MATCH_PARENT
+                                                        )
+                                                        settings.javaScriptEnabled = true
+                                                        loadUrl(url)
+                                                    }
+                                                }, update = {
+                                                    it.loadUrl(url)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
                             }
                             else -> {
                                 item(span = { GridItemSpan(maxLineSpan) }) {

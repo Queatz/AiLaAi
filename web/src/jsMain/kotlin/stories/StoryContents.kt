@@ -12,6 +12,7 @@ import app.group.GroupItem
 import app.widget.ImpactEffortTable
 import app.widget.PageTreeWidget
 import app.widget.ScriptWidget
+import app.widget.WebWidget
 import appString
 import baseUrl
 import com.queatz.db.GroupExtended
@@ -243,6 +244,9 @@ fun StoryContents(
                     }
                     Widgets.Script -> {
                         ScriptWidget(part.id)
+                    }
+                    Widgets.Web -> {
+                        WebWidget(part.id)
                     }
                 }
             }

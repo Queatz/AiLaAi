@@ -1029,6 +1029,7 @@ val Widgets.stringResource
             Widgets.ImpactEffortTable -> R.string.impact_effort_table
             Widgets.PageTree -> R.string.page_tree
             Widgets.Script -> R.string.script
+            Widgets.Web -> R.string.website
             else -> R.string.widget
         }
     )
