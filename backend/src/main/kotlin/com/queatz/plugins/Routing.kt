@@ -28,7 +28,7 @@ fun Application.configureRouting() {
     urlAttachmentFetcher.start(this)
 
     routing {
-        get("/hi") { call.respondText("{\"hi\": true}") }
+        get("/hi") { call.respondText("{\"hi\": true}", contentType = ContentType.Application.Json) }
         signRoutes()
         meRoutes()
         cardRoutes()
