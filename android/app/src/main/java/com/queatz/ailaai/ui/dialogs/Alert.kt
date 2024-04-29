@@ -33,27 +33,28 @@ fun Alert(
     AlertDialog(
         onDismissRequest,
         properties = properties,
-        title = {
-            if (title != null) {
+        title = if (title != null) {
+            {
+
                 Text(title)
             }
-        },
-        text = {
-            val state = rememberScrollState()
-            var viewport by rememberStateOf(Size.Zero)
-            Column(
-                modifier = Modifier
-                    .verticalScroll(state)
-                    .onPlaced { viewport = it.boundsInParent().size }
-                    .fadingEdge(viewport, state, factor = 10f)
-            ) {
-                if (text != null) {
+        } else null,
+        text = if (text != null) {
+            {
+                val state = rememberScrollState()
+                var viewport by rememberStateOf(Size.Zero)
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(state)
+                        .onPlaced { viewport = it.boundsInParent().size }
+                        .fadingEdge(viewport, state, factor = 10f)
+                ) {
                     SelectionContainer {
                         Text(text)
                     }
                 }
             }
-        },
+        } else null,
         dismissButton = dismissButton?.let {
             {
                 TextButton(
