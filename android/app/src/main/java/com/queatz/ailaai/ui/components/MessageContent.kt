@@ -41,6 +41,7 @@ import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
+import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -78,6 +79,7 @@ fun ColumnScope.MessageContent(
     val isMeActual = me == message.member
     var showDeleteMessageDialog by rememberStateOf(false)
     var showEditMessageDialog by rememberStateOf(false)
+    var showSelectTextDialog by rememberStateOf<String?>(null)
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
@@ -225,10 +227,14 @@ fun ColumnScope.MessageContent(
                 }
             }
 
-            if (message.text?.isBlank() == false) {
+            if (message.text?.isNotBlank() == true) {
                 menuItem(stringResource(R.string.copy)) {
                     (message.text ?: "").copyToClipboard(context, messageString)
                     context.toast(R.string.copied)
+                    onShowMessageDialog(false)
+                }
+                menuItem(stringResource(R.string.select_text)) {
+                    showSelectTextDialog = message.text
                     onShowMessageDialog(false)
                 }
                 menuItem(stringResource(R.string.select_multiple)) {
@@ -305,6 +311,19 @@ fun ColumnScope.MessageContent(
                     Text(stringResource(R.string.cancel))
                 }
             }
+        )
+    }
+
+    if (showSelectTextDialog != null) {
+        Alert(
+            {
+                showSelectTextDialog = null
+            },
+            dismissButton = null,
+            confirmButton = stringResource(R.string.close),
+            title = null,
+            text = showSelectTextDialog ?: "",
+            onConfirm = {}
         )
     }
 

@@ -22,8 +22,8 @@ import com.queatz.ailaai.extensions.rememberStateOf
 @Composable
 fun Alert(
     onDismissRequest: () -> Unit,
-    title: String,
-    text: String,
+    title: String?,
+    text: String?,
     dismissButton: String?,
     confirmButton: String,
     confirmColor: Color? = null,
@@ -34,7 +34,9 @@ fun Alert(
         onDismissRequest,
         properties = properties,
         title = {
-            Text(title)
+            if (title != null) {
+                Text(title)
+            }
         },
         text = {
             val state = rememberScrollState()
@@ -45,8 +47,10 @@ fun Alert(
                     .onPlaced { viewport = it.boundsInParent().size }
                     .fadingEdge(viewport, state, factor = 10f)
             ) {
-                SelectionContainer {
-                    Text(text)
+                if (text != null) {
+                    SelectionContainer {
+                        Text(text)
+                    }
                 }
             }
         },
