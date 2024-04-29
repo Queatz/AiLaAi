@@ -21,6 +21,12 @@ suspend fun Api.groupsOfPerson(
     onSuccess: SuccessBlock<List<GroupExtended>>,
 ) = get("people/$personId/groups", onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.storiesOfPerson(
+    personId: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<Story>>,
+) = get("people/$personId/stories", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.profileCards(
     personId: String,
     onError: ErrorBlock = null,

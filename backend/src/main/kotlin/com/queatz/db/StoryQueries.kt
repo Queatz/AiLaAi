@@ -74,11 +74,12 @@ fun Db.storyDraft(person: String, story: String) = one(
 /**
  * @person The current user
  */
-fun Db.storiesOfPerson(person: String) = list(
+fun Db.storiesOfPerson(person: String, published: Boolean? = null) = list(
     Story::class,
     """
         for x in @@collection
             filter x.${f(Story::person)} == @person
+            ${if (published != null) "and x.${f(Story::published)} == $published" else ""}
             sort x.${f(Story::createdAt)} desc
             return ${storyExtended(person.asId(Person::class), "x")}
     """.trimIndent(),

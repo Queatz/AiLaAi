@@ -3,11 +3,16 @@ package com.queatz.ailaai.extensions
 import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
@@ -19,6 +24,8 @@ import androidx.compose.ui.layout.LayoutModifier
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
 
@@ -106,6 +113,29 @@ fun Modifier.fadingEdge(viewport: Size, scrollState: ScrollState, factor: Float 
             }
         }
 )
+
+@Composable
+fun Modifier.horizontalFadingEdge(state: ScrollState = rememberScrollState(), factor: Float = 6f): Modifier {
+    var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+
+    return  then(
+        Modifier
+            .horizontalScroll(state)
+            .onPlaced { viewport = it.boundsInParent().size }
+            .horizontalFadingEdge(viewport, state, factor)
+    )
+}
+
+@Composable
+fun Modifier.horizontalFadingEdge(state: LazyListState, factor: Float = 6f): Modifier {
+    var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+
+    return  then(
+        Modifier
+            .onPlaced { viewport = it.boundsInParent().size }
+            .horizontalFadingEdge(viewport, state, factor)
+    )
+}
 
 fun Modifier.horizontalFadingEdge(viewport: Size, scrollState: ScrollState, factor: Float = 6f) = then(
     Modifier

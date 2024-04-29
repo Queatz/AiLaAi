@@ -10,11 +10,13 @@ import api
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.WebData
 import json
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Iframe
+import r
 import widget
 
 @Composable
@@ -43,6 +45,7 @@ fun WebWidget(widgetId: String) {
                     property("border", "none")
                     width(100.percent)
                     height(394.px)
+                    borderRadius(1.r)
                 }
                 attr("allowfullscreen", "true")
                 attr("allow", "autoplay; fullscreen")

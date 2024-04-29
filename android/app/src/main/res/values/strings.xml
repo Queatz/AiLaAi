@@ -666,6 +666,7 @@
     <string name="comment_added">Comment added</string>
     <string name="website">Website</string>
     <string name="url">Url</string>
+    <string name="recent_stories">Recent stories</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>
