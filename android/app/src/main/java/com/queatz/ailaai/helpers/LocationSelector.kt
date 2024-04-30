@@ -63,6 +63,7 @@ fun locationSelector(
             start()
         }
     }
+
     val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION) {
         wasRequested = true
         if (it) {
@@ -81,7 +82,7 @@ fun locationSelector(
     }
 
     LaunchedEffect(geo) {
-        geoManual = geo != null && (!locationPermissionState.status.isGranted && !coarseLocationPermissionState.status.isGranted) || context.dataStore.data.first()[geoManualKey] == true
+        geoManual = geo != null && !(locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted) || context.dataStore.data.first()[geoManualKey] == true
     }
 
     LaunchedEffect(geoManual) {

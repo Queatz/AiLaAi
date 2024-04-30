@@ -259,7 +259,7 @@ fun FriendsScreen() {
         update()
     }
 
-    var skipFirst by rememberStateOf(true)
+    var skipFirst by rememberStateOf(geo != null)
 
     LaunchedEffect(geo) {
         if (geo == null || tab != MainTab.Local) {
