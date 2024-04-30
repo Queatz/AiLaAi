@@ -27,12 +27,11 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
-import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ColumnScope.NotificationsDisabledBanner(show: Boolean = true) {
+fun ColumnScope.NotificationsDisabledBanner(modifier: Modifier = Modifier, show: Boolean = true) {
     val context = LocalContext.current
     val notificationManager = NotificationManagerCompat.from(context)
     var areNotificationsEnabled by rememberStateOf(notificationManager.areNotificationsEnabled())
@@ -71,7 +70,7 @@ fun ColumnScope.NotificationsDisabledBanner(show: Boolean = true) {
             },
             shape = MaterialTheme.shapes.large,
             colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)),
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
         ) {
             Text(

@@ -56,6 +56,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ButtonBar
+import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.LocationScaffold
@@ -64,6 +65,7 @@ import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.swipeMainTabs
+import com.queatz.ailaai.ui.screens.OutlinedText
 import com.queatz.ailaai.ui.scripts.PreviewScriptAction
 import com.queatz.ailaai.ui.scripts.ScriptsDialog
 import com.queatz.ailaai.ui.story.editor.StoryActions
@@ -157,6 +159,10 @@ fun StoriesScreen() {
             ) {
                 ScanQrCodeButton()
             }
+        },
+        rationale = {
+            // todo: translate
+            DisplayText("Share and discover what's new in town.")
         }
     ) {
         val isAtTop by state.isAtTop()
@@ -270,6 +276,22 @@ fun StoriesScreen() {
                         .align(Alignment.BottomCenter)
                 ) {
                     PageInput {
+                        if (locationSelector.isManual) {
+                            ElevatedButton(
+                                elevation = ButtonDefaults.elevatedButtonElevation(2.pad),
+                                onClick = {
+                                    locationSelector.reset()
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                            ) {
+                                Text(
+                                    stringResource(R.string.reset_location),
+                                    modifier = Modifier.padding(end = 1.pad)
+                                )
+                                Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
+                            }
+                        }
                         SearchFieldAndAction(
                             thought,
                             { thought = it },
@@ -294,23 +316,6 @@ fun StoriesScreen() {
                                 }
                             },
                         )
-                    }
-                }
-                if (locationSelector.isManual) {
-                    ElevatedButton(
-                        elevation = ButtonDefaults.elevatedButtonElevation(2.pad),
-                        onClick = {
-                            locationSelector.reset()
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 2.pad)
-                    ) {
-                        Text(
-                            stringResource(R.string.reset_location),
-                            modifier = Modifier.padding(end = 1.pad)
-                        )
-                        Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
                     }
                 }
             }

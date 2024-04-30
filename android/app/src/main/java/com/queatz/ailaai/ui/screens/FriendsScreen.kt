@@ -73,6 +73,7 @@ import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
+import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.GroupInfo
@@ -419,7 +420,11 @@ fun FriendsScreen() {
         LocationScaffold(
             geo,
             locationSelector,
-            enabled = tab == MainTab.Local
+            enabled = tab == MainTab.Local,
+            rationale = {
+                // todo: translate
+                DisplayText("Join and host groups in your town.")
+            }
         ) {
             var h by rememberStateOf(80.dp.px)
 
@@ -478,7 +483,7 @@ fun FriendsScreen() {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 ) {
-                                    NotificationsDisabledBanner(tab == MainTab.Friends)
+                                    NotificationsDisabledBanner(show = tab == MainTab.Friends)
                                     AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
                                         Friends(
                                             remember(allGroups) {

@@ -45,7 +45,11 @@ class Application : android.app.Application() {
     override fun onCreate() {
         super.onCreate()
 
-        VideoSDK.initialize(applicationContext)
+        try {
+            VideoSDK.initialize(applicationContext)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
 
         ChoiceSdk.init(this)
         api.init(this)

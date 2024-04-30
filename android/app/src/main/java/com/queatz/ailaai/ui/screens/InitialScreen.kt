@@ -1,14 +1,30 @@
 package com.queatz.ailaai.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush.Companion.linearGradient
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -19,13 +35,12 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.pad
-import io.ktor.client.plugins.*
-import io.ktor.http.*
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun InitialScreen(onKnown: () -> Unit) {
+fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
     var codeValue by remember { mutableStateOf("") }
     var codeExpired by rememberStateOf(false)
     var codeValueEnabled by rememberStateOf(true)
@@ -38,7 +53,7 @@ fun InitialScreen(onKnown: () -> Unit) {
         scope.launch {
             api.signIn(transferCode) {
                 api.setToken(it.token)
-                onKnown()
+                onKnown(false)
                 keyboardController.hide()
             }
         }
@@ -99,7 +114,7 @@ fun InitialScreen(onKnown: () -> Unit) {
                     }
                 }) {
                 api.setToken(it.token)
-                onKnown()
+                onKnown(true)
                 keyboardController.hide()
             }
             codeValueEnabled = true
@@ -111,6 +126,7 @@ fun InitialScreen(onKnown: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
+            .background(linearGradient(listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.tertiary)))
             .fillMaxSize()
             .padding(
                 PaddingValues(
@@ -162,8 +178,11 @@ fun InitialScreen(onKnown: () -> Unit) {
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(2.pad)) {
-            TextButton(
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.pad)
+        ) {
+            Button(
                 {
                     signUp()
                 },
@@ -171,7 +190,7 @@ fun InitialScreen(onKnown: () -> Unit) {
             ) {
                 Text(stringResource(R.string.sign_up))
             }
-            TextButton(
+            OutlinedButton(
                 {
                     signInDialog = true
                 },

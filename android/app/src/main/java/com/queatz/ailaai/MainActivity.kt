@@ -180,8 +180,8 @@ class MainActivity : AppCompatActivity() {
                     } != true
 
                 var known by remember { mutableStateOf(api.hasToken()) }
-                var wasKnown by remember { mutableStateOf(known) }
                 var showReleaseNotes by rememberStateOf(false)
+                var showWelcomeDialog by rememberStateOf(false)
 
                 if (showReleaseNotes) {
                     ReleaseNotesDialog {
@@ -190,7 +190,10 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (!known) {
-                    InitialScreen { known = true }
+                    InitialScreen { isSignUp ->
+                        known = true
+                        showWelcomeDialog = isSignUp
+                    }
                 } else {
                     var me by remember { mutableStateOf<Person?>(null) }
                     var showSignedOut by rememberStateOf(false)
@@ -199,8 +202,6 @@ class MainActivity : AppCompatActivity() {
                     val cantConnectString = stringResource(R.string.cant_connect)
                     val downloadString = stringResource(R.string.download)
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
-
-//                    window.setSoftInputMode(if (isLandscape) SOFT_INPUT_ADJUST_PAN else SOFT_INPUT_ADJUST_RESIZE)
 
                     fun updateAppLanguage(me: Person?) {
                         val language = appLanguage
@@ -216,10 +217,6 @@ class MainActivity : AppCompatActivity() {
                             me = it
                             push.setMe(me!!.id!!)
                             updateAppLanguage(me)
-                            if (!wasKnown) {
-                                navController.navigate(AppNav.Profile(me!!.id!!))
-                                wasKnown = true
-                            }
                         }
                     }
 
@@ -535,9 +532,23 @@ class MainActivity : AppCompatActivity() {
                                     CompositionLocalProvider(
                                         LocalAppState provides AppState(me, navController)
                                     ) {
+                                        if (showWelcomeDialog) {
+                                            WelcomeDialog(
+                                                {
+                                                    showWelcomeDialog = false
+                                                }
+                                            ) {
+                                                scope.launch {
+                                                    api.me {
+                                                        me = it
+                                                    }
+                                                }
+                                            }
+                                        }
+
                                         NavHost(
                                             navController,
-                                            startDestination ?: "explore",
+                                            startDestination ?: AppNav.Messages.route,
                                             modifier = Modifier
                                                 .padding(it)
                                                 .fillMaxSize()

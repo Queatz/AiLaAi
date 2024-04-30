@@ -45,7 +45,7 @@
     <string name="me">Me</string>
     <string name="cant_connect">Can\'t connect to the internet</string>
     <string name="enter_invite_code">Enter invite code</string>
-    <string name="hello">Chào! 👋</string>
+    <string name="hello">Hi, friend! 👋</string>
     <string name="show">Unhide</string>
     <string name="hide">Hide</string>
     <string name="more">More</string>
@@ -218,8 +218,8 @@
     <string name="not_connected_yet">Not connected yet</string>
     <string name="no_cards_nearby">No pages nearby. All pages within 100km of you will be shown here.</string>
     <string name="scan">Scan QR code</string>
-    <string name="introduce_yourself">Introduce yourself here…</string>
-    <string name="add_your_name">Add your name…</string>
+    <string name="introduce_yourself">Introduce yourself</string>
+    <string name="add_your_name">Add your name</string>
     <string name="view_profile">View profile</string>
     <string name="pay">Pay</string>
     <string name="add_pay">Add pay</string>
@@ -668,6 +668,11 @@
     <string name="url">Url</string>
     <string name="recent_stories">Recent stories</string>
     <string name="select_text">Select text</string>
+    <string name="inline_or">or</string>
+    <string name="hi">Hi</string>
+    <string name="welcome_to_town">Welcome to town!</string>
+    <string name="say_hi">Say hi!</string>
+    <string name="lets_go">Let\'s go!</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

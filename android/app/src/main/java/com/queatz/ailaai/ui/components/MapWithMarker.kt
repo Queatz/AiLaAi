@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.components
 
+import android.Manifest
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -10,16 +11,27 @@ import at.bluesource.choicesdk.maps.common.*
 import at.bluesource.choicesdk.maps.common.Map
 import at.bluesource.choicesdk.maps.common.listener.OnMarkerDragListener
 import at.bluesource.choicesdk.maps.common.options.MarkerOptions
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.extensions.rememberStateOf
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapWithMarker(zoomLevel: Float, position: LatLng, modifier: Modifier = Modifier, positionChange: (LatLng) -> Unit) {
+fun MapWithMarker(
+    zoomLevel: Float,
+    position: LatLng,
+    modifier: Modifier = Modifier,
+    positionChange: (LatLng) -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val disposable = remember { CompositeDisposable() }
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
 
     DisposableEffect(Unit) {
         onDispose {
@@ -69,7 +81,9 @@ fun MapWithMarker(zoomLevel: Float, position: LatLng, modifier: Modifier = Modif
                     isMyLocationButtonEnabled = true
                 }
 
-                isMyLocationEnabled = true
+                if (locationPermissionState.status == PermissionStatus.Granted || coarseLocationPermissionState.status == PermissionStatus.Granted) {
+                    isMyLocationEnabled = true
+                }
             }
 
             marker = map!!.addMarker(

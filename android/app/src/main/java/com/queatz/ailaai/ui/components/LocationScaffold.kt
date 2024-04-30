@@ -23,6 +23,7 @@ fun LocationScaffold(
     geo: LatLng?,
     locationSelector: LocationSelector,
     appHeader: @Composable () -> Unit = {},
+    rationale: @Composable ColumnScope.() -> Unit = {},
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
@@ -47,12 +48,14 @@ fun LocationScaffold(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.pad, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(1.pad)
                 ) {
-                    val showOpenSettings = !locationSelector.shouldShowPermissionRationale
+                    rationale()
+
+                    val showOpenSettings = locationSelector.isPermanentlyDenied
                     Button(
                         {
                             if (showOpenSettings) {

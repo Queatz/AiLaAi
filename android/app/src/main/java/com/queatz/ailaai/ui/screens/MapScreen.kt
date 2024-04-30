@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import android.Manifest
 import android.graphics.Point
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -66,6 +67,9 @@ import at.bluesource.choicesdk.maps.common.Map
 import at.bluesource.choicesdk.maps.common.MapFragment
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
@@ -92,6 +96,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.random.Random
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapScreen(
     cards: List<Card>,
@@ -116,6 +121,8 @@ fun MapScreen(
     val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
     var showMapClickMenu by remember { mutableStateOf<LatLng?>(null) }
     var viewport by rememberStateOf(IntSize(0, 0))
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
 
     LaunchedEffect(Unit) {
         if (position == null) {
@@ -225,7 +232,9 @@ fun MapScreen(
                         isMyLocationButtonEnabled = true
                     }
 
-                    isMyLocationEnabled = true
+                    if (locationPermissionState.status == PermissionStatus.Granted || coarseLocationPermissionState.status == PermissionStatus.Granted) {
+                        isMyLocationEnabled = true
+                    }
 
                     setOnMapClickListener {
                         showMapClickMenu = it

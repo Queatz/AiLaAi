@@ -323,7 +323,9 @@ fun ColumnScope.MessageContent(
             confirmButton = stringResource(R.string.close),
             title = null,
             text = showSelectTextDialog ?: "",
-            onConfirm = {}
+            onConfirm = {
+                showSelectTextDialog = null
+            }
         )
     }
 

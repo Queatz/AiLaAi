@@ -12,6 +12,9 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +26,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.linearGradient
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
@@ -52,6 +57,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeItemDialog
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardList
+import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.MainTab
 import com.queatz.ailaai.ui.components.MainTabs
@@ -342,6 +348,10 @@ fun ExploreScreen() {
             ) {
                 ScanQrCodeButton()
             }
+        },
+        rationale = {
+            // todo: translate
+            DisplayText("Discover and post pages in your town.")
         }
     ) {
         Column(

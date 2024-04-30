@@ -6,7 +6,9 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
@@ -548,31 +550,60 @@ fun SettingsScreen(updateMe: () -> Unit) {
             })
 
             DropdownMenuItem({
-                Text(
-                    stringResource(R.string.privacy_policy),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(1.pad)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.privacy_policy),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(1.pad)
+                    )
+
+                    Icon(
+                        Icons.AutoMirrored.Outlined.OpenInNew,
+                        null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }, {
                 "$appDomain/privacy".launchUrl(context)
             })
 
             DropdownMenuItem({
-                Text(
-                    stringResource(R.string.terms_of_use),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(1.pad)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.terms_of_use),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(1.pad)
+                    )
+                    Icon(
+                        Icons.AutoMirrored.Outlined.OpenInNew,
+                        null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }, {
                 "$appDomain/terms".launchUrl(context)
             })
 
             DropdownMenuItem({
-                Text(
-                    stringResource(R.string.open_source),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(1.pad)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.open_source),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(1.pad)
+                    )
+
+                    Icon(
+                        Icons.AutoMirrored.Outlined.OpenInNew,
+                        null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }, {
                 "$appDomain/info/open-source".launchUrl(context)
             })
