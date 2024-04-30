@@ -18,6 +18,7 @@ import com.queatz.db.Person
 import com.queatz.push.CallStatusPushData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,14 +71,19 @@ class Calls {
 
     val scope = CoroutineScope(Dispatchers.Default)
 
+    var job: Job? = null
+
     fun inCallCount(groupId: String) = calls.map {
         it.firstOrNull { it.group == groupId }?.participants ?: 0
     }
 
     fun init(context: Context) {
         this.context = context
+    }
 
-        scope.launch {
+    suspend fun setMe(id: String) {
+        job?.cancel()
+        job = scope.launch {
             reload()
             push.events.filter {
                 it is CallStatusPushData

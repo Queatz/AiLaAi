@@ -69,10 +69,6 @@ fun PublishStoryDialog(
     val me = me
 
     LaunchedEffect(Unit) {
-        locationSelector.start()
-    }
-
-    LaunchedEffect(Unit) {
         api.storyDraft(story.id!!, onError = {
             shareToGroups = emptyList()
             if (it.status == HttpStatusCode.NotFound) {

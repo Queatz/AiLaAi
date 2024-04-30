@@ -42,15 +42,10 @@ fun locationSelector(
     var geoManual by rememberStateOf(false)
     var showSetMyLocation by rememberStateOf(false)
     var wasRequested by rememberStateOf(false)
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) {
-        wasRequested = true
-    }
-    val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION) {
-        wasRequested = true
-    }
     var disposable: Disposable? = null
 
     fun start() {
+        disposable?.dispose()
         disposable = locationClient.observeLocation(LocationRequest.createDefault())
             .filter { it is Outcome.Success && it.value.lastLocation != null }
             .takeWhile { scope.isActive }
@@ -62,8 +57,27 @@ fun locationSelector(
             }
     }
 
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) {
+        wasRequested = true
+        if (it) {
+            start()
+        }
+    }
+    val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION) {
+        wasRequested = true
+        if (it) {
+            start()
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose { disposable?.dispose() }
+    }
+
+    LaunchedEffect(Unit) {
+        if (locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted) {
+            start()
+        }
     }
 
     LaunchedEffect(geo) {
@@ -103,7 +117,6 @@ fun locationSelector(
     return LocationSelector(
         isManualCallback = { geoManual },
         setLocationManuallyCallback = { showSetMyLocation = true },
-        startCallback = { start() },
         permissionGrantedCallback = { locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted },
         wasRequested = { wasRequested },
         shouldShowPermissionRationaleCallback = { locationPermissionState.status.shouldShowRationale || coarseLocationPermissionState.status.shouldShowRationale },
@@ -121,21 +134,16 @@ fun locationSelector(
 }
 
 class LocationSelector(
-    private val isManualCallback: () -> Boolean,
+    private val isManualCallback: @Composable () -> Boolean,
     private val setLocationManuallyCallback: () -> Unit,
-    private val startCallback: () -> Unit,
-    private val permissionGrantedCallback: () -> Boolean,
-    private val wasRequested: () -> Boolean,
+    private val permissionGrantedCallback: @Composable () -> Boolean,
+    private val wasRequested: @Composable () -> Boolean,
     private val shouldShowPermissionRationaleCallback: () -> Boolean,
     private val launchPermissionRequestCallback: () -> Unit,
     private val resetRequest: () -> Unit,
 ) {
     fun setLocationManually() {
         setLocationManuallyCallback()
-    }
-
-    fun start() {
-        startCallback()
     }
 
     fun launchPermissionRequest() {
@@ -146,7 +154,7 @@ class LocationSelector(
         resetRequest()
     }
 
-    val isGranted get() = permissionGrantedCallback()
-    val isPermanentlyDenied get() = wasRequested() && !shouldShowPermissionRationaleCallback()
-    val isManual get() = isManualCallback()
+    val isGranted @Composable get() = permissionGrantedCallback()
+    val isPermanentlyDenied @Composable get() = wasRequested() && !shouldShowPermissionRationaleCallback()
+    val isManual @Composable get() = isManualCallback()
 }

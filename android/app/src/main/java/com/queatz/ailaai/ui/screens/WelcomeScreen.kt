@@ -37,6 +37,7 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.theme.pad
@@ -61,6 +62,7 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
     var step by rememberStateOf(WelcomeStep.SetName)
     var name by rememberStateOf("")
     var about by rememberStateOf("")
+    var isLoadingPhoto by rememberStateOf(false)
     val scope = rememberCoroutineScope()
     var showProfilePhotoDialog by rememberStateOf(false)
     val setPhotoState = remember {
@@ -87,8 +89,10 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
             multiple = false,
             imagesOnly = true,
             onPhotos = { photos ->
+                isLoadingPhoto = true
                 scope.launch {
                     api.updateMyPhotoFromUri(context, photos.first()) {}
+                    isLoadingPhoto = false
                     api.me {
                         onProfileUpdate()
                     }
@@ -100,6 +104,9 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
                         onProfileUpdate()
                     }
                 }
+            },
+            onIsGeneratingPhoto = {
+                isLoadingPhoto = it
             }
         )
     }
@@ -173,6 +180,9 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
                                         showProfilePhotoDialog = true
                                     }
                             )
+                            if (isLoadingPhoto) {
+                                Loading()
+                            }
                         }
 
                         WelcomeStep.SetIntroduction -> {

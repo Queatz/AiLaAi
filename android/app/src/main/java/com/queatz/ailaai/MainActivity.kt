@@ -216,6 +216,7 @@ class MainActivity : AppCompatActivity() {
                         api.me(onError = onError) {
                             me = it
                             push.setMe(me!!.id!!)
+                            calls.setMe(me!!.id!!)
                             updateAppLanguage(me)
                         }
                     }

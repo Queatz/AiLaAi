@@ -110,10 +110,6 @@ fun InventoryScreen() {
         context as Activity
     )
 
-    LaunchedEffect(Unit) {
-        locationSelector.start()
-    }
-
     LaunchedEffect(inventory, search) {
         shownInventory = if (search.isBlank()) inventory else inventory.filter {
             it.item!!.name!!.contains(search, ignoreCase = true) ||

@@ -29,12 +29,6 @@ fun LocationScaffold(
 ) {
     val nav = nav
 
-    LaunchedEffect(geo == null) {
-        if (geo == null) {
-            locationSelector.start()
-        }
-    }
-
     when {
         !enabled -> {
             content()
