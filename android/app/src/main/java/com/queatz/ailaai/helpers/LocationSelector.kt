@@ -42,47 +42,40 @@ fun locationSelector(
     var geoManual by rememberStateOf(false)
     var showSetMyLocation by rememberStateOf(false)
     var wasRequested by rememberStateOf(false)
-    var disposable: Disposable? = null
-
-    fun start() {
-        disposable?.dispose()
-        disposable = locationClient.observeLocation(LocationRequest.createDefault())
-            .filter { it is Outcome.Success && it.value.lastLocation != null }
-            .takeWhile { scope.isActive }
-            .take(1)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                geoManual = false
-                onGeoChange((it as Outcome.Success).value.lastLocation!!.toLatLng())
-            }
-    }
 
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) {
         wasRequested = true
-        if (it) {
-            start()
-        }
     }
 
     val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION) {
         wasRequested = true
-        if (it) {
-            start()
-        }
     }
 
-    DisposableEffect(Unit) {
-        onDispose { disposable?.dispose() }
+    val isGranted = @Composable {
+        locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted
     }
 
-    LaunchedEffect(Unit) {
-        if (locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted) {
-            start()
+    val granted = isGranted()
+
+    if (granted) {
+        DisposableEffect(Unit) {
+            val disposable = locationClient
+                .observeLocation(LocationRequest.createDefault())
+                .filter { it is Outcome.Success && it.value.lastLocation != null }
+                .takeWhile { scope.isActive }
+                .take(1)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    geoManual = false
+                    onGeoChange((it as Outcome.Success).value.lastLocation!!.toLatLng())
+                }
+
+            onDispose { disposable.dispose() }
         }
     }
 
     LaunchedEffect(geo) {
-        geoManual = geo != null && !(locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted) || context.dataStore.data.first()[geoManualKey] == true
+        geoManual = geo != null && !granted || context.dataStore.data.first()[geoManualKey] == true
     }
 
     LaunchedEffect(geoManual) {
@@ -118,7 +111,7 @@ fun locationSelector(
     return LocationSelector(
         isManualCallback = { geoManual },
         setLocationManuallyCallback = { showSetMyLocation = true },
-        permissionGrantedCallback = { locationPermissionState.status.isGranted || coarseLocationPermissionState.status.isGranted },
+        permissionGrantedCallback = { isGranted() },
         wasRequested = { wasRequested },
         shouldShowPermissionRationaleCallback = { locationPermissionState.status.shouldShowRationale || coarseLocationPermissionState.status.shouldShowRationale },
         launchPermissionRequestCallback = { locationPermissionState.launchPermissionRequest() },
