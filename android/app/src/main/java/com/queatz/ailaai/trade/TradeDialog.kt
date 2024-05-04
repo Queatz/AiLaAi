@@ -11,8 +11,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,16 +47,20 @@ import com.queatz.ailaai.item.InventoryItemLayout
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.push
+import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.PeopleDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.screens.seenText
+import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Person
+import com.queatz.db.Trade
 import com.queatz.db.TradeExtended
 import com.queatz.db.TradeItem
 import com.queatz.db.TradeMember
@@ -67,6 +74,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import trade
 import unconfirmTrade
+import updateTrade
 import updateTradeItems
 
 data class TradeMemberItem(
@@ -101,6 +109,7 @@ fun TradeDialog(
     var showCancelDialog by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showMembers by rememberStateOf(false)
+    var editNote by rememberStateOf(false)
     var editItemDialog by rememberStateOf<TradeMemberItem?>(null)
     var addItemDialog by rememberStateOf<TradeMemberItem?>(null)
     var addInventoryItemDialog by rememberStateOf<Person?>(null)
@@ -150,6 +159,12 @@ fun TradeDialog(
             api.cancelTrade(tradeId) {
                 trade = it
             }
+        }
+    }
+
+    suspend fun saveNote(note: String) {
+        api.updateTrade(tradeId, Trade(note = note)) {
+            trade = it
         }
     }
 
@@ -229,7 +244,20 @@ fun TradeDialog(
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(bottom = 1.pad)
+                            .weight(1f)
                     )
+
+                    IconButton(
+                        {
+                            editNote = true
+                        },
+                        enabled = !anyConfirmed
+                    ) {
+                        Icon(
+                            Icons.Outlined.Edit,
+                            null
+                        )
+                    }
 
                     IconButton(
                         {
@@ -279,6 +307,26 @@ fun TradeDialog(
                                 .weight(1f, fill = false)
                                 .padding(bottom = 1.pad)
                         ) {
+                            if (!trade.trade?.note.isNullOrBlank()) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    OutlinedCard(
+                                        onClick = {
+                                            if (!anyConfirmed) {
+                                                editNote = true
+                                            }
+                                        },
+                                        shape = MaterialTheme.shapes.large,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            trade.trade?.note ?: "",
+                                            modifier = Modifier
+                                                .padding(1.pad)
+                                        )
+                                    }
+                                }
+                            }
                             members.forEach { member ->
                                 item(span = { GridItemSpan(maxLineSpan) }) {
                                     Row(
@@ -377,6 +425,21 @@ fun TradeDialog(
                 }
             }
         )
+    }
+
+    if (editNote) {
+        TextFieldDialog(
+            {
+                editNote = false
+            },
+            title = stringResource(R.string.edit_note),
+            initialValue = trade?.trade?.note ?: "",
+            button = stringResource(R.string.update),
+            showDismiss = true
+        ) {
+            saveNote(it)
+            editNote = false
+        }
     }
 
     fun maxQuantity(item: InventoryItemExtended, to: String? = null) =

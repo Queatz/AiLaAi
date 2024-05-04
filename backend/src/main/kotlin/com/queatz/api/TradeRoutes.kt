@@ -170,6 +170,10 @@ fun Route.tradeRoutes() {
                     return@respond HttpStatusCode.BadRequest.description("Trade has changed")
                 }
 
+                if (tradeState.note != trade.note) {
+                    return@respond HttpStatusCode.BadRequest.description("Trade note has changed")
+                }
+
                 val myMember = trade.members!!.first {
                     it.person == me.id!!
                 }
