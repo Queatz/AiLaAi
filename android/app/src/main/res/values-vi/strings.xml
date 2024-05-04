@@ -648,9 +648,9 @@
         <item quantity="other">%1$s cái</item>
     </plurals>
     <plurals name="x_active_trades">
-        <item quantity="other">%1$s giao dịch chưa xong</item>
+        <item quantity="other">%1$s việc đổi đồ chưa xong</item>
     </plurals>
-    <string name="completed_trades">Giao dịch đã hoàn thành</string>
+    <string name="completed_trades">Các việc đổi đồ đã hoàn thành</string>
     <string name="subscribe">Đăng ký</string>
     <string name="unsubscribe">Hủy đăng ký</string>
     <string name="pick_up">Vớt</string>
@@ -680,9 +680,9 @@
     <string name="welcome_to_town">Chào mừng đến với thị trấn!</string>
     <string name="say_hi">Nói xin chào đi!</string>
     <string name="lets_go">Đi đi!</string>
-    <string name="cancel_trade">Hủy giao dịch</string>
-    <string name="cancel_this_trade">Hủy giao dịch này không?</string>
-    <string name="trade_cancelled">Giao dịch bị hủy</string>
+    <string name="cancel_trade">Hủy việc đổi đồ</string>
+    <string name="cancel_this_trade">Hủy việc đổi đồ này không?</string>
+    <string name="trade_cancelled">Việc đổi đồ bị hủy</string>
     <string name="confirmed">Đã xác nhận</string>
     <string name="no_items">Không có đồ nào.</string>
     <string name="drop_x">Thả %1$s?</string>
