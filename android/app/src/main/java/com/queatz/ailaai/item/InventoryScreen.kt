@@ -62,6 +62,7 @@ import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.ScanQrCodeResult
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.swipeMainTabs
+import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -102,6 +103,7 @@ fun InventoryScreen() {
     var showCompletedTradesDialog by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showDropMenu by rememberStateOf(false)
+    var showDiscardDialog by rememberStateOf(false)
     var showStartTradeDialogItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var shownInventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
@@ -138,7 +140,11 @@ fun InventoryScreen() {
         scope.launch {
             api.dropItem(inventoryItem.id!!, DropItemBody(quantity, geo?.toList()))
             reload()
-            context.toast(R.string.items_dropped)
+            if (geo == null) {
+                context.toast(R.string.items_discarded)
+            } else {
+                context.toast(R.string.items_dropped)
+            }
         }
     }
 
@@ -285,7 +291,11 @@ fun InventoryScreen() {
             title = pluralStringResource(
                 R.plurals.drop_x_items,
                 showDropInventoryItem!!.second.toInt(),
-                showDropInventoryItem!!.second
+                if (showDropInventoryItem!!.first.item?.divisible == true) {
+                    showDropInventoryItem!!.second.toString()
+                } else {
+                    showDropInventoryItem!!.second.format()
+                }
             ),
             actions = {
                 IconButton(
@@ -300,13 +310,7 @@ fun InventoryScreen() {
                             Text(stringResource(R.string.discard_items))
                         }, {
                             showDropMenu = false
-                            showDropInventoryItem?.let { drop ->
-                                drop(drop.first.inventoryItem!!, drop.second, null)
-                            }
-                            showDropInventoryItem = null
-                            scope.launch {
-                                reload()
-                            }
+                            showDiscardDialog = true
                         })
                     }
                 }
@@ -320,6 +324,35 @@ fun InventoryScreen() {
                         reload()
                     }
                 }
+            }
+        }
+    }
+
+    if (showDiscardDialog) {
+        Alert(
+            {
+                showDiscardDialog = false
+            },
+            title = pluralStringResource(
+                R.plurals.discard_x_items,
+                showDropInventoryItem!!.second.toInt(),
+                if (showDropInventoryItem!!.first.item?.divisible == true) {
+                    showDropInventoryItem!!.second.toString()
+                } else {
+                    showDropInventoryItem!!.second.format()
+                }
+            ),
+            text = null,
+            dismissButton = stringResource(R.string.cancel),
+            confirmButton = stringResource(R.string.discard_items)
+        ) {
+            showDiscardDialog = false
+            showDropInventoryItem?.let { drop ->
+                drop(drop.first.inventoryItem!!, drop.second, null)
+            }
+            showDropInventoryItem = null
+            scope.launch {
+                reload()
             }
         }
     }

@@ -597,6 +597,7 @@
     <string name="drop">Drop</string>
     <string name="x_selected">%1$s selected</string>
     <string name="items_dropped">Items dropped</string>
+    <string name="items_discarded">Items discarded</string>
     <string name="confirm">Confirm</string>
     <string name="unconfirm">Unconfirm</string>
     <string name="your_items">Your items</string>
@@ -677,6 +678,10 @@
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>
+    </plurals>
+    <plurals name="discard_x_items">
+        <item quantity="one">Discard %1$s item</item>
+        <item quantity="other">Discard %1$s items</item>
     </plurals>
     <plurals name="x_active_trades">
         <item quantity="one">%1$s active trade</item>

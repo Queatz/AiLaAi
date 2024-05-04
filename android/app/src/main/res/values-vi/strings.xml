@@ -571,7 +571,8 @@
     <string name="drop">Thả</string>
     <string name="x_selected">%1$s đã chọn</string>
     <string name="items_dropped">Đồ bị thả</string>
-    <string name="confirm">Xác nhật</string>
+    <string name="items_discarded">Đồ bị bỏ</string>
+    <string name="confirm">Xác nhận</string>
     <string name="unconfirm">Hủy xác nhận</string>
     <string name="your_items">Đồ của bạn</string>
     <plurals name="second">
@@ -640,6 +641,9 @@
     <plurals name="drop_x_items">
         <item quantity="other">Thả %1$s món đồ</item>
     </plurals>
+    <plurals name="discard_x_items">
+        <item quantity="other">Bỏ %1$s món đồ</item>
+    </plurals>
     <plurals name="x_items">
         <item quantity="other">%1$s cái</item>
     </plurals>
@@ -655,6 +659,7 @@
     <string name="show_more">Coi thêm</string>
     <string name="page_tree">Cây trang</string>
     <string name="equip">Trang bị</string>
+    <string name="unequip">Bỏ trang bị</string>
     <string name="equipped_items">Đồ được trang bị</string>
     <string name="items_equipped">Đồ được trang bị</string>
     <string name="items_unequipped">Đồ được bỏ trang bị</string>
@@ -675,4 +680,11 @@
     <string name="welcome_to_town">Chào mừng đến với thị trấn!</string>
     <string name="say_hi">Nói xin chào đi!</string>
     <string name="lets_go">Đi đi!</string>
+    <string name="cancel_trade">Hủy giao dịch</string>
+    <string name="cancel_this_trade">Hủy giao dịch không?</string>
+    <string name="trade_cancelled">Giao dịch bị hủy</string>
+    <string name="confirmed">Đã xác nhận</string>
+    <string name="no_items">Không có đồ nào.</string>
+    <string name="drop_x">Thả %1$s?</string>
+    <string name="waiting">Đang chờ</string>
 </resources>
