@@ -125,6 +125,7 @@ fun GroupScreen(groupId: String) {
     val stickerPacks by stickers.rememberStickerPacks()
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
+    var showTradeWithDialog by rememberStateOf(false)
     var showSendDialog by rememberStateOf(false)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
     val nav = nav
@@ -474,20 +475,20 @@ fun GroupScreen(groupId: String) {
                     }
 
                     Dropdown(showMenu, { showMenu = false }) {
-                        if (myMember != null) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.invite_someone))
-                            }, {
-                                showMenu = false
-                                showInviteMembers = true
-                            })
-                        }
                         DropdownMenuItem({
                             Text(stringResource(R.string.members))
                         }, {
                             showMenu = false
                             showGroupMembers = true
                         })
+                        if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.trade))
+                            }, {
+                                showMenu = false
+                                showTradeWithDialog = true
+                            })
+                        }
                         DropdownMenuItem({
                             Text(stringResource(R.string.cards))
                         }, {
@@ -501,44 +502,6 @@ fun GroupScreen(groupId: String) {
                             showSendDialog = true
                         })
                         if (myMember != null) {
-                            if (groupExtended?.group?.config?.edits == null || myMember.member?.host == true) {
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.rename))
-                                }, {
-                                    showMenu = false
-                                    showRenameGroup = true
-                                })
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.introduction))
-                                }, {
-                                    showMenu = false
-                                    showDescriptionDialog = true
-                                })
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.photo))
-                                }, {
-                                    showMenu = false
-                                    showSetPhotoDialog = true
-                                })
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.background))
-                                }, {
-                                    showMenu = false
-                                    showSetBackgroundDialog = true
-                                })
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.set_category))
-                                }, {
-                                    showMenu = false
-                                    showCategoryDialog = true
-                                })
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.move))
-                                }, {
-                                    showMenu = false
-                                    showLocationDialog = true
-                                })
-                            }
                             if (myMember.member?.host == true) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.manage))
@@ -547,12 +510,6 @@ fun GroupScreen(groupId: String) {
                                     showManageDialog = true
                                 })
                             }
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.leave))
-                            }, {
-                                showMenu = false
-                                showLeaveGroup = true
-                            })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.qr_code))
                             }, {
@@ -605,6 +562,12 @@ fun GroupScreen(groupId: String) {
                                     showSnoozeDialog = true
                                 })
                             }
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.leave))
+                            }, {
+                                showMenu = false
+                                showLeaveGroup = true
+                            })
                             DropdownMenuItem({ Text(stringResource(R.string.report)) }, {
                                 showMenu = false
                                 showReportDialog = true
@@ -1222,7 +1185,20 @@ fun GroupScreen(groupId: String) {
                     people = allMembers.map { it.person!! },
                     infoFormatter = { person ->
                         val member = allMembers.firstOrNull { it.person?.id == person.id }
-                        "${if (member?.member?.host == true) "${context.getString(R.string.host)} • " else ""}${person.seenText(context.getString(R.string.active))}"
+                        "${if (member?.member?.host == true) "${context.getString(R.string.host)} • " else ""}${
+                            person.seenText(
+                                context.getString(R.string.active)
+                            )
+                        }"
+                    },
+                    actions = {
+                        IconButton(
+                            {
+                                showInviteMembers = true
+                            }
+                        ) {
+                            Icon(Icons.Outlined.Add, stringResource(R.string.invite_someone))
+                        }
                     },
                     extraButtons = {
                         if (myMember?.member?.host == true) {
@@ -1285,6 +1261,28 @@ fun GroupScreen(groupId: String) {
                         }
                     },
                     omit = { it.id!! !in members }
+                )
+            }
+
+            if (showTradeWithDialog) {
+                val people = groupExtended!!.members!!
+                    .mapNotNull { it.person }
+                    .filter { it.id != me?.id }
+                ChoosePeopleDialog(
+                    {
+                        showTradeWithDialog = false
+                    },
+                    title = stringResource(R.string.trade),
+                    people = people,
+                    confirmFormatter = defaultConfirmFormatter(
+                        R.string.trade,
+                        R.string.trade_with_x,
+                        R.string.trade_with_x_and_x,
+                        R.string.trade_with_x_people
+                    ) { it.name ?: someone },
+                    onPeopleSelected = { people ->
+
+                    }
                 )
             }
 
@@ -1491,6 +1489,42 @@ fun GroupScreen(groupId: String) {
                 Menu(
                     { showManageDialog = false }
                 ) {
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.rename))
+                    }, {
+                        showManageDialog = false
+                        showRenameGroup = true
+                    })
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.introduction))
+                    }, {
+                        showManageDialog = false
+                        showDescriptionDialog = true
+                    })
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.photo))
+                    }, {
+                        showManageDialog = false
+                        showSetPhotoDialog = true
+                    })
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.background))
+                    }, {
+                        showManageDialog = false
+                        showSetBackgroundDialog = true
+                    })
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.set_category))
+                    }, {
+                        showManageDialog = false
+                        showCategoryDialog = true
+                    })
+                    DropdownMenuItem({
+                        Text(stringResource(R.string.move))
+                    }, {
+                        showManageDialog = false
+                        showLocationDialog = true
+                    })
                     if (groupExtended?.group?.open == true) {
                         menuItem(stringResource(R.string.make_group_closed)) {
                             showManageDialog = false

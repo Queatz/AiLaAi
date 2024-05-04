@@ -23,6 +23,7 @@ fun PeopleDialog(
     people: List<Person>,
     showCountInTitle: Boolean = true,
     infoFormatter: (Person) -> String? = { null },
+    actions: @Composable RowScope.() -> Unit = {},
     extraButtons: @Composable RowScope.() -> Unit = {},
     onClick: (Person) -> Unit,
 ) {
@@ -31,11 +32,19 @@ fun PeopleDialog(
             modifier = Modifier
                 .padding(3.pad)
         ) {
-            Text(
-                if (showCountInTitle) "$title (${people.size})" else title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 1.pad)
-            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    if (showCountInTitle) "$title (${people.size})" else title,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 1.pad)
+                )
+                actions()
+            }
             LazyColumn(
                 modifier = Modifier
                     .weight(1f, fill = false)
