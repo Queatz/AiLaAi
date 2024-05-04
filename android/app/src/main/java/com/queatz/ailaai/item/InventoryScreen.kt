@@ -223,6 +223,7 @@ fun InventoryScreen() {
             {
                 showActiveTradesDialog = false
             },
+            pluralStringResource(R.plurals.x_active_trades, activeTrades.size, activeTrades.size),
             activeTrades
         ) {
             showTradeDialog = it.trade
@@ -242,6 +243,7 @@ fun InventoryScreen() {
                 {
                     showCompletedTradesDialog = false
                 },
+                stringResource(R.string.completed_trades),
                 completedTrades!!
             ) {
                 showTradeDialog = it.trade

@@ -48,6 +48,9 @@
     <string name="collaboration_notification_channel_description">Thông báo hợp tác.</string>
     <string name="host_notification_channel_description">Thông báo chủ trì nhóm.</string>
     <string name="subscription_notification_channel_description">Các đăng ký của bạn</string>
+    <string name="trade_notification_channel_description">Thông báo buôn bán</string>
+    <string name="calls_notification_channel_description">Trả lời cuộc gọi</string>
+    <string name="ongoing_calls_notification_channel_description">Quản lý cuộc gọi đang diễn ra</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa</string>
     <string name="connected">Đã kết nối</string>
@@ -640,6 +643,10 @@
     <plurals name="x_items">
         <item quantity="other">%1$s cái</item>
     </plurals>
+    <plurals name="x_active_trades">
+        <item quantity="other">%1$s giao dịch đang hoạt động</item>
+    </plurals>
+    <string name="completed_trades">Giao dịch đã hoàn thành</string>
     <string name="subscribe">Đăng ký</string>
     <string name="unsubscribe">Hủy đăng ký</string>
     <string name="pick_up">Vớt</string>
@@ -647,4 +654,25 @@
     <string name="search_groups">Tìm kiếm nhóm</string>
     <string name="show_more">Coi thêm</string>
     <string name="page_tree">Cây trang</string>
+    <string name="equip">Trang bị</string>
+    <string name="equipped_items">Đồ được trang bị</string>
+    <string name="items_equipped">Đồ được trang bị</string>
+    <string name="items_unequipped">Đồ được bỏ trang bị</string>
+    <string name="discard_items">Bỏ đồ</string>
+    <string name="everyone">Mọi người</string>
+    <string name="hosts">Chủ nhóm</string>
+    <string name="edit_message">Chỉnh sửa tin nhắn</string>
+    <string name="many">Nhiều</string>
+    <string name="x_thousands_mini">%1$k</string>
+    <string name="x_millions_mini">%1$tr</string>
+    <string name="custom">Tùy chỉnh</string>
+    <string name="comment">Bình luận</string>
+    <string name="comment_added">Đã thêm bình luận</string>
+    <string name="recent_stories">Bài viết gần đây</string>
+    <string name="select_text">Chọn văn bản</string>
+    <string name="inline_or">hay</string>
+    <string name="hi">Chào</string>
+    <string name="welcome_to_town">Chào mừng đến với thị trấn!</string>
+    <string name="say_hi">Nói xin chào đi!</string>
+    <string name="lets_go">Đi đi!</string>
 </resources>

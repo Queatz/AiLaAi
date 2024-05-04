@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
@@ -20,6 +19,7 @@ import com.queatz.db.TradeExtended
 @Composable
 fun TradesDialog(
     onDismissRequest: () -> Unit,
+    title: String,
     trades: List<TradeExtended>,
     onTrade: (TradeExtended) -> Unit
 ) {
@@ -32,7 +32,7 @@ fun TradesDialog(
             scrollable = false,
             content = {
                 Text(
-                    pluralStringResource(R.plurals.x_active_trades, trades.size, trades.size),
+                    title,
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .padding(bottom = 1.pad)

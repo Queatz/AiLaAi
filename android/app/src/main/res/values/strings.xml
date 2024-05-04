@@ -673,6 +673,7 @@
     <string name="welcome_to_town">Welcome to town!</string>
     <string name="say_hi">Say hi!</string>
     <string name="lets_go">Let\'s go!</string>
+    <string name="completed_trades">Completed trades</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>
