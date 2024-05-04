@@ -675,6 +675,9 @@
     <string name="say_hi">Say hi!</string>
     <string name="lets_go">Let\'s go!</string>
     <string name="completed_trades">Completed trades</string>
+    <string name="x_in_inventory">%1$s in inventory</string>
+    <string name="x_circulating">%1$s circulating</string>
+    <string name="x_expired">%1$s expired</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

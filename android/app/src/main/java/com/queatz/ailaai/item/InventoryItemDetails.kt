@@ -61,7 +61,7 @@ fun InventoryItemDetails(inventoryItem: InventoryItemExtended) {
         Text(
             listOfNotNull(
                 inventoryItem.item?.name ?: "",
-                (inventoryItem.inventoryItem!!.quantity?.formatItemQuantity() ?: "0").let { "x$it" }
+                (inventoryItem.inventoryItem!!.quantity?.format() ?: "0").let { "x$it" }
             ).joinToString(" "),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center

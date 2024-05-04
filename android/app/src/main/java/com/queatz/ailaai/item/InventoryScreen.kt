@@ -130,7 +130,9 @@ fun InventoryScreen() {
 
             if (showInventoryItem != null) {
                 showInventoryItem =
-                    inventory.firstOrNull { showInventoryItem?.inventoryItem?.id == it.inventoryItem?.id }
+                    inventory.firstOrNull {
+                        showInventoryItem?.inventoryItem?.id == it.inventoryItem?.id
+                    }
             }
         }
     }
@@ -486,7 +488,7 @@ fun InventoryScreen() {
                 search,
                 { search = it },
                 action = {
-                    Icon(Icons.Outlined.Edit, "")
+                    Icon(Icons.Outlined.Edit, null)
                 }
             ) {
                 nav.navigate(AppNav.Items)

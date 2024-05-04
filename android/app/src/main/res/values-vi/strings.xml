@@ -687,4 +687,7 @@
     <string name="no_items">Không có đồ nào.</string>
     <string name="drop_x">Thả %1$s?</string>
     <string name="waiting">Đang chờ</string>
+    <string name="x_in_inventory">%1$s trong túi đồ</string>
+    <string name="x_circulating">%1$s lưu hành</string>
+    <string name="x_expired">%1$s hết hạn</string>
 </resources>

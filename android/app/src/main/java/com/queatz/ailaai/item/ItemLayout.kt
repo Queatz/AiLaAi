@@ -10,9 +10,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ItemExtended
@@ -44,7 +48,11 @@ fun ItemLayout(item: ItemExtended, onClick: () -> Unit) {
             Text(item.item?.name ?: "")
             Text(
                 // todo translate
-                "Inventory: ${item.inventory?.formatItemQuantity()}   Circulating: ${item.circulating?.formatItemQuantity()}   Expired: ${item.expired?.formatItemQuantity()}",
+                bulletedString(
+                    stringResource(R.string.x_in_inventory, item.inventory!!.format()),
+                    stringResource(R.string.x_circulating, item.circulating!!.format()),
+                    if (item.item?.lifespan != null) stringResource(R.string.x_expired, item.expired!!.format()) else null,
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )
