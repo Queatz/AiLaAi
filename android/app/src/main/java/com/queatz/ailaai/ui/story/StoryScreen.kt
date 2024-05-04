@@ -38,7 +38,7 @@ fun StoryScreen(storyId: String) {
     LaunchedEffect(story) {
         contents = story?.let {
             it.asContents() +
-                    listOf(StoryContent.Reactions(it.id!!, it.reactions))
+                    if (it.published == true) listOf(StoryContent.Reactions(it.id!!, it.reactions)) else  emptyList()
         } ?: emptyList()
     }
 

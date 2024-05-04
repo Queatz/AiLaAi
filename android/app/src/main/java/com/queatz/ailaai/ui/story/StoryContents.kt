@@ -1,11 +1,14 @@
 package com.queatz.ailaai.ui.story
 
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -109,6 +112,8 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.ContactItem
+import com.queatz.ailaai.ui.components.DialogBase
+import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.LoadingText
@@ -154,6 +159,43 @@ fun StoryContents(
     val me = me
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    var fullscreenWebView by remember {
+        mutableStateOf<Pair<View, WebChromeClient.CustomViewCallback>?>(null)
+    }
+
+    fullscreenWebView?.let { (view, closeCallback) ->
+        DialogBase({
+            closeCallback.onCustomViewHidden()
+        }) {
+            DialogLayout(
+                scrollable = false,
+                padding = 2.pad,
+                content = {
+                    AndroidView(
+                        factory = {
+                            view
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
+                            .clip(MaterialTheme.shapes.medium)
+                    )
+                },
+                actions = {
+                    TextButton(
+                        {
+                            closeCallback.onCustomViewHidden()
+                        },
+                        modifier = Modifier
+                            .padding(top = 1.pad)
+                    ) {
+                        Text(stringResource(R.string.go_back))
+                    }
+                }
+            )
+        }
+    }
 
     if (showOpenWidgetDialog) {
         AlertDialog(
@@ -755,6 +797,19 @@ fun StoryContents(
                                                         settings.allowUniversalAccessFromFileURLs = true
                                                         settings.mediaPlaybackRequiresUserGesture = false
                                                         settings.allowContentAccess = true
+
+                                                        webChromeClient = object : WebChromeClient() {
+                                                            override fun onShowCustomView(
+                                                                view: View,
+                                                                callback: CustomViewCallback
+                                                            ) {
+                                                                fullscreenWebView = view to callback
+                                                            }
+
+                                                            override fun onHideCustomView() {
+                                                                fullscreenWebView = null
+                                                            }
+                                                        }
 
                                                         loadUrl(url)
                                                         webView = this

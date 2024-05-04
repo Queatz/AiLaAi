@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush.Companion.linearGradient
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import com.queatz.ailaai.ui.theme.pad
 
@@ -15,6 +16,7 @@ fun DisplayText(text: String) {
         text,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.headlineMedium.copy(
+            lineBreak = LineBreak.Simple.copy(strategy = LineBreak.Strategy.Balanced),
             brush = linearGradient(
                 listOf(
                     MaterialTheme.colorScheme.tertiary,
