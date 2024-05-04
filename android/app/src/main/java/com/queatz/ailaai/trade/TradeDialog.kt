@@ -432,7 +432,7 @@ fun TradeDialog(
             {
                 editNote = false
             },
-            title = stringResource(R.string.edit_note),
+            title = stringResource(R.string.note),
             initialValue = trade?.trade?.note ?: "",
             button = stringResource(R.string.update),
             showDismiss = true

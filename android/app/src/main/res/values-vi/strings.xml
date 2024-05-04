@@ -48,7 +48,7 @@
     <string name="collaboration_notification_channel_description">Thông báo hợp tác.</string>
     <string name="host_notification_channel_description">Thông báo chủ trì nhóm.</string>
     <string name="subscription_notification_channel_description">Các đăng ký của bạn</string>
-    <string name="trade_notification_channel_description">Thông báo buôn bán</string>
+    <string name="trade_notification_channel_description">Thông báo trao đổi</string>
     <string name="calls_notification_channel_description">Trả lời cuộc gọi</string>
     <string name="ongoing_calls_notification_channel_description">Quản lý cuộc gọi đang diễn ra</string>
     <string name="copy">Sao chép</string>
@@ -549,10 +549,10 @@
     <string name="inline_until">tới</string>
     <string name="inline_last">cuối cùng</string>
     <string name="inventory">Túi đồ</string>
-    <string name="trade">Buôn bán</string>
-    <string name="trade_with_x">Buôn bán với %1$s</string>
-    <string name="trade_with_x_and_x">Buôn bán với %1$s và %2$s</string>
-    <string name="trade_with_x_people">Buôn bán với %1$s người</string>
+    <string name="trade">Đổi đồ</string>
+    <string name="trade_with_x">Đổi đồ với %1$s</string>
+    <string name="trade_with_x_and_x">Đổi đồ với %1$s và %2$s</string>
+    <string name="trade_with_x_people">Đổi đồ với %1$s người</string>
     <string name="items">Đồ</string>
     <string name="create_item">Create item</string>
     <string name="divisible">Divisible</string>
@@ -690,4 +690,5 @@
     <string name="x_in_inventory">%1$s trong túi đồ</string>
     <string name="x_circulating">%1$s đang lưu hành</string>
     <string name="x_expired">%1$s hết hạn</string>
+    <string name="note">Ghi chú</string>
 </resources>
