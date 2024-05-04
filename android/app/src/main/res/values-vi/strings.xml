@@ -648,7 +648,7 @@
         <item quantity="other">%1$s cái</item>
     </plurals>
     <plurals name="x_active_trades">
-        <item quantity="other">%1$s giao dịch đang hoạt động</item>
+        <item quantity="other">%1$s giao dịch chưa xong</item>
     </plurals>
     <string name="completed_trades">Giao dịch đã hoàn thành</string>
     <string name="subscribe">Đăng ký</string>
