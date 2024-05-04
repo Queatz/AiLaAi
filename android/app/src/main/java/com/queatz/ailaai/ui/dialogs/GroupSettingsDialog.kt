@@ -44,6 +44,12 @@ fun GroupSettingsDialog(
     val recomposeScope = currentRecomposeScope
     val scope = rememberCoroutineScope()
     var isLoading by rememberStateOf(false)
+    var isModified by rememberStateOf(false)
+
+    fun modified() {
+        recomposeScope.invalidate()
+        isModified = true
+    }
 
     DialogBase(onDismissRequest) {
         DialogLayout(
@@ -76,7 +82,7 @@ fun GroupSettingsDialog(
                             selected = groupConfig.messages == GroupMessagesConfig.Hosts,
                             onClick = {
                                 groupConfig.messages = GroupMessagesConfig.Hosts
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         )
                         Column(
@@ -85,7 +91,7 @@ fun GroupSettingsDialog(
                                 null
                             ) {
                                 groupConfig.messages = GroupMessagesConfig.Hosts
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         ) {
                             Text(stringResource(R.string.hosts))
@@ -98,7 +104,7 @@ fun GroupSettingsDialog(
                             selected = groupConfig.messages == null,
                             onClick = {
                                 groupConfig.messages = null
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         )
                         Column(
@@ -107,7 +113,7 @@ fun GroupSettingsDialog(
                                 null
                             ) {
                                 groupConfig.messages = null
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         ) {
                             Text(stringResource(R.string.everyone))
@@ -131,7 +137,7 @@ fun GroupSettingsDialog(
                             selected = groupConfig.edits == GroupEditsConfig.Hosts,
                             onClick = {
                                 groupConfig.edits = GroupEditsConfig.Hosts
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         )
                         Column(
@@ -140,7 +146,7 @@ fun GroupSettingsDialog(
                                 null
                             ) {
                                 groupConfig.edits = GroupEditsConfig.Hosts
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         ) {
                             Text(stringResource(R.string.hosts))
@@ -153,7 +159,7 @@ fun GroupSettingsDialog(
                             selected = groupConfig.edits == null,
                             onClick = {
                                 groupConfig.edits = null
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         )
                         Column(
@@ -162,7 +168,7 @@ fun GroupSettingsDialog(
                                 null
                             ) {
                                 groupConfig.edits = null
-                                recomposeScope.invalidate()
+                                modified()
                             }
                         ) {
                             Text(stringResource(R.string.everyone))
@@ -188,7 +194,7 @@ fun GroupSettingsDialog(
                             isLoading = false
                         }
                     },
-                    enabled = !isLoading
+                    enabled = !isLoading && isModified
                 ) {
                     Text(stringResource(R.string.update))
                 }

@@ -63,6 +63,7 @@ import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.*
+import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.stickers.StickerPacks
@@ -70,6 +71,7 @@ import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.theme.theme_call
 import com.queatz.db.*
+import createTrade
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -126,6 +128,7 @@ fun GroupScreen(groupId: String) {
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
     var showTradeWithDialog by rememberStateOf(false)
+    var showTradeDialog by rememberStateOf<Trade?>(null)
     var showSendDialog by rememberStateOf(false)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
     val nav = nav
@@ -166,6 +169,18 @@ fun GroupScreen(groupId: String) {
     suspend fun reloadMessages() {
         api.messages(groupId) {
             messages = it
+        }
+    }
+
+    fun trade(people: List<String>) {
+        scope.launch {
+            api.createTrade(
+                Trade().apply {
+                    this.people = people + me!!.id!!
+                }
+            ) {
+                showTradeDialog = it
+            }
         }
     }
 
@@ -255,9 +270,6 @@ fun GroupScreen(groupId: String) {
             }
             .launchIn(scope)
     }
-
-    val micEnabled = rememberPermissionState(Manifest.permission.RECORD_AUDIO).status.isGranted
-    val cameraEnabled = rememberPermissionState(Manifest.permission.CAMERA).status.isGranted
 
     Column(
         verticalArrangement = Arrangement.Bottom,
@@ -1281,7 +1293,7 @@ fun GroupScreen(groupId: String) {
                         R.string.trade_with_x_people
                     ) { it.name ?: someone },
                     onPeopleSelected = { people ->
-
+                        trade(people.map { it.id!! })
                     }
                 )
             }
@@ -1660,6 +1672,15 @@ fun GroupScreen(groupId: String) {
                         showAudioRationale = false
                     },
                     stringResource(R.string.permission_request)
+                )
+            }
+
+            showTradeDialog?.let {
+                TradeDialog(
+                    {
+                        showTradeDialog = null
+                    },
+                    it.id!!
                 )
             }
         }
