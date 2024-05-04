@@ -12,10 +12,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -247,16 +245,18 @@ fun TradeDialog(
                             .weight(1f)
                     )
 
-                    IconButton(
-                        {
-                            editNote = true
-                        },
-                        enabled = !anyConfirmed
-                    ) {
-                        Icon(
-                            Icons.Outlined.Edit,
-                            null
-                        )
+                    if (!isCompletedOrCancelled) {
+                        IconButton(
+                            {
+                                editNote = true
+                            },
+                            enabled = !anyConfirmed
+                        ) {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                null
+                            )
+                        }
                     }
 
                     IconButton(
@@ -311,7 +311,7 @@ fun TradeDialog(
                                 item(span = { GridItemSpan(maxLineSpan) }) {
                                     OutlinedCard(
                                         onClick = {
-                                            if (!anyConfirmed) {
+                                            if (!anyConfirmed && !isCompletedOrCancelled) {
                                                 editNote = true
                                             }
                                         },

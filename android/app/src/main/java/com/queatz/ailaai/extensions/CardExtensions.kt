@@ -23,14 +23,14 @@ fun profileUrl(id: String) = "$appDomain/profile/$id"
 fun groupUrl(id: String) = "$appDomain/group/$id"
 
 
-val Card.hint @Composable get() = listOfNotNull(
+val Card.hint @Composable get() = bulletedString(
     pay?.pay?.let {
         pay?.frequency?.let { frequency ->
             "$it/${frequency.appStringShort}"
         } ?: it
     },
     location?.notBlank
-).joinToString(" • ")
+)
 
 val PayFrequency.appStringShort @Composable get() = when (this) {
     PayFrequency.Hourly -> stringResource(R.string.inline_hour)

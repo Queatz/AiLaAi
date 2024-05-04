@@ -17,6 +17,7 @@ import app.ailaai.api.updateReminderOccurrence
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
@@ -156,10 +157,10 @@ fun PeriodEvent(
             }
         )
         Text(
-            listOfNotNull(
+            bulletedString(
                 if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(view),
                 event.occurrence?.note ?: event.reminder.note
-            ).joinToString(" • "),
+            ),
             style = MaterialTheme.typography.labelSmall.let {
                 if (done) {
                     it.copy(textDecoration = TextDecoration.LineThrough)

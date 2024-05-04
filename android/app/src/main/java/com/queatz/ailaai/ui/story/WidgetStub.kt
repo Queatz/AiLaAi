@@ -9,6 +9,7 @@ import app.ailaai.api.script
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.db.StoryContent
@@ -40,7 +41,7 @@ fun WidgetStub(
         }
     }
 
-    Stub(listOfNotNull(part.widget.stringResource, description.notBlank).joinToString(" • ")) {
+    Stub(bulletedString(part.widget.stringResource, description.notBlank)) {
         onClick()
     }
 }
