@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -296,6 +297,16 @@ fun FriendsScreen() {
             title = showSharedGroupsDialogPerson?.name ?: stringResource(R.string.someone),
             multiple = false,
             allowNone = true,
+            actions = {
+                IconButton(
+                    {
+                        showSharedGroupsDialog = emptyList()
+                        nav.navigate(AppNav.Profile(showSharedGroupsDialogPerson!!.id!!))
+                    }
+                ) {
+                    Icon(Icons.Outlined.Person, stringResource(R.string.view_profile))
+                }
+            },
             confirmFormatter = { stringResource(R.string.close) },
             infoFormatter = { "${it.members?.size ?: 0} ${context.resources.getQuantityString(R.plurals.inline_members, it.members?.size ?: 0)}" },
             groups = {

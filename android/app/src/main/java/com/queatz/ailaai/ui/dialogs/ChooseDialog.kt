@@ -75,6 +75,7 @@ fun <T> ChooseDialog(
     confirmFormatter: @Composable (List<T>) -> String,
     textWhenEmpty: @Composable (isSearchBlank: Boolean) -> String,
     extraButtons: @Composable RowScope.() -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
     infoFormatter: (@Composable (T) -> String?)? = null,
     maxSelectedCount: Int = 50,
     multiple: Boolean = true,
@@ -121,6 +122,8 @@ fun <T> ChooseDialog(
                 if (onQrCodeScan != null) {
                     ScanQrCodeButton(onQrCodeScan)
                 }
+
+                actions()
             }
             if (searchText.isNotEmpty() || showSearch(items)) {
                 OutlinedTextField(
