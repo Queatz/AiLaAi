@@ -1,11 +1,24 @@
 package com.queatz.ailaai.extensions
 
 import android.content.Context
+import com.ibm.icu.text.DecimalFormat
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.getAttachment
-import com.queatz.db.*
+import com.queatz.db.AudioAttachment
+import com.queatz.db.CardAttachment
+import com.queatz.db.GroupAttachment
+import com.queatz.db.GroupExtended
+import com.queatz.db.InventoryItem
+import com.queatz.db.Member
+import com.queatz.db.Message
+import com.queatz.db.Person
+import com.queatz.db.PhotosAttachment
+import com.queatz.db.StickerAttachment
+import com.queatz.db.StoryAttachment
+import com.queatz.db.VideosAttachment
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import java.text.ParseException
 
 data class ContactPhoto(
     val name: String = "",
@@ -77,3 +90,12 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
 }
 
 val InventoryItem.isExpired get() = expiresAt?.let { it < Clock.System.now() } ?: false
+
+private val itemFormat = DecimalFormat("#.######")
+
+fun Number.formatItemQuantity() = itemFormat.format(this)!!
+fun String.toItemQuantity() = try {
+    itemFormat.parse(this).toDouble()
+} catch (_: ParseException) {
+    null
+}

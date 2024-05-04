@@ -13,7 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ItemExtended
 
@@ -44,7 +44,7 @@ fun ItemLayout(item: ItemExtended, onClick: () -> Unit) {
             Text(item.item?.name ?: "")
             Text(
                 // todo translate
-                "Inventory: ${item.inventory?.format()}   Circulating: ${item.circulating?.format()}   Expired: ${item.expired?.format()}",
+                "Inventory: ${item.inventory?.formatItemQuantity()}   Circulating: ${item.circulating?.formatItemQuantity()}   Expired: ${item.expired?.formatItemQuantity()}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )

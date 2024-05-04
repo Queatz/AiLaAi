@@ -12,7 +12,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,7 +36,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
-import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberSavableStateOf
@@ -45,6 +44,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.swipe
+import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
@@ -82,7 +82,6 @@ import dropItem
 import equipItem
 import kotlinx.coroutines.launch
 import myInventory
-import trades
 import unequipItem
 import updateTradeItems
 
@@ -294,7 +293,7 @@ fun InventoryScreen() {
                 if (showDropInventoryItem!!.first.item?.divisible == true) {
                     showDropInventoryItem!!.second.toString()
                 } else {
-                    showDropInventoryItem!!.second.format()
+                    showDropInventoryItem!!.second.formatItemQuantity()
                 }
             ),
             actions = {
@@ -339,7 +338,7 @@ fun InventoryScreen() {
                 if (showDropInventoryItem!!.first.item?.divisible == true) {
                     showDropInventoryItem!!.second.toString()
                 } else {
-                    showDropInventoryItem!!.second.format()
+                    showDropInventoryItem!!.second.formatItemQuantity()
                 }
             ),
             text = null,
@@ -496,9 +495,9 @@ fun InventoryScreen() {
     }
 }
 
-fun String.upTo(maximumValue: Double) = toDoubleOrNull()?.let {
+fun String.upTo(maximumValue: Double) = toItemQuantity()?.let {
     if (it > maximumValue) {
-        maximumValue.format()
+        maximumValue.formatItemQuantity()
     } else {
         null
     }

@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.formatDistance
+import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.extensions.isExpired
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
@@ -60,7 +60,7 @@ fun InventoryItemLayout(inventoryItem: InventoryItemExtended, quantity: Double? 
             Text(
                 listOfNotNull(
                     inventoryItem.item?.name ?: "",
-                    ((quantity ?: inventoryItem.inventoryItem!!.quantity)?.format() ?: "0").let { "x$it" },
+                    ((quantity ?: inventoryItem.inventoryItem!!.quantity)?.formatItemQuantity() ?: "0").let { "x$it" },
                     inventoryItem.inventoryItem?.expiresAt?.let {
                         val now = Clock.System.now()
 

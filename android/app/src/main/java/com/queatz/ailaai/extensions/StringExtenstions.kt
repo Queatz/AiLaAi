@@ -2,6 +2,7 @@ package com.queatz.ailaai.extensions
 
 import android.content.*
 import android.graphics.Bitmap
+import android.icu.text.DecimalFormatSymbols
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -23,7 +24,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 fun String.isNumericTextInput(allowDecimal: Boolean = true): Boolean {
-    return isEmpty() || if (allowDecimal) (this == "." || toDoubleOrNull() != null) else toIntOrNull() != null
+    return isEmpty() || if (allowDecimal) (this == DecimalFormatSymbols.getInstance().decimalSeparator.toString() || toItemQuantity() != null) else toIntOrNull() != null
 }
 
 fun String.wordCount() = if (isBlank()) 0 else trim().split("\\W+".toRegex()).size

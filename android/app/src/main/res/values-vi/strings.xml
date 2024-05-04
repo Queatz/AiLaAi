@@ -681,7 +681,7 @@
     <string name="say_hi">Nói xin chào đi!</string>
     <string name="lets_go">Đi đi!</string>
     <string name="cancel_trade">Hủy giao dịch</string>
-    <string name="cancel_this_trade">Hủy giao dịch không?</string>
+    <string name="cancel_this_trade">Hủy giao dịch này không?</string>
     <string name="trade_cancelled">Giao dịch bị hủy</string>
     <string name="confirmed">Đã xác nhận</string>
     <string name="no_items">Không có đồ nào.</string>

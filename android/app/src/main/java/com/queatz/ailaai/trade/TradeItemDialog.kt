@@ -11,7 +11,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.extensions.isNumericTextInput
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.item.InventoryItemDetails
@@ -37,7 +37,7 @@ fun TradeItemDialog(
         if (inventoryItem.item?.divisible == true) {
             initialQuantity.toString()
         } else {
-            initialQuantity.format()
+            initialQuantity.formatItemQuantity()
         }
     )
     val focusRequester = remember {

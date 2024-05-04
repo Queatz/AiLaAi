@@ -107,7 +107,7 @@ fun CardConversation(
                         style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(MutableInteractionSource(), null) {
+                            .clickable(remember { MutableInteractionSource() }, null) {
                                 onTitleClick()
                             }
                     )
