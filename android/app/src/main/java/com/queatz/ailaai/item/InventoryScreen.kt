@@ -1,6 +1,5 @@
 package com.queatz.ailaai.item
 
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,7 +48,6 @@ import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
-import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.trading
@@ -73,13 +72,16 @@ import com.queatz.db.EquipItemBody
 import com.queatz.db.InventoryItem
 import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Trade
+import com.queatz.db.TradeExtended
 import com.queatz.db.TradeItem
 import com.queatz.db.UnequipItemBody
+import completedTrades
 import createTrade
 import dropItem
 import equipItem
 import kotlinx.coroutines.launch
 import myInventory
+import trades
 import unequipItem
 import updateTradeItems
 
@@ -97,18 +99,16 @@ fun InventoryScreen() {
     var showDropInventoryItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var showStartTradeDialog by rememberStateOf(false)
     var showActiveTradesDialog by rememberStateOf(false)
+    var showCompletedTradesDialog by rememberStateOf(false)
+    var showMenu by rememberStateOf(false)
     var showDropMenu by rememberStateOf(false)
     var showStartTradeDialogItem by rememberStateOf<Pair<InventoryItemExtended, Double>?>(null)
     var inventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var shownInventory by rememberStateOf<List<InventoryItemExtended>>(emptyList())
     var showTradeDialog by rememberStateOf<Trade?>(null)
     val activeTrades by trading.activeTrades.collectAsState()
+    var completedTrades by rememberStateOf<List<TradeExtended>?>(null)
     var geo by rememberStateOf<LatLng?>(null)
-    val locationSelector = locationSelector(
-        geo,
-        { geo = it },
-        context as Activity
-    )
 
     LaunchedEffect(inventory, search) {
         shownInventory = if (search.isBlank()) inventory else inventory.filter {
@@ -128,7 +128,8 @@ fun InventoryScreen() {
             inventory = it
 
             if (showInventoryItem != null) {
-                showInventoryItem = inventory.firstOrNull { showInventoryItem?.inventoryItem?.id == it.inventoryItem?.id }
+                showInventoryItem =
+                    inventory.firstOrNull { showInventoryItem?.inventoryItem?.id == it.inventoryItem?.id }
             }
         }
     }
@@ -218,15 +219,33 @@ fun InventoryScreen() {
     }
 
     if (showActiveTradesDialog) {
-        activeTrades.let {
+        TradesDialog(
+            {
+                showActiveTradesDialog = false
+            },
+            activeTrades
+        ) {
+            showTradeDialog = it.trade
+            showActiveTradesDialog = false
+        }
+    }
+
+    if (showCompletedTradesDialog) {
+        LaunchedEffect(Unit) {
+            api.completedTrades {
+                completedTrades = it
+            }
+        }
+
+        if (completedTrades != null) {
             TradesDialog(
                 {
-                    showActiveTradesDialog = false
+                    showCompletedTradesDialog = false
                 },
-                it
+                completedTrades!!
             ) {
                 showTradeDialog = it.trade
-                showActiveTradesDialog = false
+                showCompletedTradesDialog = false
             }
         }
     }
@@ -261,7 +280,11 @@ fun InventoryScreen() {
             confirmButton = stringResource(R.string.drop),
             initialLocation = geo ?: LatLng(0.0, 0.0),
             initialZoom = 18f,
-            title = pluralStringResource(R.plurals.drop_x_items, showDropInventoryItem!!.second.toInt(), showDropInventoryItem!!.second),
+            title = pluralStringResource(
+                R.plurals.drop_x_items,
+                showDropInventoryItem!!.second.toInt(),
+                showDropInventoryItem!!.second
+            ),
             actions = {
                 IconButton(
                     {
@@ -348,6 +371,23 @@ fun InventoryScreen() {
                     scrollToTop()
                 },
             ) {
+                IconButton(
+                    {
+                        showMenu = true
+                    }
+                ) {
+                    Icon(Icons.Outlined.MoreVert, null)
+                    Dropdown(showMenu, { showMenu = false }) {
+                        DropdownMenuItem(
+                            {
+                                Text(stringResource(R.string.history))
+                            },
+                            onClick = {
+                                showCompletedTradesDialog = true
+                            }
+                        )
+                    }
+                }
                 IconButton(
                     {
                         showStartTradeDialogItem = null

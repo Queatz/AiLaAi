@@ -16,6 +16,11 @@ suspend fun Api.trades(
     onSuccess: SuccessBlock<List<TradeExtended>> = {}
 ) = get("trades", onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.completedTrades(
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<TradeExtended>> = {}
+) = get("trades/complete", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.trade(
     tradeId: String,
     onError: ErrorBlock = null,

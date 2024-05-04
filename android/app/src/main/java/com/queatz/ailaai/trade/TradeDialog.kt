@@ -97,6 +97,7 @@ fun TradeDialog(
     val scope = rememberCoroutineScope()
     var trade by rememberStateOf<TradeExtended?>(null)
     var isLoading by rememberStateOf(false)
+    var isCompletedOrCancelled by rememberStateOf(false)
     var showCancelDialog by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showMembers by rememberStateOf(false)
@@ -138,11 +139,9 @@ fun TradeDialog(
         } ?: emptyList()
     }
 
-    fun reload() {
-        scope.launch {
-            api.trade(tradeId) {
-                trade = it
-            }
+    suspend fun reload() {
+        api.trade(tradeId) {
+            trade = it
         }
     }
 
@@ -183,6 +182,7 @@ fun TradeDialog(
         trade = null
         isLoading = true
         reload()
+        isCompletedOrCancelled = trade?.inProgress != true
         isLoading = false
     }
 
@@ -197,6 +197,10 @@ fun TradeDialog(
     }
 
     LaunchedEffect(trade) {
+        if (isCompletedOrCancelled) {
+            return@LaunchedEffect
+        }
+
         if (trade?.trade?.completedAt != null) {
             onTradeCompleted()
             context.toast(R.string.trade_completed)
@@ -247,15 +251,17 @@ fun TradeDialog(
                                     showMembers = true
                                 }
                             )
-                            DropdownMenuItem(
-                                {
-                                    Text(stringResource(R.string.cancel))
-                                },
-                                onClick = {
-                                    showMenu = false
-                                    showCancelDialog = true
-                                }
-                            )
+                            if (trade?.inProgress == true) {
+                                DropdownMenuItem(
+                                    {
+                                        Text(stringResource(R.string.cancel))
+                                    },
+                                    onClick = {
+                                        showMenu = false
+                                        showCancelDialog = true
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -340,31 +346,33 @@ fun TradeDialog(
                 ) {
                     Text(stringResource(R.string.close))
                 }
-                if (confirmedByMe) {
-                    OutlinedButton(
-                        {
-                            confirmUnconfirm()
-                        },
-                        enabled = enableConfirm
-                    ) {
-                        Text(
-                            stringResource(
-                                R.string.unconfirm
+                if (trade?.inProgress == true) {
+                    if (confirmedByMe) {
+                        OutlinedButton(
+                            {
+                                confirmUnconfirm()
+                            },
+                            enabled = enableConfirm
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.unconfirm
+                                )
                             )
-                        )
-                    }
-                } else {
-                    OutlinedButton(
-                        {
-                            confirmUnconfirm()
-                        },
-                        enabled = enableConfirm
-                    ) {
-                        Text(
-                            stringResource(
-                                R.string.confirm
+                        }
+                    } else {
+                        OutlinedButton(
+                            {
+                                confirmUnconfirm()
+                            },
+                            enabled = enableConfirm
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.confirm
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -504,3 +512,5 @@ fun TradeDialog(
         )
     }
 }
+
+val TradeExtended.inProgress get() = trade?.cancelledAt == null && trade?.completedAt == null

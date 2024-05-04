@@ -53,6 +53,16 @@ fun Route.tradeRoutes() {
             }
         }
 
+        get("/trades/complete") {
+            respond {
+                db.completedTrades(
+                    me.id!!,
+                    offset = call.parameters["offset"]?.toInt() ?: 0,
+                    limit = call.parameters["limit"]?.toInt() ?: 20
+                )
+            }
+        }
+
         get("/trades/{id}") {
             respond {
                 db.trade(me.id!!, parameter("id")) ?: return@respond HttpStatusCode.NotFound

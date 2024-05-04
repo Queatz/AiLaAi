@@ -54,6 +54,27 @@ fun Db.activeTrades(
     )
 )
 
+fun Db.completedTrades(
+    person: String,
+    offset: Int = 0,
+    limit: Int = 20
+) = query(
+    TradeExtended::class,
+    """
+        for x in `${Trade::class.collection()}`
+            filter @person in x.${f(Trade::people)}
+                and x.${f(Trade::completedAt)} != null
+            sort x.${f(Trade::createdAt)} desc
+            limit @offset, @limit
+            return ${tradeExtended()}
+    """.trimIndent(),
+    mapOf(
+        "person" to person,
+        "offset" to offset,
+        "limit" to limit
+    )
+)
+
 private fun Db.tradeExtended(tradeVar: String = "x") =
     """
         {
