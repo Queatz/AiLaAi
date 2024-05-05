@@ -419,6 +419,7 @@ fun InventoryScreen() {
                                 Text(stringResource(R.string.history))
                             },
                             onClick = {
+                                showMenu = false
                                 showCompletedTradesDialog = true
                             }
                         )

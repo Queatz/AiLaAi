@@ -585,7 +585,7 @@
     <string name="divisible_description">Check if this item can be divided by a fraction.</string>
     <string name="has_lifespan">Has lifespan</string>
     <string name="describe_how_this_item_can_be_used">Describe how this item can be used.</string>
-    <string name="mint">Mint</string>
+    <string name="mint">Create</string>
     <string name="added_to_inventory">Items added to your inventory</string>
     <string name="quantity">Quantity</string>
     <string name="expires_x">Expires %1$s</string>
