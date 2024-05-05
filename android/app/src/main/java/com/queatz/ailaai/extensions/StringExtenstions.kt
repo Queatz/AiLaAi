@@ -2,6 +2,10 @@ package com.queatz.ailaai.extensions
 
 import android.content.*
 import android.graphics.Bitmap
+import android.graphics.Bitmap.createBitmap
+import android.graphics.BitmapShader
+import android.graphics.Paint
+import android.graphics.Shader
 import android.icu.text.DecimalFormatSymbols
 import android.net.Uri
 import android.os.Build
@@ -13,12 +17,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.ibm.icu.math.BigDecimal
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.drawable.toBitmapOrNull
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -104,6 +113,69 @@ fun String.asCacheFileUri(context: Context): Uri {
     path.mkdirs()
     val newFile = File(path, this)
     return FileProvider.getUriForFile(context, "app.ailaai.share.fileprovider", newFile)
+}
+
+suspend fun String.asOvalBitmap(context: Context, size: Int = 256): Bitmap? {
+    return withContext(Dispatchers.IO) {
+        try {
+            val result = context.imageLoader.execute(
+                ImageRequest.Builder(context)
+                    .data(this@asOvalBitmap)
+                    .allowHardware(false)
+                    .build()
+            )
+
+            val originalBitmap = result.drawable?.toBitmapOrNull()
+                ?: return@withContext null
+
+            val bitmapRatio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
+            val targetRatio = 1f // Square bitmap
+            val scaleFactor: Float
+            val x: Int
+            val y: Int
+
+            if (bitmapRatio > targetRatio) {
+                scaleFactor = size.toFloat() / originalBitmap.height.toFloat()
+            } else {
+                scaleFactor = size.toFloat() / originalBitmap.width.toFloat()
+            }
+
+            val scaledWidth = (originalBitmap.width * scaleFactor).toInt()
+            val scaledHeight = (originalBitmap.height * scaleFactor).toInt()
+
+            x = (scaledWidth / 2 - size / 2).coerceIn(0, size)
+            y = (scaledHeight / 2 - size / 2).coerceIn(0, size)
+
+            val scaledBitmap = Bitmap.createScaledBitmap(
+                originalBitmap,
+                scaledWidth,
+                scaledHeight,
+                true
+            )
+
+            val bitmap = createBitmap(size, size, Bitmap.Config.ARGB_8888).applyCanvas {
+                val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    shader = BitmapShader(
+                        createBitmap(
+                            scaledBitmap,
+                            x,
+                            y,
+                            size.coerceAtMost(scaledBitmap.width - x),
+                            size.coerceAtMost(scaledBitmap.height - y)
+                        ),
+                        Shader.TileMode.CLAMP,
+                        Shader.TileMode.CLAMP
+                    )
+                }
+                val radius = size / 2f
+                drawCircle(radius, radius, radius, paint)
+            }
+            return@withContext bitmap
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            null
+        }
+    }
 }
 
 suspend fun Bitmap.uri(context: Context): Uri? {

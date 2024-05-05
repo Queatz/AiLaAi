@@ -35,11 +35,7 @@ fun TradeItemDialog(
     onQuantity: (quantity: Double) -> Unit
 ) {
     var quantity by rememberStateOf(
-        if (inventoryItem.item?.divisible == true) {
-            initialQuantity.toString()
-        } else {
-            initialQuantity.formatItemQuantity()
-        }
+        initialQuantity.formatItemQuantity()
     )
     val focusRequester = remember {
         FocusRequester()

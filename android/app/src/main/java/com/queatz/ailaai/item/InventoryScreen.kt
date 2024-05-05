@@ -292,11 +292,7 @@ fun InventoryScreen() {
             title = pluralStringResource(
                 R.plurals.drop_x_items,
                 showDropInventoryItem!!.second.toInt(),
-                if (showDropInventoryItem!!.first.item?.divisible == true) {
-                    showDropInventoryItem!!.second.toString()
-                } else {
-                    showDropInventoryItem!!.second.formatItemQuantity()
-                }
+                showDropInventoryItem!!.second.formatItemQuantity()
             ),
             actions = {
                 IconButton(
@@ -337,11 +333,7 @@ fun InventoryScreen() {
             title = pluralStringResource(
                 R.plurals.discard_x_items,
                 showDropInventoryItem!!.second.toInt(),
-                if (showDropInventoryItem!!.first.item?.divisible == true) {
-                    showDropInventoryItem!!.second.toString()
-                } else {
-                    showDropInventoryItem!!.second.formatItemQuantity()
-                }
+                showDropInventoryItem!!.second.formatItemQuantity()
             ),
             text = null,
             dismissButton = stringResource(R.string.cancel),

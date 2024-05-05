@@ -40,13 +40,7 @@ fun InventoryItemDialog(
 ) {
     val expired = inventoryItem.inventoryItem!!.isExpired
     var quantity by rememberStateOf(
-        initialQuantity.coerceAtMost(inventoryItem.inventoryItem!!.quantity!!).let {
-            if (inventoryItem.item?.divisible == true) {
-                it.formatItemQuantity()
-            } else {
-                it.formatItemQuantity()
-            }
-        }
+        initialQuantity.coerceAtMost(inventoryItem.inventoryItem!!.quantity!!).formatItemQuantity()
     )
     val focusRequester = remember {
         FocusRequester()

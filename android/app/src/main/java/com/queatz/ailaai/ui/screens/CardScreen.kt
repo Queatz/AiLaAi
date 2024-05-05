@@ -1,6 +1,8 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
@@ -19,10 +21,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import app.ailaai.api.*
 import com.queatz.ailaai.AppNav
+import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadCardPhotoFromUri
 import com.queatz.ailaai.api.uploadCardVideoFromUri
@@ -210,6 +218,36 @@ fun CardScreen(cardId: String) {
             generatePhoto()
         } else {
             showRegeneratePhotoDialog = true
+        }
+    }
+
+    fun addToHomescreen() {
+        scope.launch {
+            val pinShortcutInfo = ShortcutInfoCompat.Builder(context, "page/$cardId")
+                .setIcon(
+                    card?.photo?.let { api.url(it) }?.asOvalBitmap(context)?.let { IconCompat.createWithBitmap(it) }
+                        ?: IconCompat.createWithResource(context, R.mipmap.ic_app)
+                )
+                .setShortLabel(card?.name ?: context.getString(R.string.app_name))
+                .setIntent(Intent(context, MainActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                    data = cardUrl(card!!.id!!).toUri()
+                })
+                .build()
+            val pinnedShortcutCallbackIntent =
+                ShortcutManagerCompat.createShortcutResultIntent(context, pinShortcutInfo)
+            val successCallback = PendingIntent.getBroadcast(
+                context,
+                0,
+                pinnedShortcutCallbackIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+            ShortcutManagerCompat.requestPinShortcut(
+                context,
+                pinShortcutInfo,
+                successCallback.intentSender
+            )
         }
     }
 
@@ -564,13 +602,20 @@ fun CardScreen(cardId: String) {
                         context.toast(textCopied)
                         showMenu = false
                     })
-
                     DropdownMenuItem({
                         Text(stringResource(R.string.view_source))
                     }, {
                         showMenu = false
                         showSourceDialog = true
                     })
+                    if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.add_to_homescreen))
+                        }, {
+                            showMenu = false
+                            addToHomescreen()
+                        })
+                    }
                     DropdownMenuItem({
                         Text(stringResource(R.string.report))
                     }, {
