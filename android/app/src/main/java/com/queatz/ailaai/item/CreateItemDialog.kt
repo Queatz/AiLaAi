@@ -27,6 +27,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.isNumericTextInput
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -226,7 +227,7 @@ fun CreateItemDialog(
                                     .weight(1f)
                             ) {
                                 val count = remember(lifespan) {
-                                    lifespan.takeIf { it.toDoubleOrNull() == 1.0 }?.let { 1 } ?: 2
+                                    lifespan.takeIf { it.toItemQuantity() == 1.0 }?.let { 1 } ?: 2
                                 }
                                 Text(
                                     when (lifespanDuration) {

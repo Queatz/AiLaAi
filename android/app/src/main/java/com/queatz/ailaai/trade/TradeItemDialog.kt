@@ -14,6 +14,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.extensions.isNumericTextInput
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.item.InventoryItemDetails
 import com.queatz.ailaai.item.upTo
 import com.queatz.ailaai.ui.components.DialogBase
@@ -86,7 +87,7 @@ fun TradeItemDialog(
                 }
             },
             actions = {
-                val quantity = quantity.toDoubleOrNull() ?: 0.0
+                val quantity = quantity.toItemQuantity() ?: 0.0
                 TextButton(
                     {
                         onDismissRequest()

@@ -97,7 +97,7 @@ fun InventoryItemDialog(
                 }
                 TextButton(
                     {
-                        quantity.toDoubleOrNull()?.let(onDrop)
+                        quantity.toItemQuantity()?.let(onDrop)
                     },
                     enabled = enabled
                 ) {
@@ -106,7 +106,7 @@ fun InventoryItemDialog(
                 if (inventoryItem.inventoryItem?.equipped == true) {
                     TextButton(
                         {
-                            quantity.toDoubleOrNull()?.let(onUnequip)
+                            quantity.toItemQuantity()?.let(onUnequip)
                         },
                         enabled = enabled
                     ) {
@@ -115,7 +115,7 @@ fun InventoryItemDialog(
                 } else {
                     TextButton(
                         {
-                            quantity.toDoubleOrNull()?.let(onEquip)
+                            quantity.toItemQuantity()?.let(onEquip)
                         },
                         enabled = enabled
                     ) {
@@ -124,7 +124,7 @@ fun InventoryItemDialog(
                 }
                 Button(
                     {
-                        quantity.toDoubleOrNull()?.let(onTrade)
+                        quantity.toItemQuantity()?.let(onTrade)
                     },
                     enabled = !expired && enabled
                 ) {

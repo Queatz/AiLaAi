@@ -149,7 +149,7 @@ fun MyItemsScreen() {
                 }
             }
         ) {
-            it.toDoubleOrNull()?.let {
+            it.toItemQuantity()?.let {
                 mint(showMintItem!!, it)
                 showMintItem = null
             } ?: context.showDidntWork()

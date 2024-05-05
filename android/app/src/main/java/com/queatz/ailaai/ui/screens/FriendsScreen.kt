@@ -506,12 +506,8 @@ fun FriendsScreen() {
                                         ) { person ->
                                             scope.launch {
                                                 api.groupsWith(listOf(me!!.id!!, person.id!!)) {
-                                                    if (it.size == 1) {
-                                                        nav.navigate(AppNav.Group(it.first().group!!.id!!))
-                                                    } else {
-                                                        showSharedGroupsDialogPerson = person
-                                                        showSharedGroupsDialog = it
-                                                    }
+                                                    showSharedGroupsDialogPerson = person
+                                                    showSharedGroupsDialog = it
                                                 }
                                             }
                                         }
