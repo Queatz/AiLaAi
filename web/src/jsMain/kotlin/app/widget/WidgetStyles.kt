@@ -29,7 +29,6 @@ object WidgetStyles : StyleSheet() {
     }
 
     val pageTree by style {
-        overflowX("hidden")
         width(100.percent)
 
         child(self, not(lastChild)) style {

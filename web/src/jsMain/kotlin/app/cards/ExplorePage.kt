@@ -57,13 +57,6 @@ fun ExplorePage(
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
-
-    var newCardTitle by remember(card) {
-        mutableStateOf("")
-    }
-
-    var publishNow by remember { mutableStateOf(false) }
-
     var cards by remember(card.id) {
         mutableStateOf(listOf<Card>())
     }
@@ -633,42 +626,8 @@ fun ExplorePage(
             saveConversation(it)
         }
 
-        Div({
-            style {
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Row)
-                flexShrink(0)
-                alignItems("center")
-            }
-        }) {
-            NavSearchInput(
-                newCardTitle,
-                { newCardTitle = it },
-                placeholder = appString { newCard },
-                autoFocus = false,
-                styles = {
-                    flexGrow(1)
-                }
-            ) {
-                if (newCardTitle.isNotBlank()) {
-                    newSubCard(card, it, publishNow)
-                    newCardTitle = ""
-                }
-            }
-
-            // todo: translate
-            IconButton(if (publishNow) "toggle_on" else "toggle_off", "Publish now", onClick = {
-                publishNow = !publishNow
-            }, styles = {
-                if (publishNow) {
-                    color(Styles.colors.primary)
-                } else {
-                    color(Styles.colors.secondary)
-                }
-
-                marginTop(.5.r)
-                marginRight(2.r)
-            })
+        NewCardInput { name, active ->
+            newSubCard(card, name, active)
         }
 
         if (isLoading) {

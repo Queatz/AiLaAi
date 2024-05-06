@@ -1,5 +1,6 @@
 package com.queatz.ailaai.item
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
+import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.trading
@@ -111,6 +113,13 @@ fun InventoryScreen() {
     var completedTrades by rememberStateOf<List<TradeExtended>?>(null)
     var geo by rememberStateOf<LatLng?>(null)
 
+    // Load location if possible
+    locationSelector(
+        geo,
+        { geo = it },
+        nav.context as Activity
+    )
+
     LaunchedEffect(inventory, search) {
         shownInventory = if (search.isBlank()) inventory else inventory.filter {
             it.item!!.name!!.contains(search, ignoreCase = true) ||
@@ -139,7 +148,10 @@ fun InventoryScreen() {
 
     fun drop(inventoryItem: InventoryItem, quantity: Double, geo: LatLng? = null) {
         scope.launch {
-            api.dropItem(inventoryItem.id!!, DropItemBody(quantity, geo?.toList()))
+            api.dropItem(
+                inventoryItem.id!!,
+                DropItemBody(quantity, geo?.toList())
+            )
             reload()
             if (geo == null) {
                 context.toast(R.string.items_discarded)
@@ -254,7 +266,6 @@ fun InventoryScreen() {
                 completedTrades!!
             ) {
                 showTradeDialog = it.trade
-                showCompletedTradesDialog = false
             }
         }
     }

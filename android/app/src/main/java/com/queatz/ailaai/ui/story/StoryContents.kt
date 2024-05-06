@@ -750,15 +750,15 @@ fun StoryContents(
                                         }
                                     }
 
-                                    data?.url?.let { url ->
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .aspectRatio(1.5f)
-                                                .clip(MaterialTheme.shapes.medium)
-                                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .aspectRatio(1.5f)
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
 
-                                        ) {
+                                    ) {
+                                        data?.url?.let { url ->
                                             val disallowIntercept = remember {
                                                 RequestDisallowInterceptTouchEvent()
                                             }

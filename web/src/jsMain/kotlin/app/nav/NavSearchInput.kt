@@ -17,6 +17,7 @@ fun NavSearchInput(
     placeholder: String = appString { search },
     autoFocus: Boolean = true,
     selectAll: Boolean = false,
+    defaultMargins: Boolean = true,
     onDismissRequest: () -> Unit = {},
     styles: StyleScope.() -> Unit = {},
     onSubmit: (String) -> Unit = {}
@@ -24,7 +25,7 @@ fun NavSearchInput(
     TextInput(value) {
         classes(Styles.textarea)
         style {
-            margin(.5.r, 1.r, 0.r, 1.r)
+            if (defaultMargins) margin(.5.r, 1.r, 0.r, 1.r)
             styles()
         }
         onKeyDown {

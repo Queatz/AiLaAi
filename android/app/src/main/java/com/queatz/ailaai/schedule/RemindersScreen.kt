@@ -2,6 +2,7 @@ package com.queatz.ailaai.schedule
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,7 @@ import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
+import java.util.Arrays
 
 @Composable
 fun RemindersScreen() {
@@ -53,6 +55,8 @@ fun RemindersScreen() {
             Loading()
         } else {
             LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(1.pad),
+                contentPadding = PaddingValues(bottom = 1.pad),
                 modifier = Modifier.fillMaxSize()
                     .padding(horizontal = 1.pad)
             ) {

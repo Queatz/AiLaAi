@@ -75,7 +75,7 @@ fun LazyListScope.Period(
                         MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
                     )
             ) {
-                PeriodDateTime(view, event.date)
+                PeriodDateTime(view, event.date, event.occurrence?.done == true)
                 PeriodEvent(
                     view,
                     event,

@@ -60,12 +60,10 @@ import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.LocationScaffold
-import com.queatz.ailaai.ui.components.MainTab
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.swipeMainTabs
-import com.queatz.ailaai.ui.screens.OutlinedText
 import com.queatz.ailaai.ui.scripts.PreviewScriptAction
 import com.queatz.ailaai.ui.scripts.ScriptsDialog
 import com.queatz.ailaai.ui.story.editor.StoryActions
@@ -100,7 +98,6 @@ fun StoriesScreen() {
     }
     var isLoading by rememberStateOf(stories.isEmpty())
     val nav = nav
-    val tabs = listOf(MainTab.Friends, MainTab.Local)
     var myScripts by rememberStateOf(emptyList<Script>())
     var showScriptsDialog by rememberStateOf(false)
     var showShareAThought by rememberStateOf(true)
@@ -191,7 +188,7 @@ fun StoriesScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .swipeMainTabs {
-                        when (tabs.swipe(Unit, it)) {
+                        when (emptyList<Unit>().swipe(Unit, it)) {
                             is SwipeResult.Previous -> {
                                 nav.navigate(AppNav.Inventory)
                             }

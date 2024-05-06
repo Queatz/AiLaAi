@@ -34,7 +34,7 @@ private val MainTab.stringResource
 fun Modifier.swipeMainTabs(onSwipe: (Int) -> Unit): Modifier = composed {
     val slop = LocalViewConfiguration.current.touchSlop
     this.draggable(
-        state = rememberDraggableState {  },
+        state = rememberDraggableState { },
         orientation = Orientation.Horizontal,
         onDragStopped = {
             if (abs(it) > slop) {

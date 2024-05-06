@@ -95,9 +95,7 @@ fun ImpactEffortTable(widgetId: String) {
 
     fun save(data: ImpactEffortTableData) {
         scope.launch {
-            api.updateWidget(widgetId, Widget(data = json.encodeToString(data))) {
-
-            }
+            api.updateWidget(widgetId, Widget(data = json.encodeToString(data))) {}
         }
     }
 
