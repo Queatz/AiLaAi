@@ -52,6 +52,13 @@ class GroupAttachment(
 }
 
 @Serializable
+class TradeAttachment(
+    var trade: String? = null,
+) : MessageAttachment() {
+    override val type = "trade"
+}
+
+@Serializable
 class StickerAttachment(
     var photo: String? = null,
     var sticker: String? = null,

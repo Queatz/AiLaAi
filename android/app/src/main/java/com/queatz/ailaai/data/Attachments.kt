@@ -23,6 +23,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
             "group" -> json.decodeFromJsonElement<GroupAttachment>(jsonElement)
             "sticker" -> json.decodeFromJsonElement<StickerAttachment>(jsonElement)
             "url" -> json.decodeFromJsonElement<UrlAttachment>(jsonElement)
+            "trade" -> json.decodeFromJsonElement<TradeAttachment>(jsonElement)
             else -> null
         }
     } catch (e: Exception) {

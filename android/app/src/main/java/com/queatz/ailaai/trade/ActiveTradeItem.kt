@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
+import com.queatz.ailaai.extensions.formatItemQuantity
+import com.queatz.ailaai.extensions.items
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -24,13 +26,17 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.TradeExtended
 
 @Composable
-fun ActiveTradeItem(trade: TradeExtended, onClick: () -> Unit) {
+fun ActiveTradeItem(
+    trade: TradeExtended,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     val me = me
 
      OutlinedCard(
          onClick = onClick,
          shape = MaterialTheme.shapes.large,
-         modifier = Modifier
+         modifier = modifier
              .fillMaxWidth()
      ) {
          Row(
@@ -56,7 +62,11 @@ fun ActiveTradeItem(trade: TradeExtended, onClick: () -> Unit) {
                  Text(
                      bulletedString(
                          trade.trade!!.createdAt!!.timeAgo(),
-                         pluralStringResource(R.plurals.x_items, trade.inventoryItems!!.size, trade.inventoryItems!!.size)
+                         trade.trade!!.note,
+                         trade.items.joinToString {
+                             "${it.inventoryItem.item!!.name} x${it.quantity.formatItemQuantity()}"
+                         }
+//                         pluralStringResource(R.plurals.x_items, trade.inventoryItems!!.size, trade.inventoryItems!!.size)
                      )
                  )
              }

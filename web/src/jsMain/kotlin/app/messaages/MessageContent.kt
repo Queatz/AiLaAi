@@ -322,6 +322,10 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
                 is UrlAttachment -> {
                     UrlPreview(attachment)
                 }
+
+                is TradeAttachment -> {
+                    // todo
+                }
             }
         }
 

@@ -31,6 +31,7 @@ fun TradeItemDialog(
     isMine: Boolean,
     isAdd: Boolean = false,
     enabled: Boolean = true,
+    active: Boolean = true,
     confirmButton: String = stringResource(R.string.add),
     onQuantity: (quantity: Double) -> Unit
 ) {
@@ -53,7 +54,7 @@ fun TradeItemDialog(
         DialogLayout(
             content = {
                 InventoryItemDetails(inventoryItem)
-                if (isMine) {
+                if (isMine && active) {
                     OutlinedTextField(
                         value = quantity,
                         shape = MaterialTheme.shapes.large,
@@ -91,29 +92,31 @@ fun TradeItemDialog(
                 ) {
                     Text(stringResource(R.string.close))
                 }
-                if (isAdd) {
-                    Button(
-                        {
-                            onQuantity(quantity)
-                        },
-                        enabled = enabled && quantity > 0.0
-                    ) {
-                        Text(confirmButton)
-                    }
-                } else if (isMine) {
-                    Button(
-                        {
-                            onQuantity(quantity)
-                        },
-                        enabled = enabled
-                    ) {
-                        Text(
-                            if (quantity > 0.0) {
-                                stringResource(R.string.update)
-                            } else {
-                                stringResource(R.string.remove)
-                            }
-                        )
+                if (active) {
+                    if (isAdd) {
+                        Button(
+                            {
+                                onQuantity(quantity)
+                            },
+                            enabled = enabled && quantity > 0.0
+                        ) {
+                            Text(confirmButton)
+                        }
+                    } else if (isMine) {
+                        Button(
+                            {
+                                onQuantity(quantity)
+                            },
+                            enabled = enabled
+                        ) {
+                            Text(
+                                if (quantity > 0.0) {
+                                    stringResource(R.string.update)
+                                } else {
+                                    stringResource(R.string.remove)
+                                }
+                            )
+                        }
                     }
                 }
             }

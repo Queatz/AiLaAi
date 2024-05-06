@@ -9,12 +9,17 @@ import com.queatz.db.CardAttachment
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
 import com.queatz.db.InventoryItem
+import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.PhotosAttachment
 import com.queatz.db.StickerAttachment
 import com.queatz.db.StoryAttachment
+import com.queatz.db.Trade
+import com.queatz.db.TradeAttachment
+import com.queatz.db.TradeExtended
+import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -86,6 +91,12 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     is StickerAttachment -> {
         context.resources.getString(R.string.sent_a_sticker)
     }
+    is UrlAttachment -> {
+        context.resources.getString(R.string.sent_a_link)
+    }
+    is TradeAttachment -> {
+        context.resources.getString(R.string.sent_a_trade)
+    }
     else -> null
 }
 
@@ -98,4 +109,17 @@ fun String.toItemQuantity() = try {
     itemFormat.parse(this).toDouble()
 } catch (_: ParseException) {
     null
+}
+
+data class TradeItemQuantity(
+    val inventoryItem: InventoryItemExtended,
+    val quantity: Double
+)
+
+val TradeExtended.items: List<TradeItemQuantity> get() = trade!!.members!!.flatMap { it.items!! }.map { tradeItem ->
+    val inventoryItem = inventoryItems!!.first {
+        it.inventoryItem!!.id == tradeItem.inventoryItem!!
+    }
+
+    TradeItemQuantity(inventoryItem, tradeItem.quantity!!)
 }

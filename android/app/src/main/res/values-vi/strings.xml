@@ -147,6 +147,10 @@
     <string name="send_group_to_group">Giử nhóm đến %1$s</string>
     <string name="send_group_to_groups">Giử nhóm đến %1$s và %2$s</string>
     <string name="send_group_to_x_groups">Giử nhóm đến %1$s nhóm</string>
+    <string name="send_trade">Gửi việc đổi đồ</string>
+    <string name="send_trade_to_group">Giử việc đổi đồ đến %1$s</string>
+    <string name="send_trade_to_groups">Giử việc đổi đồ đến %1$s và %2$s</string>
+    <string name="send_trade_to_x_groups">Giử việc đổi đồ đến %1$s nhóm</string>
     <string name="sent">Đã gửi!</string>
     <string name="app_feedback">❔ Gửi phản hồi</string>
     <string name="sent_a_card">đã gửi trang</string>
@@ -289,6 +293,8 @@
     <string name="reorder">Đổi thứ tự</string>
     <string name="sent_a_story">Đã gửi bài viết</string>
     <string name="sent_a_group">Đã gửi nhóm</string>
+    <string name="sent_a_link">Đã gửi liên kết</string>
+    <string name="sent_a_trade">Đã gửi việc đổi đồ</string>
     <string name="save_changes">Lưu những thay đổi?</string>
     <string name="all_changes_will_be_lost">Những thay đổi sẽ bị mất</string>
     <string name="remove_all">Bỏ tất cả</string>

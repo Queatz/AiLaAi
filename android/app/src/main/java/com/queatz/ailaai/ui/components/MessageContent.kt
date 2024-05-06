@@ -41,6 +41,8 @@ import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
+import com.queatz.ailaai.trade.ActiveTradeItem
+import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
@@ -54,6 +56,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
+import trade
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -81,12 +84,14 @@ fun ColumnScope.MessageContent(
     var showEditMessageDialog by rememberStateOf(false)
     var showSelectTextDialog by rememberStateOf<String?>(null)
     var attachedCardId by remember { mutableStateOf<String?>(null) }
+    var attachedTradeId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
     var attachedGroupId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
     var attachedVideos by remember { mutableStateOf<List<String>?>(null) }
     var attachedSticker by remember { mutableStateOf<Sticker?>(null) }
+    var attachedTrade by remember { mutableStateOf<TradeExtended?>(null) }
     var attachedCard by remember { mutableStateOf<Card?>(null) }
     var attachedReply by remember { mutableStateOf<Message?>(null) }
     var attachedStory by remember { mutableStateOf<Story?>(null) }
@@ -140,6 +145,10 @@ fun ColumnScope.MessageContent(
 
                 is GroupAttachment -> {
                     attachedGroupId = attachment.group
+                }
+
+                is TradeAttachment -> {
+                    attachedTradeId = attachment.trade
                 }
 
                 is StickerAttachment -> {
@@ -334,6 +343,14 @@ fun ColumnScope.MessageContent(
             api.card(cardId, onError = {
                 // todo show failed to load
             }) { attachedCard = it }
+        }
+    }
+
+    LaunchedEffect(attachedTradeId) {
+        attachedTradeId?.let { tradeId ->
+            api.trade(tradeId, onError = {
+                // todo show failed to load
+            }) { attachedTrade = it }
         }
     }
 
@@ -713,6 +730,44 @@ fun ColumnScope.MessageContent(
             urls.forEach {
                 UrlPreview(it)
             }
+        }
+    }
+
+    attachedTrade?.let { trade ->
+        var showTradeDialog by rememberStateOf(false)
+
+        if (showTradeDialog) {
+            TradeDialog(
+                onDismissRequest = {
+                    showTradeDialog = false
+                },
+                tradeId = trade.trade!!.id!!,
+                onTradeCancelled = {
+                    onUpdated()
+                },
+                onTradeCompleted = {
+                    onUpdated()
+                }
+            )
+        }
+
+        ActiveTradeItem(
+            trade,
+            modifier = Modifier
+                .align(if (isMe) Alignment.End else Alignment.Start)
+                .padding(1.pad)
+                .let {
+                    if (isReply) {
+                        it
+                    } else {
+                        when (isMe) {
+                            true -> it.padding(start = 8.pad)
+                            false -> it.padding(end = 8.pad)
+                        }
+                    }
+                }
+        ) {
+            showTradeDialog = true
         }
     }
 

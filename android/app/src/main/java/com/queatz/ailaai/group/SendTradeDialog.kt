@@ -7,14 +7,14 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
-import com.queatz.db.GroupAttachment
 import com.queatz.db.Message
+import com.queatz.db.TradeAttachment
 import kotlinx.serialization.encodeToString
 
 @Composable
-fun SendGroupDialog(
+fun SendTradeDialog(
     onDismissRequest: () -> Unit,
-    groupId: String
+    tradeId: String
 ) {
     val someone = stringResource(R.string.someone)
     val emptyGroup = stringResource(R.string.empty_group_name)
@@ -22,13 +22,13 @@ fun SendGroupDialog(
 
     SendMessageDialog(
         onDismissRequest,
-        title = stringResource(R.string.send_group),
+        title = stringResource(R.string.send_trade),
         confirmFormatter = defaultConfirmFormatter(
-            R.string.send_group,
-            R.string.send_group_to_group,
-            R.string.send_group_to_groups,
-            R.string.send_group_to_x_groups
+            R.string.send_trade,
+            R.string.send_trade_to_group,
+            R.string.send_trade_to_groups,
+            R.string.send_trade_to_x_groups
         ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
-        Message(attachment = json.encodeToString(GroupAttachment(groupId)))
+        Message(attachment = json.encodeToString(TradeAttachment(tradeId)))
     )
 }

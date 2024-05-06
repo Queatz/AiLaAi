@@ -41,6 +41,7 @@ import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.group.SendTradeDialog
 import com.queatz.ailaai.item.InventoryItemLayout
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -97,8 +98,9 @@ data class TradeMemberState(
 fun TradeDialog(
     onDismissRequest: () -> Unit,
     tradeId: String,
+    onTradeUpdated: () -> Unit = {},
     onTradeCancelled: () -> Unit = {},
-    onTradeCompleted: () -> Unit = {}
+    onTradeCompleted: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var trade by rememberStateOf<TradeExtended?>(null)
@@ -108,6 +110,7 @@ fun TradeDialog(
     var showMenu by rememberStateOf(false)
     var showMembers by rememberStateOf(false)
     var editNote by rememberStateOf(false)
+    var showSendDialog by rememberStateOf(false)
     var editItemDialog by rememberStateOf<TradeMemberItem?>(null)
     var addItemDialog by rememberStateOf<TradeMemberItem?>(null)
     var addInventoryItemDialog by rememberStateOf<Person?>(null)
@@ -163,6 +166,7 @@ fun TradeDialog(
     suspend fun saveNote(note: String) {
         api.updateTrade(tradeId, Trade(note = note)) {
             trade = it
+            onTradeUpdated()
         }
     }
 
@@ -171,6 +175,7 @@ fun TradeDialog(
             scope.launch {
                 api.unconfirmTrade(tradeId) {
                     trade = it
+                    onTradeUpdated()
                 }
             }
         } else {
@@ -186,6 +191,7 @@ fun TradeDialog(
                     }
                 ) {
                     trade = it
+                    onTradeUpdated()
                 }
             }
         }
@@ -277,6 +283,15 @@ fun TradeDialog(
                                 onClick = {
                                     showMenu = false
                                     showMembers = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                {
+                                    Text(stringResource(R.string.send))
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    showSendDialog = true
                                 }
                             )
                             if (trade?.inProgress == true) {
@@ -478,6 +493,7 @@ fun TradeDialog(
             maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isMine = item.from.id == me.id,
             enabled = !anyConfirmed,
+            active = trade?.inProgress ?: true,
             onQuantity = { newQuantity ->
                 val items = myTradeMember!!.items!!.mapNotNull {
                     if (it.inventoryItem == editItemDialog!!.inventoryItem.inventoryItem!!.id!! && it.to == editItemDialog!!.to.id!!) {
@@ -573,6 +589,10 @@ fun TradeDialog(
                 }
             }
         )
+    }
+
+    if (showSendDialog) {
+        SendTradeDialog({ showSendDialog = false }, tradeId)
     }
 }
 
