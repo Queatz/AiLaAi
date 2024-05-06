@@ -698,4 +698,6 @@
     <string name="x_expired">%1$s hết hạn</string>
     <string name="note">Ghi chú</string>
     <string name="add_to_homescreen">Add to homescreen</string>
+    <string name="completed">Hoàn thành</string>
+    <string name="cancelled">Bị hủy</string>
 </resources>

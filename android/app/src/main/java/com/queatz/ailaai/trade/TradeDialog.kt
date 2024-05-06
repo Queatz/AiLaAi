@@ -1,6 +1,7 @@
 package com.queatz.ailaai.trade
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,6 +41,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.status
+import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.group.SendTradeDialog
 import com.queatz.ailaai.item.InventoryItemLayout
@@ -122,6 +124,7 @@ fun TradeDialog(
     val confirmedByMe = trade?.trade?.members?.any { it.person == me.id!! && it.confirmed == true } == true
     val myTradeMember = trade?.trade?.members?.first { it.person == me.id }
     val enableConfirm = confirmedByMe || trade?.trade?.members?.any { it.items!!.isNotEmpty() } == true
+    val mutable = !anyConfirmed && !isCompletedOrCancelled
 
     // todo reload on trade updates, cancelled, completed pushes
 
@@ -243,20 +246,40 @@ fun TradeDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    Text(
-                        stringResource(R.string.trade),
-                        style = MaterialTheme.typography.titleLarge,
+                    Column(
                         modifier = Modifier
                             .padding(bottom = 1.pad)
                             .weight(1f)
-                    )
+                    ) {
+                        Text(
+                            stringResource(R.string.trade),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        when {
+                            trade?.trade?.completedAt != null -> {
+                                Text(
+                                    stringResource(R.string.completed) + " ${trade!!.trade!!.completedAt!!.timeAgo()}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                            trade?.trade?.cancelledAt != null -> {
+                                Text(
+                                    stringResource(R.string.cancelled) + " ${trade!!.trade!!.cancelledAt!!.timeAgo()}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                            else -> Unit
+                        }
+                    }
 
                     if (!isCompletedOrCancelled) {
                         IconButton(
                             {
                                 editNote = true
                             },
-                            enabled = !anyConfirmed
+                            enabled = mutable
                         ) {
                             Icon(
                                 Icons.Outlined.Edit,
@@ -326,7 +349,7 @@ fun TradeDialog(
                                 item(span = { GridItemSpan(maxLineSpan) }) {
                                     OutlinedCard(
                                         onClick = {
-                                            if (!anyConfirmed && !isCompletedOrCancelled) {
+                                            if (mutable) {
                                                 editNote = true
                                             }
                                         },
@@ -371,7 +394,7 @@ fun TradeDialog(
                                     }
                                 }
 
-                                if ((member.person.id == me.id || anyConfirmed) && member.items.isEmpty()) {
+                                if ((member.person.id == me.id || !mutable) && member.items.isEmpty()) {
                                     item(span = { GridItemSpan(maxLineSpan) }) {
                                         OutlinedCard(
                                             shape = MaterialTheme.shapes.large,
@@ -388,7 +411,7 @@ fun TradeDialog(
                                         }
                                     }
 
-                                    if (member.person.id != me.id && !anyConfirmed) {
+                                    if (member.person.id != me.id && mutable) {
                                         item {
                                             AddInventoryItemButton {
                                                 addInventoryItemDialog = member.person
@@ -492,7 +515,7 @@ fun TradeDialog(
             initialQuantity = item.quantity,
             maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isMine = item.from.id == me.id,
-            enabled = !anyConfirmed,
+            enabled = mutable,
             active = trade?.inProgress ?: true,
             onQuantity = { newQuantity ->
                 val items = myTradeMember!!.items!!.mapNotNull {
@@ -526,7 +549,7 @@ fun TradeDialog(
             maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isAdd = true,
             isMine = item.from.id == me.id,
-            enabled = !anyConfirmed,
+            enabled = mutable,
             onQuantity = { newQuantity ->
                 if (newQuantity > 0.0) {
                     val items = (myTradeMember!!.items!! + TradeItem(

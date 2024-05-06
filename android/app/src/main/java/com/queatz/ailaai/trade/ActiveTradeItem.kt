@@ -66,9 +66,17 @@ fun ActiveTradeItem(
                      bulletedString(
                          trade.trade!!.createdAt!!.timeAgo(),
                          trade.trade!!.note?.notBlank,
-                         trade.items.ifNotEmpty?.joinToString {
-                             "${it.inventoryItem.item!!.name} x${it.quantity.formatItemQuantity()}"
-                         } ?: pluralStringResource(R.plurals.x_items, trade.inventoryItems!!.size, trade.inventoryItems!!.size)
+                         if (trade.trade!!.cancelledAt != null) {
+                             stringResource(R.string.cancelled)
+                         } else {
+                             trade.items.ifNotEmpty?.joinToString {
+                                 "${it.inventoryItem.item!!.name} x${it.quantity.formatItemQuantity()}"
+                             } ?: pluralStringResource(
+                                 R.plurals.x_items,
+                                 trade.inventoryItems!!.size,
+                                 trade.inventoryItems!!.size
+                             )
+                         }
                      ),
                      maxLines = 2,
                      overflow = TextOverflow.Ellipsis
