@@ -32,7 +32,7 @@
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
-                android:windowSoftInputMode="adjustResize"
+                android:windowSoftInputMode="adjustNothing"
                 android:configChanges="orientation|screenSize"
                 android:theme="@style/Theme.AiLaAi.NoActionBar">
             <intent-filter>
@@ -74,7 +74,7 @@
         <activity
                 android:name=".ShareActivity"
                 android:exported="true"
-                android:windowSoftInputMode="adjustResize"
+                android:windowSoftInputMode="adjustNothing"
                 android:configChanges="orientation|screenSize"
                 android:theme="@style/Theme.AiLaAi.Translucent">
             <intent-filter>
@@ -96,7 +96,7 @@
                 android:name=".CallActivity"
                 android:exported="true"
                 android:supportsPictureInPicture="true"
-                android:windowSoftInputMode="adjustResize"
+                android:windowSoftInputMode="adjustNothing"
                 android:launchMode="singleInstance"
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
                 android:theme="@style/Theme.AiLaAi.NoActionBar">

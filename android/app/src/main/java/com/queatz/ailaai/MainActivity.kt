@@ -1,29 +1,85 @@
 package com.queatz.ailaai
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Rocket
+import androidx.compose.material.icons.outlined.RocketLaunch
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.PermanentDrawerSheet
+import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,7 +100,14 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.invoke
+import com.queatz.ailaai.extensions.isInstalledFromPlayStore
+import com.queatz.ailaai.extensions.launchUrl
+import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.LifecycleEffect
 import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
@@ -52,19 +115,44 @@ import com.queatz.ailaai.item.InventoryScreen
 import com.queatz.ailaai.item.MyItemsScreen
 import com.queatz.ailaai.schedule.ReminderScreen
 import com.queatz.ailaai.schedule.RemindersScreen
-import com.queatz.ailaai.services.*
+import com.queatz.ailaai.services.calls
+import com.queatz.ailaai.services.joins
+import com.queatz.ailaai.services.mePresence
+import com.queatz.ailaai.services.messages
+import com.queatz.ailaai.services.push
+import com.queatz.ailaai.services.saves
+import com.queatz.ailaai.services.say
+import com.queatz.ailaai.services.trading
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
-import com.queatz.ailaai.ui.screens.*
+import com.queatz.ailaai.ui.screens.CardScreen
+import com.queatz.ailaai.ui.screens.ExploreScreen
+import com.queatz.ailaai.ui.screens.FriendsScreen
+import com.queatz.ailaai.ui.screens.GroupScreen
+import com.queatz.ailaai.ui.screens.InitialScreen
+import com.queatz.ailaai.ui.screens.LinkDeviceScreen
+import com.queatz.ailaai.ui.screens.MeScreen
+import com.queatz.ailaai.ui.screens.ProfileScreen
+import com.queatz.ailaai.ui.screens.ScheduleScreen
+import com.queatz.ailaai.ui.screens.SettingsScreen
+import com.queatz.ailaai.ui.screens.WelcomeDialog
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
 import com.queatz.ailaai.ui.stickers.StickerPackScreen
 import com.queatz.ailaai.ui.stickers.StickerPacksScreen
-import com.queatz.ailaai.ui.story.*
+import com.queatz.ailaai.ui.story.MyStoriesScreen
+import com.queatz.ailaai.ui.story.StoriesScreen
+import com.queatz.ailaai.ui.story.StoryCreatorScreen
+import com.queatz.ailaai.ui.story.StoryScreen
+import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.AiLaAiTheme
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
@@ -124,8 +212,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+
+        super.onCreate(savedInstanceState)
 
         setContent {
             AiLaAiTheme {
@@ -348,6 +442,34 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         )
+                    }
+
+                    // Navigation bar background color
+                    WindowInsets.navigationBars.getBottom(LocalDensity.current).let { height ->
+                        if (height > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation))
+                                        .background(
+                                            verticalGradient(
+                                                listOf(
+                                                    MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation),
+                                                    MaterialTheme.colorScheme.tertiaryContainer
+                                                )
+                                            )
+                                        )
+                                        .height(height.px)
+                                        .fillMaxWidth()
+                                        .align(Alignment.BottomCenter)
+                                ) {
+
+                                }
+                            }
+                        }
                     }
 
                     Scaffold(
@@ -734,7 +856,7 @@ class MainActivity : AppCompatActivity() {
 @Composable
 private fun Modifier.safePadding(enabled: Boolean) = then(
     if (!enabled) Modifier else Modifier.windowInsetsPadding(
-        WindowInsets.safeContent.only(WindowInsetsSides.Bottom)
+        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
     )
 )
 

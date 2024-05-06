@@ -360,7 +360,7 @@ fun PublishStoryDialog(
         },
         modifier = Modifier
             .padding(2.pad)
-            .imePadding()
+            .imePadding() // todo Use DialogBase
     )
 
     if (showLocationDialog) {
