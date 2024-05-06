@@ -116,10 +116,10 @@ data class TradeItemQuantity(
     val quantity: Double
 )
 
-val TradeExtended.items: List<TradeItemQuantity> get() = trade!!.members!!.flatMap { it.items!! }.map { tradeItem ->
-    val inventoryItem = inventoryItems!!.first {
-        it.inventoryItem!!.id == tradeItem.inventoryItem!!
-    }
+val TradeExtended.items: List<TradeItemQuantity> get() = trade!!.members!!.flatMap { it.items ?: emptyList() }.mapNotNull { tradeItem ->
+    val inventoryItem = inventoryItems?.firstOrNull {
+        it.inventoryItem!!.id == tradeItem.inventoryItem
+    } ?: return@mapNotNull null
 
     TradeItemQuantity(inventoryItem, tradeItem.quantity!!)
 }

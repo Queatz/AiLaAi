@@ -180,6 +180,10 @@ fun GroupScreen(groupId: String) {
                 }
             ) {
                 showTradeDialog = it
+                api.sendMessage(
+                    groupId,
+                    Message(attachment = json.encodeToString(TradeAttachment(it.id!!)))
+                )
             }
         }
     }

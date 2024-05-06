@@ -13,12 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.formatItemQuantity
+import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.items
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -62,12 +65,13 @@ fun ActiveTradeItem(
                  Text(
                      bulletedString(
                          trade.trade!!.createdAt!!.timeAgo(),
-                         trade.trade!!.note,
-                         trade.items.joinToString {
+                         trade.trade!!.note?.notBlank,
+                         trade.items.ifNotEmpty?.joinToString {
                              "${it.inventoryItem.item!!.name} x${it.quantity.formatItemQuantity()}"
-                         }
-//                         pluralStringResource(R.plurals.x_items, trade.inventoryItems!!.size, trade.inventoryItems!!.size)
-                     )
+                         } ?: pluralStringResource(R.plurals.x_items, trade.inventoryItems!!.size, trade.inventoryItems!!.size)
+                     ),
+                     maxLines = 2,
+                     overflow = TextOverflow.Ellipsis
                  )
              }
              if (trade.trade?.members?.any { it.person == me?.id && it.confirmed == true } == true) {

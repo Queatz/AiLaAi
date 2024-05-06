@@ -346,12 +346,16 @@ fun ColumnScope.MessageContent(
         }
     }
 
-    LaunchedEffect(attachedTradeId) {
+    suspend fun reloadTrade() {
         attachedTradeId?.let { tradeId ->
             api.trade(tradeId, onError = {
                 // todo show failed to load
             }) { attachedTrade = it }
         }
+    }
+
+    LaunchedEffect(attachedTradeId) {
+        reloadTrade()
     }
 
     LaunchedEffect(attachedReplyId) {
@@ -742,11 +746,20 @@ fun ColumnScope.MessageContent(
                     showTradeDialog = false
                 },
                 tradeId = trade.trade!!.id!!,
+                onTradeUpdated = {
+                    scope.launch {
+                        reloadTrade()
+                    }
+                },
                 onTradeCancelled = {
-                    onUpdated()
+                    scope.launch {
+                        reloadTrade()
+                    }
                 },
                 onTradeCompleted = {
-                    onUpdated()
+                    scope.launch {
+                        reloadTrade()
+                    }
                 }
             )
         }
