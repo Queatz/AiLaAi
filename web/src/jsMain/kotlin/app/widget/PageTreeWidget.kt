@@ -233,6 +233,9 @@ fun PageTreeWidget(widgetId: String) {
                                             )
                                         }
                                     }
+                                } else {
+                                    // todo: translate
+                                    title("Sign in to vote")
                                 }
                             }) {
                                 // todo: translate
