@@ -706,7 +706,7 @@
     <string name="completed">Hoàn thành</string>
     <string name="cancelled">Bị hủy</string>
     <string name="reminder_created">Đã tạo lời nhắc</string>
-    <string name="in_a_week">Sau một tuần</string>
-    <string name="in_a_month">Sau một tháng</string>
-    <string name="in_a_year">Sau một năm</string>
+    <string name="in_a_week">Một tuần sau</string>
+    <string name="in_a_month">Một tháng sau</string>
+    <string name="in_a_year">Một năm sau</string>
 </resources>

@@ -62,6 +62,7 @@ import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.schedule.ScheduleReminderDialog
 import com.queatz.ailaai.services.*
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.*
@@ -75,9 +76,12 @@ import createTrade
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -129,6 +133,7 @@ fun GroupScreen(groupId: String) {
     var showCards by rememberStateOf(false)
     var showTradeWithDialog by rememberStateOf(false)
     var showNewReminderWithDialog by rememberStateOf(false)
+    var showScheduleNewReminderDialog by rememberStateOf<List<Person>?>(null)
     var showTradeDialog by rememberStateOf<Trade?>(null)
     var showSendDialog by rememberStateOf(false)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
@@ -189,16 +194,21 @@ fun GroupScreen(groupId: String) {
         }
     }
 
-    fun newReminder(people: List<String>) {
+    fun newReminder(people: List<String>, reminder: Reminder) {
         scope.launch {
-//            api.newReminder(
-//                Reminder().apply {
-//                    this.person = me!!.id!!
-//                    this.people = people
-//                }
-//            ) {
-//                context.toast(R.string.reminder_created)
-//            }
+            api.newReminder(
+                Reminder(
+                    people = people,
+                    title = reminder.title?.trim(),
+                    start = reminder.start ?: now().startOfMinute(),
+                    end = reminder.end,
+                    schedule = reminder.schedule,
+                    timezone = TimeZone.currentSystemDefault().id,
+                    utcOffset = TimeZone.currentSystemDefault().offsetAt(now()).totalSeconds / (60.0 * 60.0),
+                )
+            ) {
+                context.toast(R.string.reminder_created)
+            }
         }
     }
 
@@ -513,7 +523,7 @@ fun GroupScreen(groupId: String) {
                         })
                         if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
                             DropdownMenuItem({
-                                Text(stringResource(R.string.new_reminder))
+                                Text(stringResource(R.string.create_reminder))
                             }, {
                                 showMenu = false
                                 showNewReminderWithDialog = true
@@ -1341,9 +1351,25 @@ fun GroupScreen(groupId: String) {
                         R.string.create_reminder_with_x_people
                     ) { it.name ?: someone },
                     onPeopleSelected = { people ->
-                        newReminder(people.map { it.id!! })
+                        showScheduleNewReminderDialog = people
                     }
                 )
+            }
+
+            if (showScheduleNewReminderDialog != null) {
+                ScheduleReminderDialog(
+                    {
+                        showScheduleNewReminderDialog = null
+                    },
+                    initialReminder = Reminder(
+                        start = now().startOfMinute()
+                    ),
+                    showTitle = true,
+                    confirmText = stringResource(R.string.add_reminder)
+                ) {
+                    newReminder(showScheduleNewReminderDialog!!.mapNotNull { it.id }, it)
+                    showScheduleNewReminderDialog = null
+                }
             }
 
             if (showReportDialog) {

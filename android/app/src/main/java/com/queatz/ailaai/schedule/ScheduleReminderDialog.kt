@@ -2,6 +2,7 @@ package com.queatz.ailaai.schedule
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.ui.components.Check
@@ -28,6 +30,7 @@ fun ScheduleReminderDialog(
     onDismissRequest: () -> Unit,
     initialReminder: Reminder,
     confirmText: String? = null,
+    showTitle: Boolean = false,
     onUpdate: suspend (Reminder) -> Unit
 ) {
     val reminder = remember(initialReminder) {
@@ -71,6 +74,26 @@ fun ScheduleReminderDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(1.pad)
             ) {
+                if (showTitle) {
+                    var title by rememberStateOf(initialReminder.title ?: "")
+                    OutlinedTextField(
+                        title,
+                        {
+                            title = it
+                            reminder.title = it
+                        },
+                        label = {
+                            Text(stringResource(R.string.title))
+                        },
+                        shape = MaterialTheme.shapes.large,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                        ),
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
                 OutlinedButton(
                     {
                         showStart = true
@@ -181,7 +204,8 @@ fun ScheduleReminderDialog(
                                 Reminder(
                                     start = reminder.start,
                                     end = reminder.end?.takeIf { until },
-                                    schedule = reminder.schedule?.takeIf { reoccurs }
+                                    schedule = reminder.schedule?.takeIf { reoccurs },
+                                    title = reminder.title?.takeIf { showTitle }
                                 )
                             )
                             isLoading = false
