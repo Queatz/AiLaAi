@@ -27,8 +27,10 @@ fun Route.reminderRoutes() {
 
         get("/occurrences") {
             respond {
-                val start = call.parameters["start"]?.toInstant() ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
-                val end = call.parameters["end"]?.toInstant() ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
+                val start = call.parameters["start"]?.toInstant()
+                    ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
+                val end = call.parameters["end"]?.toInstant()
+                    ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
 
                 db.occurrences(me.id!!, start, end)
             }
@@ -39,12 +41,18 @@ fun Route.reminderRoutes() {
                 val new = call.receive<Reminder>()
 
 //                todo val myMember = db.member(group.id!!, me.id!!) ?: return@forEach
+//                todo check that I'm friends with everyone one in .people
+
+                new.title ?: return@respond HttpStatusCode.BadRequest.description("Missing 'title' parameter")
+                new.start ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
+                new.timezone ?: return@respond HttpStatusCode.BadRequest.description("Missing 'timezone' parameter")
+                new.utcOffset ?: return@respond HttpStatusCode.BadRequest.description("Missing 'utcOffset' parameter")
 
                 db.insert(
                     Reminder(
                         person = me.id!!,
-                        groups = new.groups, // todo check that I'm a member of each group
-                        people = new.people, // todo check that I'm friends with them
+                        groups = new.groups,
+                        people = new.people,
                         open = new.open,
                         attachment = new.attachment,
                         title = new.title,
@@ -64,7 +72,7 @@ fun Route.reminderRoutes() {
                 val reminder = db.document(Reminder::class, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
-                if (reminder.person == me.id) {
+                if (reminder.isMine(me)) {
                     reminder
                 } else {
                     HttpStatusCode.NotFound
@@ -86,7 +94,7 @@ fun Route.reminderRoutes() {
                 val reminder = db.document(Reminder::class, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
-                if (reminder.person == me.id) {
+                if (reminder.isMine(me)) {
                     val update = call.receive<Reminder>()
 
                     if (update.title != null) {
@@ -139,6 +147,8 @@ fun Route.reminderRoutes() {
                         reminder.schedule = update.schedule
                     }
 
+                    // todo notify other people on this reminder that it has been changed
+
                     db.update(reminder)
                 } else {
                     HttpStatusCode.NotFound
@@ -151,7 +161,7 @@ fun Route.reminderRoutes() {
                 val reminder = db.document(Reminder::class, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
-                if (reminder.person != me.id) {
+                if (!reminder.isMine(me)) {
                     return@respond HttpStatusCode.NotFound
                 }
 
@@ -183,7 +193,7 @@ fun Route.reminderRoutes() {
                 val reminder = db.document(Reminder::class, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
-                if (reminder.person != me.id) {
+                if (!reminder.isMine(me)) {
                     return@respond HttpStatusCode.NotFound
                 }
 
@@ -199,7 +209,7 @@ fun Route.reminderRoutes() {
                 val reminder = db.document(Reminder::class, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
-                if (reminder.person != me.id) {
+                if (!reminder.isMine(me)) {
                     return@respond HttpStatusCode.NotFound
                 }
 
@@ -210,3 +220,5 @@ fun Route.reminderRoutes() {
         }
     }
 }
+
+private fun Reminder.isMine(me: Person) = person == me.id || me.id in (people ?: emptyList())

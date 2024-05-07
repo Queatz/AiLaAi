@@ -128,6 +128,7 @@ fun GroupScreen(groupId: String) {
     var selectedMessages by rememberStateOf(emptySet<Message>())
     var showCards by rememberStateOf(false)
     var showTradeWithDialog by rememberStateOf(false)
+    var showNewReminderWithDialog by rememberStateOf(false)
     var showTradeDialog by rememberStateOf<Trade?>(null)
     var showSendDialog by rememberStateOf(false)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
@@ -185,6 +186,19 @@ fun GroupScreen(groupId: String) {
                     Message(attachment = json.encodeToString(TradeAttachment(it.id!!)))
                 )
             }
+        }
+    }
+
+    fun newReminder(people: List<String>) {
+        scope.launch {
+//            api.newReminder(
+//                Reminder().apply {
+//                    this.person = me!!.id!!
+//                    this.people = people
+//                }
+//            ) {
+//                context.toast(R.string.reminder_created)
+//            }
         }
     }
 
@@ -497,6 +511,14 @@ fun GroupScreen(groupId: String) {
                             showMenu = false
                             showGroupMembers = true
                         })
+                        if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.new_reminder))
+                            }, {
+                                showMenu = false
+                                showNewReminderWithDialog = true
+                            })
+                        }
                         if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.trade))
@@ -1298,6 +1320,28 @@ fun GroupScreen(groupId: String) {
                     ) { it.name ?: someone },
                     onPeopleSelected = { people ->
                         trade(people.map { it.id!! })
+                    }
+                )
+            }
+
+            if (showNewReminderWithDialog) {
+                val people = groupExtended!!.members!!
+                    .mapNotNull { it.person }
+                    .filter { it.id != me?.id }
+                ChoosePeopleDialog(
+                    {
+                        showNewReminderWithDialog = false
+                    },
+                    title = stringResource(R.string.create_reminder),
+                    people = people,
+                    confirmFormatter = defaultConfirmFormatter(
+                        R.string.create_reminder,
+                        R.string.create_reminder_with_x,
+                        R.string.create_reminder_with_x_and_x,
+                        R.string.create_reminder_with_x_people
+                    ) { it.name ?: someone },
+                    onPeopleSelected = { people ->
+                        newReminder(people.map { it.id!! })
                     }
                 )
             }

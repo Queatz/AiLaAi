@@ -6,7 +6,7 @@ fun Db.reminders(person: String, offset: Int = 0, limit: Int = 20) = list(
     Reminder::class,
     """
         for x in @@collection
-            filter (x.${f(Reminder::person)} == @person or @person in reminder.${f(Reminder::people)})
+            filter (x.${f(Reminder::person)} == @person or @person in x.${f(Reminder::people)})
             sort x.${f(Reminder::createdAt)} desc
             limit @offset, @limit
             return x

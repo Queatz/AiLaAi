@@ -3,6 +3,7 @@ package com.queatz.ailaai.schedule
 import ReminderEvent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -46,6 +47,7 @@ import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
@@ -248,108 +250,111 @@ fun ReminderScreen(reminderId: String) {
         if (isLoading) {
             Loading()
         } else {
-            CardToolbar {
-                item(
-                    Icons.Outlined.PersonAdd,
-                    stringResource(R.string.invite_someone)
-                ) {
-                    showAddPerson = true
-                }
-                item(
-                    Icons.Outlined.EditNote,
-                    stringResource(R.string.edit_note)
-                ) {
-                    showEditNote = true
-                }
-                item(
-                    Icons.Outlined.Update,
-                    stringResource(R.string.reschedule)
-                ) {
-                    showReschedule = true
-                }
-                item(
-                    Icons.Outlined.Edit,
-                    stringResource(R.string.rename)
-                ) {
-                    showEditTitle = true
-                }
-                if (reminder?.person == me?.id) {
-                    item(
-                        Icons.Outlined.Delete,
-                        stringResource(R.string.delete),
-                        color = MaterialTheme.colorScheme.error
-                    ) {
-                        showDelete = true
+            LazyColumn(
+                contentPadding = PaddingValues(1.pad),
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                item {
+                    CardToolbar {
+                        item(
+                            Icons.Outlined.PersonAdd,
+                            stringResource(R.string.invite_someone)
+                        ) {
+                            showAddPerson = true
+                        }
+                        item(
+                            Icons.Outlined.EditNote,
+                            stringResource(R.string.edit_note)
+                        ) {
+                            showEditNote = true
+                        }
+                        item(
+                            Icons.Outlined.Update,
+                            stringResource(R.string.reschedule)
+                        ) {
+                            showReschedule = true
+                        }
+                        item(
+                            Icons.Outlined.Edit,
+                            stringResource(R.string.rename)
+                        ) {
+                            showEditTitle = true
+                        }
+                        if (reminder?.person == me?.id) {
+                            item(
+                                Icons.Outlined.Delete,
+                                stringResource(R.string.delete),
+                                color = MaterialTheme.colorScheme.error
+                            ) {
+                                showDelete = true
+                            }
+                        } else if (me?.id in (reminder?.people ?: emptyList())) {
+                            item(
+                                Icons.Outlined.Clear,
+                                stringResource(R.string.leave),
+                                color = MaterialTheme.colorScheme.error
+                            ) {
+                                showLeave = true
+                            }
+                        }
                     }
-                } else if (me?.id in (reminder?.people ?: emptyList())) {
-                    item(
-                        Icons.Outlined.Clear,
-                        stringResource(R.string.leave),
-                        color = MaterialTheme.colorScheme.error
-                    ) {
-                        showLeave = true
-                    }
-                }
-            }
-            reminder?.note?.notBlank?.let {
-                OutlinedCard(
-                    onClick = {
-                        showEditNote = true
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = 2.pad,
-                            vertical = 1.pad
-                        )
-                ) {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 2.pad,
-                                vertical = 1.pad
+                    reminder?.note?.notBlank?.let {
+                        OutlinedCard(
+                            onClick = {
+                                showEditNote = true
+                            },
+                            shape = MaterialTheme.shapes.large,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(1.pad)
+                        ) {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier
+                                    .padding(1.pad)
                             )
+                        }
+                    }
+                    reminder?.let { reminder ->
+                        (reminder.person!!.inList() + (reminder.people ?: emptyList()))
+                            .distinct()
+                            .filter { it != me?.id }
+                            .mapNotNull { authors.get(it) }
+                            .sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
+                            .ifNotEmpty
+                            ?.let { people ->
+                                Text(
+                                    stringResource(R.string.people) + " (${people.size})",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier
+                                        .padding(horizontal = 1.pad)
+                                )
+                                Friends(
+                                    people = people,
+                                    modifier = Modifier
+                                        .padding(vertical = 1.pad)
+                                ) {
+                                    nav.navigate(AppNav.Profile(it.id!!))
+                                }
+                            }
+                    }
+                    Text(
+                        stringResource(R.string.history),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .padding(horizontal = 1.pad)
                     )
-                }
-            }
-            reminder?.let { reminder ->
-                (reminder.person!!.inList() + (reminder.people ?: emptyList()))
-                    .distinct()
-                    .filter { it != me?.id }
-                    .mapNotNull { authors.get(it) }
-                    .sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
-                    .ifNotEmpty
-                    ?.let { people ->
+                    if (events.isEmpty()) {
                         Text(
-                            stringResource(R.string.people) + " (${people.size})",
-                            style = MaterialTheme.typography.titleLarge,
+                            stringResource(R.string.none),
                             modifier = Modifier
                                 .padding(horizontal = 1.pad)
                         )
-                        Friends(
-                            people = people,
-                            modifier = Modifier
-                                .padding(vertical = 1.pad)
-                        ) {
-                            nav.navigate(AppNav.Profile(it.id!!))
-                        }
                     }
-            }
-            Text(
-                stringResource(R.string.history),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .padding(horizontal = 1.pad)
-            )
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 1.pad)
-            ) {
+                }
                 items(events) {
                     PeriodEvent(
                         ScheduleView.Yearly,

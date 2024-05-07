@@ -125,7 +125,7 @@
     <string name="story_not_found">Không tìm được bài viết này</string>
     <string name="leave">Rời khỏi</string>
     <string name="leave_group">Rời khỏi nhóm này không?</string>
-    <string name="leave_group">Rời khỏi lời nhắc này không?</string>
+    <string name="leave_reminder">Rời khỏi lời nhắc này không?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
     <string name="rename_group">Đổi tên của nhóm này</string>
@@ -560,6 +560,10 @@
     <string name="trade_with_x">Đổi đồ với %1$s</string>
     <string name="trade_with_x_and_x">Đổi đồ với %1$s và %2$s</string>
     <string name="trade_with_x_people">Đổi đồ với %1$s người</string>
+    <string name="create_reminder">Tạo lời nhắc</string>
+    <string name="create_reminder_with_x">Tạo lời nhắc với %1$s</string>
+    <string name="create_reminder_with_x_and_x">Tạo lời nhắc với %1$s và %2$s</string>
+    <string name="create_reminder_with_x_people">Tạo lời nhắc với %1$s người</string>
     <string name="items">Đồ</string>
     <string name="create_item">Create item</string>
     <string name="divisible">Divisible</string>
@@ -701,4 +705,8 @@
     <string name="add_to_homescreen">Add to homescreen</string>
     <string name="completed">Hoàn thành</string>
     <string name="cancelled">Bị hủy</string>
+    <string name="reminder_created">Đã tạo lời nhắc</string>
+    <string name="in_a_week">Sau một tuần</string>
+    <string name="in_a_month">Sau một tháng</string>
+    <string name="in_a_year">Sau một năm</string>
 </resources>

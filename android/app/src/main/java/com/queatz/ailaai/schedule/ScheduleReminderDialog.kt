@@ -79,6 +79,10 @@ fun ScheduleReminderDialog(
                 ) {
                     Text(reminder.start!!.formatFull())
                 }
+                DateTimeSuggestions {
+                    reminder.start = it
+                    recomposeScope.invalidate()
+                }
                 Check(reoccurs, { reoccurs = it }) {
                     Text(stringResource(R.string.reoccurs))
                 }
@@ -150,6 +154,10 @@ fun ScheduleReminderDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text((reminder.end ?: reminder.start!!).formatFull())
+                    }
+                    DateTimeSuggestions {
+                        reminder.end = it
+                        recomposeScope.invalidate()
                     }
                 }
             }

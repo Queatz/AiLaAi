@@ -586,6 +586,10 @@
     <string name="trade_with_x">Trade with %1$s</string>
     <string name="trade_with_x_and_x">Trade with %1$s and %2$s</string>
     <string name="trade_with_x_people">Trade with %1$s people</string>
+    <string name="create_reminder">Create reminder</string>
+    <string name="create_reminder_with_x">Create reminder with %1$s</string>
+    <string name="create_reminder_with_x_and_x">Create reminder with %1$s and %2$s</string>
+    <string name="create_reminder_with_x_people">Create reminder with %1$s people</string>
     <string name="items">Items</string>
     <string name="create_item">Create item</string>
     <string name="divisible">Divisible</string>
@@ -689,6 +693,10 @@
     <string name="add_to_homescreen">Add to homescreen</string>
     <string name="completed">Completed</string>
     <string name="cancelled">Cancelled</string>
+    <string name="reminder_created">Reminder created</string>
+    <string name="in_a_week">In a week</string>
+    <string name="in_a_month">In a month</string>
+    <string name="in_a_year">In a year</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>
