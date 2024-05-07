@@ -11,13 +11,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Draw
 import androidx.compose.material.icons.outlined.Photo
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.asCacheFileUri
+import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.isPhoto
+import com.queatz.ailaai.extensions.isVideo
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.uri
 import com.queatz.ailaai.ui.components.CardToolbar
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.db.AiPhotoRequest
@@ -50,6 +64,7 @@ fun ChoosePhotoDialog(
     val context = LocalContext.current
     val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
     var showCameraRationale by rememberStateOf(false)
+    var showDrawing by rememberStateOf(false)
 
     val cameraUri = "photo.jpg".asCacheFileUri(context)
 
@@ -157,6 +172,10 @@ fun ChoosePhotoDialog(
                     camera()
                 }
 
+                item(Icons.Outlined.Draw, stringResource(R.string.draw)) {
+                    showDrawing = !showDrawing
+                }
+
                 item(
                     Icons.Outlined.AutoAwesome,
                     allStyles.firstOrNull { it.second == selectedStyle }?.first ?: stringResource(
@@ -165,6 +184,23 @@ fun ChoosePhotoDialog(
                     selected = selectedStyle != null
                 ) {
                     aiStyleMenu = true
+                }
+
+                if (showDrawing) {
+                    DrawDialog(
+                        {
+                            showDrawing = false
+                        }
+                    ) { bitmap ->
+                        onDismissRequest()
+                        scope.launch {
+                            onIsGeneratingPhoto(true)
+                            api.uploadPhotosFromUris(context, bitmap.asAndroidBitmap().uri(context).inList()) { response ->
+                                onGeneratedPhoto(response.urls.first())
+                            }
+                            onIsGeneratingPhoto(false)
+                        }
+                    }
                 }
             }
         }

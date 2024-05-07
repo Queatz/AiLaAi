@@ -121,6 +121,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0-beta01")
     implementation("androidx.appcompat:appcompat-resources:1.7.0-beta01")
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
+    implementation("dev.shreyaspatil:capturable:2.1.0")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
@@ -138,8 +139,8 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
-    implementation("androidx.media3:media3-exoplayer:1.3.0")
-    implementation("androidx.media3:media3-ui:1.3.0")
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-ui:1.3.1")
     implementation("com.otaliastudios:transcoder:0.10.5")
 
     // Logging & Crash Reporting
