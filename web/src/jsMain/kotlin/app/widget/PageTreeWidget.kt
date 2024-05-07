@@ -32,7 +32,13 @@ import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import lib.toLocaleString
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
@@ -130,6 +136,7 @@ fun PageTreeWidget(widgetId: String) {
                 search,
                 { search = it },
                 defaultMargins = false,
+                autoFocus = false,
                 styles = {
                     width(100.percent)
                     marginBottom(1.r)
@@ -191,10 +198,13 @@ fun PageTreeWidget(widgetId: String) {
                         if (votes != 0 || me == null) {
                             Div({
                                 style {
-                                    cursor("pointer")
                                     if (me != null) {
+                                        cursor("pointer")
                                         marginTop(.5.r)
                                     }
+                                    display(DisplayStyle.Flex)
+                                    flexDirection(FlexDirection.Column)
+                                    alignItems(AlignItems.Center)
                                 }
 
                                 if (me != null) {
@@ -226,7 +236,19 @@ fun PageTreeWidget(widgetId: String) {
                                 }
                             }) {
                                 // todo: translate
-                                Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
+                                if (me != null) {
+                                    Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
+                                } else {
+                                    Div({
+                                        style {
+                                            fontSize(24.px)
+                                            fontWeight("bold")
+                                        }
+                                    }) {
+                                        Text(votes.toLocaleString())
+                                    }
+                                    Text(if (votes == 1) "vote" else "votes")
+                                }
                             }
                         }
                     }
