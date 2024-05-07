@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -76,6 +78,12 @@ fun ScheduleReminderDialog(
             ) {
                 if (showTitle) {
                     var title by rememberStateOf(initialReminder.title ?: "")
+                    val focusRequester = remember { FocusRequester() }
+
+                    LaunchedEffect(Unit) {
+                        focusRequester.requestFocus()
+                    }
+
                     OutlinedTextField(
                         title,
                         {
@@ -92,6 +100,7 @@ fun ScheduleReminderDialog(
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .focusRequester(focusRequester)
                     )
                 }
                 OutlinedButton(

@@ -67,7 +67,7 @@ fun CardsNavPage(cardUpdates: Flow<Card>, nav: CardNav, onSelected: (CardNav) ->
     var myCards by remember { mutableStateOf(emptyList<Card>()) }
 
     val childCards = remember(myCards, cardId) {
-        myCards.filter { it.parent == cardId }
+        myCards.filter { it.parent == cardId }.sortedBy { it.name }
     }
 
     val shownCards = remember(myCards, searchText, saved, filters) {
