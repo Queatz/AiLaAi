@@ -28,7 +28,6 @@ import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
 import app.ailaai.api.sticker
-import app.ailaai.api.updateMe
 import app.ailaai.api.updateMessage
 import coil.compose.AsyncImage
 import coil.imageLoader

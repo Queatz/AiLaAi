@@ -820,7 +820,7 @@ fun GroupScreen(groupId: String) {
                                         .requiredSize(16.dp)
                                 )
                                 Text(
-                                    message.text ?: message.attachmentText(context) ?: "",
+                                    message.text?.notBlank ?: message.attachmentText(context) ?: "",
                                     style = MaterialTheme.typography.bodySmall,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier

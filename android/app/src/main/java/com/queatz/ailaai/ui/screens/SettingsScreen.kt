@@ -328,7 +328,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                         isRefreshing = false
                     }
                 }) {
-                    Text(stringResource(R.string.continue_conversation))
+                    Text(stringResource(R.string.yes))
                 }
             }
         )

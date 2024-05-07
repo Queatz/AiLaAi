@@ -112,7 +112,9 @@ fun StoryCreatorScreen(
 
     // todo use a loading/error/empty scaffold
     if (isLoading) {
-        Loading()
+        Column(modifier = Modifier.fillMaxSize()) {
+            Loading()
+        }
         return
     }
 

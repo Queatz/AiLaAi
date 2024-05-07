@@ -116,13 +116,12 @@ fun StoryMenu(
                 onDismissRequest()
                 nav.navigate(AppNav.Story(storyId))
             })
-        } else if (!edited && editing) {
+        } else if (editing) {
             DropdownMenuItem({ Text(stringResource(R.string.preview)) }, {
                 onDismissRequest()
                 nav.navigate(AppNav.Story(storyId))
-            })
-        }
-        if (editing) {
+            }, enabled = !edited)
+
             DropdownMenuItem({ Text(stringResource(R.string.reorder)) }, {
                 onDismissRequest()
                 onReorder?.invoke()
