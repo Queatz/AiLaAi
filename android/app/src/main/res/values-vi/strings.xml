@@ -125,6 +125,7 @@
     <string name="story_not_found">Không tìm được bài viết này</string>
     <string name="leave">Rời khỏi</string>
     <string name="leave_group">Rời khỏi nhóm này không?</string>
+    <string name="leave_group">Rời khỏi lời nhắc này không?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
     <string name="rename_group">Đổi tên của nhóm này</string>

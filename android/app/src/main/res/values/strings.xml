@@ -129,6 +129,7 @@
     <string name="story_not_found">Story not found</string>
     <string name="leave">Leave</string>
     <string name="leave_group">Leave group?</string>
+    <string name="leave_reminder">Leave reminder?</string>
     <string name="members">Members</string>
     <string name="rename">Rename</string>
     <string name="rename_group">Rename group</string>

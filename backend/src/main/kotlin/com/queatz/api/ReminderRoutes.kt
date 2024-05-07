@@ -44,6 +44,8 @@ fun Route.reminderRoutes() {
                     Reminder(
                         person = me.id!!,
                         groups = new.groups, // todo check that I'm a member of each group
+                        people = new.people, // todo check that I'm friends with them
+                        open = new.open,
                         attachment = new.attachment,
                         title = new.title,
                         note = new.note,
@@ -95,8 +97,20 @@ fun Route.reminderRoutes() {
                         reminder.note = update.note
                     }
 
+                    if (update.open != null) {
+                        reminder.open = update.open
+                    }
+
                     if (update.groups != null) {
                         reminder.groups = update.groups
+                    }
+
+                    if (update.people != null) {
+                        reminder.people = update.people
+                    }
+
+                    if (update.open != null) {
+                        reminder.open = update.open
                     }
 
                     if (update.attachment != null) {

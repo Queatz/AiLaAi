@@ -317,8 +317,10 @@ class StoryDraft(
 @Serializable
 class Reminder(
     var person: String? = null,
+    var people: List<String>? = null,
     var groups: List<String>? = null,
     var attachment: String? = null,
+    var open: Boolean? = null,
     var title: String? = null,
     var note: String? = null,
     var start: Instant? = null,

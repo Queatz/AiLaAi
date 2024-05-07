@@ -1,43 +1,63 @@
 package com.queatz.ailaai.schedule
 
 import ReminderEvent
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import app.ailaai.api.deleteReminder
 import app.ailaai.api.reminder
 import app.ailaai.api.reminderOccurrences
 import app.ailaai.api.updateReminder
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.hint
+import com.queatz.ailaai.extensions.ifNotEmpty
+import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
+import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import toEvents
 
 @Composable
@@ -45,15 +65,18 @@ fun ReminderScreen(reminderId: String) {
     val scope = rememberCoroutineScope()
     var isLoading by rememberStateOf(false)
     var showEditNote by rememberStateOf(false)
+    var showAddPerson by rememberStateOf(false)
     var showReschedule by rememberStateOf(false)
     var showEditTitle by rememberStateOf(false)
     var showDelete by rememberStateOf(false)
+    var showLeave by rememberStateOf(false)
     var reminder by rememberStateOf<Reminder?>(null)
     var events by rememberStateOf(emptyList<ReminderEvent>())
     val onExpand = remember {
         MutableSharedFlow<Unit>()
     }
     val nav = nav
+    val me = me
 
     suspend fun reloadEvents() {
         if (reminder == null) {
@@ -80,6 +103,31 @@ fun ReminderScreen(reminderId: String) {
 
     LaunchedEffect(Unit) {
         reload()
+    }
+
+    if (showAddPerson) {
+        val someone = stringResource(R.string.someone)
+        ChoosePeopleDialog(
+            {
+                showAddPerson = false
+            },
+            title = stringResource(R.string.invite_someone),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.invite_someone,
+                R.string.invite_person,
+                R.string.invite_x_and_y,
+                R.string.invite_x_people
+            ) { it.name ?: someone },
+            onPeopleSelected = { people ->
+                api.updateReminder(
+                    reminderId,
+                    Reminder(people = ((reminder!!.people ?: emptyList()) + people.map { it.id!! }).distinct())
+                ) {
+                    reload()
+                }
+            },
+            omit = { it.id!! in (reminder?.people ?: emptyList()) + me?.id!! }
+        )
     }
 
     if (showEditNote) {
@@ -154,6 +202,25 @@ fun ReminderScreen(reminderId: String) {
         }
     }
 
+    if (showLeave) {
+        Alert(
+            {
+                showLeave = false
+            },
+            title = stringResource(R.string.leave_reminder),
+            text = null,
+            dismissButton = stringResource(R.string.cancel),
+            confirmButton = stringResource(R.string.yes),
+            confirmColor = MaterialTheme.colorScheme.error
+        ) {
+            scope.launch {
+                api.updateReminder(reminderId, Reminder(people = reminder?.people?.filter { it != me?.id })) {
+                    nav.popBackStackOrFinish()
+                }
+            }
+        }
+    }
+
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
@@ -183,6 +250,12 @@ fun ReminderScreen(reminderId: String) {
         } else {
             CardToolbar {
                 item(
+                    Icons.Outlined.PersonAdd,
+                    stringResource(R.string.invite_someone)
+                ) {
+                    showAddPerson = true
+                }
+                item(
                     Icons.Outlined.EditNote,
                     stringResource(R.string.edit_note)
                 ) {
@@ -200,31 +273,71 @@ fun ReminderScreen(reminderId: String) {
                 ) {
                     showEditTitle = true
                 }
-                item(
-                    Icons.Outlined.Delete,
-                    stringResource(R.string.delete),
-                    color = MaterialTheme.colorScheme.error
-                ) {
-                    showDelete = true
+                if (reminder?.person == me?.id) {
+                    item(
+                        Icons.Outlined.Delete,
+                        stringResource(R.string.delete),
+                        color = MaterialTheme.colorScheme.error
+                    ) {
+                        showDelete = true
+                    }
+                } else if (me?.id in (reminder?.people ?: emptyList())) {
+                    item(
+                        Icons.Outlined.Clear,
+                        stringResource(R.string.leave),
+                        color = MaterialTheme.colorScheme.error
+                    ) {
+                        showLeave = true
+                    }
                 }
             }
             reminder?.note?.notBlank?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                OutlinedCard(
+                    onClick = {
+                        showEditNote = true
+                    },
+                    shape = MaterialTheme.shapes.large,
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(
                             horizontal = 2.pad,
                             vertical = 1.pad
                         )
-                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                        .clip(MaterialTheme.shapes.large)
-                        .padding(
-                            horizontal = 2.pad,
-                            vertical = 1.pad
+                ) {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .padding(
+                                horizontal = 2.pad,
+                                vertical = 1.pad
+                            )
+                    )
+                }
+            }
+            reminder?.let { reminder ->
+                (reminder.person!!.inList() + (reminder.people ?: emptyList()))
+                    .distinct()
+                    .filter { it != me?.id }
+                    .mapNotNull { authors.get(it) }
+                    .sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
+                    .ifNotEmpty
+                    ?.let { people ->
+                        Text(
+                            stringResource(R.string.people) + " (${people.size})",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier
+                                .padding(horizontal = 1.pad)
                         )
-                )
+                        Friends(
+                            people = people,
+                            modifier = Modifier
+                                .padding(vertical = 1.pad)
+                        ) {
+                            nav.navigate(AppNav.Profile(it.id!!))
+                        }
+                    }
             }
             Text(
                 stringResource(R.string.history),
@@ -243,8 +356,6 @@ fun ReminderScreen(reminderId: String) {
                         it,
                         showOpen = false,
                         showFullTime = true,
-                        modifier = Modifier
-                            .fillMaxWidth(),
                         onExpand = onExpand,
                         onUpdated = {
                             scope.launch {

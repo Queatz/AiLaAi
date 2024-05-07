@@ -497,10 +497,10 @@ fun FriendsScreen() {
                                     NotificationsDisabledBanner(show = tab == MainTab.Friends)
                                     AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
                                         Friends(
-                                            remember(allGroups) {
+                                            people = remember(allGroups) {
                                                 allGroups.people().filter { it.id != me?.id }
                                             },
-                                            {
+                                            onLongClick = {
                                                 nav.navigate(AppNav.Profile(it.id!!))
                                             }
                                         ) { person ->

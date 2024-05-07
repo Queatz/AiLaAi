@@ -60,7 +60,7 @@ class Notify {
             )
         )
 
-        notifyPeople(listOf(reminder.person!!), pushData)
+        notifyPeople(listOf(reminder.person!!) + (reminder.people ?: emptyList()), pushData)
     }
 
     fun callStatus(group: Group, call: Call) {

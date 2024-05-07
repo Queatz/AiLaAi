@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,21 +14,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import app.ailaai.api.deleteReminderOccurrence
 import app.ailaai.api.updateReminderOccurrence
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.contactPhoto
+import com.queatz.ailaai.extensions.ifNotEmpty
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.services.authors
+import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import updateDate
+import kotlin.random.Random
 
 @Composable
 fun PeriodEvent(
@@ -45,6 +57,7 @@ fun PeriodEvent(
     var showDelete by rememberStateOf(false)
     val done = event.occurrence?.done == true
     val nav = nav
+    val me = me
 
     LaunchedEffect(Unit) {
         onExpand.collect {
@@ -128,6 +141,7 @@ fun PeriodEvent(
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = modifier
+            .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .clickable {
                 scope.launch {
@@ -139,43 +153,66 @@ fun PeriodEvent(
             }
             .padding(1.pad)
     ) {
-        Text(
-            event.reminder.title ?: "",
-            style = MaterialTheme.typography.bodyMedium.let {
-                if (done) {
-                    it.copy(textDecoration = TextDecoration.LineThrough)
-                } else {
-                    it
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(1.pad),
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            (event.reminder.person!!.inList() + (event.reminder.people ?: emptyList()))
+                .distinct()
+                .filter { it != me?.id }
+                .ifNotEmpty
+                ?.mapNotNull { authors.get(it)?.contactPhoto() }
+                ?.sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
+                ?.let { people ->
+                    GroupPhoto(
+                        people,
+                        padding = 0.pad,
+                        size = 32.dp
+                    )
                 }
-            },
-            color = MaterialTheme.colorScheme.onSurface.let {
-                if (done) {
-                    it.copy(alpha = .5f)
-                } else {
-                    it
-                }
+            Column {
+                Text(
+                    event.reminder.title ?: "",
+                    style = MaterialTheme.typography.bodyMedium.let {
+                        if (done) {
+                            it.copy(textDecoration = TextDecoration.LineThrough)
+                        } else {
+                            it
+                        }
+                    },
+                    color = MaterialTheme.colorScheme.onSurface.let {
+                        if (done) {
+                            it.copy(alpha = .5f)
+                        } else {
+                            it
+                        }
+                    }
+                )
+                Text(
+                    bulletedString(
+                        if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(
+                            view
+                        ),
+                        event.occurrence?.note ?: event.reminder.note
+                    ),
+                    style = MaterialTheme.typography.labelSmall.let {
+                        if (done) {
+                            it.copy(textDecoration = TextDecoration.LineThrough)
+                        } else {
+                            it
+                        }
+                    },
+                    color = MaterialTheme.colorScheme.secondary.let {
+                        if (done) {
+                            it.copy(alpha = .5f)
+                        } else {
+                            it
+                        }
+                    }
+                )
             }
-        )
-        Text(
-            bulletedString(
-                if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(view),
-                event.occurrence?.note ?: event.reminder.note
-            ),
-            style = MaterialTheme.typography.labelSmall.let {
-                if (done) {
-                    it.copy(textDecoration = TextDecoration.LineThrough)
-                } else {
-                    it
-                }
-            },
-            color = MaterialTheme.colorScheme.secondary.let {
-                if (done) {
-                    it.copy(alpha = .5f)
-                } else {
-                    it
-                }
-            }
-        )
+        }
         AnimatedVisibility(expanded) {
             ScheduleItemActions(
                 {

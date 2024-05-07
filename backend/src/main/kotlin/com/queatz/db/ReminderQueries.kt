@@ -6,7 +6,7 @@ fun Db.reminders(person: String, offset: Int = 0, limit: Int = 20) = list(
     Reminder::class,
     """
         for x in @@collection
-            filter x.${f(Reminder::person)} == @person
+            filter (x.${f(Reminder::person)} == @person or @person in reminder.${f(Reminder::people)})
             sort x.${f(Reminder::createdAt)} desc
             limit @offset, @limit
             return x
@@ -24,7 +24,7 @@ fun Db.occurrences(person: String?, start: Instant, end: Instant, reminders: Lis
         let dayRangeStart = date_trunc(@start, 'd')
         let dayRange = range(0, date_diff(@start, @end, 'd'))
         for reminder in ${Reminder::class.collection()}
-            filter (@person == null or reminder.${f(Reminder::person)} == @person)
+            filter (@person == null or reminder.${f(Reminder::person)} == @person or @person in reminder.${f(Reminder::people)})
                 and (@reminders == null or reminder._key in @reminders)
                 and reminder.${f(Reminder::start)} <= @end
                 and (reminder.${f(Reminder::end)} == null or reminder.${f(Reminder::end)} >= @start)

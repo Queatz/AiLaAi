@@ -94,14 +94,14 @@ fun GroupPhoto(
             )
         }
     } else {
-        val show = remember { photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L } }
+        val show = remember(photos) { photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L } }
         Box(
             modifier = Modifier
                 .padding(padding)
                 .requiredSize(size)
                 .then(modifier)
         ) {
-            listOf(Alignment.TopEnd, Alignment.BottomStart).forEachIndexed { index, alignment ->
+            listOf(1 to Alignment.TopEnd, 0 to Alignment.BottomStart).forEach { (index, alignment) ->
                 val photo = show[index].photo?.let { api.url(it) }
                 if (photo == null) {
                     Box(

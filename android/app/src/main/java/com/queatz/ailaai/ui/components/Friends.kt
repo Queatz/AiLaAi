@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.inList
@@ -10,11 +11,12 @@ import com.queatz.db.Person
 import kotlinx.datetime.Instant
 
 @Composable
-fun Friends(people: List<Person>, onLongClick: (Person) -> Unit, onClick: (Person) -> Unit) {
+fun Friends(people: List<Person>, modifier: Modifier = Modifier, onLongClick: (Person) -> Unit = {}, onClick: (Person) -> Unit) {
     ButtonBar(
-        people,
+        items = people,
         onLongClick = onLongClick,
         onClick = onClick,
+        modifier = modifier,
         photo = {
             GroupPhoto(
                 ContactPhoto(it.name ?: "", it.photo, it.seen).inList(),

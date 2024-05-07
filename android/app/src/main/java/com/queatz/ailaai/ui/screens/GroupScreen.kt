@@ -518,7 +518,7 @@ fun GroupScreen(groupId: String) {
                             showSendDialog = true
                         })
                         if (myMember != null) {
-                            if (myMember.member?.host == true) {
+                            if (myMember.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.manage))
                                 }, {
@@ -1541,20 +1541,22 @@ fun GroupScreen(groupId: String) {
                         showManageDialog = false
                         showLocationDialog = true
                     })
-                    if (groupExtended?.group?.open == true) {
-                        menuItem(stringResource(R.string.make_group_closed)) {
-                            showManageDialog = false
-                            showChangeGroupStatus = true
+                    if (myMember?.member?.host == true) {
+                        if (groupExtended?.group?.open == true) {
+                            menuItem(stringResource(R.string.make_group_closed)) {
+                                showManageDialog = false
+                                showChangeGroupStatus = true
+                            }
+                        } else {
+                            menuItem(stringResource(R.string.make_group_open)) {
+                                showManageDialog = false
+                                showChangeGroupStatus = true
+                            }
                         }
-                    } else {
-                        menuItem(stringResource(R.string.make_group_open)) {
+                        menuItem(stringResource(R.string.settings)) {
                             showManageDialog = false
-                            showChangeGroupStatus = true
+                            showSettingsDialog = true
                         }
-                    }
-                    menuItem(stringResource(R.string.settings)) {
-                        showManageDialog = false
-                        showSettingsDialog = true
                     }
                 }
             }

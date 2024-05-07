@@ -38,7 +38,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
-                implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.5")
+                implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.6")
                 implementation("app.softwork:routing-compose:0.2.14")
                 implementation(npm("@paulmillr/qr", "0.1.1"))
                 implementation(npm("date-fns", "3.5.0"))

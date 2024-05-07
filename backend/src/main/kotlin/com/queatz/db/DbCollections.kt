@@ -11,7 +11,9 @@ fun collections() = listOf(
     },
     Reminder::class.db {
         ensurePersistentIndex(listOf(Reminder::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Reminder::people.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::groups.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Reminder::open.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::attachment.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::title.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::note.name), PersistentIndexOptions())
