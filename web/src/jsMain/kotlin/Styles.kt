@@ -464,6 +464,16 @@ object Styles : StyleSheet() {
         }
     }
 
+    val inlineButton by style {
+        color(colors.primary)
+        cursor("pointer")
+        fontWeight("bold")
+
+        self + disabled style {
+            opacity(.5)
+        }
+    }
+
     val mainContentCards by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)

@@ -17,6 +17,8 @@ sealed class StoryContent {
     @Serializable
     class Reactions(var story: String, val reactions: ReactionSummary?) : StoryContent()
     @Serializable
+    class Comments(var story: String) : StoryContent()
+    @Serializable
     class Title(var title: String, val id: String) : StoryContent()
     @Serializable
     class Authors(var publishDate: Instant?, var authors: List<Person>) : StoryContent()

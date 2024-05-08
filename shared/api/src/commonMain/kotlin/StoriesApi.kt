@@ -3,6 +3,8 @@ package com.queatz.ailaai.api
 import app.ailaai.api.Api
 import app.ailaai.api.ErrorBlock
 import app.ailaai.api.SuccessBlock
+import com.queatz.db.Comment
+import com.queatz.db.CommentExtended
 import com.queatz.db.Geo
 import com.queatz.db.ReactBody
 import com.queatz.db.ReactionAndPerson
@@ -121,11 +123,24 @@ suspend fun Api.reactToStory(
     onSuccess: SuccessBlock<HttpStatusCode> = {}
 ) = post("stories/$id/react", react, onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.commentOnStory(
+    id: String,
+    comment: Comment,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<Comment> = {}
+) = post("stories/$id/comment", comment, onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.storyReactions(
     id: String,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<ReactionAndPerson>> = {}
 ) = get("stories/$id/reactions", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.storyComments(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<CommentExtended>> = {}
+) = get("stories/$id/comments", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.storyDraft(
     id: String,

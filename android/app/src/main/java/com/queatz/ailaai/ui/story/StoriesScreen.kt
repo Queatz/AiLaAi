@@ -93,7 +93,10 @@ fun StoriesScreen() {
         stories.flatMapIndexed { index, story ->
             (if (index > 0) listOf(StoryContent.Divider) else emptyList()) +
                     story.asContents() +
-                    listOf(StoryContent.Reactions(story.id!!, story.reactions))
+                    listOf(
+                        StoryContent.Reactions(story.id!!, story.reactions),
+                        StoryContent.Comments(story.id!!)
+                    )
         }
     }
     var isLoading by rememberStateOf(stories.isEmpty())

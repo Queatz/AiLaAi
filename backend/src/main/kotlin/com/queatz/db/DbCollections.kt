@@ -148,5 +148,8 @@ fun collections() = listOf(
     Reaction::class.db(CollectionType.EDGES, listOf(Person::class, Card::class, Story::class, Message::class)) {
         ensurePersistentIndex(listOf(Reaction::reaction.name), PersistentIndexOptions())
         ensureFulltextIndex(listOf(Reaction::comment.name), FulltextIndexOptions())
+    },
+    Comment::class.db(CollectionType.EDGES, listOf(Person::class, Card::class, Comment::class, Story::class, Message::class)) {
+        ensureFulltextIndex(listOf(Comment::comment.name), FulltextIndexOptions())
     }
 )

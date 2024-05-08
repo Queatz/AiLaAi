@@ -119,6 +119,11 @@ class Reaction(
 ) : Edge()
 
 @Serializable
+class Comment(
+    var comment: String? = null
+) : Edge()
+
+@Serializable
 class Group(
     var name: String? = null,
     var photo: String? = null,

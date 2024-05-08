@@ -267,6 +267,12 @@ fun StoryContents(
                         }
                     }
 
+                    is StoryContent.Comments -> {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Text("Comments!")
+                        }
+                    }
+
                     is StoryContent.Reactions -> {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             DisableSelection {

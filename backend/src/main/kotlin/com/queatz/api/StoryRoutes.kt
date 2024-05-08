@@ -37,6 +37,12 @@ fun Route.storyRoutes() {
                 db.reactionsOf(parameter("id").asId(Story::class))
             }
         }
+
+        get("/stories/{id}/comments") {
+            respond {
+                db.commentsOf(parameter("id").asId(Story::class))
+            }
+        }
     }
 
     authenticate {
@@ -215,6 +221,34 @@ fun Route.storyRoutes() {
                 }
 
                 HttpStatusCode.NoContent
+            }
+        }
+
+        post("/stories/{id}/comment") {
+            respond {
+                val story = db.document(Story::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                if (story.published != true) {
+                    return@respond HttpStatusCode.BadRequest.description("Story is not yet published")
+                }
+
+                val newComment = call.receive<Comment>()
+
+                if (newComment.comment.isNullOrBlank()) {
+                    return@respond HttpStatusCode.BadRequest.description("Missing comment")
+                }
+
+                val comment = db.insert(
+                    Comment().apply {
+                        comment = newComment.comment
+                        from = me.id!!.asId(Person::class)
+                        to = story.id!!.asId(Story::class)
+                    }
+                )
+
+                // todo notify
+
+                comment
             }
         }
 

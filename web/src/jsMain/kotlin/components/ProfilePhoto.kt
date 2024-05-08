@@ -1,7 +1,10 @@
 package components
 
+import Strings.someone
 import Styles
 import androidx.compose.runtime.Composable
+import appString
+import application
 import baseUrl
 import com.queatz.db.Person
 import focusable
@@ -12,7 +15,14 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
-fun ProfilePhoto(person: Person, size: CSSNumeric = 36.px, title: String? = null, border: Boolean = false, onClick: (() -> Unit)? = null, styles: (StyleScope.() -> Unit)? = null) {
+fun ProfilePhoto(
+    person: Person,
+    size: CSSNumeric = 36.px,
+    title: String? = null,
+    border: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    styles: (StyleScope.() -> Unit)? = null
+) {
     if (person.photo == null) {
         Div({
             classes(listOf(Styles.profilePhotoText) + if (border) {
@@ -35,7 +45,7 @@ fun ProfilePhoto(person: Person, size: CSSNumeric = 36.px, title: String? = null
                 styles?.invoke(this)
             }
 
-            title(title ?: person.name ?: "Someone")
+            title(title ?: person.name ?: application.appString { someone })
 
             onClick {
                 onClick?.invoke()
@@ -70,7 +80,7 @@ fun ProfilePhoto(person: Person, size: CSSNumeric = 36.px, title: String? = null
                 styles?.invoke(this)
             }
 
-            title(title ?: person.name ?: "Someone")
+            title(title ?: person.name ?: application.appString { someone })
 
             if (onClick != null) {
                 focusable()

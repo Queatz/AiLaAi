@@ -44,6 +44,7 @@ fun Application.configureRouting() {
         crashRoutes()
         statsRoutes()
         storyRoutes()
+        commentRoutes()
         stickerRoutes()
         appFeedbackRoutes()
         reportRoutes()

@@ -1,7 +1,9 @@
 package stories
 import Styles
 import app.AppStyles
+import app.dark
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Col
 import r
 
 object StoryStyles : StyleSheet() {
@@ -109,5 +111,62 @@ object StoryStyles : StyleSheet() {
 
     val contentAudio by style {
         borderRadius(1.r)
+    }
+
+    val comments by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        width(100.percent)
+        marginTop(1.r)
+    }
+
+    val comment by style {
+        display(DisplayStyle.Flex)
+        width(100.percent)
+    }
+
+    val commentLayout by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.FlexStart)
+        marginLeft(.5.r)
+        marginBottom(.5.r)
+        width(100.percent)
+    }
+
+    val commentBox by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        padding(.75.r)
+        borderRadius(1.r)
+        border(1.px, LineStyle.Solid, Color.black)
+        backgroundColor(Styles.colors.background)
+        overflow("hidden")
+
+        dark(self) {
+            backgroundColor(Styles.colors.dark.background)
+        }
+    }
+
+    val commentComment by style {
+        whiteSpace("pre-wrap")
+        property("word-break", "break-word")
+    }
+
+    val commentInfo by style {
+        marginBottom(.25.r)
+        fontSize(14.px)
+        opacity(.5f)
+    }
+
+    val commentTime by style {
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        fontSize(14.px)
+        marginLeft(.75.r)
+    }
+
+    val commentRepliesLayout by style {
+        alignSelf(AlignSelf.Stretch)
     }
 }

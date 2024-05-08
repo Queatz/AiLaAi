@@ -7,7 +7,8 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import r
 
-@Composable fun InfoPage(page: String) {
+@Composable
+fun InfoPage(page: String) {
     Div({
         classes(Styles.mainContent)
     }) {

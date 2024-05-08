@@ -66,6 +66,7 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
                         maxWidth(800.px)
                         alignSelf(AlignSelf.Center)
                         marginBottom(1.r)
+                        property("background", "unset")
                     }
                 }) {
                     Div({

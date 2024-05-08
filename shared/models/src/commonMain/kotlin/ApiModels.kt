@@ -233,3 +233,11 @@ data class ReactionAndPerson(
     val reaction: Reaction? = null,
     val person: Person? = null
 )
+
+@Serializable
+data class CommentExtended(
+    val comment: Comment? = null,
+    val person: Person? = null,
+    val replies: List<CommentExtended>? = null,
+    val totalReplies: Int? = null
+)

@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import api
 import app.AppStyles
 import app.ailaai.api.group
+import app.components.EditField
 import app.components.TextBox
 import app.dialog.photoDialog
 import app.group.GroupInfo
@@ -14,13 +15,19 @@ import app.widget.PageTreeWidget
 import app.widget.ScriptWidget
 import app.widget.WebWidget
 import appString
+import application
 import baseUrl
+import com.queatz.ailaai.api.commentOnStory
+import com.queatz.ailaai.api.storyComments
+import com.queatz.db.Comment
+import com.queatz.db.CommentExtended
 import com.queatz.db.GroupExtended
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import components.CardItem
 import components.Icon
 import components.LinkifyText
+import components.Loading
 import components.LoadingText
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -92,6 +99,63 @@ fun StoryContents(
 
             is StoryContent.Reactions -> {
 
+            }
+
+            is StoryContent.Comments -> {
+                val me by application.me.collectAsState()
+                var comments by remember {
+                    mutableStateOf<List<CommentExtended>?>(null)
+                }
+
+                suspend fun reloadComments() {
+                    api.storyComments(part.story) {
+                        comments = it
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    reloadComments()
+                }
+
+                Div({
+                    style {
+                        width(100.percent)
+                    }
+                }) {
+                    EditField(
+                        placeholder = appString { if (me == null) signInToComment else shareAComment },
+                        styles = {
+                            width(100.percent)
+                        },
+                        buttonBarStyles = {
+                            width(100.percent)
+                            justifyContent(JustifyContent.End)
+                        },
+                        showDiscard = false,
+                        resetOnSubmit = true,
+                        enabled = me != null,
+                        button = appString { post }
+                    ) {
+                        var success = false
+                        api.commentOnStory(
+                            part.story,
+                            Comment(comment = it)
+                        ) {
+                            success = true
+                        }
+                        reloadComments()
+                        success
+                    }
+
+                    LoadingText(
+                        comments != null,
+                        appString { loading }
+                    ) {
+                        StoryComments(comments!!, max = 3) {
+                            reloadComments()
+                        }
+                    }
+                }
             }
 
             is StoryContent.Section -> {

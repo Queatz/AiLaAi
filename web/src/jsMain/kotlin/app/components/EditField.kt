@@ -5,21 +5,29 @@ import androidx.compose.runtime.*
 import appString
 import appText
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.w3c.dom.events.Event
 import r
 
 @Composable
 fun EditField(
-    value: String,
+    value: String = "",
     placeholder: String = "",
     selectAll: Boolean = false,
-    styles: StyleScope.() -> Unit,
+    styles: StyleScope.() -> Unit = {},
+    buttonBarStyles: StyleScope.() -> Unit = {},
+    enabled: Boolean = true,
+    showDiscard: Boolean = true,
+    autoFocus: Boolean = false,
+    resetOnSubmit: Boolean = true,
+    button: String = appString { save },
     onSave: suspend (String) -> Boolean
 ) {
     val scope = rememberCoroutineScope()
@@ -45,6 +53,9 @@ fun EditField(
 
             if (result) {
                 messageChanged = false
+                if (resetOnSubmit) {
+                    messageText = value
+                }
             }
 
             isSaving = false
@@ -62,6 +73,10 @@ fun EditField(
         }
 
         placeholder(placeholder)
+
+        if (!enabled) {
+            disabled()
+        }
 
         onKeyDown {
             if (it.key == "Enter" && it.ctrlKey) {
@@ -83,7 +98,15 @@ fun EditField(
             it.target.style.height = "${it.target.scrollHeight + 2}px"
         }
 
+        if (autoFocus) {
+            autoFocus()
+        }
+
         ref { element ->
+            if (autoFocus) {
+                element.focus()
+            }
+
             element.style.height = "0"
             element.style.height = "${element.scrollHeight + 2}px"
 
@@ -99,19 +122,22 @@ fun EditField(
         }
     }
 
-    if (messageChanged) {
+    if (messageChanged && messageText != value) {
         Div({
             style {
                 margin(.5.r)
                 flexShrink(0)
                 display(DisplayStyle.Flex)
+                buttonBarStyles()
             }
         }) {
             Button({
                 classes(Styles.button)
 
-                style {
-                    marginRight(.5.r)
+                if (showDiscard) {
+                    style {
+                        marginRight(.5.r)
+                    }
                 }
 
                 onClick {
@@ -122,24 +148,26 @@ fun EditField(
                     disabled()
                 }
             }) {
-                appText { save }
+                Text(button)
             }
 
-            Button({
-                classes(Styles.outlineButton)
-                style {
-                    marginRight(.5.r)
-                }
-                onClick {
-                    messageText = value
-                    messageChanged = false
-                }
+            if (showDiscard) {
+                Button({
+                    classes(Styles.outlineButton)
+                    style {
+                        marginRight(.5.r)
+                    }
+                    onClick {
+                        messageText = value
+                        messageChanged = false
+                    }
 
-                if (isSaving) {
-                    disabled()
+                    if (isSaving) {
+                        disabled()
+                    }
+                }) {
+                    appText { discard }
                 }
-            }) {
-                appText { discard }
             }
         }
     }

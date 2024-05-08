@@ -757,6 +757,50 @@ object Strings {
         "Settings",
         "Cài đặt"
     )
+    val shareAComment = Translation(
+        "Share a comment",
+        "Chia sẻ một bình luận"
+    )
+    val post = Translation(
+        "Post",
+        "Đăng"
+    )
+    val signInToComment = Translation(
+        "Sign in to comment",
+        "Đăng nhập để chia sẻ một bình luận"
+    )
+    val signInToReply = Translation(
+        "Sign in to reply",
+        "Đăng nhập để trả lời"
+    )
+    val reply = Translation(
+        "Reply",
+        "Trả lời"
+    )
+    val inlineReply = Translation(
+        "reply",
+        "câu trả lời"
+    )
+    val inlineReplies = Translation(
+        "replies",
+        "câu trả lời"
+    )
+    val replyTo = Translation(
+        "Reply to",
+        "Trả lời đến"
+    )
+    val commentReplies = Translation(
+        "Comment replies",
+        "Trả lời bình luận"
+    )
+    val showAllComment = Translation(
+        "Show %1\$s more comment",
+        "Coi thêm %1\$s bình luận"
+    )
+    val showAllComments = Translation(
+        "Show %1\$s more comments",
+        "Coi thêm %1\$s bình luận"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {
