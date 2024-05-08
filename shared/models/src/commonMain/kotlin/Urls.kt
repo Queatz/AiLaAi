@@ -10,7 +10,7 @@ expect class UrlValidator() {
 private val urlValidator = UrlValidator()
 
 private inline fun String.trimUrl(): String? =
-    trim(*"()[].,:;!".toCharArray()).takeIf { "." in it }
+    trim(*"“”()[].,:;!".toCharArray()).takeIf { "." in it }
 
 private inline fun String.ensureScheme() =
     if (contains("://")) this else "https://$this"
