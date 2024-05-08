@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -163,17 +164,19 @@ fun InventoryScreen() {
 
     fun equip(inventoryItem: InventoryItem, quantity: Double) {
         scope.launch {
-            api.equipItem(inventoryItem.id!!, EquipItemBody(quantity))
-            reload()
-            context.toast(R.string.items_equipped)
+            api.equipItem(inventoryItem.id!!, EquipItemBody(quantity)) {
+                context.toast(R.string.items_equipped)
+                reload()
+            }
         }
     }
 
     fun unequip(inventoryItem: InventoryItem, quantity: Double) {
         scope.launch {
-            api.unequipItem(inventoryItem.id!!, UnequipItemBody(quantity))
-            reload()
-            context.toast(R.string.items_unequipped)
+            api.unequipItem(inventoryItem.id!!, UnequipItemBody(quantity)) {
+                reload()
+                context.toast(R.string.items_unequipped)
+            }
         }
     }
 
@@ -455,7 +458,7 @@ fun InventoryScreen() {
                             showActiveTradesDialog = true
                         },
                         shape = MaterialTheme.shapes.large,
-                        elevation = CardDefaults.elevatedCardElevation(1.elevation),
+                        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)),
                         modifier = Modifier
                             .padding(horizontal = 1.pad)
                             .fillMaxWidth()

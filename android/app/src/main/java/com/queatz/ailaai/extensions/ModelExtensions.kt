@@ -104,7 +104,7 @@ val InventoryItem.isExpired get() = expiresAt?.let { it < Clock.System.now() } ?
 
 private val itemFormat = DecimalFormat("#.######")
 
-fun Number.formatItemQuantity() = itemFormat.format(this)!!
+fun Double.formatItemQuantity() = itemFormat.format(this)!!
 fun String.toItemQuantity() = try {
     itemFormat.parse(this).toDouble()
 } catch (_: ParseException) {

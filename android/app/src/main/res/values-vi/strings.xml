@@ -43,12 +43,12 @@
     <string name="message">Nhắn tin</string>
     <string name="someone">Một người ai đó</string>
     <string name="active">Truy cập</string>
-    <string name="reminders_notification_channel_description">Lời nhắc của bạn.</string>
-    <string name="messages_notification_channel_description">Tin nhắn từ người.</string>
-    <string name="collaboration_notification_channel_description">Thông báo hợp tác.</string>
-    <string name="host_notification_channel_description">Thông báo chủ trì nhóm.</string>
+    <string name="reminders_notification_channel_description">Lời nhắc của bạn</string>
+    <string name="messages_notification_channel_description">Tin nhắn từ người</string>
+    <string name="collaboration_notification_channel_description">Thông báo hợp tác</string>
+    <string name="host_notification_channel_description">Thông báo chủ trì nhóm</string>
     <string name="subscription_notification_channel_description">Các đăng ký của bạn</string>
-    <string name="trade_notification_channel_description">Thông báo trao đổi</string>
+    <string name="trade_notification_channel_description">Thông báo việc đổi đồ</string>
     <string name="calls_notification_channel_description">Trả lời cuộc gọi</string>
     <string name="ongoing_calls_notification_channel_description">Quản lý cuộc gọi đang diễn ra</string>
     <string name="copy">Sao chép</string>

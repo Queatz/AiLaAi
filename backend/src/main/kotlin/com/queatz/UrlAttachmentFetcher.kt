@@ -2,6 +2,7 @@ package com.queatz
 
 import com.queatz.db.Message
 import com.queatz.db.UrlAttachment
+import com.queatz.db.extractUrls
 import com.queatz.plugins.db
 import com.queatz.plugins.json
 import io.ktor.client.HttpClient

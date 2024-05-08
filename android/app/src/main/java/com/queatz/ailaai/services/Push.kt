@@ -180,7 +180,7 @@ enum class Notifications(
     Host(R.string.host, R.string.host_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
     Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
     Trade(R.string.trade, R.string.trade_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_SOCIAL),
-    Subscriptions(R.string.subscriptions, R.string.trade_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
+    Subscriptions(R.string.subscriptions, R.string.subscription_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
     ;
     val key get() = name.lowercase()
 }

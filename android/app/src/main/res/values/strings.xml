@@ -53,10 +53,10 @@
     <string name="someone">Someone</string>
     <string name="active">Active</string>
     <string name="reminders_notification_channel_description">Your reminders</string>
-    <string name="messages_notification_channel_description">Messages from people.</string>
-    <string name="collaboration_notification_channel_description">Collaboration notifications.</string>
-    <string name="host_notification_channel_description">Host notifications.</string>
-    <string name="trade_notification_channel_description">Trade notifications.</string>
+    <string name="messages_notification_channel_description">Messages from people</string>
+    <string name="collaboration_notification_channel_description">Collaboration notifications</string>
+    <string name="host_notification_channel_description">Host notifications</string>
+    <string name="trade_notification_channel_description">Trade notifications</string>
     <string name="calls_notification_channel_description">Answer incoming calls</string>
     <string name="ongoing_calls_notification_channel_description">Manage ongoing calls</string>
     <string name="subscription_notification_channel_description">Your subscriptions</string>

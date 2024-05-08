@@ -17,7 +17,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.format
-import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ItemExtended
 

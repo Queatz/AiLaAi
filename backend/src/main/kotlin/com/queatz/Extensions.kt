@@ -20,24 +20,6 @@ suspend fun delayUntilNextMinute() = delay(
     Clock.System.now().let { now -> (now + 1.minutes).startOfMinute() - now }
 )
 
-fun String.extractUrls(): List<String> {
-    val urls = mutableListOf<String>()
-    val words = split("\\s+".toRegex()) // Split input string by whitespace
-
-    for (word in words) {
-        try {
-            val raw = word.trim(*"()[].,:;!".toCharArray())
-            if ("." !in raw) continue
-            val url = URL(if (raw.contains("://")) raw else "https://$raw")
-            urls.add(url.toString())
-        } catch (_: Throwable) {
-            // Ignore URLs that couldn't be parsed
-        }
-    }
-
-    return urls
-}
-
 data class OpenGraphData(
     var title: String? = null,
     var description: String? = null,

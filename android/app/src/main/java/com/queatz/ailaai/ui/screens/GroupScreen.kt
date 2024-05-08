@@ -661,7 +661,7 @@ fun GroupScreen(groupId: String) {
                                 ui.setShowDescription(groupId, showDescription)
                             },
                             shape = MaterialTheme.shapes.large,
-                            elevation = CardDefaults.elevatedCardElevation(1.elevation),
+                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)),
                             modifier = Modifier
                                 .padding(1.pad)
                         ) {

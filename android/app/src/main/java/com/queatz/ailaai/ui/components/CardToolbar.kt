@@ -74,8 +74,7 @@ fun CardToolbar(
     items: @Composable CardToolbarScope.() -> Unit
 ) {
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(1.pad),
+        horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
     ) {
