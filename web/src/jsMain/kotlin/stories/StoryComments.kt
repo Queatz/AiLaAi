@@ -2,7 +2,6 @@ package stories
 
 import Styles
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -14,14 +13,11 @@ import api
 import app.ailaai.api.comment
 import app.ailaai.api.replyToComment
 import app.components.EditField
-import app.dialog.dialog
-import app.messaages.inList
 import appString
 import appText
 import application
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
-import components.Loading
 import components.ProfilePhoto
 import format
 import kotlinx.browser.window
@@ -31,7 +27,6 @@ import lib.toLocaleString
 import notEmpty
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.alignSelf
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
@@ -39,7 +34,6 @@ import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
@@ -143,77 +137,82 @@ fun StoryComments(
                                 appText { reply }
                             }
                         }
-                        Div({
-                            classes(StoryStyles.commentRepliesLayout)
-                        }) {
-                            if (showReply) {
-                                EditField(
-                                    placeholder = if (me == null) appString {
-                                        signInToReply
-                                    } else "${appString { replyTo }} ${comment.person!!.name ?: appString { someone }}",
-                                    styles = {
-                                        marginTop(.5.r)
-                                        width(100.percent)
-                                    },
-                                    buttonBarStyles = {
-                                        justifyContent(JustifyContent.End)
-                                        width(100.percent)
-                                    },
-                                    autoFocus = true,
-                                    showDiscard = false,
-                                    resetOnSubmit = true,
-                                    enabled = me != null,
-                                    button = appString { post }
-                                ) {
-                                    var success = false
-                                    api.replyToComment(
-                                        comment.comment!!.id!!,
-                                        Comment(comment = it)
+
+                        val replies = (comment.replies ?: loadedCommentReplies[comment.comment!!.id!!])?.notEmpty
+
+                        if (showReply || replies != null) {
+                            Div({
+                                classes(StoryStyles.commentRepliesLayout)
+                            }) {
+                                if (showReply) {
+                                    EditField(
+                                        placeholder = if (me == null) appString {
+                                            signInToReply
+                                        } else "${appString { replyTo }} ${comment.person!!.name ?: appString { someone }}",
+                                        styles = {
+                                            marginTop(.5.r)
+                                            width(100.percent)
+                                        },
+                                        buttonBarStyles = {
+                                            justifyContent(JustifyContent.End)
+                                            width(100.percent)
+                                        },
+                                        autoFocus = true,
+                                        showDiscard = false,
+                                        resetOnSubmit = true,
+                                        enabled = me != null,
+                                        button = appString { post }
                                     ) {
-                                        success = true
-                                        if (loadRepliesInline) {
-                                            loadCommentReplies(comment)
-                                        }
-                                        onReply(it)
-                                        showReply = false
-                                    }
-                                    success
-                                }
-                            }
-
-                            (comment.replies ?: loadedCommentReplies[comment.comment!!.id!!])?.notEmpty?.let { replies ->
-                                StoryComments(
-                                    replies,
-                                    max = max,
-                                    loadRepliesInline = loadRepliesInline,
-                                    onReply = onReply
-                                )
-                            } ?: let {
-                                if (showRepliesLink && comment.totalReplies!! > 0) {
-                                    Div({
-                                        style {
-                                            marginLeft(.75.r)
-                                        }
-                                    }) {
-                                        Span({
-                                            style {
-                                                opacity(.5f)
+                                        var success = false
+                                        api.replyToComment(
+                                            comment.comment!!.id!!,
+                                            Comment(comment = it)
+                                        ) {
+                                            success = true
+                                            if (loadRepliesInline) {
+                                                loadCommentReplies(comment)
                                             }
-                                        }) { Text("⮡ ") }
-                                        Span({
-                                            classes(Styles.inlineButton)
+                                            onReply(it)
+                                            showReply = false
+                                        }
+                                        success
+                                    }
+                                }
 
-                                            onClick {
-                                                if (loadRepliesInline != it.ctrlKey) {
-                                                    scope.launch {
-                                                        loadCommentReplies(comment)
-                                                    }
-                                                } else {
-                                                    openComment(comment)
-                                                }
+                                replies?.let { replies ->
+                                    StoryComments(
+                                        replies,
+                                        max = max,
+                                        loadRepliesInline = loadRepliesInline,
+                                        onReply = onReply
+                                    )
+                                } ?: let {
+                                    if (showRepliesLink && comment.totalReplies!! > 0) {
+                                        Div({
+                                            style {
+                                                marginLeft(.75.r)
                                             }
                                         }) {
-                                            Text("${comment.totalReplies} ${appString { if (comment.totalReplies == 1) inlineReply else inlineReplies}}")
+                                            Span({
+                                                style {
+                                                    opacity(.5f)
+                                                }
+                                            }) { Text("⮡ ") }
+                                            Span({
+                                                classes(Styles.inlineButton)
+
+                                                onClick {
+                                                    if (loadRepliesInline != it.ctrlKey) {
+                                                        scope.launch {
+                                                            loadCommentReplies(comment)
+                                                        }
+                                                    } else {
+                                                        openComment(comment)
+                                                    }
+                                                }
+                                            }) {
+                                                Text("${comment.totalReplies} ${appString { if (comment.totalReplies == 1) inlineReply else inlineReplies }}")
+                                            }
                                         }
                                     }
                                 }

@@ -185,6 +185,11 @@ object Strings {
         "bởi",
         ""
     )
+    val inlineAnd = Translation(
+        "and",
+        "và",
+        ""
+    )
     val draft = Translation(
         "Draft",
         "Bản nháp",

@@ -6,7 +6,6 @@ import api
 import app.ailaai.api.comment
 import app.ailaai.api.group
 import app.cards.CardsPage
-import app.dialog.dialog
 import app.group.GroupPage
 import app.nav.*
 import app.page.SchedulePage
@@ -15,6 +14,7 @@ import app.page.StoriesPage
 import app.widget.WidgetStyles
 import appString
 import application
+import asNaturalList
 import call
 import com.queatz.db.Card
 import com.queatz.db.Reminder
@@ -25,6 +25,7 @@ import com.queatz.push.CommentReplyPushData
 import com.queatz.push.MessagePushData
 import com.queatz.push.PushAction
 import com.queatz.push.ReminderPushData
+import com.queatz.push.StoryPushData
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -177,6 +178,28 @@ fun AppPage() {
         }
     }
 
+    LaunchedEffect(Unit) {
+        push.events.filter {
+            it.action == PushAction.Story
+        }.collect {
+            val data = it.data as? StoryPushData
+            playNotificationSound = true
+            notifications.add(
+                Notification(
+                    null,
+                    data?.story?.title ?: reminderString,
+                    "${data!!.authors.asNaturalList(application) { it.name ?: someone }} posted a story",
+                    onDismiss = {
+                        playNotificationSound = false
+                    }
+                ) {
+                    playNotificationSound = false
+                    window.open("/story/${data.story.id!!}", target = "_blank")
+                }
+            )
+        }
+    }
+
     fun showComment(comment: String) {
         scope.launch {
             api.comment(comment) {
@@ -197,7 +220,7 @@ fun AppPage() {
                             Notification(
                                 null,
                                 // todo translate
-                                "${data!!.person!!.name ?: someone} commented on your story",
+                                "${data.person!!.name ?: someone} commented on your story",
                                 data.comment?.comment ?: "",
                                 onDismiss = {
                                     playNotificationSound = false
@@ -262,8 +285,6 @@ fun AppPage() {
             }
         }
     }
-
-    // todo story published
 
     if (playCallSound || playNotificationSound || playMessageSound) {
         Audio({

@@ -32,6 +32,15 @@ fun <T> List<T>.asNaturalList(transform: (T) -> String) = when (size) {
     }
 }
 
+fun <T> List<T>.asNaturalList(application: Application, transform: (T) -> String) = when (size) {
+    0 -> ""
+    1 -> transform(first())
+    2 -> "${transform(first())} ${application.appString { inlineAnd }} ${transform(last())}"
+    else -> {
+        "${dropLast(1).joinToString(", ", transform = transform)} ${application.appString { inlineAnd }} ${transform(last())}"
+    }
+}
+
 val formatOptions = js("""
     {
      weekday: 'long',
