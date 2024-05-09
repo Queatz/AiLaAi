@@ -18,6 +18,7 @@ import appText
 import application
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
+import components.LinkifyText
 import components.ProfilePhoto
 import format
 import kotlinx.browser.window
@@ -106,7 +107,7 @@ fun StoryComments(
                             Div({
                                 classes(StoryStyles.commentComment)
                             }) {
-                                Text(comment.comment?.comment ?: appString { someone })
+                                LinkifyText(comment.comment?.comment ?: appString { someone })
                             }
                         }
                         Div({
@@ -138,9 +139,10 @@ fun StoryComments(
                             }
                         }
 
+                        val showTotalReplies = comment.totalReplies!! > 0
                         val replies = (comment.replies ?: loadedCommentReplies[comment.comment!!.id!!])?.notEmpty
 
-                        if (showReply || replies != null) {
+                        if (showReply || replies != null || showTotalReplies) {
                             Div({
                                 classes(StoryStyles.commentRepliesLayout)
                             }) {
@@ -187,7 +189,7 @@ fun StoryComments(
                                         onReply = onReply
                                     )
                                 } ?: let {
-                                    if (showRepliesLink && comment.totalReplies!! > 0) {
+                                    if (showRepliesLink && showTotalReplies) {
                                         Div({
                                             style {
                                                 marginLeft(.75.r)

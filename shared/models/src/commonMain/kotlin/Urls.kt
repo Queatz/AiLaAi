@@ -9,8 +9,10 @@ expect class UrlValidator() {
 
 private val urlValidator = UrlValidator()
 
+private val trimChars = "\"'“”()[].,:;!?".toCharArray()
+
 private inline fun String.trimUrl(): String? =
-    trim(*"“”()[].,:;!".toCharArray()).takeIf { "." in it }
+    trim(*trimChars).takeIf { "." in it }
 
 private inline fun String.ensureScheme() =
     if (contains("://")) this else "https://$this"
@@ -28,7 +30,7 @@ fun String.matchUrls(): List<IntRange> = mutableListOf<IntRange>().apply {
     for (word in "\\S+".toRegex().findAll(this@matchUrls)) {
         val raw = word.value.trimUrl() ?: continue
         if (urlValidator.validate(raw.ensureScheme()) != null) {
-            add(word.range)
+            add((word.range.first + word.value.takeWhile { it in trimChars }.length)..(word.range.last - word.value.takeLastWhile { it in trimChars }.length))
         }
     }
 }
