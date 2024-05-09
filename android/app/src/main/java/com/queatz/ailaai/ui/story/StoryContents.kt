@@ -175,7 +175,7 @@ fun StoryContents(
                 when (content) {
                     is StoryContent.Divider -> dividerItem()
 
-                    is StoryContent.Comments -> commentsItem(content, onCommentFocused, onReloadRequest)
+                    is StoryContent.Comments -> commentsItem(content, onCommentFocused)
 
                     is StoryContent.Reactions -> reactionsItem(
                         content,

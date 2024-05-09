@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
@@ -54,10 +55,12 @@ fun CommentTextField(
         },
         placeholder = {
             placeholder?.let {
-                Text(
-                    it,
-                    modifier = Modifier.alpha(.5f)
-                )
+                DisableSelection {
+                    Text(
+                        it,
+                        modifier = Modifier.alpha(.5f)
+                    )
+                }
             }
         },
         keyboardOptions = KeyboardOptions(
