@@ -139,12 +139,13 @@ object StoryStyles : StyleSheet() {
         flexDirection(FlexDirection.Column)
         padding(.75.r)
         borderRadius(1.r)
-        border(1.px, LineStyle.Solid, Color.black)
+        outline("${1.px} ${LineStyle.Solid} ${Color.white}")
         backgroundColor(Styles.colors.background)
         overflow("hidden")
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)
+            outline("${1.px} ${LineStyle.Solid} ${Color.black}")
         }
     }
 

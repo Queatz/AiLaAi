@@ -13,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.notBlank
-import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Story
 
@@ -42,7 +41,6 @@ fun StoryCard(
                     style = MaterialTheme.typography.headlineSmall
                 )
                 StoryAuthors(
-                    nav,
                     story.publishDate,
                     story.authors ?: emptyList()
                 )

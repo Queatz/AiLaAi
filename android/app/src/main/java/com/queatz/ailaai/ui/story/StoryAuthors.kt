@@ -11,12 +11,14 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.nav
 import com.queatz.db.Person
 import kotlinx.datetime.Instant
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-fun StoryAuthors(navController: NavController, publishDate: Instant?, authors: List<Person>) {
+fun StoryAuthors(publishDate: Instant?, authors: List<Person>) {
+    val nav = nav
     val someone = stringResource(R.string.someone)
     val and = stringResource(R.string.inline_and)
     val authorsText = buildAnnotatedString {
@@ -51,7 +53,7 @@ fun StoryAuthors(navController: NavController, publishDate: Instant?, authors: L
         )
     ) {
         authorsText.getStringAnnotations(it, it).firstOrNull()?.tag?.let { id ->
-            navController.navigate(AppNav.Profile(id))
+            nav.navigate(AppNav.Profile(id))
         }
     }
 }

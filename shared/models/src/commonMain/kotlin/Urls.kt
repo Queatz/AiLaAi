@@ -12,7 +12,7 @@ private val urlValidator = UrlValidator()
 private val trimChars = "\"'“”()[].,:;!?".toCharArray()
 
 private inline fun String.trimUrl(): String? =
-    trim(*trimChars).takeIf { "." in it }
+    trim(*trimChars).takeIf { it.contains(tldsRegex) }
 
 private inline fun String.ensureScheme() =
     if (contains("://")) this else "https://$this"

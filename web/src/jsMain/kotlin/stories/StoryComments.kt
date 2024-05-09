@@ -184,7 +184,7 @@ fun StoryComments(
                                 replies?.let { replies ->
                                     StoryComments(
                                         replies,
-                                        max = max,
+                                        max = max?.let { it - 1 }?.coerceAtLeast(2),
                                         loadRepliesInline = loadRepliesInline,
                                         onReply = onReply
                                     )

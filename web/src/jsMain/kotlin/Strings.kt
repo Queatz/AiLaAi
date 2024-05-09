@@ -796,7 +796,7 @@ object Strings {
     )
     val replyTo = Translation(
         "Reply to",
-        "Trả lời đến"
+        "Trả lời"
     )
     val commentReplies = Translation(
         "Comment replies",
