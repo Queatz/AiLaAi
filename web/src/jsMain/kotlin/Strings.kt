@@ -713,6 +713,10 @@ object Strings {
         "Loading group…",
         "Đang tải nhóm…"
     )
+    val loadingComments = Translation(
+        "Loading comments…",
+        "Đang tải bình luận…"
+    )
     val addPay = Translation(
         "Add pay",
         "Thêm lương"

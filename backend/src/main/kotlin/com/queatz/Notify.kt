@@ -1,5 +1,6 @@
 package com.queatz
 
+import com.queatz.api.ellipsize
 import com.queatz.db.*
 import com.queatz.db.Call
 import com.queatz.plugins.db
@@ -115,6 +116,44 @@ class Notify {
         )
 
         notifyPeople(subscribers.map { it.id!! }, pushData)
+    }
+
+    fun comment(story: Story, comment: Comment, person: Person) {
+        val pushData = PushData(
+            PushAction.Comment,
+            CommentPushData(
+                comment = Comment().apply {
+                    id = comment.id
+                    this.comment = comment.comment?.ellipsize()
+                },
+                story = Story().apply {
+                    id = story.id
+                    title = story.title
+                },
+                person = person
+            )
+        )
+
+        notifyPeople(listOf(story.person!!), pushData)
+    }
+
+    fun commentReply(comment: Comment, onComment: Comment, person: Person) {
+        val pushData = PushData(
+            PushAction.CommentReply,
+            CommentReplyPushData(
+                comment = Comment().apply {
+                    id = comment.id
+                    this.comment = comment.comment?.ellipsize()
+                },
+                onComment = Comment().apply {
+                    id = onComment.id
+                    this.comment = onComment.comment?.ellipsize()
+                },
+                person = person
+            )
+        )
+
+        notifyPeople(listOf(comment.from!!.asKey()), pushData)
     }
 
     fun message(group: Group, from: Person, message: Message) {

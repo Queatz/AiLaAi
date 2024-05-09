@@ -51,6 +51,7 @@
     <string name="trade_notification_channel_description">Thông báo việc đổi đồ</string>
     <string name="calls_notification_channel_description">Trả lời cuộc gọi</string>
     <string name="ongoing_calls_notification_channel_description">Quản lý cuộc gọi đang diễn ra</string>
+    <string name="comments_notification_channel_description">Bình luận đến bài viết của bạn</string>
     <string name="copy">Sao chép</string>
     <string name="delete">Xóa</string>
     <string name="connected">Đã kết nối</string>
@@ -710,4 +711,7 @@
     <string name="in_a_month">Một tháng sau</string>
     <string name="in_a_year">Một năm sau</string>
     <string name="draw">Vẽ</string>
+    <string name="comments">Bình luận</string>
+    <string name="x_commented_on_your_story">%1$s commented on your story</string>
+    <string name="x_replied_to_your_comment">%1$s replied to your comment</string>
 </resources>

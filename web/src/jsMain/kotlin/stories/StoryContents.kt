@@ -1,7 +1,15 @@
 package stories
 
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.ailaai.api.group
@@ -27,7 +35,6 @@ import com.queatz.widgets.Widgets
 import components.CardItem
 import components.Icon
 import components.LinkifyText
-import components.Loading
 import components.LoadingText
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -35,8 +42,23 @@ import lib.format
 import lib.isThisYear
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.backgroundImage
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.Audio
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Source
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import r
 import kotlin.js.Date
 
@@ -103,7 +125,7 @@ fun StoryContents(
 
             is StoryContent.Comments -> {
                 val me by application.me.collectAsState()
-                var comments by remember {
+                var comments by remember(part.story) {
                     mutableStateOf<List<CommentExtended>?>(null)
                 }
 
@@ -113,7 +135,7 @@ fun StoryContents(
                     }
                 }
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(part.story) {
                     reloadComments()
                 }
 
@@ -149,7 +171,7 @@ fun StoryContents(
 
                     LoadingText(
                         comments != null,
-                        appString { loading }
+                        appString { loadingComments }
                     ) {
                         StoryComments(comments!!, max = 3) {
                             reloadComments()

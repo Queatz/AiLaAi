@@ -7,6 +7,7 @@ import com.queatz.db.comment
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
+import com.queatz.plugins.notify
 import com.queatz.plugins.respond
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -44,7 +45,11 @@ fun Route.commentRoutes() {
                     }
                 )
 
-                // todo notify
+                notify.commentReply(
+                    comment,
+                    onComment,
+                    me
+                )
 
                 comment
             }

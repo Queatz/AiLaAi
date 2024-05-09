@@ -13,6 +13,8 @@ enum class PushAction {
     Reminder,
     Trade,
     Story,
+    Comment,
+    CommentReply,
 }
 
 enum class StoryEvent {
@@ -128,13 +130,27 @@ data class StoryPushData(
 ) : PushDataData()
 
 @Serializable
-data class CollaborationEventData (
+data class CollaborationEventData(
     val card: Card? = null,
     val person: Person? = null,
     val details: CollaborationEventDataDetails? = null
 )
 
 @Serializable
-data class GroupEventData (
+data class GroupEventData(
     val invitor: Person? = null
 )
+
+@Serializable
+data class CommentPushData(
+    val comment: Comment? = null,
+    val story: Story? = null,
+    val person: Person? = null
+) : PushDataData()
+
+@Serializable
+data class CommentReplyPushData(
+    val comment: Comment? = null,
+    val onComment: Comment? = null,
+    val person: Person? = null
+) : PushDataData()

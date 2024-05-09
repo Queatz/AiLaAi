@@ -3,8 +3,10 @@ package app
 import Notification
 import androidx.compose.runtime.*
 import api
+import app.ailaai.api.comment
 import app.ailaai.api.group
 import app.cards.CardsPage
+import app.dialog.dialog
 import app.group.GroupPage
 import app.nav.*
 import app.page.SchedulePage
@@ -18,10 +20,13 @@ import com.queatz.db.Card
 import com.queatz.db.Reminder
 import com.queatz.db.Story
 import com.queatz.push.CallPushData
+import com.queatz.push.CommentPushData
+import com.queatz.push.CommentReplyPushData
 import com.queatz.push.MessagePushData
 import com.queatz.push.PushAction
 import com.queatz.push.ReminderPushData
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
@@ -34,6 +39,7 @@ import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
 import stories.StoryStyles
+import stories.commentDialog
 
 @Serializable
 enum class NavPage {
@@ -158,7 +164,6 @@ fun AppPage() {
                     Notification(
                         null,
                         data.reminder.title ?: reminderString,
-                        // todo translate
                         data.occurrence?.note ?: data.reminder.note ?: "",
                         onDismiss = {
                             playNotificationSound = false
@@ -172,6 +177,61 @@ fun AppPage() {
         }
     }
 
+    fun showComment(comment: String) {
+        scope.launch {
+            api.comment(comment) {
+                commentDialog(it)
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        push.events.filter {
+            it.action == PushAction.Comment || it.action == PushAction.CommentReply
+        }.collect {
+            when (val data = it.data) {
+                is CommentPushData -> {
+                    if (data.person?.id != me?.id) {
+                        playNotificationSound = true
+                        notifications.add(
+                            Notification(
+                                null,
+                                // todo translate
+                                "${data!!.person!!.name ?: someone} commented on your story",
+                                data.comment?.comment ?: "",
+                                onDismiss = {
+                                    playNotificationSound = false
+                                }
+                            ) {
+                                playNotificationSound = false
+                                window.open("/story/${data.story!!.id!!}", target = "_blank")
+                            }
+                        )
+                    }
+                }
+                is CommentReplyPushData -> {
+                    if (data.person?.id != me?.id) {
+                        playNotificationSound = true
+                        notifications.add(
+                            Notification(
+                                null,
+                                // todo translate
+                                "${data.person!!.name ?: someone} replied to your comment",
+                                data.comment?.comment ?: "",
+                                onDismiss = {
+                                    playNotificationSound = false
+                                }
+                            ) {
+                                playNotificationSound = false
+                                showComment(data.onComment!!.id!!)
+                            }
+                        )
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         push.events.filter {
@@ -202,6 +262,8 @@ fun AppPage() {
             }
         }
     }
+
+    // todo story published
 
     if (playCallSound || playNotificationSound || playMessageSound) {
         Audio({

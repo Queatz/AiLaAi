@@ -238,6 +238,8 @@ class Push {
                                                 is ReminderPushData -> it
                                                 is StoryPushData -> it
                                                 is TradePushData -> it
+                                                is CommentPushData -> it
+                                                is CommentReplyPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

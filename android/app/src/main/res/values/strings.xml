@@ -60,6 +60,7 @@
     <string name="calls_notification_channel_description">Answer incoming calls</string>
     <string name="ongoing_calls_notification_channel_description">Manage ongoing calls</string>
     <string name="subscription_notification_channel_description">Your subscriptions</string>
+    <string name="comments_notification_channel_description">Comments on your stories</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
@@ -698,6 +699,9 @@
     <string name="in_a_month">In a month</string>
     <string name="in_a_year">In a year</string>
     <string name="draw">Draw</string>
+    <string name="comments">Comments</string>
+    <string name="x_commented_on_your_story">%1$s commented on your story</string>
+    <string name="x_replied_to_your_comment">%1$s replied to your comment</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>

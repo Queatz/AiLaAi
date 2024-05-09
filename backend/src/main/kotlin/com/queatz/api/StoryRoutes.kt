@@ -226,6 +226,7 @@ fun Route.storyRoutes() {
 
         post("/stories/{id}/comment") {
             respond {
+                val me = me
                 val story = db.document(Story::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
 
                 if (story.published != true) {
@@ -246,7 +247,11 @@ fun Route.storyRoutes() {
                     }
                 )
 
-                // todo notify
+                notify.comment(
+                    story,
+                    comment,
+                    me
+                )
 
                 comment
             }

@@ -27,6 +27,7 @@ import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import lib.formatDistanceToNow
+import lib.toLocaleString
 import notEmpty
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.JustifyContent
@@ -72,42 +73,7 @@ fun StoryComments(
 
     fun openComment(comment: CommentExtended) {
         scope.launch {
-            dialog(
-                title = application.appString { commentReplies },
-                confirmButton = application.appString { close },
-                cancelButton = null
-            ) {
-                Style(StoryStyles)
-
-                var comment by remember { mutableStateOf(comment) }
-                var isLoading by remember { mutableStateOf(true) }
-
-                suspend fun reloadCommentReplies() {
-                    api.comment(comment.comment!!.id!!) {
-                        comment = it
-                    }
-                    isLoading = false
-                }
-
-                LaunchedEffect(Unit) {
-                    reloadCommentReplies()
-                }
-
-                StoryComments(
-                    comment.inList(),
-                    showRepliesLink = !isLoading,
-                    loadRepliesInline = true
-                ) {
-                    reloadCommentReplies()
-                }
-                if (isLoading) {
-                    Loading {
-                        style {
-                            padding(2.r)
-                        }
-                    }
-                }
-            }
+            commentDialog(comment)
         }
     }
 
@@ -238,7 +204,7 @@ fun StoryComments(
                                             classes(Styles.inlineButton)
 
                                             onClick {
-                                                if (loadRepliesInline && !it.ctrlKey) {
+                                                if (loadRepliesInline != it.ctrlKey) {
                                                     scope.launch {
                                                         loadCommentReplies(comment)
                                                     }
@@ -273,7 +239,7 @@ fun StoryComments(
             }) {
                 val remaining = comments.size - max!!
                 Text(appString { if (remaining == 1) showAllComment else showAllComments }.format(
-                    remaining.toString()
+                    remaining.toLocaleString()
                 ))
             }
         }

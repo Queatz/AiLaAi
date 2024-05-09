@@ -82,6 +82,8 @@ class Push {
                 PushAction.Reminder -> receive(parse<ReminderPushData>(push))
                 PushAction.Trade -> receive(parse<TradePushData>(push))
                 PushAction.Story -> receive(parse<StoryPushData>(push))
+                PushAction.Comment -> receive(parse<CommentPushData>(push))
+                PushAction.CommentReply -> receive(parse<CommentReplyPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()
@@ -181,6 +183,7 @@ enum class Notifications(
     Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
     Trade(R.string.trade, R.string.trade_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_SOCIAL),
     Subscriptions(R.string.subscriptions, R.string.subscription_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
+    Comments(R.string.comments, R.string.comments_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
     ;
     val key get() = name.lowercase()
 }
