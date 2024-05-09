@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.story.contents
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.DisposableEffect
@@ -73,7 +74,9 @@ fun LazyGridScope.commentsItem(
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(1.5f.pad)
+            verticalArrangement = Arrangement.spacedBy(1.5f.pad),
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             DisposableEffect(Unit) {
                 onDispose {
@@ -98,7 +101,7 @@ fun LazyGridScope.commentsItem(
             }
 
             comments?.let {
-                StoryComments(it, onCommentFocused)
+                StoryComments(it, onCommentFocused, max = 3)
             }
         }
     }

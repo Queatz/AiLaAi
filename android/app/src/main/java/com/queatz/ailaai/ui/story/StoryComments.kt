@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -33,6 +34,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.contactPhoto
+import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.navigate
@@ -52,6 +54,7 @@ import kotlinx.coroutines.launch
 fun StoryComments(
     comments: List<CommentExtended>,
     onCommentFocused: (Boolean) -> Unit,
+    max: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -60,6 +63,9 @@ fun StoryComments(
     var loadedCommentReplies by remember {
         mutableStateOf(emptyMap<String, List<CommentExtended>>())
     }
+
+    var showAll by rememberStateOf(false)
+    val maxShown = max != null && comments.size > max && !showAll
 
     suspend fun loadCommentReplies(comment: CommentExtended) {
         api.comment(comment.comment!!.id!!) {
@@ -70,8 +76,13 @@ fun StoryComments(
     Column(
         verticalArrangement = Arrangement.spacedBy(1.pad),
         modifier = modifier
+            .fillMaxWidth()
     ) {
-        comments.forEach { comment ->
+        if (maxShown) {
+            comments.take(max!!)
+        } else {
+            comments
+        }.forEach { comment ->
             key(comment.comment!!.id!!) {
                 val showTotalReplies = comment.totalReplies!! > 0
                 val replies = (comment.replies ?: loadedCommentReplies[comment.comment!!.id!!])?.ifNotEmpty
@@ -118,21 +129,22 @@ fun StoryComments(
                             modifier = Modifier
                                 .padding(start = 1.pad)
                         )
+
+                        val focusRequester = remember { FocusRequester() }
+
+                        LaunchedEffect(showReply) {
+                            if (showReply) {
+                                focusRequester.requestFocus()
+                            }
+                        }
+
+                        DisposableEffect(Unit) {
+                            onDispose {
+                                onCommentFocused(false)
+                            }
+                        }
+
                         AnimatedVisibility(showReply) {
-                            val focusRequester = remember { FocusRequester() }
-
-                            LaunchedEffect(showReply) {
-                                if (showReply) {
-                                    focusRequester.requestFocus()
-                                }
-                            }
-
-                            DisposableEffect(Unit) {
-                                onDispose {
-                                    onCommentFocused(false)
-                                }
-                            }
-
                             CommentTextField(
                                 reply,
                                 { reply = it },
@@ -170,6 +182,7 @@ fun StoryComments(
                             StoryComments(
                                 replies,
                                 onCommentFocused,
+                                max = max?.let { it - 1 }?.coerceAtLeast(2),
                                 modifier = Modifier
                                     .padding(top = 1.pad)
                             )
@@ -194,6 +207,16 @@ fun StoryComments(
                         }
                     }
                 }
+            }
+        }
+        if (maxShown) {
+            val remaining = comments.size - max!!
+            OutlinedButton(
+                {
+                    showAll = !showAll
+                }
+            ) {
+                Text(pluralStringResource(R.plurals.show_x_more_comments, remaining, remaining.format()))
             }
         }
     }
