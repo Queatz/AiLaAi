@@ -241,7 +241,7 @@ fun StoriesScreen() {
                             source = null,
                             content = storyContents,
                             state = state,
-                            onReactionChange = {
+                            onReloadRequest = {
                                 scope.launch {
                                     reload()
                                 }

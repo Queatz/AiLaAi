@@ -66,7 +66,7 @@ fun StoryContents(
     bottomContentPadding: Dp = 0.pad,
     horizontalPadding: Dp = 2.pad,
     fade: Boolean = false,
-    onReactionChange: () -> Unit = {},
+    onReloadRequest: () -> Unit = {},
     onCommentFocused: (Boolean) -> Unit = {},
     onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null
@@ -175,7 +175,7 @@ fun StoryContents(
                 when (content) {
                     is StoryContent.Divider -> dividerItem()
 
-                    is StoryContent.Comments -> commentsItem()
+                    is StoryContent.Comments -> commentsItem(content, onCommentFocused, onReloadRequest)
 
                     is StoryContent.Reactions -> reactionsItem(
                         content,
@@ -183,7 +183,7 @@ fun StoryContents(
                         scope,
                         me,
                         onCommentFocused,
-                        onReactionChange
+                        onReloadRequest
                     )
 
                     is StoryContent.Title -> titleItem(content, actions)

@@ -2,22 +2,17 @@ package com.queatz.ailaai.ui.story.contents
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ButtonDefaults
@@ -26,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,18 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -61,6 +49,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.shortAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.components.CommentTextField
 import com.queatz.ailaai.ui.components.rememberLongClickInteractionSource
 import com.queatz.ailaai.ui.dialogs.AddReactionDialog
 import com.queatz.ailaai.ui.dialogs.ItemsPeopleDialog
@@ -92,20 +81,21 @@ fun LazyGridScope.reactionsItem(
 
         DisableSelection {
             fun sendComment() {
-                if (sendComment.isNotBlank()) {
-                    isSendingComment = true
-                    scope.launch {
-                        api.reactToStory(
-                            content.story,
-                            ReactBody(Reaction(reaction = commentOnReaction!!, comment = sendComment.trim()))
-                        ) {
-                            commentOnReaction = null
-                            sendComment = ""
-                            onReactionChange()
-                            context.toast(R.string.comment_added)
-                        }
-                        isSendingComment = false
+                if (sendComment.isBlank()) {
+                    return
+                }
+                isSendingComment = true
+                scope.launch {
+                    api.reactToStory(
+                        content.story,
+                        ReactBody(Reaction(reaction = commentOnReaction!!, comment = sendComment.trim()))
+                    ) {
+                        commentOnReaction = null
+                        sendComment = ""
+                        onReactionChange()
+                        context.toast(R.string.comment_added)
                     }
+                    isSendingComment = false
                 }
             }
 
@@ -339,60 +329,23 @@ fun LazyGridScope.reactionsItem(
                 }
 
                 AnimatedVisibility(commentOnReaction != null) {
-                    OutlinedTextField(
-                        value = sendComment,
-                        onValueChange = {
-                            sendComment = it
-                        },
-                        trailingIcon = {
-                            Crossfade(targetState = sendComment.isNotBlank()) { show ->
-                                when (show) {
-                                    true -> IconButton({ sendComment() }) {
-                                        Icon(
-                                            Icons.Default.Send,
-                                            Icons.Default.Send.name,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-
-                                    false -> {}
-                                }
-                            }
-                        },
-                        placeholder = {
-                            Text(
-                                stringResource(R.string.add_a_comment_to_your_reaction),
-                                modifier = Modifier.alpha(.5f)
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Default
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onSend = {
-                                sendComment()
-                            }
-                        ),
-                        shape = MaterialTheme.shapes.large,
-                        enabled = !isSendingComment,
+                    CommentTextField(
+                        sendComment,
+                        { sendComment = it },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 128.dp)
                             .focusRequester(focusRequester)
                             .onFocusChanged {
                                 onCommentFocused(it.isFocused)
-                            }
-                            .onKeyEvent { keyEvent ->
-                                if (sendComment.isEmpty() && keyEvent.key == Key.Backspace) {
-                                    commentOnReaction = null
-                                    sendComment = ""
-                                    true
-                                } else {
-                                    false
-                                }
-                            }
-                    )
+                            },
+                        placeholder = stringResource(R.string.add_a_comment_to_your_reaction),
+                        enabled = !isSendingComment,
+                        onDismissRequest = {
+                            commentOnReaction = null
+                            sendComment = ""
+                        }
+                    ) {
+                        sendComment()
+                    }
                 }
             }
         }

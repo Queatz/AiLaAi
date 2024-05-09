@@ -71,7 +71,7 @@ fun StoryScreen(storyId: String) {
             StorySource.Story(storyId),
             contents,
             state,
-            onReactionChange = {
+            onReloadRequest = {
                 scope.launch {
                     reload()
                 }

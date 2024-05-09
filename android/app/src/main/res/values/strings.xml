@@ -702,6 +702,7 @@
     <string name="comments">Comments</string>
     <string name="x_commented_on_your_story">%1$s commented on your story</string>
     <string name="x_replied_to_your_comment">%1$s replied to your comment</string>
+    <string name="share_a_comment">Share a comment</string>
     <plurals name="drop_x_items">
         <item quantity="one">Drop %1$s item</item>
         <item quantity="other">Drop %1$s items</item>
