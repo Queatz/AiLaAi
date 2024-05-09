@@ -72,7 +72,7 @@ fun LazyGridScope.commentsItem(
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(2.pad)
+            verticalArrangement = Arrangement.spacedBy(1.5f.pad)
         ) {
             CommentTextField(
                 sendComment,

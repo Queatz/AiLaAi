@@ -23,6 +23,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.contactPhoto
+import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.timeAgo
@@ -33,7 +34,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.CommentExtended
 
 @Composable
-fun StoryComments(comments: List<CommentExtended>) {
+fun StoryComments(comments: List<CommentExtended>, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val nav = nav
 
@@ -48,7 +49,8 @@ fun StoryComments(comments: List<CommentExtended>) {
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(1.pad)
+        verticalArrangement = Arrangement.spacedBy(1.pad),
+        modifier = modifier
     ) {
         comments.forEach { comment ->
             Row(
@@ -87,6 +89,13 @@ fun StoryComments(comments: List<CommentExtended>) {
                         modifier = Modifier
                             .padding(start = 1.pad)
                     )
+                    comment.replies?.ifNotEmpty?.let { replies ->
+                        StoryComments(
+                            replies,
+                            modifier = Modifier
+                                .padding(top = 1.pad)
+                        )
+                    }
                 }
             }
         }
