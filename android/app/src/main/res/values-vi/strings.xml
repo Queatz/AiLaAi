@@ -662,6 +662,9 @@
     <plurals name="x_active_trades">
         <item quantity="other">%1$s việc đổi đồ chưa xong</item>
     </plurals>
+    <plurals name="x_replies">
+        <item quantity="other">%1$s câu trả lời</item>
+    </plurals>
     <string name="completed_trades">Các việc đổi đồ đã hoàn thành</string>
     <string name="subscribe">Đăng ký</string>
     <string name="unsubscribe">Hủy đăng ký</string>
@@ -714,4 +717,5 @@
     <string name="comments">Bình luận</string>
     <string name="x_commented_on_your_story">%1$s commented on your story</string>
     <string name="x_replied_to_your_comment">%1$s replied to your comment</string>
+    <string name="reply_to_x">Trả lời %1$s</string>
 </resources>

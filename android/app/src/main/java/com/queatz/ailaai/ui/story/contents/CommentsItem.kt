@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,6 +75,12 @@ fun LazyGridScope.commentsItem(
         Column(
             verticalArrangement = Arrangement.spacedBy(1.5f.pad)
         ) {
+            DisposableEffect(Unit) {
+                onDispose {
+                    onCommentFocused(false)
+                }
+            }
+
             CommentTextField(
                 sendComment,
                 { sendComment = it },
@@ -91,7 +98,7 @@ fun LazyGridScope.commentsItem(
             }
 
             comments?.let {
-                StoryComments(it)
+                StoryComments(it, onCommentFocused)
             }
         }
     }
