@@ -78,7 +78,9 @@ fun StoryComments(
     }
 
     showCommentReplies?.let {
-        CommentRepliesDialog({ showCommentReplies = null }, it)
+        DisableSelection {
+            CommentRepliesDialog({ showCommentReplies = null }, it)
+        }
     }
 
     fun loadReplies(comment: CommentExtended, inline: Boolean) {
