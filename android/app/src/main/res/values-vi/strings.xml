@@ -718,4 +718,5 @@
     <string name="x_commented_on_your_story">%1$s commented on your story</string>
     <string name="x_replied_to_your_comment">%1$s replied to your comment</string>
     <string name="reply_to_x">Trả lời %1$s</string>
+    <string name="comment_replies">Comment replies</string>
 </resources>

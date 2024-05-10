@@ -389,12 +389,14 @@ object AppStyles : StyleSheet() {
 
         self + className(myMessage) style {
             backgroundColor(Styles.colors.background)
+            outline("${1.px} ${LineStyle.Solid} ${Color.white}")
             property("border", "none")
         }
 
         dark(self) {
             self + className(myMessage) style {
                 backgroundColor(Styles.colors.dark.background)
+                outline("${1.px} ${LineStyle.Solid} ${Color.black}")
             }
         }
 

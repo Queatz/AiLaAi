@@ -267,6 +267,7 @@ class MainActivity : AppCompatActivity() {
                     ?.let {
                         it.startsWith("group/")
                                 || it.startsWith("write/")
+                                || it.startsWith("story/")
                                 || it.startsWith("sticker-pack/")
                                 || (it.startsWith("card/") && it.endsWith("/edit"))
                                 || (it.startsWith("profile/") && it.endsWith("/edit"))

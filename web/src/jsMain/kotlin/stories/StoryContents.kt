@@ -276,6 +276,10 @@ fun StoryContents(
             is StoryContent.Photos -> {
                 Div({
                     classes(StoryStyles.contentPhotos)
+
+                    if (part.photos.size > 1) {
+                        classes(StoryStyles.contentPhotosMulti)
+                    }
                 }) {
                     part.photos.forEach { photo ->
                         val url = "$baseUrl$photo"

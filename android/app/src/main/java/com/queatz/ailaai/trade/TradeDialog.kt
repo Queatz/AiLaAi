@@ -48,7 +48,6 @@ import com.queatz.ailaai.item.InventoryItemLayout
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.push
-import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Dropdown
@@ -57,7 +56,6 @@ import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.PeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.screens.seenText
-import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Person

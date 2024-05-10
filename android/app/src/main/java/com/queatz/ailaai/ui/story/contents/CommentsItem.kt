@@ -101,7 +101,7 @@ fun LazyGridScope.commentsItem(
             }
 
             comments?.let {
-                StoryComments(it, onCommentFocused, max = 3)
+                StoryComments(it, onCommentFocused = onCommentFocused, max = 3)
             }
         }
     }

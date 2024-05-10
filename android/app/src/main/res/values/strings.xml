@@ -704,6 +704,7 @@
     <string name="x_replied_to_your_comment">%1$s replied to your comment</string>
     <string name="share_a_comment">Share a comment</string>
     <string name="reply_to_x">Reply to %1$s</string>
+    <string name="comment_replies">Comment replies</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

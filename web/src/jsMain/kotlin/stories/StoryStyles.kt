@@ -42,14 +42,20 @@ object StoryStyles : StyleSheet() {
         textAlign("justify")
     }
 
+    val contentPhotosMulti by style {  }
+
     val contentPhotos by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)
         flexWrap(FlexWrap.Wrap)
+        gap(1.r)
         alignItems(AlignItems.Stretch)
         justifyContent(JustifyContent.Stretch)
         lineHeight("0")
-        maxWidth(100.percent)
+        width(100.percent)
+
+        self + className(contentPhotosMulti) style {
+        }
     }
 
     val contentCards by style {
@@ -94,11 +100,10 @@ object StoryStyles : StyleSheet() {
         backgroundPosition("center")
         backgroundSize("cover")
         borderRadius(1.r)
-        height(480.px)
+        flex(1)
+        minWidth(33.percent)
         maxHeight(100.vh)
         maxWidth(100.percent)
-        marginRight(1.r)
-        marginBottom(1.r)
         cursor("pointer")
 
         media(mediaMaxWidth(640.px)) {

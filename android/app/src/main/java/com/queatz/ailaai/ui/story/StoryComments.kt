@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.CommentTextField
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.rememberLongClickInteractionSource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
@@ -53,9 +55,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun StoryComments(
     comments: List<CommentExtended>,
-    onCommentFocused: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onCommentFocused: (Boolean) -> Unit = {},
     max: Int? = null,
-    modifier: Modifier = Modifier
+    loadRepliesInline: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val nav = nav
@@ -65,11 +68,28 @@ fun StoryComments(
     }
 
     var showAll by rememberStateOf(false)
+    var showCommentReplies by rememberStateOf<CommentExtended?>(null)
     val maxShown = max != null && comments.size > max && !showAll
 
     suspend fun loadCommentReplies(comment: CommentExtended) {
         api.comment(comment.comment!!.id!!) {
             loadedCommentReplies = loadedCommentReplies + (it.comment!!.id!! to it.replies!!)
+        }
+    }
+
+    showCommentReplies?.let {
+        CommentRepliesDialog({ showCommentReplies = null }, it)
+    }
+
+    fun loadReplies(comment: CommentExtended, inline: Boolean) {
+        scope.launch {
+            if (inline) {
+                loadCommentReplies(comment)
+            } else {
+                api.comment(comment.comment!!.id!!) {
+                    showCommentReplies = it
+                }
+            }
         }
     }
 
@@ -181,27 +201,37 @@ fun StoryComments(
                         replies?.ifNotEmpty?.let { replies ->
                             StoryComments(
                                 replies,
-                                onCommentFocused,
+                                onCommentFocused = onCommentFocused,
                                 max = max?.let { it - 1 }?.coerceAtLeast(2),
+                                loadRepliesInline = loadRepliesInline,
                                 modifier = Modifier
                                     .padding(top = 1.pad)
                             )
                         } ?: let {
                             if (showTotalReplies) {
-                                OutlinedButton(
-                                    onClick = {
+                                DisableSelection {
+                                    OutlinedButton(
+                                        onClick = {},
+                                        interactionSource = rememberLongClickInteractionSource(
+                                            onClick = {
+                                                loadReplies(comment, loadRepliesInline)
 
-                                    },
-                                    modifier = Modifier
-                                        .padding(start = 1.pad)
-                                ) {
-                                    Text(
-                                        pluralStringResource(
-                                            R.plurals.x_replies,
-                                            comment.totalReplies!!,
-                                            comment.totalReplies!!
+                                            },
+                                            onLongClick = {
+                                                loadReplies(comment, !loadRepliesInline)
+                                            }
                                         ),
-                                    )
+                                        modifier = Modifier
+                                            .padding(start = 1.pad)
+                                    ) {
+                                        Text(
+                                            pluralStringResource(
+                                                R.plurals.x_replies,
+                                                comment.totalReplies!!,
+                                                comment.totalReplies!!
+                                            ),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -211,12 +241,14 @@ fun StoryComments(
         }
         if (maxShown) {
             val remaining = comments.size - max!!
-            OutlinedButton(
-                {
-                    showAll = !showAll
+            DisableSelection {
+                OutlinedButton(
+                    {
+                        showAll = !showAll
+                    }
+                ) {
+                    Text(pluralStringResource(R.plurals.show_x_more_comments, remaining, remaining.format()))
                 }
-            ) {
-                Text(pluralStringResource(R.plurals.show_x_more_comments, remaining, remaining.format()))
             }
         }
     }
