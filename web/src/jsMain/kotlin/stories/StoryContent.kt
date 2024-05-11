@@ -64,8 +64,8 @@ fun Story.full(): List<StoryContent> = contents().let { parts ->
     listOf(
         StoryContent.Title(title ?: "", id!!),
         StoryContent.Authors(publishDate, authors ?: emptyList()),
-    ) + parts + listOf(
+    ) + parts + (if (published == true) listOf(
         StoryContent.Reactions(id!!, reactions),
         StoryContent.Comments(id!!)
-    )
+    ) else emptyList())
 }

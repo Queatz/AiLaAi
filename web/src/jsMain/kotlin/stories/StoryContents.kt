@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -144,37 +145,39 @@ fun StoryContents(
                         width(100.percent)
                     }
                 }) {
-                    EditField(
-                        placeholder = appString { if (me == null) signInToComment else shareAComment },
-                        styles = {
-                            width(100.percent)
-                        },
-                        buttonBarStyles = {
-                            width(100.percent)
-                            justifyContent(JustifyContent.End)
-                        },
-                        showDiscard = false,
-                        resetOnSubmit = true,
-                        enabled = me != null,
-                        button = appString { post }
-                    ) {
-                        var success = false
-                        api.commentOnStory(
-                            part.story,
-                            Comment(comment = it)
+                    key(part.story) {
+                        EditField(
+                            placeholder = appString { if (me == null) signInToComment else shareAComment },
+                            styles = {
+                                width(100.percent)
+                            },
+                            buttonBarStyles = {
+                                width(100.percent)
+                                justifyContent(JustifyContent.End)
+                            },
+                            showDiscard = false,
+                            resetOnSubmit = true,
+                            enabled = me != null,
+                            button = appString { post }
                         ) {
-                            success = true
-                        }
-                        reloadComments()
-                        success
-                    }
-
-                    LoadingText(
-                        comments != null,
-                        appString { loadingComments }
-                    ) {
-                        StoryComments(comments!!, max = 3) {
+                            var success = false
+                            api.commentOnStory(
+                                part.story,
+                                Comment(comment = it)
+                            ) {
+                                success = true
+                            }
                             reloadComments()
+                            success
+                        }
+
+                        LoadingText(
+                            comments != null,
+                            appString { loadingComments }
+                        ) {
+                            StoryComments(comments!!, max = 3) {
+                                reloadComments()
+                            }
                         }
                     }
                 }
