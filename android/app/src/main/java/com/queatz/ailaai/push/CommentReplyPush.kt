@@ -17,7 +17,7 @@ fun Push.receive(data: CommentReplyPushData) {
 
     val deeplinkIntent = Intent(
         Intent.ACTION_VIEW,
-        "$appDomain/comment/${data.onComment!!.id!!}".toUri(),
+        "$appDomain/story/${data.story!!.id!!}?comment=${data.onComment!!.id!!}".toUri(),
         context,
         MainActivity::class.java
     )

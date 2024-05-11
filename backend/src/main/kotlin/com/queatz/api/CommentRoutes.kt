@@ -2,7 +2,9 @@ package com.queatz.api
 
 import com.queatz.db.Comment
 import com.queatz.db.Person
+import com.queatz.db.Story
 import com.queatz.db.asId
+import com.queatz.db.collection
 import com.queatz.db.comment
 import com.queatz.parameter
 import com.queatz.plugins.db
@@ -16,6 +18,19 @@ import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+
+private fun storyOfComment(comment: Comment): Story? {
+    var parent = comment.to!!
+    while (true) {
+        if (parent.startsWith(Story::class.collection() + "/")) {
+            return db.document(Story::class, parent)
+        } else if (parent.startsWith(Comment::class.collection() + "/")) {
+            parent = db.document(Comment::class, parent)?.to ?: return null
+        } else {
+            return null
+        }
+    }
+}
 
 fun Route.commentRoutes() {
     authenticate(optional = true) {
@@ -48,6 +63,7 @@ fun Route.commentRoutes() {
                 notify.commentReply(
                     comment,
                     onComment,
+                    storyOfComment(onComment),
                     me
                 )
 

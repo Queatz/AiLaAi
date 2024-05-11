@@ -734,9 +734,12 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable(
                                                 "story/{id}",
-                                                deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/story/{id}" })
+                                                deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/story/{id}?comment={comment}" })
                                             ) {
-                                                StoryScreen(it.arguments!!.getString("id")!!)
+                                                StoryScreen(
+                                                    it.arguments!!.getString("id")!!,
+                                                    commentId = it.arguments!!.getString("comment")
+                                                )
                                             }
                                             composable("write") {
                                                 MyStoriesScreen()

@@ -152,5 +152,6 @@ data class CommentPushData(
 data class CommentReplyPushData(
     val comment: Comment? = null,
     val onComment: Comment? = null,
+    val story: Story? = null,
     val person: Person? = null
 ) : PushDataData()

@@ -1,30 +1,45 @@
 package com.queatz.ailaai.ui.story
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.ailaai.api.comment
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.editor.StoryActions
+import com.queatz.db.CommentExtended
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import kotlinx.coroutines.launch
 
 @Composable
-fun StoryScreen(storyId: String) {
+fun StoryScreen(storyId: String, commentId: String? = null) {
     // todo storyId could be a url from a deeplink
     val state = rememberLazyGridState()
     var isLoading by rememberStateOf(true)
     var story by remember { mutableStateOf<Story?>(null) }
     var contents by remember { mutableStateOf(emptyList<StoryContent>()) }
     val scope = rememberCoroutineScope()
+    var showCommentReplies by rememberStateOf<CommentExtended?>(null)
 
+    showCommentReplies?.let {
+        CommentRepliesDialog(
+            onDismissRequest = { showCommentReplies = null },
+            comment = it,
+            onCommentDeleted = {
+                showCommentReplies = null
+            }
+        )
+    }
     suspend fun reload() {
         api.story(storyId) { story = it }
     }
@@ -33,6 +48,14 @@ fun StoryScreen(storyId: String) {
         isLoading = true
         reload()
         isLoading = false
+    }
+
+    LaunchedEffect(commentId) {
+        if (commentId != null) {
+            api.comment(commentId) {
+                showCommentReplies = it
+            }
+        }
     }
 
     LaunchedEffect(story) {
@@ -51,7 +74,12 @@ fun StoryScreen(storyId: String) {
 
     // todo use a loading/error/empty scaffold
     if (isLoading) {
-        Loading()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Loading()
+        }
         return
     }
 

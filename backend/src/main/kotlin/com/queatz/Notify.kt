@@ -137,7 +137,7 @@ class Notify {
         notifyPeople(listOf(story.person!!), pushData)
     }
 
-    fun commentReply(comment: Comment, onComment: Comment, person: Person) {
+    fun commentReply(comment: Comment, onComment: Comment, story: Story?, person: Person) {
         val pushData = PushData(
             PushAction.CommentReply,
             CommentReplyPushData(
@@ -149,11 +149,17 @@ class Notify {
                     id = onComment.id
                     this.comment = onComment.comment?.ellipsize()
                 },
+                story = story?.let {
+                    Story().apply {
+                        id = story.id
+                        title = story.title
+                    }
+                },
                 person = person
             )
         )
 
-        notifyPeople(listOf(comment.from!!.asKey()), pushData)
+        notifyPeople(listOf(onComment.from!!.asKey()), pushData)
     }
 
     fun message(group: Group, from: Person, message: Message) {
