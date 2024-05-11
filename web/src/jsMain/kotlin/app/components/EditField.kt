@@ -26,7 +26,7 @@ fun EditField(
     enabled: Boolean = true,
     showDiscard: Boolean = true,
     autoFocus: Boolean = false,
-    resetOnSubmit: Boolean = true,
+    resetOnSubmit: Boolean = false,
     button: String = appString { save },
     onSave: suspend (String) -> Boolean
 ) {

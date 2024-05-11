@@ -14,11 +14,13 @@ import com.queatz.db.CommentExtended
 import components.Loading
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
 import r
 
 suspend fun commentDialog(comment: CommentExtended) = dialog(
     title = application.appString { commentReplies },
     confirmButton = application.appString { close },
+    maxWidth = 800.px,
     cancelButton = null
 ) {
     Style(StoryStyles)

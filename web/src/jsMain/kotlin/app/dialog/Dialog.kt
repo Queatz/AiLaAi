@@ -7,6 +7,8 @@ import kotlinx.browser.document
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import org.jetbrains.compose.web.attributes.autoFocus
+import org.jetbrains.compose.web.css.CSSSizeValue
+import org.jetbrains.compose.web.css.CSSUnit
 import org.jetbrains.compose.web.dom.*
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDialogElement
@@ -16,11 +18,17 @@ suspend fun dialog(
     confirmButton: String = application.appString { okay },
     cancelButton: String? = application.appString { cancel },
     cancellable: Boolean = true,
+    maxWidth: CSSSizeValue<out CSSUnit>? = null,
     content: @Composable (resolve: (Boolean?) -> Unit) -> Unit = {}
 ): Boolean? {
     val result = CompletableDeferred<Boolean?>()
     val dialog = document.createElement("dialog") as HTMLDialogElement
     dialog.classList.add(Styles.modal)
+
+    maxWidth?.let {
+        dialog.style.maxWidth = it.toString()
+    }
+
     dialog.onclose = {
         if (!result.isCompleted) {
             result.complete(null)

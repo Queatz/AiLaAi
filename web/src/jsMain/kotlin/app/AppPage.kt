@@ -94,7 +94,7 @@ fun AppPage() {
     }
 
     var story by remember {
-        mutableStateOf<StoryNav>(StoryNav.Local)
+        mutableStateOf<StoryNav>(StoryNav.Friends)
     }
 
     var scheduleView by remember {
