@@ -22,6 +22,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 
@@ -58,6 +59,8 @@ fun CommentTextField(
                 DisableSelection {
                     Text(
                         it,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.alpha(.5f)
                     )
                 }
@@ -65,7 +68,7 @@ fun CommentTextField(
         },
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
-            imeAction = ImeAction.Send
+            imeAction = ImeAction.Default
         ),
         keyboardActions = KeyboardActions(
             onSend = { onSubmit() }

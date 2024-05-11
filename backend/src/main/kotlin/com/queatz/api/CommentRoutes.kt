@@ -54,5 +54,41 @@ fun Route.commentRoutes() {
                 comment
             }
         }
+
+        post("/comments/{id}") {
+            respond {
+                val comment = db.document(Comment::class, parameter("id"))
+                val updatedComment = call.receive<Comment>()
+
+                if (comment == null) {
+                    HttpStatusCode.NotFound
+                } else if (comment.from != me.id!!.asId(Person::class)) {
+                    HttpStatusCode.Forbidden
+                } else {
+                    if (updatedComment.comment != null) {
+                        comment.comment = updatedComment.comment
+                    }
+
+                    // todo save history
+
+                    db.update(comment)
+                }
+            }
+        }
+
+        post("/comments/{id}/delete") {
+            respond {
+                val comment = db.document(Comment::class, parameter("id"))
+
+                if (comment == null) {
+                    HttpStatusCode.NotFound
+                } else if (comment.from != me.id!!.asId(Person::class)) {
+                    HttpStatusCode.Forbidden
+                } else {
+                    db.delete(comment)
+                    HttpStatusCode.NoContent
+                }
+            }
+        }
     }
 }

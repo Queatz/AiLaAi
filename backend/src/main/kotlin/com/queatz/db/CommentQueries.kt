@@ -4,7 +4,7 @@ fun Db.comment(id: String) = query(
     CommentExtended::class,
     """
         let comment = document(@to)
-        return {
+        return comment == null ? null : {
             ${f(CommentExtended::comment)}: comment,
             ${f(CommentExtended::person)}: keep(document(comment._from), "_key", "${f(Person::name)}", "${f(Person::photo)}", "${f(Person::seen)}"),
             ${f(CommentExtended::totalReplies)}: count(

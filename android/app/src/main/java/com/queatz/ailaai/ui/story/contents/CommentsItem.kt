@@ -101,7 +101,16 @@ fun LazyGridScope.commentsItem(
             }
 
             comments?.let {
-                StoryComments(it, onCommentFocused = onCommentFocused, max = 3)
+                StoryComments(
+                    it,
+                    onCommentFocused = onCommentFocused,
+                    onCommentUpdated = {
+                        scope.launch {
+                            reloadComments()
+                        }
+                    },
+                    max = 3
+                )
             }
         }
     }
