@@ -27,7 +27,7 @@ sealed class StoryContent {
     @Serializable
     class Text(var text: String) : StoryContent()
     @Serializable
-    class Groups(var groups: List<String>) : StoryContent()
+    class Groups(var groups: List<String>, var coverPhotos: Boolean = false) : StoryContent()
     @Serializable
     class Cards(var cards: List<String>) : StoryContent()
     @Serializable

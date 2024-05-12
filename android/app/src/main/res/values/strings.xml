@@ -708,6 +708,8 @@
     <string name="edit_comment">Edit comment</string>
     <string name="you_cannot_undo_this_comment">You cannot undo this.</string>
     <string name="delete_comment">Delete this comment?</string>
+    <string name="hide_photos">Hide photos</string>
+    <string name="show_photos">Show photos</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

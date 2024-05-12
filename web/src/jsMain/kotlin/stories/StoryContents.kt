@@ -258,7 +258,8 @@ fun StoryContents(
                                     onSelected = {
                                         onGroupClick(group)
                                     },
-                                    info = GroupInfo.LatestMessage
+                                    info = GroupInfo.LatestMessage,
+                                    coverPhoto = part.coverPhotos
                                 )
                             }
                         }

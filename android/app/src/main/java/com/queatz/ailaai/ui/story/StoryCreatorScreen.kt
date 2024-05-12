@@ -603,6 +603,12 @@ fun StoryCreatorScreen(
                                         showGroupMenu = false
                                     }
                                 ) {
+                                    menuItem(stringResource(if (part.coverPhotos) R.string.hide_photos else R.string.show_photos)) {
+                                        showGroupMenu = false
+                                        part.edit {
+                                            coverPhotos = !coverPhotos
+                                        }
+                                    }
                                     menuItem(stringResource(R.string.add_group)) {
                                         showGroupMenu = false
                                         showAddGroupDialog = true
@@ -650,7 +656,8 @@ fun StoryCreatorScreen(
                                     },
                                     onLongClick = {},
                                     SearchResult.Group(group!!),
-                                    info = GroupInfo.LatestMessage
+                                    info = GroupInfo.LatestMessage,
+                                    coverPhoto = part.coverPhotos
                                 )
                             }
                         }

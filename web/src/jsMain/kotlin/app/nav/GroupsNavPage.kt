@@ -69,11 +69,11 @@ fun GroupsNavPage(
         showSearch = false
     }
 
-    LaunchedEffect(groups) {
+    LaunchedEffect(groups, selected) {
         indicator.set(IndicatorSource.Group, groups.count {
             val myMember = it.members?.firstOrNull { it.person?.id == me?.id }
 
-            it.isUnread(myMember?.member)
+            it.isUnread(myMember?.member) && it.group?.id != (selected as? GroupNav.Selected)?.group?.group?.id
         })
     }
 
