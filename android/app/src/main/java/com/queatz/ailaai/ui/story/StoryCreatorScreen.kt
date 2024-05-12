@@ -2,41 +2,77 @@ package com.queatz.ailaai.ui.story
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.*
-import coil.compose.AsyncImage
-import com.queatz.ailaai.AppNav
+import app.ailaai.api.card
+import app.ailaai.api.profile
+import app.ailaai.api.updateCard
+import app.ailaai.api.updateProfile
 import com.queatz.ailaai.R
-import com.queatz.ailaai.api.*
+import com.queatz.ailaai.api.story
+import com.queatz.ailaai.api.updateStory
+import com.queatz.ailaai.api.updateStoryDraft
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.popBackStackOrFinish
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.toList
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.story.creator.audioCreatorItem
+import com.queatz.ailaai.ui.story.creator.buttonCreatorItem
+import com.queatz.ailaai.ui.story.creator.cardsCreatorItem
+import com.queatz.ailaai.ui.story.creator.groupsCreatorItem
+import com.queatz.ailaai.ui.story.creator.photosCreatorItem
+import com.queatz.ailaai.ui.story.creator.sectionCreatorItem
+import com.queatz.ailaai.ui.story.creator.textCreatorItem
+import com.queatz.ailaai.ui.story.creator.titleCreatorItem
+import com.queatz.ailaai.ui.story.creator.widgetCreatorItem
 import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.PersonProfile
+import com.queatz.db.Profile
+import com.queatz.db.Story
+import com.queatz.db.StoryContent
+import com.queatz.db.StoryDraft
+import com.queatz.db.isPart
+import com.queatz.db.toJsonStoryContent
 import com.queatz.widgets.Widgets
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -399,645 +435,27 @@ fun StoryCreatorScreen(
                 .padding(bottom = 1.pad)
                 .weight(1f)
         ) {
+            fun <T : StoryContent> creatorScope(part: T, partIndex: Int) = CreatorScope(source, part, partIndex, currentFocus, { currentFocus = it }, ::addPart, ::removePartAt, part::edit)
+
             storyContents.forEachIndexed { partIndex, part ->
                 when (part) {
-                    is StoryContent.Title -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
-                            val focusRequester = remember { FocusRequester() }
-                            LaunchedEffect(currentFocus) {
-                                if (currentFocus == partIndex) {
-                                    focusRequester.requestFocus()
-                                }
-                            }
-                            EditorTextField(
-                                part.title,
-                                {
-                                    part.edit {
-                                        title = it
-                                    }
-                                },
-                                focusRequester = focusRequester,
-                                placeholder = stringResource(R.string.title),
-                                singleLine = true,
-                                onFocus = {
-                                    currentFocus = partIndex
-                                },
-                                onNext = { addPart(position = partIndex + 1, part = StoryContent.Text("")) },
-                                textStyle = { headlineMedium }
-                            )
-                        }
-                    }
+                    is StoryContent.Title -> titleCreatorItem(creatorScope(part, partIndex))
 
-                    is StoryContent.Section -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
-                            val focusRequester = remember { FocusRequester() }
-                            LaunchedEffect(currentFocus) {
-                                if (currentFocus == partIndex) {
-                                    focusRequester.requestFocus()
-                                }
-                            }
-                            EditorTextField(
-                                part.section,
-                                {
-                                    part.edit {
-                                        section = it
-                                    }
-                                },
-                                focusRequester = focusRequester,
-                                placeholder = stringResource(R.string.section),
-                                singleLine = true,
-                                onDelete = {
-                                    removePartAt(partIndex)
-                                },
-                                onFocus = {
-                                    currentFocus = partIndex
-                                },
-                                onNext = { addPart(position = partIndex + 1, part = StoryContent.Text("")) },
-                                textStyle = { titleLarge }
-                            )
-                        }
-                    }
+                    is StoryContent.Section -> sectionCreatorItem(creatorScope(part, partIndex))
 
-                    is StoryContent.Text -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
-                            val focusRequester = remember { FocusRequester() }
-                            LaunchedEffect(currentFocus) {
-                                if (currentFocus == partIndex) {
-                                    focusRequester.requestFocus()
-                                }
-                            }
-                            EditorTextField(
-                                part.text,
-                                {
-                                    part.edit {
-                                        text = it
-                                    }
-                                },
-                                focusRequester = focusRequester,
-                                placeholder = stringResource(R.string.write),
-                                onDelete = {
-                                    removePartAt(partIndex)
-                                },
-                                onFocus = {
-                                    currentFocus = partIndex
-                                },
-                                textStyle = { bodyMedium }
-                            )
-                        }
-                    }
+                    is StoryContent.Text -> textCreatorItem(creatorScope(part, partIndex))
 
-                    is StoryContent.Audio -> {
-                        item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
-                            Card(
-                                shape = MaterialTheme.shapes.large,
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.large)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(1.pad)
-                                ) {
-                                    Audio(
-                                        api.url(part.audio),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .fillMaxSize()
-                                    )
-                                    IconButton(
-                                        onClick = {
-                                            removePartAt(partIndex)
-                                        }
-                                    ) {
-                                        Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    is StoryContent.Audio -> audioCreatorItem(creatorScope(part, partIndex))
 
-                    is StoryContent.Groups -> {
-                        itemsIndexed(
-                            part.groups,
-                            span = { _, _ -> GridItemSpan(maxLineSpan) },
-                            key = { index, it -> "${part.hashCode()}.$it" }
-                        ) { index, groupId ->
-                            var group by remember { mutableStateOf<GroupExtended?>(null) }
-                            var showGroupMenu by rememberStateOf(false)
-                            var showAddGroupDialog by rememberStateOf(false)
-                            var showCreateGroupDialog by rememberStateOf(false)
-                            var showReorderDialog by rememberStateOf(false)
+                    is StoryContent.Groups -> groupsCreatorItem(creatorScope(part, partIndex))
 
-                            if (showCreateGroupDialog) {
-                                TextFieldDialog(
-                                    onDismissRequest = { showCreateGroupDialog = false },
-                                    title = stringResource(R.string.group_name),
-                                    button = stringResource(R.string.create_group),
-                                    singleLine = true,
-                                    placeholder = stringResource(R.string.empty_group_name),
-                                    requireModification = false
-                                ) { value ->
-                                    api.createGroup(emptyList()) { group ->
-                                        if (value.isNotBlank()) {
-                                            api.updateGroup(group.id!!, Group(name = value))
-                                        }
-                                        part.edit {
-                                            groups += group.id!!
-                                        }
-                                    }
-                                    showCreateGroupDialog = false
-                                }
-                            }
+                    is StoryContent.Cards -> cardsCreatorItem(creatorScope(part, partIndex))
 
-                            if (showAddGroupDialog) {
-                                val someone = stringResource(R.string.someone)
-                                val emptyGroup = stringResource(R.string.empty_group_name)
+                    is StoryContent.Photos -> photosCreatorItem(creatorScope(part, partIndex))
 
-                                ChooseGroupDialog(
-                                    {
-                                        showAddGroupDialog = false
-                                    },
-                                    title = stringResource(R.string.add_group),
-                                    confirmFormatter = defaultConfirmFormatter(
-                                        R.string.choose_group,
-                                        R.string.choose_x,
-                                        R.string.choose_x_and_x,
-                                        R.string.choose_x_groups
-                                    ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
-                                    infoFormatter = {
-                                        buildString {
-                                            val count = it.members?.size ?: 0
-                                            append("$count ")
-                                            append(context.resources.getQuantityString(R.plurals.inline_members, count))
-                                            if (it.group?.description.isNullOrBlank().not()) {
-                                                append(" • ")
-                                                append(it.group!!.description)
-                                            }
-                                        }
-                                    },
-                                    filter = {
-                                        it.group?.open == true && part.groups.none { id -> it.group?.id == id }
-                                    }
-                                ) {
-                                    part.edit {
-                                        groups += it
-                                            .mapNotNull { it.id }
-                                            .distinctBy { it }
-                                    }
-                                }
-                            }
+                    is StoryContent.Widget -> widgetCreatorItem(creatorScope(part, partIndex))
 
-                            if (showReorderDialog) {
-                                ReorderDialog(
-                                    { showReorderDialog = false },
-                                    onMove = { from, to ->
-                                        part.edit {
-                                            groups = groups.toMutableList().apply {
-                                                add(to.index, removeAt(from.index))
-                                            }
-                                        }
-                                    },
-                                    list = true,
-                                    items = part.groups,
-                                    key = { it }
-                                ) { groupId, elevation ->
-                                    var group by remember { mutableStateOf<GroupExtended?>(null) }
-
-                                    LaunchedEffect(groupId) {
-                                        api.group(groupId) { group = it }
-                                    }
-
-                                    LoadingText(group != null, stringResource(R.string.loading_group)) {
-                                        ContactItem(
-                                            onClick = null,
-                                            onLongClick = null,
-                                            item = SearchResult.Group(group!!),
-                                            info = GroupInfo.LatestMessage
-                                        )
-                                    }
-                                }
-                            }
-
-                            if (showGroupMenu) {
-                                Menu(
-                                    {
-                                        showGroupMenu = false
-                                    }
-                                ) {
-                                    menuItem(stringResource(if (part.coverPhotos) R.string.hide_photos else R.string.show_photos)) {
-                                        showGroupMenu = false
-                                        part.edit {
-                                            coverPhotos = !coverPhotos
-                                        }
-                                    }
-                                    menuItem(stringResource(R.string.add_group)) {
-                                        showGroupMenu = false
-                                        showAddGroupDialog = true
-                                    }
-                                    menuItem(stringResource(R.string.open_group)) {
-                                        showGroupMenu = false
-                                        nav.navigate(AppNav.Group(groupId))
-                                    }
-                                    if (part.groups.size > 1) {
-                                        menuItem(stringResource(R.string.reorder)) {
-                                            showGroupMenu = false
-                                            showReorderDialog = true
-                                        }
-                                    }
-                                    menuItem(stringResource(R.string.remove)) {
-                                        showGroupMenu = false
-                                        if (part.groups.size == 1) {
-                                            showGroupMenu = false
-                                            removePartAt(partIndex)
-                                        } else {
-                                            part.edit {
-                                                groups = groups.toMutableList().apply {
-                                                    removeAt(index)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (part.groups.size > 1) {
-                                        menuItem(stringResource(R.string.remove_all)) {
-                                            showGroupMenu = false
-                                            removePartAt(partIndex)
-                                        }
-                                    }
-                                }
-                            }
-
-                            LaunchedEffect(groupId) {
-                                api.group(groupId) { group = it }
-                            }
-
-                            LoadingText(group != null, stringResource(R.string.loading_group)) {
-                                ContactItem(
-                                    onClick = {
-                                        showGroupMenu = true
-                                    },
-                                    onLongClick = {},
-                                    SearchResult.Group(group!!),
-                                    info = GroupInfo.LatestMessage,
-                                    coverPhoto = part.coverPhotos
-                                )
-                            }
-                        }
-                    }
-
-                    is StoryContent.Cards -> {
-                        itemsIndexed(part.cards, key = { index, it -> "${part.hashCode()}.$it" }) { index, cardId ->
-                            var showCardMenu by rememberStateOf(false)
-                            var showAddCardDialog by rememberStateOf(false)
-                            var showReorderDialog by rememberStateOf(false)
-                            var card by remember { mutableStateOf<Card?>(null) }
-
-                            if (showAddCardDialog) {
-                                ChooseCardDialog(
-                                    {
-                                        showAddCardDialog = false
-                                    },
-                                ) {
-                                    part.edit {
-                                        cards = (cards + it).distinctBy { it }
-                                    }
-                                    showAddCardDialog = false
-                                }
-                            }
-
-                            if (showReorderDialog) {
-                                ReorderDialog(
-                                    { showReorderDialog = false },
-                                    onMove = { from, to ->
-                                        part.edit {
-                                            cards = cards.toMutableList().apply {
-                                                add(to.index, removeAt(from.index))
-                                            }
-                                        }
-                                    },
-                                    items = part.cards,
-                                    key = { it }
-                                ) { cardId, elevation ->
-                                    var card by remember { mutableStateOf<Card?>(null) }
-
-                                    LaunchedEffect(cardId) {
-                                        api.card(cardId) { card = it }
-                                    }
-
-                                    CardItem(
-                                        onClick = null,
-                                        card = card,
-                                        isChoosing = true,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-
-                            LaunchedEffect(cardId) {
-                                api.card(cardId) { card = it }
-                            }
-
-                            if (showCardMenu) {
-                                Menu(
-                                    {
-                                        showCardMenu = false
-                                    }
-                                ) {
-                                    menuItem(stringResource(R.string.add_card)) {
-                                        showCardMenu = false
-                                        showAddCardDialog = true
-                                    }
-                                    menuItem(stringResource(R.string.open_card)) {
-                                        showCardMenu = false
-                                        nav.navigate(AppNav.Page(cardId))
-                                    }
-                                    if (part.cards.size > 1) {
-                                        menuItem(stringResource(R.string.reorder)) {
-                                            showCardMenu = false
-                                            showReorderDialog = true
-                                        }
-                                    }
-                                    menuItem(stringResource(R.string.remove)) {
-                                        showCardMenu = false
-                                        if (part.cards.size == 1) {
-                                            showCardMenu = false
-                                            removePartAt(partIndex)
-                                        } else {
-                                            part.edit {
-                                                cards = cards.toMutableList().apply {
-                                                    removeAt(index)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (part.cards.size > 1) {
-                                        menuItem(stringResource(R.string.remove_all)) {
-                                            showCardMenu = false
-                                            removePartAt(partIndex)
-                                        }
-                                    }
-                                }
-                            }
-
-                            CardItem(
-                                {
-                                    showCardMenu = true
-                                },
-                                onCategoryClick = {},
-                                card = card,
-                                isChoosing = true,
-                                modifier = Modifier.fillMaxWidth(.75f)
-                            )
-                        }
-                    }
-
-                    is StoryContent.Photos -> {
-                        itemsIndexed(
-                            part.photos,
-                            span = { index, item ->
-                                GridItemSpan(if (index == 0) maxLineSpan else if (index % 3 == 1) 1 else maxCurrentLineSpan)
-                            },
-                            key = { index, it -> "${part.hashCode()}.$it" }
-                        ) { index, it ->
-                            var showPhotoMenu by rememberStateOf(false)
-                            var showPhotoAspectMenu by rememberStateOf(false)
-                            var showReorderDialog by rememberStateOf(false)
-                            var showPhotoDialog by rememberStateOf(false)
-
-                            if (showPhotoDialog) {
-                                ChoosePhotoDialog(
-                                    scope = scope,
-                                    onDismissRequest = { showPhotoDialog = false },
-                                    imagesOnly = true,
-                                    onPhotos = {
-                                        scope.launch {
-                                            when (source) {
-                                                is StorySource.Story -> {
-                                                    api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
-                                                        part.edit {
-                                                            photos += photoUrls
-                                                        }
-                                                    }
-                                                }
-
-                                                is StorySource.Card -> {
-                                                    api.uploadCardContentPhotosFromUri(
-                                                        context,
-                                                        source.id,
-                                                        it
-                                                    ) { photoUrls ->
-                                                        part.edit {
-                                                            photos += photoUrls
-                                                        }
-                                                    }
-                                                }
-
-                                                is StorySource.Profile -> {
-                                                    api.uploadProfileContentPhotosFromUri(
-                                                        context,
-                                                        source.id,
-                                                        it
-                                                    ) { photoUrls ->
-                                                        part.edit {
-                                                            photos += photoUrls
-                                                        }
-                                                    }
-                                                }
-
-                                                else -> {}
-                                            }
-                                        }
-                                    },
-                                    onGeneratedPhoto = {
-                                        val photoUrls = listOf(it)
-                                        scope.launch {
-                                            when (source) {
-                                                is StorySource.Story -> {
-                                                    part.edit {
-                                                        photos += photoUrls
-                                                    }
-                                                }
-
-                                                is StorySource.Card -> {
-                                                    part.edit {
-                                                        photos += photoUrls
-                                                    }
-                                                }
-
-                                                is StorySource.Profile -> {
-                                                    part.edit {
-                                                        photos += photoUrls
-                                                    }
-                                                }
-
-                                                else -> {}
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-
-                            if (showPhotoAspectMenu) {
-                                Menu(
-                                    {
-                                        showPhotoAspectMenu = false
-                                    }
-                                ) {
-                                    menuItem(stringResource(R.string.portrait)) {
-                                        showPhotoAspectMenu = false
-                                        part.edit {
-                                            aspect = .75f
-                                        }
-                                    }
-                                    menuItem(stringResource(R.string.landscape)) {
-                                        showPhotoAspectMenu = false
-                                        part.edit {
-                                            aspect = 1.5f
-                                        }
-                                    }
-                                    menuItem(stringResource(R.string.square)) {
-                                        showPhotoAspectMenu = false
-                                        part.edit {
-                                            aspect = 1f
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (showReorderDialog) {
-                                ReorderDialog(
-                                    { showReorderDialog = false },
-                                    onMove = { from, to ->
-                                        part.edit {
-                                            photos = photos.toMutableList().apply {
-                                                add(to.index, removeAt(from.index))
-                                            }
-                                        }
-                                    },
-                                    items = part.photos,
-                                    key = { it }
-                                ) { photo, elevation ->
-                                    AsyncImage(
-                                        model = api.url(photo),
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        alignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .shadow(elevation, shape = MaterialTheme.shapes.large)
-                                            .clip(MaterialTheme.shapes.large)
-                                            .aspectRatio(part.aspect)
-                                            .heightIn(min = 240.dp)
-                                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    )
-                                }
-                            }
-
-                            if (showPhotoMenu) {
-                                Menu(
-                                    {
-                                        showPhotoMenu = false
-                                    }
-                                ) {
-                                    menuItem(stringResource(R.string.add_photo)) {
-                                        showPhotoMenu = false
-                                        showPhotoDialog = true
-                                    }
-                                    menuItem(stringResource(R.string.change_aspect_ratio)) {
-                                        showPhotoMenu = false
-                                        showPhotoAspectMenu = true
-                                    }
-                                    if (part.photos.size > 1) {
-                                        menuItem(stringResource(R.string.reorder)) {
-                                            showReorderDialog = true
-                                            showPhotoMenu = false
-                                        }
-                                    }
-                                    menuItem(stringResource(R.string.remove)) {
-                                        showPhotoMenu = false
-                                        if (part.photos.size == 1) {
-                                            showPhotoMenu = false
-                                            removePartAt(partIndex)
-                                        } else {
-                                            part.edit {
-                                                photos = photos.toMutableList().apply {
-                                                    removeAt(index)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (part.photos.size > 1) {
-                                        menuItem(stringResource(R.string.remove_all)) {
-                                            showPhotoMenu = false
-                                            removePartAt(partIndex)
-                                        }
-                                    }
-                                }
-                            }
-
-                            AsyncImage(
-                                model = api.url(it),
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                alignment = Alignment.Center,
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.large)
-                                    .fillMaxWidth()
-                                    .aspectRatio(part.aspect)
-                                    .heightIn(min = 240.dp)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .clickable {
-                                        showPhotoMenu = true
-                                    }
-                            )
-                        }
-                    }
-
-                    is StoryContent.Widget -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            var showWidgetMenu by rememberStateOf(false)
-
-                            if (showWidgetMenu) {
-                                Menu({
-                                    showWidgetMenu = false
-                                }) {
-                                    menuItem(stringResource(R.string.remove)) {
-                                        showWidgetMenu = false
-                                        removePartAt(partIndex)
-                                    }
-                                    // todo edit (same-ish as AddWidgetDialog)
-                                }
-                            }
-
-                            WidgetStub(
-                                part
-                            ) {
-                                showWidgetMenu = true
-                            }
-                        }
-                    }
-
-                    is StoryContent.Button -> {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            var showButtonMenu by rememberStateOf(false)
-
-                            if (showButtonMenu) {
-                                Menu({
-                                    showButtonMenu = false
-                                }) {
-                                    menuItem(stringResource(R.string.remove)) {
-                                        showButtonMenu = false
-                                        removePartAt(partIndex)
-                                    }
-                                }
-                            }
-
-                            Button(
-                                onClick = {
-                                    showButtonMenu = true
-                                }
-                            ) {
-                                Text(part.text)
-                            }
-                        }
-                    }
+                    is StoryContent.Button -> buttonCreatorItem(creatorScope(part, partIndex))
 
                     else -> {
                         // Not supported in the editor
