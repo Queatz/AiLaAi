@@ -38,11 +38,9 @@ import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.*
 import com.queatz.widgets.Widgets
-import com.queatz.widgets.widgets.ScriptData
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
-import widget
 
 sealed class StorySource {
     data class Card(val id: String) : StorySource()
@@ -526,7 +524,29 @@ fun StoryCreatorScreen(
                             var group by remember { mutableStateOf<GroupExtended?>(null) }
                             var showGroupMenu by rememberStateOf(false)
                             var showAddGroupDialog by rememberStateOf(false)
+                            var showCreateGroupDialog by rememberStateOf(false)
                             var showReorderDialog by rememberStateOf(false)
+
+                            if (showCreateGroupDialog) {
+                                TextFieldDialog(
+                                    onDismissRequest = { showCreateGroupDialog = false },
+                                    title = stringResource(R.string.group_name),
+                                    button = stringResource(R.string.create_group),
+                                    singleLine = true,
+                                    placeholder = stringResource(R.string.empty_group_name),
+                                    requireModification = false
+                                ) { value ->
+                                    api.createGroup(emptyList()) { group ->
+                                        if (value.isNotBlank()) {
+                                            api.updateGroup(group.id!!, Group(name = value))
+                                        }
+                                        part.edit {
+                                            groups += group.id!!
+                                        }
+                                    }
+                                    showCreateGroupDialog = false
+                                }
+                            }
 
                             if (showAddGroupDialog) {
                                 val someone = stringResource(R.string.someone)

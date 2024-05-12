@@ -105,7 +105,7 @@
     <string name="reset_location">Đặt lại vị trí</string>
     <string name="no_groups_to_show">Không tìm được nhóm để cho bạn xem.</string>
     <string name="groups">Nhóm</string>
-    <string name="new_group">Tạo nhóm</string>
+    <string name="create_group">Tạo nhóm</string>
     <string name="new_group_with_person">Tạo nhóm vơi %1$s</string>
     <string name="new_group_with_people">Tạo nhóm vơi %1$s và %2$s</string>
     <string name="new_group_with_x_people">Tạo nhóm vơi %1$s người</string>

@@ -561,7 +561,7 @@ fun FriendsScreen() {
                         { searchText = it },
                         placeholder = stringResource(R.string.search_people_and_groups),
                         action = {
-                            Icon(Icons.Outlined.Add, stringResource(R.string.new_group))
+                            Icon(Icons.Outlined.Add, stringResource(R.string.create_group))
                         },
                         onAction = {
                             createGroupName = searchText
