@@ -32,6 +32,7 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
         var showAddCardDialog by rememberStateOf(false)
         var showReorderDialog by rememberStateOf(false)
         var card by remember { mutableStateOf<Card?>(null) }
+        val nav = nav
 
         if (showAddCardDialog) {
             ChooseCardDialog(

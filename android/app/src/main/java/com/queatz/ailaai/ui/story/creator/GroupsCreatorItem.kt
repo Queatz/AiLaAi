@@ -44,6 +44,7 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
     ) { index, groupId ->
         val context = LocalContext.current
         val me = me
+        val nav = nav
         var group by remember { mutableStateOf<GroupExtended?>(null) }
         var showGroupMenu by rememberStateOf(false)
         var showAddGroupDialog by rememberStateOf(false)
