@@ -1647,8 +1647,8 @@ fun GroupScreen(groupId: String) {
                         showChangeGroupStatus = false
                     },
                     title = {
-                        if (!open) Text(stringResource(R.string.action_open_group))
-                        else Text(stringResource(R.string.action_close_group))
+                        if (!open) Text(stringResource(R.string.open_group_action))
+                        else Text(stringResource(R.string.close_group_action))
                     },
                     text = {
                         if (!open) Text(stringResource(R.string.make_group_open_description))

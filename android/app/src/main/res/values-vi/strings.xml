@@ -449,8 +449,8 @@
     <string name="make_group_closed">Chuyển sang nhóm đóng</string>
     <string name="make_group_open_description">Bất kì ai cũng có thể khám phá nhóm này, xem tất cả thành viên, tin nhắn và yêu cầu trở thành thành viên.</string>
     <string name="make_group_closed_description">Nhóm này sẽ chỉ có thể truy cập được đối với các thành viên.</string>
-    <string name="action_open_group">Mở nhóm</string>
-    <string name="action_close_group">Đóng nhóm</string>
+    <string name="open_group_action">Mở nhóm</string>
+    <string name="close_group_action">Đóng nhóm</string>
     <string name="nothing_scheduled">Không có gì được lên lịch</string>
     <string name="add_reminder">Tạo lời nhắc</string>
     <string name="schedule_reminder">Lên lịch lời nhắc mới</string>

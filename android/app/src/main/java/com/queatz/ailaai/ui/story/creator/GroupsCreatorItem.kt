@@ -157,7 +157,11 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                     showGroupMenu = false
                     showAddGroupDialog = true
                 }
-                menuItem(stringResource(R.string.open_group)) {
+                menuItem(stringResource(R.string.create_group)) {
+                    showGroupMenu = false
+                    showCreateGroupDialog = true
+                }
+                menuItem(stringResource(R.string.open_group_action)) {
                     showGroupMenu = false
                     nav.navigate(AppNav.Group(groupId))
                 }
