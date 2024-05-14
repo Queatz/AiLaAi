@@ -3,8 +3,10 @@ package components
 import Styles
 import androidx.compose.runtime.*
 import api
+import app.AppNavigation
 import app.AppStyles
 import app.ailaai.api.*
+import app.appNav
 import app.components.Empty
 import app.components.TopBarSearch
 import app.dialog.photoDialog
@@ -34,6 +36,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
     var personId by remember { mutableStateOf(personId) }
     val scope = rememberCoroutineScope()
     val router = Router.current
+    val appNav = appNav
     var profile by remember { mutableStateOf<PersonProfile?>(null) }
     var cards by remember { mutableStateOf<List<Card>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -241,8 +244,11 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                             classes(Styles.button)
 
                                             onClick {
-                                                // todo go to specific group
-                                                router.navigate("/")
+                                                scope.launch {
+                                                    api.createGroup(listOf(personId!!), reuse = true) {
+                                                        appNav.navigate(AppNavigation.Group(it.id!!))
+                                                    }
+                                                }
                                             }
                                         }) {
                                             Text(appString { message })
