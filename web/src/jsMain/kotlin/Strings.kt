@@ -170,6 +170,10 @@ object Strings {
         "Không tìm được bài viết này.",
         "История не найдена."
     )
+    val groupNotFound = Translation(
+        "Group not found.",
+        "Không tìm được nhóm này."
+    )
     val cardNotFound = Translation(
         "Page not found.",
         "Không tìm được trang này.",

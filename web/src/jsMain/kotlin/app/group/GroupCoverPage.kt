@@ -5,18 +5,27 @@ import api
 import app.AppStyles
 import app.FullPageLayout
 import app.ailaai.api.group
+import app.components.Empty
+import appText
 import application
 import baseUrl
 import com.queatz.db.GroupExtended
 import components.Loading
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
 fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     Style(AppStyles)
 
+    var isLoading by remember {
+        mutableStateOf(true)
+    }
+    var isError by remember {
+        mutableStateOf(false)
+    }
     var group by remember {
         mutableStateOf<GroupExtended?>(null)
     }
@@ -24,19 +33,28 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     application.background(group?.group?.background?.let { "$baseUrl$it" })
 
     LaunchedEffect(groupId) {
-        api.group(groupId) {
+        api.group(
+            groupId,
+            onError = {
+                isError = true
+            }
+        ) {
             group = it
             onGroupLoaded(it)
         }
+        isLoading = false
     }
 
-    // todo failed to load state
-    if (group == null) {
-        Loading()
-    } else {
-        Div({
-            classes(Styles.mainContent)
-        }) {
+    Div({
+        classes(Styles.mainContent)
+    }) {
+        if (isError) {
+            Empty {
+                appText { groupNotFound }
+            }
+        } else if (isLoading) {
+            Loading()
+        } else if (group != null) {
             FullPageLayout {
                 Div({
                     style {
