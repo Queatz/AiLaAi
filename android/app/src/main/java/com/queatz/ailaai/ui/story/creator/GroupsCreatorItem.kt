@@ -113,7 +113,7 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                     }
                 },
                 filter = {
-                    it.group?.open == true && part.groups.none { id -> it.group?.id == id }
+                    part.groups.none { id -> it.group?.id == id }
                 }
             ) {
                 edit {

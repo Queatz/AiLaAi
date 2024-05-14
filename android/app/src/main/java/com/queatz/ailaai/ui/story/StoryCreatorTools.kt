@@ -18,23 +18,28 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.ailaai.api.createGroup
+import app.ailaai.api.updateGroup
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.*
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.horizontalFadingEdge
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.widget.AddWidgetDialog
+import com.queatz.db.Group
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
 import createWidget
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
+import okhttp3.internal.cache2.Relay.Companion.edit
 
 @Composable
 fun StoryCreatorTools(
@@ -45,6 +50,7 @@ fun StoryCreatorTools(
     val scope = rememberCoroutineScope()
     var showCardSelectorDialog by rememberStateOf(false)
     var showCardGroupSelectorDialog by rememberStateOf(false)
+    var showCreateGroupDialog by rememberStateOf(false)
     var showWidgetsMenu by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
@@ -220,6 +226,27 @@ fun StoryCreatorTools(
         }
     }
 
+    if (showCreateGroupDialog) {
+        TextFieldDialog(
+            onDismissRequest = { showCreateGroupDialog = false },
+            title = stringResource(R.string.group_name),
+            button = stringResource(R.string.create_group),
+            singleLine = true,
+            placeholder = stringResource(R.string.empty_group_name),
+            requireModification = false
+        ) { value ->
+            api.createGroup(emptyList()) { group ->
+                if (value.isNotBlank()) {
+                    api.updateGroup(group.id!!, Group(name = value))
+                }
+                addPart(
+                    StoryContent.Groups(group.id!!.inList())
+                )
+            }
+            showCreateGroupDialog = false
+        }
+    }
+
     if (showCardGroupSelectorDialog) {
         val someone = stringResource(R.string.someone)
         val emptyGroup = stringResource(R.string.empty_group_name)
@@ -230,6 +257,16 @@ fun StoryCreatorTools(
                 showCardGroupSelectorDialog = false
             },
             title = stringResource(R.string.add_group),
+            actions = {
+                IconButton(
+                    {
+                        showCreateGroupDialog = true
+                        showCardGroupSelectorDialog = false
+                    }
+                ) {
+                    Icon(Icons.Outlined.Add, null)
+                }
+            },
             confirmFormatter = defaultConfirmFormatter(
                 R.string.choose_group,
                 R.string.choose_x,
@@ -246,9 +283,6 @@ fun StoryCreatorTools(
                         append(it.group!!.description)
                     }
                 }
-            },
-            filter = {
-                it.group?.open == true
             }
         ) { groups ->
             addPart(
