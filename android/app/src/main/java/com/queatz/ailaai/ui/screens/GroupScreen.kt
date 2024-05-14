@@ -1357,7 +1357,7 @@ fun GroupScreen(groupId: String) {
                             ) {
                                 context.toast(
                                     context.getString(
-                                        R.string.x_removed,
+                                        R.string.x_promoted,
                                         person.name?.nullIfBlank ?: someone
                                     )
                                 )

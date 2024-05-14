@@ -716,6 +716,7 @@
     <string name="show_photos">Show photos</string>
     <string name="add_hosts">Add hosts</string>
     <string name="remove_members">Remove members</string>
+    <string name="x_promoted">%1$s promoted</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

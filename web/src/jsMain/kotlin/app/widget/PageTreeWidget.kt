@@ -12,9 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.AppNavigation
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.newCard
+import app.appNav
 import app.cards.NewCardInput
 import app.components.Empty
 import app.dialog.inputDialog
@@ -62,6 +64,7 @@ fun PageTreeWidget(widgetId: String) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
     val router = Router.current
+    val appNav = appNav
     var widget by remember(widgetId) {
         mutableStateOf<Widget?>(null)
     }
@@ -270,7 +273,13 @@ fun PageTreeWidget(widgetId: String) {
                             if (event.ctrlKey) {
                                 window.open("/page/${card.id!!}", target = "_blank")
                             } else {
-                                router.navigate("/page/${card.id!!}")
+                                if (card.person == me?.id) {
+                                    scope.launch {
+                                        appNav.navigate(AppNavigation.Page(card.id!!, card))
+                                    }
+                                } else {
+                                    router.navigate("/page/${card.id!!}")
+                                }
                             }
                         }
                     }) {

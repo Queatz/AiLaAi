@@ -3,6 +3,7 @@ package app
 import Notification
 import androidx.compose.runtime.*
 import api
+import app.ailaai.api.card
 import app.ailaai.api.comment
 import app.ailaai.api.group
 import app.cards.CardsPage
@@ -273,13 +274,24 @@ fun AppPage() {
             when (it) {
                 is AppNavigation.Group -> {
                     if (it.groupExtended == null) {
-                        api.group(it.group) {
+                        api.group(it.id) {
                             nav = NavPage.Groups
                             group = GroupNav.Selected(it)
                         }
                     } else {
                         nav = NavPage.Groups
                         group = GroupNav.Selected(it.groupExtended)
+                    }
+                }
+                is AppNavigation.Page -> {
+                    if (it.card == null) {
+                        api.card(it.id) {
+                            nav = NavPage.Cards
+                            card = CardNav.Selected(it)
+                        }
+                    } else {
+                        nav = NavPage.Cards
+                        card = CardNav.Selected(it.card)
                     }
                 }
             }

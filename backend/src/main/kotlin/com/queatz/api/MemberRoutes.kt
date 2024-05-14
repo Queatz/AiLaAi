@@ -83,11 +83,14 @@ fun Route.memberRoutes() {
         post("/members/{id}/delete") {
             respond {
                 val member = db.document(Member::class, parameter("id"))
+                val isMe = member?.from == me.id!!.asId(Person::class)
 
                 if (member == null) {
                     HttpStatusCode.NotFound
-                } else if (member.from != me.id!!.asId(Person::class) && !isGroupHost(me.id!!, member.to!!)) {
-                    HttpStatusCode.Forbidden
+                } else if (!isMe && !isGroupHost(me.id!!, member.to!!)) {
+                    HttpStatusCode.BadRequest.description("Only hosts can remove a member")
+                } else if (isMe && member.host == true) {
+                    HttpStatusCode.BadRequest.description("Member is a host")
                 } else {
                     member.hide = true
                     member.gone = true
