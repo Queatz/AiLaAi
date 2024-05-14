@@ -38,6 +38,7 @@ import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
 import components.CardItem
 import components.CardPhotoOrVideo
+import components.IconButton
 import components.Loading
 import components.Switch
 import components.getConversation
@@ -61,6 +62,7 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.overflowX
@@ -591,6 +593,19 @@ fun ExplorePage(
     PageTopBar(
         card.name?.notBlank ?: appString { newCard },
         card.hint,
+        navActions = {
+            if (card.parent != null) {
+                IconButton("arrow_upward", appString { openEnclosingCard }, styles = {
+                    marginRight(.5f.r)
+                }) {
+                    scope.launch {
+                        api.card(card.parent!!) {
+                            onCard(it)
+                        }
+                    }
+                }
+            }
+        },
         actions = {
             Switch(published, { published = it }, {
                 scope.launch {

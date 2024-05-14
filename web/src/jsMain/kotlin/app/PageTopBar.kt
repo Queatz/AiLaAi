@@ -17,6 +17,7 @@ fun PageTopBar(
     title: String,
     description: String? = null,
     actions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
+    navActions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     onMenu: ((SyntheticMouseEvent) -> Unit)? = null
 ) {
     Div({
@@ -29,6 +30,7 @@ fun PageTopBar(
             flexShrink(0)
         }
     }) {
+        navActions()
         Div({
             style {
                 display(DisplayStyle.Flex)
