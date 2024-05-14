@@ -110,7 +110,9 @@ fun GroupScreen(groupId: String) {
     var showLocationDialog by rememberStateOf(false)
     var showRenameGroup by rememberStateOf(false)
     var showGroupMembers by rememberStateOf(false)
+    var showManageGroupMembersMenu by rememberStateOf(false)
     var showRemoveGroupMembers by rememberStateOf(false)
+    var showPromoteGroupMembers by rememberStateOf(false)
     var showInviteMembers by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
@@ -1252,8 +1254,7 @@ fun GroupScreen(groupId: String) {
                         if (myMember?.member?.host == true) {
                             TextButton(
                                 {
-                                    showGroupMembers = false
-                                    showRemoveGroupMembers = true
+                                    showManageGroupMembersMenu = true
                                 }
                             ) {
                                 Text(stringResource(R.string.manage))
@@ -1263,6 +1264,21 @@ fun GroupScreen(groupId: String) {
                 ) {
                     showGroupMembers = false
                     nav.navigate(AppNav.Profile(it.id!!))
+                }
+            }
+
+            if (showManageGroupMembersMenu) {
+                Menu({
+                    showManageGroupMembersMenu = false
+                }) {
+                    menuItem(stringResource(R.string.add_hosts)) {
+                        showManageGroupMembersMenu = false
+                        showPromoteGroupMembers = true
+                    }
+                    menuItem(stringResource(R.string.remove_members)) {
+                        showManageGroupMembersMenu = false
+                        showRemoveGroupMembers = true
+                    }
                 }
             }
 
@@ -1288,6 +1304,53 @@ fun GroupScreen(groupId: String) {
                             api.removeMember(
                                 otherMembers.find { member -> member.person?.id == person.id }?.member?.id
                                     ?: return@forEach,
+                                onError = {
+                                    anyFailed = true
+                                }
+                            ) {
+                                context.toast(
+                                    context.getString(
+                                        R.string.x_removed,
+                                        person.name?.nullIfBlank ?: someone
+                                    )
+                                )
+                                anySucceeded = true
+                            }
+                        }
+                        if (anySucceeded) {
+                            reload()
+                        }
+                        if (anyFailed) {
+                            context.showDidntWork()
+                        }
+                    },
+                    omit = { it.id!! !in members }
+                )
+            }
+
+            if (showPromoteGroupMembers) {
+                val members = groupExtended!!.members!!
+                    .mapNotNull { it.person?.id }
+                    .filter { it != me?.id }
+                ChoosePeopleDialog(
+                    {
+                        showPromoteGroupMembers = false
+                    },
+                    title = stringResource(R.string.manage),
+                    confirmFormatter = defaultConfirmFormatter(
+                        R.string.promote,
+                        R.string.promote_person,
+                        R.string.promote_people,
+                        R.string.promote_x_people
+                    ) { it.name ?: someone },
+                    onPeopleSelected = { people ->
+                        var anySucceeded = false
+                        var anyFailed = false
+                        people.forEach { person ->
+                            api.updateMember(
+                                otherMembers.find { member -> member.person?.id == person.id }?.member?.id
+                                    ?: return@forEach,
+                                Member(host = true),
                                 onError = {
                                     anyFailed = true
                                 }

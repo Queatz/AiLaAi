@@ -184,6 +184,10 @@
     <string name="remove_person">Remove %1$s</string>
     <string name="remove_people">Remove %1$s and %2$s</string>
     <string name="remove_x_people">Remove %1$s people</string>
+    <string name="promote">Promote</string>
+    <string name="promote_person">Promote %1$s</string>
+    <string name="promote_people">Promote %1$s and %2$s</string>
+    <string name="promote_x_people">Promote %1$s people</string>
     <string name="collaboration">Collaboration</string>
     <string name="open_card">Open page</string>
     <string name="open_story">Open story</string>
@@ -710,6 +714,8 @@
     <string name="delete_comment">Delete this comment?</string>
     <string name="hide_photos">Hide photos</string>
     <string name="show_photos">Show photos</string>
+    <string name="add_hosts">Add hosts</string>
+    <string name="remove_members">Remove members</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

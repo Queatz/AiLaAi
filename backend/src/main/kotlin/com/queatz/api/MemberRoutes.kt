@@ -39,13 +39,12 @@ fun Route.memberRoutes() {
             respond {
                 val member = db.document(Member::class, parameter("id"))
 
+                val update = call.receive<Member>()
+
                 if (member == null) {
                     HttpStatusCode.NotFound
                 } else {
-                    if (member.from != me.id!!.asId(Person::class)) {
-                        HttpStatusCode.Forbidden
-                    } else {
-                        val update = call.receive<Member>()
+                    if (member.from == me.id!!.asId(Person::class)) {
 
                         if (update.hide != null) {
                             member.hide = update.hide
@@ -63,6 +62,19 @@ fun Route.memberRoutes() {
                         db.update(member)
 
                         HttpStatusCode.NoContent
+                    } else {
+                        val myMember = db.member(me.id!!, member.to!!)
+                        if (myMember?.host == true) {
+                            if (update.host == true) {
+                                member.host = update.host
+                            }
+
+                            db.update(member)
+
+                            HttpStatusCode.NoContent
+                        } else {
+                            HttpStatusCode.Forbidden
+                        }
                     }
                 }
             }

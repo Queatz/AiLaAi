@@ -3,6 +3,10 @@ package com.queatz.ailaai.ui.story.creator
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,6 +85,16 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                     showAddGroupDialog = false
                 },
                 title = stringResource(R.string.add_group),
+                actions = {
+                    IconButton(
+                        {
+                            showAddGroupDialog = false
+                            showCreateGroupDialog = true
+                        }
+                    ) {
+                        Icon(Icons.Outlined.Add, null)
+                    }
+                },
                 confirmFormatter = defaultConfirmFormatter(
                     R.string.choose_group,
                     R.string.choose_x,
