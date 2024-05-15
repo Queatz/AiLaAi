@@ -43,9 +43,7 @@ fun Route.storyRoutes() {
                 db.commentsOf(parameter("id").asId(Story::class))
             }
         }
-    }
 
-    authenticate {
         get("/stories") {
             respond {
                 val geo = call.parameters["geo"]?.split(",")?.map { it.toDouble() } ?: emptyList()
@@ -54,29 +52,42 @@ fun Route.storyRoutes() {
                     return@respond HttpStatusCode.BadRequest.description("'geo' must be an array of size 2")
                 }
 
-                call.parameters["public"]?.toBoolean().let {
-                    if (it == null) {
+                meOrNull.let { me ->
+                    if (me == null) {
                         db.stories(
                             geo,
-                            me.id!!,
                             defaultNearbyMaxDistanceInMeters,
                             call.parameters["offset"]?.toInt() ?: 0,
                             call.parameters["limit"]?.toInt() ?: 20
                         )
                     } else {
-                        db.stories(
-                            geo,
-                            me.id!!,
-                            defaultNearbyMaxDistanceInMeters,
-                            call.parameters["offset"]?.toInt() ?: 0,
-                            call.parameters["limit"]?.toInt() ?: 20,
-                            it
-                        )
+                        call.parameters["public"]?.toBoolean().let {
+                            if (it == null) {
+                                db.stories(
+                                    geo,
+                                    me.id!!,
+                                    defaultNearbyMaxDistanceInMeters,
+                                    call.parameters["offset"]?.toInt() ?: 0,
+                                    call.parameters["limit"]?.toInt() ?: 20
+                                )
+                            } else {
+                                db.stories(
+                                    geo,
+                                    me.id!!,
+                                    defaultNearbyMaxDistanceInMeters,
+                                    call.parameters["offset"]?.toInt() ?: 0,
+                                    call.parameters["limit"]?.toInt() ?: 20,
+                                    it
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
+    }
 
+    authenticate {
         post("/stories") {
             respond {
                 val story = call.receive<Story>()

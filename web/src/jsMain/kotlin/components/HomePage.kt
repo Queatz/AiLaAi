@@ -1,20 +1,29 @@
 package components
 
 import LocalConfiguration
+import Strings.save
 import Styles
 import androidx.compose.runtime.*
 import api
 import app.ailaai.api.cards
+import app.nav.StoryNav
 import appString
 import appText
+import com.queatz.ailaai.api.stories
 import com.queatz.db.Card
 import com.queatz.db.Geo
+import com.queatz.db.StoryContent
+import com.queatz.db.asGeo
+import defaultGeo
+import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import r
+import stories.StoryContents
+import stories.full
 
 @Composable
 fun HomePage() {
@@ -61,7 +70,7 @@ fun HomePage() {
                     style {
                         borderRadius(1.r)
                         marginRight(1.r)
-                        width(20.vw)
+                        width(10.vw)
                     }
                 }
             }
@@ -82,6 +91,7 @@ fun HomePage() {
                         opacity(.5f)
                     }
                 }) {
+                    // todo translate
                     Text("or get it on")
                 }
                 A("https://play.google.com/store/apps/details?id=com.ailaai.app", {
@@ -89,6 +99,7 @@ fun HomePage() {
                     style {
                         marginLeft(.5.r)
                         fontWeight("bold")
+                        textDecoration("underline")
                     }
                 }) {
                     Text("Google Play")
@@ -102,14 +113,14 @@ fun HomePage() {
             searchText = it
         }
 
+        val hcmc = Geo(10.7915858, 106.7426523)
+
         LaunchedEffect(searchText) {
             isLoading = true
             delay(250)
 
-
             if (searchText.isNotBlank()) {
-                // HCMC
-                api.cards(Geo(10.7915858, 106.7426523), search = searchText, onError = {
+                api.cards(hcmc, search = searchText, onError = {
                     searchResults = emptyList()
                 }) {
                     searchResults = it
@@ -122,50 +133,60 @@ fun HomePage() {
 
         when (searchText.isBlank()) {
             true -> {
-                listOf(
-                    appString { peopleToKnow } to listOf(
-                        "11389583",
-                        "11156377",
-                        "10455696",
-                        "12319827",
-                        "9914441"
-                    ).shuffled().take(3),
-                    appString { placesToKnow } to listOf("9879608", "10102613")
-                )
+                var storyContent by remember { mutableStateOf<List<StoryContent>>(emptyList()) }
+
+                LaunchedEffect(Unit) {
+                    api.stories(hcmc) { stories ->
+                        storyContent = stories.flatMapIndexed { index, it ->
+                            if (index < stories.lastIndex) it.full() + StoryContent.Divider else it.full()
+                        }
+                    }
+                }
+
+                Div({
+                    classes(Styles.cardContent)
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        padding(1.r)
+                    }
+                }) {
+                    StoryContents(
+                        storyContent,
+                        {
+                            window.open("/groups/${it.group!!.id!!}", "_blank")
+                        },
+                        openInNewWindow = true
+                    )
+                }
             }
 
             false -> {
                 listOf(
                     (if (isLoading) appString { searching } else appString { this.searchResults }) to searchResults,
-                )
-            }
-        }.forEach { (category, cards) ->
-            H3 {
-                Text(category)
-            }
-            Div({
-                classes(Styles.mainContentCards)
-            }) {
-                if (cards.isEmpty()) {
-                    if (!isLoading) {
-                        Span({
-                            style {
-                                color(Styles.colors.secondary)
-                            }
-                        }) {
-                            appText { noCards }
-                        }
+                ).forEach { (category, cards) ->
+                    H3 {
+                        Text(category)
                     }
-                } else {
-                    cards.forEach { card ->
-                        when (card) {
-                            is String -> CardItem(card) {
-                                margin(1.r)
+                    Div({
+                        classes(Styles.mainContentCards)
+                    }) {
+                        if (cards.isEmpty()) {
+                            if (!isLoading) {
+                                Span({
+                                    style {
+                                        color(Styles.colors.secondary)
+                                    }
+                                }) {
+                                    appText { noCards }
+                                }
                             }
-
-                            is Card -> CardItem(card, styles = {
-                                margin(1.r)
-                            })
+                        } else {
+                            cards.forEach { card ->
+                                CardItem(card, styles = {
+                                    margin(1.r)
+                                })
+                            }
                         }
                     }
                 }

@@ -11,7 +11,7 @@ fun Db.storyExtended(person: String?, storyVal: String) = """
                     filter author._key == $storyVal.${f(Story::person)}
                     return author
             ),
-            ${f(Story::reactions)}: ${reactions("\"$person\"", "$storyVal._id")}
+            ${f(Story::reactions)}: ${reactions(person?.let { "\"$it\"" }, "$storyVal._id")}
         }
     )
 """.trimIndent()
@@ -168,6 +168,36 @@ fun Db.stories(
     mapOf(
         "person" to person.asId(Person::class),
         "personKey" to person,
+        "geo" to geo,
+        "nearbyMaxDistance" to nearbyMaxDistance,
+        "offset" to offset,
+        "limit" to limit
+    )
+)
+
+/**
+ * Public
+ *
+ * @geo The geolocation bias
+ */
+fun Db.stories(
+    geo: List<Double>,
+    nearbyMaxDistance: Double,
+    offset: Int,
+    limit: Int
+) = list(
+    Story::class,
+    """
+        for x in @@collection
+            filter x.${f(Story::published)} == true
+            let g = x.${f(Story::geo)} == null ? document(${Person::class.collection()}, x.${f(Story::person)}).${f(Person::geo)} : x.${f(Story::geo)}
+            let d = g == null ? null : distance(g[0], g[1], @geo[0], @geo[1])
+            filter d != null and d <= @nearbyMaxDistance
+            sort x.${f(Story::publishDate)} desc, x.${f(Story::createdAt)} desc
+            limit @offset, @limit
+            return ${storyExtended(null, "x")}
+    """.trimIndent(),
+    mapOf(
         "geo" to geo,
         "nearbyMaxDistance" to nearbyMaxDistance,
         "offset" to offset,

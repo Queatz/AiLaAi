@@ -23,6 +23,7 @@ import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
 import org.w3c.dom.set
+import stories.StoryStyles
 
 const val baseUrl = "https://api.ailaai.app"
 
@@ -49,6 +50,7 @@ fun main() {
         Style(Styles)
         Style(WidgetStyles)
         Style(CallStyles)
+        Style(StoryStyles)
 
         var language by remember {
             mutableStateOf(
