@@ -22,6 +22,7 @@ fun GroupList(
             onSurface = onSurface,
             coverPhoto = coverPhoto,
             maxWidth = maxWidth,
+            shadow = true,
             onSelected = {
                 onSelected(it)
             },

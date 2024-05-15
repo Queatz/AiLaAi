@@ -255,6 +255,7 @@ fun StoryContents(
                                     group,
                                     selectable = true,
                                     selected = false,
+                                    shadow = true,
                                     onSelected = {
                                         onGroupClick(group)
                                     },

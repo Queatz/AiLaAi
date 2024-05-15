@@ -42,6 +42,7 @@ fun GroupItem(
     onBackground: Boolean = false,
     coverPhoto: Boolean = false,
     showInCall: Boolean = false,
+    shadow: Boolean = false,
     maxWidth: CSSSizeValue<CSSUnit.rem>? = null,
     onSelected: () -> Unit,
     info: GroupInfo = GroupInfo.LatestMessage,
@@ -61,10 +62,15 @@ fun GroupItem(
     Div({
         classes(AppStyles.groupItemCard)
 
-        maxWidth?.let {
-            style {
+        if (shadow) {
+            classes(AppStyles.groupItemCardShadow)
+        }
+
+        style {
+            maxWidth?.let {
                 maxWidth(it)
             }
+            styles()
         }
     }) {
         if (hasCover) {
@@ -107,8 +113,6 @@ fun GroupItem(
                 if (hasCover) {
                     borderRadius(0.r, 0.r, 1.r, 1.r)
                 }
-
-                styles()
             }
             onClick {
                 onSelected()
@@ -194,6 +198,7 @@ fun GroupItem(
                         }
                     }
                 }
+
                 info == GroupInfo.Members && myMember != null -> {
                     Div({
                         style {
@@ -212,6 +217,7 @@ fun GroupItem(
                         }
                     }
                 }
+
                 joinRequestCount > 0 -> {
                     Div({
                         style {
@@ -234,6 +240,7 @@ fun GroupItem(
                         }
                     }
                 }
+
                 group.latestMessage != null -> {
                     Div({
                         style {

@@ -256,6 +256,11 @@ object AppStyles : StyleSheet() {
         width(100.percent)
     }
 
+    val groupItemCardShadow by style {
+        property("box-shadow", "0 0 16px rgba(0, 0, 0, .125)")
+        borderRadius(1.r)
+    }
+
     val groupList by style {
         display(DisplayStyle.Flex)
         flexWrap(FlexWrap.Wrap)

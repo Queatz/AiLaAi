@@ -21,6 +21,7 @@ fun GroupCover(group: GroupExtended) {
         group,
         onBackground = true,
         coverPhoto = true,
+        shadow = true,
         onSelected = {
             scope.launch {
                 if (me == null) {
