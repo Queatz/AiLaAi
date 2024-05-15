@@ -9,7 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.AppNavigation
 import app.ailaai.api.runScript
+import app.appNav
 import application
 import com.queatz.db.RunScriptBody
 import com.queatz.db.ScriptResult
@@ -30,6 +32,7 @@ import widget
 @Composable
 fun ScriptWidget(widgetId: String) {
     val me by application.me.collectAsState()
+    val appNav = appNav
     val scope = rememberCoroutineScope()
     var widget by remember(widgetId) {
         mutableStateOf<Widget?>(null)
@@ -63,7 +66,11 @@ fun ScriptWidget(widgetId: String) {
     scriptResult?.content?.notEmpty?.let { content ->
         StoryContents(
             storyContent = content,
-            onGroupClick = {},
+            onGroupClick = {
+                scope.launch {
+                    appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                }
+            },
             onButtonClick = { script, data ->
                 scope.launch {
                     api.runScript(script, RunScriptBody(data)) {

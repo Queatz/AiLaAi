@@ -153,7 +153,7 @@ fun HomePage() {
                 }) {
                     StoryContents(
                         storyContent,
-                        {
+                        onGroupClick = {
                             window.open("/groups/${it.group!!.id!!}", "_blank")
                         },
                         openInNewWindow = true

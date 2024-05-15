@@ -29,6 +29,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.TextArea
 import org.w3c.dom.events.Event
 import r
+import resize
 
 @Composable
 fun ScheduleNavPage(
@@ -196,13 +197,11 @@ fun ScheduleNavPage(
 
                 onInput {
                     newReminderTitle = it.value
-                    it.target.style.height = "0"
-                    it.target.style.height = "${it.target.scrollHeight + 2}px"
+                    it.target.resize()
                 }
 
                 onChange {
-                    it.target.style.height = "0"
-                    it.target.style.height = "${it.target.scrollHeight + 2}px"
+                    it.target.resize()
 
                     if (newReminderTitle.isEmpty()) {
                         it.target.focus()

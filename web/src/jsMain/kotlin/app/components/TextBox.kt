@@ -1,11 +1,23 @@
 package app.components
 
-import androidx.compose.runtime.*
+import Styles
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.StyleScope
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.dom.TextArea
 import org.w3c.dom.events.Event
 import r
+import resize
 
 @Composable
 fun TextBox(
@@ -51,18 +63,15 @@ fun TextBox(
 
         onInput {
             onValue(it.value)
-            it.target.style.height = "0"
-            it.target.style.height = "${it.target.scrollHeight + 2}px"
+            it.target.resize()
         }
 
         onChange {
-            it.target.style.height = "0"
-            it.target.style.height = "${it.target.scrollHeight + 2}px"
+            it.target.resize()
         }
 
         ref { element ->
-            element.style.height = "0"
-            element.style.height = "${element.scrollHeight + 2}px"
+            element.resize()
 
             if (selectAll) {
                 element.select()

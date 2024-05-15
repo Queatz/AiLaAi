@@ -15,6 +15,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.w3c.dom.events.Event
 import r
+import resize
 
 @Composable
 fun EditField(
@@ -88,14 +89,12 @@ fun EditField(
 
         onInput {
             messageText = it.value
-            it.target.style.height = "0"
-            it.target.style.height = "${it.target.scrollHeight + 2}px"
+            it.target.resize()
             messageChanged = true
         }
 
         onChange {
-            it.target.style.height = "0"
-            it.target.style.height = "${it.target.scrollHeight + 2}px"
+            it.target.resize()
         }
 
         if (autoFocus) {
@@ -107,8 +106,7 @@ fun EditField(
                 element.focus()
             }
 
-            element.style.height = "0"
-            element.style.height = "${element.scrollHeight + 2}px"
+            element.resize()
 
             onValueChange = { element.dispatchEvent(Event("change")) }
 

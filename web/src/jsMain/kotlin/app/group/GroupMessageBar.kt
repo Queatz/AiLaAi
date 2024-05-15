@@ -27,6 +27,7 @@ import org.w3c.dom.get
 import org.w3c.files.File
 import pickPhotos
 import r
+import resize
 import toBytes
 
 @Composable
@@ -179,22 +180,18 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
                     it.preventDefault()
                     scope.launch {
                         delay(1)
-                        (it.target as HTMLTextAreaElement).style.height = "0"
-                        (it.target as HTMLTextAreaElement).style.height =
-                            "${(it.target as HTMLTextAreaElement).scrollHeight + 2}px"
+                        (it.target as HTMLTextAreaElement).resize()
                     }
                 }
             }
 
             onInput {
                 messageText = it.value
-                it.target.style.height = "0"
-                it.target.style.height = "${it.target.scrollHeight + 2}px"
+                it.target.resize()
             }
 
             onChange {
-                it.target.style.height = "0"
-                it.target.style.height = "${it.target.scrollHeight + 2}px"
+                it.target.resize()
             }
 
             onPaste {
