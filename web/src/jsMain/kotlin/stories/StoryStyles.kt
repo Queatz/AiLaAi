@@ -80,6 +80,7 @@ object StoryStyles : StyleSheet() {
         position(Position.Relative)
         width(100.percent)
         maxWidth(32.r)
+        gap(1.r)
 
         child(self, className(AppStyles.groupItem)) style {
             self style {
@@ -109,7 +110,6 @@ object StoryStyles : StyleSheet() {
         media(mediaMaxWidth(640.px)) {
             self style {
                 width(100.percent)
-                property("max-width", "calc(100vw - ${1.r * 4})")
             }
         }
     }

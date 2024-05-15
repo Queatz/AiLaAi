@@ -47,11 +47,6 @@ fun TextFieldDialog(
     var disableSubmit by remember { mutableStateOf(requireModification) }
     val coroutineScope = rememberCoroutineScope()
     var text by remember { mutableStateOf(initialValue) }
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 
     DialogBase(onDismissRequest, modifier = Modifier.wrapContentHeight()) {
         val scrollState = rememberScrollState()
@@ -68,6 +63,11 @@ fun TextFieldDialog(
                 )
             }
             extraContent?.invoke(this)
+            val focusRequester = remember { FocusRequester() }
+
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
             OutlinedTextField(
                 text,
                 onValueChange = {
