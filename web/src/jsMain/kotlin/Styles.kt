@@ -44,11 +44,31 @@ object Styles : StyleSheet() {
     }
 
     val background by style {
+        position(Position.Relative)
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+    }
+
+    val backgroundPhotoLoaded by style {}
+
+    @OptIn(ExperimentalComposeWebApi::class)
+    val backgroundPhoto by style {
+        position(Position.Absolute)
         backgroundPosition("center")
         backgroundSize("cover")
         backgroundAttachment("fixed")
-        display(DisplayStyle.Flex)
-        flexDirection(FlexDirection.Column)
+        property("inset", "0")
+        opacity(0)
+
+        self + className(backgroundPhotoLoaded) style {
+            opacity(1)
+        }
+
+        transitions {
+            "opacity" {
+                duration = 200.ms
+            }
+        }
     }
 
     val mobileRow by style {
@@ -195,6 +215,7 @@ object Styles : StyleSheet() {
         padding(1.r)
         margin(1.r)
         elevated()
+        property("z-index", "1")
     }
 
     val appFooter by style {
@@ -205,6 +226,7 @@ object Styles : StyleSheet() {
         padding(1.r)
         marginTop(1.r)
         backgroundColor(Color("#f7f7f7"))
+        property("z-index", "1")
 
         dark(self) {
             backgroundColor(colors.dark.background)
@@ -236,6 +258,7 @@ object Styles : StyleSheet() {
         lineHeight("1.25")
         property("aspect-ratio", "6/1")
         property("text-shadow", "#fff 0px 0px .5rem")
+        property("z-index", "1")
 
         media(mediaMinWidth(641.px)) {
             self style {
@@ -255,6 +278,7 @@ object Styles : StyleSheet() {
         minHeight(100.vh)
         alignItems(AlignItems.Stretch)
         justifyContent(JustifyContent.Stretch)
+        property("z-index", "1")
     }
 
     @OptIn(ExperimentalComposeWebApi::class)

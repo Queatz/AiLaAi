@@ -1,14 +1,29 @@
 package app
 
 import Notification
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.card
 import app.ailaai.api.comment
 import app.ailaai.api.group
 import app.cards.CardsPage
+import app.components.Background
 import app.group.GroupPage
-import app.nav.*
+import app.nav.CardNav
+import app.nav.CardsNavPage
+import app.nav.GroupNav
+import app.nav.GroupsNavPage
+import app.nav.ProfileNavPage
+import app.nav.ScheduleNavPage
+import app.nav.StoriesNavPage
+import app.nav.StoryNav
 import app.page.SchedulePage
 import app.page.ScheduleView
 import app.page.StoriesPage
@@ -36,7 +51,13 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import lib.hidden
 import notifications
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexGrow
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
@@ -59,7 +80,6 @@ fun AppPage() {
     Style(StoryStyles)
 
     val scope = rememberCoroutineScope()
-    val background by application.background.collectAsState(null)
     val me by application.me.collectAsState()
 
     var nav by remember {
@@ -326,14 +346,8 @@ fun AppPage() {
         }) {}
     }
 
-    Div({
+    Background({
         classes(AppStyles.baseLayout)
-
-        style {
-            if (background != null) {
-                backgroundImage("url($background)")
-            }
-        }
     }) {
         Div({
             classes(AppStyles.sideLayout)

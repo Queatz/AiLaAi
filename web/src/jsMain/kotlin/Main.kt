@@ -122,7 +122,9 @@ fun main() {
 
                 route("group") {
                     string { groupId ->
-                        Background {
+                        Background({
+                            classes(Styles.background)
+                        }) {
                             AppHeader(appName)
                             GroupCoverPage(groupId) {
                                 title = it.group?.name ?: appName

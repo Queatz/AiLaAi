@@ -203,6 +203,8 @@ fun StoryComments(
                                             Span({
                                                 classes(Styles.inlineButton)
 
+                                                title("Ctrl+click to expand inline")
+
                                                 onClick {
                                                     if (loadRepliesInline != it.ctrlKey) {
                                                         scope.launch {

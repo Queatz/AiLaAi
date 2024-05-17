@@ -143,13 +143,11 @@ object AppStyles : StyleSheet() {
     }
 
     val baseLayout by style {
+        position(Position.Relative)
         width(100.vw)
         height(100.vh)
         overflow("hidden")
         display(DisplayStyle.Flex)
-
-        backgroundPosition("center")
-        backgroundSize("cover")
 
         dark(self) {
             backgroundColor(Color.black)
@@ -187,6 +185,7 @@ object AppStyles : StyleSheet() {
     val mainLayout by style {
         overflow("hidden")
         flexGrow(1)
+        property("z-index", "1")
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.ColumnReverse)
     }
