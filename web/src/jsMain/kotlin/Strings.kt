@@ -574,9 +574,17 @@ object Strings {
         "Choose photo",
         "Chọn ảnh"
     )
+    val describePhoto = Translation(
+        "Describe photo",
+        "Mô tả ảnh"
+    )
     val generatePhoto = Translation(
         "Generate photo",
         "Tạo ảnh"
+    )
+    val confirm = Translation(
+        "Confirm",
+        "Xác nhận"
     )
     val regeneratePhoto = Translation(
         "Regenerate photo",

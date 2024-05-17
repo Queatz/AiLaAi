@@ -96,6 +96,7 @@ object AppStyles : StyleSheet() {
         property("z-index", "102")
         property("transform", "translateX(-100%)")
         property("user-select", "none")
+        boxSizing("border-box")
 
         dark(self) {
             backgroundColor(Styles.colors.dark.background)

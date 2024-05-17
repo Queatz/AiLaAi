@@ -19,6 +19,7 @@ fun IconButton(
     background: Boolean = false,
     backgroundColor: CSSColorValue? = null,
     styles: (StyleScope.() -> Unit)? = null,
+    iconStyles: (StyleScope.() -> Unit)? = null,
     onClick: (SyntheticMouseEvent) -> Unit
 ) {
     Span({
@@ -49,6 +50,12 @@ fun IconButton(
     }) {
         Span({
             classes("material-symbols-outlined")
+
+            iconStyles?.let {
+                style {
+                    it()
+                }
+            }
         }) {
             Text(name)
         }

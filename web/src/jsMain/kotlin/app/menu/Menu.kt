@@ -1,6 +1,10 @@
 package app.menu
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import app.AppStyles
 import components.Icon
 import focusable
@@ -53,15 +57,18 @@ class MenuScope {
 fun Menu(
     onDismissRequest: () -> Unit,
     target: DOMRect,
+    above: Boolean = false,
     content: @Composable MenuScope.() -> Unit
 ) {
+    var y by remember { mutableStateOf(0) }
+
     Div({
         classes(AppStyles.menu)
 
         style {
-            target.let { it.left + it.width to it.top + it.height }
+            target.let { it.left + it.width to it.top + (if (above) 0.0 else it.height) }
                 .let { (left, top) ->
-                    top(top.px)
+                    top((top - y).px)
                     left(left.px)
                 }
         }
@@ -77,6 +84,17 @@ fun Menu(
                     onDismissRequest()
                 }
             }
+
+            if (above) {
+                y = menuElement.clientHeight
+            }
+
+            menuElement.onresize = {
+                if (above) {
+                    y = menuElement.clientHeight
+                }
+            }
+
             val resizeListener = EventListener { onDismissRequest() }
             document.addEventListener("click", clickListener)
             window.addEventListener("resize", resizeListener)

@@ -1,6 +1,11 @@
 package com.queatz.ailaai.ui.dialogs
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -16,9 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.appString
-import com.queatz.ailaai.extensions.appStringShort
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.toggle
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.GroupMember
 import com.queatz.ailaai.ui.theme.pad
