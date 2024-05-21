@@ -48,6 +48,7 @@ val http = HttpClient(Js) {
 fun main() {
     renderComposableInBody {
         Style(Styles)
+        Style(EffectStyles)
         Style(WidgetStyles)
         Style(CallStyles)
         Style(StoryStyles)

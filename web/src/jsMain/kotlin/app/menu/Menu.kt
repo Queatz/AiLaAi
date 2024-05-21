@@ -23,7 +23,7 @@ import r
 
 class MenuScope {
     @Composable
-    fun item(title: String, selected: Boolean = false, icon: String? = null, onClick: () -> Unit) {
+    fun item(title: String, selected: Boolean = false, icon: String? = null, onIconClick: (() -> Unit)? = null, onClick: () -> Unit) {
         Div({
             classes(
                 if (selected) {
@@ -43,7 +43,7 @@ class MenuScope {
                 Text(title)
             }
             if (icon != null) {
-                Icon(icon) {
+                Icon(icon, onClick = onIconClick) {
                     flexShrink(0)
                     marginLeft(1.r)
                     opacity(.5)

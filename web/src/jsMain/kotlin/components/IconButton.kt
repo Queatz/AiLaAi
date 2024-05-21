@@ -79,7 +79,7 @@ fun IconButton(
 }
 
 @Composable
-fun Icon(name: String, title: String? = null, styles: (StyleScope.() -> Unit)? = null) {
+fun Icon(name: String, title: String? = null, onClick: (() -> Unit)? = null, styles: (StyleScope.() -> Unit)? = null) {
     Span({
         classes("material-symbols-outlined")
         style {
@@ -88,6 +88,13 @@ fun Icon(name: String, title: String? = null, styles: (StyleScope.() -> Unit)? =
 
         if (title != null) {
             title(title)
+        }
+
+        if (onClick != null) {
+            onClick {
+                it.stopPropagation()
+                onClick()
+            }
         }
     }) {
         Text(name)

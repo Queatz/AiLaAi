@@ -182,11 +182,10 @@ fun SigninPage() {
                 }
 
                 Div({
+                    classes(Styles.button)
+
                     style {
-                        color(Styles.colors.primary)
-                        fontWeight("bold")
                         margin(1.r)
-                        cursor("pointer")
                     }
 
                     onClick {

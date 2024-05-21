@@ -1,5 +1,6 @@
 package app.group
 
+import Strings.settings
 import Styles
 import androidx.compose.runtime.*
 import api
@@ -10,7 +11,7 @@ import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.InlineMenu
 import app.menu.Menu
-import app.nav.CardNav
+import app.messaages.inList
 import app.nav.name
 import appString
 import appText
@@ -20,14 +21,20 @@ import com.queatz.db.*
 import components.IconButton
 import components.LinkifyText
 import joins
+import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import lib.formatDistanceToNow
 import notBlank
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.dom.Input
+import org.jetbrains.compose.web.dom.RangeInput
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -90,6 +97,70 @@ fun GroupTopBar(
 
             api.updateGroup(group.group!!.id!!, Group(open = open)) {
                 onGroupUpdated()
+            }
+        }
+    }
+
+    fun showEffects() {
+        scope.launch {
+            val groupConfig = group.group?.config ?: GroupConfig()
+
+            val result = dialog(
+                application.appString { effects },
+                application.appString { update },
+                closeStr
+            ) {
+                var effectsConfig by remember {
+                    mutableStateOf<List<Effect>?>(group.group?.config?.effects?.let { json.decodeFromString(it) })
+                }
+
+                LaunchedEffect(effectsConfig) {
+                    groupConfig.effects = json.encodeToString(effectsConfig)
+                }
+
+                InlineMenu({}) {
+                    item(appString { none }, selected = effectsConfig.isNullOrEmpty()) {
+                        effectsConfig = emptyList()
+                    }
+
+                    val selected = effectsConfig?.any { it is RainEffect } == true
+                    item(
+                        appString { rain },
+                        selected = selected,
+                        icon = "settings".takeIf { selected },
+                        onIconClick = if (selected) {
+                            {
+                                scope.launch {
+                                    dialog(application.appString { settings }) {
+                                        var rainAmount by remember { mutableStateOf((effectsConfig?.firstOrNull() as? RainEffect)?.amount ?: 0.1) }
+
+                                        LaunchedEffect(rainAmount) {
+                                            effectsConfig = RainEffect(rainAmount).inList()
+                                        }
+
+                                        RangeInput(
+                                            rainAmount * 100.0,
+                                            min = 5,
+                                            max = 100
+                                        ) {
+                                            onInput {
+                                                rainAmount = it.value!!.toDouble() / 100.0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else null
+                    ) {
+                        effectsConfig = RainEffect(.1).inList()
+                    }
+                }
+            }
+
+            if (result == true) {
+                api.updateGroup(group.group!!.id!!, Group(config = groupConfig)) {
+                    onGroupUpdated()
+                }
             }
         }
     }
@@ -281,6 +352,9 @@ fun GroupTopBar(
                                         item(appString { makeOpenGroup }) {
                                             makeOpen(true)
                                         }
+                                    }
+                                    item(appString { effects }) {
+                                        showEffects()
                                     }
                                     item(appString { settings }) {
                                         showSettings()

@@ -14,6 +14,7 @@ fun GroupLayout(
     }
 
     application.background(group.group?.background?.let { "$baseUrl$it" })
+    application.effects(group.group?.config?.effects?.let { json.decodeFromString(it) })
 
     LaunchedEffect(group.group?.id) {
         group.group?.id?.let { groupId ->

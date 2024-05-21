@@ -46,6 +46,7 @@ suspend fun inputDialog(
                 selectAll = true,
                 styles = {
                     margin(0.r)
+                    maxWidth(100.percent)
                     inputStyles()
                 },
                 onDismissRequest = {

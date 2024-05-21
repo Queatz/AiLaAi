@@ -568,7 +568,7 @@ object Strings {
     )
     val none = Translation(
         "None",
-        "Chưa có"
+        "Không có"
     )
     val choosePhoto = Translation(
         "Choose photo",
@@ -778,6 +778,10 @@ object Strings {
         "Settings",
         "Cài đặt"
     )
+    val effects = Translation(
+        "Effects",
+        "Hiệu ứng"
+    )
     val shareAComment = Translation(
         "Share a comment",
         "Chia sẻ một bình luận"
@@ -809,6 +813,10 @@ object Strings {
     val replyTo = Translation(
         "Reply to",
         "Trả lời"
+    )
+    val rain = Translation(
+        "Rain",
+        "Mưa"
     )
     val commentReplies = Translation(
         "Comment replies",

@@ -140,7 +140,8 @@ class Group(
 @Serializable
 data class GroupConfig(
     var messages: GroupMessagesConfig? = null,
-    var edits: GroupEditsConfig? = null
+    var edits: GroupEditsConfig? = null,
+    var effects: String? = null,
 )
 
 @Serializable

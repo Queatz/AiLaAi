@@ -41,6 +41,7 @@ import app.ailaai.api.replyToComment
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.ifNotEmpty
@@ -210,7 +211,10 @@ fun StoryComments(
                             LinkifyText(comment.comment!!.comment!!)
                         }
                         Text(
-                            comment.comment!!.createdAt!!.timeAgo(),
+                            bulletedString(
+                                comment.comment!!.createdAt!!.timeAgo(),
+                                stringResource(R.string.tap_to_reply)
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier

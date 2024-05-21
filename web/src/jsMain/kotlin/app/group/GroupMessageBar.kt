@@ -116,6 +116,7 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
                 placeholder = application.appString { describePhoto },
                 confirmButton = application.appString { confirm },
                 defaultValue = aiPrompt,
+                singleLine = false,
                 inputStyles = {
                     width(32.r)
                 }
