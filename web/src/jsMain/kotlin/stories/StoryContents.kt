@@ -293,10 +293,6 @@ fun StoryContents(
                             Img(url) {
                                 classes(StoryStyles.contentPhotosPhotoNoAspect)
 
-                                style {
-                                    backgroundColor(Styles.colors.background)
-                                }
-
                                 onClick {
                                     scope.launch {
                                         photoDialog(url)
@@ -306,8 +302,8 @@ fun StoryContents(
                         } else {
                             Div({
                                 classes(StoryStyles.contentPhotosPhoto)
+
                                 style {
-                                    backgroundColor(Styles.colors.background)
                                     backgroundImage("url($url)")
                                     property("aspect-ratio", "${part.aspect}")
                                 }

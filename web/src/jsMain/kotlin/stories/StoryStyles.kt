@@ -98,6 +98,7 @@ object StoryStyles : StyleSheet() {
     }
 
     val contentPhotosPhoto by style {
+        backgroundColor(Styles.colors.background)
         backgroundPosition("center")
         backgroundSize("cover")
         borderRadius(1.r)
@@ -115,6 +116,7 @@ object StoryStyles : StyleSheet() {
     }
 
     val contentPhotosPhotoNoAspect by style {
+        backgroundColor(Styles.colors.background)
         borderRadius(1.r)
         flex(1)
         width(100.percent)
