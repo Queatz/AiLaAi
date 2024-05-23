@@ -57,6 +57,7 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -288,20 +289,36 @@ fun StoryContents(
                 }) {
                     part.photos.forEach { photo ->
                         val url = "$baseUrl$photo"
-                        Div({
-                            classes(StoryStyles.contentPhotosPhoto)
-                            style {
-                                backgroundColor(Styles.colors.background)
-                                backgroundImage("url($url)")
-                                property("aspect-ratio", "${part.aspect}")
-                            }
+                        if (part.aspect == null) {
+                            Img(url) {
+                                classes(StoryStyles.contentPhotosPhotoNoAspect)
 
-                            onClick {
-                                scope.launch {
-                                    photoDialog(url)
+                                style {
+                                    backgroundColor(Styles.colors.background)
+                                }
+
+                                onClick {
+                                    scope.launch {
+                                        photoDialog(url)
+                                    }
                                 }
                             }
-                        })
+                        } else {
+                            Div({
+                                classes(StoryStyles.contentPhotosPhoto)
+                                style {
+                                    backgroundColor(Styles.colors.background)
+                                    backgroundImage("url($url)")
+                                    property("aspect-ratio", "${part.aspect}")
+                                }
+
+                                onClick {
+                                    scope.launch {
+                                        photoDialog(url)
+                                    }
+                                }
+                            })
+                        }
                     }
                 }
             }

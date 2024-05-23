@@ -31,7 +31,7 @@ sealed class StoryContent {
     @Serializable
     class Cards(var cards: List<String>) : StoryContent()
     @Serializable
-    class Photos(var photos: List<String>, var aspect: Float = 0.75f) : StoryContent()
+    class Photos(var photos: List<String>, var aspect: Float? = null) : StoryContent()
     @Serializable
     class Audio(var audio: String) : StoryContent()
     @Serializable

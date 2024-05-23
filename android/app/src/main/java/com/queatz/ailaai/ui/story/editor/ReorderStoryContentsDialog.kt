@@ -117,7 +117,14 @@ fun ReorderStoryContentsDialog(
                                 .shadow(elevation, shape = MaterialTheme.shapes.large)
                                 .clip(MaterialTheme.shapes.large)
                                 .height(106.dp)
-                                .aspectRatio(it.aspect)
+                                .then(
+                                    if (it.aspect != null) {
+                                        Modifier
+                                            .aspectRatio(it.aspect!!)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
                         )
                     }

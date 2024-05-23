@@ -40,8 +40,15 @@ fun LazyGridScope.photosItem(content: StoryContent.Photos, viewHeight: Float) {
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.large)
                     .fillMaxWidth()
-                    .aspectRatio(content.aspect)
-                    .heightIn(min = 240.dp.coerceAtMost(viewHeight.inDp()), max = viewHeight.inDp())
+                    .then(
+                        if (content.aspect != null) {
+                            Modifier
+                                .aspectRatio(content.aspect!!)
+                                .heightIn(min = 240.dp.coerceAtMost(viewHeight.inDp()), max = viewHeight.inDp())
+                        } else {
+                            Modifier
+                        }
+                    )
                     .background(MaterialTheme.colorScheme.secondaryContainer)
             )
         }

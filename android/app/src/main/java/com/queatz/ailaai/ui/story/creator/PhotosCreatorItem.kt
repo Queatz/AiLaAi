@@ -26,6 +26,7 @@ import com.queatz.ailaai.api.uploadCardContentPhotosFromUri
 import com.queatz.ailaai.api.uploadProfileContentPhotosFromUri
 import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.Menu
@@ -130,6 +131,12 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                     showPhotoAspectMenu = false
                 }
             ) {
+                menuItem(stringResource(R.string.none)) {
+                    showPhotoAspectMenu = false
+                    edit {
+                        aspect = null
+                    }
+                }
                 menuItem(stringResource(R.string.portrait)) {
                     showPhotoAspectMenu = false
                     edit {
@@ -172,9 +179,17 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                     modifier = Modifier
                         .shadow(elevation, shape = MaterialTheme.shapes.large)
                         .clip(MaterialTheme.shapes.large)
-                        .aspectRatio(part.aspect)
-                        .heightIn(min = 240.dp)
                         .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .then(
+                            if (part.aspect != null) {
+                                Modifier
+                                    .aspectRatio(part.aspect!!)
+                                    .heightIn(min = 240.dp)
+                            } else {
+                                Modifier
+                                    .fillMaxWidth()
+                            }
+                        )
                 )
             }
         }
@@ -229,8 +244,15 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
             modifier = Modifier
                 .clip(MaterialTheme.shapes.large)
                 .fillMaxWidth()
-                .aspectRatio(part.aspect)
-                .heightIn(min = 240.dp)
+                .then(
+                    if (part.aspect != null) {
+                        Modifier
+                            .aspectRatio(part.aspect!!)
+                            .heightIn(min = 240.dp)
+                    } else {
+                        Modifier
+                    }
+                )
                 .background(MaterialTheme.colorScheme.secondaryContainer)
                 .clickable {
                     showPhotoMenu = true

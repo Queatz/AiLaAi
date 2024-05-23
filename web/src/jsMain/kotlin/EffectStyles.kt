@@ -1,3 +1,4 @@
+import app.dark
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.AnimationTimingFunction.Companion.Linear
 import org.jetbrains.compose.web.css.Position
@@ -45,11 +46,15 @@ object EffectStyles : StyleSheet() {
         width(1.px)
         height(10.vh)
         bottom(100.percent)
-        background("linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.25)")
+        background("linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(118, 195, 232, 0.8)")
         animation(dropKeyframes) {
             timingFunction(Linear)
             duration(1.s)
             iterationCount(null)
+        }
+
+        dark(self) {
+            background("linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.25)")
         }
     }
 }

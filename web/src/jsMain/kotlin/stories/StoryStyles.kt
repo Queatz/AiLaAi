@@ -114,6 +114,13 @@ object StoryStyles : StyleSheet() {
         }
     }
 
+    val contentPhotosPhotoNoAspect by style {
+        borderRadius(1.r)
+        flex(1)
+        width(100.percent)
+        cursor("pointer")
+    }
+
     val contentAudio by style {
         borderRadius(1.r)
     }
