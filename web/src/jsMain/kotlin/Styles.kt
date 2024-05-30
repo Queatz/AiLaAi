@@ -498,6 +498,14 @@ object Styles : StyleSheet() {
         }
     }
 
+    val buttonSelected by style {
+        outline(colors.secondary, LineStyle.Solid.toString(), 2.px)
+
+        dark(self) {
+            outlineColor(Color.white)
+        }
+    }
+
     val mainContentCards by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)

@@ -63,10 +63,11 @@ fun NewCardInput(defaultMargins: Boolean = true, onSubmit: (name: String, active
             }
 
             marginTop(.5.r)
-            marginRight(2.r)
 
             if (!defaultMargins) {
                 marginLeft(1.r)
+            } else {
+                marginRight(2.r)
             }
         })
     }

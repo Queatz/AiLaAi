@@ -120,7 +120,7 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
                 inputStyles = {
                     width(32.r)
                 }
-            ) {
+            ) { _, _ ->
                 Div({
                     style {
                         marginTop(1.r)
