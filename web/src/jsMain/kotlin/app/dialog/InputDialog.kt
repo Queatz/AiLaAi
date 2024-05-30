@@ -23,7 +23,7 @@ suspend fun inputDialog(
     defaultValue: String = "",
     singleLine: Boolean = true,
     inputStyles: StyleScope.() -> Unit = {},
-    content: @Composable (resolve: (Boolean?) -> Unit, onValue: (String) -> Unit) -> Unit = { _, _ -> }
+    content: @Composable (resolve: (Boolean?) -> Unit, value: String, onValue: (String) -> Unit) -> Unit = { _, _, _ -> }
 ): String? {
     var text: String = defaultValue
     val result = dialog(
@@ -74,7 +74,7 @@ suspend fun inputDialog(
                 resolve(true)
             }
         }
-        content(resolve) {
+        content(resolve, value) {
             value = it
             text = it
         }

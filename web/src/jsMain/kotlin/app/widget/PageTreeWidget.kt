@@ -41,6 +41,8 @@ import notBlank
 import notEmpty
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.CSSSizeValue
+import org.jetbrains.compose.web.css.CSSUnit
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -182,14 +184,20 @@ fun PageTreeWidget(widgetId: String) {
     fun addTag(card: Card) {
         scope.launch {
             // todo: translate
-            val tag = inputDialog(null, confirmButton = "Add tag") { resolve, onValue ->
+            val tag = inputDialog(null, confirmButton = "Add tag") { resolve, value, onValue ->
                 Div({
                     style {
                         overflowY("auto")
-                        maxHeight(8.r)
+                        maxHeight(16.r)
                     }
                 }) {
-                    allTags?.forEach { tag ->
+                    allTags?.let {
+                        if (value.isNotBlank()) {
+                            it.filter { it.contains(value, ignoreCase = true) }
+                        } else {
+                            it
+                        }
+                    }?.forEach { tag ->
                         Div({
                             classes(
                                 listOf(AppStyles.groupItem, AppStyles.groupItemOnSurface)
@@ -221,7 +229,7 @@ fun PageTreeWidget(widgetId: String) {
 
             if (!tag.isNullOrBlank()) {
                 api.updateWidget(widgetId, Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
-                    put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag).distinct())
+                    put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag.trim()).distinct())
                 })))) {
                     widget = it
                     data = json.decodeFromString<PageTreeData>(it.data!!)
@@ -257,6 +265,7 @@ fun PageTreeWidget(widgetId: String) {
                 Tags(
                     tags = tags,
                     selected = tagFilter,
+                    marginTop = 0.r,
                     // todo: translate
                     title = "Tap to filter",
                     tagColor = ::tagColor,
@@ -421,32 +430,36 @@ fun PageTreeWidget(widgetId: String) {
                         Tags(
                             tags = tags,
                             // todo: translate
-                            title = "Tap to remove",
+                            title = if (me != null) "Tap to remove" else "",
                             tagColor = ::tagColor,
                             onClick = {
-                                removeTag(card, it)
+                                if (me != null) {
+                                    removeTag(card, it)
+                                }
                             }
                         ) {
-                            Button(
-                                {
-                                    classes(Styles.outlineButton)
+                            if (me != null) {
+                                Button(
+                                    {
+                                        classes(Styles.outlineButton)
 
-                                    style {
-                                        padding(0.r, 1.5.r)
-                                        height(2.5.r)
+                                        style {
+                                            padding(0.r, 1.5.r)
+                                            height(2.5.r)
+                                        }
+
+                                        // todo: translate
+                                        title("Add tag")
+
+                                        onClick {
+                                            it.stopPropagation()
+                                            addTag(card)
+                                        }
                                     }
-
-                                    // todo: translate
-                                    title("Add tag")
-
-                                    onClick {
-                                        it.stopPropagation()
-                                        addTag(card)
+                                ) {
+                                    Icon("new_label") {
+                                        marginRight(0.r)
                                     }
-                                }
-                            ) {
-                                Icon("new_label") {
-                                    marginRight(0.r)
                                 }
                             }
                         }
@@ -461,6 +474,7 @@ fun PageTreeWidget(widgetId: String) {
 fun Tags(
     tags: List<String>,
     selected: String? = null,
+    marginTop: CSSSizeValue<*> = 1.r,
     tagColor: (String) -> CSSColorValue,
     title: String,
     onClick: (tag: String) -> Unit,
@@ -468,7 +482,7 @@ fun Tags(
 ) {
     Div({
         style {
-            marginTop(1.r)
+            marginTop(marginTop)
             display(DisplayStyle.Flex)
             flexWrap(FlexWrap.Wrap)
             gap(.5.r)
