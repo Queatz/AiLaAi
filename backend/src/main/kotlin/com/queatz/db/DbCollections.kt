@@ -67,7 +67,6 @@ fun collections() = listOf(
     },
     StoryDraft::class.db {
         ensurePersistentIndex(listOf(StoryDraft::story.name), PersistentIndexOptions())
-
     },
     Card::class.db {
         ensurePersistentIndex(listOf(Card::person.name), PersistentIndexOptions())
@@ -151,5 +150,7 @@ fun collections() = listOf(
     },
     Comment::class.db(CollectionType.EDGES, listOf(Person::class, Card::class, Comment::class, Story::class, Message::class)) {
         ensureFulltextIndex(listOf(Comment::comment.name), FulltextIndexOptions())
+    },
+    PlatformConfig::class.db {
     }
 )

@@ -26,6 +26,7 @@ val push = Push()
 val app = App()
 val notify = Notify()
 val ai = Ai()
+val platform = Platform()
 
 const val defaultNearbyMaxDistanceInMeters = 100_000.0
 const val defaultInventoriesNearbyMaxDistanceInMeters = 10_000.0

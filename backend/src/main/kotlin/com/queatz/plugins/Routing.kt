@@ -29,6 +29,7 @@ fun Application.configureRouting() {
 
     routing {
         get("/hi") { call.respondText("{\"hi\": true}", contentType = ContentType.Application.Json) }
+        platformRoutes()
         signRoutes()
         meRoutes()
         cardRoutes()

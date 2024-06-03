@@ -431,6 +431,12 @@ enum class ReportType {
 }
 
 @Serializable
+data class PlatformConfig(
+    val hosts: List<String>? = null,
+    val inviteOnly: Boolean? = null
+) : Model()
+
+@Serializable
 expect open class Model() {
     var id: String?
     var createdAt: Instant?

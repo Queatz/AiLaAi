@@ -4,6 +4,7 @@ import com.queatz.db.*
 import com.queatz.plugins.app
 import com.queatz.plugins.db
 import com.queatz.plugins.jwt
+import com.queatz.plugins.platform
 import com.queatz.plugins.respond
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -18,8 +19,12 @@ fun Route.signRoutes() {
             val code = call.receive<SignUpRequest>().code
 
             if (code == null) {
-                val person = db.insert(Person(seen = Clock.System.now()))
-                TokenResponse(jwt(person.id!!))
+                if (platform.config.inviteOnly == true) {
+                    HttpStatusCode.BadRequest.description("Missing invite code")
+                } else {
+                    val person = db.insert(Person(seen = Clock.System.now()))
+                    TokenResponse(jwt(person.id!!))
+                }
             } else if (code == "000000" && db.totalPeople == 0) {
                 val person = db.insert(Person(seen = Clock.System.now()))
                 TokenResponse(jwt(person.id!!))
