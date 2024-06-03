@@ -6,6 +6,5 @@ import com.queatz.plugins.db
 
 
 class Platform {
-    var config get() = db.platformConfig ?: db.insert(PlatformConfig(hosts = emptyList(), inviteOnly = false))
-        set(value) { db.update(value) }
+    val config get() = db.platformConfig ?: db.insert(PlatformConfig(hosts = emptyList(), inviteOnly = false))
 }

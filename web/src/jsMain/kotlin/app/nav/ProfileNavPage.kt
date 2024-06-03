@@ -1,8 +1,16 @@
 package app.nav
 
 import LocalConfiguration
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.platformMe
 import app.ailaai.api.profile
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
@@ -12,14 +20,18 @@ import app.dialog.inputDialog
 import appString
 import appText
 import application
-import com.queatz.db.*
+import com.queatz.db.Person
+import com.queatz.db.PersonProfile
+import com.queatz.db.Profile
 import components.IconButton
 import components.Wbr
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import qr
@@ -27,13 +39,15 @@ import r
 import webBaseUrl
 
 @Composable
-fun ProfileNavPage(onProfileClick: () -> Unit) {
+fun ProfileNavPage(onProfileClick: () -> Unit, onPlatformClick: () -> Unit) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
 
     var profile by remember {
         mutableStateOf<PersonProfile?>(null)
     }
+
+    var isPlatformHost by remember { mutableStateOf(false) }
 
     suspend fun reload() {
         api.profile(me!!.id!!) {
@@ -44,6 +58,12 @@ fun ProfileNavPage(onProfileClick: () -> Unit) {
     LaunchedEffect(me) {
         if (me != null) {
             reload()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        api.platformMe {
+            isPlatformHost = it.host
         }
     }
 
@@ -80,15 +100,7 @@ fun ProfileNavPage(onProfileClick: () -> Unit) {
         }
     }
 
-    Div({
-        style {
-            overflowY("auto")
-            overflowX("hidden")
-            padding(1.r / 2)
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Column)
-        }
-    }) {
+    NavMenu {
         val yourName = appString { yourName }
         val update = appString { update }
 
@@ -145,6 +157,12 @@ fun ProfileNavPage(onProfileClick: () -> Unit) {
 
         val signOut = appString { signOut }
         val signOutQuestion = appString { signOutQuestion }
+
+        if (true || isPlatformHost) {
+            NavMenuItem("guardian", appString { platform }) {
+                onPlatformClick()
+            }
+        }
 
         NavMenuItem("logout", signOut) {
             scope.launch {

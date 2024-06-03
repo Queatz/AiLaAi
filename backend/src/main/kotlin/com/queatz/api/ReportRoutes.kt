@@ -13,18 +13,13 @@ import io.ktor.server.request.*
 import io.ktor.server.routing.*
 
 fun Route.reportRoutes() {
-    // todo only for admins
-    get("/report") {
-        respond {
-            if (parameter("password") != "letmein") {
-                return@respond HttpStatusCode.NotFound
-            }
-
-            db.recentReports(call.parameters["limit"]?.toInt() ?: 20)
-        }
-    }
-
     authenticate {
+        get("/report") {
+            hosts {
+                db.recentReports(call.parameters["limit"]?.toInt() ?: 20)
+            }
+        }
+
         post("/report") {
             respond {
                 call.receive<Report>().also { report ->

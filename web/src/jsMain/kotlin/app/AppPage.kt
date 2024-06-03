@@ -27,6 +27,9 @@ import app.nav.StoryNav
 import app.page.SchedulePage
 import app.page.ScheduleView
 import app.page.StoriesPage
+import app.platform.PlatformNav
+import app.platform.PlatformNavPage
+import app.platform.PlatformPage
 import app.widget.WidgetStyles
 import appString
 import application
@@ -70,7 +73,8 @@ enum class NavPage {
     Schedule,
     Cards,
     Stories,
-    Profile
+    Profile,
+    Platform
 }
 
 @Composable
@@ -136,6 +140,10 @@ fun AppPage() {
 
     var playMessageSound by remember {
         mutableStateOf(false)
+    }
+
+    var platform by remember {
+        mutableStateOf<PlatformNav>(PlatformNav.None)
     }
 
     LaunchedEffect(nav) {
@@ -402,9 +410,21 @@ fun AppPage() {
                     })
 
                     NavPage.Stories -> StoriesNavPage(storyUpdates, story, { story = it }, { nav = NavPage.Profile })
-                    NavPage.Profile -> ProfileNavPage {
-                        nav = NavPage.Groups
-                    }
+                    NavPage.Profile -> ProfileNavPage(
+                        onProfileClick = {
+                            nav = NavPage.Groups
+                        },
+                        onPlatformClick = {
+                            nav = NavPage.Platform
+                        }
+                    )
+                    NavPage.Platform -> PlatformNavPage(
+                        onProfileClick = {
+                            nav = NavPage.Profile
+                        },
+                        platform,
+                        { platform = it }
+                    )
                 }
             }
         }
@@ -469,6 +489,8 @@ fun AppPage() {
                 NavPage.Profile -> {
 
                 }
+
+                NavPage.Platform -> PlatformPage(platform)
             }
         }
     }

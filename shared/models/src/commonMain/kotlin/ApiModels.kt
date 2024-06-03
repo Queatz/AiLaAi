@@ -241,3 +241,32 @@ data class CommentExtended(
     val replies: List<CommentExtended>? = null,
     val totalReplies: Int? = null
 )
+
+@Serializable
+data class PlatformMeResponse(
+    val host: Boolean
+)
+
+@Serializable
+data class AppStats(
+    val activePeople30Days: Int,
+    val activePeople7Days: Int,
+    val activePeople24Hours: Int,
+    val newPeople30Days: Int,
+    val newPeople7Days: Int,
+    val newPeople24Hours: Int,
+    val totalPeople: Int,
+    val totalDraftCards: Int,
+    val totalPublishedCards: Int,
+    val totalDraftStories: Int,
+    val totalPublishedStories: Int,
+    val totalClosedGroups: Int,
+    val totalOpenGroups: Int,
+    val totalReminders: Int,
+    val totalItems: Int
+)
+
+@Serializable
+data class StatsHealth(
+    val diskUsagePercent: Double
+)

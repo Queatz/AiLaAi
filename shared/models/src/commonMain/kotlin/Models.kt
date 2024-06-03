@@ -79,7 +79,8 @@ class LinkDeviceToken(
 
 @Serializable
 class Crash(
-    var details: String? = null
+    var details: String? = null,
+    var person: String? = null
 ) : Model()
 
 @Serializable
@@ -432,8 +433,8 @@ enum class ReportType {
 
 @Serializable
 data class PlatformConfig(
-    val hosts: List<String>? = null,
-    val inviteOnly: Boolean? = null
+    var hosts: List<String>? = null,
+    var inviteOnly: Boolean? = null
 ) : Model()
 
 @Serializable

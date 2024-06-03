@@ -830,6 +830,10 @@ object Strings {
         "Show %1\$s more comments",
         "Coi thêm %1\$s bình luận"
     )
+    val platform = Translation(
+        "Platform",
+        "Nền tảng"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

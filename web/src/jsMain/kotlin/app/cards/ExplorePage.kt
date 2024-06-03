@@ -607,16 +607,22 @@ fun ExplorePage(
             }
         },
         actions = {
-            Switch(published, { published = it }, {
-                scope.launch {
-                    val previousValue = card.active == true
-                    api.updateCard(card.id!!, Card(active = it), onError = {
-                        published = previousValue
-                    }) {
-                        onCardUpdated(it)
+            Switch(
+                published,
+                { published = it },
+                {
+                    scope.launch {
+                        val previousValue = card.active == true
+                        api.updateCard(card.id!!, Card(active = it), onError = {
+                            published = previousValue
+                        }) {
+                            onCardUpdated(it)
+                        }
                     }
-                }
-            }, title = "Page is ${if (published) "published" else "not published"}") { // todo: translate
+                },
+                // todo: translate
+                title = "Page is ${if (published) "published" else "not published"}"
+            ) {
                 margin(1.r)
             }
         }

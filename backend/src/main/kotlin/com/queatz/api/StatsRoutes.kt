@@ -1,30 +1,26 @@
 package com.queatz.api
 
-import com.queatz.db.*
+import com.queatz.db.AppStats
+import com.queatz.db.StatsHealth
+import com.queatz.db.activePeople
+import com.queatz.db.newPeople
+import com.queatz.db.recentFeedback
+import com.queatz.db.recentSearches
+import com.queatz.db.totalClosedGroups
+import com.queatz.db.totalDraftCards
+import com.queatz.db.totalDraftStories
+import com.queatz.db.totalItems
+import com.queatz.db.totalOpenGroups
+import com.queatz.db.totalPeople
+import com.queatz.db.totalPublishedCards
+import com.queatz.db.totalPublishedStories
+import com.queatz.db.totalReminders
 import com.queatz.plugins.db
 import com.queatz.plugins.respond
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class AppStats(
-    val activePeople30Days: Int,
-    val activePeople7Days: Int,
-    val activePeople24Hours: Int,
-    val newPeople30Days: Int,
-    val newPeople7Days: Int,
-    val newPeople24Hours: Int,
-    val totalPeople: Int,
-    val totalDraftCards: Int,
-    val totalPublishedCards: Int,
-    val totalDraftStories: Int,
-    val totalPublishedStories: Int,
-    val totalClosedGroups: Int,
-    val totalOpenGroups: Int,
-    val totalReminders: Int,
-    val totalItems: Int
-)
+import io.ktor.server.application.call
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import java.io.File
 
 fun Route.statsRoutes() {
     get("/stats") {
@@ -48,14 +44,28 @@ fun Route.statsRoutes() {
             )
         }
     }
+
     get("/stats/searches") {
         respond {
             db.recentSearches(call.parameters["limit"]?.toInt() ?: 20)
         }
     }
+
     get("/stats/feedback") {
         respond {
             db.recentFeedback(call.parameters["limit"]?.toInt() ?: 20)
         }
     }
+
+    get("/stats/health") {
+        respond {
+            StatsHealth(
+                diskUsagePercent = getFreeSpacePercentage()
+            )
+        }
+    }
+}
+
+private fun getFreeSpacePercentage(): Double = File("/").run {
+    freeSpace.toDouble() / totalSpace.toDouble() * 100.0
 }
