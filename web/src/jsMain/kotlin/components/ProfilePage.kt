@@ -1,11 +1,24 @@
 package components
 
+import AppLayout
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.AppNavigation
 import app.AppStyles
-import app.ailaai.api.*
+import app.ailaai.api.activeCardsOfPerson
+import app.ailaai.api.createGroup
+import app.ailaai.api.groupsOfPerson
+import app.ailaai.api.profile
+import app.ailaai.api.profileByUrl
+import app.ailaai.api.profileCards
 import app.appNav
 import app.components.Empty
 import app.components.TopBarSearch
@@ -20,14 +33,57 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.PersonProfile
 import format
 import kotlinx.coroutines.launch
+import mainContent
 import notBlank
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.ExperimentalComposeWebApi
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.backgroundImage
+import org.jetbrains.compose.web.css.backgroundPosition
+import org.jetbrains.compose.web.css.backgroundSize
+import org.jetbrains.compose.web.css.bottom
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.minHeight
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.transform
+import org.jetbrains.compose.web.css.unaryMinus
+import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Source
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Video
 import org.w3c.dom.HTMLVideoElement
 import profile.ProfileStyles
 import r
+import webBaseUrl
 import kotlin.js.Date
 
+@OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (PersonProfile) -> Unit) {
     Style(ProfileStyles)
@@ -41,6 +97,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
     var cards by remember { mutableStateOf<List<Card>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     val me by application.me.collectAsState()
+    val layout by application.layout.collectAsState()
 
     var search by remember {
         mutableStateOf("")
@@ -101,9 +158,21 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
         }
     }
 
+    if (layout == AppLayout.Kiosk) {
+        QrImg("$webBaseUrl/profile/$personId") {
+            position(Position.Fixed)
+            bottom(1.r)
+            left(1.r)
+            transform {
+                scale(2)
+                translate(25.percent, -25.percent)
+            }
+        }
+    }
+
     if (!isLoading && profile == null) {
         Div({
-            classes(Styles.mainContent)
+            mainContent(layout)
             style {
                 display(DisplayStyle.Flex)
                 minHeight(100.vh)
@@ -117,9 +186,10 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
             Text(appString { profileNotFound })
         }
     } else {
+        application.layout.collectAsState().value
         profile?.let { profile ->
             Div({
-                classes(Styles.mainContent)
+                mainContent(layout)
             }) {
                 Div({
                     classes(Styles.navContainer)

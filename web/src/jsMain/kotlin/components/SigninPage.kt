@@ -1,7 +1,14 @@
 package components
 
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.me
 import app.ailaai.api.signIn
@@ -15,10 +22,23 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import linkDevice
+import mainContent
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.AlignSelf
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.alignSelf
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.maxWidth
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
@@ -33,6 +53,8 @@ import kotlin.time.Duration.Companion.seconds
 fun SigninPage() {
     val scope = rememberCoroutineScope()
     val router = Router.current
+
+    val layout by application.layout.collectAsState()
 
     var qrCode by remember {
         mutableStateOf<String?>(null)
@@ -129,7 +151,7 @@ fun SigninPage() {
     }
 
     Div({
-        classes(Styles.mainContent)
+        mainContent(layout)
     }) {
         Div({
             classes(Styles.navContainer)

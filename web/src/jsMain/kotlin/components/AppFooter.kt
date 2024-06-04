@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import app.softwork.routingcompose.Router
 import appString
 import appText
+import application
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.whiteSpace
@@ -75,6 +76,15 @@ fun AppFooter() {
             }
         }) {
             appText { openSource }
+        }
+        Bullet()
+        Span({
+            classes(Styles.menuButton)
+            onClick {
+                application.toggleLayout()
+            }
+        }) {
+            Text("Toggle Layout")
         }
     }
 }

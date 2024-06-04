@@ -17,11 +17,17 @@ val application = Application()
 
 private class Background(val url: String)
 
+enum class AppLayout {
+    Default,
+    Kiosk
+}
+
 class Application {
     private val _effects = MutableStateFlow<List<List<Effect>>>(emptyList())
     private val _background = MutableStateFlow<List<Background>>(emptyList())
 
     val me = MutableStateFlow<Person?>(null)
+    val layout = MutableStateFlow(localStorage["layout"]?.let { AppLayout.valueOf(it) } ?: AppLayout.Default)
     val effects = _effects.map { it.lastOrNull() }
     val background = _background.map { it.lastOrNull()?.url }
     val bearerToken = MutableStateFlow<String?>(null)
@@ -62,6 +68,15 @@ class Application {
         } else {
             localStorage.removeItem("app.nav")
         }
+    }
+
+    fun toggleLayout() {
+        layout.value = when(layout.value) {
+            AppLayout.Default -> AppLayout.Kiosk
+            else -> AppLayout.Default
+        }
+
+        localStorage["layout"] = layout.value.name
     }
 
     fun setMe(me: Person?) {

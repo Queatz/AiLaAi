@@ -1,6 +1,8 @@
 import app.dark
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
+import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.*
+import org.w3c.dom.HTMLDivElement
 
 object Styles : StyleSheet() {
     object colors {
@@ -281,13 +283,18 @@ object Styles : StyleSheet() {
         property("z-index", "1")
     }
 
+    val mainContentKiosk by style {
+        maxWidth(40.vw)
+        property("margin-left", "auto")
+        // paddingTop(1.r) // todo: if header is hidden
+    }
+
     @OptIn(ExperimentalComposeWebApi::class)
     val navContainer by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Stretch)
-//        padding(1.r)
         overflowX("hidden")
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
         backgroundColor(Color.white)
@@ -597,4 +604,12 @@ fun StyleScope.ellipsize() {
     overflow("hidden")
     property("text-overflow", "ellipsis")
     whiteSpace("nowrap")
+}
+
+fun AttrsScope<HTMLDivElement>.mainContent(layout: AppLayout) {
+    if (layout == AppLayout.Kiosk) {
+        classes(Styles.mainContent, Styles.mainContentKiosk)
+    } else {
+        classes(Styles.mainContent)
+    }
 }

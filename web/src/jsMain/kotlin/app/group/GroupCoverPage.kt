@@ -1,6 +1,12 @@
 package app.group
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.FullPageLayout
@@ -11,14 +17,21 @@ import application
 import baseUrl
 import com.queatz.db.GroupExtended
 import components.Loading
-import org.jetbrains.compose.web.css.*
+import mainContent
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
 fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     Style(AppStyles)
+
+    val layout by application.layout.collectAsState()
 
     var isLoading by remember {
         mutableStateOf(true)
@@ -46,7 +59,7 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     }
 
     Div({
-        classes(Styles.mainContent)
+        mainContent(layout)
     }) {
         if (isError) {
             Empty {

@@ -20,6 +20,18 @@ fun AppHeader(
     showMe: Boolean = true,
     onBack: () -> Unit = {},
 ) {
+    val layout by application.layout.collectAsState()
+
+    if (layout == AppLayout.Kiosk) {
+        Div({
+            style {
+                height(1.r)
+                width(100.percent)
+            }
+        }) {  }
+        return
+    }
+
     val router = Router.current
 
     Div({

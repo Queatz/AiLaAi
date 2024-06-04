@@ -24,17 +24,15 @@ import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 import com.queatz.db.Profile
 import components.IconButton
+import components.QrImg
 import components.Wbr
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.textAlign
-import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
-import qr
 import r
 import webBaseUrl
 
@@ -81,14 +79,7 @@ fun ProfileNavPage(onProfileClick: () -> Unit, onPlatformClick: () -> Unit) {
         IconButton("qr_code", appString { qrCode }) {
             scope.launch {
                 dialog("", cancelButton = null) {
-                    val qrCode = remember {
-                        "$webBaseUrl/profile/${me!!.id!!}".qr
-                    }
-                    Img(src = qrCode) {
-                        style {
-                            borderRadius(1.r)
-                        }
-                    }
+                    QrImg("$webBaseUrl/profile/${me!!.id!!}")
                 }
             }
         }

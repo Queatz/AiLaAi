@@ -1,25 +1,59 @@
 package components
 
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.softwork.routingcompose.Router
 import appString
+import application
 import com.queatz.db.Card
 import com.queatz.db.CardOptions
 import com.queatz.db.ConversationItem
 import hint
 import json
 import kotlinx.browser.window
+import mainContent
 import notBlank
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.ExperimentalComposeWebApi
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.bottom
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.minHeight
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.transform
+import org.jetbrains.compose.web.css.unaryMinus
+import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
+import webBaseUrl
 
+@OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) -> Unit) {
     var isLoading by remember { mutableStateOf(false) }
@@ -31,6 +65,9 @@ fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) 
     var isReplying by remember { mutableStateOf<List<ConversationItem>?>(null) }
     var replyMessage by remember { mutableStateOf("") }
     val router = Router.current
+    val layout by application.layout.collectAsState()
+
+    application.layout.collectAsState()
 
     LaunchedEffect(cardId) {
         isReplying = null
@@ -57,9 +94,21 @@ fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) 
         }
     }
 
+    if (layout == AppLayout.Kiosk) {
+        QrImg("$webBaseUrl/page/$cardId") {
+            position(Position.Fixed)
+            bottom(1.r)
+            left(1.r)
+            transform {
+                scale(2)
+                translate(25.percent, -25.percent)
+            }
+        }
+    }
+
     if (!isLoading && card == null) {
         Div({
-            classes(Styles.mainContent)
+            mainContent(layout)
             style {
                 display(DisplayStyle.Flex)
                 minHeight(100.vh)
@@ -74,7 +123,7 @@ fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) 
         }
     } else {
         Div({
-            classes(Styles.mainContent)
+            mainContent(layout)
         }) {
             Div({
                 classes(Styles.navContainer)
