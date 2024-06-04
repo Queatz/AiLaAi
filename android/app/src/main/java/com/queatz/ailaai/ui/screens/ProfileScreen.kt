@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.ailaai.api.activeCardsOfPerson
@@ -754,14 +755,14 @@ fun ProfileScreen(personId: String) {
                                                 }
                                             }
                                         ) {
-                                            Text(stringResource(R.string.message))
+                                            Text(stringResource(R.string.message), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         }
                                         OutlinedButton(
                                             {
                                                 trade()
                                             }
                                         ) {
-                                            Text(stringResource(R.string.trade))
+                                            Text(stringResource(R.string.trade), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         }
                                         OutlinedButton(
                                             {
@@ -782,9 +783,9 @@ fun ProfileScreen(personId: String) {
                                             enabled = !isSubscribing
                                         ) {
                                             if (subscribed) {
-                                                Text(stringResource(R.string.unsubscribe))
+                                                Text(stringResource(R.string.unsubscribe), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                             } else {
-                                                Text(stringResource(R.string.subscribe))
+                                                Text(stringResource(R.string.subscribe), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                             }
                                         }
                                     }

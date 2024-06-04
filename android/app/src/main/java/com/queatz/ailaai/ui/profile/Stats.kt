@@ -1,11 +1,11 @@
 package com.queatz.ailaai.ui.profile
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -70,132 +70,54 @@ fun Stats(stats: ProfileStats, person: Person?) {
             .padding(2.pad)
             .fillMaxWidth()
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                .clip(MaterialTheme.shapes.large)
-                .weight(1f)
-                .widthIn(min = 120.dp)
-                .padding(2.pad)
-        ) {
-            Text(
-                stats.friendsCount.toString(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                pluralStringResource(
-                    R.plurals.friends_plural,
-                    stats.friendsCount,
-                    stats.friendsCount
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                .clip(MaterialTheme.shapes.large)
-                .weight(1f)
-                .widthIn(min = 120.dp)
-                .padding(2.pad)
-        ) {
-            Text(
-                stats.cardCount.toString(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                pluralStringResource(R.plurals.cards_plural, stats.cardCount, stats.cardCount),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                .clip(MaterialTheme.shapes.large)
-                .clickable {
-                    showJoined = true
-                }
-                .weight(1f)
-                .widthIn(min = 120.dp)
-                .padding(2.pad)
-        ) {
-            Text(
-                person?.createdAt?.monthYear() ?: "?",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                stringResource(R.string.joined),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                .clip(MaterialTheme.shapes.large)
-                .weight(1f)
-                .widthIn(min = 120.dp)
-                .padding(2.pad)
-        ) {
-            Text(
-                stats.storiesCount.toString(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                pluralStringResource(R.plurals.stories_plural, stats.storiesCount, stats.storiesCount),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                .clip(MaterialTheme.shapes.large)
-                .weight(1f)
-                .widthIn(min = 120.dp)
-                .padding(2.pad)
-        ) {
-            Text(
-                stats.subscriberCount.toString(),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                pluralStringResource(R.plurals.subscribers_plural, stats.subscriberCount, stats.subscriberCount),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+        StatsCard(
+            title = stats.friendsCount.toString(),
+            text = pluralStringResource(R.plurals.friends_plural, stats.friendsCount, stats.friendsCount)
+        )
+        StatsCard(
+            title = stats.cardCount.toString(),
+            text = pluralStringResource(R.plurals.cards_plural, stats.cardCount, stats.cardCount)
+        )
+        StatsCard(
+            title = person?.createdAt?.monthYear() ?: "?",
+            text = stringResource(R.string.joined),
+            onClick = { showJoined = true }
+        )
+        StatsCard(
+            title = stats.storiesCount.toString(),
+            text = pluralStringResource(R.plurals.stories_plural, stats.storiesCount, stats.storiesCount)
+        )
+        StatsCard(
+            title = stats.subscriberCount.toString(),
+            text = pluralStringResource(R.plurals.subscribers_plural, stats.subscriberCount, stats.subscriberCount)
+        )
+    }
+}
+
+@Composable
+fun RowScope.StatsCard(title: String, text: String, onClick: (() -> Unit)? = null) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .weight(1f)
+            .widthIn(min = 64.dp)
+            .padding(1.dp)
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
+    ) {
+        Text(
+            text = title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontWeight = FontWeight.ExtraBold,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
