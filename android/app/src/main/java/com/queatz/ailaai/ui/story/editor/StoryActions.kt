@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
 import app.ailaai.api.createGroup
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -22,7 +21,6 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.dialogs.*
-import com.queatz.db.Person
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 

@@ -62,6 +62,7 @@ import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -70,6 +71,7 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -107,6 +109,8 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
         router.navigate("/")
         return
     }
+
+    application.background(profile?.profile?.background?.let { "$baseUrl$it" })
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -161,8 +165,10 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
     if (layout == AppLayout.Kiosk) {
         QrImg("$webBaseUrl/profile/$personId") {
             position(Position.Fixed)
-            bottom(1.r)
-            left(1.r)
+            bottom(2.r)
+            left(2.r)
+            maxWidth(10.vw)
+            maxHeight(10.vw)
             transform {
                 scale(2)
                 translate(25.percent, -25.percent)
@@ -292,36 +298,38 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                 Div({
                                     classes(ProfileStyles.name)
                                 }) {
-                                    NameAndLocation(profile.person.name, "")
+                                    NameAndLocation(profile.person.name, profile.profile.location?.takeIf { layout == AppLayout.Kiosk })
                                 }
                                 Div({
                                     style {
                                         display(DisplayStyle.Flex)
                                     }
                                 }) {
-                                    if (me == null) {
-                                        Button({
-                                            classes(Styles.button)
+                                    if (layout == AppLayout.Default) {
+                                        if (me == null) {
+                                            Button({
+                                                classes(Styles.button)
 
-                                            onClick {
-                                                router.navigate("/signin")
+                                                onClick {
+                                                    router.navigate("/signin")
+                                                }
+                                            }) {
+                                                Text(appString { connect })
                                             }
-                                        }) {
-                                            Text(appString { connect })
-                                        }
-                                    } else {
-                                        Button({
-                                            classes(Styles.button)
+                                        } else {
+                                            Button({
+                                                classes(Styles.button)
 
-                                            onClick {
-                                                scope.launch {
-                                                    api.createGroup(listOf(personId!!), reuse = true) {
-                                                        appNav.navigate(AppNavigation.Group(it.id!!))
+                                                onClick {
+                                                    scope.launch {
+                                                        api.createGroup(listOf(personId!!), reuse = true) {
+                                                            appNav.navigate(AppNavigation.Group(it.id!!))
+                                                        }
                                                     }
                                                 }
+                                            }) {
+                                                Text(appString { message })
                                             }
-                                        }) {
-                                            Text(appString { message })
                                         }
                                     }
 //                                    Button({

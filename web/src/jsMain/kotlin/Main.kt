@@ -159,19 +159,24 @@ fun main() {
 
                 route("page") {
                     string { cardId ->
-                        AppHeader(appName, showBack = parentCardId != null || personId != null, onBack = {
-                            if (parentCardId != null) {
-                                router.navigate("/page/$parentCardId")
-                            } else if (personId != null) {
-                                router.navigate("/profile/$personId")
+
+                        Background({
+                            classes(Styles.background)
+                        }) {
+                            AppHeader(appName, showBack = parentCardId != null || personId != null, onBack = {
+                                if (parentCardId != null) {
+                                    router.navigate("/page/$parentCardId")
+                                } else if (personId != null) {
+                                    router.navigate("/profile/$personId")
+                                }
+                            })
+                            CardPage(cardId, onError = { parentCardId = null }) {
+                                title = it.name
+                                parentCardId = it.parent
+                                personId = if (it.equipped == true) it.person else null
                             }
-                        })
-                        CardPage(cardId, onError = { parentCardId = null }) {
-                            title = it.name
-                            parentCardId = it.parent
-                            personId = if (it.equipped == true) it.person else null
+                            AppFooter()
                         }
-                        AppFooter()
                     }
 
                     noMatch {
@@ -181,11 +186,16 @@ fun main() {
 
                 route("story") {
                     string { storyUrl ->
-                        AppHeader(appString { stories })
-                        StoryPage(storyUrl) {
-                            title = it.title
+
+                        Background({
+                            classes(Styles.background)
+                        }) {
+                            AppHeader(appString { stories })
+                            StoryPage(storyUrl) {
+                                title = it.title
+                            }
+                            AppFooter()
                         }
-                        AppFooter()
                     }
 
                     noMatch {
@@ -195,12 +205,17 @@ fun main() {
 
                 route("profile") {
                     string { profileUrl ->
-                        AppHeader(appName)
-                        val someoneString = appString { someone }
-                        ProfilePage(profileUrl) {
-                            title = it.person.name ?: someoneString
+
+                        Background({
+                            classes(Styles.background)
+                        }) {
+                            AppHeader(appName)
+                            val someoneString = appString { someone }
+                            ProfilePage(profileUrl) {
+                                title = it.person.name ?: someoneString
+                            }
+                            AppFooter()
                         }
-                        AppFooter()
                     }
 
                     noMatch {
@@ -239,12 +254,16 @@ fun main() {
                 }
 
                 string { profileUrl ->
-                    AppHeader(appName)
-                    val someoneString = appString { someone }
-                    ProfilePage(url = profileUrl) {
-                        title = it.person.name ?: someoneString
+                    Background({
+                        classes(Styles.background)
+                    }) {
+                        AppHeader(appName)
+                        val someoneString = appString { someone }
+                        ProfilePage(url = profileUrl) {
+                            title = it.person.name ?: someoneString
+                        }
+                        AppFooter()
                     }
-                    AppFooter()
                 }
 
                 noMatch {

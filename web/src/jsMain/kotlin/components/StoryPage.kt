@@ -14,6 +14,7 @@ import app.AppNavigation
 import app.appNav
 import appString
 import application
+import baseUrl
 import com.queatz.ailaai.api.storyByUrl
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
@@ -35,6 +36,7 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.padding
@@ -44,6 +46,7 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -61,6 +64,8 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
     val scope = rememberCoroutineScope()
 
     val layout by application.layout.collectAsState()
+
+    application.background(story?.background?.let { "$baseUrl$it" })
 
     LaunchedEffect(storyUrl) {
         isLoading = true
@@ -80,8 +85,10 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
     if (layout == AppLayout.Kiosk && story != null) {
         QrImg("$webBaseUrl/story/${story?.id}") {
             position(Position.Fixed)
-            bottom(1.r)
-            left(1.r)
+            bottom(2.r)
+            left(2.r)
+            maxWidth(10.vw)
+            maxHeight(10.vw)
             transform {
                 scale(2)
                 translate(25.percent, -25.percent)
@@ -123,7 +130,10 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
                         marginBottom(1.r)
                         if (layout == AppLayout.Default) {
                             maxWidth(800.px)
-                            property("background", "unset")
+
+                            if (story.background.isNullOrBlank()) {
+                                property("background", "unset")
+                            }
                         }
                     }
                 }) {

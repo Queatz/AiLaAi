@@ -6,22 +6,31 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import app.ailaai.api.card
+import app.ailaai.api.updateCard
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
+import com.queatz.ailaai.api.updateStory
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
+import com.queatz.db.Card
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
@@ -35,6 +44,7 @@ fun StoryMenu(
     showOpen: Boolean = false,
     edited: Boolean = false,
     editing: Boolean = false,
+    onIsLoading: (Boolean) -> Unit = {},
     onReorder: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -45,6 +55,11 @@ fun StoryMenu(
     var showQrCode by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showSourceDialog by rememberStateOf(false)
+    var showBackgroundDialog by rememberStateOf(false)
+
+    val setBackgroundState = remember(story?.title == null) {
+        ChoosePhotoDialogState(mutableStateOf(story?.title ?: ""))
+    }
 
     val textCopied = stringResource(R.string.copied)
     val storyString = stringResource(R.string.story)
@@ -69,6 +84,36 @@ fun StoryMenu(
         }
     }
 
+    if (showBackgroundDialog) {
+        ChoosePhotoDialog(
+            scope = scope,
+            state = setBackgroundState,
+            onDismissRequest = { showBackgroundDialog = false },
+            multiple = false,
+            imagesOnly = true,
+            onPhotos = { photos ->
+                scope.launch {
+                    onIsLoading(true)
+                    api.uploadPhotosFromUris(context, photos) {
+                        api.updateStory(storyId, Story(background = it.urls.first())) {
+                            context.toast(R.string.background_updated)
+                        }
+                    }
+                    onIsLoading(false)
+                }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateStory(storyId, Story(background = photo)) {
+                        context.toast(R.string.background_updated)
+                    }
+                }
+            },
+            onIsGeneratingPhoto = {
+                onIsLoading(it)
+            }
+        )
+    }
     if (showManageMenu) {
         Menu({
             showManageMenu = false
@@ -128,6 +173,12 @@ fun StoryMenu(
             })
         }
         if (isMine) {
+            if (editing) {
+                DropdownMenuItem({ Text(stringResource(R.string.background)) }, {
+                    showBackgroundDialog = true
+                    onDismissRequest()
+                })
+            }
             DropdownMenuItem({ Text(stringResource(R.string.manage)) }, {
                 showManageMenu = true
                 onDismissRequest()

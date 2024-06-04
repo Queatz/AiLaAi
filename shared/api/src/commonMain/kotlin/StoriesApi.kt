@@ -48,7 +48,7 @@ suspend fun Api.updateStory(
     id: String,
     story: Story,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Story>
+    onSuccess: SuccessBlock<Story> = {}
 ) = post("stories/$id", story, onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.myStories(

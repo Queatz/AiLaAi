@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,11 +16,13 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +96,7 @@ fun StoryCreatorScreen(
     val state = rememberLazyGridState()
     val context = LocalContext.current
     var isLoading by rememberStateOf(true)
+    var isLoadingMenu by rememberStateOf(false)
     var showPublishDialog by rememberStateOf(false)
     var showBackDialog by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
@@ -351,11 +355,18 @@ fun StoryCreatorScreen(
                     showMenu = true
                 }
             ) {
-                Icon(
-                    Icons.Outlined.MoreVert,
-                    null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (isLoadingMenu) {
+                    CircularProgressIndicator(
+                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Icon(
+                        Icons.Outlined.MoreVert,
+                        null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
                 when (source) {
                     is StorySource.Story -> {
@@ -369,6 +380,9 @@ fun StoryCreatorScreen(
                             isMine = story?.person == me?.id,
                             edited = edited,
                             editing = true,
+                            onIsLoading = {
+                                isLoadingMenu = it
+                            },
                             onReorder = {
                                 showReorderContentDialog = true
                             }

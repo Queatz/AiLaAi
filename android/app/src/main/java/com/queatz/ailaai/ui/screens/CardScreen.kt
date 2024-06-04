@@ -34,6 +34,7 @@ import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadCardPhotoFromUri
 import com.queatz.ailaai.api.uploadCardVideoFromUri
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
@@ -52,6 +53,7 @@ import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.Message
 import com.queatz.db.Person
+import com.queatz.db.Profile
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
@@ -89,6 +91,8 @@ fun CardScreen(cardId: String) {
     var videoUploadStage by remember { mutableStateOf(ProcessingVideoStage.Processing) }
     var videoUploadProgress by remember { mutableStateOf(0f) }
     var showSetCategory by rememberStateOf(false)
+    var isGeneratingBackground by rememberStateOf(false)
+    var showBackgroundDialog by rememberStateOf(false)
     var showPay by rememberStateOf(false)
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
@@ -98,6 +102,9 @@ fun CardScreen(cardId: String) {
     val me = me
     val nav = nav
     val setPhotoState = remember(card?.name == null) {
+        ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
+    }
+    val setBackgroundState = remember(card?.name == null) {
         ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
     }
     var showSourceDialog by rememberStateOf(false)
@@ -151,6 +158,37 @@ fun CardScreen(cardId: String) {
             },
             onIsGeneratingPhoto = {
                 isGeneratingPhoto = it
+            }
+        )
+    }
+
+    if (showBackgroundDialog) {
+        ChoosePhotoDialog(
+            scope = scope,
+            state = setBackgroundState,
+            onDismissRequest = { showBackgroundDialog = false },
+            multiple = false,
+            imagesOnly = true,
+            onPhotos = { photos ->
+                scope.launch {
+                    isGeneratingBackground = true
+                    api.uploadPhotosFromUris(context, photos) {
+                        api.updateCard(cardId, Card(background = it.urls.first())) {
+                            api.card(cardId) { card = it }
+                        }
+                    }
+                    isGeneratingBackground = false
+                }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateCard(cardId, Card(background = photo)) {
+                        api.card(cardId) { card = it }
+                    }
+                }
+            },
+            onIsGeneratingPhoto = {
+                isGeneratingBackground = it
             }
         )
     }
@@ -714,6 +752,15 @@ fun CardScreen(cardId: String) {
                             ) {
                                 showSetCategory = true
                                 showMenu = false
+                            }
+
+                            item(
+                                Icons.Outlined.Wallpaper,
+                                stringResource(R.string.background),
+                                selected = !card.background.isNullOrBlank(),
+                                isLoading = isGeneratingBackground
+                            ) {
+                                showBackgroundDialog = true
                             }
 
                             item(

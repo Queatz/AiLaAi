@@ -138,6 +138,10 @@ fun Route.meRoutes() {
                     profile.about = update.about?.trim()
                 }
 
+                if (update.location != null) {
+                    profile.location = update.location?.trim()
+                }
+
                 if (update.photo != null) {
                     profile.photo = update.photo
                     profile.video = null

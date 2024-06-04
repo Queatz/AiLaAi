@@ -1,5 +1,6 @@
 package components
 import androidx.compose.runtime.Composable
+import notBlank
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -15,7 +16,7 @@ fun NameAndLocation(name: String?, location: String?) {
     }) {
         Text(name ?: "")
     }
-    location?.let { location ->
+    location?.notBlank?.let { location ->
         Span({
             style {
                 marginLeft(1.r / 2)

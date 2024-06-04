@@ -163,6 +163,10 @@ fun Route.storyRoutes() {
                         story.content = update.content
                     }
 
+                    if (update.background != null) {
+                        story.background = update.background
+                    }
+
                     if (update.geo != null) {
                         story.geo = update.geo?.takeIf { it.isNotEmpty() }
                     }

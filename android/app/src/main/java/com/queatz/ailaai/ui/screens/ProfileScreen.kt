@@ -29,12 +29,14 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,12 +71,14 @@ import app.ailaai.api.subscribe
 import app.ailaai.api.unsubscribe
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
+import app.ailaai.api.uploadPhotos
 import coil.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri
 import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
+import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.copyToClipboard
@@ -117,6 +121,7 @@ import com.queatz.ailaai.ui.dialogs.ProcessingVideoDialog
 import com.queatz.ailaai.ui.dialogs.ProcessingVideoStage
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.profile.ProfileGroups
@@ -155,12 +160,16 @@ fun ProfileScreen(personId: String) {
     var showEditName by rememberStateOf(false)
     var showEditAbout by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
+    var showMyMenu by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
     var showSourceDialog by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
     var showCoverPhotoDialog by rememberStateOf(false)
     var showProfilePhotoDialog by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
+    var chooseBackground by rememberStateOf(false)
+    var isLoadingBackground by rememberStateOf(false)
+    var updateHintDialog by rememberStateOf(false)
     var uploadJob by remember { mutableStateOf<Job?>(null) }
     var isUploadingVideo by rememberStateOf(false)
     var showTradeDialog by rememberStateOf<Trade?>(null)
@@ -171,6 +180,10 @@ fun ProfileScreen(personId: String) {
     val nav = nav
 
     val setPhotoState = remember(person == null) {
+        ChoosePhotoDialogState(mutableStateOf(person?.name ?: ""))
+    }
+
+    val setBackgroundState = remember(person == null) {
         ChoosePhotoDialogState(mutableStateOf(person?.name ?: ""))
     }
 
@@ -319,6 +332,35 @@ fun ProfileScreen(personId: String) {
         )
     }
 
+    if (chooseBackground) {
+        ChoosePhotoDialog(
+            scope = scope,
+            state = setBackgroundState,
+            onDismissRequest = { chooseBackground = false },
+            multiple = false,
+            imagesOnly = true,
+            onPhotos = { photos ->
+                scope.launch {
+                    isLoadingBackground = true
+                    api.uploadPhotosFromUris(context, photos) {
+                        api.updateProfile(Profile(background = it.urls.first()))
+                        reload()
+                    }
+                    isLoadingBackground = false
+                }
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateProfile(Profile(background = photo))
+                    reload()
+                }
+            },
+            onIsGeneratingPhoto = {
+                isLoadingBackground = it
+            }
+        )
+    }
+
     if (showCoverPhotoDialog) {
         ChoosePhotoDialog(
             scope = scope,
@@ -427,6 +469,21 @@ fun ProfileScreen(personId: String) {
                 }
             }
         )
+    }
+
+    if (updateHintDialog) {
+        TextFieldDialog(
+            onDismissRequest = { updateHintDialog = false },
+            title = stringResource(R.string.hint),
+            button = stringResource(R.string.update),
+            singleLine = true,
+            initialValue = profile?.location.orEmpty()
+        ) { value ->
+            api.updateProfile(Profile(location = value.trim())) {
+                reload()
+                updateHintDialog = false
+            }
+        }
     }
 
     if (showMedia != null) {
@@ -583,16 +640,43 @@ fun ProfileScreen(personId: String) {
                             ) {
                                 IconButton(
                                     {
-                                        showQrCodeDialog = true
+                                        showMyMenu = true
                                     },
                                     Modifier
                                         .size(42.dp)
                                 ) {
-                                    Icon(
-                                        Icons.Outlined.QrCode2,
-                                        stringResource(R.string.qr_code),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    if(isLoadingBackground) {
+                                        CircularProgressIndicator(
+                                            strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    } else {
+                                        Icon(
+                                            Icons.Outlined.MoreVert,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Dropdown(showMyMenu, { showMyMenu = false }) {
+                                        DropdownMenuItem({
+                                            Text(stringResource(R.string.background))
+                                        }, {
+                                            showMyMenu = false
+                                            chooseBackground = true
+                                        })
+                                        DropdownMenuItem({
+                                            Text(stringResource(R.string.hint))
+                                        }, {
+                                            showMyMenu = false
+                                            updateHintDialog = true
+                                        })
+                                        DropdownMenuItem({
+                                            Text(stringResource(R.string.qr_code))
+                                        }, {
+                                            showMyMenu = false
+                                            showQrCodeDialog = true
+                                        })
+                                    }
                                 }
                                 IconButton(
                                     {

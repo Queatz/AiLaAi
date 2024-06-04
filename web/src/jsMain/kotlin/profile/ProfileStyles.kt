@@ -130,6 +130,7 @@ object ProfileStyles : StyleSheet() {
     val infoAbout by style {
         whiteSpace("pre-wrap")
         lineHeight("1.25")
+        maxWidth(100.percent)
 
         media(mediaMaxWidth(640.px)) {
             self style {

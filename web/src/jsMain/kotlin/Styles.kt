@@ -284,9 +284,8 @@ object Styles : StyleSheet() {
     }
 
     val mainContentKiosk by style {
-        maxWidth(40.vw)
+        width(40.vw)
         property("margin-left", "auto")
-        // paddingTop(1.r) // todo: if header is hidden
     }
 
     @OptIn(ExperimentalComposeWebApi::class)

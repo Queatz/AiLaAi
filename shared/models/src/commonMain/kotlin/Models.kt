@@ -44,6 +44,7 @@ class Profile(
     var background: String? = null,
     var video: String? = null,
     var about: String? = null,
+    var location: String? = null,
     var content: String? = null,
     var url: String? = null
 ) : Model()
@@ -306,6 +307,7 @@ class Story(
     var person: String? = null,
     var title: String? = null,
     var url: String? = null,
+    var background: String? = null,
     var geo: List<Double>? = null,
     var publishDate: Instant? = null,
     var published: Boolean? = null,

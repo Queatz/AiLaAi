@@ -9,7 +9,11 @@ import com.queatz.ailaai.data.api
 import com.queatz.db.Profile
 
 @Composable
-fun EditProfileAboutDialog(onDismissRequest: () -> Unit, initialValue: String, onUpdated: () -> Unit) {
+fun EditProfileAboutDialog(
+    onDismissRequest: () -> Unit,
+    initialValue: String,
+    onUpdated: () -> Unit
+) {
     TextFieldDialog(
         onDismissRequest,
         stringResource(R.string.introduction),

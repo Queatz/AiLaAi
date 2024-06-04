@@ -14,6 +14,7 @@ import app.ailaai.api.cardsCards
 import app.softwork.routingcompose.Router
 import appString
 import application
+import baseUrl
 import com.queatz.db.Card
 import com.queatz.db.CardOptions
 import com.queatz.db.ConversationItem
@@ -37,6 +38,8 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
@@ -45,6 +48,7 @@ import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
@@ -68,6 +72,8 @@ fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) 
     val layout by application.layout.collectAsState()
 
     application.layout.collectAsState()
+
+    application.background(card?.background?.let { "$baseUrl$it" })
 
     LaunchedEffect(cardId) {
         isReplying = null
@@ -97,8 +103,10 @@ fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) 
     if (layout == AppLayout.Kiosk) {
         QrImg("$webBaseUrl/page/$cardId") {
             position(Position.Fixed)
-            bottom(1.r)
-            left(1.r)
+            bottom(2.r)
+            left(2.r)
+            maxWidth(10.vw)
+            maxHeight(10.vw)
             transform {
                 scale(2)
                 translate(25.percent, -25.percent)
