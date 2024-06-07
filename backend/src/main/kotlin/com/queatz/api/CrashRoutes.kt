@@ -7,19 +7,22 @@ import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 
 fun Route.crashRoutes() {
-    post("/crash") {
-        respond {
-            db.insert(
-                Crash(
-                    details = call.receive<Crash>().details,
-                    person = meOrNull?.id
+    authenticate(optional = true) {
+        post("/crash") {
+            respond {
+                db.insert(
+                    Crash(
+                        details = call.receive<Crash>().details,
+                        person = meOrNull?.id
+                    )
                 )
-            )
-            HttpStatusCode.NoContent
+                HttpStatusCode.NoContent
+            }
         }
     }
 

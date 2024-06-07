@@ -1,12 +1,22 @@
 package com.queatz.ailaai.ui.screens
 
-import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -17,9 +27,48 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.NotificationsPaused
+import androidx.compose.material.icons.outlined.Reply
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,11 +88,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import app.ailaai.api.*
+import app.ailaai.api.createMember
+import app.ailaai.api.group
+import app.ailaai.api.message
+import app.ailaai.api.messages
+import app.ailaai.api.messagesBefore
+import app.ailaai.api.newReminder
+import app.ailaai.api.removeMember
+import app.ailaai.api.sendMessage
+import app.ailaai.api.updateGroup
+import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
@@ -54,7 +110,25 @@ import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.attachmentText
+import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.fadingEdge
+import com.queatz.ailaai.extensions.formatFuture
+import com.queatz.ailaai.extensions.formatTime
+import com.queatz.ailaai.extensions.groupUrl
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.startOfMinute
+import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.toLatLng
+import com.queatz.ailaai.extensions.toList
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.group.GroupCards
 import com.queatz.ailaai.group.GroupJoinRequest
 import com.queatz.ailaai.group.SendGroupDialog
@@ -63,20 +137,66 @@ import com.queatz.ailaai.helpers.audioRecorder
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.schedule.ScheduleReminderDialog
-import com.queatz.ailaai.services.*
+import com.queatz.ailaai.services.calls
+import com.queatz.ailaai.services.joins
+import com.queatz.ailaai.services.push
+import com.queatz.ailaai.services.say
+import com.queatz.ailaai.services.stickers
+import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.trade.TradeDialog
-import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.ui.components.AppBar
+import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.components.IconAndCount
+import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.MessageItem
+import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
+import com.queatz.ailaai.ui.dialogs.EditCardDialog
+import com.queatz.ailaai.ui.dialogs.GroupDescriptionDialog
+import com.queatz.ailaai.ui.dialogs.GroupSettingsDialog
+import com.queatz.ailaai.ui.dialogs.Media
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.PeopleDialog
+import com.queatz.ailaai.ui.dialogs.PhotoDialog
+import com.queatz.ailaai.ui.dialogs.QrCodeDialog
+import com.queatz.ailaai.ui.dialogs.RationaleDialog
+import com.queatz.ailaai.ui.dialogs.RenameGroupDialog
+import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.SetLocationDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.stickers.StickerPacks
-import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.theme.theme_call
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.Group
+import com.queatz.db.GroupEditsConfig
+import com.queatz.db.GroupExtended
+import com.queatz.db.GroupMessagesConfig
+import com.queatz.db.JoinRequestAndPerson
+import com.queatz.db.Member
+import com.queatz.db.Message
+import com.queatz.db.Person
+import com.queatz.db.PhotosAttachment
+import com.queatz.db.Reminder
+import com.queatz.db.ReplyAttachment
+import com.queatz.db.Sticker
+import com.queatz.db.StickerAttachment
+import com.queatz.db.Trade
+import com.queatz.db.TradeAttachment
 import createTrade
-import io.ktor.utils.io.*
-import kotlinx.coroutines.flow.*
+import io.ktor.utils.io.CancellationException
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
@@ -439,47 +559,49 @@ fun GroupScreen(groupId: String) {
                     }
 
                     if (!showCards) {
-                        if (inCallCount > 0) {
-                            Button(
-                                onClick = {
-                                    startCall()
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = theme_call
-                                )
-                            ) {
-                                Icon(
-                                    Icons.Outlined.Call,
-                                    stringResource(R.string.call)
-                                )
-                                Text(
-                                    stringResource(R.string.x_in_call, inCallCount),
-                                    modifier = Modifier
-                                        .padding(start = 1.pad)
-                                )
-                            }
-                        } else {
-                            IconButton(
-                                {
-                                    startCall()
+                        if (myMember != null) {
+                            if (inCallCount > 0) {
+                                Button(
+                                    onClick = {
+                                        startCall()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = theme_call
+                                    )
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.Call,
+                                        stringResource(R.string.call)
+                                    )
+                                    Text(
+                                        stringResource(R.string.x_in_call, inCallCount),
+                                        modifier = Modifier
+                                            .padding(start = 1.pad)
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    Icons.Outlined.Call,
-                                    stringResource(R.string.call)
-                                )
+                            } else {
+                                IconButton(
+                                    {
+                                        startCall()
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.Call,
+                                        stringResource(R.string.call)
+                                    )
+                                }
                             }
-                        }
 
-                        if (isSnoozed) {
-                            IconButton({
-                                snooze(false)
-                            }) {
-                                Icon(
-                                    Icons.Outlined.NotificationsPaused,
-                                    stringResource(R.string.unsnooze),
-                                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = .5f)
-                                )
+                            if (isSnoozed) {
+                                IconButton({
+                                    snooze(false)
+                                }) {
+                                    Icon(
+                                        Icons.Outlined.NotificationsPaused,
+                                        stringResource(R.string.unsnooze),
+                                        tint = MaterialTheme.colorScheme.tertiary.copy(alpha = .5f)
+                                    )
+                                }
                             }
                         }
                     }
@@ -523,21 +645,23 @@ fun GroupScreen(groupId: String) {
                             showMenu = false
                             showGroupMembers = true
                         })
-                        if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.create_reminder))
-                            }, {
-                                showMenu = false
-                                showNewReminderWithDialog = true
-                            })
-                        }
-                        if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.trade))
-                            }, {
-                                showMenu = false
-                                showTradeWithDialog = true
-                            })
+                        if (myMember != null) {
+                            if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.create_reminder))
+                                }, {
+                                    showMenu = false
+                                    showNewReminderWithDialog = true
+                                })
+                            }
+                            if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.trade))
+                                }, {
+                                    showMenu = false
+                                    showTradeWithDialog = true
+                                })
+                            }
                         }
                         DropdownMenuItem({
                             Text(stringResource(R.string.cards))
@@ -560,12 +684,14 @@ fun GroupScreen(groupId: String) {
                                     showManageDialog = true
                                 })
                             }
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.qr_code))
-                            }, {
-                                showMenu = false
-                                showQrCodeDialog = true
-                            })
+                        }
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.qr_code))
+                        }, {
+                            showMenu = false
+                            showQrCodeDialog = true
+                        })
+                        if (myMember != null) {
                             val hidden = myMember.member?.hide == true
                             DropdownMenuItem({
                                 Text(
@@ -663,7 +789,11 @@ fun GroupScreen(groupId: String) {
                                 ui.setShowDescription(groupId, showDescription)
                             },
                             shape = MaterialTheme.shapes.large,
-                            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)),
+                            colors = CardDefaults.outlinedCardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                    1.dp
+                                )
+                            ),
                             modifier = Modifier
                                 .padding(1.pad)
                         ) {

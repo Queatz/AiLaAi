@@ -29,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import app.ailaai.api.*
+import com.queatz.ailaai.AppUi
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.appLanguage
@@ -57,7 +58,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 
 @Composable
-fun SettingsScreen(updateMe: () -> Unit) {
+fun SettingsScreen(
+    appUi: AppUi,
+    onAppUi: (AppUi) -> Unit,
+    updateMe: () -> Unit
+) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var signOutDialog by rememberStateOf(false)
@@ -70,6 +75,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
     var isRefreshing by rememberStateOf(false)
     var showBiometrics by rememberStateOf(false)
     var biometricsSucceeded by rememberStateOf(false)
+    var onBiometricsSucceeded by rememberStateOf<(() -> Unit)?>(null)
     var profile by rememberSaveable(stateSaver = jsonSaver<PersonProfile?>()) {
         mutableStateOf(null)
     }
@@ -87,6 +93,9 @@ fun SettingsScreen(updateMe: () -> Unit) {
         if (biometricsSucceeded) {
             loadTransferCode()
         } else {
+            onBiometricsSucceeded = {
+                loadTransferCode()
+            }
             showBiometrics = true
         }
     }
@@ -100,7 +109,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 context.showDidntWork()
             } else {
                 biometricsSucceeded = true
-                loadTransferCode()
+                onBiometricsSucceeded?.invoke()
             }
         },
         onFailed = {
@@ -109,7 +118,7 @@ fun SettingsScreen(updateMe: () -> Unit) {
     ) {
         showBiometrics = false
         biometricsSucceeded = true
-        loadTransferCode()
+        onBiometricsSucceeded?.invoke()
     }
 
     LaunchedEffect(Unit) {
@@ -203,10 +212,17 @@ fun SettingsScreen(updateMe: () -> Unit) {
         var confirmSignOutChecked by rememberStateOf(false)
 
         fun signOut() {
-            scope.launch {
-                api.signOut()
-                updateMe()
-                signOutDialog = false
+            if (biometricsSucceeded) {
+                scope.launch {
+                    api.signOut()
+                    updateMe()
+                    signOutDialog = false
+                }
+            } else {
+                onBiometricsSucceeded = {
+                    signOut()
+                }
+                showBiometrics = true
             }
         }
 
@@ -547,6 +563,40 @@ fun SettingsScreen(updateMe: () -> Unit) {
                 }
             }, onClick = {
                 showReleaseNotes = true
+            })
+
+            DropdownMenuItem({
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "${stringResource(R.string.app_name)} ${stringResource(R.string.website)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(1.pad)
+                    )
+
+                    Icon(
+                        Icons.AutoMirrored.Outlined.OpenInNew,
+                        null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }, {
+                appDomain.launchUrl(context)
+            })
+
+            DropdownMenuItem({
+                Text(
+                    if (appUi.showNavLabels) {
+                        stringResource(R.string.hide_navigation_labels)
+                    } else {
+                        stringResource(R.string.show_navigation_labels)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(1.pad)
+                )
+            }, {
+                onAppUi(appUi.copy(showNavLabels = !appUi.showNavLabels))
             })
 
             DropdownMenuItem({

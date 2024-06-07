@@ -4,7 +4,7 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
-import java.net.URL
+import org.apache.commons.text.StringEscapeUtils.unescapeHtml4
 import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.minutes
 
@@ -35,10 +35,10 @@ fun String.extractOpenGraphData(): OpenGraphData {
                 if (name == "meta") {
                     when (attributes["property"]?.lowercase()) {
                         "og:title" -> {
-                            result.title = attributes["content"]
+                            result.title = attributes["content"]?.decodeHtml()
                         }
                         "og:description" -> {
-                            result.description = attributes["content"]
+                            result.description = attributes["content"]?.decodeHtml()
                         }
                         "og:image" -> {
                             result.image = attributes["content"]
@@ -51,3 +51,5 @@ fun String.extractOpenGraphData(): OpenGraphData {
 
     return result
 }
+
+private fun String.decodeHtml() = unescapeHtml4(this).trim()

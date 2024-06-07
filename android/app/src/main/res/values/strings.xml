@@ -719,6 +719,8 @@
     <string name="x_promoted">%1$s promoted</string>
     <string name="tap_to_reply">Tap to reply</string>
     <string name="background_updated">Background updated</string>
+    <string name="show_navigation_labels">Show navigation labels</string>
+    <string name="hide_navigation_labels">Hide navigation labels</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

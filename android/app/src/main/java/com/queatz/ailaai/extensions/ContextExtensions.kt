@@ -1,6 +1,7 @@
 package com.queatz.ailaai.extensions
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -46,3 +47,5 @@ val Context.isInstalledFromPlayStore: Boolean get() {
 
     return installer != null && playStoreInstallers.contains(installer)
 }
+
+fun Context.cameraSupported() = packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)

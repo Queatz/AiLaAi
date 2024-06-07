@@ -115,6 +115,7 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
                         style {
                             display(DisplayStyle.Flex)
                             flexWrap(FlexWrap.Wrap)
+                            gap(.5.r)
 
                             if (isMe) {
                                 justifyContent(JustifyContent.FlexEnd)

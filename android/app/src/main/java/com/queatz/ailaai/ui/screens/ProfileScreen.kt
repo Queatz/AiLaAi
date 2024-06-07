@@ -27,7 +27,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -71,7 +70,6 @@ import app.ailaai.api.subscribe
 import app.ailaai.api.unsubscribe
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
-import app.ailaai.api.uploadPhotos
 import coil.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -1016,7 +1014,7 @@ fun ProfileScreen(personId: String) {
             },
             modifier = Modifier
                 .padding(bottom = 2.pad)
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomCenter)
         )
     }
 

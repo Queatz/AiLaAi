@@ -436,13 +436,14 @@ object Styles : StyleSheet() {
         borderRadius(2.r)
         border(0.px)
         padding(0.r, 2.r)
-        height(3.r)
+        minHeight(3.r)
         backgroundColor(colors.primary)
         color(Color.white)
         cursor("pointer")
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
         fontWeight("bold")
+        overflow("hidden")
 
         selector(".material-symbols-outlined") style {
             marginRight(.5.r)
@@ -457,7 +458,7 @@ object Styles : StyleSheet() {
         borderRadius(2.r)
         border(1.px, LineStyle.Solid, colors.primary)
         padding(0.r, 2.r)
-        height(3.r)
+        minHeight(3.r)
         backgroundColor(Color.transparent)
         color(colors.primary)
         cursor("pointer")
@@ -477,7 +478,7 @@ object Styles : StyleSheet() {
     val textButton by style {
         property("border", "none")
         borderRadius(2.r)
-        height(3.r)
+        minHeight(3.r)
         backgroundColor(Color.transparent)
         color(colors.primary)
         cursor("pointer")

@@ -18,7 +18,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
             flexShrink(0)
         }
     }) {
-        IconButton("people", appString { groups }, styles = {
+        IconButton("chat_bubble_outline", appString { groups }, styles = {
             if (nav == NavPage.Groups) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)

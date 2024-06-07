@@ -37,7 +37,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.ChatBubble
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Rocket
@@ -100,6 +103,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.invoke
 import com.queatz.ailaai.extensions.isInstalledFromPlayStore
@@ -154,10 +158,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlin.time.Duration.Companion.seconds
 
 private val appTabKey = stringPreferencesKey("app.tab")
-private val appVersionCode = intPreferencesKey("app.versionCode")
+private val appVersionCodeKey = intPreferencesKey("app.versionCode")
+private val appUiKey = stringPreferencesKey("app.ui")
 
 private class Background(val url: String)
 
@@ -203,7 +211,7 @@ fun background(url: String?) {
 class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
-            NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.Group),
+            NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.ChatBubbleOutline),
             NavButton(AppNav.Schedule, getString(R.string.reminders), Icons.Outlined.CalendarMonth),
             NavButton(AppNav.Explore, getString(R.string.cards), Icons.Outlined.Map),
             NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
@@ -297,6 +305,21 @@ class MainActivity : AppCompatActivity() {
                     val cantConnectString = stringResource(R.string.cant_connect)
                     val downloadString = stringResource(R.string.download)
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
+                    var appUi by rememberStateOf(AppUi())
+
+                    LaunchedEffect(Unit) {
+                        appUi = context.dataStore.data.first()[appUiKey]?.let {
+                            runCatching {
+                                json.decodeFromString<AppUi>(it)
+                            }.getOrNull()
+                        } ?: AppUi()
+                    }
+
+                    LaunchedEffect(appUi) {
+                        context.dataStore.edit {
+                            it[appUiKey] = json.encodeToString(appUi)
+                        }
+                    }
 
                     fun updateAppLanguage(me: Person?) {
                         val language = appLanguage
@@ -393,12 +416,12 @@ class MainActivity : AppCompatActivity() {
                     LaunchedEffect(Unit) {
                         try {
                             if (
-                                context.dataStore.data.first()[appVersionCode].let {
+                                context.dataStore.data.first()[appVersionCodeKey].let {
                                     it != null && it != BuildConfig.VERSION_CODE
                                 }
                             ) {
                                 context.dataStore.edit {
-                                    it[appVersionCode] = BuildConfig.VERSION_CODE
+                                    it[appVersionCodeKey] = BuildConfig.VERSION_CODE
                                 }
                                 if (snackbarHostState.showSnackbar(
                                         context.getString(R.string.updated_to_x, BuildConfig.VERSION_NAME),
@@ -447,7 +470,7 @@ class MainActivity : AppCompatActivity() {
 
                     // Navigation bar background color
                     WindowInsets.navigationBars.getBottom(LocalDensity.current).let { height ->
-                        if (height > 0) {
+                        if (height > 0 && !isLandscape) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -466,9 +489,7 @@ class MainActivity : AppCompatActivity() {
                                         .height(height.px)
                                         .fillMaxWidth()
                                         .align(Alignment.BottomCenter)
-                                ) {
-
-                                }
+                                ) {}
                             }
                         }
                     }
@@ -487,7 +508,7 @@ class MainActivity : AppCompatActivity() {
                                         menuItems.forEach { item ->
                                             val selected = navController.currentDestination?.route == item.route.route
                                             val scale by animateFloatAsState(
-                                                if (selected) 1.25f else 1f,
+                                                if (selected && !appUi.showNavLabels) 1.25f else 1f,
                                                 spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)
                                             )
                                             NavigationBarItem(
@@ -548,8 +569,12 @@ class MainActivity : AppCompatActivity() {
                                                         }
                                                     }
                                                 },
-                                                alwaysShowLabel = false,
-                                                label = null,
+                                                alwaysShowLabel = appUi.showNavLabels,
+                                                label = if (appUi.showNavLabels) {
+                                                    { Text(item.text) }
+                                                } else {
+                                                    null
+                                                },
                                                 selected = selected,
                                                 onClick = {
                                                     navController.popBackStack()
@@ -790,7 +815,7 @@ class MainActivity : AppCompatActivity() {
                                                 )
                                             }
                                             composable("settings") {
-                                                SettingsScreen {
+                                                SettingsScreen(appUi, { appUi = it }) {
                                                     if (api.hasToken()) {
                                                         scope.launch {
                                                             loadMe(onError = {

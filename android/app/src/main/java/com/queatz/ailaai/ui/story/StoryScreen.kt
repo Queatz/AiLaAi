@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -104,7 +103,9 @@ fun StoryScreen(storyId: String, commentId: String? = null) {
                     reload()
                 }
             },
-            modifier = Modifier.widthIn(max = 640.dp).fillMaxSize(),
+            modifier = Modifier
+                .widthIn(max = 640.dp)
+                .fillMaxSize(),
         )
     }
 }

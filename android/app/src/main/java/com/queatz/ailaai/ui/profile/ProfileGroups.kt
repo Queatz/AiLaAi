@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -96,7 +98,9 @@ fun ProfileGroups(person: Person?) {
 
     if (groups.isNotEmpty()) {
         Column(
-            modifier = Modifier.padding(1.pad),
+            modifier = Modifier
+                .padding(1.pad)
+                .widthIn(max = 640.dp),
             verticalArrangement = Arrangement.spacedBy(1.pad),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

@@ -27,10 +27,12 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.asCacheFileUri
+import com.queatz.ailaai.extensions.cameraSupported
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isPhoto
 import com.queatz.ailaai.extensions.isVideo
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.uri
 import com.queatz.ailaai.ui.components.CardToolbar
 import com.queatz.ailaai.ui.permission.permissionRequester
@@ -121,7 +123,11 @@ fun ChoosePhotoDialog(
                 showCameraRationale = true
             }
         ) {
-            cameraLauncher.launch(cameraUri)
+            runCatching {
+                cameraLauncher.launch(cameraUri)
+            }.onFailure {
+                context.showDidntWork()
+            }
         }
     }
 
@@ -168,8 +174,10 @@ fun ChoosePhotoDialog(
                     launcher.launch(PickVisualMediaRequest(if (imagesOnly) ActivityResultContracts.PickVisualMedia.ImageOnly else ActivityResultContracts.PickVisualMedia.ImageAndVideo))
                 }
 
-                item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {
-                    camera()
+                if (context.cameraSupported()) {
+                    item(Icons.Outlined.CameraAlt, stringResource(R.string.take_photo)) {
+                        camera()
+                    }
                 }
 
                 item(Icons.Outlined.Draw, stringResource(R.string.draw)) {

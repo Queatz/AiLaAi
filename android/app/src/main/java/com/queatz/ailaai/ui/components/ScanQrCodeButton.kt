@@ -20,6 +20,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.cameraSupported
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
@@ -41,7 +42,13 @@ sealed class ScanQrCodeResult {
 
 @Composable
 fun ScanQrCodeButton() {
+    val context = LocalContext.current
     val nav = nav
+
+    if (!context.cameraSupported()) {
+        return
+    }
+
     ScanQrCodeButton {
         when (it) {
             is ScanQrCodeResult.Group -> {
