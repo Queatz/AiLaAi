@@ -720,4 +720,8 @@
     <string name="reply_to_x">Trả lời %1$s</string>
     <string name="comment_replies">Trả lời bình luận</string>
     <string name="tap_to_reply">Nhấn để trả lời</string>
+    <string name="slideshow">Trình chiếu</string>
+    <string name="slideshow_started">Trình chiếu bắt đầu</string>
+    <string name="slideshow_stopped">Đã dừng trình chiếu</string>
+    <string name="stop_slideshow">Dừng trình chiếu</string>
 </resources>

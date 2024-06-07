@@ -1,7 +1,7 @@
 package com.queatz.ailaai.ui.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -17,6 +17,6 @@ fun BackButton() {
     IconButton({
         nav.popBackStackOrFinish()
     }) {
-        Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
+        Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.go_back))
     }
 }

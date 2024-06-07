@@ -19,6 +19,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.ui
+import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.db.DeviceType
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -56,6 +57,7 @@ class Application : android.app.Application() {
         push.init(this)
         ui.init(this)
         calls.init(this)
+        slideshow.init(this)
 
         val scope = CoroutineScope(Dispatchers.IO)
 
@@ -146,6 +148,7 @@ class YourOwnSender : ReportSender {
 
 @AutoService(ReportSenderFactory::class)
 @Keep
+@Suppress("UNUSED")
 class CrashSenderFactory : ReportSenderFactory {
 
     override fun create(context: Context, config: CoreConfiguration) : ReportSender {

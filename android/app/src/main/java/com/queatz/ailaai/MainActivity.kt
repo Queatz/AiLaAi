@@ -37,11 +37,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.ChatBubble
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.Forum
-import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.RocketLaunch
@@ -76,7 +73,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -127,6 +123,7 @@ import com.queatz.ailaai.services.push
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.services.trading
+import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.screens.CardScreen
 import com.queatz.ailaai.ui.screens.ExploreScreen
@@ -158,9 +155,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlin.time.Duration.Companion.seconds
 
 private val appTabKey = stringPreferencesKey("app.tab")
@@ -233,6 +228,7 @@ class MainActivity : AppCompatActivity() {
             AiLaAiTheme {
                 val navController = rememberNavController()
                 push.navController = navController
+                slideshow.navController = navController
 
                 var newMessages by rememberStateOf(0)
                 var activeTrades by rememberStateOf(0)
@@ -879,6 +875,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onUserInteraction() {
+        slideshow.onUserInteraction()
     }
 }
 

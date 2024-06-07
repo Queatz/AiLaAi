@@ -721,6 +721,10 @@
     <string name="background_updated">Background updated</string>
     <string name="show_navigation_labels">Show navigation labels</string>
     <string name="hide_navigation_labels">Hide navigation labels</string>
+    <string name="slideshow">Slideshow</string>
+    <string name="slideshow_started">Slideshow started</string>
+    <string name="slideshow_stopped">Slideshow stopped</string>
+    <string name="stop_slideshow">Stop slideshow</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

@@ -2,18 +2,64 @@ package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
 import android.app.PendingIntent
-import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddBox
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.ToggleOff
+import androidx.compose.material.icons.outlined.ToggleOn
+import androidx.compose.material.icons.outlined.Wallpaper
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,10 +71,16 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import app.ailaai.api.*
+import app.ailaai.api.card
+import app.ailaai.api.cardPeople
+import app.ailaai.api.cardsCards
+import app.ailaai.api.createGroup
+import app.ailaai.api.generateCardPhoto
+import app.ailaai.api.leaveCollaboration
+import app.ailaai.api.sendMessage
+import app.ailaai.api.updateCard
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
@@ -38,25 +90,73 @@ import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.asOvalBitmap
+import com.queatz.ailaai.extensions.bitmapResource
+import com.queatz.ailaai.extensions.cardUrl
+import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.hint
+import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.isAtTop
+import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.popBackStackOrFinish
+import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.extensions.rememberAutoplayIndex
+import com.queatz.ailaai.extensions.rememberSavableStateOf
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.shareAsUrl
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.status
+import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
-import com.queatz.ailaai.ui.components.*
-import com.queatz.ailaai.ui.dialogs.*
+import com.queatz.ailaai.slideshow.slideshow
+import com.queatz.ailaai.ui.components.AppBar
+import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.CardLayout
+import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
+import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
+import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
+import com.queatz.ailaai.ui.dialogs.EditCardDialog
+import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
+import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.PayDialog
+import com.queatz.ailaai.ui.dialogs.PeopleDialog
+import com.queatz.ailaai.ui.dialogs.ProcessingVideoDialog
+import com.queatz.ailaai.ui.dialogs.ProcessingVideoStage
+import com.queatz.ailaai.ui.dialogs.QrCodeDialog
+import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
+import com.queatz.ailaai.ui.dialogs.buildQrBitmap
+import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.Message
 import com.queatz.db.Person
-import com.queatz.db.Profile
-import io.ktor.http.*
-import kotlinx.coroutines.*
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
@@ -108,6 +208,8 @@ fun CardScreen(cardId: String) {
         ChoosePhotoDialogState(mutableStateOf(card?.name ?: ""))
     }
     var showSourceDialog by rememberStateOf(false)
+    val slideshowActive by slideshow.active.collectAsState()
+    val userIsInactive by slideshow.userIsInactive.collectAsState()
 
     if (showPhotoDialog) {
         ChoosePhotoDialog(
@@ -202,24 +304,35 @@ fun CardScreen(cardId: String) {
         )
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(cardId) {
         if (card != null) {
             return@LaunchedEffect
         }
         isLoading = true
         notFound = false
 
-        api.card(cardId, onError = {
-            if (it.status == HttpStatusCode.NotFound) {
-                notFound = true
+        slideshow.card.value?.takeIf { it.id!! == cardId }.let {
+            if (it != null) {
+                card = it
+            } else {
+                api.card(cardId, onError = {
+                    if (it.status == HttpStatusCode.NotFound) {
+                        notFound = true
+                    }
+                }) {
+                    card = it
+                }
             }
-        }) { card = it }
-        api.cardsCards(cardId) { cards = it }
+        }
+
+        api.cardsCards(cardId) {
+            cards = it
+        }
         isLoading = false
     }
 
-    val isMine = me?.id == card?.person
-    val isMineOrIAmACollaborator = isMine || card?.collaborators?.contains(me?.id) == true
+    val isMine = me?.id == card?.person && !slideshowActive
+    val isMineOrIAmACollaborator = (isMine || card?.collaborators?.contains(me?.id) == true) && !slideshowActive
     val recomposeScope = currentRecomposeScope
 
     fun reload() {
@@ -520,28 +633,32 @@ fun CardScreen(cardId: String) {
                 }
             },
             navigationIcon = {
-                BackButton()
+                if (!slideshowActive) {
+                    BackButton()
+                }
             },
             actions = {
                 card?.let { card ->
-                    IconButton({
-                        scope.launch {
-                            when (saves.toggleSave(card)) {
-                                ToggleSaveResult.Saved -> {
-                                    context.toast(R.string.card_saved)
-                                }
+                    if (!slideshowActive) {
+                        IconButton({
+                            scope.launch {
+                                when (saves.toggleSave(card)) {
+                                    ToggleSaveResult.Saved -> {
+                                        context.toast(R.string.card_saved)
+                                    }
 
-                                ToggleSaveResult.Unsaved -> {
-                                    context.toast(R.string.card_unsaved)
-                                }
+                                    ToggleSaveResult.Unsaved -> {
+                                        context.toast(R.string.card_unsaved)
+                                    }
 
-                                else -> {
-                                    context.showDidntWork()
+                                    else -> {
+                                        context.showDidntWork()
+                                    }
                                 }
                             }
+                        }) {
+                            SavedIcon(card)
                         }
-                    }) {
-                        SavedIcon(card)
                     }
                 }
 
@@ -589,6 +706,21 @@ fun CardScreen(cardId: String) {
                             nav.navigate(AppNav.Profile(card.person!!))
                             showMenu = false
                         })
+                        if (slideshowActive) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.stop_slideshow))
+                            }, {
+                                slideshow.stop()
+                                showMenu = false
+                            })
+                        } else {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.slideshow))
+                            }, {
+                                slideshow.start(card.id!!)
+                                showMenu = false
+                            }, enabled = cards.isNotEmpty())
+                        }
                         if (card.parent != null) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.open_enclosing_card))
@@ -894,6 +1026,33 @@ fun CardScreen(cardId: String) {
                             .align(Alignment.BottomEnd)
                     ) {
                         Icon(Icons.Outlined.Add, stringResource(R.string.add_a_card))
+                    }
+                }
+
+                if (slideshowActive) {
+                    val logo = bitmapResource(R.drawable.ic_notification)
+                    val size = 160.dp.px
+                    val qrCode = remember(cardId) {
+                        cardUrl(cardId).buildQrBitmap(logo, size)
+                    }
+
+                    Crossfade(
+                        userIsInactive,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(2.pad)
+                    ) {
+                        if (it) {
+                            Image(
+                                qrCode.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .shadow(16.dp, MaterialTheme.shapes.medium)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .background(Color.White)
+                                    .padding(.5f.pad)
+                            )
+                        }
                     }
                 }
             }

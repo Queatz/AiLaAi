@@ -29,18 +29,20 @@ import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
+fun String.buildQrBitmap(logo: Bitmap?, size: Int = 500) = ScanUtil.buildBitmap(
+    this,
+    QRCODE_SCAN_TYPE,
+    size,
+    size,
+    HmsBuildBitmapOption.Creator().setQRLogoBitmap(logo?.tint(android.graphics.Color.BLACK)).create()
+)
+
 @Composable
 fun QrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
     val scope = rememberCoroutineScope()
     val logo = bitmapResource(R.drawable.ic_notification)
     val qrCode = remember {
-        ScanUtil.buildBitmap(
-            url,
-            QRCODE_SCAN_TYPE,
-            500,
-            500,
-            HmsBuildBitmapOption.Creator().setQRLogoBitmap(logo?.tint(android.graphics.Color.BLACK)).create()
-        )
+        url.buildQrBitmap(logo)
     }
 
     DialogBase(onDismissRequest) {
