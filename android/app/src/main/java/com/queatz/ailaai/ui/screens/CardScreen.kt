@@ -1031,7 +1031,7 @@ fun CardScreen(cardId: String) {
 
                 if (slideshowActive) {
                     val logo = bitmapResource(R.drawable.ic_notification)
-                    val size = 160.dp.px
+                    val size = 220.dp.px
                     val qrCode = remember(cardId) {
                         cardUrl(cardId).buildQrBitmap(logo, size)
                     }

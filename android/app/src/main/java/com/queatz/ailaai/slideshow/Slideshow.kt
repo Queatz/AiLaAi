@@ -44,7 +44,7 @@ class Slideshow {
     private var slideshowJob: Job? = null
     private var userInteractionTimeoutJob: Job? = null
 
-    private val userInteractionTimeout: Duration = 45.seconds
+    private val userInteractionTimeout: Duration = 30.seconds
 
     fun init(context: Context) {
         this.context = context
