@@ -7,11 +7,22 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun NameAndLocation(name: String?, location: String?) {
+fun NameAndLocation(
+    name: String?,
+    location: String?,
+    onNameClick: (() -> Unit)? = null,
+    onLocationClick: (() -> Unit)? = null
+) {
     Span({
         style {
             fontWeight("bold")
             fontSize(24.px)
+        }
+
+        onNameClick?.let { block ->
+            onClick {
+                block()
+            }
         }
     }) {
         Text(name ?: "")
@@ -22,6 +33,12 @@ fun NameAndLocation(name: String?, location: String?) {
                 marginLeft(1.r / 2)
                 fontSize(18.px)
                 opacity(.75f)
+            }
+
+            onLocationClick?.let { block ->
+                onClick {
+                    block()
+                }
             }
         }) {
             Text(location)

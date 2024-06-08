@@ -229,9 +229,51 @@ fun ExplorePage(
         }
     }
 
+    val configuration = LocalConfiguration.current
     val inAPage = appString { inAPage }
     val cancel = appString { cancel }
-    val configuration = LocalConfiguration.current
+    val titleString = appString { title }
+    val rename = appString { rename }
+    val hint = appString { hint }
+    val update = appString { update }
+
+    fun rename() {
+        scope.launch {
+            val name = inputDialog(
+                titleString,
+                "",
+                rename,
+                defaultValue = card.name ?: ""
+            )
+
+            if (name == null) {
+                return@launch
+            }
+
+            api.updateCard(card.id!!, Card(name = name)) {
+                onCardUpdated(it)
+            }
+        }
+    }
+
+    fun rehint() {
+        scope.launch {
+            val hint = inputDialog(
+                hint,
+                "",
+                update,
+                defaultValue = card.location ?: ""
+            )
+
+            if (hint == null) {
+                return@launch
+            }
+
+            api.updateCard(card.id!!, Card(location = hint)) {
+                onCardUpdated(it)
+            }
+        }
+    }
 
     fun moveToGroup() {
         scope.launch {
@@ -300,9 +342,6 @@ fun ExplorePage(
     }
 
     if (menuTarget != null) {
-        val titleString = appString { title }
-        val rename = appString { rename }
-
         Menu({ menuTarget = null }, menuTarget!!) {
             val isSaved = saves.cards.value.any { it.id == card.id }
             item(appString { openInNewTab }, icon = "open_in_new") {
@@ -319,44 +358,11 @@ fun ExplorePage(
             }
 
             item(rename) {
-                scope.launch {
-                    val name = inputDialog(
-                        titleString,
-                        "",
-                        rename,
-                        defaultValue = card.name ?: ""
-                    )
-
-                    if (name == null) {
-                        return@launch
-                    }
-
-                    api.updateCard(card.id!!, Card(name = name)) {
-                        onCardUpdated(it)
-                    }
-                }
+                rename()
             }
 
-            val hint = appString { hint }
-            val update = appString { update }
-
             item(hint) {
-                scope.launch {
-                    val hint = inputDialog(
-                        hint,
-                        "",
-                        update,
-                        defaultValue = card.location ?: ""
-                    )
-
-                    if (hint == null) {
-                        return@launch
-                    }
-
-                    api.updateCard(card.id!!, Card(location = hint)) {
-                        onCardUpdated(it)
-                    }
-                }
+                rehint()
             }
 
             val location = appString { location }
@@ -591,8 +597,18 @@ fun ExplorePage(
     }
 
     PageTopBar(
-        card.name?.notBlank ?: appString { newCard },
-        card.hint,
+        title = card.name?.notBlank ?: appString { newCard },
+        description = card.hint,
+        onTitleClick = if (me?.id == card.person) {
+            {
+                rename()
+            }
+        } else null,
+        onDescriptionClick = if (me?.id == card.person) {
+            {
+                rehint()
+            }
+        } else null,
         navActions = {
             if (card.parent != null) {
                 IconButton("arrow_upward", appString { openEnclosingCard }, styles = {

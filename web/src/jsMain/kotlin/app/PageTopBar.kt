@@ -18,6 +18,8 @@ fun PageTopBar(
     description: String? = null,
     actions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     navActions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
+    onTitleClick: (() -> Unit)? = null,
+    onDescriptionClick: (() -> Unit)? = null,
     onMenu: ((SyntheticMouseEvent) -> Unit)? = null
 ) {
     Div({
@@ -44,14 +46,28 @@ fun PageTopBar(
                     fontSize(24.px)
                     ellipsize()
                 }
+
+                onTitleClick?.let {
+                    onClick {
+                        it()
+                    }
+                }
             }) {
                 Text(title)
             }
+
             if (!description.isNullOrBlank()) {
                 Div({
                     classes(AppStyles.groupItemMessage)
+
                     style {
                         ellipsize()
+                    }
+
+                    onDescriptionClick?.let {
+                        onClick {
+                            it()
+                        }
                     }
                 }) {
                     Text(description)
