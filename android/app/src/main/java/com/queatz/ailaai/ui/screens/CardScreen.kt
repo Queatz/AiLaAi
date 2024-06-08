@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -87,6 +88,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadCardPhotoFromUri
 import com.queatz.ailaai.api.uploadCardVideoFromUri
 import com.queatz.ailaai.api.uploadPhotosFromUris
+import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
@@ -210,6 +212,8 @@ fun CardScreen(cardId: String) {
     var showSourceDialog by rememberStateOf(false)
     val slideshowActive by slideshow.active.collectAsState()
     val userIsInactive by slideshow.userIsInactive.collectAsState()
+
+    background(card?.background?.takeIf { slideshowActive }?.let(api::url))
 
     if (showPhotoDialog) {
         ChoosePhotoDialog(
@@ -616,187 +620,193 @@ fun CardScreen(cardId: String) {
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
     ) {
-        AppBar(
-            title = {
-                Column {
-                    Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
+        val showAppBar = !slideshowActive || !userIsInactive
 
-                    card?.hint?.notBlank?.let {
-                        Text(
-                            it,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-            },
-            navigationIcon = {
-                if (!slideshowActive) {
-                    BackButton()
-                }
-            },
-            actions = {
-                card?.let { card ->
+        AnimatedVisibility(showAppBar) {
+            AppBar(
+                title = {
                     if (!slideshowActive) {
-                        IconButton({
-                            scope.launch {
-                                when (saves.toggleSave(card)) {
-                                    ToggleSaveResult.Saved -> {
-                                        context.toast(R.string.card_saved)
-                                    }
+                        Column {
+                            Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
 
-                                    ToggleSaveResult.Unsaved -> {
-                                        context.toast(R.string.card_unsaved)
-                                    }
+                            card?.hint?.notBlank?.let {
+                                Text(
+                                    it,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
+                    }
+                },
+                navigationIcon = {
+                    if (!slideshowActive) {
+                        BackButton()
+                    }
+                },
+                actions = {
+                    card?.let { card ->
+                        if (!slideshowActive) {
+                            IconButton({
+                                scope.launch {
+                                    when (saves.toggleSave(card)) {
+                                        ToggleSaveResult.Saved -> {
+                                            context.toast(R.string.card_saved)
+                                        }
 
-                                    else -> {
-                                        context.showDidntWork()
+                                        ToggleSaveResult.Unsaved -> {
+                                            context.toast(R.string.card_unsaved)
+                                        }
+
+                                        else -> {
+                                            context.showDidntWork()
+                                        }
                                     }
                                 }
+                            }) {
+                                SavedIcon(card)
                             }
-                        }) {
-                            SavedIcon(card)
                         }
                     }
-                }
 
-                IconButton({
-                    showMenu = !showMenu
-                }) {
-                    Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
-                }
+                    IconButton({
+                        showMenu = !showMenu
+                    }) {
+                        Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
+                    }
 
-                val cardString = stringResource(R.string.card)
+                    val cardString = stringResource(R.string.card)
 
-                Dropdown(showMenu, { showMenu = false }) {
-                    if (isMine) {
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.manage))
-                        }, {
-                            showManageMenu = true
-                            showMenu = false
-                        })
-                        if (card?.collaborators?.isNotEmpty() != true) {
+                    Dropdown(showMenu, { showMenu = false }) {
+                        if (isMine) {
                             DropdownMenuItem({
-                                Text(stringResource(R.string.add_collaborators))
+                                Text(stringResource(R.string.manage))
                             }, {
-                                openAddCollaboratorDialog = true
+                                showManageMenu = true
+                                showMenu = false
+                            })
+                            if (card?.collaborators?.isNotEmpty() != true) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.add_collaborators))
+                                }, {
+                                    openAddCollaboratorDialog = true
+                                    showMenu = false
+                                })
+                            }
+                        }
+                        if (isMineOrIAmACollaborator && (card?.collaborators?.isNotEmpty() == true)) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.collaborators))
+                            }, {
+                                if (isMine) {
+                                    openRemoveCollaboratorsDialog = true
+                                } else {
+                                    openCollaboratorsDialog = true
+                                }
                                 showMenu = false
                             })
                         }
-                    }
-                    if (isMineOrIAmACollaborator && (card?.collaborators?.isNotEmpty() == true)) {
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.collaborators))
-                        }, {
-                            if (isMine) {
-                                openRemoveCollaboratorsDialog = true
+                        card?.let { card ->
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.view_profile))
+                            }, {
+                                nav.navigate(AppNav.Profile(card.person!!))
+                                showMenu = false
+                            })
+                            if (slideshowActive) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.stop_slideshow))
+                                }, {
+                                    slideshow.stop()
+                                    showMenu = false
+                                })
                             } else {
-                                openCollaboratorsDialog = true
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.slideshow))
+                                }, {
+                                    slideshow.start(card.id!!)
+                                    showMenu = false
+                                }, enabled = cards.isNotEmpty())
                             }
-                            showMenu = false
-                        })
-                    }
-                    card?.let { card ->
+                            if (card.parent != null) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.open_enclosing_card))
+                                }, {
+                                    nav.navigate(AppNav.Page(card.parent!!))
+                                    showMenu = false
+                                })
+                            }
+                        }
                         DropdownMenuItem({
-                            Text(stringResource(R.string.view_profile))
+                            Text(stringResource(R.string.send_card))
                         }, {
-                            nav.navigate(AppNav.Profile(card.person!!))
+                            showSendDialog = true
                             showMenu = false
                         })
-                        if (slideshowActive) {
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.qr_code))
+                        }, {
+                            showQrCode = true
+                            showMenu = false
+                        })
+                        if (card?.geo?.size == 2) {
                             DropdownMenuItem({
-                                Text(stringResource(R.string.stop_slideshow))
+                                Text(stringResource(R.string.show_on_map))
                             }, {
-                                slideshow.stop()
+                                card?.let { card ->
+                                    val uri = Uri.parse(
+                                        "geo:${card.geo!![0]},${card.geo!![1]}?q=${card.geo!![0]},${card.geo!![1]}(${
+                                            Uri.encode(card.name ?: cardString)
+                                        })"
+                                    )
+                                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                                    nav.context.startActivity(Intent.createChooser(intent, null))
+                                }
                                 showMenu = false
                             })
-                        } else {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.slideshow))
-                            }, {
-                                slideshow.start(card.id!!)
-                                showMenu = false
-                            }, enabled = cards.isNotEmpty())
                         }
-                        if (card.parent != null) {
+                        val textCopied = stringResource(R.string.copied)
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.share))
+                        }, {
+                            cardUrl(cardId).shareAsUrl(context, card?.name ?: cardString)
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.copy_link))
+                        }, {
+                            cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
+                            context.toast(textCopied)
+                            showMenu = false
+                        })
+                        DropdownMenuItem({
+                            Text(stringResource(R.string.view_source))
+                        }, {
+                            showMenu = false
+                            showSourceDialog = true
+                        })
+                        if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
                             DropdownMenuItem({
-                                Text(stringResource(R.string.open_enclosing_card))
+                                Text(stringResource(R.string.add_to_homescreen))
                             }, {
-                                nav.navigate(AppNav.Page(card.parent!!))
                                 showMenu = false
+                                addToHomescreen()
                             })
                         }
-                    }
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.send_card))
-                    }, {
-                        showSendDialog = true
-                        showMenu = false
-                    })
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.qr_code))
-                    }, {
-                        showQrCode = true
-                        showMenu = false
-                    })
-                    if (card?.geo?.size == 2) {
                         DropdownMenuItem({
-                            Text(stringResource(R.string.show_on_map))
+                            Text(stringResource(R.string.report))
                         }, {
-                            card?.let { card ->
-                                val uri = Uri.parse(
-                                    "geo:${card.geo!![0]},${card.geo!![1]}?q=${card.geo!![0]},${card.geo!![1]}(${
-                                        Uri.encode(card.name ?: cardString)
-                                    })"
-                                )
-                                val intent = Intent(Intent.ACTION_VIEW, uri)
-                                nav.context.startActivity(Intent.createChooser(intent, null))
-                            }
+                            showReportDialog = true
                             showMenu = false
                         })
                     }
-                    val textCopied = stringResource(R.string.copied)
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.share))
-                    }, {
-                        cardUrl(cardId).shareAsUrl(context, card?.name ?: cardString)
-                        showMenu = false
-                    })
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.copy_link))
-                    }, {
-                        cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
-                        context.toast(textCopied)
-                        showMenu = false
-                    })
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.view_source))
-                    }, {
-                        showMenu = false
-                        showSourceDialog = true
-                    })
-                    if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.add_to_homescreen))
-                        }, {
-                            showMenu = false
-                            addToHomescreen()
-                        })
-                    }
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.report))
-                    }, {
-                        showReportDialog = true
-                        showMenu = false
-                    })
-                }
-            },
-            modifier = Modifier
-                .zIndex(1f)
-        )
+                },
+                modifier = Modifier
+                    .zIndex(1f)
+            )
+        }
 
         fun LazyGridScope.cardHeaderItem(
             card: Card?,
@@ -915,7 +925,7 @@ fun CardScreen(cardId: String) {
                     }
                     CardLayout(
                         card = card,
-                        showTitle = false,
+                        showTitle = slideshowActive,
                         aspect = aspect,
                         scope = scope,
                         elevation = elevation,

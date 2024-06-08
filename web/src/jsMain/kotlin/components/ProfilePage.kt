@@ -298,7 +298,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                 Div({
                                     classes(ProfileStyles.name)
                                 }) {
-                                    NameAndLocation(profile.person.name, profile.profile.location?.takeIf { layout == AppLayout.Kiosk })
+                                    NameAndLocation(profile.person.name, profile.profile.location)
                                 }
                                 Div({
                                     style {

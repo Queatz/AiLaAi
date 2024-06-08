@@ -1,6 +1,7 @@
 package com.queatz.ailaai
 
 import android.os.Bundle
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -79,10 +80,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -237,6 +242,22 @@ class MainActivity : AppCompatActivity() {
                 LifecycleEffect {
                     if (push.navController == navController) {
                         push.latestEvent = it
+                    }
+                }
+
+                val windowInsetsController = WindowCompat.getInsetsController(window, LocalView.current)
+
+                LaunchedEffect(Unit) {
+                    slideshow.active.collectLatest {
+                        if (it) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                            windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                            windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+                        }
                     }
                 }
 

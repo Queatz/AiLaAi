@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AppUi(
-    val showNavLabels: Boolean = false
+    val showNavLabels: Boolean = true
 )

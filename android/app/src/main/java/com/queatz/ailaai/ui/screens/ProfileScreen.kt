@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -139,7 +140,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun ProfileScreen(personId: String) {
@@ -176,6 +179,7 @@ fun ProfileScreen(personId: String) {
     var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
     val me = me
     val nav = nav
+    var showProfileLocation by rememberStateOf(false)
 
     val setPhotoState = remember(person == null) {
         ChoosePhotoDialogState(mutableStateOf(person?.name ?: ""))
@@ -186,6 +190,18 @@ fun ProfileScreen(personId: String) {
     }
 
     val context = LocalContext.current
+
+    LaunchedEffect(profile) {
+        while (true) {
+            showProfileLocation = false
+            delay(5.seconds)
+
+            if (!profile?.location.isNullOrBlank()) {
+                showProfileLocation = true
+                delay(5.seconds)
+            }
+        }
+    }
 
     if (showQrCodeDialog) {
         QrCodeDialog(
@@ -809,16 +825,30 @@ fun ProfileScreen(personId: String) {
                                     style = MaterialTheme.typography.titleLarge,
                                     textAlign = TextAlign.Center
                                 )
-                                Text(person?.seen?.timeAgo()?.let { timeAgo ->
-                                    "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
-                                } ?: "",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
-                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                                    textAlign = TextAlign.Center,
+                                Crossfade(
+                                    showProfileLocation,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(bottom = .5f.pad)
-                                )
+                                ) {
+                                    if (it) {
+                                        Text(profile?.location.orEmpty(),
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
+                                            color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    } else {
+                                        Text(person?.seen?.timeAgo()?.let { timeAgo ->
+                                            "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                                        } ?: "",
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
+                                            color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
                                 if (!isMe) {
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterHorizontally),
