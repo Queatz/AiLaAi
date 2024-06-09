@@ -64,7 +64,7 @@ class Slideshow {
 
                 api.cardsCards(cardId) {
                     cards.clear()
-                    cards.addAll(it)
+                    cards.addAll(it.filter { it.active == true })
                 }
 
                 if (cards.isEmpty()) {

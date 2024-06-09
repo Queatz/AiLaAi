@@ -1050,7 +1050,7 @@ fun CardScreen(cardId: String) {
                         userIsInactive,
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(2.pad)
+                            .padding(1.pad)
                     ) {
                         if (it) {
                             Image(

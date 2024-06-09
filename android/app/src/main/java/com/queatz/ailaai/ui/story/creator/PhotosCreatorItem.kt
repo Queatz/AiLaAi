@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -187,7 +188,7 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                                     .heightIn(min = 240.dp)
                             } else {
                                 Modifier
-                                    .fillMaxWidth()
+                                    .heightIn(max = 240.dp)
                             }
                         )
                 )

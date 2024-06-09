@@ -284,6 +284,9 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                val slideshowActive by slideshow.active.collectAsState()
+                val userIsInactive by slideshow.userIsInactive.collectAsState()
+
                 val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
                 val showNavigation = navController.currentBackStackEntryAsState()
                     .value
@@ -297,7 +300,7 @@ class MainActivity : AppCompatActivity() {
                                 || (it.startsWith("card/") && it.endsWith("/edit"))
                                 || (it.startsWith("profile/") && it.endsWith("/edit"))
                                 || it == "sticker-packs"
-                    } != true
+                    } != true && !(slideshowActive && userIsInactive)
 
                 var known by remember { mutableStateOf(api.hasToken()) }
                 var showReleaseNotes by rememberStateOf(false)
