@@ -30,6 +30,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.services.authors
+import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Person
@@ -50,6 +51,7 @@ fun CardConversation(
     conversationChange: ((List<ConversationItem>) -> Unit)? = null,
     onCategoryClick: ((String) -> Unit)? = null
 ) {
+    val slideshowActive by slideshow.active.collectAsState()
     val categories = card.categories ?: emptyList()
     val conversation = remember(card.conversation) {
         json.decodeFromString<ConversationItem>(card.conversation ?: "{}")
@@ -87,7 +89,11 @@ fun CardConversation(
             if (hasTitle) {
                 val text = buildAnnotatedString {
                     withStyle(
-                        MaterialTheme.typography.titleMedium.toSpanStyle().copy(fontWeight = FontWeight.Bold)
+                        if (slideshowActive) {
+                            MaterialTheme.typography.headlineMedium
+                        } else {
+                            MaterialTheme.typography.titleMedium
+                        }.toSpanStyle().copy(fontWeight = FontWeight.Bold)
                     ) {
                         append(current.title.takeIf { stack.isNotEmpty() } ?: card.name ?: "")
                     }
@@ -95,7 +101,11 @@ fun CardConversation(
                     append("  ")
 
                     withStyle(
-                        MaterialTheme.typography.titleSmall.toSpanStyle()
+                        if (slideshowActive) {
+                            MaterialTheme.typography.headlineSmall
+                        } else {
+                            MaterialTheme.typography.titleSmall
+                        }.toSpanStyle()
                             .copy(color = MaterialTheme.colorScheme.secondary)
                     ) {
                         append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.hint)

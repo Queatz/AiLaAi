@@ -42,6 +42,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -627,7 +628,11 @@ fun CardScreen(cardId: String) {
                 title = {
                     if (!slideshowActive) {
                         Column {
-                            Text(card?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                card?.name ?: "",
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
 
                             card?.hint?.notBlank?.let {
                                 Text(
@@ -1049,7 +1054,7 @@ fun CardScreen(cardId: String) {
                     Crossfade(
                         userIsInactive,
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
+                            .align(if (isLandscape) Alignment.BottomEnd else Alignment.BottomStart)
                             .padding(1.pad)
                     ) {
                         if (it) {
