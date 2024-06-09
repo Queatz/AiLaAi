@@ -12,8 +12,19 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Message
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -28,9 +39,13 @@ import androidx.compose.ui.text.withStyle
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.json
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.approximate
+import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.hint
+import com.queatz.ailaai.extensions.latLng
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.services.authors
-import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Person
@@ -46,12 +61,12 @@ fun CardConversation(
     onTitleClick: () -> Unit = {},
     showDistance: LatLng? = null,
     showTitle: Boolean = true,
+    largeTitle: Boolean = false,
     hideCreators: List<String>? = null,
     selectingText: ((Boolean) -> Unit)? = null,
     conversationChange: ((List<ConversationItem>) -> Unit)? = null,
     onCategoryClick: ((String) -> Unit)? = null
 ) {
-    val slideshowActive by slideshow.active.collectAsState()
     val categories = card.categories ?: emptyList()
     val conversation = remember(card.conversation) {
         json.decodeFromString<ConversationItem>(card.conversation ?: "{}")
@@ -89,7 +104,7 @@ fun CardConversation(
             if (hasTitle) {
                 val text = buildAnnotatedString {
                     withStyle(
-                        if (slideshowActive) {
+                        if (largeTitle) {
                             MaterialTheme.typography.headlineMedium
                         } else {
                             MaterialTheme.typography.titleMedium
@@ -98,23 +113,32 @@ fun CardConversation(
                         append(current.title.takeIf { stack.isNotEmpty() } ?: card.name ?: "")
                     }
 
-                    append("  ")
+                    val hint = card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.hint
 
-                    withStyle(
-                        if (slideshowActive) {
-                            MaterialTheme.typography.headlineSmall
-                        } else {
-                            MaterialTheme.typography.titleSmall
-                        }.toSpanStyle()
-                            .copy(color = MaterialTheme.colorScheme.secondary)
-                    ) {
-                        append(card.name?.takeIf { stack.size == 1 } ?: stack.lastOrNull()?.title ?: card.hint)
+                    if (hint.isNotBlank()) {
+                        withStyle(
+                            if (largeTitle) {
+                                MaterialTheme.typography.headlineSmall
+                            } else {
+                                MaterialTheme.typography.titleSmall
+                            }.toSpanStyle()
+                                .copy(color = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            append("  $hint")
+                        }
                     }
                 }
                 if (text.isNotBlank()) {
                     Text(
                         text = text,
-                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = if (largeTitle) {
+                                MaterialTheme.typography.headlineMedium.lineHeight
+                            } else {
+                                MaterialTheme.typography.titleMedium.lineHeight
+                            }
+                        ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(remember { MutableInteractionSource() }, null) {

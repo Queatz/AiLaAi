@@ -931,6 +931,7 @@ fun CardScreen(cardId: String) {
                     CardLayout(
                         card = card,
                         showTitle = slideshowActive,
+                        largeTitle = slideshowActive,
                         aspect = aspect,
                         scope = scope,
                         elevation = elevation,
@@ -1004,19 +1005,8 @@ fun CardScreen(cardId: String) {
                                 playVideo = isAtTop
                             )
                         }
-                        if (cards.isEmpty()) {
-                            if (isLandscape && !isMine) {
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    Text(
-                                        stringResource(R.string.no_cards),
-                                        textAlign = TextAlign.Center,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.padding(2.pad)
-                                    )
-                                }
-                            }
-                        } else {
-                            items(cards, { it.id!! }) {
+                        if (cards.isNotEmpty()) {
+                            items(cards, key = { it.id!! }) {
                                 CardLayout(
                                     card = it,
                                     showTitle = true,

@@ -39,6 +39,7 @@ fun CardLayout(
     card: Card?,
     showTitle: Boolean,
     modifier: Modifier = Modifier,
+    largeTitle: Boolean = false,
     aspect: Float = 1.5f,
     onClick: () -> Unit = {},
     scope: CoroutineScope,
@@ -98,6 +99,7 @@ fun CardLayout(
                 card,
                 interactable = true,
                 showTitle = showTitle,
+                largeTitle = largeTitle,
                 hideCreators = hideCreators,
                 showDistance = showDistance,
                 onCategoryClick = {
