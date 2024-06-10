@@ -3,6 +3,7 @@ package com.queatz.ailaai.slideshow
 import android.content.Context
 import android.util.Log
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import app.ailaai.api.cardsCards
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -83,7 +84,13 @@ class Slideshow {
                     Log.w("Slideshow", "Navigating to card ${card.id!!}")
 
                     withContext(Dispatchers.Main) {
-                        navController!!.navigate(AppNav.Page(card.id!!))
+                        navController!!.navigate(
+                            AppNav.Page(card.id!!),
+                            navOptions {
+                                launchSingleTop = true
+                                popUpTo(AppNav.Explore.route)
+                            }
+                        )
                     }
 
                     delay(slideDuration)

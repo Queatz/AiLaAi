@@ -371,12 +371,10 @@ fun MapScreen(
                             )
 
                     ) {
-                        OutlinedText(
-                            card.name ?: "",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
+                                .padding(bottom = 1.pad)
                                 .clickable(
                                     remember { MutableInteractionSource() },
                                     null
@@ -385,28 +383,27 @@ fun MapScreen(
                                         onCard(card.id!!)
                                     }
                                 }
-                                .widthIn(max = 120.dp)
-                        )
-                        card.categories?.firstOrNull()?.let { category ->
+                        ) {
                             OutlinedText(
-                                category,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                outlineWidth = 4f,
-                                style = MaterialTheme.typography.labelSmall,
+                                card.name ?: "",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
-                                    .padding(bottom = 1.pad)
-                                    .clickable(
-                                        remember { MutableInteractionSource() },
-                                        null
-                                    ) {
-                                        tryNav(pos) {
-                                            onCard(card.id!!)
-                                        }
-                                    }
                                     .widthIn(max = 120.dp)
                             )
+                            card.categories?.firstOrNull()?.let { category ->
+                                OutlinedText(
+                                    category,
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    outlineWidth = 4f,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .widthIn(max = 120.dp)
+                                )
+                            }
                         }
 
                         val photo = card.photo?.let(api::url)

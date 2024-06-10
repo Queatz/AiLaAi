@@ -104,6 +104,14 @@ fun HomePage() {
                 }) {
                     Text("Google Play")
                 }
+                Span({
+                    style {
+                        opacity(.5f)
+                    }
+                }) {
+                    // todo translate
+                    Text(". iOS support is coming soon!")
+                }
             }
         }
 
