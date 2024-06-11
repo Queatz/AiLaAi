@@ -2,7 +2,9 @@ package com.queatz.ailaai.api
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toFile
 import app.ailaai.api.*
+import com.queatz.ailaai.extensions.ScaledVideo
 import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
@@ -58,10 +60,16 @@ suspend fun Api.sendVideosFromUri(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
     val scaledVideos = try {
-        videos.map { it.asScaledVideo(
-            context,
-            progressCallback = processingCallback
-        ).asInputProvider() to (context.contentResolver.getType(it) ?: "video/*") }
+        videos.map {
+            ScaledVideo(
+                it.asScaledVideo(
+                    context,
+                    progressCallback = processingCallback
+                ).asInputProvider(),
+                context.contentResolver.getType(it) ?: "video/*",
+                it.toFile().name
+            )
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         onError?.invoke(e)
@@ -76,3 +84,4 @@ suspend fun Api.sendVideosFromUri(
         onSuccess
     )
 }
+

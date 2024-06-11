@@ -21,11 +21,17 @@ fun List<PartData>.toMap() = buildMap {
 
 fun PipelineContext<*, ApplicationCall>.parameter(name: String) = call.parameters[name]!!
 
-suspend fun ApplicationCall.receiveFiles(param: String, prefix: String, onFileNames: suspend (fileNames: List<String>, params: Map<String, String>) -> Unit) {
+suspend fun ApplicationCall.receiveFiles(
+    param: String,
+    prefix: String,
+    onFileNames: suspend (fileNames: List<String>, params: Map<String, String>) -> Unit
+) {
     val parts = receiveMultipart().readAllParts()
 
     val match = "$param\\[(\\d+)]".toRegex()
-    val (fileItems, params) = parts.partition { match.matches(it.name ?: return@partition false) }.let {
+    val (fileItems, params) = parts.partition {
+        match.matches(it.name ?: return@partition false)
+    }.let {
         it.first.mapNotNull { it as? PartData.FileItem } to it.second.toMap()
     }
 

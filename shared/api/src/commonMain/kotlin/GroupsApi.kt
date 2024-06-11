@@ -146,7 +146,7 @@ suspend fun Api.sendAudio(
 
 suspend fun Api.sendVideos(
     group: String,
-    videos: List<Pair<InputProvider, String>>,
+    videos: List<ScaledVideo>,
     message: Message? = null,
     uploadCallback: (Float) -> Unit,
     onError: ErrorBlock = null,
@@ -162,10 +162,10 @@ suspend fun Api.sendVideos(
                 videos.forEachIndexed { index, video ->
                     append(
                         "photo[$index]",
-                        video.first,
+                        video.inputProvider,
                         Headers.build {
-                            append(HttpHeaders.ContentType, video.second)
-                            append(HttpHeaders.ContentDisposition, "filename=${video.second.split("/").lastOrNull() ?: ""}")
+                            append(HttpHeaders.ContentType, video.type)
+                            append(HttpHeaders.ContentDisposition, "filename=${video.fileName?.split("/")?.lastOrNull() ?: ""}")
                         }
                     )
                 }
@@ -184,3 +184,9 @@ suspend fun Api.sendMessage(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post("groups/$group/messages", message, onError = onError, onSuccess = onSuccess)
+
+data class ScaledVideo(
+    val inputProvider: InputProvider,
+    val type: String,
+    val fileName: String?
+)
