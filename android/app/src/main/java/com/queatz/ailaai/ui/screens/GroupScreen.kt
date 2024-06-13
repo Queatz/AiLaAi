@@ -1312,6 +1312,7 @@ fun GroupScreen(groupId: String) {
                                     }
                                 )
                             ) {
+                                stageReply = null
                                 reloadMessages()
                             }
                         }
