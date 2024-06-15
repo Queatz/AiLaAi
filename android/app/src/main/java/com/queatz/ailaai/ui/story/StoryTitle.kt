@@ -18,7 +18,7 @@ import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
 @Composable
-fun RowScope.StoryTitle(state: LazyGridState, story: Story?) {
+fun RowScope.StoryTitle(state: LazyGridState, title: String?) {
     val isScrolled by remember { derivedStateOf { state.firstVisibleItemIndex > 0 } }
     val scope = rememberCoroutineScope()
 
@@ -32,7 +32,7 @@ fun RowScope.StoryTitle(state: LazyGridState, story: Story?) {
         when (it) {
             true -> {
                 Text(
-                    story?.title
+                    title
                         ?: stringResource(R.string.empty_story_name),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
