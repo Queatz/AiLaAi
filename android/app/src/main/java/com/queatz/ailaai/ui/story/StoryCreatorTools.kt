@@ -54,6 +54,7 @@ fun StoryCreatorTools(
     var showWidgetsMenu by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
+    var isUploadingAudio by remember { mutableStateOf(false) }
     val photoState = remember {
         ChoosePhotoDialogState(mutableStateOf(""))
     }
@@ -145,6 +146,8 @@ fun StoryCreatorTools(
     val audioLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         if (it == null) return@rememberLauncherForActivityResult
 
+        isUploadingAudio = true
+
         scope.launch {
             when (source) {
                 is StorySource.Story -> {
@@ -153,6 +156,7 @@ fun StoryCreatorTools(
                         addPart(
                             StoryContent.Text("")
                         )
+                        isUploadingAudio = false
                     }
                 }
 
@@ -162,6 +166,7 @@ fun StoryCreatorTools(
                         addPart(
                             StoryContent.Text("")
                         )
+                        isUploadingAudio = false
                     }
                 }
 
@@ -171,10 +176,13 @@ fun StoryCreatorTools(
                         addPart(
                             StoryContent.Text("")
                         )
+                        isUploadingAudio = false
                     }
                 }
 
-                else -> {}
+                else -> {
+                    isUploadingAudio = false
+                }
             }
         }
     }
@@ -355,7 +363,14 @@ fun StoryCreatorTools(
                     audioLauncher.launch("audio/*")
                 }
             ) {
-                Icon(Icons.Outlined.PlayCircle, null)
+                if (isUploadingAudio) {
+                    CircularProgressIndicator(
+                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Icon(Icons.Outlined.PlayCircle, null)
+                }
             }
             IconButton(
                 onClick = {
