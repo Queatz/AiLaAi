@@ -334,7 +334,16 @@ fun StoryCreatorScreen(
         },
         actions = {
             if (story != null) {
-                StoryTitle(state, story)
+                if (edited) {
+                    StoryTitle(
+                        state,
+                        Story(
+                            title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title
+                        )
+                    )
+                }else {
+                    StoryTitle(state, story)
+                }
             } else if (card != null) {
                 Text(
                     card?.name ?: stringResource(R.string.content),
