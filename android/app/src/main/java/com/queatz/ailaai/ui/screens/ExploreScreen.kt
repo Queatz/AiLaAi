@@ -48,6 +48,7 @@ import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.sortedDistinct
 import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.toGeo
+import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.item.InventoryDialog
@@ -134,6 +135,8 @@ fun ExploreScreen() {
     var showInventory by rememberStateOf<String?>(null)
     var showInventoryDialog by rememberStateOf<List<InventoryItemExtended>?>(null)
     var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
+    var showBar by rememberStateOf(true)
+    val mapControl = remember { MapControl() }
 
     suspend fun reloadInventories() {
         if (showAsMap && (mapGeo ?: geo) != null) {
@@ -372,6 +375,15 @@ fun ExploreScreen() {
                     }
                 }
             ) {
+                if (showAsMap) {
+                IconButton(
+                    onClick = {
+                        showBar = !showBar
+                    }
+                ) {
+                    Icon(if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null)
+                }
+                    }
                 IconButton({
                     showAsMap = !showAsMap
                 }) {
@@ -389,7 +401,6 @@ fun ExploreScreen() {
             }
 
             var viewportHeight by remember { mutableIntStateOf(0) }
-            var showBar by rememberStateOf(true)
 
             if (showAsMap) {
                 Box(
@@ -405,22 +416,21 @@ fun ExploreScreen() {
                         if (cards.isNotEmpty()) {
                             AnimatedVisibility(showBar) {
                                 CardsBar(
-                                    cards,
+                                    cardsOfCategory,
                                     modifier = Modifier
-                                        .fillMaxWidth()
+                                        .fillMaxWidth(),
+                                    onLongClick = {
+                                        scope.launch {
+                                            mapControl.recenter(it.geo?.toLatLng() ?: return@launch)
+                                        }
+                                    }
                                 ) {
                                     nav.navigate(AppNav.Page(it.id!!))
                                 }
                             }
-                            IconButton(
-                                onClick = {
-                                    showBar = !showBar
-                                }
-                            ) {
-                                Icon(if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null)
-                            }
                         }
                         MapScreen(
+                            control = mapControl,
                             cards = cardsOfCategory,
                             inventories = inventories,
                             bottomPadding = viewportHeight,

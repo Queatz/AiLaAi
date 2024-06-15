@@ -90,15 +90,25 @@ import com.queatz.db.Inventory
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.random.Random
 
+class MapControl {
+    internal val recenter = MutableSharedFlow<LatLng>()
+
+    suspend fun recenter(geo: LatLng) {
+        recenter.emit(geo)
+    }
+}
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapScreen(
+    control: MapControl,
     cards: List<Card>,
     inventories: List<Inventory>,
     bottomPadding: Int,
@@ -123,6 +133,12 @@ fun MapScreen(
     var viewport by rememberStateOf(IntSize(0, 0))
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    LaunchedEffect(control) {
+        control.recenter.collectLatest {
+            recenter.emit(it to 18f)
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (position == null) {
