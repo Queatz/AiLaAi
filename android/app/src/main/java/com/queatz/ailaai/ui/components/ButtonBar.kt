@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import com.queatz.ailaai.ui.theme.pad
 
 
@@ -28,7 +31,8 @@ fun <T> ButtonBar(
     onLongClick: (T) -> Unit = {},
     onClick: (T) -> Unit,
     photo: @Composable (T) -> Unit,
-    title: @Composable (T) -> String
+    title: @Composable (T) -> String,
+    subtitle: @Composable (T) -> String? = { null },
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(2.pad),
@@ -52,11 +56,24 @@ fun <T> ButtonBar(
             ) {
                 photo(it)
                 Text(
-                    title(it),
+                    text = title(it),
                     style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .padding(top = 1.pad)
                 )
+                subtitle(it)?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }

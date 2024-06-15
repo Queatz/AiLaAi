@@ -11,7 +11,12 @@ import com.queatz.db.Person
 import kotlinx.datetime.Instant
 
 @Composable
-fun Friends(people: List<Person>, modifier: Modifier = Modifier, onLongClick: (Person) -> Unit = {}, onClick: (Person) -> Unit) {
+fun Friends(
+    people: List<Person>,
+    modifier: Modifier = Modifier,
+    onLongClick: (Person) -> Unit = {},
+    onClick: (Person) -> Unit
+) {
     ButtonBar(
         items = people,
         onLongClick = onLongClick,

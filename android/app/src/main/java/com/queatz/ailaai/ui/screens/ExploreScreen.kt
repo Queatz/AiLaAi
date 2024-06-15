@@ -1,20 +1,21 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,8 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Brush.Companion.linearGradient
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
@@ -57,6 +56,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.trade.TradeItemDialog
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardList
+import com.queatz.ailaai.ui.components.CardsBar
 import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.MainTab
@@ -219,14 +219,18 @@ fun ExploreScreen() {
         }
     }
 
-    suspend fun loadMore(clear: Boolean = false, reload: Boolean = false) {
+    fun clear() {
+        offset = 0
+        hasMore = true
+        isLoading = true
+        cards = emptyList()
+    }
+
+    suspend fun loadMore(
+        reload: Boolean = false
+    ) {
         val geo = (mapGeo?.takeIf { showAsMap } ?: geo) ?: return
-        if (clear) {
-            offset = 0
-            hasMore = true
-            isLoading = true
-            cards = emptyList()
-        } else if (reload) {
+        if (reload) {
             offset = 0
             hasMore = true
         }
@@ -236,7 +240,7 @@ fun ExploreScreen() {
                 api.cards(
                     geo.toGeo(),
                     offset = offset,
-                    paid = filterPaid,
+                    paid = filterPaid.takeIf { it },
                     search = value.notBlank,
                     public = tab == MainTab.Local,
                     onError = { ex ->
@@ -248,7 +252,7 @@ fun ExploreScreen() {
                         }
                     }
                 ) {
-                    onNewPage(it, clear)
+                    onNewPage(it, reload)
                 }
             }
 
@@ -264,14 +268,14 @@ fun ExploreScreen() {
                             isError = true
                         }
                     }) {
-                    onNewPage(it.mapNotNull { it.card }, clear)
+                    onNewPage(it.mapNotNull { it.card }, reload)
                 }
             }
         }
     }
 
     LaunchedEffect(filterPaid) {
-        loadMore(clear = true)
+        loadMore(reload = true)
     }
 
     LaunchedEffect(geo, mapGeo, value, tab) {
@@ -288,10 +292,13 @@ fun ExploreScreen() {
             return@LaunchedEffect
         }
 
+        if (shownTab != tab) {
+            clear()
+        }
+
         // The map doesn't clear for geo updates, but should for value and tab changes
         loadMore(
-            clear = shownValue != value || shownTab != tab,
-            reload = !moveUnder100
+            reload = !moveUnder100 || shownValue != value
         )
     }
 
@@ -382,6 +389,7 @@ fun ExploreScreen() {
             }
 
             var viewportHeight by remember { mutableIntStateOf(0) }
+            var showBar by rememberStateOf(true)
 
             if (showAsMap) {
                 Box(
@@ -389,18 +397,42 @@ fun ExploreScreen() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    MapScreen(
-                        cards = cardsOfCategory,
-                        inventories = inventories,
-                        bottomPadding = viewportHeight,
-                        onCard = {
-                            nav.navigate(AppNav.Page(it))
-                        },
-                        onInventory = {
-                            showInventory = it
-                        }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxSize()
                     ) {
-                        mapGeo = it
+                        if (cards.isNotEmpty()) {
+                            AnimatedVisibility(showBar) {
+                                CardsBar(
+                                    cards,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    nav.navigate(AppNav.Page(it.id!!))
+                                }
+                            }
+                            IconButton(
+                                onClick = {
+                                    showBar = !showBar
+                                }
+                            ) {
+                                Icon(if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null)
+                            }
+                        }
+                        MapScreen(
+                            cards = cardsOfCategory,
+                            inventories = inventories,
+                            bottomPadding = viewportHeight,
+                            onCard = {
+                                nav.navigate(AppNav.Page(it))
+                            },
+                            onInventory = {
+                                showInventory = it
+                            }
+                        ) {
+                            mapGeo = it
+                        }
                     }
                     PageInput(
                         modifier = Modifier
@@ -439,7 +471,8 @@ fun ExploreScreen() {
                     geo = geo,
                     onChanged = {
                         scope.launch {
-                            loadMore(clear = true)
+                            clear()
+                            loadMore(reload = true)
                         }
                     },
                     isLoading = isLoading,

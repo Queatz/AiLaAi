@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -62,8 +63,7 @@ fun GroupPhoto(
                 .singlePhoto(size, padding, border)
                 .then(modifier)
         ) {}
-    }
-    else if (photos.size == 1) {
+    } else if (photos.size == 1) {
         val contact = photos.firstOrNull()
         val photo = contact?.photo?.nullIfBlank?.let { api.url(it) }
         if (photo == null) {
@@ -75,7 +75,8 @@ fun GroupPhoto(
             ) {
                 Text(
                     contact?.name?.take(1) ?: "",
-                    style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
+                    style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
                 )
             }
         } else {
@@ -94,7 +95,9 @@ fun GroupPhoto(
             )
         }
     } else {
-        val show = remember(photos) { photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L } }
+        val show = remember(photos) {
+            photos.sortedByDescending { it.seen?.toEpochMilliseconds() ?: 0L }
+        }
         Box(
             modifier = Modifier
                 .padding(padding)
@@ -112,7 +115,8 @@ fun GroupPhoto(
                     ) {
                         Text(
                             show[index].name.take(1),
-                            style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
+                            style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
                         )
                     }
                 } else {
