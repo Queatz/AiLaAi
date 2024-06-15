@@ -90,7 +90,7 @@ fun StoryScreen(storyId: String, commentId: String? = null) {
         },
         actions = {
             if (story == null) return@StoryScaffold
-            StoryTitle(state, story)
+            StoryTitle(state, story?.title)
             StoryActions(storyId, story)
         }
     ) {

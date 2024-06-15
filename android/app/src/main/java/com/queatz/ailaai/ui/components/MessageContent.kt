@@ -452,18 +452,18 @@ fun ColumnScope.MessageContent(
                     }
             ) {
                 MessageContent(
-                    reply,
-                    isMe,
-                    me,
-                    showReplyTime,
-                    { showReplyTime = it },
-                    showReplyMessageDialog,
-                    { showReplyMessageDialog = it },
-                    getPerson,
-                    getMessage,
-                    onReply,
-                    {}, // todo delete from reply
-                    {}, // todo open photo in reply
+                    message = reply,
+                    isMe = isMe,
+                    me = me,
+                    showTime = showReplyTime,
+                    onShowTime = { showReplyTime = it },
+                    showMessageDialog = showReplyMessageDialog,
+                    onShowMessageDialog = { showReplyMessageDialog = it },
+                    getPerson = getPerson,
+                    getMessage = getMessage,
+                    onReply = onReply,
+                    onUpdated = {}, // todo delete from reply
+                    onShowPhoto = onShowPhoto,
                     isReply = true
                 )
             }
