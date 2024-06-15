@@ -1248,11 +1248,15 @@ fun GroupScreen(groupId: String) {
 
             if (showPhoto != null) {
                 PhotoDialog(
-                    {
+                    onDismissRequest = {
                         showPhoto = null
                     },
-                    Media.Photo(showPhoto!!),
-                    messages.photos().map { Media.Photo(it) }
+                    initialMedia = Media.Photo(showPhoto!!),
+                    medias = if (showPhoto !in messages.photos()) {
+                        listOf(Media.Photo(showPhoto!!))
+                    } else {
+                        messages.photos().map { Media.Photo(it) }
+                    }
                 )
             }
 
