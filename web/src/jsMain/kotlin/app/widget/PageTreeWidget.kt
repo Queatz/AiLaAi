@@ -1,7 +1,6 @@
 package app.widget
 
 import Styles
-import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,15 +41,12 @@ import notEmpty
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.CSSColorValue
 import org.jetbrains.compose.web.css.CSSSizeValue
-import org.jetbrains.compose.web.css.CSSUnit
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
-import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
@@ -65,7 +61,6 @@ import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
-import org.jetbrains.compose.web.css.outline
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -79,7 +74,16 @@ import r
 import updateWidget
 import widget
 import kotlin.random.Random
-import kotlin.random.Random.Default.nextInt
+
+sealed class TagFilter {
+    data class Tag(val tag: String) : TagFilter()
+    data object Untagged : TagFilter()
+}
+
+internal fun tagColor(tag: String): CSSColorValue {
+    val hue = Random(tag.hashCode()).nextInt(360)
+    return Color("hsl($hue, 60%, 40%)")
+}
 
 @Composable
 fun PageTreeWidget(widgetId: String) {
@@ -100,7 +104,7 @@ fun PageTreeWidget(widgetId: String) {
         mutableStateOf("")
     }
     var tagFilter by remember(widgetId) {
-        mutableStateOf("")
+        mutableStateOf<TagFilter?>(null)
     }
     var data by remember(widgetId) {
         mutableStateOf<PageTreeData?>(null)
@@ -113,9 +117,14 @@ fun PageTreeWidget(widgetId: String) {
         } else {
             cards
         }.let {
-            if (tagFilter.isNotBlank()) {
+            val tag = (tagFilter as? TagFilter.Tag)?.tag
+            if (tag != null) {
                 it.filter {
-                    data?.tags?.get(it.id!!)?.contains(tagFilter) == true
+                    data?.tags?.get(it.id!!)?.contains(tag) == true
+                }
+            } else if (tagFilter is TagFilter.Untagged) {
+                it.filter {
+                    data?.tags?.get(it.id!!).isNullOrEmpty()
                 }
             } else {
                 it
@@ -163,11 +172,6 @@ fun PageTreeWidget(widgetId: String) {
             widget = it
             data = json.decodeFromString<PageTreeData>(it.data!!)
         }
-    }
-
-    fun tagColor(tag: String): CSSColorValue {
-        val hue = Random(tag.hashCode()).nextInt(360)
-        return Color("hsl($hue, 60%, 40%)")
     }
 
     fun removeTag(card: Card, tag: String) {
@@ -268,9 +272,9 @@ fun PageTreeWidget(widgetId: String) {
                     marginTop = 0.r,
                     // todo: translate
                     title = "Tap to filter",
-                    tagColor = ::tagColor,
+                    showNoTag = true,
                     onClick = {
-                        tagFilter = if (tagFilter == it) "" else it
+                        tagFilter = if (tagFilter == it) null else it
                     }
                 )
             }
@@ -364,8 +368,8 @@ fun PageTreeWidget(widgetId: String) {
                                     title("Sign in to vote")
                                 }
                             }) {
-                                // todo: translate
                                 if (me != null) {
+                                    // todo: translate
                                     Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
                                 } else {
                                     Div({
@@ -431,10 +435,9 @@ fun PageTreeWidget(widgetId: String) {
                             tags = tags,
                             // todo: translate
                             title = if (me != null) "Tap to remove" else "",
-                            tagColor = ::tagColor,
                             onClick = {
                                 if (me != null) {
-                                    removeTag(card, it)
+                                    removeTag(card, (it as? TagFilter.Tag)?.tag ?: "")
                                 }
                             }
                         ) {
@@ -473,11 +476,11 @@ fun PageTreeWidget(widgetId: String) {
 @Composable
 fun Tags(
     tags: List<String>,
-    selected: String? = null,
+    selected: TagFilter? = null,
     marginTop: CSSSizeValue<*> = 1.r,
-    tagColor: (String) -> CSSColorValue,
     title: String,
-    onClick: (tag: String) -> Unit,
+    onClick: (tag: TagFilter) -> Unit,
+    showNoTag: Boolean = false,
     content: @Composable () -> Unit = {}
 ) {
     Div({
@@ -489,33 +492,67 @@ fun Tags(
         }
     }) {
         tags.forEach { tag ->
-            Button(
-                {
-                    classes(Styles.button)
-
-                    if (selected == tag) {
-                        classes(Styles.buttonSelected)
-                    }
-
-                    style {
-                        height(2.5.r)
-                        color(Color.white)
-                        padding(0.r, 1.5.r)
-                        backgroundColor(tagColor(tag))
-                    }
-
-                    title(title)
-
-                    onClick {
-                        it.stopPropagation()
-                        onClick(tag)
-                    }
+            TagButton(
+                tag = tag,
+                title = title,
+                selected = (selected as? TagFilter.Tag)?.tag == tag,
+                onClick = {
+                    onClick(TagFilter.Tag(tag))
                 }
-            ) {
-                Text(tag)
-            }
+            )
+        }
+
+        if (tags.isNotEmpty() && showNoTag) {
+            // todo: Translate
+            TagButton(
+                tag = "No tag",
+                title = title,
+                selected = selected == TagFilter.Untagged,
+                outline = true,
+                onClick = {
+                    onClick(TagFilter.Untagged)
+                }
+            )
         }
 
         content()
+    }
+}
+
+@Composable
+fun TagButton(
+    tag: String,
+    title: String,
+    selected: Boolean,
+    outline: Boolean = false,
+    onClick: () -> Unit
+) {
+    Button(
+        {
+            classes(if (outline) Styles.outlineButton else Styles.button)
+
+            if (selected) {
+                classes(Styles.buttonSelected)
+            }
+
+            style {
+                height(2.5.r)
+                padding(0.r, 1.5.r)
+
+                if (!outline) {
+                    color(Color.white)
+                    backgroundColor(tagColor(tag))
+                }
+            }
+
+            title(title)
+
+            onClick {
+                it.stopPropagation()
+                onClick()
+            }
+        }
+    ) {
+        Text(tag)
     }
 }
