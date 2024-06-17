@@ -160,6 +160,10 @@ fun Route.meRoutes() {
                     profile.content = update.content
                 }
 
+                if (update.config != null) {
+                    profile.config = update.config
+                }
+
                 if (update.url != null && profile.url != update.url) {
                     val url = update.url!!.urlize()
                     if (db.profileByUrl(url) != null) {

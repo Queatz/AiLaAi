@@ -46,8 +46,14 @@ class Profile(
     var about: String? = null,
     var location: String? = null,
     var content: String? = null,
-    var url: String? = null
+    var url: String? = null,
+    var config: ProfileConfig? = null
 ) : Model()
+
+@Serializable
+data class ProfileConfig(
+    var showGroups: Boolean? = null
+)
 
 @Serializable
 class Invite(
