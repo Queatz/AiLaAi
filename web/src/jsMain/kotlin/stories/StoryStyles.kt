@@ -118,7 +118,6 @@ object StoryStyles : StyleSheet() {
     val contentPhotosPhotoNoAspect by style {
         backgroundColor(Styles.colors.background)
         borderRadius(1.r)
-        flex(1)
         width(100.percent)
         cursor("pointer")
     }

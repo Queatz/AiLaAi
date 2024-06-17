@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
         listOf(
             NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.ChatBubbleOutline),
             NavButton(AppNav.Schedule, getString(R.string.reminders), Icons.Outlined.CalendarMonth),
-            NavButton(AppNav.Explore, getString(R.string.cards), Icons.Outlined.Map),
+            NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
             NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton(AppNav.Stories, getString(R.string.explore), Icons.Outlined.Explore),
         )
