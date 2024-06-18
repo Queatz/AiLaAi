@@ -155,6 +155,10 @@ object Strings {
         "Khám phá",
         "Исследовать"
     )
+    val map = Translation(
+        "Map",
+        "Bài viết"
+    )
     val tapToOpen = Translation(
         "Tap to open",
         "Nhấn để mở",

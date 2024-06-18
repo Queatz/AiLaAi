@@ -38,7 +38,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.DynamicFeed
 import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.House
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Rocket
@@ -212,7 +214,7 @@ class MainActivity : AppCompatActivity() {
         listOf(
             NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.ChatBubbleOutline),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
-            NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.House),
+            NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.Home),
             NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
         )
