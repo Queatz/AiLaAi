@@ -70,3 +70,13 @@ fun StoryContent.wordCount() = when (this) {
     is StoryContent.Text -> text.wordCount()
     else -> 0
 }
+
+fun StoryContent.isNotBlank() = when (this) {
+    is StoryContent.Title -> title.isNotBlank()
+    is StoryContent.Section -> section.isNotBlank()
+    is StoryContent.Text -> text.isNotBlank()
+    is StoryContent.Photos -> photos.isNotEmpty()
+    is StoryContent.Groups -> groups.isNotEmpty()
+    is StoryContent.Cards -> cards.isNotEmpty()
+    else -> true
+}

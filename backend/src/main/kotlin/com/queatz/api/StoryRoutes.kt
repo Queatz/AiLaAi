@@ -148,6 +148,7 @@ fun Route.storyRoutes() {
                     val authors = listOf(
                         db.document(Person::class, story.person!!)!!
                     )
+
                     notify.story(
                         story = story,
                         authors = authors,

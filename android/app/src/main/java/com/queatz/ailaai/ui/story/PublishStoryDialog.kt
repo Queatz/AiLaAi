@@ -120,7 +120,7 @@ fun PublishStoryDialog(
 
     LaunchedEffect(story, storyContents, allCardsArePublished) {
         publishEnabled = !story.title.isNullOrBlank()
-                && storyContents.sumOf { it.wordCount() } >= storyMinimumWordCount
+                && storyContents.any { it.isNotBlank() }
                 && allCardsArePublished == true
     }
 
@@ -137,32 +137,6 @@ fun PublishStoryDialog(
                 modifier = Modifier
                     .verticalScroll(dialogScroll)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(1.pad),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val wordCount = storyContents.sumOf { it.wordCount() }
-                    if (wordCount >= storyMinimumWordCount) {
-                        Icon(Icons.Outlined.CheckCircle, null, tint = MaterialTheme.colorScheme.primary)
-                        Text(pluralStringResource(R.plurals.x_words, wordCount, wordCount))
-                    } else {
-                        Text(
-                            text = stringResource(R.string.minimum_words_count, wordCount),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier
-                                .padding(bottom = .5f.pad)
-                                .fillMaxWidth()
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.5f),
-                                    MaterialTheme.shapes.medium
-                                )
-                                .padding(1.pad)
-                        )
-                    }
-                }
                 if (containsCards == true) {
                     allCardsArePublished?.let { allCardsArePublished ->
                         Row(
@@ -400,5 +374,3 @@ fun PublishStoryDialog(
         }
     }
 }
-
-const val storyMinimumWordCount = 25

@@ -358,7 +358,6 @@
     <string name="share_to_groups_description">Share your story at time of publishing (optional)</string>
     <string name="all_cards_are_posted">All pages are posted</string>
     <string name="story_contains_unposted_cards">Story contains unposted pages</string>
-    <string name="minimum_words_count">Minimum 25 words (%1$s so far)</string>
     <string name="audio">Audio</string>
     <string name="send_story">Send story</string>
     <string name="send_story_to_group">Send story to %1$s</string>

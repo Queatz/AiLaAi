@@ -341,7 +341,6 @@
     <string name="share_to_groups_description">Chia sẻ bài viết của bạn tại thời điểm đăng (tùy chọn)</string>
     <string name="all_cards_are_posted">Tất cả trang đã đăng</string>
     <string name="story_contains_unposted_cards">Bài viết chứa trang chưa đăng</string>
-    <string name="minimum_words_count">Số từ tối thiểu là 25 (hiện có %1$s)</string>
     <string name="audio">Âm thanh</string>
     <string name="no_stories_to_read">" Không có gì để đọc hiện tại.\n\nCó lẽ bạn sẽ viết một điều gì đó?"</string>
     <string name="send_story">Gửi bài viết</string>
