@@ -413,7 +413,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     }
                                 }
 
-                                if (groups.isNotEmpty()) {
+                                if (profile.profile.config?.showGroups == true) {
                                     Span({
                                         style {
                                             marginTop(1.r)
