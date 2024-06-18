@@ -1,7 +1,6 @@
 package com.queatz.ailaai
 
 import android.os.Bundle
-import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -40,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.House
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.RocketLaunch
@@ -84,7 +84,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -212,10 +211,10 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.ChatBubbleOutline),
-            NavButton(AppNav.Schedule, getString(R.string.reminders), Icons.Outlined.CalendarMonth),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
+            NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.House),
             NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
-            NavButton(AppNav.Stories, getString(R.string.explore), Icons.Outlined.Explore),
+            NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
         )
     }
 

@@ -111,7 +111,7 @@ fun MyStoriesScreen() {
                     },
                     onAction = {
                         scope.launch {
-                            api.createStory(Story()) {
+                            api.createStory(Story(content = emptyStoryContent())) {
                                 nav.navigate(AppNav.WriteStory(it.id!!))
                             }
                         }

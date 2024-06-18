@@ -43,6 +43,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.navigate
@@ -71,6 +72,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Script
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
+import com.queatz.db.toJsonStoryContent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -297,6 +299,7 @@ fun StoriesScreen() {
                             { thought = it },
                             placeholder = stringResource(R.string.share_a_thought),
                             showClear = false,
+                            singleLine = false,
                             action = {
                                 if (thought.isBlank()) {
                                     Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
@@ -309,7 +312,7 @@ fun StoriesScreen() {
                                     nav.navigate(AppNav.Write)
                                 } else {
                                     scope.launch {
-                                        api.createStory(Story(title = thought)) {
+                                        api.createStory(Story(title = thought, content = emptyStoryContent())) {
                                             nav.navigate(AppNav.WriteStory(it.id!!))
                                         }
                                     }
@@ -322,3 +325,7 @@ fun StoriesScreen() {
         }
     }
 }
+
+fun emptyStoryContent() = listOf(
+    StoryContent.Text("")
+).toJsonStoryContent(json)

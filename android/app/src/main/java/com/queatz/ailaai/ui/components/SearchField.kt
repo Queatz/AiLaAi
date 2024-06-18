@@ -8,9 +8,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -23,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.elevation
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchField(
     value: String,
     onValueChange: (value: String) -> Unit,
     placeholder: String = stringResource(R.string.search),
     showClear: Boolean = true,
+    singleLine: Boolean = true,
     imeAction: ImeAction = ImeAction.Search,
     onAction: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -56,7 +60,7 @@ fun SearchField(
                 )
             },
             shape = MaterialTheme.shapes.large,
-            singleLine = true,
+            singleLine = singleLine,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences,
                 imeAction = imeAction

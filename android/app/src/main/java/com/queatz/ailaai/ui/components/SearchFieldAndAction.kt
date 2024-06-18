@@ -19,6 +19,7 @@ fun SearchFieldAndAction(
     modifier: Modifier = Modifier,
     placeholder: String = stringResource(R.string.search),
     showClear: Boolean = true,
+    singleLine: Boolean = true,
     action: (@Composable () -> Unit)? = null,
     onAction: (() -> Unit)? = null
 ) {
@@ -28,6 +29,7 @@ fun SearchFieldAndAction(
             onValueChange = valueChange,
             placeholder = placeholder,
             showClear = showClear,
+            singleLine = singleLine,
             modifier = modifier
                 .padding(horizontal = 2.pad)
         )
@@ -46,7 +48,8 @@ fun SearchFieldAndAction(
                     value = value,
                     onValueChange = valueChange,
                     placeholder = placeholder,
-                    showClear = showClear
+                    showClear = showClear,
+                    singleLine = singleLine
                 )
             }
             FloatingActionButton(

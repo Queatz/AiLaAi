@@ -724,4 +724,6 @@
     <string name="slideshow_started">Trình chiếu bắt đầu</string>
     <string name="slideshow_stopped">Đã dừng trình chiếu</string>
     <string name="stop_slideshow">Dừng trình chiếu</string>
+    <string name="calendar">Lịch</string>
+    <string name="posts">Bài viết</string>
 </resources>

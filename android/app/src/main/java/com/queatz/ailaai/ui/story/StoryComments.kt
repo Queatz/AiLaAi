@@ -210,16 +210,18 @@ fun StoryComments(
                             )
                             LinkifyText(comment.comment!!.comment!!)
                         }
-                        Text(
-                            bulletedString(
-                                comment.comment!!.createdAt!!.timeAgo(),
-                                stringResource(R.string.tap_to_reply)
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier
-                                .padding(start = 1.pad)
-                        )
+                        DisableSelection {
+                            Text(
+                                bulletedString(
+                                    comment.comment!!.createdAt!!.timeAgo(),
+                                    stringResource(R.string.tap_to_reply)
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier
+                                    .padding(start = 1.pad)
+                            )
+                        }
 
                         val focusRequester = remember { FocusRequester() }
 
