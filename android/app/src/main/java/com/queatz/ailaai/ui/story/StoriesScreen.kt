@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.HistoryEdu
@@ -304,7 +306,7 @@ fun StoriesScreen() {
                                 if (thought.isBlank()) {
                                     Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
                                 } else {
-                                    Icon(Icons.Outlined.Add, stringResource(R.string.write_a_story))
+                                    Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.write_a_story))
                                 }
                             },
                             onAction = {
@@ -312,7 +314,7 @@ fun StoriesScreen() {
                                     nav.navigate(AppNav.Write)
                                 } else {
                                     scope.launch {
-                                        api.createStory(Story(title = thought, content = emptyStoryContent())) {
+                                        api.createStory(Story(title = thought)) {
                                             nav.navigate(AppNav.WriteStory(it.id!!))
                                         }
                                     }
@@ -325,7 +327,3 @@ fun StoriesScreen() {
         }
     }
 }
-
-fun emptyStoryContent() = listOf(
-    StoryContent.Text("")
-).toJsonStoryContent(json)

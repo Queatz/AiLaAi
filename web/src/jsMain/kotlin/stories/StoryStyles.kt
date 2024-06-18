@@ -3,7 +3,6 @@ import Styles
 import app.AppStyles
 import app.dark
 import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.Col
 import r
 
 object StoryStyles : StyleSheet() {
@@ -13,6 +12,7 @@ object StoryStyles : StyleSheet() {
         alignItems(AlignItems.Stretch)
         justifyContent(JustifyContent.Stretch)
         fontSize(36.px)
+        whiteSpace("pre-wrap")
     }
 
     val contentAuthors by style {

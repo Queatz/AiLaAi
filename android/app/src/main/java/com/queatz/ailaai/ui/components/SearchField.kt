@@ -34,7 +34,7 @@ fun SearchField(
     placeholder: String = stringResource(R.string.search),
     showClear: Boolean = true,
     singleLine: Boolean = true,
-    imeAction: ImeAction = ImeAction.Search,
+    imeAction: ImeAction = if (singleLine) ImeAction.Search else ImeAction.Default,
     onAction: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -65,7 +65,8 @@ fun SearchField(
                 capitalization = KeyboardCapitalization.Sentences,
                 imeAction = imeAction
             ),
-            keyboardActions = KeyboardActions(onSearch = {
+            keyboardActions = KeyboardActions(
+                onSearch = {
                 keyboardController.hide()
                 onAction()
             }, onDone = {

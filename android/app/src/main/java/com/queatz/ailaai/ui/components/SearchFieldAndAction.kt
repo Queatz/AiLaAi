@@ -35,7 +35,7 @@ fun SearchFieldAndAction(
         )
     } else {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
             modifier = modifier
                 .padding(horizontal = 2.pad)
         ) {

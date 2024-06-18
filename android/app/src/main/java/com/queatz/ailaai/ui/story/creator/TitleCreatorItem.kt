@@ -28,11 +28,10 @@ fun LazyGridScope.titleCreatorItem(creatorScope: CreatorScope<StoryContent.Title
             },
             focusRequester = focusRequester,
             placeholder = stringResource(R.string.title),
-            singleLine = true,
+            singleLine = false,
             onFocus = {
                 onCurrentFocus(partIndex)
             },
-            onNext = { add(StoryContent.Text(""), partIndex + 1) },
             textStyle = { headlineMedium }
         )
     }
