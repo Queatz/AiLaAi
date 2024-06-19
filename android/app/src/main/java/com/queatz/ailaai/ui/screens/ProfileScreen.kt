@@ -118,6 +118,7 @@ import com.queatz.ailaai.ui.dialogs.Media
 import com.queatz.ailaai.ui.dialogs.PhotoDialog
 import com.queatz.ailaai.ui.dialogs.ProcessingVideoDialog
 import com.queatz.ailaai.ui.dialogs.ProcessingVideoStage
+import com.queatz.ailaai.ui.dialogs.ProfileSettingsDialog
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -168,6 +169,7 @@ fun ProfileScreen(personId: String) {
     var showCoverPhotoDialog by rememberStateOf(false)
     var showProfilePhotoDialog by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
+    var showProfileSettingDialog by rememberStateOf(false)
     var chooseBackground by rememberStateOf(false)
     var isLoadingBackground by rememberStateOf(false)
     var updateHintDialog by rememberStateOf(false)
@@ -210,6 +212,15 @@ fun ProfileScreen(personId: String) {
             },
             profileUrl(personId),
             person?.name
+        )
+    }
+
+    if (showProfileSettingDialog) {
+        ProfileSettingsDialog(
+            {
+                showProfileSettingDialog = false
+            },
+            profile
         )
     }
 
@@ -473,11 +484,11 @@ fun ProfileScreen(personId: String) {
 
     if (showEditAbout) {
         EditProfileAboutDialog(
-            {
+            onDismissRequest = {
                 showEditAbout = false
             },
-            profile?.about ?: "",
-            {
+            initialValue = profile?.about ?: "",
+            onUpdated = {
                 scope.launch {
                     reload()
                 }
@@ -689,6 +700,12 @@ fun ProfileScreen(personId: String) {
                                         }, {
                                             showMyMenu = false
                                             showQrCodeDialog = true
+                                        })
+                                        DropdownMenuItem({
+                                            Text(stringResource(R.string.profile_setting))
+                                        }, {
+                                            showMyMenu = false
+                                            showProfileSettingDialog = true
                                         })
                                     }
                                 }
@@ -985,7 +1002,9 @@ fun ProfileScreen(personId: String) {
                         }
 
                         person?.let {
-                            ProfileGroups(it)
+                            if (profile?.config?.showGroups != false) {
+                                ProfileGroups(it)
+                            }
                         }
                     }
                 }

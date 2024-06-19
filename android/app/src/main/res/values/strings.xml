@@ -136,6 +136,8 @@
     <string name="rename_group">Rename group</string>
     <string name="group_name">Group name</string>
     <string name="qr_code">QR code</string>
+    <string name="profile_setting">Profile Settings</string>
+    <string name="show_open_groups">Show open groups that I\'m a member of</string>
     <string name="group_not_found">Group not found</string>
     <string name="group_hidden">Group hidden until new messages are sent</string>
     <string name="saved">Saved</string>

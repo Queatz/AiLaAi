@@ -413,7 +413,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     }
                                 }
 
-                                if (groups.isNotEmpty()) {
+                                if (profile.profile.config?.showGroups != false && groups.isNotEmpty()) {
                                     Span({
                                         style {
                                             marginTop(1.r)
@@ -427,7 +427,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                         classes(AppStyles.groupList)
                                     }) {
                                         GroupList(groups, coverPhoto = true, onSurface = true, maxWidth = 32.r) {
-                                                // todo navigate to group
+                                            // todo navigate to group
                                             router.navigate("/signin")
                                         }
                                     }
