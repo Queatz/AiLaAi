@@ -89,7 +89,7 @@ fun Route.memberRoutes() {
                     HttpStatusCode.NotFound
                 } else if (!isMe && !isGroupHost(me.id!!, member.to!!)) {
                     HttpStatusCode.BadRequest.description("Only hosts can remove a member")
-                } else if (isMe && member.host == true) {
+                } else if (!isMe && member.host == true) {
                     HttpStatusCode.BadRequest.description("Member is a host")
                 } else {
                     member.hide = true
