@@ -413,24 +413,22 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     }
                                 }
 
-                                if (profile.profile.config?.showGroups != false) {
-                                    if (groups.isNotEmpty()) {
-                                        Span({
-                                            style {
-                                                marginTop(1.r)
-                                                fontWeight("bold")
-                                                fontSize(24.px)
-                                            }
-                                        }) {
-                                            Text("${profile.person.name ?: appString { someone }} ${appString { inlineIsAMember }}")
+                                if (profile.profile.config?.showGroups != false && groups.isNotEmpty()) {
+                                    Span({
+                                        style {
+                                            marginTop(1.r)
+                                            fontWeight("bold")
+                                            fontSize(24.px)
                                         }
-                                        Div({
-                                            classes(AppStyles.groupList)
-                                        }) {
-                                            GroupList(groups, coverPhoto = true, onSurface = true, maxWidth = 32.r) {
-                                                // todo navigate to group
-                                                router.navigate("/signin")
-                                            }
+                                    }) {
+                                        Text("${profile.person.name ?: appString { someone }} ${appString { inlineIsAMember }}")
+                                    }
+                                    Div({
+                                        classes(AppStyles.groupList)
+                                    }) {
+                                        GroupList(groups, coverPhoto = true, onSurface = true, maxWidth = 32.r) {
+                                            // todo navigate to group
+                                            router.navigate("/signin")
                                         }
                                     }
                                 }
