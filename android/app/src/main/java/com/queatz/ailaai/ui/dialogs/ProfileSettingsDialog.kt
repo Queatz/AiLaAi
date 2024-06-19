@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileSettingsDialog(
     onDismissRequest: () -> Unit,
+    onUpdated: () -> Unit,
     profile: Profile?,
 ) {
     val profileConfig by remember(profile) { mutableStateOf(profile?.config ?: ProfileConfig()) }
@@ -93,6 +94,7 @@ fun ProfileSettingsDialog(
                         isLoading = true
                         scope.launch {
                             api.updateProfile(Profile(config = profileConfig)) {
+                                onUpdated()
                                 onDismissRequest()
                             }
                             isLoading = false

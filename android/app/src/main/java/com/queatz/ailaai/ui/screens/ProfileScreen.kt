@@ -215,12 +215,26 @@ fun ProfileScreen(personId: String) {
         )
     }
 
+    suspend fun reloadProfile() {
+        api.profile(personId, onError = { isError = true }) {
+            person = it.person
+            profile = it.profile
+            stats = it.stats
+            subscribed = it.subscription != null
+        }
+    }
+
     if (showProfileSettingDialog) {
         ProfileSettingsDialog(
-            {
+            onDismissRequest = {
                 showProfileSettingDialog = false
             },
-            profile
+            onUpdated = {
+                scope.launch {
+                    reloadProfile()
+                }
+            },
+            profile = profile
         )
     }
 
@@ -321,12 +335,7 @@ fun ProfileScreen(personId: String) {
                 reloadCards()
             },
             scope.async {
-                api.profile(personId, onError = { isError = true }) {
-                    person = it.person
-                    profile = it.profile
-                    stats = it.stats
-                    subscribed = it.subscription != null
-                }
+                reloadProfile()
             },
             scope.async {
                 reloadItems()
