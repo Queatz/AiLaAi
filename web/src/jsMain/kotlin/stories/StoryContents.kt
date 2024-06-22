@@ -27,11 +27,9 @@ import appString
 import application
 import baseUrl
 import com.queatz.ailaai.api.commentOnStory
+import com.queatz.ailaai.api.reactToStory
 import com.queatz.ailaai.api.storyComments
-import com.queatz.db.Comment
-import com.queatz.db.CommentExtended
-import com.queatz.db.GroupExtended
-import com.queatz.db.StoryContent
+import com.queatz.db.*
 import com.queatz.widgets.Widgets
 import components.CardItem
 import components.Icon
@@ -122,7 +120,25 @@ fun StoryContents(
             }
 
             is StoryContent.Reactions -> {
-
+                ReactionItem(
+                    reactions = part.reactions!!.all,
+                    onAddReaction = { reaction ->
+                        scope.launch {
+                            api.reactToStory(
+                                part.story,
+                                ReactBody(Reaction(reaction = reaction))
+                            )
+                        }
+                    },
+                    onReactionComment = {reaction, comment ->
+                        scope.launch {
+                            api.reactToStory(
+                                part.story,
+                                ReactBody(Reaction(reaction = reaction, comment = comment))
+                            )
+                        }
+                    }
+                )
             }
 
             is StoryContent.Comments -> {

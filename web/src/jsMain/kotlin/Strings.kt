@@ -159,6 +159,11 @@ object Strings {
         "Map",
         "Bài viết"
     )
+    val addReaction = Translation(
+        "Add Reaction",
+        "",
+        ""
+    )
     val tapToOpen = Translation(
         "Tap to open",
         "Nhấn để mở",
