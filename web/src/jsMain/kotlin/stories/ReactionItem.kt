@@ -1,22 +1,14 @@
 package stories
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import app.components.Spacer
+import androidx.compose.runtime.*
 import appString
+import com.queatz.db.ReactionAndPerson
 import com.queatz.db.ReactionCount
 import components.IconButton
-import format
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
-import qr
 import r
-import stories.StoryStyles.buttonRow
-import stories.StoryStyles.reactionButton
 import stories.StoryStyles.reactionSpan
 
 @Composable
@@ -35,7 +27,7 @@ fun ReactionItem(
             display(DisplayStyle.Flex)
             alignItems(AlignItems.Center)
             justifyContent(JustifyContent.Start)
-            gap(1.px)
+            gap(0.5.r)
         }
     }) {
         reactions.forEach { reaction ->
@@ -73,9 +65,9 @@ fun ReactionItem(
 
     selectedReactionForComment?.let { reaction ->
         Div() {
-            Text("Add Comment:")
+            Text(appString { addCommentToReaction })
             TextArea(value = commentText, attrs = {
-                onInput { e -> commentText = e.value }
+                onInput { commentText = it.value }
             })
             Button(attrs = {
                 onClick {

@@ -26,6 +26,66 @@ object StoryStyles : StyleSheet() {
         whiteSpace("pre-wrap")
     }
 
+    val dialog by style {
+        position(Position.Fixed)
+        top(0.px)
+        left(0.px)
+        width(100.vw)
+        height(100.vh)
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
+    }
+
+    val dialogContent by style {
+        backgroundColor(Styles.colors.dark.background)
+        borderRadius(8.px)
+        padding(16.px)
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Center)
+
+    }
+
+    val buttonRow by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Row)
+        alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
+        gap(8.px)
+        overflowX("auto")
+        fontSize(90.px)
+        marginBottom(0.8.r)
+    }
+
+    val reactionButton by style {
+        border {
+            width = 1.px
+            style = LineStyle.Solid
+            color = Styles.colors.background
+        }
+        borderRadius(3.r)
+        paddingLeft(1.r)
+        paddingRight(1.r)
+        alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
+    }
+
+    val reactionSpan by style {
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
+        fontSize(15.px)
+        border {
+            width = 1.px
+            style = LineStyle.Solid
+            color = Styles.colors.secondary
+        }
+        borderRadius(3.r)
+        marginRight(0.5.r)
+
+    }
+
     val contentSection by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)

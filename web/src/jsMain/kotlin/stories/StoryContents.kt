@@ -1,16 +1,7 @@
 package stories
 
 import Styles
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentRecomposeScope
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import api
 import app.AppStyles
 import app.ailaai.api.group
@@ -29,6 +20,7 @@ import baseUrl
 import com.queatz.ailaai.api.commentOnStory
 import com.queatz.ailaai.api.reactToStory
 import com.queatz.ailaai.api.storyComments
+import com.queatz.ailaai.api.storyReactions
 import com.queatz.db.*
 import com.queatz.widgets.Widgets
 import components.CardItem
@@ -41,24 +33,8 @@ import lib.format
 import lib.isThisYear
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
-import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.css.backgroundColor
-import org.jetbrains.compose.web.css.backgroundImage
-import org.jetbrains.compose.web.css.fontSize
-import org.jetbrains.compose.web.css.fontWeight
-import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.A
-import org.jetbrains.compose.web.dom.Audio
-import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Img
-import org.jetbrains.compose.web.dom.Source
-import org.jetbrains.compose.web.dom.Span
-import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.*
 import r
 import kotlin.js.Date
 
@@ -120,25 +96,42 @@ fun StoryContents(
             }
 
             is StoryContent.Reactions -> {
-                ReactionItem(
-                    reactions = part.reactions!!.all,
-                    onAddReaction = { reaction ->
-                        scope.launch {
-                            api.reactToStory(
-                                part.story,
-                                ReactBody(Reaction(reaction = reaction))
-                            )
+                var reactions by remember(part.reactions) {
+                    mutableStateOf<List<ReactionCount>?>(null)
+                }
+
+                fun reloadReactions() {
+                    reactions = part.reactions?.all
+                }
+
+                LaunchedEffect(part.story) {
+                    reloadReactions()
+                }
+
+                key(part.story) {
+                    ReactionItem(
+                        reactions = reactions ?: emptyList(),
+                        onAddReaction = { reaction ->
+                            scope.launch {
+                                api.reactToStory(
+                                    part.story,
+                                    ReactBody(Reaction(reaction = reaction))
+                                )
+                                reloadReactions()
+                            }
+                        },
+                        onReactionComment = {reaction, comment ->
+                            scope.launch {
+                                api.reactToStory(
+                                    part.story,
+                                    ReactBody(Reaction(reaction = reaction, comment = comment))
+                                )
+                                reloadReactions()
+                            }
                         }
-                    },
-                    onReactionComment = {reaction, comment ->
-                        scope.launch {
-                            api.reactToStory(
-                                part.story,
-                                ReactBody(Reaction(reaction = reaction, comment = comment))
-                            )
-                        }
-                    }
-                )
+                    )
+                }
+
             }
 
             is StoryContent.Comments -> {

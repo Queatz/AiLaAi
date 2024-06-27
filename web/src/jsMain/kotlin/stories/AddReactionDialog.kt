@@ -1,13 +1,17 @@
 package stories
 
 import androidx.compose.runtime.Composable
+import app.components.EditField
+import appString
 import components.IconButton
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import stories.StoryStyles.buttonRow
 import stories.StoryStyles.dialog
 import stories.StoryStyles.dialogContent
-import stories.StoryStyles.buttonRow
-import r
 import stories.StoryStyles.reactionButton
 
 @Composable
@@ -53,6 +57,25 @@ fun AddReactionDialog(
 
                 }
             }
+            EditField(
+                placeholder = appString { customReaction },
+                styles = {
+                    width(100.percent)
+                },
+                buttonBarStyles = {
+                    width(100.percent)
+                    justifyContent(JustifyContent.End)
+                },
+                showDiscard = false,
+                resetOnSubmit = true,
+                button = appString { addButton }
+            ) {
+                val success = false
+                onAddReaction(it)
+                onDismissRequest()
+                success
+            }
+
         }
     }
 }
