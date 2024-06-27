@@ -159,6 +159,11 @@ object Strings {
         "Map",
         "Bài viết"
     )
+    val addReaction = Translation(
+        "Add Reaction",
+        "",
+        ""
+    )
     val tapToOpen = Translation(
         "Tap to open",
         "Nhấn để mở",
@@ -790,9 +795,21 @@ object Strings {
         "Share a comment",
         "Chia sẻ một bình luận"
     )
+    val customReaction = Translation(
+        "Create a Custom Reaction",
+        ""
+    )
+    val addCommentToReaction = Translation(
+        "Add a Comment to your reaction:",
+        ""
+    )
     val post = Translation(
         "Post",
         "Đăng"
+    )
+    val addButton = Translation(
+        "Add",
+        ""
     )
     val signInToComment = Translation(
         "Sign in to comment",
