@@ -33,7 +33,7 @@ fun LazyGridScope.groupsItem(content: StoryContent.Groups) {
                 ContactItem(
                     SearchResult.Group(group!!),
                     onChange = {},
-                    info = GroupInfo.LatestMessage,
+                    info = GroupInfo.Members,
                     coverPhoto = content.coverPhotos
                 )
             }

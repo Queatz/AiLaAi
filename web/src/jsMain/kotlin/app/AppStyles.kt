@@ -159,6 +159,7 @@ object AppStyles : StyleSheet() {
             flexDirection(FlexDirection.ColumnReverse)
         }
     }
+
     val sideLayout by style {
         overflow("hidden")
         flexShrink(0)

@@ -17,6 +17,7 @@ fun SearchField(
     value: String,
     placeholder: String,
     focus: Boolean = true,
+    shadow: Boolean = true,
     styles: StyleScope.() -> Unit = {},
     onValue: (String) -> Unit
 ) {
@@ -31,6 +32,11 @@ fun SearchField(
             style {
                 width(100.percent)
                 paddingLeft(3.r)
+
+                if (shadow) {
+                    property("border", "none")
+                    property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+                }
             }
 
             if (value.isNotEmpty()) {

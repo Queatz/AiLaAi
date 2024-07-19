@@ -1,4 +1,10 @@
-import androidx.compose.runtime.*
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import app.appNav
 import app.call.CallLayout
 import app.call.CallStyles
@@ -7,17 +13,28 @@ import app.group.GroupCoverPage
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import app.widget.WidgetStyles
-import components.*
-import io.ktor.client.*
-import io.ktor.client.engine.js.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
+import components.AppFooter
+import components.AppHeader
+import components.CardPage
+import components.CitiesPage
+import components.InfoPage
+import components.NotificationsLayout
+import components.PrivacyPage
+import components.ProfilePage
+import components.SigninPage
+import components.StoryPage
+import components.TosPage
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.js.Js
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
+import lib.mapboxgl
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
@@ -46,6 +63,11 @@ val http = HttpClient(Js) {
 }
 
 fun main() {
+    js("require(\"mapbox-gl/dist/mapbox-gl.css\")")
+
+    mapboxgl.accessToken =
+        "pk.eyJ1IjoiamFjb2JmZXJyZXJvIiwiYSI6ImNraXdyY211eTBlMmcycW02eDNubWNpZzcifQ.1KtSoMzrPCM0A8UVtI_gdg"
+
     renderComposableInBody {
         Style(Styles)
         Style(EffectStyles)
@@ -159,7 +181,6 @@ fun main() {
 
                 route("page") {
                     string { cardId ->
-
                         Background({
                             classes(Styles.background)
                         }) {
@@ -225,7 +246,7 @@ fun main() {
 
                 route("info") {
                     string { page ->
-                        AppHeader(appName, showMenu = true, showBack = true) {
+                        AppHeader(appName, showBack = true) {
                             router.navigate("/")
                         }
                         InfoPage(page)
@@ -234,7 +255,7 @@ fun main() {
                 }
 
                 route("cities") {
-                    AppHeader(appString { chooseYourCity }, showMenu = false, showBack = true) {
+                    AppHeader(appString { chooseYourCity }, showBack = true) {
                         router.navigate("/")
                     }
                     CitiesPage()
@@ -242,13 +263,13 @@ fun main() {
                 }
 
                 route("privacy") {
-                    AppHeader(appName, showMenu = false)
+                    AppHeader(appName)
                     PrivacyPage()
                     AppFooter()
                 }
 
                 route("terms") {
-                    AppHeader(appName, showMenu = false)
+                    AppHeader(appName)
                     TosPage()
                     AppFooter()
                 }

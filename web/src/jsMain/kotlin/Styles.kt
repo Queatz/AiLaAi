@@ -1,4 +1,5 @@
 import app.dark
+import app.mobile
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.*
@@ -42,6 +43,20 @@ object Styles : StyleSheet() {
             color(colors.primary)
             fontWeight("bold")
             textDecoration("none")
+        }
+    }
+
+    val mainContainer by style {
+        position(Position.Relative)
+        width(100.vw)
+        height(100.vh)
+        overflow("hidden")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+
+        dark(self) {
+            backgroundColor(Color.black)
+            color(Color.white)
         }
     }
 

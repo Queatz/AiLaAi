@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
@@ -66,6 +67,7 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import at.bluesource.choicesdk.maps.common.Map
 import at.bluesource.choicesdk.maps.common.MapFragment
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -424,31 +426,52 @@ fun MapScreen(
 
                         val photo = card.photo?.let(api::url)
 
-                        AsyncImage(
-                            model = remember(photo) {
-                                ImageRequest.Builder(context)
-                                    .data(photo)
-                                    .crossfade(true)
-                                    .size(64)
-                                    .build()
-                            },
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center,
-                            modifier = Modifier
-                                .requiredSize(32.dp)
-                                .shadow(2.dp, CircleShape)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .border(1.5f.dp, MaterialTheme.colorScheme.background, CircleShape)
-                                .padding(1.5f.dp)
-                                .clip(CircleShape)
-                                .clickable {
-                                    tryNav(pos) {
-                                        onCard(card.id!!)
+                        val societyGirlPageId = "19099623"
+
+                        if (card.id == societyGirlPageId) {
+                            Image(
+                                painter = painterResource(id = R.drawable.society_girl),
+                                contentDescription = "",
+                                contentScale = ContentScale.Inside,
+                                alignment = Alignment.Center,
+                                modifier = Modifier
+                                    .requiredWidth(128.dp)
+                                    .clickable(
+                                        remember { MutableInteractionSource() },
+                                        null
+                                    ) {
+                                        tryNav(pos) {
+                                            onCard(card.id!!)
+                                        }
                                     }
-                                }
-                        )
+                            )
+                        } else {
+                            AsyncImage(
+                                model = remember(photo) {
+                                    ImageRequest.Builder(context)
+                                        .data(photo)
+                                        .crossfade(true)
+                                        .size(64)
+                                        .build()
+                                },
+                                contentDescription = "",
+                                contentScale = ContentScale.Crop,
+                                alignment = Alignment.Center,
+                                modifier = Modifier
+                                    .requiredSize(32.dp)
+                                    .shadow(2.dp, CircleShape)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .border(1.5f.dp, MaterialTheme.colorScheme.background, CircleShape)
+                                    .padding(1.5f.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        tryNav(pos) {
+                                            onCard(card.id!!)
+                                        }
+                                    }
+                            )
+                        }
                     }
                 }
             }

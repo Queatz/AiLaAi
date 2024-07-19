@@ -21,6 +21,11 @@ kotlin {
             runTask {
                 devServer = devServer?.copy(port = 4040)
             }
+            commonWebpackConfig {
+                cssSupport {
+                    enabled = true
+                }
+            }
         }
         binaries.executable()
     }
@@ -40,10 +45,11 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
                 implementation("dev.opensavvy.compose.lazy:lazy-layouts-js:0.2.6")
                 implementation("app.softwork:routing-compose:0.2.14")
-                implementation(npm("@paulmillr/qr", "0.1.1"))
+                implementation(npm("@paulmillr/qr", "0.2.0"))
                 implementation(npm("date-fns", "3.5.0"))
-                implementation(npm("@vvo/tzdb", "6.125.0"))
-                implementation(npm("@videosdk.live/js-sdk", "0.0.80"))
+                implementation(npm("@vvo/tzdb", "6.141.0"))
+                implementation(npm("@videosdk.live/js-sdk", "0.0.90"))
+                implementation(npm("mapbox-gl", "3.5.2"))
             }
         }
     }

@@ -16,8 +16,8 @@ import r
 fun AppHeader(
     title: String,
     showBack: Boolean = false,
-    showMenu: Boolean = false,
     showMe: Boolean = true,
+    background: Boolean = true,
     onBack: () -> Unit = {},
 ) {
     val layout by application.layout.collectAsState()
@@ -36,6 +36,13 @@ fun AppHeader(
 
     Div({
         classes(Styles.appHeader)
+
+        if (!background) {
+            style {
+                backgroundColor(Color.transparent)
+                property("box-shadow", "none")
+            }
+        }
     }) {
         if (showBack) {
             Button({
@@ -86,31 +93,7 @@ fun AppHeader(
                 overflow("hidden")
             }
         }) {
-            if (showMenu) {
-                Div({
-                    style {
-                        display(DisplayStyle.Flex)
-                        alignItems(AlignItems.Center)
-                        cursor("pointer")
-                    }
-                    onClick {
-                        router.navigate("/cities")
-                    }
-                }) {
-                    Span {
-                        Text("Hồ Chí Minh")
-                    }
-                    Span({
-                        classes("material-symbols-outlined")
-                        style {
-                        }
-                    }) {
-                        Text("expand_more")
-                    }
-                }
-            } else {
-                Text("")
-            }
+            Text("")
         }
         val configuration = LocalConfiguration.current
         Span({

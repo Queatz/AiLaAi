@@ -1,0 +1,49 @@
+package lib
+
+import Strings.map
+import org.w3c.dom.HTMLElement
+
+@JsModule("mapbox-gl")
+@JsNonModule
+external object mapboxgl {
+    var accessToken: String
+
+    interface LngLat {
+        var lng: Double
+        var lat: Double
+
+        fun distanceTo(other: LngLat): Double
+    }
+
+    interface MapOptions {
+        var container: HTMLElement
+        var boxZoom: Boolean
+        var hash: Boolean
+    }
+
+    interface MarkerOptions {
+        var element: HTMLElement?
+        var anchor: String
+    }
+
+    class Marker(options: dynamic) {
+        fun addTo(map: Map): Marker
+        fun setLngLat(lngLat: LngLat): Marker
+        fun getLngLat(): LngLat
+        fun getElement(): HTMLElement
+        fun remove()
+    }
+
+    class Map(options: MapOptions) {
+        fun addControl(control: dynamic, position: String)
+        fun remove()
+        fun getCenter(): LngLat
+        fun getZoom(): Double
+        fun getFreeCameraOptions(): dynamic
+        fun on(event: String, block: () -> Unit)
+    }
+
+    class GeolocateControl(options: dynamic = definedExternally)
+}
+
+fun mapboxgl.Map.getCameraLngLat(): mapboxgl.LngLat = getFreeCameraOptions().position.toLngLat() ?: getCenter()
