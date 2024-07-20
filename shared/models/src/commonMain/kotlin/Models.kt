@@ -116,6 +116,7 @@ class Card(
     var content: String? = null,
     var options: String? = null,
     var pay: Pay? = null,
+    var npc: Npc? = null,
     var active: Boolean? = null,
     var cardCount: Int? = null
 ) : Model()
@@ -191,6 +192,13 @@ enum class PayFrequency {
 data class Pay(
     var pay: String? = null,
     var frequency: PayFrequency? = null
+)
+
+@Serializable
+data class Npc(
+    var name: String? = null,
+    var photo: String? = null,
+    var text: String? = null
 )
 
 @Serializable

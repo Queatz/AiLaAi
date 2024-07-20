@@ -370,6 +370,11 @@ fun Route.cardRoutes() {
                             card.pay = null
                         }
                     }
+                    check(Card::npc) {
+                        if (it?.name.isNullOrBlank()) {
+                            card.npc = null
+                        }
+                    }
                     check(Card::photo) {
                         card.video = update.video
                     }

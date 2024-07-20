@@ -31,6 +31,7 @@ import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.components.SetPhotoButton
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Item
@@ -62,15 +63,9 @@ fun CreateItemDialog(
     var divisible by rememberStateOf(false)
     var hasLifespan by rememberStateOf(false)
     var showLifespanDurationDialog by rememberStateOf(false)
-    var choosePhotoDialog by rememberStateOf(false)
-    var showPhotoDialog by rememberStateOf(false)
     var isLoading by rememberStateOf(false)
-    var isGeneratingPhoto by rememberStateOf(false)
     var lifespan by rememberStateOf("1")
     var lifespanDuration by rememberStateOf(LifespanDuration.Month)
-    val setPhotoState = remember(name) {
-        ChoosePhotoDialogState(mutableStateOf(name))
-    }
 
     val enabled = !isLoading
             && name.isNotBlank()
@@ -84,65 +79,10 @@ fun CreateItemDialog(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        if (photo.isNotBlank() && !isGeneratingPhoto) {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(1.pad),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                            ) {
-                                AsyncImage(
-                                    model = photo.let { api.url(it) },
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Crop,
-                                    alignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .requiredSize(64.dp)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                                        .clickable {
-                                            showPhotoDialog = true
-                                        }
-                                )
-                                OutlinedButton(
-                                    {
-                                        choosePhotoDialog = true
-                                    }
-                                ) {
-                                    Text(stringResource(R.string.change_photo))
-                                }
-                            }
-                        } else {
-                            TextButton(
-                                {
-                                    choosePhotoDialog = true
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                            ) {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(1.pad),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    if (isGeneratingPhoto) {
-                                        CircularProgressIndicator(
-                                            strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    } else {
-                                        Icon(
-                                            Icons.Outlined.CameraAlt, ""
-                                        )
-                                    }
-                                    Text(stringResource(R.string.photo))
-                                }
-                            }
-                        }
-                    }
+                    SetPhotoButton(
+                        name,
+                        photo
+                    ) { photo = it }
                     OutlinedTextField(
                         name,
                         { name = it },
@@ -376,43 +316,6 @@ fun CreateItemDialog(
                 showLifespanDurationDialog = false
             }
         }
-    }
-
-    if (showPhotoDialog) {
-        PhotoDialog(
-            {
-                showPhotoDialog = false
-            },
-            initialMedia = Media.Photo(photo),
-            medias = listOf(Media.Photo(photo))
-        )
-    }
-
-    if (choosePhotoDialog) {
-        val context = LocalContext.current
-
-        ChoosePhotoDialog(
-            scope = scope,
-            state = setPhotoState,
-            onDismissRequest = { choosePhotoDialog = false },
-            multiple = false,
-            imagesOnly = true,
-            onPhotos = { photos ->
-                scope.launch {
-                    isGeneratingPhoto = true
-                    api.uploadPhotosFromUris(context, photos) {
-                        photo = it.urls.first()
-                    }
-                    isGeneratingPhoto = false
-                }
-            },
-            onGeneratedPhoto = {
-                photo = it
-            },
-            onIsGeneratingPhoto = {
-                isGeneratingPhoto = it
-            }
-        )
     }
 }
 

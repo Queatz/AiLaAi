@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Man
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Place
@@ -116,6 +117,7 @@ import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.npc.NpcDialog
 import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
@@ -150,6 +152,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.Message
+import com.queatz.db.Npc
 import com.queatz.db.Person
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
@@ -197,6 +200,7 @@ fun CardScreen(cardId: String) {
     var isGeneratingBackground by rememberStateOf(false)
     var showBackgroundDialog by rememberStateOf(false)
     var showPay by rememberStateOf(false)
+    var showNpc by rememberStateOf(false)
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
@@ -512,6 +516,22 @@ fun CardScreen(cardId: String) {
             api.updateCard(
                 cardId,
                 Card(pay = pay)
+            ) {
+                reload()
+            }
+        }
+    }
+
+    if (showNpc) {
+        NpcDialog(
+            npc = card?.npc ?: Npc(),
+            onDismissRequest = {
+                showNpc = false
+            }
+        ) { npc ->
+            api.updateCard(
+                cardId,
+                Card(npc = npc)
             ) {
                 reload()
             }
@@ -916,6 +936,15 @@ fun CardScreen(cardId: String) {
                                 selected = card.pay != null
                             ) {
                                 showPay = true
+                                showMenu = false
+                            }
+
+                            item(
+                                Icons.Outlined.Man,
+                                stringResource(if (card.npc == null) R.string.add_npc else R.string.npc),
+                                selected = card.npc != null
+                            ) {
+                                showNpc = true
                                 showMenu = false
                             }
 
