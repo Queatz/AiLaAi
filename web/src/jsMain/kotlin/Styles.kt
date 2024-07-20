@@ -1,4 +1,5 @@
 import app.dark
+import app.desktop
 import app.mobile
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.AttrsScope
@@ -605,6 +606,46 @@ object Styles : StyleSheet() {
 
         dark(self) {
             border(3.px, LineStyle.Solid, Color.black)
+        }
+    }
+
+    val mapContainer by style {
+        height(0.r)
+        flexGrow(1)
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.FlexStart)
+
+        mobile(self) {
+            flexDirection(FlexDirection.Column)
+        }
+    }
+
+    val mapUi by style {
+        flexGrow(1)
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Center)
+
+        mobile(self) {
+            width(100.percent)
+        }
+    }
+
+    val mapPanel by style {
+        marginBottom(1.r)
+
+        // Show above map controls
+        property("z-index", "10")
+
+        desktop(self) {
+            marginLeft(0.r)
+            width(36.r)
+            property("max-height", "calc(${100.percent} - ${1.r})")
+        }
+
+        mobile(self) {
+            width(100.percent)
+            property("max-height", "calc(${50.percent} - ${1.r})")
         }
     }
 }

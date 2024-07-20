@@ -29,6 +29,7 @@ fun CardReply(
     onMessageSent: () -> Unit,
     onIsReplying: (List<ConversationItem>?) -> Unit,
     onReplyMessage: (String) -> Unit,
+    isLastElement: Boolean
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
@@ -86,11 +87,19 @@ fun CardReply(
             }
 
             autoFocus()
+
+            ref {
+                it.focus()
+                onDispose {}
+            }
         }
         Div({
             style {
                 display(DisplayStyle.Flex)
-                marginBottom(0.r)
+
+                if (!isLastElement) {
+                    marginBottom(1.r)
+                }
             }
         }) {
             Button({

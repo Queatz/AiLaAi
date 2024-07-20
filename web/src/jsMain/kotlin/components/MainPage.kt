@@ -3,16 +3,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.AppPage
 import app.ailaai.api.cards
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import components.AppHeader
+import components.CardContent
 import components.SearchField
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import lib.getCameraLngLat
 import lib.mapboxgl
 import org.jetbrains.compose.web.css.AlignItems
@@ -29,6 +32,7 @@ import org.jetbrains.compose.web.css.backgroundPosition
 import org.jetbrains.compose.web.css.backgroundRepeat
 import org.jetbrains.compose.web.css.backgroundSize
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
@@ -41,6 +45,7 @@ import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
@@ -59,6 +64,7 @@ import kotlin.math.sqrt
 
 @Composable
 fun MainPage() {
+    // todo: remove "true ||"
     if (true || application.me.value == null) {
         var searchText by remember { mutableStateOf("") }
         var isLoading by remember { mutableStateOf(false) }
@@ -66,6 +72,8 @@ fun MainPage() {
         var geo by remember { mutableStateOf<Geo?>(null) }
         var map by remember { mutableStateOf<mapboxgl.Map?>(null) }
         var markers by remember { mutableStateOf(emptyList<mapboxgl.Marker>()) }
+        var selectedCard by remember { mutableStateOf<Card?>(null) }
+        val scope = rememberCoroutineScope()
 
         LaunchedEffect(geo, searchText) {
             geo ?: return@LaunchedEffect
@@ -84,21 +92,30 @@ fun MainPage() {
 
             val cameraLngLat = map!!.getCameraLngLat()
             val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
-            console.log(altitude)
 
             markers.forEach {
                 val groundDistance = cameraLngLat.distanceTo(it.getLngLat())
                 val scale = 100.0 / sqrt(groundDistance.pow(2.0) + altitude.pow(2.0))
                 val element = it.getElement().firstElementChild as HTMLElement
-                element.style.transform = "scale(${scale.coerceIn(1.0/16.0, 100.0)})"
+                element.style.transform = "scale(${scale.coerceIn(0.125, 100.0)})"
                 it.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
+                val ele = it.getElement() // for the following line
+                js("ele.style.pointerEvents = \"none\"")
+            }
+
+            // prevent mapbox from overriding pointer-events
+            scope.launch {
+                delay(100)
+                markers.forEach {
+                    val ele = it.getElement() // for the following line
+                    js("ele.style.pointerEvents = \"none\"")
+                }
             }
         }
 
         LaunchedEffect(searchResults) {
             markers.forEach {
                 it.remove()
-                console.log("removed", it.getElement())
             }
 
             markers = searchResults.map { card ->
@@ -127,25 +144,37 @@ fun MainPage() {
                                     alignItems(AlignItems.Center)
                                     gap(2.r)
                                     cursor("pointer")
+                                    property("pointer-events", "auto")
                                     property("will-change", "transform")
                                     property("transform-origin", "bottom center")
                                 }
 
                                 onClick {
-                                    window.open("$webBaseUrl/page/${card.id!!}", target = "_blank")
+                                    it.stopPropagation()
+
+                                    if (it.ctrlKey) {
+                                        window.open("$webBaseUrl/page/${card.id!!}", target = "_blank")
+                                    } else {
+                                        selectedCard = if (selectedCard?.id == card.id) {
+                                            null
+                                        } else {
+                                            card
+                                        }
+                                    }
                                 }
                             }) {
                                 Div({
                                     style {
                                         textAlign("center")
-                                        fontSize(48.px)
+                                        fontSize(64.px)
                                         color(Color.black)
+                                        padding(2.r)
+                                        lineHeight(120.percent)
 
                                         if (isNpc) {
                                             property("box-shadow", "0 2px 16px rgba(0, 0, 0, 0.125)")
                                             borderRadius(2.r)
                                             backgroundColor(Color.white)
-                                            padding(2.r)
                                         }
                                     }
                                 }) {
@@ -153,7 +182,6 @@ fun MainPage() {
                                         Div({
                                             style {
                                                 textAlign("left")
-                                                lineHeight(150.percent)
                                             }
                                         }) {
                                             B {
@@ -177,6 +205,7 @@ fun MainPage() {
                                         Text("${card.name}")
                                     }
                                 }
+
                                 Div({
                                     style {
                                         width(16.r)
@@ -212,10 +241,13 @@ fun MainPage() {
         Div({
             classes(Styles.mainContainer)
         }) {
-           Div({
+            Div({
                 style {
                     property("inset", "0")
                     position(Position.Absolute)
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    property("z-index", "0")
                 }
 
                 ref { ref ->
@@ -237,6 +269,10 @@ fun MainPage() {
                         on("render") {
                             update()
                         }
+
+                        on("click") {
+                            selectedCard = null
+                        }
                     }
 
                     onDispose {
@@ -248,19 +284,47 @@ fun MainPage() {
             AppHeader(appString { appName }, background = false)
 
             Div({
-                style {
-                    display(DisplayStyle.Flex)
-                    flexDirection(FlexDirection.Column)
-                    maxWidth(800.px)
-                    width(100.percent)
-                    alignSelf(AlignSelf.Center)
-                }
+                classes(Styles.mapContainer)
             }) {
-                SearchField(searchText, appString { search },
-                    shadow = true,
-                    styles = {
-                }) {
-                    searchText = it
+                Div(
+                    {
+                        classes(Styles.mapUi)
+                    }
+                ) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            maxWidth(800.px)
+                            width(100.percent)
+                            alignSelf(AlignSelf.Center)
+                            paddingLeft(1.r)
+                            paddingRight(1.r)
+                            boxSizing("border-box")
+                        }
+                    }) {
+                        SearchField(searchText, appString { search },
+                            shadow = true,
+                            styles = {
+                            }) {
+                            searchText = it
+                        }
+                    }
+                }
+                if (selectedCard != null) {
+                    Div({
+                        classes(Styles.navContainer, Styles.mapPanel)
+                    }) {
+                        Div({
+                            classes(Styles.navContent)
+                        }) {
+                            Div {
+                                selectedCard?.let {
+                                    CardContent(it)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
