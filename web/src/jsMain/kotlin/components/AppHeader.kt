@@ -39,6 +39,7 @@ fun AppHeader(
 
         if (!background) {
             style {
+                margin(0.r)
                 backgroundColor(Color.transparent)
                 property("box-shadow", "none")
             }
