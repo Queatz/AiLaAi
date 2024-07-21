@@ -12,6 +12,7 @@ import com.queatz.db.UploadResponse
 suspend fun Api.uploadPhotosFromUris(
     context: Context,
     photos: List<Uri>,
+    removeBackground: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<UploadResponse> = {},
 ) {
@@ -20,6 +21,7 @@ suspend fun Api.uploadPhotosFromUris(
     }
     return uploadPhotos(
         scaledPhotos,
+        removeBackground,
         onError,
         onSuccess
     )

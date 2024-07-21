@@ -53,6 +53,8 @@ fun ChoosePhotoDialog(
     state: ChoosePhotoDialogState = remember { ChoosePhotoDialogState(mutableStateOf("")) },
     multiple: Boolean = true,
     imagesOnly: Boolean = false,
+    aspect: Double = 1.5,
+    transparentBackground: Boolean = false,
     onDismissRequest: () -> Unit,
     onIsGeneratingPhoto: (Boolean) -> Unit = {},
     onPhotos: (List<Uri>) -> Unit,
@@ -203,7 +205,11 @@ fun ChoosePhotoDialog(
                         onDismissRequest()
                         scope.launch {
                             onIsGeneratingPhoto(true)
-                            api.uploadPhotosFromUris(context, bitmap.asAndroidBitmap().uri(context).inList()) { response ->
+                            api.uploadPhotosFromUris(
+                                context,
+                                bitmap.asAndroidBitmap().uri(context).inList(),
+                                removeBackground = transparentBackground,
+                            ) { response ->
                                 onGeneratedPhoto(response.urls.first())
                             }
                             onIsGeneratingPhoto(false)
@@ -217,7 +223,12 @@ fun ChoosePhotoDialog(
         onDismissRequest()
         scope.launch {
             onIsGeneratingPhoto(true)
-            api.aiPhoto(AiPhotoRequest(prompt, selectedStyle)) { response ->
+            api.aiPhoto(AiPhotoRequest(
+                prompt,
+                selectedStyle,
+                aspect = aspect,
+                removeBackground = transparentBackground.takeIf { it }
+            )) { response ->
                 onGeneratedPhoto(response.photo)
             }
             onIsGeneratingPhoto(false)

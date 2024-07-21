@@ -43,7 +43,12 @@ import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
 
 @Composable
-fun SetPhotoButton(photoText: String, photo: String, onPhoto: (String) -> Unit) {
+fun SetPhotoButton(
+    photoText: String,
+    photo: String,
+    transparentBackground: Boolean = false,
+    onPhoto: (String) -> Unit
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var choosePhotoDialog by rememberStateOf(false)
@@ -70,10 +75,11 @@ fun SetPhotoButton(photoText: String, photo: String, onPhoto: (String) -> Unit) 
             onDismissRequest = { choosePhotoDialog = false },
             multiple = false,
             imagesOnly = true,
+            transparentBackground = transparentBackground,
             onPhotos = { photos ->
                 scope.launch {
                     isGeneratingPhoto = true
-                    api.uploadPhotosFromUris(context, photos) {
+                    api.uploadPhotosFromUris(context, photos, removeBackground = transparentBackground) {
                         onPhoto(it.urls.first())
                     }
                     isGeneratingPhoto = false

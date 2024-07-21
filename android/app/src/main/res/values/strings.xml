@@ -730,6 +730,7 @@
     <string name="posts">Posts</string>
     <string name="npc">NPC</string>
     <string name="add_npc">Add NPC</string>
+    <string name="remove_npc">Remove NPC</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

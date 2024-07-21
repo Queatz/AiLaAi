@@ -524,7 +524,7 @@ fun CardScreen(cardId: String) {
 
     if (showNpc) {
         NpcDialog(
-            npc = card?.npc ?: Npc(),
+            npc = card?.npc,
             onDismissRequest = {
                 showNpc = false
             }
@@ -534,6 +534,7 @@ fun CardScreen(cardId: String) {
                 Card(npc = npc)
             ) {
                 reload()
+                showNpc = false
             }
         }
     }

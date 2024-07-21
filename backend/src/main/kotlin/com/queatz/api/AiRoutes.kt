@@ -31,7 +31,9 @@ fun Route.aiRoutes() {
                                 TextPrompt(request.prompt)
                             )
                         },
-                        request.style
+                        request.style,
+                        aspect = request.aspect ?: 1.5,
+                        transparentBackground = request.removeBackground ?: false
                     )
                 )
             }

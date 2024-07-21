@@ -29,13 +29,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NpcDialog(
-    npc: Npc,
+    npc: Npc?,
     onDismissRequest: () -> Unit,
     onUpdate: suspend (Npc) -> Unit
 ) {
+    val hasNpc by rememberStateOf(npc != null)
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current!!
-    var npc by rememberStateOf(npc)
+    var npc by rememberStateOf(npc ?: Npc())
     var isLoading by rememberStateOf(false)
 
     DialogBase(
@@ -46,7 +47,8 @@ fun NpcDialog(
             content = {
                 SetPhotoButton(
                     npc.text.orEmpty(),
-                    npc.photo.orEmpty()
+                    npc.photo.orEmpty(),
+                    transparentBackground = true
                 ) {
                     npc = npc.copy(photo = it)
                 }
@@ -101,9 +103,13 @@ fun NpcDialog(
                             isLoading = false
                         }
                     },
-                    enabled = !isLoading
+                    enabled = !isLoading && (hasNpc || !npc.name.isNullOrBlank())
                 ) {
-                    Text(stringResource(R.string.update))
+                    when {
+                        !hasNpc -> Text(stringResource(R.string.add_npc))
+                        npc.name.isNullOrBlank() -> Text(stringResource(R.string.remove_npc))
+                        else -> Text(stringResource(R.string.update))
+                    }
                 }
             }
         )

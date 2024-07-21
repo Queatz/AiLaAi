@@ -6,6 +6,8 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -56,6 +58,7 @@ class Ai {
         private const val endpoint = "https://api.dezgo.com/text2image"
         private const val endpointXl = "https://api.dezgo.com/text2image_sdxl"
         private const val endpointXlLightning = "https://api.dezgo.com/text2image_sdxl_lightning"
+        private const val endpointRemoveBackground = "https://api.dezgo.com/remove-background"
         private const val height = 416
         private const val width = 608
         private const val heightXl = 832
@@ -74,11 +77,20 @@ class Ai {
         }
     }
 
-    suspend fun photo(prefix: String, prompts: List<TextPrompt>, style: String? = null): String {
+    suspend fun photo(
+        prefix: String,
+        prompts: List<TextPrompt>,
+        style: String? = null,
+        aspect: Double = 1.5,
+        transparentBackground: Boolean = false
+    ): String {
         val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.random()
 
         val isXlLightning = model.endsWith("_lightning_1024px")
         val isXl = model.endsWith("_1024px")
+
+        val height = if (isXl) heightXl else height
+        val width = if (isXl) widthXl else width
 
         val body = json.encodeToString(
             DezgoPrompt(
@@ -87,9 +99,11 @@ class Ai {
                 model = model,
                 steps = 25.takeIf { !isXlLightning },
                 refiner = true.takeIf { !isXlLightning },
-                guidance = if (isXlLightning) 1.2f else 7f,
-                height = if (isXl) heightXl else height,
-                width = if (isXl) widthXl else width,
+                guidance = if (isXlLightning) 2f else 7f,
+                height = if (aspect < 1.0) width else height,
+                width = if (aspect < 1.0) height else width,
+                transparentBackground = if (isXl) transparentBackground else null,
+                format = if (transparentBackground) "png" else "jpg"
             )
         )
 
@@ -102,6 +116,30 @@ class Ai {
             setBody(body)
         }.body<ByteArray>().let {
             save("$prefix-$model", it)
+        }
+    }
+
+    suspend fun removeBackground(photo: File): String {
+        return http.post(endpointRemoveBackground) {
+            header("X-Dezgo-Key", secrets.dezgo.key)
+            accept(ContentType.Image.PNG)
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("mode", "transparent")
+                        append(
+                            "image",
+                            photo.readBytes(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "image/jpeg")
+                                append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
+                            }
+                        )
+                    }
+                )
+            )
+        }.body<ByteArray>().let {
+            save("photo", it)
         }
     }
 
@@ -127,6 +165,8 @@ class Ai {
 data class DezgoPrompt(
     @SerialName("negative_prompt")
     val negativePrompt: String,
+    @SerialName("transparent_background")
+    val transparentBackground: Boolean? = null,
     val prompt: String,
     val model: String?,
     val height: Int,

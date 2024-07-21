@@ -110,6 +110,8 @@ class MyDevice(
 class AiPhotoRequest(
     val prompt: String,
     val style: String? = null,
+    val aspect: Double? = null,
+    val removeBackground: Boolean? = null,
 )
 
 @Serializable
