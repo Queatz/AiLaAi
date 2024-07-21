@@ -1,6 +1,7 @@
 package com.queatz.api
 
 import com.queatz.db.UploadResponse
+import com.queatz.hasTransparency
 import com.queatz.plugins.ai
 import com.queatz.plugins.me
 import com.queatz.plugins.respond
@@ -23,10 +24,12 @@ fun Route.uploadRoutes() {
                     removeBackground = params.containsKey("removeBackground")
                 }
 
-                if (removeBackground) {
+                val file = File(".$it")
+
+                if (removeBackground && !file.hasTransparency()) {
                     runCatching {
                         urls = urls.map {
-                            ai.removeBackground(File(".$it"))
+                            ai.removeBackground(file)
                         }
                     }.onFailure {
                         it.printStackTrace()
