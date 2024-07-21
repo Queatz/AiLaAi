@@ -1,7 +1,14 @@
 package app.cards
 
-import Styles.card
-import androidx.compose.runtime.*
+import MapView
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.FullPageLayout
 import app.ailaai.api.card
@@ -11,13 +18,34 @@ import app.components.TopBarSearch
 import app.nav.CardNav
 import appText
 import application
-import com.queatz.db.*
-import components.*
+import com.queatz.db.Card
+import com.queatz.db.asGeo
+import components.CardItem
+import components.Loading
 import defaultGeo
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexGrow
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.overflowX
+import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Div
+import r
 
 @Composable
 fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> Unit) {
@@ -46,6 +74,12 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
         if (me == null) return
 
         when (nav) {
+            is CardNav.Map -> {
+                api.cards(me?.geo?.asGeo() ?: defaultGeo, search = search.notBlank, public = true) {
+                    cards = it
+                }
+            }
+
             is CardNav.Friends -> {
                 api.cards(me?.geo?.asGeo() ?: defaultGeo, search = search.notBlank) {
                     cards = it
@@ -80,36 +114,50 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
     } else {
         FullPageLayout(maxWidth = null) {
             if (nav !is CardNav.Selected) {
-                if (cards.isEmpty()) {
+                if (nav is CardNav.Map) {
                     Div({
                         style {
-                            height(100.percent)
-                            display(DisplayStyle.Flex)
-                            alignItems(AlignItems.Center)
-                            justifyContent(JustifyContent.Center)
-                            opacity(.5)
+                            flexGrow(1)
+                            borderRadius(1.r)
+                            margin(1.r)
+                            position(Position.Relative)
+                            overflow("hidden")
                         }
                     }) {
-                        when (nav) {
-                            is CardNav.Friends -> appText { noCards }
-                            is CardNav.Local -> appText { noCardsNearby }
-                            is CardNav.Saved -> appText { noSavedCards }
-                            else -> {}
-                        }
+                        MapView()
                     }
                 } else {
-                    Div(
-                        {
-                            classes(CardsPageStyles.layout)
-
+                    if (cards.isEmpty()) {
+                        Div({
                             style {
-                                overflowX("hidden")
-                                overflowY("auto")
+                                height(100.percent)
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                justifyContent(JustifyContent.Center)
+                                opacity(.5)
+                            }
+                        }) {
+                            when (nav) {
+                                is CardNav.Friends -> appText { noCards }
+                                is CardNav.Local -> appText { noCardsNearby }
+                                is CardNav.Saved -> appText { noSavedCards }
+                                else -> {}
                             }
                         }
-                    ) {
-                        cards.forEach {
-                            CardItem(it, openInNewWindow = true)
+                    } else {
+                        Div(
+                            {
+                                classes(CardsPageStyles.layout)
+
+                                style {
+                                    overflowX("hidden")
+                                    overflowY("auto")
+                                }
+                            }
+                        ) {
+                            cards.forEach {
+                                CardItem(it, openInNewWindow = true)
+                            }
                         }
                     }
                 }
@@ -138,7 +186,7 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
                 )
             }
         }
-        if (nav !is CardNav.Selected) {
+        if (nav !is CardNav.Selected && nav !is CardNav.Map) {
             TopBarSearch(search, { search = it })
         }
     }

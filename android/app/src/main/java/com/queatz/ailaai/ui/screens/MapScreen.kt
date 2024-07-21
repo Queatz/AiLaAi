@@ -413,8 +413,8 @@ fun MapScreen(
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(.5f.pad),
                                     modifier = Modifier
-                                        .shadow(2.elevation, MaterialTheme.shapes.medium)
-                                        .clip(MaterialTheme.shapes.medium)
+                                        .shadow(.5f.elevation, MaterialTheme.shapes.large)
+                                        .clip(MaterialTheme.shapes.large)
                                         .background(MaterialTheme.colorScheme.background)
                                         .padding(1.5f.pad)
                                         .widthIn(max = 240.dp)

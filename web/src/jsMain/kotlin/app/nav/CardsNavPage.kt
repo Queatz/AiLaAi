@@ -25,6 +25,7 @@ import r
 import saves
 
 sealed class CardNav {
+    data object Map : CardNav()
     data object Friends : CardNav()
     data object Local : CardNav()
     data object Saved : CardNav()
@@ -213,6 +214,9 @@ fun CardsNavPage(cardUpdates: Flow<Card>, nav: CardNav, onSelected: (CardNav) ->
             }
         }) {
             if (!showSearch) {
+                NavMenuItem("map", appString { map }, selected = nav == CardNav.Map) {
+                    onSelected(CardNav.Map)
+                }
                 NavMenuItem("group", appString { friends }, selected = nav == CardNav.Friends) {
                     onSelected(CardNav.Friends)
                 }

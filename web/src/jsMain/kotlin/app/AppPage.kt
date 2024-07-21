@@ -95,7 +95,7 @@ fun AppPage() {
     }
 
     var card by remember {
-        mutableStateOf<CardNav>(CardNav.Local)
+        mutableStateOf<CardNav>(CardNav.Map)
     }
 
     var reminder by remember {
