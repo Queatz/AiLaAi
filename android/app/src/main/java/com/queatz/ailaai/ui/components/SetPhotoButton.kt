@@ -108,12 +108,19 @@ fun SetPhotoButton(
                 AsyncImage(
                     model = photo.let { api.url(it) },
                     contentDescription = "",
-                    contentScale = ContentScale.Crop,
+                    contentScale = if (transparentBackground) { ContentScale.Inside } else { ContentScale.Crop },
                     alignment = Alignment.Center,
                     modifier = Modifier
                         .requiredSize(64.dp)
-                        .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .then(
+                            if (transparentBackground) {
+                                Modifier
+                            } else {
+                                Modifier
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                            }
+                        )
                         .clickable {
                             showPhotoDialog = true
                         }

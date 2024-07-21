@@ -5,9 +5,11 @@ import com.queatz.plugins.secrets
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -115,7 +117,22 @@ class Ai {
             contentType(ContentType.Application.Json.withCharset(UTF_8))
             setBody(body)
         }.body<ByteArray>().let {
-            save("$prefix-$model", it)
+            save("$prefix-$model", it).let { path ->
+                // Dezgo doesn't support transparent for non XL models out of the box
+                if (transparentBackground == true && !isXl) {
+                    runCatching {
+                        removeBackground(File(".$path"))
+                    }.onFailure {
+                        it.printStackTrace()
+                        (it as? ServerResponseException)?.let {
+                            println("Remove background error:")
+                            println(it.response.bodyAsText())
+                        }
+                    }.getOrDefault(path)
+                } else {
+                    path
+                }
+            }
         }
     }
 
