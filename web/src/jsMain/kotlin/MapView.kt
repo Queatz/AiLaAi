@@ -9,7 +9,6 @@ import app.ailaai.api.cards
 import app.components.Spacer
 import com.queatz.db.Card
 import com.queatz.db.Geo
-import components.AppHeader
 import components.CardContent
 import components.SearchField
 import kotlinx.browser.document
@@ -204,14 +203,16 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
 
                             Div({
                                 style {
-                                    width(16.r)
-                                    height(16.r)
                                     backgroundRepeat("no-repeat")
                                     if (isNpc) {
+                                        width(32.r)
+                                        height(32.r)
                                         backgroundImage("url(\"$baseUrl/${card.npc!!.photo}\")")
                                         backgroundPosition("center")
                                         backgroundSize("contain")
                                     } else {
+                                        width(16.r)
+                                        height(16.r)
                                         borderRadius(16.r)
                                         backgroundColor(Styles.colors.background)
                                         backgroundImage("url($baseUrl${card.photo!!})")
