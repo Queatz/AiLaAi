@@ -425,7 +425,7 @@ fun MapScreen(
                                                 append(card.npc?.name.orEmpty())
                                             }
                                             append(" ")
-                                            withStyle(LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.secondary).toSpanStyle()) {
+                                            withStyle(MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary).toSpanStyle()) {
                                                 append(card.name.orEmpty())
                                             }
                                         }
@@ -467,7 +467,7 @@ fun MapScreen(
                                 contentScale = ContentScale.Inside,
                                 alignment = Alignment.Center,
                                 modifier = Modifier
-                                    .requiredWidth(128.dp)
+                                    .requiredWidth(64.dp)
                                     .clickable(
                                         remember { MutableInteractionSource() },
                                         null

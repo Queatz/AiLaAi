@@ -48,6 +48,7 @@ fun NpcDialog(
                 SetPhotoButton(
                     npc.text.orEmpty(),
                     npc.photo.orEmpty(),
+                    aspect = .75,
                     transparentBackground = true
                 ) {
                     npc = npc.copy(photo = it)

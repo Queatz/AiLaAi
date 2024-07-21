@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 fun SetPhotoButton(
     photoText: String,
     photo: String,
+    aspect: Double = 1.5,
     transparentBackground: Boolean = false,
     onPhoto: (String) -> Unit
 ) {
@@ -75,6 +76,7 @@ fun SetPhotoButton(
             onDismissRequest = { choosePhotoDialog = false },
             multiple = false,
             imagesOnly = true,
+            aspect = aspect,
             transparentBackground = transparentBackground,
             onPhotos = { photos ->
                 scope.launch {
