@@ -110,7 +110,9 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         }
     }
 
-    LaunchedEffect(searchResults) {
+    LaunchedEffect(searchResults, map) {
+        map ?: return@LaunchedEffect
+
         markers.forEach {
             it.remove()
         }
