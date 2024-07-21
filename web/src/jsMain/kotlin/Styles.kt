@@ -644,7 +644,7 @@ object Styles : StyleSheet() {
         }
 
         mobile(self) {
-            width(100.percent)
+            property("width", "calc(${100.percent} - ${2.r})")
             property("max-height", "calc(${50.percent} - ${1.r})")
         }
     }

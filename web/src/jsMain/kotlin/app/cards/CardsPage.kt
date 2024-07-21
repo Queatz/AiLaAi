@@ -27,12 +27,14 @@ import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
@@ -122,6 +124,8 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
                             margin(1.r)
                             position(Position.Relative)
                             overflow("hidden")
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
                         }
                     }) {
                         MapView()
