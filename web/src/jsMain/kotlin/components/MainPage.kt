@@ -1,3 +1,5 @@
+import Strings.map
+import Strings.update
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -133,9 +135,7 @@ fun MainPage() {
                     .setLngLat(latlng)
                     .addTo(map!!).also {
                         renderComposable(root = element) {
-                            // todo: card.npc != null
-                            val isNpc = card.name?.contains("HYPER") == true ||
-                                    card.name?.contains("OKKIO") == true
+                            val isNpc = !card.npc?.photo.isNullOrBlank()
 
                             Div({
                                 style {
@@ -185,8 +185,7 @@ fun MainPage() {
                                             }
                                         }) {
                                             B {
-                                                // todo npc.name
-                                                Text("Mia")
+                                                Text(card.npc?.name.orEmpty())
                                             }
                                             Span({
                                                 style {
@@ -197,9 +196,10 @@ fun MainPage() {
                                             }) {
                                                 Text("${card.name}")
                                             }
-                                            Br()
-                                            Text("Coffee, tea, good times!")
-
+                                            card.npc?.text?.notBlank?.let {
+                                                Br()
+                                                Text(it)
+                                            }
                                         }
                                     } else {
                                         Text("${card.name}")
@@ -211,22 +211,17 @@ fun MainPage() {
                                         width(16.r)
                                         height(16.r)
                                         backgroundRepeat("no-repeat")
-
-                                        if (card.photo.isNullOrBlank()) {
-                                            backgroundColor(Styles.colors.background)
-                                            borderRadius(16.r)
+                                        if (isNpc) {
+                                            backgroundImage("url(\"$baseUrl/${card.npc!!.photo}\")")
+                                            backgroundPosition("center")
+                                            backgroundSize("contain")
                                         } else {
-                                            if (isNpc) {
-                                                backgroundImage("url(https://api.ailaai.app/static/photo/group-32807229-40915952-photo.jpg)")
-                                                backgroundPosition("center")
-                                                backgroundSize("contain")
-                                            } else {
-                                                borderRadius(16.r)
-                                                backgroundImage("url($baseUrl${card.photo!!})")
-                                                backgroundPosition("center")
-                                                backgroundSize("cover")
-                                                property("border", "${2.px} solid ${Color.white}")
-                                            }
+                                            borderRadius(16.r)
+                                            backgroundColor(Styles.colors.background)
+                                            backgroundImage("url($baseUrl${card.photo!!})")
+                                            backgroundPosition("center")
+                                            backgroundSize("cover")
+                                            property("border", "${2.px} solid ${Color.white}")
                                         }
                                     }
                                 }) {}

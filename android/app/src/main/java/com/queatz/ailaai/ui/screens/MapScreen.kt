@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,8 +53,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
@@ -86,6 +90,7 @@ import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.state.latLngSaver
+import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Inventory
@@ -389,6 +394,8 @@ fun MapScreen(
                             )
 
                     ) {
+                        val isNpc = !card.npc?.photo.isNullOrBlank()
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
@@ -402,35 +409,60 @@ fun MapScreen(
                                     }
                                 }
                         ) {
-                            OutlinedText(
-                                card.name ?: "",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .widthIn(max = 120.dp)
-                            )
-                            card.categories?.firstOrNull()?.let { category ->
+                            if (isNpc) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(.5f.pad),
+                                    modifier = Modifier
+                                        .shadow(2.elevation, MaterialTheme.shapes.medium)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(MaterialTheme.colorScheme.background)
+                                        .padding(1.5f.pad)
+                                        .widthIn(max = 240.dp)
+                                ) {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(MaterialTheme.typography.titleMedium.toSpanStyle()) {
+                                                append(card.npc?.name.orEmpty())
+                                            }
+                                            append(" ")
+                                            withStyle(LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.secondary).toSpanStyle()) {
+                                                append(card.name.orEmpty())
+                                            }
+                                        }
+                                    )
+                                    card.npc?.text?.let {
+                                        Text(it)
+                                    }
+                                }
+                            } else {
                                 OutlinedText(
-                                    category,
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    outlineWidth = 4f,
-                                    style = MaterialTheme.typography.labelSmall,
+                                    card.name ?: "",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .widthIn(max = 120.dp)
                                 )
+                                card.categories?.firstOrNull()?.let { category ->
+                                    OutlinedText(
+                                        category,
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        outlineWidth = 4f,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .widthIn(max = 120.dp)
+                                    )
+                                }
                             }
                         }
 
                         val photo = card.photo?.let(api::url)
 
-                        val societyGirlPageId = "19099623"
-
-                        if (card.id == societyGirlPageId) {
-                            Image(
-                                painter = painterResource(id = R.drawable.society_girl),
+                        if (isNpc) {
+                            AsyncImage(
+                                model = api.url(card.npc!!.photo!!),
                                 contentDescription = "",
                                 contentScale = ContentScale.Inside,
                                 alignment = Alignment.Center,
