@@ -115,7 +115,7 @@ fun HomePage() {
             }
         }
 
-        SearchField(searchText, appString { searchCity }, styles = {
+        SearchField(searchText, appString { search }, styles = {
             marginTop(2.r)
         }) {
             searchText = it

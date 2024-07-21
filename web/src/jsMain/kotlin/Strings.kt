@@ -354,14 +354,6 @@ object Strings {
         "No groups",
         "Không tìm được nhóm."
     )
-    val searchCity = Translation(
-        "Search Ho Chi Minh City",
-        "Tìm kiếm trong TP. Hồ Chí Mình"
-    )
-    val chooseYourCity = Translation(
-        "Choose your city",
-        "Chọn thành phố"
-    )
     val search = Translation(
         "Search",
         "Tìm kiếm"

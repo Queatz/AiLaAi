@@ -16,7 +16,6 @@ import app.widget.WidgetStyles
 import components.AppFooter
 import components.AppHeader
 import components.CardPage
-import components.CitiesPage
 import components.InfoPage
 import components.NotificationsLayout
 import components.PrivacyPage
@@ -252,14 +251,6 @@ fun main() {
                         InfoPage(page)
                         AppFooter()
                     }
-                }
-
-                route("cities") {
-                    AppHeader(appString { chooseYourCity }, showBack = true) {
-                        router.navigate("/")
-                    }
-                    CitiesPage()
-                    AppFooter()
                 }
 
                 route("privacy") {

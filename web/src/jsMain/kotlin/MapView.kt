@@ -210,7 +210,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                                         backgroundImage("url(\"$baseUrl/${card.npc!!.photo}\")")
                                         backgroundPosition("center")
                                         backgroundSize("contain")
-                                    } else {
+                                    } else if (!card.photo.isNullOrBlank()) {
                                         width(16.r)
                                         height(16.r)
                                         borderRadius(16.r)
