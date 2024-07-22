@@ -31,6 +31,8 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Man
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Payments
@@ -168,10 +170,12 @@ import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
 
 private val showGeneratingMessage = booleanPreferencesKey("ui.showGeneratingMessage")
+private val showMyCardTools = booleanPreferencesKey("ui.showMyCardTools")
 
 @Composable
 fun CardScreen(cardId: String) {
     var isLoading by rememberStateOf(false)
+    var showTools by rememberStateOf(true)
     var notFound by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showManageMenu by rememberStateOf(false)
@@ -367,6 +371,23 @@ fun CardScreen(cardId: String) {
                     showGeneratingPhotoDialog = true
                 }
                 oldPhoto = card?.photo ?: ""
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        showTools = context.dataStore.data.first().let {
+            it[showMyCardTools] ?: true
+        }
+    }
+
+    fun toggleShowTools() {
+        scope.launch {
+            showTools = context.dataStore.data.first().let {
+                it[showMyCardTools]?.not() ?: false
+            }
+            context.dataStore.edit {
+                it[showMyCardTools] = showTools
             }
         }
     }
@@ -675,6 +696,13 @@ fun CardScreen(cardId: String) {
                 actions = {
                     card?.let { card ->
                         if (!slideshowActive) {
+                            if (isMine) {
+                                IconButton({
+                                    toggleShowTools()
+                                }) {
+                                    Icon(if (showTools) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, stringResource(R.string.tools))
+                                }
+                            }
                             IconButton({
                                 scope.launch {
                                     when (saves.toggleSave(card)) {
@@ -850,111 +878,113 @@ fun CardScreen(cardId: String) {
                         var active by remember { mutableStateOf(card.active ?: false) }
                         var activeCommitted by remember { mutableStateOf(active) }
 
-                        CardToolbar(
-                            modifier = Modifier.padding(bottom = 1.pad)
-                        ) {
-                            item(
-                                if (active) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
-                                if (activeCommitted) stringResource(R.string.posted) else stringResource(R.string.not_posted),
-                                selected = active
+                        AnimatedVisibility(showTools) {
+                            CardToolbar(
+                                modifier = Modifier.padding(bottom = 1.pad)
                             ) {
-                                active = !active
-                                scope.launch {
-                                    api.updateCard(card.id!!, Card(active = active)) {
-                                        card.active = it.active
-                                        activeCommitted = it.active ?: false
-                                        active = activeCommitted
+                                item(
+                                    if (active) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                                    if (activeCommitted) stringResource(R.string.posted) else stringResource(R.string.not_posted),
+                                    selected = active
+                                ) {
+                                    active = !active
+                                    scope.launch {
+                                        api.updateCard(card.id!!, Card(active = active)) {
+                                            card.active = it.active
+                                            activeCommitted = it.active ?: false
+                                            active = activeCommitted
+                                        }
                                     }
                                 }
-                            }
 
-                            item(
-                                Icons.Outlined.Place,
-                                when {
-                                    card.parent != null -> stringResource(R.string.inside_another_card)
-                                    card.group != null -> stringResource(R.string.in_a_group)
-                                    card.equipped == true -> stringResource(R.string.on_profile)
-                                    card.offline != true -> stringResource(R.string.at_a_location)
-                                    else -> stringResource(R.string.none)
-                                },
-                                selected = when {
-                                    card.parent != null -> true
-                                    card.group != null -> true
-                                    card.equipped == true -> true
-                                    card.offline != true -> true
-                                    else -> false
+                                item(
+                                    Icons.Outlined.Place,
+                                    when {
+                                        card.parent != null -> stringResource(R.string.inside_another_card)
+                                        card.group != null -> stringResource(R.string.in_a_group)
+                                        card.equipped == true -> stringResource(R.string.on_profile)
+                                        card.offline != true -> stringResource(R.string.at_a_location)
+                                        else -> stringResource(R.string.none)
+                                    },
+                                    selected = when {
+                                        card.parent != null -> true
+                                        card.group != null -> true
+                                        card.equipped == true -> true
+                                        card.offline != true -> true
+                                        else -> false
+                                    }
+                                ) {
+                                    openLocationDialog = true
                                 }
-                            ) {
-                                openLocationDialog = true
-                            }
 
-                            item(
-                                Icons.Outlined.Edit,
-                                stringResource(R.string.edit)
-                            ) {
-                                openEditDialog = true
-                            }
+                                item(
+                                    Icons.Outlined.Edit,
+                                    stringResource(R.string.edit)
+                                ) {
+                                    openEditDialog = true
+                                }
 
-                            item(
-                                Icons.Outlined.CameraAlt,
-                                stringResource(R.string.set_photo),
-                                isLoading = isGeneratingPhoto
-                            ) {
-                                showPhotoDialog = true
-                            }
+                                item(
+                                    Icons.Outlined.CameraAlt,
+                                    stringResource(R.string.set_photo),
+                                    isLoading = isGeneratingPhoto
+                                ) {
+                                    showPhotoDialog = true
+                                }
 
-                            item(
-                                Icons.Outlined.AutoAwesome,
-                                stringResource(R.string.generate_photo),
-                                isLoading = oldPhoto != null
-                            ) {
-                                regeneratePhoto()
-                                showMenu = false
-                            }
+                                item(
+                                    Icons.Outlined.AutoAwesome,
+                                    stringResource(R.string.generate_photo),
+                                    isLoading = oldPhoto != null
+                                ) {
+                                    regeneratePhoto()
+                                    showMenu = false
+                                }
 
-                            val category = card.categories?.firstOrNull()
-                            item(
-                                Icons.Outlined.Category,
-                                category ?: stringResource(R.string.set_category),
-                                selected = category != null
-                            ) {
-                                showSetCategory = true
-                                showMenu = false
-                            }
+                                val category = card.categories?.firstOrNull()
+                                item(
+                                    Icons.Outlined.Category,
+                                    category ?: stringResource(R.string.set_category),
+                                    selected = category != null
+                                ) {
+                                    showSetCategory = true
+                                    showMenu = false
+                                }
 
-                            item(
-                                Icons.Outlined.Wallpaper,
-                                stringResource(R.string.background),
-                                selected = !card.background.isNullOrBlank(),
-                                isLoading = isGeneratingBackground
-                            ) {
-                                showBackgroundDialog = true
-                            }
+                                item(
+                                    Icons.Outlined.Wallpaper,
+                                    stringResource(R.string.background),
+                                    selected = !card.background.isNullOrBlank(),
+                                    isLoading = isGeneratingBackground
+                                ) {
+                                    showBackgroundDialog = true
+                                }
 
-                            item(
-                                Icons.Outlined.Payments,
-                                stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay),
-                                selected = card.pay != null
-                            ) {
-                                showPay = true
-                                showMenu = false
-                            }
+                                item(
+                                    Icons.Outlined.Payments,
+                                    stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay),
+                                    selected = card.pay != null
+                                ) {
+                                    showPay = true
+                                    showMenu = false
+                                }
 
-                            item(
-                                Icons.Outlined.Man,
-                                stringResource(if (card.npc == null) R.string.add_npc else R.string.npc),
-                                selected = card.npc != null
-                            ) {
-                                showNpc = true
-                                showMenu = false
-                            }
+                                item(
+                                    Icons.Outlined.Man,
+                                    stringResource(if (card.npc == null) R.string.add_npc else R.string.npc),
+                                    selected = card.npc != null
+                                ) {
+                                    showNpc = true
+                                    showMenu = false
+                                }
 
-                            item(
-                                Icons.Outlined.AddBox,
-                                stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
-                                selected = card.content?.notBlank != null
-                            ) {
-                                nav.navigate(AppNav.EditCard(card.id!!))
+                                item(
+                                    Icons.Outlined.AddBox,
+                                    stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
+                                    selected = card.content?.notBlank != null
+                                ) {
+                                    nav.navigate(AppNav.EditCard(card.id!!))
+                                }
                             }
                         }
                     }
