@@ -457,34 +457,43 @@ enum class ReportType {
 
 @Serializable
 data class Bot(
-    val url: String? = null,
-    val name: String? = null,
-    val photo: String? = null,
-    val creator: String? = null,
-    val description: String? = null,
-    val keywords: List<String>? = null,
-    val config: String? = null
+    var url: String? = null,
+    var name: String? = null,
+    var photo: String? = null,
+    var creator: String? = null,
+    var description: String? = null,
+    var keywords: List<String>? = null,
+    var config: List<BotConfigField>? = null
 ) : Model()
 
 @Serializable
 data class BotData(
-    val bot: String? = null,
-    val secret: String? = null
+    var bot: String? = null,
+    var secret: String? = null
 ) : Model()
 
 @Serializable
+data class BotConfigValue(
+    var key: String? = null,
+    var value: String? = null
+)
+
+@Serializable
 data class BotConfigField(
-    val key: String? = null,
-    val value: String? = null
+    var key: String? = null,
+    var label: String? = null,
+    var placeholder: String? = null,
+    var type: String? = null,
+    var required: Boolean? = null
 )
 
 @Serializable
 data class GroupBot(
-    val group: String? = null,
-    val bot: String? = null,
-    val config: List<BotConfigField>? = null,
-    val webhook: String? = null,
-    val active: Boolean? = null
+    var group: String? = null,
+    var bot: String? = null,
+    var config: List<BotConfigValue>? = null,
+    var webhook: String? = null,
+    var active: Boolean? = null
 ) : Model()
 
 @Serializable

@@ -273,3 +273,8 @@ data class AppStats(
 data class StatsHealth(
     val diskUsagePercent: Double
 )
+
+@Serializable
+data class CreateBotBody(
+    val url: String
+)
