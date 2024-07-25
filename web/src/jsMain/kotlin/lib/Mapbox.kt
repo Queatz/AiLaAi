@@ -39,11 +39,14 @@ external object mapboxgl {
         fun remove()
         fun getCenter(): LngLat
         fun getZoom(): Double
+        fun getPitch(): Double
         fun getFreeCameraOptions(): dynamic
         fun on(event: String, block: () -> Unit)
     }
 
-    class GeolocateControl(options: dynamic = definedExternally)
+    class GeolocateControl(options: dynamic = definedExternally) {
+        fun trigger()
+    }
 }
 
 fun mapboxgl.Map.getCameraLngLat(): mapboxgl.LngLat = getFreeCameraOptions().position.toLngLat() ?: getCenter()

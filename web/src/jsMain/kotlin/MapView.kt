@@ -71,6 +71,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     var markers by remember { mutableStateOf(emptyList<mapboxgl.Marker>()) }
     var selectedCard by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
+    val hasHash = remember { window.location.hash.isBlank() }
 
     LaunchedEffect(geo, searchText) {
         geo ?: return@LaunchedEffect
@@ -242,19 +243,29 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         }
 
         ref { ref ->
+            val locateMeControl = mapboxgl.GeolocateControl()
+
             val options: mapboxgl.MapOptions = js("{}")
             options.container = ref
             options.boxZoom = false
             options.hash = true
             map = mapboxgl.Map(options).apply {
-                addControl(mapboxgl.GeolocateControl(), "bottom-right")
+                addControl(locateMeControl, "bottom-right")
 
                 on("load") {
                     geo = getCameraLngLat().let { Geo(it.lat, it.lng) }
+
+                    if (hasHash) {
+                        locateMeControl.trigger()
+                    }
                 }
 
                 on("moveend") {
-                    geo = getCameraLngLat().let { Geo(it.lat, it.lng) }
+                    geo = if (getPitch() > 60.0) {
+                        map!!.getCenter()
+                    } else {
+                        getCameraLngLat()
+                    }.let { Geo(it.lat, it.lng) }
                 }
 
                 on("render") {
