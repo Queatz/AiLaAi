@@ -384,23 +384,61 @@ fun Route.groupRoutes() {
         }
 
         get("/groups/{id}/bots") {
-
+            respond {
+                db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                db.botsOfGroup(parameter("id"))
+            }
         }
 
         post("/groups/{id}/bots") {
+            respond {
+                val group = db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val member = db.member(me.id!!, group.group!!.id!!)
 
-        }
+                if (member?.host != true) {
+                    return@respond HttpStatusCode.BadRequest
+                }
 
-        get("/groups/{group}/bots/{bot}") {
+                val groupBot = call.receive<GroupBot>()
 
-        }
+                val bot = db.document(Bot::class, groupBot.bot!!)
+                    ?: return@respond HttpStatusCode.BadRequest.description("Bot not found")
 
-        post("/groups/{group}/bots/{bot}") {
+                val botData = db.botData(bot.id!!)
 
-        }
+                val groupBotData = db.groupBotData(groupBot.id!!)
+                    ?: return@respond HttpStatusCode.BadRequest.description("Group bot data not found")
 
-        post("/groups/{group}/bots/{bot}/delete") {
+                val webhook = (0..255).token()
 
+                val installResponse = bots.install(
+                    url = bot.url!!,
+                    body = InstallBotBody(
+                        groupId = group.group!!.id!!,
+                        groupName = group.group!!.name!!,
+                        webhook = groupBotData.webhook!!,
+                        config = groupBot.config,
+                        secret = botData?.secret,
+                    )
+                )
+
+                db.insert(
+                    GroupBot(
+                        group = group.group!!.id!!,
+                        bot = groupBot.bot,
+                        config = groupBot.config,
+                        active = true
+                    )
+                ).also { groupBot ->
+                    db.insert(
+                        GroupBotData(
+                            groupBot = groupBot.id!!,
+                            webhook = webhook,
+                            authToken = installResponse.token!!
+                        )
+                    )
+                }
+            }
         }
     }
 }

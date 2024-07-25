@@ -275,6 +275,6 @@ data class StatsHealth(
 )
 
 @Serializable
-data class CreateBotBody(
+data class BotDetailsBody(
     val url: String
 )

@@ -89,11 +89,12 @@ class Call {
     private var videoSdkEndpoint = "https://api.videosdk.live/v2"
 
     private val http = HttpClient(Java) {
+        expectSuccess = true
+
         engine {
             protocolVersion = HttpClient.Version.HTTP_2
         }
         install(ContentNegotiation) {
-            expectSuccess = true
             json(json)
         }
     }

@@ -1,7 +1,9 @@
 package com.queatz.api
 
 import com.queatz.db.Bot
-import com.queatz.db.CreateBotBody
+import com.queatz.db.BotData
+import com.queatz.db.BotDetailsBody
+import com.queatz.db.botData
 import com.queatz.db.bots
 import com.queatz.parameter
 import com.queatz.plugins.bots
@@ -26,7 +28,14 @@ fun Route.botRoutes() {
 
         post("bots") {
             respond {
-                val body = call.receive<CreateBotBody>()
+                val body = call.receive<BotDetailsBody>()
+
+                val url = body.url.trimEnd('/')
+
+                if (!url.startsWith("https://", ignoreCase = true)) {
+                    return@respond HttpStatusCode.BadRequest.description("Param 'url' must begin with \"https://\"")
+                }
+
                 val botDetails = bots.details(body.url)
 
                 db.insert(
@@ -100,6 +109,42 @@ fun Route.botRoutes() {
                 db.delete(bot)
 
                 HttpStatusCode.NoContent
+            }
+        }
+
+        get("bots/{id}/data") {
+            respond {
+                val bot = db.document(Bot::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                if (bot.creator != me.id!!) {
+                    return@respond HttpStatusCode.BadRequest
+                }
+
+                db.botData(parameter("id")) ?: BotData().let {
+                    db.insert(it)
+                }
+            }
+        }
+
+        post("bots/{id}/data") {
+            respond {
+                val bot = db.document(Bot::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                if (bot.creator != me.id!!) {
+                    return@respond HttpStatusCode.BadRequest
+                }
+
+                val botData = db.botData(parameter("id")) ?: BotData().let {
+                    db.insert(it)
+                }
+
+                val update = call.receive<BotData>()
+
+                if (update.secret != null) {
+                    botData.secret = update.secret
+                }
+
+                db.update(botData)
             }
         }
     }

@@ -11,3 +11,39 @@ fun Db.bots(person: String) = list(
         "person" to person
     )
 )
+
+fun Db.botsOfGroup(group: String) = list(
+    GroupBot::class,
+    """
+        for groupBot in @@collection
+            filter groupBot.${f(GroupBot::group)} == @group
+            return groupBot
+    """.trimIndent(),
+    mapOf(
+        "group" to group
+    )
+)
+
+fun Db.botData(bot: String) = one(
+    BotData::class,
+    """
+        for botData in @@collection
+            filter botData.${f(BotData::bot)} == @bot
+            return botData
+    """.trimIndent(),
+    mapOf(
+        "bot" to bot
+    )
+)
+
+fun Db.groupBotData(groupBot: String) = one(
+    GroupBotData::class,
+    """
+        for groupBotData in @@collection
+            filter groupBotData.${f(GroupBotData::groupBot)} == @groupBot
+            return groupBotData
+    """.trimIndent(),
+    mapOf(
+        "groupBot" to groupBot
+    )
+)

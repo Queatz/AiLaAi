@@ -492,8 +492,14 @@ data class GroupBot(
     var group: String? = null,
     var bot: String? = null,
     var config: List<BotConfigValue>? = null,
-    var webhook: String? = null,
     var active: Boolean? = null
+) : Model()
+
+@Serializable
+data class GroupBotData(
+    var groupBot: String? = null,
+    var authToken: String? = null,
+    var webhook: String? = null,
 ) : Model()
 
 @Serializable

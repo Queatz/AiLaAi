@@ -28,6 +28,8 @@ private val json = Json {
 }
 
 val scriptHttpClient = HttpClient(Java) {
+    expectSuccess = true
+
     engine {
         protocolVersion = java.net.http.HttpClient.Version.HTTP_2
     }
@@ -36,7 +38,6 @@ val scriptHttpClient = HttpClient(Java) {
         requestTimeoutMillis = 1.minutes.inWholeMilliseconds
     }
     install(ContentNegotiation) {
-        expectSuccess = true
         json(json)
     }
 }
