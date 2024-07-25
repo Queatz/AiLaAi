@@ -280,8 +280,16 @@ class Message(
     var member: String? = null,
     var text: String? = null,
     var attachment: String? = null,
-    var attachments: List<String>? = null
+    var attachments: List<String>? = null,
+    var bots: List<BotMessageStatus>? = null
 ) : Model()
+
+@Serializable
+data class BotMessageStatus(
+    val bot: String? = null,
+    val success: Boolean? = null,
+    val note: String? = null
+)
 
 @Serializable
 class Sticker(
@@ -446,6 +454,38 @@ enum class ReportType {
     Spam,
     Other
 }
+
+@Serializable
+data class Bot(
+    val url: String? = null,
+    val name: String? = null,
+    val photo: String? = null,
+    val creator: String? = null,
+    val description: String? = null,
+    val keywords: List<String>? = null,
+    val config: String? = null
+) : Model()
+
+@Serializable
+data class BotData(
+    val bot: String? = null,
+    val secret: String? = null
+) : Model()
+
+@Serializable
+data class BotConfigField(
+    val key: String? = null,
+    val value: String? = null
+)
+
+@Serializable
+data class GroupBot(
+    val group: String? = null,
+    val bot: String? = null,
+    val config: List<BotConfigField>? = null,
+    val webhook: String? = null,
+    val active: Boolean? = null
+) : Model()
 
 @Serializable
 data class PlatformConfig(

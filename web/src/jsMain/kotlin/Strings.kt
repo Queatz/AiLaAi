@@ -830,6 +830,10 @@ object Strings {
         "Platform",
         "Nền tảng"
     )
+    val bots = Translation(
+        "Bots",
+        "Bot"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

@@ -23,6 +23,7 @@ class GroupExtended(
     var group: Group? = null,
     var members: List<MemberAndPerson>? = null,
     var cardCount: Int? = null,
+    var botCount: Int? = null,
     var latestMessage: Message? = null
 )
 

@@ -255,5 +255,6 @@ fun Db.groupExtended(groupVar: String = "group") = """{
             limit 1
             return message
     ),
-    ${f(GroupExtended::cardCount)}: count(for groupCard in `${Card::class.collection()}` filter groupCard.${f(Card::active)} == true and groupCard.${f(Card::group)} == $groupVar._key return true)
+    ${f(GroupExtended::cardCount)}: count(for groupCard in `${Card::class.collection()}` filter groupCard.${f(Card::active)} == true and groupCard.${f(Card::group)} == $groupVar._key return true),
+    ${f(GroupExtended::botCount)}: count(for groupBot in `${GroupBot::class.collection()}` filter groupBot.${f(GroupBot::active)} == true and groupBot.${f(GroupBot::group)} == $groupVar._key return true)
 }"""

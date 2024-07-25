@@ -152,5 +152,16 @@ fun collections() = listOf(
         ensureFulltextIndex(listOf(Comment::comment.name), FulltextIndexOptions())
     },
     PlatformConfig::class.db {
+    },
+    Bot::class.db {
+        ensurePersistentIndex(listOf(Bot::name.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Bot::creator.name), PersistentIndexOptions())
+    },
+    BotData::class.db {
+        ensurePersistentIndex(listOf(BotData::bot.name), PersistentIndexOptions())
+    },
+    GroupBot::class.db {
+        ensurePersistentIndex(listOf(GroupBot::bot.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GroupBot::group.name), PersistentIndexOptions())
     }
 )

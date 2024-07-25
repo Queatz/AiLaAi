@@ -382,6 +382,26 @@ fun Route.groupRoutes() {
                 }
             }
         }
+
+        get("/groups/{id}/bots") {
+
+        }
+
+        post("/groups/{id}/bots") {
+
+        }
+
+        get("/groups/{group}/bots/{bot}") {
+
+        }
+
+        post("/groups/{group}/bots/{bot}") {
+
+        }
+
+        post("/groups/{group}/bots/{bot}/delete") {
+
+        }
     }
 }
 

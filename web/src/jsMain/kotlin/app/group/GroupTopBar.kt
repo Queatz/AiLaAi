@@ -1,12 +1,22 @@
 package app.group
 
-import Strings.settings
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.PageTopBar
-import app.ailaai.api.*
+import app.ailaai.api.createMember
+import app.ailaai.api.newCard
+import app.ailaai.api.removeMember
+import app.ailaai.api.updateGroup
+import app.ailaai.api.updateMember
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.InlineMenu
@@ -17,23 +27,45 @@ import appString
 import appText
 import application
 import call
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.Effect
+import com.queatz.db.Group
+import com.queatz.db.GroupConfig
+import com.queatz.db.GroupEditsConfig
+import com.queatz.db.GroupExtended
+import com.queatz.db.GroupMessagesConfig
+import com.queatz.db.JoinRequestAndPerson
+import com.queatz.db.Member
+import com.queatz.db.Person
+import com.queatz.db.RainEffect
 import components.IconButton
 import components.LinkifyText
 import joins
 import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import lib.formatDistanceToNow
 import notBlank
-import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflowX
+import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.vh
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
-import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.RangeInput
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
@@ -65,6 +97,14 @@ fun GroupTopBar(
 
     var showDescription by remember(group) {
         mutableStateOf(true)
+    }
+
+    fun showBots() {
+        if ((group.botCount ?: 0) > 0) {
+            // view bots
+        } else {
+            // add bot
+        }
     }
 
     fun renameGroup() {
@@ -321,6 +361,9 @@ fun GroupTopBar(
                     groupMembersDialog(group)
                 }
             }
+            item(appString { bots }) {
+                showBots()
+            }
             item(appString { this.cards }) {
                 onShowCards()
             }
@@ -525,6 +568,18 @@ fun GroupTopBar(
                         }
                     ) {
                         onShowCards()
+                    }
+                }
+                group.botCount?.takeIf { it > 0 }?.let {
+                    IconButton(
+                        name = "smart_toy",
+                        title = appString { bots },
+                        count = it,
+                        styles = {
+                            marginRight(.5.r)
+                        }
+                    ) {
+                        showBots()
                     }
                 }
             }

@@ -35,6 +35,8 @@ fun Application.configureRouting() {
         cardRoutes()
         categoryRoutes()
         groupRoutes()
+        botRoutes()
+        botWebhookRoutes()
         peopleRoutes()
         profileRoutes()
         reminderRoutes()
