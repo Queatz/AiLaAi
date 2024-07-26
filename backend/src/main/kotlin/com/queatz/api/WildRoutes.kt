@@ -8,7 +8,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.Clock
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 
 fun Route.wildRoutes() {
@@ -64,7 +63,7 @@ fun Route.wildRoutes() {
 
                 notify.message(
                     group = group,
-                    from = wildPerson,
+                    person = wildPerson,
                     message = Message(text = wildReply.message.ellipsize())
                 )
 

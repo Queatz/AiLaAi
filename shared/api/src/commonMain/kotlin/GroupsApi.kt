@@ -4,7 +4,6 @@ import com.queatz.db.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 
 suspend fun Api.messages(
@@ -24,7 +23,6 @@ suspend fun Api.groupCards(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Card>>,
 ) = get("groups/$group/cards", onError = onError, onSuccess = onSuccess)
-
 
 suspend fun Api.messagesBefore(
     group: String,

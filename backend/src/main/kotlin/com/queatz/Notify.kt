@@ -1,13 +1,43 @@
 package com.queatz
 
 import com.queatz.api.ellipsize
-import com.queatz.db.*
+import com.queatz.db.Bot
 import com.queatz.db.Call
+import com.queatz.db.Comment
+import com.queatz.db.Group
+import com.queatz.db.JoinRequest
+import com.queatz.db.Member
+import com.queatz.db.MemberDevice
+import com.queatz.db.Message
+import com.queatz.db.Person
+import com.queatz.db.Reminder
+import com.queatz.db.ReminderOccurrence
+import com.queatz.db.Story
+import com.queatz.db.Trade
+import com.queatz.db.asId
+import com.queatz.db.asKey
+import com.queatz.db.memberDevices
+import com.queatz.db.peopleDevices
 import com.queatz.plugins.db
 import com.queatz.plugins.push
-import com.queatz.push.*
+import com.queatz.push.CallPushData
+import com.queatz.push.CallStatusPushData
+import com.queatz.push.CommentPushData
+import com.queatz.push.CommentReplyPushData
+import com.queatz.push.GroupEvent
+import com.queatz.push.GroupEventData
+import com.queatz.push.GroupPushData
+import com.queatz.push.JoinRequestEvent
+import com.queatz.push.JoinRequestPushData
+import com.queatz.push.MessagePushData
+import com.queatz.push.PushAction
+import com.queatz.push.PushData
+import com.queatz.push.ReminderPushData
+import com.queatz.push.StoryEvent
+import com.queatz.push.StoryPushData
+import com.queatz.push.TradeEvent
+import com.queatz.push.TradePushData
 import kotlinx.datetime.Clock
-import java.util.logging.Logger
 
 class Notify {
     fun trade(trade: Trade, person: Person, people: List<Person>? = null, event: TradeEvent) {
@@ -162,23 +192,36 @@ class Notify {
         notifyPeople(listOf(onComment.from!!.asKey()), pushData)
     }
 
-    fun message(group: Group, from: Person, message: Message) {
+    fun message(
+        group: Group,
+        person: Person? = null,
+        bot: Bot? = null,
+        message: Message
+    ) {
         val pushData = PushData(
             PushAction.Message,
             MessagePushData(
-                Group().apply {
+                group = Group().apply {
                     id = group.id
                     name = group.name
                 },
-                Person().apply {
-                    name = from.name
-                    id = from.id
+                person = person?.let {
+                    Person().apply {
+                        name = person.name
+                        id = person.id
+                    }
                 },
-                message
+                bot = bot?.let {
+                    Bot().apply {
+                        name = bot.name
+                        id = bot.id
+                    }
+                },
+                message = message
             )
         )
 
-        notifyGroupMembers(from, group, pushData)
+        notifyGroupMembers(person, group, pushData)
     }
 
     fun newJoinRequest(person: Person, joinRequest: JoinRequest, group: Group) {

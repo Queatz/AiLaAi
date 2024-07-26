@@ -66,7 +66,8 @@ sealed class PushDataData
 @Serializable
 data class MessagePushData(
     val group: Group,
-    val person: Person,
+    val person: Person? = null,
+    val bot: Bot? = null,
     val message: Message,
     val show: Boolean? = null
 ) : PushDataData()

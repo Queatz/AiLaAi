@@ -265,7 +265,7 @@ fun Route.groupRoutes() {
                     )
 
                     urlAttachmentFetcher.handle(newMessage)
-
+                    bots.notify(newMessage)
                     updateSeen(me, member, group)
                     notifyMessage(me, group, newMessage)
 
@@ -386,11 +386,11 @@ fun Route.groupRoutes() {
         get("/groups/{id}/bots") {
             respond {
                 db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
-                db.botsOfGroup(parameter("id"))
+                db.groupBotsOfGroup(parameter("id"))
             }
         }
 
-        post("/groups/{id}/bots") {
+        post("/groups/{id}/bots") {2
             respond {
                 val group = db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
                 val member = db.member(me.id!!, group.group!!.id!!)
@@ -434,7 +434,7 @@ fun Route.groupRoutes() {
                         GroupBotData(
                             groupBot = groupBot.id!!,
                             webhook = webhook,
-                            authToken = installResponse.token!!
+                            authToken = installResponse.token
                         )
                     )
                 }
@@ -454,7 +454,14 @@ fun GroupExtended.forApi() = also {
 }
 
 private fun notifyMessage(me: Person, group: Group, message: Message) {
-    notify.message(group, me, Message(text = message.text?.ellipsize(), attachment = message.attachment))
+    notify.message(
+        group = group,
+        person = me,
+        message = Message(
+            text = message.text?.ellipsize(),
+            attachment = message.attachment
+        )
+    )
 }
 
 private fun updateSeen(me: Person, member: Member, group: Group) {

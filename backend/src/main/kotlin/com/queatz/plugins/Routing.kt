@@ -26,6 +26,7 @@ fun Application.configureRouting() {
     groupCall.start(this)
     remind.start(this)
     urlAttachmentFetcher.start(this)
+    bots.start(this)
 
     routing {
         get("/hi") { call.respondText("{\"hi\": true}", contentType = ContentType.Application.Json) }

@@ -135,7 +135,7 @@ fun Route.storyRoutes() {
 
                             notify.message(
                                 group = group,
-                                from = me,
+                                person = me,
                                 message = Message(text = null, attachment = attachment)
                             )
 

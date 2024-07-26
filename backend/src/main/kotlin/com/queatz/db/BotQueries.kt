@@ -12,7 +12,7 @@ fun Db.bots(person: String) = list(
     )
 )
 
-fun Db.botsOfGroup(group: String) = list(
+fun Db.groupBotsOfGroup(group: String) = list(
     GroupBot::class,
     """
         for groupBot in @@collection

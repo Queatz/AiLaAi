@@ -1,7 +1,15 @@
 package com.queatz
 
+import com.queatz.api.ellipsize
+import com.queatz.db.Bot
 import com.queatz.db.BotConfigField
 import com.queatz.db.BotConfigValue
+import com.queatz.db.BotMessageStatus
+import com.queatz.db.Group
+import com.queatz.db.Message
+import com.queatz.db.groupBotData
+import com.queatz.db.groupBotsOfGroup
+import com.queatz.plugins.db
 import com.queatz.plugins.json
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -13,6 +21,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
 
@@ -61,6 +71,8 @@ data class MessageBotBody(
 )
 
 class Bots {
+
+    private lateinit var coroutineScope: CoroutineScope
     private val http = HttpClient(CIO) {
         expectSuccess = true
 
@@ -71,6 +83,10 @@ class Bots {
         engine {
             requestTimeout = 2.minutes.inWholeMilliseconds
         }
+    }
+
+    fun start(coroutineScope: CoroutineScope) {
+        this.coroutineScope = coroutineScope
     }
 
     suspend fun details(url: String): BotDetails = http.get(url).body()
@@ -96,4 +112,75 @@ class Bots {
             bearerAuth(authToken)
             setBody(body)
         }.body()
+
+    fun notify(message: Message) {
+        coroutineScope.launch {
+            db.groupBotsOfGroup(message.group!!).forEach { groupBot ->
+                val bot = db.document(Bot::class, groupBot.bot!!) ?: let {
+                    print("Bot not found: GroupBot(id = ${groupBot.id!!})")
+                    return@forEach
+                }
+
+                val authToken = db.groupBotData(groupBot.id!!)?.authToken ?: let {
+                    print("GroupBotData not found: GroupBot(id = ${groupBot.id!!})")
+                    return@forEach
+                }
+
+                val group = db.document(Group::class, message.group!!)
+                    ?: let {
+                        println("Group not found")
+                        return@forEach
+                    }
+
+                val text = message.text.orEmpty().lowercase()
+
+                val matches = bot.keywords.isNullOrEmpty() || bot.keywords?.any { keyword ->
+                    text.contains(keyword, ignoreCase = true)
+                } == true
+
+                if (!matches) {
+                    return@forEach
+                }
+
+                val response = message(
+                    url = bot.url!!,
+                    authToken = authToken,
+                    body = MessageBotBody(message = message.text.orEmpty())
+                )
+
+                db.document(Message::class, message.id!!)?.let {
+                    db.update(
+                        it.apply {
+                            bots = (bots ?: emptyList()) + BotMessageStatus(
+                                bot = bot.id!!,
+                                success = response.success ?: true,
+                                note = response.note
+                            )
+                        }
+                    )
+                }
+
+                response.actions?.forEach { action ->
+                    handle(action, group, bot)
+                }
+            }
+        }
+    }
+
+    private fun handle(action: BotAction, group: Group, bot: Bot) {
+        action.message?.let { actionMessage ->
+            val botMessage = db.insert(
+                Message(
+                    group = group.id!!,
+                    bot = bot.id!!,
+                    text = actionMessage
+                )
+            )
+            com.queatz.plugins.notify.message(
+                group = group,
+                bot = bot,
+                message = Message(text = botMessage.text?.ellipsize())
+            )
+        }
+    }
 }

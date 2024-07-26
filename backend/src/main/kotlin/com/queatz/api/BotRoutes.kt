@@ -108,6 +108,12 @@ fun Route.botRoutes() {
 
                 db.delete(bot)
 
+                db.botData(bot.id!!)?.let {
+                    db.delete(it)
+                }
+
+                // todo: delete all GroupBot, GroupBotData
+
                 HttpStatusCode.NoContent
             }
         }

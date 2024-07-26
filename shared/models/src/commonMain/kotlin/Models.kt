@@ -281,6 +281,7 @@ class Message(
     var text: String? = null,
     var attachment: String? = null,
     var attachments: List<String>? = null,
+    var bot: String? = null,
     var bots: List<BotMessageStatus>? = null
 ) : Model()
 

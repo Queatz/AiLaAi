@@ -86,6 +86,8 @@ fun Route.groupBotRoutes() {
                     val groupBotData = db.groupBotData(groupBot.id!!)
                         ?: throw Exception("Group bot data doesn't exist")
 
+                    db.delete(groupBotData)
+
                     bots.uninstall(
                         url = bot.url!!,
                         authToken = groupBotData.authToken!!
