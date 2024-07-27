@@ -92,7 +92,7 @@ object AppStyles : StyleSheet() {
         backgroundColor(Color.white)
         borderRadius(1.r)
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
-        position(Position.Absolute)
+        position(Position.Fixed)
         property("z-index", "102")
         property("transform", "translateX(-100%)")
         property("user-select", "none")

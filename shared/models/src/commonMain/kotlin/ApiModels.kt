@@ -276,5 +276,6 @@ data class StatsHealth(
 
 @Serializable
 data class BotDetailsBody(
-    val url: String
+    val url: String,
+    val photo: String? = null,
 )

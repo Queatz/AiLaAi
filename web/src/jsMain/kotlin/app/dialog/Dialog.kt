@@ -7,18 +7,29 @@ import kotlinx.browser.document
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import org.jetbrains.compose.web.attributes.autoFocus
+import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.CSSSizeValue
 import org.jetbrains.compose.web.css.CSSUnit
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.dom.*
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDialogElement
+import r
 
 suspend fun dialog(
     title: String?,
-    confirmButton: String = application.appString { okay },
+    confirmButton: String? = application.appString { okay },
     cancelButton: String? = application.appString { cancel },
     cancellable: Boolean = true,
     maxWidth: CSSSizeValue<out CSSUnit>? = null,
+    actions: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
+    extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     content: @Composable (resolve: (Boolean?) -> Unit) -> Unit = {}
 ): Boolean? {
     val result = CompletableDeferred<Boolean?>()
@@ -48,11 +59,23 @@ suspend fun dialog(
             }
         }
     }
+
     document.body?.appendChild(dialog)
+
     renderComposable(dialog) {
-        if (title.isNullOrBlank().not()) {
-            Header {
+        if (title.isNullOrBlank().not() || actions != null) {
+            Header({
+                style {
+                    display(DisplayStyle.Flex)
+                    alignItems(AlignItems.Center)
+                    justifyContent(JustifyContent.SpaceBetween)
+                    gap(1.r)
+                }
+            }) {
                 Text(title ?: "")
+                actions?.invoke {
+                    result.complete(it)
+                }
             }
         }
         Section {
@@ -61,22 +84,24 @@ suspend fun dialog(
             }
         }
         Footer {
-            Button({
-                classes(Styles.button)
-                onClick {
-                    result.complete(true)
-                }
-
-                if (cancelButton == null) {
-                    autoFocus()
-
-                    ref {
-                        it.focus()
-                        onDispose {  }
+            if (confirmButton != null) {
+                Button({
+                    classes(Styles.button)
+                    onClick {
+                        result.complete(true)
                     }
+
+                    if (cancelButton == null) {
+                        autoFocus()
+
+                        ref {
+                            it.focus()
+                            onDispose {  }
+                        }
+                    }
+                }) {
+                    Text(confirmButton)
                 }
-            }) {
-                Text(confirmButton)
             }
             if (cancelButton != null) {
                 Button({
@@ -86,6 +111,19 @@ suspend fun dialog(
                     }
                 }) {
                     Text(cancelButton)
+                }
+            }
+            if (extraButtons != null) {
+                Div({
+                    style {
+                        flex(1)
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                    }
+                }) {
+                    extraButtons.invoke {
+                        result.complete(it)
+                    }
                 }
             }
         }

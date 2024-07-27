@@ -75,6 +75,10 @@ object Strings {
         "Delete",
         "Xóa bỏ"
     )
+    val remove = Translation(
+        "Remove",
+        "Bỏ"
+    )
     val inlineMember = Translation(
         "member",
         "thành viên"
@@ -833,6 +837,18 @@ object Strings {
     val bots = Translation(
         "Bots",
         "Bot"
+    )
+    val addBot = Translation(
+        "Add a bot",
+        "Thêm bot"
+    )
+    val createBot = Translation(
+        "Create bot",
+        "Tạo bot"
+    )
+    val openBot = Translation(
+        "Open bot",
+        "Mở bot"
     )
 }
 

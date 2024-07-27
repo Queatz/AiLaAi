@@ -17,6 +17,12 @@ import app.ailaai.api.newCard
 import app.ailaai.api.removeMember
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
+import app.bots.addBotDialog
+import app.bots.botHowToDialog
+import app.bots.createBotDialog
+import app.bots.createGroupBotDialog
+import app.bots.groupBotDialog
+import app.bots.groupBotsDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.InlineMenu
@@ -27,6 +33,7 @@ import appString
 import appText
 import application
 import call
+import com.queatz.db.Bot
 import com.queatz.db.Card
 import com.queatz.db.Effect
 import com.queatz.db.Group
@@ -99,11 +106,60 @@ fun GroupTopBar(
         mutableStateOf(true)
     }
 
+    fun createBot() {
+        scope.launch {
+            createBotDialog(this)
+        }
+    }
+
+    fun addBot(bot: Bot) {
+        scope.launch {
+            createGroupBotDialog(bot)
+        }
+    }
+
+    fun addABot() {
+        scope.launch {
+            addBotDialog(
+                onCreateBot = {
+                    createBot()
+                },
+                onBotHelp = {
+                    scope.launch {
+                        botHowToDialog()
+                    }
+                },
+                onAddBot = {
+                    addBot(it)
+                }
+            )
+        }
+    }
+
+    fun showBot(bot: Bot) {
+        scope.launch {
+            groupBotDialog(bot)
+        }
+    }
+
+    fun bots() {
+        scope.launch {
+            groupBotsDialog(
+                onAddBot = {
+                    addABot()
+                },
+                onBot = {
+                    showBot(it)
+                }
+            )
+        }
+    }
+
     fun showBots() {
-        if ((group.botCount ?: 0) > 0) {
-            // view bots
+        if ((group.botCount ?: 0) > 0 || true) {
+            bots()
         } else {
-            // add bot
+            addABot()
         }
     }
 
