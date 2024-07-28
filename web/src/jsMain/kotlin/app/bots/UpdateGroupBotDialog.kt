@@ -2,6 +2,7 @@ package app.bots
 
 import app.dialog.dialog
 import com.queatz.db.Bot
+import com.queatz.db.GroupBot
 import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -12,11 +13,14 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
 
-suspend fun createGroupBotDialog(bot: Bot) {
+suspend fun updateGroupBotDialog(
+    bot: Bot,
+    groupBot: GroupBot
+) {
     val result = dialog(
         title = bot.name!!,
         // todo: translate
-        confirmButton = "Add to group",
+        confirmButton = "Update",
     ) {
         Div({
             style {

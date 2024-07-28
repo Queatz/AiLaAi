@@ -30,7 +30,7 @@ suspend fun groupBotsDialog(
     onBot: (Bot) -> Unit,
 ) {
     dialog(
-        title = application.appString { bots },
+        title = application.appString { groupBots },
         confirmButton = application.appString { close },
         cancelButton = null,
         actions = {

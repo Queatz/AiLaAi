@@ -13,13 +13,22 @@ import kotlinx.coroutines.launch
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 
-suspend fun createBotDialog(scope: CoroutineScope) {
+suspend fun createBotDialog(
+    scope: CoroutineScope,
+    onBotHelp: () -> Unit
+) {
     val secret = mutableStateOf("")
 
     val url = inputDialog(
         title = application.appString { createBot },
         placeholder = "https://",
         confirmButton = application.appString { create },
+        extraButtons = {
+            // todo: translate
+            IconButton("help", "Bot specifications") {
+                onBotHelp()
+            }
+        },
         actions = {
             var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
 

@@ -23,6 +23,7 @@ import app.bots.createBotDialog
 import app.bots.createGroupBotDialog
 import app.bots.groupBotDialog
 import app.bots.groupBotsDialog
+import app.bots.updateGroupBotDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.InlineMenu
@@ -37,6 +38,7 @@ import com.queatz.db.Bot
 import com.queatz.db.Card
 import com.queatz.db.Effect
 import com.queatz.db.Group
+import com.queatz.db.GroupBot
 import com.queatz.db.GroupConfig
 import com.queatz.db.GroupEditsConfig
 import com.queatz.db.GroupExtended
@@ -108,7 +110,11 @@ fun GroupTopBar(
 
     fun createBot() {
         scope.launch {
-            createBotDialog(this)
+            createBotDialog(this) {
+                scope.launch {
+                    botHowToDialog()
+                }
+            }
         }
     }
 
@@ -118,16 +124,17 @@ fun GroupTopBar(
         }
     }
 
+    fun editBot(bot: Bot, groupBot: GroupBot) {
+        scope.launch {
+            updateGroupBotDialog(bot, groupBot)
+        }
+    }
+
     fun addABot() {
         scope.launch {
             addBotDialog(
                 onCreateBot = {
                     createBot()
-                },
-                onBotHelp = {
-                    scope.launch {
-                        botHowToDialog()
-                    }
                 },
                 onAddBot = {
                     addBot(it)
@@ -138,7 +145,19 @@ fun GroupTopBar(
 
     fun showBot(bot: Bot) {
         scope.launch {
-            groupBotDialog(bot)
+            groupBotDialog(
+                scope = scope,
+                bot = bot,
+                onEditBot = {
+                    editBot(it, GroupBot())
+                },
+                onBotRemoved = {
+                    // todo
+                },
+                onOpenBot = {
+                    showBot(it)
+                }
+            )
         }
     }
 

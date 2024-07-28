@@ -850,6 +850,10 @@ object Strings {
         "Open bot",
         "Mở bot"
     )
+    val groupBots = Translation(
+        "Group bots",
+        "Mở bot"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

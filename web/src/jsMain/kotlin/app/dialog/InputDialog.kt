@@ -23,6 +23,7 @@ suspend fun inputDialog(
     defaultValue: String = "",
     singleLine: Boolean = true,
     inputStyles: StyleScope.() -> Unit = {},
+    extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     actions: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     content: @Composable (resolve: (Boolean?) -> Unit, value: String, onValue: (String) -> Unit) -> Unit = { _, _, _ -> }
 ): String? {
@@ -31,6 +32,7 @@ suspend fun inputDialog(
         title = title,
         confirmButton = confirmButton,
         cancelButton = cancelButton,
+        extraButtons = extraButtons,
         actions = actions
     ) { resolve ->
         var value by remember {

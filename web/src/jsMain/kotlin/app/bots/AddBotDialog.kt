@@ -19,7 +19,6 @@ import r
 
 suspend fun addBotDialog(
     onCreateBot: () -> Unit,
-    onBotHelp: () -> Unit,
     onAddBot: (Bot) -> Unit,
 ) {
     dialog(
@@ -29,12 +28,6 @@ suspend fun addBotDialog(
         actions = {
             IconButton("add", appString { createBot }) {
                 onCreateBot()
-            }
-        },
-        extraButtons = {
-            // todo: translate
-            IconButton("help", "Bot specifications") {
-                onBotHelp()
             }
         }
     ) { resolve ->
