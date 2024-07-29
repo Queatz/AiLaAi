@@ -7,6 +7,7 @@ import com.queatz.db.BotConfigValue
 import com.queatz.db.BotMessageStatus
 import com.queatz.db.Group
 import com.queatz.db.Message
+import com.queatz.db.Person
 import com.queatz.db.groupBotData
 import com.queatz.db.groupBotsOfGroup
 import com.queatz.plugins.db
@@ -67,7 +68,8 @@ data class BotAction(
 
 @Serializable
 data class MessageBotBody(
-    val message: String? = null
+    val message: String? = null,
+    val person: Person? = null
 )
 
 class Bots {
@@ -113,7 +115,7 @@ class Bots {
             setBody(body)
         }.body()
 
-    fun notify(message: Message) {
+    fun notify(message: Message, person: Person) {
         coroutineScope.launch {
             db.groupBotsOfGroup(message.group!!).forEach { groupBot ->
                 val bot = db.document(Bot::class, groupBot.bot!!) ?: let {
@@ -145,7 +147,13 @@ class Bots {
                 val response = message(
                     url = bot.url!!,
                     authToken = authToken,
-                    body = MessageBotBody(message = message.text.orEmpty())
+                    body = MessageBotBody(
+                        message = message.text.orEmpty(),
+                        person = Person().apply {
+                            id = person.id
+                            name = person.name
+                        }
+                    )
                 )
 
                 db.document(Message::class, message.id!!)?.let {

@@ -34,7 +34,7 @@ suspend fun updateGroupBotDialog(
             }
 
             bot.config?.let {
-                BotConfigValues(it)
+                BotConfigValues(it, groupBot.config)
             }
         }
     }

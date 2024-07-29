@@ -1,7 +1,8 @@
 package app.dialog
 
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import app.components.HorizontalSpacer
 import application
 import kotlinx.browser.document
 import kotlinx.coroutines.CancellationException
@@ -17,7 +18,12 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Footer
+import org.jetbrains.compose.web.dom.Header
+import org.jetbrains.compose.web.dom.Section
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDialogElement
 import r
@@ -73,7 +79,9 @@ suspend fun dialog(
                 }
             }) {
                 Text(title ?: "")
-                actions?.invoke {
+                actions?.also {
+                    HorizontalSpacer()
+                }?.invoke {
                     result.complete(it)
                 }
             }

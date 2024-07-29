@@ -256,7 +256,7 @@ fun Route.groupRoutes() {
 
                     val newMessage = db.insert(
                         Message(
-                            member.to?.asKey(),
+                            member.to!!.asKey(),
                             member.id,
                             message.text,
                             message.attachment,
@@ -265,7 +265,7 @@ fun Route.groupRoutes() {
                     )
 
                     urlAttachmentFetcher.handle(newMessage)
-                    bots.notify(newMessage)
+                    bots.notify(newMessage, db.document(Person::class, member.from!!.asKey())!!)
                     updateSeen(me, member, group)
                     notifyMessage(me, group, newMessage)
 

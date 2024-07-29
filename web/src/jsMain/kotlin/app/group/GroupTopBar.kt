@@ -18,6 +18,7 @@ import app.ailaai.api.removeMember
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import app.bots.addBotDialog
+import app.bots.botDialog
 import app.bots.botHowToDialog
 import app.bots.createBotDialog
 import app.bots.createGroupBotDialog
@@ -118,13 +119,19 @@ fun GroupTopBar(
         }
     }
 
-    fun addBot(bot: Bot) {
+    fun showBot(bot: Bot) {
+        scope.launch {
+            botDialog(scope, bot)
+        }
+    }
+
+    fun createGroupBot(bot: Bot) {
         scope.launch {
             createGroupBotDialog(bot)
         }
     }
 
-    fun editBot(bot: Bot, groupBot: GroupBot) {
+    fun editGroupBot(bot: Bot, groupBot: GroupBot) {
         scope.launch {
             updateGroupBotDialog(bot, groupBot)
         }
@@ -137,19 +144,20 @@ fun GroupTopBar(
                     createBot()
                 },
                 onAddBot = {
-                    addBot(it)
+                    createGroupBot(it)
                 }
             )
         }
     }
 
-    fun showBot(bot: Bot) {
+    fun showGroupBot(bot: Bot, groupBot: GroupBot) {
         scope.launch {
             groupBotDialog(
                 scope = scope,
                 bot = bot,
+                groupBot = groupBot,
                 onEditBot = {
-                    editBot(it, GroupBot())
+                    editGroupBot(it, groupBot)
                 },
                 onBotRemoved = {
                     // todo
@@ -167,8 +175,8 @@ fun GroupTopBar(
                 onAddBot = {
                     addABot()
                 },
-                onBot = {
-                    showBot(it)
+                onBot = { bot, groupBot ->
+                    showGroupBot(bot, groupBot)
                 }
             )
         }

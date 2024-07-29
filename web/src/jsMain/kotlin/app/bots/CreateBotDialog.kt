@@ -9,6 +9,7 @@ import app.menu.Menu
 import application
 import components.IconButton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -17,7 +18,7 @@ suspend fun createBotDialog(
     scope: CoroutineScope,
     onBotHelp: () -> Unit
 ) {
-    val secret = mutableStateOf("")
+    val secret = MutableStateFlow("")
 
     val url = inputDialog(
         title = application.appString { createBot },
@@ -37,12 +38,7 @@ suspend fun createBotDialog(
                     // todo: translate
                     item("Secret") {
                         scope.launch {
-                            val result = inputDialog(
-                                // todo: translate
-                                title = "Secret",
-                                defaultValue = secret.value,
-                                confirmButton = application.appString { update }
-                            )
+                            val result = botSecretDialog(secret.value)
 
                             if (result != null) {
                                 secret.value = result

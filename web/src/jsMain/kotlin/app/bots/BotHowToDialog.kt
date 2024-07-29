@@ -73,7 +73,7 @@ suspend fun botHowToDialog() {
                       groupName: string,
                       webhook: string,
                       config: [ { key: string, value: string } ] // note that value is always a string, even if type was "number"
-                      secret?: string // useful when needing verify bot was created by bot"s server
+                      secret?: string // useful to verify the request is coming from the correct bot
                     }
                 """.trimIndent())
             }
@@ -117,7 +117,7 @@ suspend fun botHowToDialog() {
                 }
             }
             H2 {
-                Text("POST /reinstall")
+                Text("POST /uninstall")
             }
             Div {
                 Text("Called after bot was uninstalled from a group")
@@ -142,7 +142,7 @@ suspend fun botHowToDialog() {
                 Text("POST /message")
             }
             Div {
-                Text("Called when a message i   n the group matches the keyword(s).")
+                Text("Called when a message in the group matches the keyword(s).")
             }
             H4 {
                 Text("Request")
@@ -156,7 +156,10 @@ suspend fun botHowToDialog() {
                 codeBlock()
             }) {
                 Text("""
-                   { message: "A message" }
+                   {
+                       message: "A message",
+                       person: { id: string, name: string } // for additional fields, GET api.ailaai.app/people/{id}/profile
+                   }
                 """.trimIndent())
             }
             H4 {
@@ -167,7 +170,7 @@ suspend fun botHowToDialog() {
             }) {
                 Text("""
                    {
-                       success: false|true,
+                       success: false | true,
                        note: "Optional reason",
                        actions?: [{ message: "Message to send to the group" }]
                    }
@@ -182,9 +185,9 @@ suspend fun botHowToDialog() {
     }
 }
 
-private fun AttrsScope<HTMLElement>.codeBlock() = style {
-    backgroundColor(Color("#e4e4e411"))
-    border(1.px, LineStyle.Solid, Color("#e4e4e444"))
+fun AttrsScope<HTMLElement>.codeBlock() = style {
+    backgroundColor(Color("#88888811"))
+    border(1.px, LineStyle.Solid, Color("#88888844"))
     borderRadius(1.r)
     padding(1.r)
 }

@@ -12,22 +12,20 @@ import app.menu.Menu
 import appString
 import application
 import com.queatz.db.Bot
+import com.queatz.db.BotConfigField
+import com.queatz.db.GroupBot
 import components.IconButton
 import components.ProfilePhoto
 import focusable
-import org.jetbrains.compose.web.css.flexGrow
-import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
-import org.w3c.dom.HTMLElement
 import r
 
 suspend fun groupBotsDialog(
     onAddBot: () -> Unit,
-    onBot: (Bot) -> Unit,
+    onBot: (Bot, GroupBot) -> Unit,
 ) {
     dialog(
         title = application.appString { groupBots },
@@ -43,13 +41,23 @@ suspend fun groupBotsDialog(
             mutableStateOf(
                 listOf(
                     Bot(
+                        url = "https://bot.app",
                         name = "Bot 1",
                         description = "I am a bot"
-                    ).apply { id = "1" },
+                    ).apply { id = "1" } to GroupBot(active = false),
                     Bot(
+                        url = "https://bot.app",
                         name = "Bot 2",
-                        description = "I am a bot, two"
-                    ).apply { id = "2" }
+                        description = "I am a bot, two",
+                        config = listOf(
+                            BotConfigField(
+                                key = "key",
+                                label = "Your name",
+                                placeholder = "First last",
+                                required = true
+                            )
+                        )
+                    ).apply { id = "2" } to GroupBot(active = true)
                 )
             )
         }
@@ -59,7 +67,7 @@ suspend fun groupBotsDialog(
                 Text("No bots.")
             }
         } else {
-            bots.forEach { bot ->
+            bots.forEach { (bot, groupBot) ->
                 key(bot.id!!) {
                     var menuTarget by remember {
                         mutableStateOf<DOMRect?>(null)
@@ -84,9 +92,10 @@ suspend fun groupBotsDialog(
                         focusable()
 
                         onClick {
-                            onBot(bot)
+                            onBot(bot, groupBot)
                         }
                     }) {
+                        // todo: translate
                         ProfilePhoto(bot.photo, bot.name ?: "New bot")
                         Div({
                             style {
@@ -96,11 +105,16 @@ suspend fun groupBotsDialog(
                             Div({
                                 classes(AppStyles.groupItemName)
                             }) {
+                                // todo: translate
                                 Text(bot.name ?: "New bot")
                             }
                             Div({
                                 classes(AppStyles.groupItemMessage)
                             }) {
+                                // todo: translate
+                                Text(if (groupBot.active == true) "Running" else "Paused")
+                                Text(" • ")
+                                // todo: translate
                                 Text(bot.description ?: "No description")
                             }
                         }

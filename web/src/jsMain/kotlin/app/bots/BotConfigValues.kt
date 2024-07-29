@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.components.TextBox
 import com.queatz.db.BotConfigField
+import com.queatz.db.BotConfigValue
 import notBlank
 import notEmpty
 import org.jetbrains.compose.web.css.fontSize
@@ -18,11 +19,14 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
 
-@Composable fun BotConfigValues(config: List<BotConfigField>) {
+@Composable fun BotConfigValues(
+    config: List<BotConfigField>,
+    values: List<BotConfigValue>? = null
+) {
     config.notEmpty?.let { config ->
         config.forEach {
             var value by remember {
-                mutableStateOf("")
+                mutableStateOf(values?.firstOrNull { value -> it.key == value.key }?.value ?: "")
             }
             it.label?.notBlank?.let {
                 Div({

@@ -201,6 +201,14 @@ object Styles : StyleSheet() {
         }
     }
 
+    val switchBordered by style {
+        border(1.px, LineStyle.Solid, Color.white)
+
+        dark(self) {
+            border(1.px, LineStyle.Solid, Color.black)
+        }
+    }
+
     val dateTimeInput by style {
         borderRadius(1.r)
         property("color", "inherit")

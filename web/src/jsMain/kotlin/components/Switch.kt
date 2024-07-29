@@ -13,10 +13,16 @@ fun Switch(
     onValue: (Boolean) -> Unit,
     onChange: (Boolean) -> Unit,
     title: String? = null,
+    border: Boolean = false,
     styles: StyleScope.() -> Unit = {}
 ) {
     Label(attrs = {
         classes(Styles.switch)
+
+        if (border) {
+            classes(Styles.switchBordered)
+        }
+
         focusable()
         style {
             styles()
