@@ -16,7 +16,6 @@ import at.bluesource.choicesdk.maps.common.*
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.MapWithMarker
-import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.theme.pad
 
 

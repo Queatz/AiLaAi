@@ -732,6 +732,8 @@
     <string name="add_npc">Add NPC</string>
     <string name="remove_npc">Remove NPC</string>
     <string name="tools">Tools</string>
+    <string name="bot_not_found">Bot not found.</string>
+    <string name="new_bot">New bot</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

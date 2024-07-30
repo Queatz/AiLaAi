@@ -14,6 +14,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.bot.BotProfileDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Bot
 import com.queatz.db.Message
@@ -36,8 +37,13 @@ fun MessageItem(
 ) {
     var showTime by rememberStateOf(false)
     var showMessageDialog by rememberStateOf(false)
+    var botDialog by rememberStateOf<String?>(null)
     val isMe = me == message.member
     val nav = nav
+
+    botDialog?.let { id ->
+        BotProfileDialog({ botDialog = null }, id)
+    }
 
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -73,7 +79,9 @@ fun MessageItem(
                             bot?.photo,
                             bot?.name,
                             PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
-                        ) {}
+                        ) {
+                            botDialog = bot!!.id!!
+                        }
                     }
                 }
             } else {
