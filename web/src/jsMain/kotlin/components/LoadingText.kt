@@ -7,7 +7,11 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun LoadingText(done: Boolean, text: String, content: @Composable () -> Unit) {
+fun LoadingText(
+    done: Boolean,
+    text: String,
+    content: @Composable () -> Unit
+) {
     if (done) {
         content()
     } else {

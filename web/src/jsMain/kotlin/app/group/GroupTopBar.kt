@@ -109,37 +109,80 @@ fun GroupTopBar(
         mutableStateOf(true)
     }
 
-    fun createBot() {
-        scope.launch {
-            createBotDialog(this) {
-                scope.launch {
-                    botHowToDialog()
-                }
-            }
-        }
-    }
-
     fun showBot(bot: Bot) {
         scope.launch {
-            botDialog(scope, bot)
+            botDialog(
+                scope = scope,
+                bot = bot,
+                onBotUpdated = {},
+                onBotDeleted = {}
+            )
         }
     }
 
-    fun createGroupBot(bot: Bot) {
+    fun createBot() {
         scope.launch {
-            createGroupBotDialog(bot)
+            createBotDialog(
+                this,
+                {
+                    scope.launch {
+                        botHowToDialog()
+                    }
+                }
+            ) {
+                showBot(it)
+            }
         }
     }
 
     fun editGroupBot(bot: Bot, groupBot: GroupBot) {
         scope.launch {
-            updateGroupBotDialog(bot, groupBot)
+            updateGroupBotDialog(bot, groupBot) {
+
+            }
+        }
+    }
+
+    fun showGroupBot(bot: Bot, groupBot: GroupBot) {
+        scope.launch {
+            groupBotDialog(
+                scope = scope,
+                bot = bot,
+                groupBot = groupBot,
+                group = group,
+                myMember = myMember,
+                onEditBot = {
+                    editGroupBot(it, groupBot)
+                },
+                onBotRemoved = {
+
+                },
+                onOpenBot = {
+                    showBot(it)
+                }
+            )
+        }
+    }
+
+    fun createGroupBot(bot: Bot) {
+        scope.launch {
+            createGroupBotDialog(
+                scope = scope,
+                group = group.group!!.id!!,
+                bot = bot,
+                onOpenBot = {
+                    showBot(it)
+                }
+            ) {
+                showGroupBot(bot, it)
+            }
         }
     }
 
     fun addABot() {
         scope.launch {
             addBotDialog(
+                group = group.group!!.id!!,
                 onCreateBot = {
                     createBot()
                 },
@@ -150,28 +193,10 @@ fun GroupTopBar(
         }
     }
 
-    fun showGroupBot(bot: Bot, groupBot: GroupBot) {
-        scope.launch {
-            groupBotDialog(
-                scope = scope,
-                bot = bot,
-                groupBot = groupBot,
-                onEditBot = {
-                    editGroupBot(it, groupBot)
-                },
-                onBotRemoved = {
-                    // todo
-                },
-                onOpenBot = {
-                    showBot(it)
-                }
-            )
-        }
-    }
-
     fun bots() {
         scope.launch {
             groupBotsDialog(
+                group = group.group!!.id!!,
                 onAddBot = {
                     addABot()
                 },
@@ -183,7 +208,7 @@ fun GroupTopBar(
     }
 
     fun showBots() {
-        if ((group.botCount ?: 0) > 0 || true) {
+        if ((group.botCount ?: 0) > 0) {
             bots()
         } else {
             addABot()

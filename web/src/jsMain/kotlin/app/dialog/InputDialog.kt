@@ -25,6 +25,7 @@ suspend fun inputDialog(
     inputStyles: StyleScope.() -> Unit = {},
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     actions: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
+    topContent: @Composable (resolve: (Boolean?) -> Unit, value: String, onValue: (String) -> Unit) -> Unit = { _, _, _ -> },
     content: @Composable (resolve: (Boolean?) -> Unit, value: String, onValue: (String) -> Unit) -> Unit = { _, _, _ -> }
 ): String? {
     var text: String = defaultValue
@@ -37,6 +38,11 @@ suspend fun inputDialog(
     ) { resolve ->
         var value by remember {
             mutableStateOf(defaultValue)
+        }
+
+        topContent(resolve, value) {
+            value = it
+            text = it
         }
 
         if (singleLine) {

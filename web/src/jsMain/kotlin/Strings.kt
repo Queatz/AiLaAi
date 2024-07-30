@@ -843,7 +843,7 @@ object Strings {
         "Thêm bot"
     )
     val createBot = Translation(
-        "Create bot",
+        "Create a bot",
         "Tạo bot"
     )
     val openBot = Translation(

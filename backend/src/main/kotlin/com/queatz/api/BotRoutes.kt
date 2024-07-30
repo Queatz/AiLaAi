@@ -5,6 +5,9 @@ import com.queatz.db.BotData
 import com.queatz.db.BotDetailsBody
 import com.queatz.db.botData
 import com.queatz.db.bots
+import com.queatz.db.groupBotData
+import com.queatz.db.groupBotsOfBot
+import com.queatz.db.groupBotsOfGroup
 import com.queatz.parameter
 import com.queatz.plugins.bots
 import com.queatz.plugins.db
@@ -107,13 +110,20 @@ fun Route.botRoutes() {
                     return@respond HttpStatusCode.BadRequest
                 }
 
-                db.delete(bot)
+                // Remove all associated GroupBots
+                db.groupBotsOfBot(bot.id!!).forEach { groupBot ->
+                    // Remove all associated GroupBotDatas
+                    db.groupBotData(groupBot.id!!)?.let { db.delete(it) }
+                    db.delete(groupBot)
+                }
 
+                // Remove associated BotData
                 db.botData(bot.id!!)?.let {
                     db.delete(it)
                 }
 
-                // todo: delete all GroupBot, GroupBotData
+                // Remove associated Bot
+                db.delete(bot)
 
                 HttpStatusCode.NoContent
             }
@@ -127,7 +137,7 @@ fun Route.botRoutes() {
                     return@respond HttpStatusCode.BadRequest
                 }
 
-                db.botData(parameter("id")) ?: BotData().let {
+                db.botData(bot.id!!) ?: BotData(bot = bot.id!!).let {
                     db.insert(it)
                 }
             }
@@ -141,7 +151,7 @@ fun Route.botRoutes() {
                     return@respond HttpStatusCode.BadRequest
                 }
 
-                val botData = db.botData(parameter("id")) ?: BotData().let {
+                val botData = db.botData(parameter("id")) ?: BotData(bot = bot.id!!).let {
                     db.insert(it)
                 }
 

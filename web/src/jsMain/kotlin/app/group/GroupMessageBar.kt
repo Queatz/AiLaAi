@@ -1,10 +1,9 @@
 package app.group
 
 import Styles
-import aiPhoto
-import aiStyles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,18 +14,15 @@ import app.AppStyles
 import app.StickersTray
 import app.ailaai.api.sendMedia
 import app.ailaai.api.sendMessage
-import app.dialog.inputDialog
+import app.dialog.rememberChoosePhotoDialog
 import app.menu.Menu
 import appString
-import application
-import com.queatz.db.AiPhotoRequest
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
 import com.queatz.db.PhotosAttachment
 import com.queatz.db.Sticker
 import com.queatz.db.StickerAttachment
 import components.IconButton
-import focusable
 import json
 import kotlinx.browser.window
 import kotlinx.coroutines.awaitAnimationFrame
@@ -40,22 +36,16 @@ import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexShrink
-import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
-import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.rad
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -81,106 +71,23 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
         mutableStateOf(false)
     }
 
-    var isGenerating by remember(group) {
-        mutableStateOf(false)
-    }
-
     var showStickers by remember(group) {
         mutableStateOf(false)
     }
 
-    var aiPrompt by remember {
-        mutableStateOf("")
-    }
+    val choosePhoto = rememberChoosePhotoDialog()
 
-    var aiStyle by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var aiStyles by remember {
-        mutableStateOf<List<Pair<String, String>>>(emptyList())
-    }
+    val isGenerating = choosePhoto.isGenerating.collectAsState().value
 
     fun describePhoto() {
-        if (aiStyles.isEmpty()) {
-            scope.launch {
-                api.aiStyles {
-                    aiStyles = it
-                }
-            }
-        }
-
-        scope.launch {
-            val result = inputDialog(
-                title = null,
-                placeholder = application.appString { describePhoto },
-                confirmButton = application.appString { confirm },
-                defaultValue = aiPrompt,
-                singleLine = false,
-                inputStyles = {
-                    width(32.r)
-                }
-            ) { _, _, _ ->
-                Div({
-                    style {
-                        marginTop(1.r)
-                        marginLeft(1.r)
-                        marginBottom(.5.r)
-                        opacity(.5f)
-                        fontSize(14.px)
-                    }
-                }) {
-                    // todo translate
-                    Text("Style")
-                }
-                Div({
-                    style {
-                        overflowY("auto")
-                        height(8.r)
-                    }
-                }) {
-                    aiStyles.forEach { (name, style) ->
-                        Div({
-                            classes(
-                                listOf(AppStyles.groupItem, AppStyles.groupItemOnSurface)
-                            )
-
-                            if (aiStyle == style) {
-                                classes(AppStyles.groupItemSelected)
-                            }
-
-                            onClick {
-                                aiStyle = if (aiStyle == style) null else style
-                            }
-
-                            focusable()
-                        }) {
-                            Div {
-                                Div({
-                                    classes(AppStyles.groupItemName)
-                                }) {
-                                    Text(name)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!result.isNullOrBlank()) {
-                aiPrompt = result
-                isGenerating = true
-                api.aiPhoto(AiPhotoRequest(result, aiStyle)) { photo ->
-                    api.sendMessage(
-                        group.group!!.id!!,
-                        Message(
-                            attachment = json.encodeToString(PhotosAttachment(photos = listOf(photo.photo))),
-                        )
-                    ) {
-                        reloadMessages()
-                    }
-                }
-                isGenerating = false
+        choosePhoto.launch { photo ->
+            api.sendMessage(
+                group.group!!.id!!,
+                Message(
+                    attachment = json.encodeToString(PhotosAttachment(photos = listOf(photo))),
+                )
+            ) {
+                reloadMessages()
             }
         }
     }
@@ -263,7 +170,7 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
             item(appString { describePhoto }) {
                 describePhoto()
             }
-            item(appString { choosePhoto }) {
+            item(appString { this.choosePhoto }) {
                 pickPhotos {
                     sendPhotos(it)
                 }
@@ -300,27 +207,8 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
 //                    IconButton("mic", "Record audio", styles = { marginLeft(1.r) }) {
 //                        // todo
 //                    }
-
-                val start = remember { Clock.System.now().toEpochMilliseconds() }
-                var rotation by remember { mutableStateOf(0.rad) }
-
-                LaunchedEffect(isGenerating) {
-                    if (isGenerating) while (true) {
-                        rotation = ((Clock.System.now().toEpochMilliseconds() - start) / 2_000.0 * PI).rad
-                        delay(50)
-                        window.awaitAnimationFrame()
-                    }
-                }
-
-                IconButton(if (isGenerating) "progress_activity" else "image", appString { sendPhoto }, styles = {
+                IconButton("image", appString { sendPhoto }, isLoading = isGenerating, styles = {
                     marginLeft(1.r)
-                }, iconStyles = {
-                    if (isGenerating) {
-                        property("font-smooth", "never")
-                        transform {
-                            rotate(rotation)
-                        }
-                    }
                 }) {
                     it.stopPropagation()
                     photoMenuTarget =

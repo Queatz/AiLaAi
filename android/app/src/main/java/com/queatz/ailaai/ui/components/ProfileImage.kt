@@ -21,8 +21,8 @@ import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.db.Person
 
 @Composable
-fun ProfileImage(person: Person?, padding: PaddingValues, onClick: (Person) -> Unit) {
-    if (person?.photo?.nullIfBlank == null) {
+fun ProfileImage(photo: String?, name: String?, padding: PaddingValues, onClick: () -> Unit) {
+    if (photo?.nullIfBlank == null) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -31,17 +31,17 @@ fun ProfileImage(person: Person?, padding: PaddingValues, onClick: (Person) -> U
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
                 .clickable {
-                    person?.let(onClick)
+                    onClick()
                 }
         ) {
             Text(
-                person?.name?.take(1) ?: "",
+                name?.take(1) ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
         }
     } else {
         AsyncImage(
-            model = person.photo?.let { api.url(it) } ?: "",
+            model = photo.let { api.url(it) },
             contentDescription = "",
             contentScale = ContentScale.Crop,
             alignment = Alignment.Center,
@@ -51,7 +51,7 @@ fun ProfileImage(person: Person?, padding: PaddingValues, onClick: (Person) -> U
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
                 .clickable {
-                    onClick(person)
+                    onClick()
                 }
         )
     }

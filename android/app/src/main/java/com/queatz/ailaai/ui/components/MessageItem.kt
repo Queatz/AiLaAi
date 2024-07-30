@@ -15,6 +15,7 @@ import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Bot
 import com.queatz.db.Message
 import com.queatz.db.Person
 
@@ -26,6 +27,7 @@ fun MessageItem(
     selectedMessages: Set<Message>,
     onSelectedChange: (Message, Boolean) -> Unit,
     getPerson: (String) -> Person?,
+    getBot: (String) -> Bot?,
     getMessage: suspend (String) -> Message?,
     me: String?,
     onUpdated: () -> Unit,
@@ -51,11 +53,28 @@ fun MessageItem(
         )) {
         if (!isMe) {
             if (previousMessage?.member != message.member) {
-                ProfileImage(
-                    getPerson(message.member!!),
-                    PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
-                ) { person ->
-                    nav.navigate(AppNav.Profile(person.id!!))
+                when {
+                    message.member != null -> {
+                        val person = message.member!!.let(getPerson)
+                        ProfileImage(
+                            person?.photo,
+                            person?.name,
+                            PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
+                        ) {
+                            if (message.member != null) {
+                                nav.navigate(AppNav.Profile(message.member!!.let(getPerson)!!.id!!))
+                            }
+                        }
+                    }
+
+                    message.bot != null -> {
+                        val bot = message.bot!!.let(getBot)
+                        ProfileImage(
+                            bot?.photo,
+                            bot?.name,
+                            PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
+                        ) {}
+                    }
                 }
             } else {
                 Box(Modifier.requiredSize(32.dp + 1.pad))
@@ -78,6 +97,7 @@ fun MessageItem(
                 showMessageDialog = showMessageDialog,
                 onShowMessageDialog = { showMessageDialog = it },
                 getPerson = getPerson,
+                getBot = getBot,
                 getMessage = getMessage,
                 onReply = onReply,
                 onUpdated = onUpdated,

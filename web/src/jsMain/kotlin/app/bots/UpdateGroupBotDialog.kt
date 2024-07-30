@@ -1,8 +1,12 @@
 package app.bots
 
+import api
+import app.ailaai.api.updateGroupBot
 import app.dialog.dialog
+import application
 import com.queatz.db.Bot
 import com.queatz.db.GroupBot
+import kotlinx.coroutines.flow.MutableStateFlow
 import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -15,12 +19,14 @@ import r
 
 suspend fun updateGroupBotDialog(
     bot: Bot,
-    groupBot: GroupBot
+    groupBot: GroupBot,
+    onUpdated: (GroupBot) -> Unit
 ) {
+    val values = MutableStateFlow(groupBot.config ?: emptyList())
+
     val result = dialog(
         title = bot.name!!,
-        // todo: translate
-        confirmButton = "Update",
+        confirmButton = application.appString { update },
     ) {
         Div({
             style {
@@ -34,8 +40,19 @@ suspend fun updateGroupBotDialog(
             }
 
             bot.config?.let {
-                BotConfigValues(it, groupBot.config)
+                BotConfigValues(it, groupBot.config) {
+                    values.value = it
+                }
             }
+        }
+    }
+
+    if (result == true) {
+        api.updateGroupBot(
+            groupBot = groupBot.id!!,
+            GroupBot(config = values.value)
+        ) {
+            onUpdated(it)
         }
     }
 }

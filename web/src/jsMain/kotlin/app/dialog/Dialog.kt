@@ -80,7 +80,7 @@ suspend fun dialog(
             }) {
                 Text(title ?: "")
                 actions?.also {
-                    HorizontalSpacer()
+                    HorizontalSpacer(fill = true)
                 }?.invoke {
                     result.complete(it)
                 }

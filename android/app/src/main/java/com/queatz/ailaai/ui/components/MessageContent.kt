@@ -68,6 +68,7 @@ fun ColumnScope.MessageContent(
     showMessageDialog: Boolean,
     onShowMessageDialog: (Boolean) -> Unit,
     getPerson: (String) -> Person?,
+    getBot: (String) -> Bot?,
     getMessage: suspend (String) -> Message?,
     onReply: (Message) -> Unit,
     onUpdated: () -> Unit,
@@ -460,6 +461,7 @@ fun ColumnScope.MessageContent(
                     showMessageDialog = showReplyMessageDialog,
                     onShowMessageDialog = { showReplyMessageDialog = it },
                     getPerson = getPerson,
+                    getBot = getBot,
                     getMessage = getMessage,
                     onReply = onReply,
                     onUpdated = {}, // todo delete from reply
@@ -825,7 +827,7 @@ fun ColumnScope.MessageContent(
 
     AnimatedVisibility(showTime, modifier = Modifier.align(if (isMe) Alignment.End else Alignment.Start)) {
         Text(
-            "${message.createdAt!!.timeAgo()}, ${getPerson(message.member!!)?.name ?: stringResource(R.string.someone)}",
+            "${message.createdAt!!.timeAgo()}, ${message.member?.let { getPerson(it)?.name } ?: message.bot?.let { getBot(it)?.name } ?: stringResource(R.string.someone)}",
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodySmall,
             textAlign = if (isMe) TextAlign.End else TextAlign.Start,

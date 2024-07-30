@@ -11,6 +11,7 @@ import org.jetbrains.compose.web.css.CSSNumeric
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
@@ -28,13 +29,13 @@ fun ProfilePhoto(
     styles: (StyleScope.() -> Unit)? = null
 ) {
     ProfilePhoto(
-        person.photo,
-        person.name,
-        size,
-        title,
-        border,
-        onClick,
-        styles
+        photo = person.photo,
+        name = person.name,
+        size = size,
+        title = title,
+        border = border,
+        onClick = onClick,
+        styles = styles
     )
 }
 
@@ -43,7 +44,9 @@ fun ProfilePhoto(
     photo: String?,
     name: String?,
     size: CSSNumeric = 36.px,
+    fontSize: CSSNumeric? = null,
     title: String? = null,
+    showTitle: Boolean = true,
     border: Boolean = false,
     onClick: (() -> Unit)? = null,
     styles: (StyleScope.() -> Unit)? = null
@@ -64,13 +67,19 @@ fun ProfilePhoto(
                 width(size)
                 height(size)
 
+                fontSize?.let {
+                    fontSize(it)
+                }
+
                 if (onClick != null) {
                     cursor("pointer")
                 }
                 styles?.invoke(this)
             }
 
-            title(title ?: name ?: application.appString { someone })
+            if (showTitle) {
+                title(title ?: name ?: application.appString { someone })
+            }
 
             onClick {
                 onClick?.invoke()
@@ -105,7 +114,9 @@ fun ProfilePhoto(
                 styles?.invoke(this)
             }
 
-            title(title ?: name ?: application.appString { someone })
+            if (showTitle) {
+                title(title ?: name ?: application.appString { someone })
+            }
 
             if (onClick != null) {
                 focusable()

@@ -826,8 +826,8 @@ fun GroupScreen(groupId: String) {
                 LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
                     itemsIndexed(messages, key = { _, it -> it.id!! }) { index, it ->
                         MessageItem(
-                            it,
-                            index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
+                            message = it,
+                            previousMessage = index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
                             selectedMessages = selectedMessages,
                             onSelectedChange = { message, selected ->
                                 selectedMessages = if (selected) {
@@ -838,6 +838,9 @@ fun GroupScreen(groupId: String) {
                             },
                             getPerson = {
                                 groupExtended?.members?.find { member -> member.member?.id == it }?.person
+                            },
+                            getBot = {
+                                groupExtended?.bots?.find { bot -> bot.id == it }
                             },
                             getMessage = { messageId ->
                                 var message: Message? = messages.find { it.id == messageId }

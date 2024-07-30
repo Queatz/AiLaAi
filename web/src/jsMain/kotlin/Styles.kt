@@ -13,6 +13,7 @@ object Styles : StyleSheet() {
         val secondary = Color("#767676")
         val tertiary = Color("#2e8900")
         val red = Color("#761c1c")
+        val green = Color("#1c7626")
 
         object dark {
             val background = Color("#18191a")

@@ -386,11 +386,11 @@ fun Route.groupRoutes() {
         get("/groups/{id}/bots") {
             respond {
                 db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
-                db.groupBotsOfGroup(parameter("id"))
+                db.groupBots(parameter("id"))
             }
         }
 
-        post("/groups/{id}/bots") {2
+        post("/groups/{id}/bots") {
             respond {
                 val group = db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
                 val member = db.member(me.id!!, group.group!!.id!!)
@@ -406,9 +406,6 @@ fun Route.groupRoutes() {
 
                 val botData = db.botData(bot.id!!)
 
-                val groupBotData = db.groupBotData(groupBot.id!!)
-                    ?: return@respond HttpStatusCode.BadRequest.description("Group bot data not found")
-
                 val webhook = (0..255).token()
 
                 val installResponse = bots.install(
@@ -416,7 +413,7 @@ fun Route.groupRoutes() {
                     body = InstallBotBody(
                         groupId = group.group!!.id!!,
                         groupName = group.group!!.name!!,
-                        webhook = groupBotData.webhook!!,
+                        webhook = "https://${secrets.config.domain}/bot/$webhook",
                         config = groupBot.config,
                         secret = botData?.secret,
                     )

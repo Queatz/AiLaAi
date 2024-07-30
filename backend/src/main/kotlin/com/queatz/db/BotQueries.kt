@@ -24,6 +24,33 @@ fun Db.groupBotsOfGroup(group: String) = list(
     )
 )
 
+fun Db.groupBotsOfBot(bot: String) = list(
+    GroupBot::class,
+    """
+        for groupBot in @@collection
+            filter groupBot.${f(GroupBot::bot)} == @bot
+            return groupBot
+    """.trimIndent(),
+    mapOf(
+        "bot" to bot
+    )
+)
+
+fun Db.groupBots(group: String) = query(
+    GroupBotExtended::class,
+    """
+        for groupBot in `${GroupBot::class.collection()}`
+            filter groupBot.${f(GroupBot::group)} == @group
+            return {
+                ${f(GroupBotExtended::bot)}: document(${Bot::class.collection()}, groupBot.${f(GroupBot::bot)}),
+                ${f(GroupBotExtended::groupBot)}: groupBot
+            }
+    """.trimIndent(),
+    mapOf(
+        "group" to group
+    )
+)
+
 fun Db.botData(bot: String) = one(
     BotData::class,
     """
@@ -45,5 +72,17 @@ fun Db.groupBotData(groupBot: String) = one(
     """.trimIndent(),
     mapOf(
         "groupBot" to groupBot
+    )
+)
+
+fun Db.groupBotByWebhook(webhook: String) = one(
+    GroupBot::class,
+    """
+        for groupBotData in `${GroupBotData::class.collection()}`
+            filter groupBotData.${f(GroupBotData::webhook)} == @webhook
+            return document(${GroupBot::class.collection()}, groupBotData.${f(GroupBotData::groupBot)})
+    """.trimIndent(),
+    mapOf(
+        "webhook" to webhook
     )
 )

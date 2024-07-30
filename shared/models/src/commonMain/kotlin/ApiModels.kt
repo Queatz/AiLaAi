@@ -22,6 +22,7 @@ class MemberDevice(
 class GroupExtended(
     var group: Group? = null,
     var members: List<MemberAndPerson>? = null,
+    var bots: List<Bot>? = null,
     var cardCount: Int? = null,
     var botCount: Int? = null,
     var latestMessage: Message? = null
@@ -278,4 +279,10 @@ data class StatsHealth(
 data class BotDetailsBody(
     val url: String,
     val photo: String? = null,
+)
+
+@Serializable
+class GroupBotExtended(
+    var bot: Bot? = null,
+    var groupBot: GroupBot? = null
 )

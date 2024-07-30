@@ -1,15 +1,21 @@
 package app.bots
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import api
 import app.AppStyles
+import app.ailaai.api.bots
+import app.ailaai.api.groupBots
+import app.components.Empty
 import app.dialog.dialog
 import appString
 import application
 import com.queatz.db.Bot
-import com.queatz.db.BotConfigField
 import components.IconButton
+import components.LoadingText
 import components.ProfilePhoto
 import focusable
 import org.jetbrains.compose.web.css.marginLeft
@@ -18,6 +24,7 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 suspend fun addBotDialog(
+    group: String,
     onCreateBot: () -> Unit,
     onAddBot: (Bot) -> Unit,
 ) {
@@ -31,55 +38,65 @@ suspend fun addBotDialog(
             }
         }
     ) { resolve ->
-        val bots by remember {
-            mutableStateOf(
-                listOf(
-                    Bot(
-                        name = "Bot 1",
-                        description = "I am a bot"
-                    ),
-                    Bot(
-                        name = "Bot 2",
-                        description = "I am a bot, two",
-                        config = listOf(
-                            BotConfigField(
-                                key = "key",
-                                label = "Your name",
-                                placeholder = "First last",
-                                required = true
-                            )
-                        )
-                    )
-                )
-            )
+        var isLoading by remember {
+            mutableStateOf(true)
+        }
+        var bots by remember {
+            mutableStateOf(emptyList<Bot>())
         }
 
-        bots.forEach { bot ->
-            Div({
-                classes(AppStyles.groupItem)
-
-                focusable()
-
-                onClick {
-                    onAddBot(bot)
-                    resolve(true)
+        LaunchedEffect(Unit) {
+            api.groupBots(group) { groupBots ->
+                api.bots {
+                    bots = it.filter { bot ->
+                        groupBots.none { it.bot!!.id!! == bot.id!! }
+                    }
                 }
-            }) {
-                ProfilePhoto(bot.photo, bot.name ?: "New bot")
+            }
+            isLoading = false
+        }
+
+        LoadingText(
+            done = !isLoading,
+            text = appString { loading }
+        ) {
+            if (bots.isEmpty()) {
+                Empty {
+                    // todo: translate
+                    Text("No bots.")
+                }
+            }
+
+            bots.forEach { bot ->
                 Div({
-                    style {
-                        marginLeft(1.r)
+                    classes(AppStyles.groupItem)
+
+                    focusable()
+
+                    onClick {
+                        onAddBot(bot)
+                        resolve(true)
                     }
                 }) {
+                    // todo: translate
+                    ProfilePhoto(bot.photo, bot.name ?: "New bot")
                     Div({
-                        classes(AppStyles.groupItemName)
+                        style {
+                            marginLeft(1.r)
+                        }
                     }) {
-                        Text(bot.name ?: "New bot")
-                    }
-                    Div({
-                        classes(AppStyles.groupItemMessage)
-                    }) {
-                        Text(bot.description ?: "No description")
+                        Div({
+                            classes(AppStyles.groupItemName)
+                        }) {
+                            // todo: translate
+                            Text(bot.name ?: "New bot")
+                        }
+                        Div({
+                            classes(AppStyles.groupItemMessage)
+                        }) {
+                            // todo: translate
+                            Text(bot.description ?: "No description")
+                        }
                     }
                 }
             }

@@ -6,6 +6,7 @@ import com.queatz.db.BotConfigField
 import com.queatz.db.BotConfigValue
 import com.queatz.db.BotMessageStatus
 import com.queatz.db.Group
+import com.queatz.db.GroupBot
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.groupBotData
@@ -16,15 +17,20 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.withCharset
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration.Companion.minutes
 
 @Serializable
@@ -95,12 +101,14 @@ class Bots {
 
     suspend fun install(url: String, body: InstallBotBody): InstallBotResponse =
         http.post("$url/install") {
+            json()
             setBody(body)
         }.body()
 
     suspend fun reinstall(url: String, authToken: String, body: ReinstallBotBody): HttpStatusCode =
         http.post("$url/reinstall") {
             bearerAuth(authToken)
+            json()
             setBody(body)
         }.body()
 
@@ -109,9 +117,20 @@ class Bots {
             bearerAuth(authToken)
         }.body()
 
+    suspend fun pause(url: String, authToken: String): HttpStatusCode =
+        http.post("$url/pause") {
+            bearerAuth(authToken)
+        }.body()
+
+    suspend fun resume(url: String, authToken: String): HttpStatusCode =
+        http.post("$url/resume") {
+            bearerAuth(authToken)
+        }.body()
+
     suspend fun message(url: String, authToken: String, body: MessageBotBody): MessageBotResponse =
         http.post("$url/message") {
             bearerAuth(authToken)
+            json()
             setBody(body)
         }.body()
 
@@ -175,6 +194,12 @@ class Bots {
         }
     }
 
+    fun action(groupBot: GroupBot, action: BotAction) {
+        val group = db.document(Group::class, groupBot.group!!) ?: return
+        val bot = db.document(Bot::class, groupBot.bot!!) ?: return
+        handle(action, group, bot)
+    }
+
     private fun handle(action: BotAction, group: Group, bot: Bot) {
         action.message?.let { actionMessage ->
             val botMessage = db.insert(
@@ -191,4 +216,8 @@ class Bots {
             )
         }
     }
+}
+
+private fun HttpRequestBuilder.json() {
+    contentType(ContentType.Application.Json.withCharset(UTF_8))
 }

@@ -1,34 +1,34 @@
 package app.bots
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import api
+import app.ailaai.api.deleteGroupBot
+import app.ailaai.api.updateGroupBot
 import app.dialog.dialog
-import app.dialog.inputDialog
 import app.menu.Menu
 import application
 import com.queatz.db.Bot
 import com.queatz.db.GroupBot
+import com.queatz.db.GroupExtended
+import com.queatz.db.MemberAndPerson
 import components.IconButton
 import components.Switch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.css.LineStyle
-import org.jetbrains.compose.web.css.border
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
-import r
 
 suspend fun groupBotDialog(
     scope: CoroutineScope,
     bot: Bot,
     groupBot: GroupBot,
+    group: GroupExtended,
+    myMember: MemberAndPerson?,
     onOpenBot: (Bot) -> Unit,
     onBotRemoved: (Bot) -> Unit,
     onEditBot: (Bot) -> Unit
@@ -38,19 +38,16 @@ suspend fun groupBotDialog(
         cancelButton = null,
         confirmButton = application.appString { close },
         actions = {
-            val me = application.me.collectAsState()
             var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
             var active by remember { mutableStateOf(groupBot.active == true) }
 
             menuTarget?.let {
                 Menu({ menuTarget = null }, it) {
-                    // todo: translate
-                    item("Edit") {
-                        onEditBot(bot)
-                    }
-
-                    // todo: if I am a group host
-                    if (true) {
+                    if (myMember?.member?.host == true) {
+                        // todo: translate
+                        item("Edit") {
+                            onEditBot(bot)
+                        }
                         // todo: translate
                         item("Remove") {
                             scope.launch {
@@ -62,15 +59,16 @@ suspend fun groupBotDialog(
                                 )
 
                                 if (result == true) {
-                                    // todo api call
-                                    onBotRemoved(bot)
+                                    api.deleteGroupBot(groupBot = groupBot.id!!) {
+                                        onBotRemoved(bot)
+                                    }
                                 }
                             }
                         }
-                        // todo: translate
-                        item("Go to bot") {
-                            onOpenBot(bot)
-                        }
+                    }
+                    // todo: translate
+                    item("Go to bot") {
+                        onOpenBot(bot)
                     }
                 }
             }
@@ -81,10 +79,19 @@ suspend fun groupBotDialog(
             }
 
             Switch(
-                active,
-                { active = it },
+                value = active,
+                onValue = {},
+                // todo: translate
+                title = if (active) "Bot is running" else "Bot is paused",
                 onChange = {
-                    // todo call api
+                    scope.launch {
+                        api.updateGroupBot(
+                            groupBot = groupBot.id!!,
+                            update = GroupBot(active = it)
+                        ) {
+                            active = it.active == true
+                        }
+                    }
                 },
                 border = true
             )

@@ -50,7 +50,7 @@ suspend fun botHowToDialog() {
                       description: "Bot description",
                       keywords: ["keyword"] // null or empty to match all messages
                       config: [
-                        { key: string, label: string, placeholder: string, type: "string"|"number", required: boolean}
+                        { key: string, label: string, placeholder: string, type: "string" | "number", required: boolean}
                       ]
                     }
                 """.trimIndent())
@@ -59,7 +59,7 @@ suspend fun botHowToDialog() {
                 Text("POST /install")
             }
             Div {
-                Text("Called when a bot is installed in a group.")
+                Text("Called when the bot is installed in a group.")
             }
             H4 {
                 Text("Request")
@@ -84,14 +84,14 @@ suspend fun botHowToDialog() {
                 codeBlock()
             }) {
                 Text("""
-                   { token: string } // represents a bot installed in a group
+                   { token: string } // represents the bot installed in a group
                 """.trimIndent())
             }
             H2 {
                 Text("POST /reinstall")
             }
             Div {
-                Text("Called when a bot config is updated for a group.")
+                Text("Called when the bot config is updated for a group.")
             }
             H4 {
                 Text("Request")
@@ -120,7 +120,7 @@ suspend fun botHowToDialog() {
                 Text("POST /uninstall")
             }
             Div {
-                Text("Called after bot was uninstalled from a group")
+                Text("Called after bot was uninstalled from a group.")
             }
             H4 {
                 Text("Request")
@@ -178,9 +178,54 @@ suspend fun botHowToDialog() {
             }
             Text(
                 """
-                POST to the provided webhook for async actions
+                POST [ { message: string }, ... ] to the provided webhook for async actions.
+                Webhook response is either 200 OK or 400 Bad Request (bot is paused)
                 """.trimIndent()
             )
+            H2 {
+                Text("POST /pause")
+            }
+            Div {
+                Text("Called when the bot has been paused in a group.")
+            }
+            H4 {
+                Text("Request")
+            }
+            Div {
+                B {
+                    Text("Authorization: Bearer <token>")
+                }
+            }
+            H4 {
+                Text("Response")
+            }
+            Div {
+                B {
+                    Text("2XX OK")
+                }
+            }
+            H2 {
+                Text("POST /resume")
+            }
+            Div {
+                Text("Called when the bot has been resumed in a group.")
+            }
+            H4 {
+                Text("Request")
+            }
+            Div {
+                B {
+                    Text("Authorization: Bearer <token>")
+                }
+            }
+            H4 {
+                Text("Response")
+            }
+            Div {
+                B {
+                    Text("2XX OK")
+                }
+            }
         }
     }
 }

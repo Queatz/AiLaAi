@@ -28,7 +28,7 @@ fun Push.receive(data: MessagePushData) {
     }
 
     // Don't notify notifications from myself, but do update latestMessage flow
-    if (data.person.id == meId) {
+    if (data.person?.id == meId) {
         return
     }
 
@@ -41,7 +41,7 @@ fun Push.receive(data: MessagePushData) {
 
     if (data.show != false) {
         val groupName = data.group.name?.notBlank
-        val personName = personNameOrYou(data.person)
+        val personName = data.bot?.name ?: personNameOrYou(data.person)
         send(
             intent = deeplinkIntent,
             channel = Notifications.Messages,

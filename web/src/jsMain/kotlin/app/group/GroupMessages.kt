@@ -114,10 +114,12 @@ fun GroupMessages(group: GroupExtended) {
         ) {
             messages.forEachIndexed { index, it ->
                 MessageItem(
-                    it,
-                    if (index < messages.lastIndex) messages[index + 1] else null,
-                    group.members?.find { member -> member.member?.id == it.member },
-                    myMember
+                    message = it,
+                    previousMessage = if (index < messages.lastIndex) messages[index + 1] else null,
+                    member = group.members?.find { member -> member.member?.id == it.member },
+                    bot = group.bots?.find { bot -> bot.id == it.bot },
+                    myMember = myMember,
+                    bots = group.bots ?: emptyList()
                 )
             }
         }

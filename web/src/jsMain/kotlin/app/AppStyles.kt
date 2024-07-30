@@ -377,6 +377,7 @@ object AppStyles : StyleSheet() {
     }
 
     val messageLayout by style {
+        position(Position.Relative)
         display(DisplayStyle.Flex)
         margin(.5.r, 6.r, 0.r, 1.r)
 
@@ -411,6 +412,12 @@ object AppStyles : StyleSheet() {
             backgroundColor(Color.black)
             border(1.px, LineStyle.Solid, Color("#444444"))
         }
+    }
+
+    val messageBots by style {
+        position(Position.Absolute)
+        top(-12.px)
+        right(-12.px)
     }
 
     val myMessageReply by style {

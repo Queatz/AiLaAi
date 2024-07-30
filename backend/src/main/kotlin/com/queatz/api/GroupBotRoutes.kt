@@ -52,16 +52,30 @@ fun Route.groupBotRoutes() {
 
                 if (update.active != null) {
                     groupBot.active = update.active
+
+                    runCatching {
+                        if (groupBot.active == true) {
+                            bots.resume(bot.url!!, groupBotData.authToken!!)
+                        } else {
+                            bots.pause(bot.url!!, groupBotData.authToken!!)
+                        }
+                    }.onFailure {
+                        it.printStackTrace()
+                    }
                 }
 
                 if (update.config != null) {
                     groupBot.config = update.config
 
-                    bots.reinstall(
-                        url = bot.url!!,
-                        authToken = groupBotData.authToken!!,
-                        body = ReinstallBotBody(groupBot.config)
-                    )
+                    runCatching {
+                        bots.reinstall(
+                            url = bot.url!!,
+                            authToken = groupBotData.authToken!!,
+                            body = ReinstallBotBody(groupBot.config)
+                        )
+                    }.onFailure {
+                        it.printStackTrace()
+                    }
                 }
 
                 db.update(groupBot)
@@ -79,15 +93,15 @@ fun Route.groupBotRoutes() {
 
                 db.delete(groupBot)
 
+                val bot = db.document(Bot::class, groupBot.bot!!)
+                    ?: throw Exception("Bot doesn't exist")
+
+                val groupBotData = db.groupBotData(groupBot.id!!)
+                    ?: throw Exception("Group bot data doesn't exist")
+
+                db.delete(groupBotData)
+
                 runCatching {
-                    val bot = db.document(Bot::class, groupBot.bot!!)
-                        ?: throw Exception("Bot doesn't exist")
-
-                    val groupBotData = db.groupBotData(groupBot.id!!)
-                        ?: throw Exception("Group bot data doesn't exist")
-
-                    db.delete(groupBotData)
-
                     bots.uninstall(
                         url = bot.url!!,
                         authToken = groupBotData.authToken!!
