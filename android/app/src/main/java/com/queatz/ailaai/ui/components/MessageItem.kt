@@ -80,7 +80,7 @@ fun MessageItem(
                             bot?.name,
                             PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
                         ) {
-                            botDialog = bot!!.id!!
+                            botDialog = message.bot!!
                         }
                     }
                 }
