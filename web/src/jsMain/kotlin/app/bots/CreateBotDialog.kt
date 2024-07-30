@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.createBot
-import app.ailaai.api.updateBotData
+import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.photoDialog
 import app.dialog.rememberChoosePhotoDialog
@@ -23,6 +23,7 @@ import components.IconButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -117,15 +118,13 @@ suspend fun createBotDialog(
         api.createBot(
             BotDetailsBody(
                 url = url,
-                photo = photo.value
-            )
-        ) {
-            if (secret.value.isNotEmpty()) {
-                api.updateBotData(it.id!!, BotData(secret = secret.value)) {
-
-                }
+                photo = photo.value,
+                data = secret.value.notBlank?.let { BotData(secret = it) }
+            ),
+            onError = {
+                scope.launch { dialog(application.appString { didntWork }, cancelButton = null) }
             }
-
+        ) {
             onBotCreated(it)
         }
     }

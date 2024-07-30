@@ -53,6 +53,7 @@ import components.LinkifyText
 import joins
 import json
 import kotlinx.browser.window
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import lib.formatDistanceToNow
@@ -109,18 +110,28 @@ fun GroupTopBar(
         mutableStateOf(true)
     }
 
-    fun showBot(bot: Bot) {
+    fun showBot(bot: Bot, onBotDeleted: () -> Unit) {
         scope.launch {
+            val reload = MutableSharedFlow<Unit>()
+
             botDialog(
                 scope = scope,
+                reload = reload,
                 bot = bot,
-                onBotUpdated = {},
-                onBotDeleted = {}
+                onBotUpdated = {
+                    scope.launch {
+                        reload.emit(Unit)
+                    }
+                },
+                onBotDeleted = {
+                    onBotDeleted()
+                    onGroupUpdated()
+                }
             )
         }
     }
 
-    fun createBot() {
+    fun createBot(onCreated: (Bot) -> Unit) {
         scope.launch {
             createBotDialog(
                 this,
@@ -130,88 +141,120 @@ fun GroupTopBar(
                     }
                 }
             ) {
-                showBot(it)
+                onCreated(it)
+                showBot(it) {}
             }
         }
     }
 
-    fun editGroupBot(bot: Bot, groupBot: GroupBot) {
+    fun editGroupBot(bot: Bot, groupBot: GroupBot, onUpdated: () -> Unit) {
         scope.launch {
             updateGroupBotDialog(bot, groupBot) {
-
+                onUpdated()
             }
         }
     }
 
-    fun showGroupBot(bot: Bot, groupBot: GroupBot) {
+    fun showGroupBot(bot: Bot, groupBot: GroupBot, onUpdated: () -> Unit) {
         scope.launch {
+            val reload = MutableSharedFlow<Unit>()
             groupBotDialog(
                 scope = scope,
+                reload = reload,
                 bot = bot,
                 groupBot = groupBot,
-                group = group,
                 myMember = myMember,
-                onEditBot = {
-                    editGroupBot(it, groupBot)
+                onGroupBotUpdated = {
+                    onUpdated()
+                },
+                onEditBot = { bot, groupBot ->
+                    editGroupBot(bot, groupBot) {
+                        scope.launch {
+                            reload.emit(Unit)
+                        }
+                        onUpdated()
+                    }
                 },
                 onBotRemoved = {
-
+                    onUpdated()
                 },
                 onOpenBot = {
-                    showBot(it)
+                    showBot(it) {
+                        scope.launch {
+                            reload.emit(Unit)
+                        }
+                        onUpdated()
+                    }
                 }
             )
         }
     }
 
-    fun createGroupBot(bot: Bot) {
+    fun createGroupBot(bot: Bot, onCreated: () -> Unit) {
         scope.launch {
+            val reload = MutableSharedFlow<Unit>()
             createGroupBotDialog(
-                scope = scope,
+                reload = reload,
                 group = group.group!!.id!!,
                 bot = bot,
                 onOpenBot = {
-                    showBot(it)
+                    showBot(it) {
+                        scope.launch {
+                            reload.emit(Unit)
+                        }
+                    }
                 }
             ) {
-                showGroupBot(bot, it)
+                onCreated()
             }
         }
     }
 
-    fun addABot() {
+    fun addABot(onAdded: () -> Unit) {
         scope.launch {
+            val reload = MutableSharedFlow<Unit>()
             addBotDialog(
+                reload = reload,
                 group = group.group!!.id!!,
                 onCreateBot = {
-                    createBot()
+                    createBot {
+                        scope.launch {
+                            reload.emit(Unit)
+                        }
+                    }
                 },
                 onAddBot = {
-                    createGroupBot(it)
-                }
-            )
-        }
-    }
-
-    fun bots() {
-        scope.launch {
-            groupBotsDialog(
-                group = group.group!!.id!!,
-                onAddBot = {
-                    addABot()
-                },
-                onBot = { bot, groupBot ->
-                    showGroupBot(bot, groupBot)
+                    createGroupBot(it) {
+                        onAdded()
+                        onGroupUpdated()
+                    }
                 }
             )
         }
     }
 
     fun showBots() {
-        if ((group.botCount ?: 0) > 0) {
-            bots()
-        } else {
-            addABot()
+        scope.launch {
+            val reload = MutableSharedFlow<Unit>()
+            groupBotsDialog(
+                reload = reload,
+                group = group.group!!.id!!,
+                onAddBot = {
+                    addABot {
+                        scope.launch {
+                            reload.emit(Unit)
+                        }
+                    }
+                },
+                onBot = { bot, groupBot ->
+                    showGroupBot(bot, groupBot) {
+                        onGroupUpdated()
+                        scope.launch {
+                            reload.emit(Unit)
+                        }
+                    }
+                }
+            )
         }
     }
 
@@ -280,7 +323,11 @@ fun GroupTopBar(
                             {
                                 scope.launch {
                                     dialog(application.appString { settings }) {
-                                        var rainAmount by remember { mutableStateOf((effectsConfig?.firstOrNull() as? RainEffect)?.amount ?: 0.1) }
+                                        var rainAmount by remember {
+                                            mutableStateOf(
+                                                (effectsConfig?.firstOrNull() as? RainEffect)?.amount ?: 0.1
+                                            )
+                                        }
 
                                         LaunchedEffect(rainAmount) {
                                             effectsConfig = RainEffect(rainAmount).inList()
@@ -563,7 +610,7 @@ fun GroupTopBar(
     }
 
     LaunchedEffect(allJoinRequests) {
-        joinRequests = allJoinRequests.filter { it.joinRequest?.group == group.group?.id}
+        joinRequests = allJoinRequests.filter { it.joinRequest?.group == group.group?.id }
     }
 
     if (joinRequests.isNotEmpty()) {

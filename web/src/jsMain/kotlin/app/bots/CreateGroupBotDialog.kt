@@ -1,10 +1,12 @@
 package app.bots
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.bot
 import app.ailaai.api.createGroupBot
 import app.dialog.dialog
 import app.menu.Menu
@@ -12,8 +14,12 @@ import com.queatz.db.Bot
 import com.queatz.db.BotConfigValue
 import com.queatz.db.GroupBot
 import components.IconButton
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -28,7 +34,7 @@ import org.w3c.dom.HTMLElement
 import r
 
 suspend fun createGroupBotDialog(
-    scope: CoroutineScope,
+    reload: SharedFlow<Unit>,
     group: String,
     bot: Bot,
     onOpenBot: (Bot) -> Unit,
@@ -40,8 +46,22 @@ suspend fun createGroupBotDialog(
         title = bot.name!!,
         // todo: translate
         confirmButton = "Add to group",
-        actions = {
+        actions = { resolve ->
             var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+
+            var bot by remember { mutableStateOf(bot) }
+
+            LaunchedEffect(Unit) {
+                reload.collectLatest {
+                    api.bot(bot.id!!, onError = {
+                        if ((it as? ResponseException)?.response?.status == HttpStatusCode.NotFound) {
+                            resolve(null)
+                        }
+                    }) {
+                        bot = it
+                    }
+                }
+            }
 
             menuTarget?.let {
                 Menu({ menuTarget = null }, it) {

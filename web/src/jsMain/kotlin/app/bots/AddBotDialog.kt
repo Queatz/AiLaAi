@@ -18,12 +18,15 @@ import components.IconButton
 import components.LoadingText
 import components.ProfilePhoto
 import focusable
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
 
 suspend fun addBotDialog(
+    reload: SharedFlow<Unit>,
     group: String,
     onCreateBot: () -> Unit,
     onAddBot: (Bot) -> Unit,
@@ -45,7 +48,7 @@ suspend fun addBotDialog(
             mutableStateOf(emptyList<Bot>())
         }
 
-        LaunchedEffect(Unit) {
+        suspend fun load() {
             api.groupBots(group) { groupBots ->
                 api.bots {
                     bots = it.filter { bot ->
@@ -53,7 +56,14 @@ suspend fun addBotDialog(
                     }
                 }
             }
+        }
+
+        LaunchedEffect(Unit) {
+            load()
             isLoading = false
+            reload.collectLatest {
+                load()
+            }
         }
 
         LoadingText(

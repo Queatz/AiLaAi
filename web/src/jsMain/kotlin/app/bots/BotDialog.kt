@@ -1,11 +1,13 @@
 package app.bots
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.bot
 import app.ailaai.api.botData
 import app.ailaai.api.deleteBot
 import app.ailaai.api.reloadBot
@@ -22,8 +24,12 @@ import com.queatz.db.BotData
 import components.GroupPhoto
 import components.GroupPhotoItem
 import components.IconButton
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.css.AlignItems
@@ -33,7 +39,6 @@ import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Pre
@@ -44,6 +49,7 @@ import r
 
 suspend fun botDialog(
     scope: CoroutineScope,
+    reload: SharedFlow<Unit>,
     bot: Bot,
     onBotUpdated: () -> Unit,
     onBotDeleted: () -> Unit
@@ -54,8 +60,22 @@ suspend fun botDialog(
         title = bot.name!!,
         confirmButton = application.appString { close },
         cancelButton = null,
-        actions = {
+        actions = { resolve ->
             val me by application.me.collectAsState()
+
+            var bot by remember { mutableStateOf(bot) }
+
+            LaunchedEffect(Unit) {
+                reload.collectLatest {
+                    api.bot(bot.id!!, onError = {
+                        if ((it as? ResponseException)?.response?.status == HttpStatusCode.NotFound) {
+                            resolve(null)
+                        }
+                    }) {
+                        bot = it
+                    }
+                }
+            }
 
             if (me?.id == bot.creator) {
                 val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
@@ -95,10 +115,12 @@ suspend fun botDialog(
                             }
                         }
 
+                        // todo: translate
                         item("Reload") {
                             scope.launch {
                                 api.reloadBot(bot.id!!) {
                                     onBotUpdated()
+                                    dialog("Bot details reloaded", cancelButton = null)
                                 }
                             }
                         }
@@ -118,6 +140,7 @@ suspend fun botDialog(
                                 if (result == true) {
                                     api.deleteBot(bot.id!!) {
                                         onBotDeleted()
+                                        resolve(null)
                                     }
                                 }
                             }

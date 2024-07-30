@@ -21,6 +21,8 @@ import components.IconButton
 import components.LoadingText
 import components.ProfilePhoto
 import focusable
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -28,6 +30,7 @@ import org.w3c.dom.DOMRect
 import r
 
 suspend fun groupBotsDialog(
+    reload: SharedFlow<Unit>,
     group: String,
     onAddBot: () -> Unit,
     onBot: (Bot, GroupBot) -> Unit,
@@ -49,11 +52,18 @@ suspend fun groupBotsDialog(
             mutableStateOf(emptyList<GroupBotExtended>())
         }
 
-        LaunchedEffect(Unit) {
+        suspend fun load() {
             api.groupBots(group = group) {
                 groupBots = it
             }
+        }
+
+        LaunchedEffect(Unit) {
+            load()
             isLoading = false
+            reload.collectLatest {
+                load()
+            }
         }
 
         LoadingText(

@@ -51,7 +51,13 @@ fun Route.botRoutes() {
                         keywords = botDetails.keywords,
                         config = botDetails.config
                     )
-                )
+                ).also { bot ->
+                    if (body.data != null) {
+                        db.insert(
+                            BotData(bot = bot.id!!, secret = body.data!!.secret)
+                        )
+                    }
+                }
             }
         }
 

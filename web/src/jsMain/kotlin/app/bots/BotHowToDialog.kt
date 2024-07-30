@@ -1,22 +1,17 @@
 package app.bots
 
-import app.AppStyles
 import app.dialog.dialog
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.LineStyle
-import org.jetbrains.compose.web.css.background
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
-import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H2
-import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.H4
 import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
@@ -186,7 +181,7 @@ suspend fun botHowToDialog() {
                 Text("POST /pause")
             }
             Div {
-                Text("Called when the bot has been paused in a group.")
+                Text("Called when the bot has been paused in a group. The webhook will return 400 Bad Request while the bot is paused.")
             }
             H4 {
                 Text("Request")

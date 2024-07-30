@@ -50,7 +50,7 @@ suspend fun updateGroupBotDialog(
     if (result == true) {
         api.updateGroupBot(
             groupBot = groupBot.id!!,
-            GroupBot(config = values.value)
+            update = GroupBot(config = values.value)
         ) {
             onUpdated(it)
         }

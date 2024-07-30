@@ -1,22 +1,28 @@
 package app.bots
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.bot
 import app.ailaai.api.deleteGroupBot
+import app.ailaai.api.groupBot
 import app.ailaai.api.updateGroupBot
 import app.dialog.dialog
 import app.menu.Menu
 import application
 import com.queatz.db.Bot
 import com.queatz.db.GroupBot
-import com.queatz.db.GroupExtended
 import com.queatz.db.MemberAndPerson
 import components.IconButton
 import components.Switch
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.dom.Text
@@ -25,28 +31,51 @@ import org.w3c.dom.HTMLElement
 
 suspend fun groupBotDialog(
     scope: CoroutineScope,
+    reload: SharedFlow<Unit>,
     bot: Bot,
     groupBot: GroupBot,
-    group: GroupExtended,
     myMember: MemberAndPerson?,
     onOpenBot: (Bot) -> Unit,
+    onGroupBotUpdated: (GroupBot) -> Unit,
     onBotRemoved: (Bot) -> Unit,
-    onEditBot: (Bot) -> Unit
+    onEditBot: (Bot, GroupBot) -> Unit
 ) {
     dialog(
-        bot.name,
+        title = bot.name,
         cancelButton = null,
         confirmButton = application.appString { close },
-        actions = {
+        actions = { resolve ->
             var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
             var active by remember { mutableStateOf(groupBot.active == true) }
+
+            var bot by remember { mutableStateOf(bot) }
+            var groupBot by remember { mutableStateOf(groupBot) }
+
+            LaunchedEffect(Unit) {
+                reload.collectLatest {
+                    api.bot(bot.id!!, onError = {
+                        if ((it as? ResponseException)?.response?.status == HttpStatusCode.NotFound) {
+                            resolve(null)
+                        }
+                    }) {
+                        bot = it
+                    }
+                    api.groupBot(groupBot.id!!, onError = {
+                        if ((it as? ResponseException)?.response?.status == HttpStatusCode.NotFound) {
+                            resolve(null)
+                        }
+                    }) {
+                        groupBot = it
+                    }
+                }
+            }
 
             menuTarget?.let {
                 Menu({ menuTarget = null }, it) {
                     if (myMember?.member?.host == true) {
                         // todo: translate
                         item("Edit") {
-                            onEditBot(bot)
+                            onEditBot(bot, groupBot)
                         }
                         // todo: translate
                         item("Remove") {
@@ -61,6 +90,7 @@ suspend fun groupBotDialog(
                                 if (result == true) {
                                     api.deleteGroupBot(groupBot = groupBot.id!!) {
                                         onBotRemoved(bot)
+                                        resolve(null)
                                     }
                                 }
                             }
@@ -90,6 +120,7 @@ suspend fun groupBotDialog(
                             update = GroupBot(active = it)
                         ) {
                             active = it.active == true
+                            onGroupBotUpdated(it)
                         }
                     }
                 },
