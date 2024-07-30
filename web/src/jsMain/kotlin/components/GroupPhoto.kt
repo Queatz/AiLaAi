@@ -2,6 +2,7 @@ package components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import application
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import org.jetbrains.compose.web.css.*
@@ -52,6 +53,8 @@ fun GroupPhoto(
     items: List<GroupPhotoItem>,
     size: CSSSizeValue<CSSUnit.px> = 54.px,
     mergeTitles: Boolean = false,
+    fallback: String = "account_circle",
+    fallbackTitle: String = application.appString { someone },
     onClick: (() -> Unit)? = null
 ) {
     if (items.size > 1) {
@@ -103,6 +106,10 @@ fun GroupPhoto(
             onClick = onClick
 
         ) {
+            marginRight(.5.r)
+        }
+    } else {
+        ProfilePhoto(null, null, size, fontSize = size / 2, onClick = onClick, fallback = fallback, fallbackTitle = fallbackTitle) {
             marginRight(.5.r)
         }
     }

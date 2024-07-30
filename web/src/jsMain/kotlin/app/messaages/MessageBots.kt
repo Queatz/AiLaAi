@@ -2,6 +2,7 @@ package app.messaages
 
 import Styles
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import app.AppStyles
 import com.queatz.db.Bot
 import com.queatz.db.BotMessageStatus
@@ -28,17 +29,28 @@ fun MessageBots(bots: List<Bot>, statuses: List<BotMessageStatus>) {
         classes(AppStyles.messageBots)
     }) {
         GroupPhoto(
-            statuses.mapNotNull { status ->
-                bots.find { it.id == status.bot }?.let { bot ->
-                    GroupPhotoItem(bot.photo, "${bot.name}: ${if (status.success == true) "✅" else "❌"} ${status.note}")
+            items = remember(bots, statuses) {
+                statuses.mapNotNull { status ->
+                    bots.find { it.id == status.bot }?.let { bot ->
+                        GroupPhotoItem(bot.photo, "${bot.name}: ${if (status.success == true) "✅" else "❌"} ${status.note}")
+                    }
                 }
             },
             size = 24.px,
-            mergeTitles = true
+            mergeTitles = true,
+            fallback = "smart_toy",
+            fallbackTitle = remember(bots, statuses) {
+                statuses.map { status ->
+                    bots.find { it.id == status.bot }.let { bot ->
+                        "${bot?.name ?: "\uD83E\uDD16"}: ${if (status.success == true) "✅" else "❌"} ${status.note}"
+                    }
+                }.joinToString("\n")
+            }
         )
         val success = statuses.all { it.success == true }
         Icon(if (success) "check" else "clear") {
-            property("pointer-events", "none")
+            property("pointer-events", 
+                "none")
             position(Position.Absolute)
             bottom(-2.px)
             right(2.px)

@@ -46,6 +46,8 @@ fun ProfilePhoto(
     size: CSSNumeric = 36.px,
     fontSize: CSSNumeric? = null,
     title: String? = null,
+    fallback: String = "account_circle",
+    fallbackTitle: String = application.appString { someone },
     showTitle: Boolean = true,
     border: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -78,7 +80,7 @@ fun ProfilePhoto(
             }
 
             if (showTitle) {
-                title(title ?: name ?: application.appString { someone })
+                title(title ?: name ?: fallbackTitle)
             }
 
             onClick {
@@ -93,7 +95,7 @@ fun ProfilePhoto(
                         classes("material-symbols-outlined")
                     }
                 ) {
-                    Text("account_circle")
+                    Text(fallback)
                 }
             }
         }
