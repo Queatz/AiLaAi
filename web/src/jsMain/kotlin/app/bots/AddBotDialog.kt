@@ -93,6 +93,7 @@ suspend fun addBotDialog(
                     Div({
                         style {
                             marginLeft(1.r)
+                            property("max-width", "calc(100% - 2rem)")
                         }
                     }) {
                         Div({
