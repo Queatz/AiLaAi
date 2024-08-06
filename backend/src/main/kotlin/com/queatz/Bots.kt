@@ -29,6 +29,7 @@ import io.ktor.http.withCharset
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration.Companion.minutes
@@ -214,6 +215,9 @@ class Bots {
                 bot = bot,
                 message = Message(text = botMessage.text?.ellipsize())
             )
+
+            group.seen = Clock.System.now()
+            db.update(group)
         }
     }
 }
