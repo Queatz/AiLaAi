@@ -64,6 +64,7 @@ class Push {
         private val hmsPushEndpoint = "https://push-api.cloud.huawei.com/v1/${secrets.hms.appId}/messages:send"
         private val gmsPushEndpoint = "https://fcm.googleapis.com/v1/projects/${secrets.gms.appId}/messages:send"
         private val apnsPushEndpoint = "https://api.push.apple.com:443"
+        private val apnsPushSandboxEndpoint = "https://api.sandbox.push.apple.com:443"
     }
 
     private var hmsToken: String? = null
@@ -177,6 +178,30 @@ class Push {
                     }
                 }
             }
+
+            // APNS Sandbox token
+            launch {
+                while (Thread.currentThread().isAlive) {
+                    try {
+                        val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(secrets.apns.privateKey))
+                        val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
+                        val token = JWT.create()
+                            .withAudience(apnsPushSandboxEndpoint)
+                            .withIssuer(secrets.apns.teamId)
+                            .withKeyId(secrets.apns.privateKeyId)
+                            .withSubject(secrets.apns.teamId)
+                            .withIssuedAt(Clock.System.now().toJavaInstant().toGMTDate().toJvmDate())
+                            .withExpiresAt(Clock.System.now().plus(1.hours).toJavaInstant().toGMTDate().toJvmDate())
+                            .sign(Algorithm.ECDSA256(null, privateKey as ECPrivateKey))
+
+                        apnsToken = token
+                        delay(1.hours.inWholeSeconds.seconds.minus(30.seconds))
+                    } catch (throwable: Throwable) {
+                        throwable.printStackTrace()
+                        delay(15.seconds)
+                    }
+                }
+            }
         }
     }
 
@@ -264,6 +289,31 @@ class Push {
             DeviceType.Apns -> {
                 try {
                     val response = http2.post("$apnsPushEndpoint/3/device/${device.token!!}") {
+                        contentType(ContentType.Application.Json.withCharset(UTF_8))
+                        header(HttpHeaders.Authorization, "Bearer $apnsToken")
+                        header("apns-push-type", "alert")
+                        header("apns-topic", secrets.apns.topic)//todo move to secrets.json
+                        setBody(
+                            ApnsPushBody(
+                                aps = ApsBody(
+                                    alert = ApsAlertBody(
+                                        body = json.encodeToString(pushData)
+                                    )
+                                ),
+                                data = ApsDataBody(
+                                    data = json.encodeToString(pushData)
+                                )
+                            )
+                        )
+                    }
+                    Logger.getAnonymousLogger().info("APNS response: ${response.status} ${response.bodyAsText()}")
+                } catch (throwable: Throwable) {
+                    Logger.getAnonymousLogger().info("APNS error: $throwable")
+                    throwable.printStackTrace()
+                }
+
+                try {
+                    val response = http2.post("$apnsPushSandboxEndpoint/3/device/${device.token!!}") {
                         contentType(ContentType.Application.Json.withCharset(UTF_8))
                         header(HttpHeaders.Authorization, "Bearer $apnsToken")
                         header("apns-push-type", "alert")

@@ -17,6 +17,7 @@ import application
 import com.queatz.db.Bot
 import com.queatz.db.GroupBot
 import com.queatz.db.GroupBotExtended
+import com.queatz.db.MemberAndPerson
 import components.IconButton
 import components.LoadingText
 import components.ProfilePhoto
@@ -32,6 +33,7 @@ import r
 suspend fun groupBotsDialog(
     reload: SharedFlow<Unit>,
     group: String,
+    myMember: MemberAndPerson?,
     onAddBot: () -> Unit,
     onBot: (Bot, GroupBot) -> Unit,
 ) {
@@ -40,8 +42,10 @@ suspend fun groupBotsDialog(
         confirmButton = application.appString { close },
         cancelButton = null,
         actions = {
-            IconButton("add", appString { addBot }) {
-                onAddBot()
+            if (myMember?.member?.host == true) {
+                IconButton("add", appString { addBot }) {
+                    onAddBot()
+                }
             }
         }
     ) { resolve ->

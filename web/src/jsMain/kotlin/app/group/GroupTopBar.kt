@@ -239,6 +239,7 @@ fun GroupTopBar(
             groupBotsDialog(
                 reload = reload,
                 group = group.group!!.id!!,
+                myMember = myMember,
                 onAddBot = {
                     addABot {
                         scope.launch {

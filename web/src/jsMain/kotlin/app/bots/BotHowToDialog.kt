@@ -7,6 +7,7 @@ import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.B
@@ -230,4 +231,5 @@ fun AttrsScope<HTMLElement>.codeBlock() = style {
     border(1.px, LineStyle.Solid, Color("#88888844"))
     borderRadius(1.r)
     padding(1.r)
+    overflowX("auto")
 }

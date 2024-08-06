@@ -24,9 +24,13 @@ import org.jetbrains.compose.web.dom.Div
 import r
 
 @Composable
-fun MessageBots(bots: List<Bot>, statuses: List<BotMessageStatus>) {
+fun MessageBots(
+    bots: List<Bot>,
+    statuses: List<BotMessageStatus>,
+    isMine: Boolean
+) {
     Div({
-        classes(AppStyles.messageBots)
+        classes(listOf(AppStyles.messageBots) + (if (isMine) listOf(AppStyles.myMessageBots) else emptyList()))
     }) {
         GroupPhoto(
             items = remember(bots, statuses) {

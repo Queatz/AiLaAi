@@ -62,7 +62,7 @@ fun MessageItem(
         }
         MessageContent(message, myMember)
         message.bots?.notEmpty?.let {
-            MessageBots(bots, it)
+            MessageBots(bots, it, isMine = isMe)
         }
     }
 }

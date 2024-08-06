@@ -414,10 +414,20 @@ object AppStyles : StyleSheet() {
         }
     }
 
+    val myMessageBots by style {
+
+    }
+
     val messageBots by style {
         position(Position.Absolute)
         top(-12.px)
-        right(-12.px)
+        property("left", "2.5rem")
+        property("z-index", "1")
+
+        self + className(myMessageBots) style {
+            right(-12.px)
+            property("left", "unset")
+        }
     }
 
     val myMessageReply by style {
