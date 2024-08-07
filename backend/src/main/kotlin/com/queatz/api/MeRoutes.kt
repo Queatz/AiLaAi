@@ -290,6 +290,28 @@ fun Route.meRoutes() {
                 )
             }
         }
+
+        post("/me/delete") {
+            respond {
+                val me = me
+
+                db.transferOfPerson(me.id!!)?.let {
+                    db.delete(it)
+                }
+
+                db.delete(db.profile(me.id!!))
+
+                me.photo = null
+                me.name = null
+                me.geo = null
+                me.seen = null
+                me.language = null
+
+                db.update(me)
+
+                HttpStatusCode.NoContent
+            }
+        }
     }
 }
 

@@ -114,3 +114,13 @@ suspend fun Api.updateMyPhoto(
     )
 }
 
+suspend fun Api.deleteMe(
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) {
+    return post(
+        "me/delete",
+        onError = onError,
+        onSuccess = onSuccess
+    )
+}
