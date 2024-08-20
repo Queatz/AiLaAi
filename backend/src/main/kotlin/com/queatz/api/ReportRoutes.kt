@@ -1,8 +1,8 @@
 package com.queatz.api
 
 import com.queatz.db.Report
+import com.queatz.db.ReportType
 import com.queatz.db.recentReports
-import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.respond
@@ -26,7 +26,7 @@ fun Route.reportRoutes() {
                     db.insert(
                         Report(
                             reporter = me.id!!,
-                            type = report.type!!,
+                            type = report.type ?: ReportType.Other,
                             entity = report.entity!!,
                             urgent = report.urgent?.takeIf { it },
                             reporterMessage = report.reporterMessage

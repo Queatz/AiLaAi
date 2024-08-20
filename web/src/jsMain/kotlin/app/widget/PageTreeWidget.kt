@@ -1,6 +1,7 @@
 package app.widget
 
 import Styles
+import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,12 +64,15 @@ import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
 import updateWidget
@@ -131,8 +135,11 @@ fun PageTreeWidget(widgetId: String) {
             }
         }
     }
+    val tagCount = remember(data) {
+        data?.tags?.values?.flatten()?.groupingBy { it }?.eachCount()
+    }
     val allTags = remember(data) {
-        data?.tags?.values?.flatten()?.distinct()?.sorted()
+        data?.tags?.values?.flatten()?.distinct()?.sortedByDescending { tagCount?.get(it) ?: 0 }
     }
 
     suspend fun reload() {
@@ -272,6 +279,7 @@ fun PageTreeWidget(widgetId: String) {
                     marginTop = 0.r,
                     // todo: translate
                     title = "Tap to filter",
+                    formatCount = { tagCount?.get(it)?.toString() ?: "" },
                     showNoTag = true,
                     onClick = {
                         tagFilter = if (tagFilter == it) null else it
@@ -480,6 +488,7 @@ fun Tags(
     marginTop: CSSSizeValue<*> = 1.r,
     title: String,
     onClick: (tag: TagFilter) -> Unit,
+    formatCount: ((tag: String) -> String?)? = null,
     showNoTag: Boolean = false,
     content: @Composable () -> Unit = {}
 ) {
@@ -496,6 +505,7 @@ fun Tags(
                 tag = tag,
                 title = title,
                 selected = (selected as? TagFilter.Tag)?.tag == tag,
+                count = formatCount?.invoke(tag),
                 onClick = {
                     onClick(TagFilter.Tag(tag))
                 }
@@ -524,6 +534,7 @@ fun TagButton(
     tag: String,
     title: String,
     selected: Boolean,
+    count: String? = null,
     outline: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -554,5 +565,14 @@ fun TagButton(
         }
     ) {
         Text(tag)
+
+        count?.let {
+            Span({
+                style {
+                    fontWeight("normal")
+                    paddingLeft(.25.r)
+                }
+            }) { Text(it) }
+        }
     }
 }
