@@ -8,6 +8,7 @@ import appString
 import appText
 import application
 import ellipsize
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import r
@@ -18,9 +19,13 @@ fun AppHeader(
     showBack: Boolean = false,
     showMe: Boolean = true,
     background: Boolean = true,
+    showDownloadApp: Boolean = false,
     onBack: () -> Unit = {},
 ) {
     val layout by application.layout.collectAsState()
+    val router = Router.current
+    val configuration = LocalConfiguration.current
+    val scope = rememberCoroutineScope()
 
     if (layout == AppLayout.Kiosk) {
         Div({
@@ -31,8 +36,6 @@ fun AppHeader(
         }) {  }
         return
     }
-
-    val router = Router.current
 
     Div({
         classes(Styles.appHeader)
@@ -96,7 +99,24 @@ fun AppHeader(
         }) {
             Text("")
         }
-        val configuration = LocalConfiguration.current
+        if (showDownloadApp) {
+            Button({
+                classes(Styles.button)
+
+                style {
+                    marginRight(.5.r)
+                }
+
+                onClick {
+                    scope.launch {
+                        getAppDialog()
+                    }
+                }
+            }) {
+                // todo: translate
+                Text("Get the app")
+            }
+        }
         Span({
             style {
                 padding(.5.r, 1.r)

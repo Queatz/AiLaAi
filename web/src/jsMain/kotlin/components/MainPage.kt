@@ -69,7 +69,7 @@ fun MainPage() {
             classes(Styles.mainContainer)
         }) {
             MapView {
-                AppHeader(appString { appName }, background = false)
+                AppHeader(appString { appName }, background = false, showDownloadApp = true)
             }
         }
     } else {

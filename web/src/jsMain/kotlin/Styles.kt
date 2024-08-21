@@ -479,6 +479,8 @@ object Styles : StyleSheet() {
         }
     }
 
+    val outlineButtonAlt by style {}
+
     val outlineButton by style {
         borderRadius(2.r)
         border(1.px, LineStyle.Solid, colors.primary)
@@ -495,8 +497,18 @@ object Styles : StyleSheet() {
             marginRight(.5.r)
         }
 
+        self + className(outlineButtonAlt) style {
+            color(Color.black)
+        }
+
         self + disabled style {
             opacity(.5)
+        }
+
+        dark(self) {
+            self + className(outlineButtonAlt) style {
+                color(Color.white)
+            }
         }
     }
 
