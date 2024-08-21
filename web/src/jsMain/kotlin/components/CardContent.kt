@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.components.Spacer
 import app.softwork.routingcompose.Router
 import appString
 import com.queatz.db.Card
@@ -25,7 +26,7 @@ import r
 import stories.asStoryContents
 
 @Composable
-fun CardContent(card: Card) {
+fun CardContent(card: Card, showOpenCardInNewTab: Boolean = false) {
     val router = Router.current
     var cardConversation by remember { mutableStateOf<ConversationItem?>(null) }
     var isReplying by remember { mutableStateOf<List<ConversationItem>?>(null) }
@@ -49,6 +50,7 @@ fun CardContent(card: Card) {
             Div {
                 NameAndLocation(card.name, card.hint)
                 val viewProfileString = appString { viewProfile }
+                val openInNewTabString = appString { openInNewTab }
                 Span({
                     classes("material-symbols-outlined")
                     title(viewProfileString)
@@ -67,6 +69,23 @@ fun CardContent(card: Card) {
                     }
                 }) {
                     Text("person")
+                }
+                if (showOpenCardInNewTab) {
+                    Span({
+                        classes("material-symbols-outlined")
+                        title(openInNewTabString)
+                        style {
+                            cursor("pointer")
+                            opacity(.5f)
+                            marginLeft(.25.r)
+                            property("vertical-align", "text-bottom")
+                        }
+                        onClick { event ->
+                            window.open("/page/${card.id}", target = "_blank")
+                        }
+                    }) {
+                        Text("open_in_new")
+                    }
                 }
             }
             card.categories?.firstOrNull()?.let { category ->

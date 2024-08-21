@@ -224,7 +224,19 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                                         }
                                     }
                                 } else {
-                                    Text("${card.name}")
+                                    Div {
+                                        Text("${card.name}")
+                                    }
+                                    if (card.categories.isNullOrEmpty().not()) {
+                                        Div({
+                                            style {
+                                                fontSize(85.percent)
+                                                opacity(.85f)
+                                            }
+                                        }) {
+                                            Text(card.categories!!.first())
+                                        }
+                                    }
                                 }
                             }
 
@@ -380,7 +392,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                 }) {
                     Div {
                         selectedCard?.let {
-                            CardContent(it)
+                            CardContent(it, showOpenCardInNewTab = true)
                         }
                     }
                 }
