@@ -500,6 +500,40 @@ object Styles : StyleSheet() {
         }
     }
 
+    val floatingButtonSelected by style {}
+
+    val floatingButton by style {
+        borderRadius(2.r)
+        property("border", "none")
+        padding(0.r, 2.r)
+        minHeight(3.r)
+        backgroundColor(colors.background)
+        color(colors.primary)
+        cursor("pointer")
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        fontWeight("bold")
+        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+
+        selector(".material-symbols-outlined") style {
+            marginRight(.5.r)
+        }
+
+        self + disabled style {
+            opacity(.5)
+        }
+
+        self + className(floatingButtonSelected) style {
+            backgroundColor(colors.primary)
+            color(Color.white)
+        }
+
+        dark(self) {
+            backgroundColor(colors.dark.background)
+            color(Color.white)
+        }
+    }
+
     val textButton by style {
         property("border", "none")
         borderRadius(2.r)

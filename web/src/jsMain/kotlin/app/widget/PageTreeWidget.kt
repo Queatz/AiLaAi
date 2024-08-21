@@ -139,7 +139,7 @@ fun PageTreeWidget(widgetId: String) {
         data?.tags?.values?.flatten()?.groupingBy { it }?.eachCount()
     }
     val allTags = remember(data) {
-        data?.tags?.values?.flatten()?.distinct()?.sortedByDescending { tagCount?.get(it) ?: 0 }
+        data?.tags?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
     }
 
     suspend fun reload() {

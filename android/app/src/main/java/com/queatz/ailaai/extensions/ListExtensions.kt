@@ -27,8 +27,8 @@ fun <E> List<E>.swipe(current: E, offset: Int): SwipeResult {
     }
 }
 
-fun <T> List<T>.sortedDistinct(): List<T> = groupBy { it }.let { occurrences ->
+fun <T> List<T>.sortedDistinct(): List<T> = groupingBy { it }.eachCount().let { occurrences ->
     distinct().sortedByDescending {
-        occurrences[it]?.size ?: 0
+        occurrences[it] ?: 0
     }
 }

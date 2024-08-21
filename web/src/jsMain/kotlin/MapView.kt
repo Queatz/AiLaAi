@@ -36,15 +36,19 @@ import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
@@ -52,6 +56,7 @@ import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Br
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -72,6 +77,17 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     var selectedCard by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
     val hasHash = remember { window.location.hash.isBlank() }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    val categories = remember(searchResults) {
+        searchResults.mapNotNull { it.categories }.flatten().sortedDistinct()
+    }
+
+    LaunchedEffect(categories) {
+        if (selectedCategory !in categories) {
+            selectedCategory = null
+        }
+    }
 
     LaunchedEffect(geo, searchText) {
         geo ?: return@LaunchedEffect
@@ -111,14 +127,22 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         }
     }
 
-    LaunchedEffect(searchResults, map) {
+    val shownCards = remember(searchResults, selectedCategory) {
+        if (selectedCategory == null) {
+            searchResults
+        } else {
+            searchResults.filter { it.categories?.contains(selectedCategory) == true }
+        }
+    }
+
+    LaunchedEffect(shownCards, map) {
         map ?: return@LaunchedEffect
 
         markers.forEach {
             it.remove()
         }
 
-        markers = searchResults.map { card ->
+        markers = shownCards.map { card ->
             val element = document.createElement("div") as HTMLDivElement
 
             val options: mapboxgl.MarkerOptions = js("{}")
@@ -314,6 +338,36 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                     styles = {
                     }) {
                     searchText = it
+                }
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        gap(.5.r)
+                        overflowY("auto")
+                        paddingTop(.5.r)
+                        paddingBottom(.5.r)
+                        position(Position.Relative)
+                    }
+                }) {
+                    categories.forEach { category ->
+                        Button({
+                            classes(Styles.floatingButton)
+
+                            if (selectedCategory == category) {
+                                classes(Styles.floatingButtonSelected)
+                            }
+
+                            style {
+                                flexShrink(0)
+                            }
+
+                            onClick {
+                                selectedCategory = if (selectedCategory == category) null else category
+                            }
+                        }) {
+                            Text(category)
+                        }
+                    }
                 }
             }
         }

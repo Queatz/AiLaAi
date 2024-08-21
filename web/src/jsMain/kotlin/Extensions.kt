@@ -201,3 +201,9 @@ suspend fun Blob.toBytes(): ByteArray {
     }
     return bytes
 }
+
+fun <T> List<T>.sortedDistinct(): List<T> = groupingBy { it }.eachCount().let { occurrences ->
+    distinct().sortedByDescending {
+        occurrences[it] ?: 0
+    }
+}
