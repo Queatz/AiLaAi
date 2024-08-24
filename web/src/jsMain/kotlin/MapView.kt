@@ -11,6 +11,9 @@ import app.components.Spacer
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import components.CardContent
+import components.CardItem
+import components.CardListItem
+import components.ProfilePhoto
 import components.SearchField
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.dom.addClass
 import lib.getCameraLngLat
 import lib.mapboxgl
+import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.Color
@@ -338,6 +342,29 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     Div({
         classes(Styles.mapContainer)
     }) {
+        if (!shownCards.isEmpty()) {
+            Div({
+                classes(Styles.navContainer, Styles.mapList)
+            }) {
+                Div({
+                    classes(Styles.navContent)
+                }) {
+                    LazyColumn({
+                        style {
+                            gap(.5.r)
+                            alignItems(AlignItems.Stretch)
+                            padding(.5.r)
+                        }
+                    }) {
+                        items(shownCards, key = { it.id!! }) { card ->
+                            CardListItem(card) {
+                                window.open("/page/${card.id}", target = "_blank")
+                            }
+                        }
+                    }
+                }
+            }
+        }
         Div(
             {
                 classes(Styles.mapUi)

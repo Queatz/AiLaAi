@@ -758,6 +758,22 @@ object Styles : StyleSheet() {
         }
     }
 
+    val mapList by style {
+        marginBottom(1.r)
+
+        // Show above map controls
+        property("z-index", "10")
+
+        desktop(self) {
+            width(24.r)
+            property("max-height", "calc(${100.percent} - ${1.r})")
+        }
+
+        mobile(self) {
+            display(DisplayStyle.None)
+        }
+    }
+
     val mapPanel by style {
         marginBottom(1.r)
 

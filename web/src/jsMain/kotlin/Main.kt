@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.AppStyles
 import app.appNav
 import app.call.CallLayout
 import app.call.CallStyles
@@ -69,6 +70,7 @@ fun main() {
 
     renderComposableInBody {
         Style(Styles)
+        Style(AppStyles)
         Style(EffectStyles)
         Style(WidgetStyles)
         Style(CallStyles)

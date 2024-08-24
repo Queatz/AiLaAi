@@ -79,7 +79,6 @@ enum class NavPage {
 
 @Composable
 fun AppPage() {
-    Style(AppStyles)
     Style(WidgetStyles)
     Style(StoryStyles)
 
