@@ -16,20 +16,30 @@ import application
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
+import com.queatz.db.people
 import components.IconButton
 import components.Loading
+import components.ProfilePhoto
 import indicator
 import joins
+import kotlinx.browser.window
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toJSDate
+import lib.differenceInMinutes
+import lib.formatDistanceToNow
+import lib.formatDistanceToNowStrict
 import notBlank
 import opensavvy.compose.lazy.LazyColumn
+import opensavvy.compose.lazy.LazyRow
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import push
 import r
+import kotlin.js.Date
 
 sealed class GroupNav {
     data object None : GroupNav()
@@ -206,7 +216,55 @@ fun GroupsNavPage(
                     appText { noGroups }
                 }
             } else {
+                val people = remember(shownGroups) {
+                    shownGroups.people().filter { it.id != me?.id }
+                }
+
                 LazyColumn {
+                    if (!showSearch) {
+                        item {
+                            LazyRow({
+                                classes(Styles.personList)
+
+                                style {
+                                    marginBottom(1.r)
+                                }
+                            }) {
+                                items(people, key = { it.id!! }) { person ->
+                                    Div({
+                                        classes(Styles.personItem)
+
+                                        title(person.name.orEmpty())
+
+                                        onClick {
+                                            window.open("/profile/${person.id}", "_blank")
+                                        }
+                                    }) {
+                                        ProfilePhoto(person, size = 54.px)
+                                        Div({
+                                            style {
+                                                opacity(.5f)
+                                                whiteSpace("nowrap")
+                                            }
+                                        }) {
+                                            person.seen?.let {
+                                                Text(
+                                                    if (differenceInMinutes(Date(), it.toJSDate(), js("{ roundingMethod: \"floor\" }")) < 1) {
+                                                        appString { now }
+                                                    } else {
+                                                        formatDistanceToNowStrict(
+                                                            Date(it.toEpochMilliseconds()),
+                                                            js("{ includeSeconds: false }")
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     items(shownGroups, key = { it.group!!.id!! }) { group ->
                         GroupItem(
                             group,

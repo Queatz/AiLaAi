@@ -8,6 +8,9 @@ import kotlin.js.Date
 external fun intlFormat(date: Date, formatOptions: dynamic = definedExternally, localeOptions: dynamic = definedExternally): String
 
 external fun formatDistanceToNow(date: Date, options: dynamic = definedExternally): String
+external fun formatDistanceToNowStrict(date: Date, options: dynamic = definedExternally): String
+
+external fun differenceInMinutes(date: Date, otherDate: Date, options: dynamic = definedExternally): Int
 
 external fun format(date: Date, format: String, options: dynamic = definedExternally): String
 external fun parse(string: String, format: String, date: Date): Date

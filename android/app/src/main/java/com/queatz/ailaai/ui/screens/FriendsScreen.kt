@@ -88,7 +88,6 @@ import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchResult
-import com.queatz.ailaai.ui.components.people
 import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
@@ -99,6 +98,7 @@ import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
+import com.queatz.db.people
 import com.queatz.push.GroupPushData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async

@@ -61,6 +61,8 @@ import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
@@ -786,6 +788,24 @@ object Styles : StyleSheet() {
         property("pointer-events", "auto")
         property("will-change", "transform")
         property("transform-origin", "bottom center")
+    }
+
+    val personList by style {
+        property("width", "calc(${100.percent} - ${1.r})")
+        overflowX("auto")
+        property("scrollbar-width", "none")
+        paddingLeft(.5.r)
+        paddingRight(1.r)
+        gap(1.r)
+    }
+
+    val personItem by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Center)
+        gap(.5.r)
+        textAlign("center")
+        cursor("pointer")
     }
 }
 

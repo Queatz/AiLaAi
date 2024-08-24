@@ -854,6 +854,10 @@ object Strings {
         "Group bots",
         "Mở bot"
     )
+    val now = Translation(
+        "Now",
+        "Bây giờ"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

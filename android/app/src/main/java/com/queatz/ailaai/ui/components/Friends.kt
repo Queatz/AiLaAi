@@ -34,8 +34,3 @@ fun Friends(
         }
     )
 }
-
-fun List<GroupExtended>.people(): List<Person> {
-    return mapNotNull { it.members?.mapNotNull { it.person } }.flatten().distinctBy { it.id!! }
-        .sortedByDescending { it.seen ?: Instant.DISTANT_PAST }
-}
