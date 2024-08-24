@@ -1,6 +1,5 @@
 package lib
 
-import Strings.map
 import org.w3c.dom.HTMLElement
 
 @JsModule("mapbox-gl")
@@ -13,6 +12,11 @@ external object mapboxgl {
         var lat: Double
 
         fun distanceTo(other: LngLat): Double
+    }
+
+    interface Point {
+        var x: Double
+        var y: Double
     }
 
     interface MapOptions {
@@ -40,6 +44,7 @@ external object mapboxgl {
         fun getCenter(): LngLat
         fun getZoom(): Double
         fun getPitch(): Double
+        fun project(latLng: LngLat): Point
         fun getFreeCameraOptions(): dynamic
         fun on(event: String, block: () -> Unit)
     }

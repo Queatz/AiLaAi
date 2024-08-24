@@ -1,3 +1,4 @@
+import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.dom.addClass
 import lib.getCameraLngLat
 import lib.mapboxgl
 import org.jetbrains.compose.web.css.AlignItems
@@ -63,6 +65,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -104,16 +107,31 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     fun update() {
         map ?: return
 
+        fun mapboxgl.Point.near(other: mapboxgl.Point, distance: Int) =
+            abs(x - other.x) <= distance && abs(y - other.y) <= distance
+
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
+        val nearDistance = 32
+        val cardPositions = markers.mapIndexed { index, it -> index to map!!.project(it.getLngLat()) }
 
-        markers.forEach {
-            val groundDistance = cameraLngLat.distanceTo(it.getLngLat())
+        markers.forEachIndexed { index, marker ->
+            val pos = cardPositions[index].second
+            val groundDistance = cameraLngLat.distanceTo(marker.getLngLat())
+
+            val nearScale = if (cardPositions.any { it.first != index && it.second.near(pos, nearDistance / 4) }) {
+                .25f
+            } else if (cardPositions.any { it.first != index && it.second.near(pos, nearDistance) }) {
+                .5f
+            } else {
+                1f
+            }
+
             val scale = 100.0 / sqrt(groundDistance.pow(2.0) + altitude.pow(2.0))
-            val element = it.getElement().firstElementChild as HTMLElement
-            element.style.transform = "scale(${scale.coerceIn(0.125, 100.0)})"
-            it.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
-            val ele = it.getElement() // for the following line
+            val element = marker.getElement().firstElementChild as HTMLElement
+            element.style.transform = "scale(${scale.coerceIn(0.125, 100.0) * nearScale})"
+            marker.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
+            val ele = marker.getElement() // for the following line
             js("ele.style.pointerEvents = \"none\"")
         }
 
@@ -144,6 +162,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
 
         markers = shownCards.map { card ->
             val element = document.createElement("div") as HTMLDivElement
+            element.addClass(Styles.mapMarker)
 
             val options: mapboxgl.MarkerOptions = js("{}")
             options.element = element
@@ -160,16 +179,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                         val isNpc = !card.npc?.photo.isNullOrBlank()
 
                         Div({
-                            style {
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                alignItems(AlignItems.Center)
-                                gap(2.r)
-                                cursor("pointer")
-                                property("pointer-events", "auto")
-                                property("will-change", "transform")
-                                property("transform-origin", "bottom center")
-                            }
+                            classes(Styles.mapMarkerContent)
 
                             onClick {
                                 it.stopPropagation()
