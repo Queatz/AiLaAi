@@ -13,6 +13,7 @@ import app.ailaai.api.deleteBot
 import app.ailaai.api.reloadBot
 import app.ailaai.api.updateBot
 import app.ailaai.api.updateBotData
+import app.components.Empty
 import app.dialog.dialog
 import app.dialog.photoDialog
 import app.dialog.rememberChoosePhotoDialog
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import notBlank
+import notEmpty
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -40,6 +42,8 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.dom.B
+import org.jetbrains.compose.web.dom.Br
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
@@ -52,7 +56,7 @@ suspend fun botDialog(
     reload: SharedFlow<Unit>,
     bot: Bot,
     onBotUpdated: () -> Unit,
-    onBotDeleted: () -> Unit
+    onBotDeleted: () -> Unit,
 ) {
     val photo = MutableStateFlow(bot.photo ?: "")
 
@@ -77,13 +81,42 @@ suspend fun botDialog(
                 }
             }
 
-            if (me?.id == bot.creator) {
-                val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
+            val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
+            val isGenerating = choosePhoto.isGenerating.collectAsState().value
+            var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
 
-                var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+            menuTarget?.let {
+                Menu({ menuTarget = null }, it) {
+                    // todo: translate
+                    item("Keywords") {
+                        scope.launch {
+                            // todo: translate
+                            dialog(
+                                "Keywords",
+                                cancelButton = null
+                            ) {
+                                bot.keywords?.notEmpty.let {
+                                    if (it == null) {
+                                        // todo: translate
+                                        Empty {
+                                            Text("This bot receives all messages.")
+                                        }
+                                    } else {
+                                        Div {
+                                            Text("This bot responds to messages containing the following keywords: ")
+                                            Br()
+                                            Br()
+                                            B {
+                                                Text(it.joinToString())
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-                menuTarget?.let {
-                    Menu({ menuTarget = null }, it) {
+                    if (me?.id == bot.creator) {
                         item(application.appString { this.choosePhoto }) {
                             scope.launch {
                                 choosePhoto.launch {
@@ -147,13 +180,11 @@ suspend fun botDialog(
                         }
                     }
                 }
+            }
 
-                val isGenerating = choosePhoto.isGenerating.collectAsState().value
-
-                // todo: translate
-                IconButton("more_vert", "More options", isLoading = isGenerating) {
-                    menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
-                }
+            // todo: translate
+            IconButton("more_vert", "More options", isLoading = isGenerating) {
+                menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
             }
         }
     ) {
