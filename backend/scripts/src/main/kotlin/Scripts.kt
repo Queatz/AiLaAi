@@ -49,7 +49,7 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
                 unpackJarCollections = true
             )
             compilerOptions.append("-Xadd-modules=ALL-MODULE-PATH")
-            compilerOptions.append("-Xplugin=kotlin-serialization-compiler-plugin-embeddable-1.9.22.jar")
+            compilerOptions.append("-Xplugin=kotlin-serialization-compiler-plugin-embeddable-1.9.22.jar") // todo Kotlin 2.0.20
         }
 
         refineConfiguration {

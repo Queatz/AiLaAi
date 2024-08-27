@@ -5,7 +5,8 @@ import org.jetbrains.kotlin.konan.properties.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("plugin.serialization") version "2.0.20"
+    kotlin("plugin.compose") version "2.0.20"
     id("com.huawei.agconnect")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
@@ -67,9 +68,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
-    }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
@@ -95,7 +93,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:${versions.ktor}")
 
     // Compose
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:${versions.compose}")
@@ -113,13 +111,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("androidx.activity:activity-compose:1.9.1")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0-beta01")
-    implementation("androidx.appcompat:appcompat-resources:1.7.0-beta01")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.appcompat:appcompat-resources:1.7.0")
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
     implementation("dev.shreyaspatil:capturable:2.1.0")
 

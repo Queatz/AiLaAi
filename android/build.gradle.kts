@@ -5,15 +5,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.2.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
+        classpath("com.android.tools.build:gradle:8.5.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20")
         classpath("com.huawei.agconnect:agcp:1.9.1.300")
-        classpath("com.google.gms:google-services:4.4.1")
+        classpath("com.google.gms:google-services:4.4.2")
     }
 }
 
 plugins {
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
+    id("com.google.devtools.ksp") version "2.0.20-1.0.24" apply false
 }
 
 tasks.register("clean", Delete::class) {
