@@ -217,11 +217,11 @@ fun CardsNavPage(cardUpdates: Flow<Card>, nav: CardNav, onSelected: (CardNav) ->
                 NavMenuItem("map", appString { map }, selected = nav == CardNav.Map) {
                     onSelected(CardNav.Map)
                 }
-                NavMenuItem("group", appString { friends }, selected = nav == CardNav.Friends) {
-                    onSelected(CardNav.Friends)
-                }
                 NavMenuItem("location_on", appString { local }, selected = nav == CardNav.Local) {
                     onSelected(CardNav.Local)
+                }
+                NavMenuItem("group", appString { friends }, selected = nav == CardNav.Friends) {
+                    onSelected(CardNav.Friends)
                 }
                 NavMenuItem("favorite", appString { this.saved }, selected = nav == CardNav.Saved) {
                     onSelected(CardNav.Saved)

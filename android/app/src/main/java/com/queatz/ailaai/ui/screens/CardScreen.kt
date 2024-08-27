@@ -992,6 +992,7 @@ fun CardScreen(cardId: String) {
                         card = card,
                         showTitle = slideshowActive,
                         largeTitle = slideshowActive,
+                        showAuthors = !slideshowActive,
                         aspect = aspect,
                         scope = scope,
                         elevation = elevation,

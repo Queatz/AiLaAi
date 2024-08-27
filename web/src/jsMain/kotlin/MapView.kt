@@ -1,4 +1,3 @@
-import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -11,9 +10,7 @@ import app.components.Spacer
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import components.CardContent
-import components.CardItem
 import components.CardListItem
-import components.ProfilePhoto
 import components.SearchField
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -39,7 +36,6 @@ import org.jetbrains.compose.web.css.backgroundSize
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
@@ -342,7 +338,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     Div({
         classes(Styles.mapContainer)
     }) {
-        if (!shownCards.isEmpty()) {
+        if (shownCards.isNotEmpty()) {
             Div({
                 classes(Styles.navContainer, Styles.mapList)
             }) {
