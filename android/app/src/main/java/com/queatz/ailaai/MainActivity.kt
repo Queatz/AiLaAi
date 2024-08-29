@@ -41,8 +41,6 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Rocket
-import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -213,7 +211,7 @@ class MainActivity : AppCompatActivity() {
             NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.ChatBubbleOutline),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
             NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.Home),
-            NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
+//            NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
         )
     }
@@ -545,20 +543,20 @@ class MainActivity : AppCompatActivity() {
                                                                 .scale(scale)
                                                         )
                                                         // todo reusable icon IconAndCount
-                                                        if (item.route == AppNav.Inventory && activeTrades > 0) {
-                                                            Text(
-                                                                activeTrades.toString(),
-                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                fontWeight = FontWeight.Bold,
-                                                                modifier = Modifier
-                                                                    .offset(2.pad, -.5f.pad)
-                                                                    .align(Alignment.TopEnd)
-                                                                    .clip(CircleShape)
-                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                                                    .padding(1.pad, .25f.pad)
-                                                            )
-                                                        }
+//                                                        if (item.route == AppNav.Inventory && activeTrades > 0) {
+//                                                            Text(
+//                                                                activeTrades.toString(),
+//                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                                                style = MaterialTheme.typography.labelSmall,
+//                                                                fontWeight = FontWeight.Bold,
+//                                                                modifier = Modifier
+//                                                                    .offset(2.pad, -.5f.pad)
+//                                                                    .align(Alignment.TopEnd)
+//                                                                    .clip(CircleShape)
+//                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+//                                                                    .padding(1.pad, .25f.pad)
+//                                                            )
+//                                                        }
                                                         // todo reusable icon IconAndCount
                                                         if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(

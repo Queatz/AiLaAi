@@ -21,13 +21,13 @@ fun IconAndCount(
     icon: @Composable BoxScope.() -> Unit,
     count: Int,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-    if (count > 0) {
-        Box(modifier = modifier) {
-            IconButton(onClick = onClick) {
-                icon()
-            }
+    Box(modifier = modifier) {
+        IconButton(onClick = onClick) {
+            icon()
+        }
+        if (count > 0) {
             Text(
                 count.coerceAtMost(99).toString(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

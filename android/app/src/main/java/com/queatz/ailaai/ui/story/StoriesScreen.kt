@@ -158,7 +158,7 @@ fun StoriesScreen() {
         locationSelector,
         appHeader = {
             AppHeader(
-                stringResource(R.string.explore),
+                stringResource(R.string.posts),
                 {}
             ) {
                 ScanQrCodeButton()
@@ -197,7 +197,7 @@ fun StoriesScreen() {
                     .swipeMainTabs {
                         when (emptyList<Unit>().swipe(Unit, it)) {
                             is SwipeResult.Previous -> {
-                                nav.navigate(AppNav.Inventory)
+                                nav.navigate(AppNav.Stories)
                             }
                             is SwipeResult.Next -> {
                                 nav.navigate(AppNav.Messages)

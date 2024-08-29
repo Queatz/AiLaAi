@@ -614,13 +614,16 @@ fun GroupScreen(groupId: String) {
                                 Icon(Icons.Outlined.Forum, stringResource(R.string.go_back))
                             }
                         } else {
-                            IconAndCount(
-                                {
-                                    Icon(Icons.Outlined.Map, stringResource(R.string.cards))
-                                },
-                                groupExtended?.cardCount ?: 0
-                            ) {
-                                showCards = !showCards
+                            val count = groupExtended?.cardCount ?: 0
+                            if (count > 0) {
+                                IconAndCount(
+                                    {
+                                        Icon(Icons.Outlined.Map, stringResource(R.string.cards))
+                                    },
+                                    count
+                                ) {
+                                    showCards = !showCards
+                                }
                             }
                         }
                     }
