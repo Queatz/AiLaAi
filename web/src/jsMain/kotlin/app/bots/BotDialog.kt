@@ -103,7 +103,8 @@ suspend fun botDialog(
                                         }
                                     } else {
                                         Div {
-                                            Text("This bot responds to messages containing the following keywords: ")
+                                            // todo: translate
+                                            Text("This bot responds to messages containing the following keywords:")
                                             Br()
                                             Br()
                                             B {

@@ -354,7 +354,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                     }) {
                         items(shownCards, key = { it.id!! }) { card ->
                             CardListItem(card) {
-                                window.open("/page/${card.id}", target = "_blank")
+                                selectedCard = if (selectedCard?.id == card.id) null else card
                             }
                         }
                     }
