@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +47,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.navigate
@@ -108,6 +109,7 @@ fun StoriesScreen() {
     var myScripts by rememberStateOf(emptyList<Script>())
     var showScriptsDialog by rememberStateOf(false)
     var showShareAThought by rememberStateOf(true)
+    val isAtTop by state.isAtTop()
 
     LaunchedEffect(Unit) {
         api.myScripts {
@@ -153,14 +155,31 @@ fun StoriesScreen() {
         reload()
     }
 
+    @Composable
+    fun RowScope.ScriptsButton() {
+        AnimatedVisibility(myScripts.isNotEmpty() && isAtTop) {
+            IconButton(
+                onClick = {
+                    showScriptsDialog = true
+                }
+            ) {
+                Icon(
+                    Icons.Outlined.HistoryEdu,
+                    stringResource(R.string.scripts)
+                )
+            }
+        }
+    }
+
     LocationScaffold(
         geo,
         locationSelector,
         appHeader = {
             AppHeader(
-                stringResource(R.string.posts),
-                {}
+                title = stringResource(R.string.posts),
+                onTitleClick = {}
             ) {
+                ScriptsButton()
                 ScanQrCodeButton()
             }
         },
@@ -169,8 +188,6 @@ fun StoriesScreen() {
             DisplayText("Share and discover what's new in town.")
         }
     ) {
-        val isAtTop by state.isAtTop()
-
         if (showScriptsDialog) {
             ScriptsDialog(
                 {
@@ -189,6 +206,7 @@ fun StoriesScreen() {
                     }
                 }
             ) {
+                ScriptsButton()
                 ScanQrCodeButton()
             }
             Box(
@@ -213,26 +231,6 @@ fun StoriesScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    AnimatedVisibility(myScripts.isNotEmpty() && isAtTop) {
-                        ButtonBar(
-                            items = listOf(Unit),
-                            onClick = {
-                                showScriptsDialog = true
-                            },
-                            photo = {
-                                Icon(
-                                    Icons.Outlined.HistoryEdu,
-                                    null
-                                )
-                            },
-                            title = { stringResource(R.string.scripts) },
-                            itemModifier = {
-                                Modifier
-                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.large)
-                                    .padding(horizontal = 2.pad, vertical = 1.pad)
-                            }
-                        )
-                    }
                     if (isLoading) {
                         Loading(
                             modifier = Modifier

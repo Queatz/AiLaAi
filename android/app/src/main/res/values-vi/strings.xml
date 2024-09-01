@@ -254,7 +254,7 @@
     <string name="invite_to_groups">Thêm đến %1$s và %2$s</string>
     <string name="invite_to_x_groups">Thêm đến %1$s nhóm</string>
     <plurals name="friends_plural">
-        <item quantity="other">Bạn</item>
+        <item quantity="other">Bạn bè</item>
     </plurals>
     <plurals name="x_friends">
         <item quantity="other">%1$s bạn</item>

@@ -44,6 +44,7 @@ import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.NotificationsPaused
 import androidx.compose.material.icons.outlined.Reply
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -389,6 +390,10 @@ fun GroupScreen(groupId: String) {
 
     LaunchedEffect(searchMessages) {
         reloadMessages()
+    }
+
+    LaunchedEffect(stageReply) {
+        searchMessages = null
     }
 
     suspend fun reload() {
@@ -848,6 +853,10 @@ fun GroupScreen(groupId: String) {
                             previousMessage = index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
                             selectedMessages = selectedMessages,
                             onSelectedChange = { message, selected ->
+                                if (searchMessages != null) {
+                                    searchMessages = null
+                                }
+
                                 selectedMessages = if (selected) {
                                     selectedMessages + message
                                 } else {
@@ -1048,10 +1057,22 @@ fun GroupScreen(groupId: String) {
                                     true -> {
                                         when {
                                             searchMessages != null -> {
+                                                val searchFocusRequester = remember { FocusRequester() }
+
+                                                LaunchedEffect(Unit) {
+                                                    searchFocusRequester.requestFocus()
+                                                }
+
                                                 OutlinedTextField(
                                                     value = searchMessages.orEmpty(),
                                                     onValueChange = {
                                                         searchMessages = it
+                                                    },
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            Icons.Outlined.Search,
+                                                            contentDescription = null
+                                                        )
                                                     },
                                                     trailingIcon = {
                                                         IconButton({ searchMessages = null }) {
@@ -1077,6 +1098,7 @@ fun GroupScreen(groupId: String) {
                                                         .fillMaxWidth()
                                                         .heightIn(max = 128.dp)
                                                         .padding(1.pad)
+                                                        .focusRequester(searchFocusRequester)
                                                         .onKeyEvent { keyEvent ->
                                                             if (keyEvent.key == Key.Backspace && searchMessages.isNullOrEmpty()) {
                                                                 searchMessages = null
@@ -1191,7 +1213,7 @@ fun GroupScreen(groupId: String) {
                                 }
                             }
                         }
-                        AnimatedVisibility(sendMessage.isBlank()) {
+                        AnimatedVisibility(sendMessage.isBlank() && searchMessages == null) {
                             Row {
                                 if (selectedMessages.isNotEmpty()) {
                                     IconButton(

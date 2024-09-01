@@ -325,13 +325,14 @@ fun ColumnScope.MessageContent(
 
     if (showSelectTextDialog != null) {
         Alert(
-            {
+            onDismissRequest = {
                 showSelectTextDialog = null
             },
             dismissButton = null,
             confirmButton = stringResource(R.string.close),
             title = null,
             text = showSelectTextDialog ?: "",
+            textStyle = MaterialTheme.typography.bodyLarge,
             onConfirm = {
                 showSelectTextDialog = null
             }

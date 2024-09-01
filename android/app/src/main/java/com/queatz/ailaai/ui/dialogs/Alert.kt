@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.window.DialogProperties
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -27,6 +29,7 @@ fun Alert(
     dismissButton: String?,
     confirmButton: String,
     confirmColor: Color? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
     properties: DialogProperties = DialogProperties(),
     onConfirm: () -> Unit,
 ) {
@@ -50,7 +53,7 @@ fun Alert(
                         .fadingEdge(viewport, state, factor = 10f)
                 ) {
                     SelectionContainer {
-                        Text(text)
+                        Text(text, style = textStyle)
                     }
                 }
             }
