@@ -328,6 +328,7 @@ class MainActivity : AppCompatActivity() {
                     val downloadString = stringResource(R.string.download)
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
                     var appUi by rememberStateOf(AppUi())
+                    var apiIsReachable by rememberStateOf(true)
 
                     LaunchedEffect(Unit) {
                         appUi = context.dataStore.data.first()[appUiKey]?.let {
@@ -353,7 +354,11 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     suspend fun loadMe(onError: ErrorBlock) {
-                        api.me(onError = onError) {
+                        api.me(onError = {
+                            apiIsReachable = false
+                            onError?.invoke(it)
+                        }) {
+                            apiIsReachable = true
                             me = it
                             push.setMe(me!!.id!!)
                             calls.setMe(me!!.id!!)
@@ -399,7 +404,6 @@ class MainActivity : AppCompatActivity() {
                                 throw Exception("Error loading me")
                             })
                         } catch (ex: Exception) {
-                            snackbarHostState.showSnackbar(cantConnectString, withDismissAction = true)
                             delay(5.seconds)
                         }
                     }
@@ -701,7 +705,7 @@ class MainActivity : AppCompatActivity() {
 
                                 if (startDestinationLoaded) {
                                     CompositionLocalProvider(
-                                        LocalAppState provides AppState(me, navController)
+                                        LocalAppState provides AppState(me, navController, apiIsReachable)
                                     ) {
                                         if (showWelcomeDialog) {
                                             WelcomeDialog(

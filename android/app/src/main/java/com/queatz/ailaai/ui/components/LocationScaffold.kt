@@ -22,7 +22,7 @@ import com.queatz.ailaai.ui.theme.pad
 fun LocationScaffold(
     geo: LatLng?,
     locationSelector: LocationSelector,
-    appHeader: @Composable () -> Unit = {},
+    appHeader: @Composable ColumnScope.() -> Unit = {},
     rationale: @Composable ColumnScope.() -> Unit = {},
     enabled: Boolean = true,
     content: @Composable () -> Unit,

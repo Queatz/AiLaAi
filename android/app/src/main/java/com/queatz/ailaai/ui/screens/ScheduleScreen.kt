@@ -101,7 +101,6 @@ fun ScheduleScreen() {
             range.first,
             range.second
         ) {
-            isLoading = false
             val scrollToTop = range.first != shownRange.first
             shownRange = range
             // todo move this list to :shared
@@ -177,6 +176,7 @@ fun ScheduleScreen() {
                 }
             }
         }
+        isLoading = false
     }
 
     LaunchedEffect(view, range) {

@@ -8,7 +8,8 @@ import com.queatz.db.Person
 
 data class AppState(
     val me: Person?,
-    val navController: NavController? = null
+    val navController: NavController? = null,
+    val apiIsReachable: Boolean = true
 )
 
 val LocalAppState = compositionLocalOf<AppState>(

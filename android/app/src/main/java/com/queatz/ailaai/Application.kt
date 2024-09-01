@@ -3,6 +3,8 @@ package com.queatz.ailaai
 import android.content.Context
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -15,6 +17,7 @@ import com.google.auto.service.AutoService
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.maps.MapsInitializer
+import com.queatz.ailaai.connectivity.ConnectivityObserver
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.push
@@ -39,9 +42,18 @@ import java.util.*
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+val Context.hasConnectivity @Composable get() = (applicationContext as Application)
+    .connectivityObserver
+    .isConnected
+    .collectAsState()
+    .value
+
 class Application : android.app.Application() {
 
     private var disposable = CompositeDisposable()
+
+    lateinit var connectivityObserver: ConnectivityObserver
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -58,6 +70,9 @@ class Application : android.app.Application() {
         ui.init(this)
         calls.init(this)
         slideshow.init(this)
+
+        connectivityObserver = ConnectivityObserver(applicationContext)
+        connectivityObserver.start()
 
         val scope = CoroutineScope(Dispatchers.IO)
 
@@ -127,6 +142,7 @@ class Application : android.app.Application() {
 
     override fun onTerminate() {
         disposable.dispose()
+        connectivityObserver.stop()
         super.onTerminate()
     }
 }

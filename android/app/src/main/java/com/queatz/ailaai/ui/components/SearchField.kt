@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -34,7 +36,11 @@ fun SearchField(
     placeholder: String = stringResource(R.string.search),
     showClear: Boolean = true,
     singleLine: Boolean = true,
+    useMaxWidth: Boolean = true,
+    useMaxHeight: Boolean = false,
+    icon: ImageVector? = null,
     imeAction: ImeAction = if (singleLine) ImeAction.Search else ImeAction.Default,
+    onClear: () -> Unit = { onValueChange("") },
     onAction: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -44,7 +50,7 @@ fun SearchField(
         colors = CardDefaults.elevatedCardColors(),
         elevation = CardDefaults.elevatedCardElevation(.5f.elevation),
         modifier = modifier
-            .widthIn(max = 480.dp)
+            .then(if (useMaxWidth) Modifier.widthIn(max = 480.dp) else Modifier)
             .fillMaxWidth()
     ) {
         OutlinedTextField(
@@ -73,8 +79,14 @@ fun SearchField(
                 keyboardController.hide()
                 onAction()
             }),
-            trailingIcon =
-            if (showClear && value.isNotEmpty()) {
+            leadingIcon = if (icon != null) {
+                {
+                    Icon(icon, contentDescription = null)
+                }
+            } else {
+                null
+            },
+            trailingIcon = if (showClear && value.isNotEmpty()) {
                 {
                     Icon(
                         Icons.Outlined.Close,
@@ -82,13 +94,16 @@ fun SearchField(
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.medium)
                             .clickable {
-                                onValueChange("")
+                                onClear()
                             }
                     )
                 }
-            } else null,
+            } else {
+                null
+            },
             modifier = Modifier
                 .fillMaxWidth()
+                .then(if (useMaxHeight) Modifier.heightIn(max = 128.dp) else Modifier)
                 .clip(MaterialTheme.shapes.large)
                 .background(MaterialTheme.colorScheme.surface)
         )
