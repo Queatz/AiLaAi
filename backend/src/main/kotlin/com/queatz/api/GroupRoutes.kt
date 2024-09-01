@@ -40,7 +40,8 @@ fun Route.groupRoutes() {
                     db.messages(
                         it.group!!.id!!,
                         call.parameters["before"]?.toInstant(),
-                        call.parameters["limit"]?.toInt() ?: 20
+                        call.parameters["limit"]?.toInt() ?: 20,
+                        call.parameters["search"]?.notBlank,
                     )
                 } ?: HttpStatusCode.NotFound
             }

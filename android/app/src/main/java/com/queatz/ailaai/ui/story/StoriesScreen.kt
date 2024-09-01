@@ -182,7 +182,7 @@ fun StoriesScreen() {
 
         Column {
             AppHeader(
-                stringResource(R.string.explore),
+                stringResource(R.string.posts),
                 {
                     scope.launch {
                         state.scrollToTop()
@@ -319,7 +319,7 @@ fun StoriesScreen() {
                                         }
                                     }
                                 }
-                            },
+                            }
                         )
                     }
                 }

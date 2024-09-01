@@ -247,12 +247,18 @@ fun Db.groupsWith(people: List<String>, exact: Boolean = false) = query(
     )
 )
 
-fun Db.messages(group: String, before: Instant? = null, limit: Int = 20) = list(
+fun Db.messages(
+    group: String,
+    before: Instant? = null,
+    limit: Int = 20,
+    search: String? = null
+) = list(
     Message::class,
     """
         for x in @@collection
             filter x.${f(Message::group)} == @group
-            and (@before == null or x.${f(Message::createdAt)} <= @before)
+            ${if (before != null) "and x.${f(Message::createdAt)} <= @before" else ""}
+            ${if (search != null) "and contains(lower(x.${f(Message::text)}), @search)" else ""}
             sort x.${f(Message::createdAt)} desc
             limit @limit
             return x
@@ -260,6 +266,7 @@ fun Db.messages(group: String, before: Instant? = null, limit: Int = 20) = list(
     mapOf(
         "group" to group,
         "before" to before,
-        "limit" to limit
-    )
+        "limit" to limit,
+        "search" to search?.lowercase()
+    ).filterValues { it != null }
 )

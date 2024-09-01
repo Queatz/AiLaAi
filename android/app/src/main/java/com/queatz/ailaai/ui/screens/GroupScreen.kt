@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Call
@@ -77,6 +78,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
@@ -207,7 +211,6 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
@@ -258,6 +261,7 @@ fun GroupScreen(groupId: String) {
     var showScheduleNewReminderDialog by rememberStateOf<List<Person>?>(null)
     var showTradeDialog by rememberStateOf<Trade?>(null)
     var showSendDialog by rememberStateOf(false)
+    var searchMessages by rememberStateOf<String?>(null)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
     val nav = nav
     val me = me
@@ -295,7 +299,8 @@ fun GroupScreen(groupId: String) {
     }
 
     suspend fun reloadMessages() {
-        api.messages(groupId) {
+        api.messages(group = groupId, search = searchMessages) {
+            hasOlderMessages = true
             messages = it
         }
     }
@@ -355,7 +360,7 @@ fun GroupScreen(groupId: String) {
         }
 
         val oldest = messages.lastOrNull()?.createdAt ?: return
-        api.messagesBefore(groupId, oldest) { older ->
+        api.messagesBefore(group = groupId, before = oldest, search = searchMessages) { older ->
             val newMessages = (messages + older).distinctBy { it.id }
 
             if (messages.size == newMessages.size) {
@@ -380,6 +385,10 @@ fun GroupScreen(groupId: String) {
             groupExtended = it
         }
         isLoading = false
+    }
+
+    LaunchedEffect(searchMessages) {
+        reloadMessages()
     }
 
     suspend fun reload() {
@@ -742,6 +751,12 @@ fun GroupScreen(groupId: String) {
                                 })
                             }
                             DropdownMenuItem({
+                                Text(stringResource(R.string.search))
+                            }, {
+                                showMenu = false
+                                searchMessages = ""
+                            })
+                            DropdownMenuItem({
                                 Text(stringResource(R.string.leave))
                             }, {
                                 showMenu = false
@@ -1013,7 +1028,7 @@ fun GroupScreen(groupId: String) {
                         }
                     }
 
-                    val showTools = isRecordingAudio || selectedMessages.isNotEmpty()
+                    val showTools = isRecordingAudio || selectedMessages.isNotEmpty() || searchMessages != null
 
                     Row(
                         horizontalArrangement = Arrangement.End,
@@ -1031,55 +1046,100 @@ fun GroupScreen(groupId: String) {
                             Crossfade(showTools, label = "") { show ->
                                 when (show) {
                                     true -> {
-                                        if (selectedMessages.isNotEmpty()) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier
-                                                    .heightIn(min = maxInputAreaHeight.inDp())
-                                            ) {
-                                                Text(
-                                                    pluralStringResource(
-                                                        R.plurals.x_selected,
-                                                        selectedMessages.size,
-                                                        selectedMessages.size
+                                        when {
+                                            searchMessages != null -> {
+                                                OutlinedTextField(
+                                                    value = searchMessages.orEmpty(),
+                                                    onValueChange = {
+                                                        searchMessages = it
+                                                    },
+                                                    trailingIcon = {
+                                                        IconButton({ searchMessages = null }) {
+                                                            Icon(
+                                                                Icons.Default.Clear,
+                                                                Icons.Default.Clear.name,
+                                                                tint = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        }
+                                                    },
+                                                    placeholder = {
+                                                        Text(
+                                                            stringResource(R.string.search),
+                                                            modifier = Modifier.alpha(.5f)
+                                                        )
+                                                    },
+                                                    keyboardOptions = KeyboardOptions(
+                                                        capitalization = KeyboardCapitalization.Sentences,
+                                                        imeAction = ImeAction.Default
                                                     ),
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    textAlign = TextAlign.Center,
-                                                    color = MaterialTheme.colorScheme.primary,
+                                                    shape = MaterialTheme.shapes.large,
                                                     modifier = Modifier
-                                                        .padding(1.pad)
                                                         .fillMaxWidth()
+                                                        .heightIn(max = 128.dp)
+                                                        .padding(1.pad)
+                                                        .onKeyEvent { keyEvent ->
+                                                            if (keyEvent.key == Key.Backspace && searchMessages.isNullOrEmpty()) {
+                                                                searchMessages = null
+                                                                true
+                                                            } else {
+                                                                false
+                                                            }
+                                                        }
                                                 )
                                             }
-                                        } else if (isRecordingAudio) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier
-                                                    .heightIn(min = maxInputAreaHeight.inDp())
-                                            ) {
-                                                IconButton(
-                                                    {
-                                                        audioRecorder.cancelRecording()
-                                                    }
+
+                                            selectedMessages.isNotEmpty() -> {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .heightIn(min = maxInputAreaHeight.inDp())
                                                 ) {
-                                                    Icon(
-                                                        Icons.Outlined.Delete,
-                                                        stringResource(R.string.discard_recording),
-                                                        tint = MaterialTheme.colorScheme.error
+                                                    Text(
+                                                        pluralStringResource(
+                                                            R.plurals.x_selected,
+                                                            selectedMessages.size,
+                                                            selectedMessages.size
+                                                        ),
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        textAlign = TextAlign.Center,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier
+                                                            .padding(1.pad)
+                                                            .fillMaxWidth()
                                                     )
                                                 }
-                                                Text(
-                                                    stringResource(
-                                                        R.string.recording_audio,
-                                                        recordingAudioDuration.formatTime()
-                                                    ),
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    textAlign = TextAlign.Center,
-                                                    color = MaterialTheme.colorScheme.primary,
+                                            }
+
+                                            isRecordingAudio -> {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
                                                     modifier = Modifier
-                                                        .padding(1.pad)
-                                                        .fillMaxWidth()
-                                                )
+                                                        .heightIn(min = maxInputAreaHeight.inDp())
+                                                ) {
+                                                    IconButton(
+                                                        {
+                                                            audioRecorder.cancelRecording()
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Outlined.Delete,
+                                                            stringResource(R.string.discard_recording),
+                                                            tint = MaterialTheme.colorScheme.error
+                                                        )
+                                                    }
+                                                    Text(
+                                                        stringResource(
+                                                            R.string.recording_audio,
+                                                            recordingAudioDuration.formatTime()
+                                                        ),
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        textAlign = TextAlign.Center,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier
+                                                            .padding(1.pad)
+                                                            .fillMaxWidth()
+                                                    )
+                                                }
                                             }
                                         }
                                     }

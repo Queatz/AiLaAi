@@ -8,9 +8,15 @@ import kotlinx.serialization.encodeToString
 
 suspend fun Api.messages(
     group: String,
+    search: String? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Message>>,
-) = get("groups/$group/messages", onError = onError, onSuccess = onSuccess)
+) = get(
+    "groups/$group/messages",
+    mapOf("search" to search).filterValues { it != null },
+    onError = onError,
+    onSuccess = onSuccess
+)
 
 suspend fun Api.groupCall(
     group: String,
@@ -27,13 +33,15 @@ suspend fun Api.groupCards(
 suspend fun Api.messagesBefore(
     group: String,
     before: Instant,
+    search: String? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Message>>,
 ) = get(
     url = "groups/$group/messages",
     parameters = mapOf(
-        "before" to before.toString()
-    ),
+        "before" to before.toString(),
+        "search" to search
+    ).filterValues { it != null },
     onError = onError,
     onSuccess = onSuccess
 )
