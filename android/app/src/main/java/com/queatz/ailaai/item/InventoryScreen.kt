@@ -69,7 +69,6 @@ import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
-import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.DropItemBody
 import com.queatz.db.EquipItemBody
@@ -87,6 +86,7 @@ import kotlinx.coroutines.launch
 import myInventory
 import unequipItem
 import updateTradeItems
+import kotlin.math.abs
 
 @Composable
 fun InventoryScreen() {
@@ -151,7 +151,7 @@ fun InventoryScreen() {
         scope.launch {
             api.dropItem(
                 inventoryItem.id!!,
-                DropItemBody(quantity, geo?.toList())
+                DropItemBody(quantity.ofInventoryItem(inventoryItem), geo?.toList())
             )
             reload()
             if (geo == null) {
@@ -164,7 +164,7 @@ fun InventoryScreen() {
 
     fun equip(inventoryItem: InventoryItem, quantity: Double) {
         scope.launch {
-            api.equipItem(inventoryItem.id!!, EquipItemBody(quantity)) {
+            api.equipItem(inventoryItem.id!!, EquipItemBody(quantity.ofInventoryItem(inventoryItem))) {
                 context.toast(R.string.items_equipped)
                 reload()
             }
@@ -173,7 +173,7 @@ fun InventoryScreen() {
 
     fun unequip(inventoryItem: InventoryItem, quantity: Double) {
         scope.launch {
-            api.unequipItem(inventoryItem.id!!, UnequipItemBody(quantity)) {
+            api.unequipItem(inventoryItem.id!!, UnequipItemBody(quantity.ofInventoryItem(inventoryItem))) {
                 reload()
                 context.toast(R.string.items_unequipped)
             }
@@ -511,3 +511,10 @@ fun String.upTo(maximumValue: Double) = toItemQuantity()?.let {
         null
     }
 } ?: this
+
+fun Double.ofInventoryItem(inventoryItem: InventoryItem) =
+    if (abs((inventoryItem.quantity ?: 0.0) - this) < 0.000001) {
+        inventoryItem.quantity ?: 0.0
+    } else {
+        this
+    }

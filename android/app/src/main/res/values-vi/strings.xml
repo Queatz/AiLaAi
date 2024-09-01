@@ -725,4 +725,5 @@
     <string name="stop_slideshow">Dừng trình chiếu</string>
     <string name="calendar">Lịch</string>
     <string name="posts">Bài viết</string>
+    <string name="all">Tất cả</string>
 </resources>

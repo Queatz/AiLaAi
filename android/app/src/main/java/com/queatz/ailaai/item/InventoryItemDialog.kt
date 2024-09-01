@@ -63,6 +63,21 @@ fun InventoryItemDialog(
                     onValueChange = {
                         quantity = it.upTo(inventoryItem.inventoryItem!!.quantity!!)
                     },
+                    trailingIcon = {
+                        TextButton(
+                            onClick = {
+                                quantity = (inventoryItem.inventoryItem?.quantity ?: 0.0).formatItemQuantity()
+                            },
+                            enabled = quantity != (inventoryItem.inventoryItem?.quantity ?: 0.0).formatItemQuantity(),
+                            modifier = Modifier
+                                .padding(end = 1.pad)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.all),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    },
                     label = {
                         Text(
                             stringResource(R.string.quantity)

@@ -16,13 +16,13 @@ import com.queatz.db.Person
 import com.queatz.db.PhotosAttachment
 import com.queatz.db.StickerAttachment
 import com.queatz.db.StoryAttachment
-import com.queatz.db.Trade
 import com.queatz.db.TradeAttachment
 import com.queatz.db.TradeExtended
 import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import java.math.BigDecimal
 import java.text.ParseException
 
 data class ContactPhoto(
@@ -102,7 +102,9 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
 
 val InventoryItem.isExpired get() = expiresAt?.let { it < Clock.System.now() } ?: false
 
-private val itemFormat = DecimalFormat("#.######")
+private val itemFormat = DecimalFormat("#.######").apply {
+    roundingMode = BigDecimal.ROUND_CEILING
+}
 
 fun Double.formatItemQuantity() = itemFormat.format(this)!!
 fun String.toItemQuantity() = try {
