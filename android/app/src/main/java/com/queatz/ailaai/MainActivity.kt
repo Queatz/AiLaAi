@@ -118,6 +118,7 @@ import com.queatz.ailaai.item.MyItemsScreen
 import com.queatz.ailaai.schedule.ReminderScreen
 import com.queatz.ailaai.schedule.RemindersScreen
 import com.queatz.ailaai.services.calls
+import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.services.joins
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.services.messages
@@ -905,6 +906,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        connectivity.refresh()
     }
 
     override fun onUserInteraction() {

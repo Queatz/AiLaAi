@@ -43,6 +43,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.hasConnectivity
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.delay
@@ -58,7 +59,7 @@ fun ColumnScope.AppHeader(
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     val context = LocalContext.current
-    val hasConnectivity = context.hasConnectivity
+    val hasConnectivity = connectivity.hasConnectivity
     val nav = nav
     val me = me
     val apiIsReachable = LocalAppState.current.apiIsReachable

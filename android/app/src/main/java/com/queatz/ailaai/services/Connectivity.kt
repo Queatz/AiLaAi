@@ -1,20 +1,23 @@
-package com.queatz.ailaai.connectivity
+package com.queatz.ailaai.services
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ConnectivityObserver(context: Context) {
+private class ConnectivityObserver(val context: Context) {
 
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private val _isConnected = MutableStateFlow(checkInitialNetworkStatus())
+    private val _isConnected = MutableStateFlow(getNetworkStatus())
     val isConnected = _isConnected.asStateFlow()
+
+    val hasConnectivity @Composable get() = isConnected.collectAsState().value
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -39,9 +42,37 @@ class ConnectivityObserver(context: Context) {
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
-    private fun checkInitialNetworkStatus(): Boolean {
+    fun refresh() {
+        _isConnected.value = getNetworkStatus()
+    }
+
+    private fun getNetworkStatus(): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+}
+
+val connectivity by lazy {
+    Connectivity()
+}
+
+class Connectivity {
+
+    private lateinit var observer: ConnectivityObserver
+
+    val hasConnectivity get() = observer.hasConnectivity
+
+    fun start(context: Context) {
+        observer = ConnectivityObserver(context)
+        observer.start()
+    }
+
+    fun stop() {
+        observer.stop()
+    }
+
+    fun refresh() {
+        observer.refresh()
     }
 }
