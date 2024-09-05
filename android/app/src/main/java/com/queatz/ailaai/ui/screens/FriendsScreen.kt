@@ -55,8 +55,8 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -302,7 +302,7 @@ fun FriendsScreen() {
                 IconButton(
                     {
                         showSharedGroupsDialog = emptyList()
-                        nav.navigate(AppNav.Profile(showSharedGroupsDialogPerson!!.id!!))
+                        nav.appNavigate(AppNav.Profile(showSharedGroupsDialogPerson!!.id!!))
                     }
                 ) {
                     Icon(Icons.Outlined.Person, stringResource(R.string.view_profile))
@@ -315,7 +315,7 @@ fun FriendsScreen() {
             }
         ) { selected ->
             showSharedGroupsDialog = emptyList()
-            nav.navigate(AppNav.Group(selected.first().id!!))
+            nav.appNavigate(AppNav.Group(selected.first().id!!))
         }
     }
 
@@ -447,11 +447,11 @@ fun FriendsScreen() {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                nav.navigate(AppNav.Stories)
+                                nav.appNavigate(AppNav.Stories)
                             }
 
                             is SwipeResult.Next -> {
-                                nav.navigate(AppNav.Schedule)
+                                nav.appNavigate(AppNav.Schedule)
                             }
 
                             is SwipeResult.Select<*> -> {
@@ -508,7 +508,7 @@ fun FriendsScreen() {
                                                 allGroups.people().filter { it.id != me?.id }
                                             },
                                             onLongClick = {
-                                                nav.navigate(AppNav.Profile(it.id!!))
+                                                nav.appNavigate(AppNav.Profile(it.id!!))
                                             }
                                         ) { person ->
                                             scope.launch {
@@ -636,7 +636,7 @@ fun FriendsScreen() {
                     if (createGroupName.isNotBlank()) {
                         api.updateGroup(group.id!!, Group(name = createGroupName))
                     }
-                    nav.navigate(AppNav.Group(group.id!!))
+                    nav.appNavigate(AppNav.Group(group.id!!))
                 }
             },
             omit = { it.id == me?.id }

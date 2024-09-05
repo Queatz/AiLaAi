@@ -21,7 +21,7 @@ import app.ailaai.api.newReminder
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.nav
@@ -93,7 +93,7 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
                 if (value.isNotBlank()) {
                     addReminder()
                 } else {
-                    nav.navigate(AppNav.Reminders)
+                    nav.appNavigate(AppNav.Reminders)
                 }
             },
             onLongClick = {

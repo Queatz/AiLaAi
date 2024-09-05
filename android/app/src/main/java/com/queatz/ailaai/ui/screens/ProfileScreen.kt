@@ -80,13 +80,13 @@ import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.isGroupLike
 import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
@@ -473,7 +473,7 @@ fun ProfileScreen(personId: String) {
             },
             create = true
         ) {
-            nav.navigate(AppNav.Page(it.id!!))
+            nav.appNavigate(AppNav.Page(it.id!!))
         }
     }
 
@@ -720,7 +720,7 @@ fun ProfileScreen(personId: String) {
                                 }
                                 IconButton(
                                     {
-                                        nav.navigate(AppNav.Settings)
+                                        nav.appNavigate(AppNav.Settings)
                                     },
                                     Modifier
                                         .size(42.dp)
@@ -888,7 +888,7 @@ fun ProfileScreen(personId: String) {
                                                         listOf(me!!.id!!, personId),
                                                         reuse = true
                                                     ) { group ->
-                                                        nav.navigate(AppNav.Group(group.id!!))
+                                                        nav.appNavigate(AppNav.Group(group.id!!))
                                                     }
                                                 }
                                             }
@@ -995,7 +995,7 @@ fun ProfileScreen(personId: String) {
                         if (isMe) {
                             OutlinedButton(
                                 onClick = {
-                                    nav.navigate(AppNav.EditProfile(person!!.id!!))
+                                    nav.appNavigate(AppNav.EditProfile(person!!.id!!))
                                 }
                             ) {
                                 Text(
@@ -1045,7 +1045,7 @@ fun ProfileScreen(personId: String) {
                     card = card,
                     showTitle = true,
                     onClick = {
-                        nav.navigate(AppNav.Page(card.id!!))
+                        nav.appNavigate(AppNav.Page(card.id!!))
                     },
                     scope = scope,
                     playVideo = card == playingVideo && !isAtTop,

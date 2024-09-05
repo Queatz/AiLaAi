@@ -502,11 +502,11 @@ fun ColumnScope.MessageContent(
         ) {
             CardItem(
                 {
-                    nav.navigate(AppNav.Page(it))
+                    nav.appNavigate(AppNav.Page(it))
                 },
                 onCategoryClick = {
                     exploreInitialCategory = it
-                    nav.navigate(AppNav.Explore)
+                    nav.appNavigate(AppNav.Explore)
                 },
                 card = attachedCard,
                 isChoosing = true
@@ -652,7 +652,7 @@ fun ColumnScope.MessageContent(
                             }
                         }
                     ) {
-                        nav.navigate(AppNav.StickerPack(it.pack!!))
+                        nav.appNavigate(AppNav.StickerPack(it.pack!!))
                     }
                 }
             }
@@ -711,7 +711,7 @@ fun ColumnScope.MessageContent(
             )
         ) {
             if (!attachedStoryNotFound) {
-                nav.navigate(AppNav.Story(storyId))
+                nav.appNavigate(AppNav.Story(storyId))
             }
         }
     }

@@ -38,9 +38,9 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.formatItemQuantity
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
@@ -393,11 +393,11 @@ fun InventoryScreen() {
             .swipeMainTabs {
                 when (emptyList<Unit>().swipe(Unit, it)) {
                     is SwipeResult.Previous -> {
-                        nav.navigate(AppNav.Explore)
+                        nav.appNavigate(AppNav.Explore)
                     }
 
                     is SwipeResult.Next -> {
-                        nav.navigate(AppNav.Stories)
+                        nav.appNavigate(AppNav.Stories)
                     }
 
                     is SwipeResult.Select<*> -> {
@@ -498,7 +498,7 @@ fun InventoryScreen() {
                     Icon(Icons.Outlined.Edit, null)
                 }
             ) {
-                nav.navigate(AppNav.Items)
+                nav.appNavigate(AppNav.Items)
             }
         }
     }

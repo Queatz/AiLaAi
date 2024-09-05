@@ -20,8 +20,8 @@ import app.ailaai.api.updateGroup
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -177,7 +177,7 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                 }
                 menuItem(stringResource(R.string.open_group_action)) {
                     showGroupMenu = false
-                    nav.navigate(AppNav.Group(groupId))
+                    nav.appNavigate(AppNav.Group(groupId))
                 }
                 if (part.groups.size > 1) {
                     menuItem(stringResource(R.string.reorder)) {

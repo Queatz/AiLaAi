@@ -7,7 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
@@ -16,7 +15,7 @@ import app.ailaai.api.myStickerPacks
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
@@ -59,7 +58,7 @@ fun StickerPacksScreen() {
             api.createStickerPack(StickerPack(name = value)) {
                 stickers.reload()
                 showCreateStickerPackDialog = false
-                nav.navigate(AppNav.EditStickerPack(it.id!!))
+                nav.appNavigate(AppNav.EditStickerPack(it.id!!))
             }
         }
     }
@@ -92,7 +91,7 @@ fun StickerPacksScreen() {
                     stickerPacks,
                     edit = true,
                     onEdit = {
-                        nav.navigate(AppNav.EditStickerPack(it.id!!))
+                        nav.appNavigate(AppNav.EditStickerPack(it.id!!))
                     },
                     onStickerLongClick = {
                         scope.launch {
@@ -100,7 +99,7 @@ fun StickerPacksScreen() {
                         }
                     }
                 ) {
-                    nav.navigate(AppNav.EditStickerPack(it.pack!!))
+                    nav.appNavigate(AppNav.EditStickerPack(it.pack!!))
                 }
             }
             FloatingActionButton(

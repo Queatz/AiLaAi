@@ -20,8 +20,8 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.cameraSupported
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.nav
@@ -52,19 +52,19 @@ fun ScanQrCodeButton() {
     ScanQrCodeButton {
         when (it) {
             is ScanQrCodeResult.Group -> {
-                nav.navigate(AppNav.Group(it.id))
+                nav.appNavigate(AppNav.Group(it.id))
             }
             is ScanQrCodeResult.Page -> {
-                nav.navigate(AppNav.Page(it.id))
+                nav.appNavigate(AppNav.Page(it.id))
             }
             is ScanQrCodeResult.Story -> {
-                nav.navigate(AppNav.Story(it.id))
+                nav.appNavigate(AppNav.Story(it.id))
             }
             is ScanQrCodeResult.Profile -> {
-                nav.navigate(AppNav.Profile(it.id))
+                nav.appNavigate(AppNav.Profile(it.id))
             }
             is ScanQrCodeResult.LinkDevice -> {
-                nav.navigate(AppNav.LinkDevice(it.token))
+                nav.appNavigate(AppNav.LinkDevice(it.token))
             }
         }
     }

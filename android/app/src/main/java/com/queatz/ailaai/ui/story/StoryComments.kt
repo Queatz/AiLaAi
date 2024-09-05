@@ -41,12 +41,12 @@ import app.ailaai.api.replyToComment
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
@@ -187,7 +187,7 @@ fun StoryComments(
                         size = 32.dp,
                         modifier = Modifier
                             .clickable {
-                                nav.navigate(AppNav.Profile(comment.person!!.id!!))
+                                nav.appNavigate(AppNav.Profile(comment.person!!.id!!))
                             }
                     )
                     Column(

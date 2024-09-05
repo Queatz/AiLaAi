@@ -20,12 +20,11 @@ import app.ailaai.api.updateReminderOccurrence
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import updateDate
-import kotlin.random.Random
 
 @Composable
 fun PeriodEvent(
@@ -231,7 +229,7 @@ fun PeriodEvent(
                     }
                 },
                 onOpen = {
-                    nav.navigate(AppNav.Reminder(event.reminder.id!!))
+                    nav.appNavigate(AppNav.Reminder(event.reminder.id!!))
                 },
                 onEdit = {
                     showEditNote = true

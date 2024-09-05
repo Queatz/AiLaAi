@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,8 +15,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.HistoryEdu
@@ -25,7 +22,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,8 +44,8 @@ import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.isAtTop
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
@@ -59,7 +55,6 @@ import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.ButtonBar
 import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
@@ -75,7 +70,6 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Script
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
-import com.queatz.db.toJsonStoryContent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -215,10 +209,10 @@ fun StoriesScreen() {
                     .swipeMainTabs {
                         when (emptyList<Unit>().swipe(Unit, it)) {
                             is SwipeResult.Previous -> {
-                                nav.navigate(AppNav.Stories)
+                                nav.appNavigate(AppNav.Stories)
                             }
                             is SwipeResult.Next -> {
-                                nav.navigate(AppNav.Messages)
+                                nav.appNavigate(AppNav.Messages)
                             }
                             is SwipeResult.Select<*> -> {
                                 // Impossible
@@ -309,11 +303,11 @@ fun StoriesScreen() {
                             },
                             onAction = {
                                 if (thought.isBlank()) {
-                                    nav.navigate(AppNav.Write)
+                                    nav.appNavigate(AppNav.Write)
                                 } else {
                                     scope.launch {
                                         api.createStory(Story(title = thought)) {
-                                            nav.navigate(AppNav.WriteStory(it.id!!))
+                                            nav.appNavigate(AppNav.WriteStory(it.id!!))
                                         }
                                     }
                                 }

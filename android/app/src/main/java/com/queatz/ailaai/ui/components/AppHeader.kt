@@ -38,9 +38,8 @@ import com.queatz.ailaai.LocalAppState
 import com.queatz.ailaai.R
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.hasConnectivity
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.connectivity
@@ -147,12 +146,12 @@ fun ColumnScope.AppHeader(
                                 size = 40.dp,
                                 modifier = Modifier
                                     .clickable {
-                                        nav.navigate(AppNav.Profile(me.id!!))
+                                        nav.appNavigate(AppNav.Profile(me.id!!))
                                     }
                             )
                         } else {
                             IconButton({
-                                nav.navigate(AppNav.Profile(me.id!!))
+                                nav.appNavigate(AppNav.Profile(me.id!!))
                             }) {
                                 Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                             }

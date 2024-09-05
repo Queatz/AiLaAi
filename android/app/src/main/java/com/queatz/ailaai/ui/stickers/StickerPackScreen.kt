@@ -13,7 +13,7 @@ import app.ailaai.api.stickerPack
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
@@ -78,7 +78,7 @@ fun StickerPackScreen(stickerPackId: String) {
                                 Text(stringResource(R.string.view_creator))
                             }, {
                                 showMenu = false
-                                nav.navigate(AppNav.Profile(stickerPack.person!!))
+                                nav.appNavigate(AppNav.Profile(stickerPack.person!!))
                             })
                             DropdownMenuItem({
                                 Text(stringResource(R.string.report))

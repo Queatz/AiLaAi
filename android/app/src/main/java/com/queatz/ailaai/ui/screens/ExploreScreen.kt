@@ -40,9 +40,9 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -401,7 +401,7 @@ fun ExploreScreen() {
                     },
                     count = activeTrades.size
                 ) {
-                    nav.navigate(AppNav.Inventory)
+                    nav.appNavigate(AppNav.Inventory)
                 }
                 ScanQrCodeButton()
             }
@@ -439,7 +439,7 @@ fun ExploreScreen() {
                                         }
                                     }
                                 ) {
-                                    nav.navigate(AppNav.Page(it.id!!))
+                                    nav.appNavigate(AppNav.Page(it.id!!))
                                 }
                             }
                         }
@@ -449,7 +449,7 @@ fun ExploreScreen() {
                             inventories = inventories,
                             bottomPadding = viewportHeight,
                             onCard = {
-                                nav.navigate(AppNav.Page(it))
+                                nav.appNavigate(AppNav.Page(it))
                             },
                             onInventory = {
                                 showInventory = it
@@ -480,7 +480,7 @@ fun ExploreScreen() {
                                 Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                             },
                             onAction = {
-                                nav.navigate(AppNav.Me)
+                                nav.appNavigate(AppNav.Me)
                             },
                         )
                     }
@@ -512,17 +512,17 @@ fun ExploreScreen() {
                         Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                     },
                     onAction = {
-                        nav.navigate(AppNav.Me)
+                        nav.appNavigate(AppNav.Me)
                     },
                     modifier = Modifier
                         .swipeMainTabs {
                             when (val it = MainTab.entries.swipe(tab, it)) {
                                 is SwipeResult.Previous -> {
-                                    nav.navigate(AppNav.Schedule)
+                                    nav.appNavigate(AppNav.Schedule)
                                 }
 
                                 is SwipeResult.Next -> {
-                                    nav.navigate(AppNav.Schedule)
+                                    nav.appNavigate(AppNav.Schedule)
                                 }
 
                                 is SwipeResult.Select<*> -> {

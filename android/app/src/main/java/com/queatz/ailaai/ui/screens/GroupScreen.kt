@@ -104,7 +104,6 @@ import app.ailaai.api.sendMessage
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
@@ -115,6 +114,7 @@ import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.attachmentText
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.fadingEdge
@@ -123,7 +123,6 @@ import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.groupUrl
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -414,7 +413,7 @@ fun GroupScreen(groupId: String) {
         ) {
             scope.launch {
                 reload()
-                nav.navigate(AppNav.Page(it.id!!))
+                nav.appNavigate(AppNav.Page(it.id!!))
             }
         }
     }
@@ -502,7 +501,7 @@ fun GroupScreen(groupId: String) {
                                     }
                                 } else {
                                     if (otherMembers.size == 1) {
-                                        nav.navigate(AppNav.Profile(otherMembers.first().person!!.id!!))
+                                        nav.appNavigate(AppNav.Profile(otherMembers.first().person!!.id!!))
                                     } else {
                                         showGroupMembers = true
                                     }
@@ -1310,7 +1309,7 @@ fun GroupScreen(groupId: String) {
                                     }
                                 },
                                 onStickerPack = {
-                                    nav.navigate(AppNav.StickerPack(it.id!!))
+                                    nav.appNavigate(AppNav.StickerPack(it.id!!))
                                 },
                                 modifier = Modifier.fillMaxSize()
                             ) { sticker ->
@@ -1320,7 +1319,7 @@ fun GroupScreen(groupId: String) {
                             }
                             FloatingActionButton(
                                 onClick = {
-                                    nav.navigate(AppNav.StickerPacks)
+                                    nav.appNavigate(AppNav.StickerPacks)
                                 },
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
@@ -1486,7 +1485,7 @@ fun GroupScreen(groupId: String) {
                     }
                 ) {
                     showGroupMembers = false
-                    nav.navigate(AppNav.Profile(it.id!!))
+                    nav.appNavigate(AppNav.Profile(it.id!!))
                 }
             }
 

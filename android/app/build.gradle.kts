@@ -94,14 +94,14 @@ dependencies {
 
     // Compose
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:${versions.compose}")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
-    implementation("androidx.compose.material3:material3:1.2.1")
-    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
+    implementation("androidx.compose.material3:material3:1.3.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.0")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
@@ -111,9 +111,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
+    implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -137,8 +137,8 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.3.7")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("me.saket.telephoto:zoomable-image-coil:1.0.0-alpha02")
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
     implementation("com.otaliastudios:transcoder:0.10.5")
 
     // Logging & Crash Reporting
@@ -149,7 +149,7 @@ dependencies {
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 
     // VideoSDK
-    implementation("live.videosdk:rtc-android-sdk:0.1.26") {
+    implementation("live.videosdk:rtc-android-sdk:0.1.32") {
         exclude("androidx.core")
         exclude("com.android.support")
     }

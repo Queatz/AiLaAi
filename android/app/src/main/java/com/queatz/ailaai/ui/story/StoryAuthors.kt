@@ -6,10 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.navigation.NavController
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.nav
 import com.queatz.db.Person
@@ -53,7 +52,7 @@ fun StoryAuthors(publishDate: Instant?, authors: List<Person>) {
         )
     ) {
         authorsText.getStringAnnotations(it, it).firstOrNull()?.tag?.let { id ->
-            nav.navigate(AppNav.Profile(id))
+            nav.appNavigate(AppNav.Profile(id))
         }
     }
 }

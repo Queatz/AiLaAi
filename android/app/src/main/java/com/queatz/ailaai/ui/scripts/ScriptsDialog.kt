@@ -304,7 +304,7 @@ fun ScriptsDialog(
                             shape = MaterialTheme.shapes.large,
                             singleLine = false,
                             keyboardOptions = KeyboardOptions.Default.copy(
-                                autoCorrect = false,
+                                autoCorrectEnabled = false,
                                 keyboardType = KeyboardType.Ascii,
                                 capitalization = KeyboardCapitalization.None
                             ),

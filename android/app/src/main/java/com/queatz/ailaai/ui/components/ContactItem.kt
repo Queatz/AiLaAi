@@ -93,13 +93,13 @@ fun ContactItem(
                 when (item) {
                     is SearchResult.Connect -> {
                         api.createGroup(listOf(me!!.id!!, item.person.id!!), reuse = true) { group ->
-                            nav.navigate(AppNav.Group(group.id!!))
+                            nav.appNavigate(AppNav.Group(group.id!!))
                         }
                     }
 
                     is SearchResult.Group -> {
                         val groupExtended = item.groupExtended
-                        nav.navigate(AppNav.Group(groupExtended.group!!.id!!))
+                        nav.appNavigate(AppNav.Group(groupExtended.group!!.id!!))
 
                     }
                 }

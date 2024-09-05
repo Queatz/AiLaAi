@@ -14,7 +14,7 @@ import app.ailaai.api.card
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.CardItem
@@ -91,7 +91,7 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
                 }
                 menuItem(stringResource(R.string.open_card)) {
                     showCardMenu = false
-                    nav.navigate(AppNav.Page(cardId))
+                    nav.appNavigate(AppNav.Page(cardId))
                 }
                 if (part.cards.size > 1) {
                     menuItem(stringResource(R.string.reorder)) {

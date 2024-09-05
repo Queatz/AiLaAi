@@ -68,7 +68,7 @@ fun ScriptWidget(widgetId: String) {
             storyContent = content,
             onGroupClick = {
                 scope.launch {
-                    appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                    appNav.appNavigate(AppNavigation.Group(it.group!!.id!!, it))
                 }
             },
             onButtonClick = { script, data ->

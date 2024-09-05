@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.queatz.ailaai.AppNav
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.StoryContent
@@ -45,7 +45,7 @@ fun LazyGridScope.titleItem(
                                     remember { MutableInteractionSource() },
                                     indication = null
                                 ) {
-                                    nav.navigate(AppNav.Story(content.id))
+                                    nav.appNavigate(AppNav.Story(content.id))
                                 }
                         }
                     }

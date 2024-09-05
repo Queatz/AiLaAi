@@ -198,10 +198,10 @@ fun ScheduleScreen() {
             .swipeMainTabs {
                 when (emptyList<Unit>().swipe(Unit, it)) {
                     is SwipeResult.Previous -> {
-                        nav.navigate(AppNav.Messages)
+                        nav.appNavigate(AppNav.Messages)
                     }
                     is SwipeResult.Next -> {
-                        nav.navigate(AppNav.Explore)
+                        nav.appNavigate(AppNav.Explore)
                     }
                     is SwipeResult.Select<*> -> {
                         // Impossible

@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.bulletedString
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
@@ -22,7 +22,7 @@ fun ReminderItem(reminder: Reminder) {
     val nav = nav
     OutlinedCard(
         onClick = {
-            nav.navigate(AppNav.Reminder(reminder.id!!))
+            nav.appNavigate(AppNav.Reminder(reminder.id!!))
         },
         modifier = Modifier
             .fillMaxWidth()

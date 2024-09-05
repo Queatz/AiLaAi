@@ -42,9 +42,9 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.reactToStory
 import com.queatz.ailaai.api.storyReactions
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.formatMini
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.shortAgo
 import com.queatz.ailaai.extensions.toast
@@ -173,7 +173,7 @@ fun LazyGridScope.reactionsItem(
                         commentOnReaction = reaction.reaction!!.reaction!!
                         sendComment = reaction.reaction!!.comment.orEmpty()
                     } else {
-                        nav.navigate(AppNav.Profile(reaction.person!!.id!!))
+                        nav.appNavigate(AppNav.Profile(reaction.person!!.id!!))
                     }
                 }
             }

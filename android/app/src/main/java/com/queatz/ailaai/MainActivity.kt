@@ -102,11 +102,11 @@ import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.invoke
 import com.queatz.ailaai.extensions.isInstalledFromPlayStore
 import com.queatz.ailaai.extensions.launchUrl
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
@@ -605,7 +605,7 @@ class MainActivity : AppCompatActivity() {
                                                 selected = selected,
                                                 onClick = {
                                                     navController.popBackStack()
-                                                    navController.navigate(item.route)
+                                                    navController.appNavigate(item.route)
                                                 }
                                             )
                                         }
@@ -660,7 +660,7 @@ class MainActivity : AppCompatActivity() {
                                                 selected = navController.currentDestination?.route == item.route.route,
                                                 onClick = {
                                                     navController.popBackStack()
-                                                    navController.navigate(item.route)
+                                                    navController.appNavigate(item.route)
                                                 },
                                                 modifier = Modifier.padding(horizontal = .5f.pad)
                                             )

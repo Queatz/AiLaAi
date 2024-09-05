@@ -38,7 +38,7 @@ import cancelTrade
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.timeAgo
@@ -578,7 +578,7 @@ fun TradeDialog(
             }
         ) {
             showMembers = false
-            nav.navigate(AppNav.Profile(it.id!!))
+            nav.appNavigate(AppNav.Profile(it.id!!))
         }
     }
 

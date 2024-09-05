@@ -8,7 +8,7 @@ import app.ailaai.api.cardsCards
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.toast
 import com.queatz.db.Card
 import kotlinx.coroutines.CoroutineScope
@@ -84,7 +84,7 @@ class Slideshow {
                     Log.w("Slideshow", "Navigating to card ${card.id!!}")
 
                     withContext(Dispatchers.Main) {
-                        navController!!.navigate(
+                        navController!!.appNavigate(
                             AppNav.Page(card.id!!),
                             navOptions {
                                 launchSingleTop = true

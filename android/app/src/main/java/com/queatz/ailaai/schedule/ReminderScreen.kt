@@ -35,9 +35,9 @@ import app.ailaai.api.updateReminder
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -47,7 +47,6 @@ import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardToolbar
-import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
@@ -337,7 +336,7 @@ fun ReminderScreen(reminderId: String) {
                                     modifier = Modifier
                                         .padding(vertical = 1.pad)
                                 ) {
-                                    nav.navigate(AppNav.Profile(it.id!!))
+                                    nav.appNavigate(AppNav.Profile(it.id!!))
                                 }
                             }
                     }

@@ -22,7 +22,7 @@ fun Content(content: String?) {
             storyContent!!,
             onGroupClick = {
                 scope.launch {
-                    appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                    appNav.appNavigate(AppNavigation.Group(it.group!!.id!!, it))
                 }
             }
         )

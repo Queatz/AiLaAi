@@ -5,7 +5,7 @@ open class Versions {
     val coroutines = "1.8.1"
     val ktor = "2.3.12"
     val choiceSdk = "0.3.0"
-    val compose = "1.6.8"
+    val compose = "1.7.0"
     val serialization = "1.7.1"
     val datetime = "0.5.0"
     val logback = "1.4.12"

@@ -61,7 +61,7 @@ class Connectivity {
 
     private lateinit var observer: ConnectivityObserver
 
-    val hasConnectivity get() = observer.hasConnectivity
+    val hasConnectivity @Composable get() = observer.hasConnectivity
 
     fun start(context: Context) {
         observer = ConnectivityObserver(context)

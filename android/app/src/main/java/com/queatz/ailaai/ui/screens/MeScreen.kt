@@ -139,7 +139,7 @@ fun MeScreen() {
             },
             create = true
         ) {
-            nav.navigate(AppNav.Page(it.id!!))
+            nav.appNavigate(AppNav.Page(it.id!!))
         }
     }
 
@@ -192,7 +192,7 @@ fun MeScreen() {
                             card = card,
                             showTitle = true,
                             onClick = {
-                                nav.navigate(AppNav.Page(card.id!!))
+                                nav.appNavigate(AppNav.Page(card.id!!))
                             },
                             scope = scope,
                             playVideo = playingVideo == card

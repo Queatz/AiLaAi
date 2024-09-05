@@ -27,7 +27,7 @@ fun GroupCover(group: GroupExtended) {
                 if (me == null) {
                     router.navigate("/signin")
                 } else {
-                    appNav.navigate(AppNavigation.Group(group.group!!.id!!, group))
+                    appNav.appNavigate(AppNavigation.Group(group.group!!.id!!, group))
                     router.navigate("/")
                 }
             }

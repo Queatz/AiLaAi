@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -22,20 +21,18 @@ import app.ailaai.api.storiesOfPerson
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.horizontalFadingEdge
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.story.StoryCard
-import com.queatz.ailaai.ui.story.StoryContents
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.GroupExtended
 import com.queatz.db.Person
 import com.queatz.db.Story
-import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileGroups(person: Person?) {
@@ -89,7 +86,7 @@ fun ProfileGroups(person: Person?) {
                             .requiredHeight(180.dp)
                             .fillParentMaxWidth(.8f)
                     ) {
-                        nav.navigate(AppNav.Story(it.id!!))
+                        nav.appNavigate(AppNav.Story(it.id!!))
                     }
                 }
             }

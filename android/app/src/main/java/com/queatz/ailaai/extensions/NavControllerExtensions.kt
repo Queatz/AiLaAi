@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.queatz.ailaai.AppNav
 
-fun NavController.navigate(route: AppNav, options: NavOptions? = null) = navigate(route.route, options)
+fun NavController.appNavigate(route: AppNav, options: NavOptions? = null) = navigate(route.route, options)
 
 fun NavController.popBackStackOrFinish() {
     if (!popBackStack()) {

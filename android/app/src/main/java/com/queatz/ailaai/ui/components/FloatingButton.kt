@@ -62,7 +62,7 @@ fun FloatingButton(
                 .clip(shape)
                 .combinedClickable(
                     interactionSource = interactionSource,
-                    indication = rememberRipple(),
+                    indication = remember { ripple() },
                     enabled = enabled,
                     onClick = onClick,
                     onLongClick = onLongClick,

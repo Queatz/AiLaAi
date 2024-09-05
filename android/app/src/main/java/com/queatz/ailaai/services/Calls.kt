@@ -29,6 +29,7 @@ import live.videosdk.rtc.android.Stream
 import live.videosdk.rtc.android.VideoSDK
 import live.videosdk.rtc.android.listeners.MeetingEventListener
 import live.videosdk.rtc.android.listeners.ParticipantEventListener
+import live.videosdk.rtc.android.mediaDevice.VideoDeviceInfo
 import org.json.JSONObject
 import org.webrtc.AudioTrack
 import org.webrtc.MediaStreamTrack
@@ -162,7 +163,8 @@ class Calls {
             "front",
             CustomStreamTrack.VideoMode.DETAIL,
             true,
-            context
+            context,
+            VideoSDK.getSelectedVideoDevice()
         )
         customTracks["video"] = videoCustomTrack
 
@@ -301,7 +303,8 @@ class Calls {
                 "front",
                 CustomStreamTrack.VideoMode.DETAIL,
                 true,
-                context
+                context,
+                VideoSDK.getSelectedVideoDevice()
             )
             meeting.enableWebcam(videoCustomTrack)
         }

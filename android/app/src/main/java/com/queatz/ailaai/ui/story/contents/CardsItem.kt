@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import app.ailaai.api.card
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
@@ -32,11 +32,11 @@ fun LazyGridScope.cardsItem(content: StoryContent.Cards, viewHeight: Float) {
             }
             CardItem(
                 {
-                    nav.navigate(AppNav.Page(it))
+                    nav.appNavigate(AppNav.Page(it))
                 },
                 onCategoryClick = {
                     exploreInitialCategory = it
-                    nav.navigate(AppNav.Explore)
+                    nav.appNavigate(AppNav.Explore)
                 },
                 card = card,
                 isChoosing = true,

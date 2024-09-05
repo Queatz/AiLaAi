@@ -17,7 +17,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.myStories
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.nav
@@ -93,9 +93,9 @@ fun MyStoriesScreen() {
                                 .fillMaxWidth()
                         ) {
                             if (story.published == true) {
-                                nav.navigate(AppNav.Story(story.id!!))
+                                nav.appNavigate(AppNav.Story(story.id!!))
                             } else {
-                                nav.navigate(AppNav.WriteStory(story.id!!))
+                                nav.appNavigate(AppNav.WriteStory(story.id!!))
                             }
                         }
                     }
@@ -112,7 +112,7 @@ fun MyStoriesScreen() {
                     onAction = {
                         scope.launch {
                             api.createStory(Story()) {
-                                nav.navigate(AppNav.WriteStory(it.id!!))
+                                nav.appNavigate(AppNav.WriteStory(it.id!!))
                             }
                         }
                     }

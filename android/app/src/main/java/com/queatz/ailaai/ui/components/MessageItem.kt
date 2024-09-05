@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.AppNav
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.bot.BotProfileDialog
@@ -68,7 +68,7 @@ fun MessageItem(
                             PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
                         ) {
                             if (message.member != null) {
-                                nav.navigate(AppNav.Profile(message.member!!.let(getPerson)!!.id!!))
+                                nav.appNavigate(AppNav.Profile(message.member!!.let(getPerson)!!.id!!))
                             }
                         }
                     }

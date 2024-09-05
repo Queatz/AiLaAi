@@ -45,7 +45,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -96,6 +95,7 @@ import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.asOvalBitmap
 import com.queatz.ailaai.extensions.bitmapResource
 import com.queatz.ailaai.extensions.cardUrl
@@ -104,7 +104,6 @@ import com.queatz.ailaai.extensions.hint
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.px
@@ -154,7 +153,6 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.Message
-import com.queatz.db.Npc
 import com.queatz.db.Person
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
@@ -597,7 +595,7 @@ fun CardScreen(cardId: String) {
             create = true
         ) {
             reloadCards()
-            nav.navigate(AppNav.Page(it.id!!))
+            nav.appNavigate(AppNav.Page(it.id!!))
         }
     }
 
@@ -766,7 +764,7 @@ fun CardScreen(cardId: String) {
                             DropdownMenuItem({
                                 Text(stringResource(R.string.view_profile))
                             }, {
-                                nav.navigate(AppNav.Profile(card.person!!))
+                                nav.appNavigate(AppNav.Profile(card.person!!))
                                 showMenu = false
                             })
                             if (slideshowActive) {
@@ -788,7 +786,7 @@ fun CardScreen(cardId: String) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.open_enclosing_card))
                                 }, {
-                                    nav.navigate(AppNav.Page(card.parent!!))
+                                    nav.appNavigate(AppNav.Page(card.parent!!))
                                     showMenu = false
                                 })
                             }
@@ -983,7 +981,7 @@ fun CardScreen(cardId: String) {
                                     stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
                                     selected = card.content?.notBlank != null
                                 ) {
-                                    nav.navigate(AppNav.EditCard(card.id!!))
+                                    nav.appNavigate(AppNav.EditCard(card.id!!))
                                 }
                             }
                         }
@@ -1073,7 +1071,7 @@ fun CardScreen(cardId: String) {
                                     showTitle = true,
                                     hideCreators = card?.person?.inList()?.let { it + (card?.collaborators ?: emptyList()) },
                                     onClick = {
-                                        nav.navigate(AppNav.Page(it.id!!))
+                                        nav.appNavigate(AppNav.Page(it.id!!))
                                     },
                                     scope = scope,
                                     playVideo = playingVideo == it && !isAtTop,
@@ -1247,7 +1245,7 @@ fun CardScreen(cardId: String) {
                 scope.launch {
                     // todo open conversations dialog
                     api.createGroup(listOf(me!!.id!!, person.id!!), reuse = true) {
-                        nav.navigate(AppNav.Group(it.id!!))
+                        nav.appNavigate(AppNav.Group(it.id!!))
                         openCollaboratorsDialog = false
                     }
                 }

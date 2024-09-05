@@ -16,7 +16,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -91,7 +91,7 @@ fun StoryActions(
             onPeopleSelected = { authors ->
                 scope.launch {
                     api.createGroup(authors.map { it.id!! } + me!!.id!!, reuse = true) {
-                        nav.navigate(AppNav.Group(it.id!!))
+                        nav.appNavigate(AppNav.Group(it.id!!))
                     }
                 }
                 showMessageDialog = false

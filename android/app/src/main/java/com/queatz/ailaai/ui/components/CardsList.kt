@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
-import com.queatz.ailaai.extensions.navigate
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
@@ -85,7 +85,7 @@ fun CardList(
                         showTitle = true,
                         showDistance = geo,
                         onClick = {
-                            nav.navigate(AppNav.Page(it.id!!))
+                            nav.appNavigate(AppNav.Page(it.id!!))
                         },
                         scope = scope,
                         playVideo = playingVideo == it,

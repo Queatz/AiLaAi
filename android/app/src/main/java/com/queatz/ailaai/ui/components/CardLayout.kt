@@ -19,7 +19,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.navigate
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.card.CardContent
@@ -103,12 +103,12 @@ fun CardLayout(
                 showDistance = showDistance,
                 onCategoryClick = {
                     exploreInitialCategory = it
-                    nav.navigate(AppNav.Explore)
+                    nav.appNavigate(AppNav.Explore)
                 },
                 onReply = { conversation ->
                     scope.launch {
                         it.reply(conversation) { groupId ->
-                            nav.navigate(AppNav.Group(groupId))
+                            nav.appNavigate(AppNav.Group(groupId))
                         }
                     }
                 },
