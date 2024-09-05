@@ -518,11 +518,11 @@ fun ExploreScreen() {
                         .swipeMainTabs {
                             when (val it = MainTab.entries.swipe(tab, it)) {
                                 is SwipeResult.Previous -> {
-                                    nav.appNavigate(AppNav.Schedule)
+                                    nav.appNavigate(AppNav.Messages)
                                 }
 
                                 is SwipeResult.Next -> {
-                                    nav.appNavigate(AppNav.Schedule)
+                                    nav.appNavigate(AppNav.Stories)
                                 }
 
                                 is SwipeResult.Select<*> -> {

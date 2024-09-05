@@ -447,11 +447,11 @@ fun FriendsScreen() {
                     .swipeMainTabs {
                         when (val it = tabs.swipe(tab, it)) {
                             is SwipeResult.Previous -> {
-                                nav.appNavigate(AppNav.Stories)
+                                nav.appNavigate(AppNav.Schedule)
                             }
 
                             is SwipeResult.Next -> {
-                                nav.appNavigate(AppNav.Schedule)
+                                nav.appNavigate(AppNav.Explore)
                             }
 
                             is SwipeResult.Select<*> -> {

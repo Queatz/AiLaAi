@@ -64,7 +64,6 @@ import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.ScanQrCodeResult
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
-import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
@@ -390,21 +389,6 @@ fun InventoryScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .swipeMainTabs {
-                when (emptyList<Unit>().swipe(Unit, it)) {
-                    is SwipeResult.Previous -> {
-                        nav.appNavigate(AppNav.Explore)
-                    }
-
-                    is SwipeResult.Next -> {
-                        nav.appNavigate(AppNav.Stories)
-                    }
-
-                    is SwipeResult.Select<*> -> {
-                        // Impossible
-                    }
-                }
-            }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(

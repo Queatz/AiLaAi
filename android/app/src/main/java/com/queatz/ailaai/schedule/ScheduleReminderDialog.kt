@@ -35,15 +35,16 @@ fun ScheduleReminderDialog(
     showTitle: Boolean = false,
     onUpdate: suspend (Reminder) -> Unit
 ) {
-    val reminder = remember(initialReminder) {
-        Reminder(
-            start = initialReminder.start,
-            end = initialReminder.end,
-            schedule = initialReminder.schedule
+    var reminder by remember(initialReminder) {
+        mutableStateOf(
+            Reminder(
+                start = initialReminder.start,
+                end = initialReminder.end,
+                schedule = initialReminder.schedule
+            )
         )
     }
     val scope = rememberCoroutineScope()
-    val recomposeScope = currentRecomposeScope
     var isLoading by rememberStateOf(false)
     var reoccurs by rememberStateOf(reminder.schedule != null)
     var until by rememberStateOf(reminder.end != null)
@@ -55,6 +56,23 @@ fun ScheduleReminderDialog(
     var showMonths by rememberStateOf(false)
     val today = Clock.System.now().startOfDay()
 
+    fun invalidate() {
+        reminder = Reminder(
+            person = reminder.person,
+            people = reminder.people,
+            groups = reminder.groups,
+            attachment = reminder.attachment,
+            open = reminder.open,
+            title = reminder.title,
+            note = reminder.note,
+            start = reminder.start,
+            end = reminder.end,
+            timezone = reminder.timezone,
+            utcOffset = reminder.utcOffset,
+            schedule = reminder.schedule,
+        )
+    }
+
     LaunchedEffect(reminder.schedule?.hours?.isNotEmpty() != true) {
         if (reminder.schedule?.hours?.isNotEmpty() != true) {
             if (reminder.schedule == null) {
@@ -63,7 +81,7 @@ fun ScheduleReminderDialog(
             reminder.schedule = reminder.schedule!!.copy(
                 hours = (reminder.schedule?.hours ?: emptyList()) + reminder.start!!.hour()
             )
-            recomposeScope.invalidate()
+            invalidate()
         }
     }
 
@@ -113,7 +131,7 @@ fun ScheduleReminderDialog(
                 }
                 DateTimeSuggestions {
                     reminder.start = it
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
                 Check(reoccurs, { reoccurs = it }) {
                     Text(stringResource(R.string.reoccurs))
@@ -189,7 +207,7 @@ fun ScheduleReminderDialog(
                     }
                     DateTimeSuggestions {
                         reminder.end = it
-                        recomposeScope.invalidate()
+                        invalidate()
                     }
                 }
             }
@@ -250,7 +268,7 @@ fun ScheduleReminderDialog(
                             hours = (reminder.schedule!!.hours ?: emptyList()) - it
                         )
                     }
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
             }
         }
@@ -278,7 +296,7 @@ fun ScheduleReminderDialog(
                             weekdays = (reminder.schedule!!.weekdays ?: emptyList()) - it
                         )
                     }
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
             }
             (1..31).forEach {
@@ -301,7 +319,7 @@ fun ScheduleReminderDialog(
                             days = (reminder.schedule!!.days ?: emptyList()) - it
                         )
                     }
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
             }
             run {
@@ -324,7 +342,7 @@ fun ScheduleReminderDialog(
                             days = (reminder.schedule!!.days ?: emptyList()) - -1
                         )
                     }
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
             }
         }
@@ -352,7 +370,7 @@ fun ScheduleReminderDialog(
                             weeks = (reminder.schedule!!.weeks ?: emptyList()) - it
                         )
                     }
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
             }
         }
@@ -380,7 +398,7 @@ fun ScheduleReminderDialog(
                             months = (reminder.schedule!!.months ?: emptyList()) - it
                         )
                     }
-                    recomposeScope.invalidate()
+                    invalidate()
                 }
             }
         }
@@ -394,7 +412,7 @@ fun ScheduleReminderDialog(
             reminder.start ?: Clock.System.now()
         ) {
             reminder.start = it
-            recomposeScope.invalidate()
+            invalidate()
         }
     }
 
@@ -406,7 +424,7 @@ fun ScheduleReminderDialog(
             reminder.end ?: Clock.System.now()
         ) {
             reminder.end = it
-            recomposeScope.invalidate()
+            invalidate()
         }
     }
 }
