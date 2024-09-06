@@ -10,6 +10,7 @@ import app.ailaai.api.updateGroup
 import app.components.Spacer
 import app.dialog.inputDialog
 import app.group.GroupItem
+import app.menu.Menu
 import appString
 import appText
 import application
@@ -37,8 +38,11 @@ import opensavvy.compose.lazy.LazyRow
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import push
 import r
+import sortedDistinct
 import kotlin.js.Date
 
 sealed class GroupNav {
@@ -62,6 +66,10 @@ fun GroupsNavPage(
         mutableStateOf(true)
     }
 
+    var filterMenuTarget by remember {
+        mutableStateOf<DOMRect?>(null)
+    }
+
     var groups by remember {
         mutableStateOf(emptyList<GroupExtended>())
     }
@@ -72,6 +80,14 @@ fun GroupsNavPage(
 
     var searchText by remember {
         mutableStateOf("")
+    }
+
+    val categories by remember(groups) {
+        mutableStateOf(groups.mapNotNull { it.group?.categories }.flatten().sortedDistinct())
+    }
+
+    var selectedCategory by remember {
+        mutableStateOf<String?>(null)
     }
 
     LaunchedEffect(selected) {
@@ -87,7 +103,7 @@ fun GroupsNavPage(
         })
     }
 
-    val shownGroups = remember(groups, searchText) {
+    val shownGroups = remember(groups, searchText, selectedCategory) {
         val search = searchText.trim()
         if (searchText.isBlank()) {
             groups
@@ -95,6 +111,12 @@ fun GroupsNavPage(
             groups.filter {
                 (it.group?.name?.contains(search, true)
                     ?: false) || (it.members?.any { it.person?.name?.contains(search, true) ?: false } ?: false)
+            }
+        }.let {
+            if (selectedCategory == null) {
+                it
+            } else {
+                it.filter { it.group?.categories?.contains(selectedCategory) == true }
             }
         }
     }
@@ -141,7 +163,32 @@ fun GroupsNavPage(
         }
     }
 
+    if (filterMenuTarget != null) {
+        Menu(
+            onDismissRequest = { filterMenuTarget = null },
+            target = filterMenuTarget!!
+        ) {
+            categories.forEach { category ->
+                item(category, icon = if (category == selectedCategory) "check" else null) {
+                    if (category == selectedCategory) {
+                        selectedCategory = null
+                    } else {
+                        selectedCategory = category
+                    }
+                }
+            }
+        }
+    }
+
     NavTopBar(me, appString { this.groups }, onProfileClick = onProfileClick) {
+        IconButton("filter_list", appString { filter }, count = selectedCategory?.let { 1 } ?: 0, styles = {
+        }) {
+            filterMenuTarget = if (filterMenuTarget == null) {
+                (it.target as HTMLElement).getBoundingClientRect()
+            } else {
+                null
+            }
+        }
         IconButton("search", appString { search }, styles = {
         }) {
             showSearch = !showSearch
