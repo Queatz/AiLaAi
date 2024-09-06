@@ -294,13 +294,13 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
                             LoadingText(group != null, appString { loadingGroup }) {
                                 group?.let { group ->
                                     GroupItem(
-                                        group,
+                                        group = group,
                                         selectable = true,
                                         selected = false,
                                         onBackground = true,
                                         onSelected = {
                                             scope.launch {
-                                                appNav.appNavigate(AppNavigation.Group(group.group!!.id!!, group))
+                                                appNav.navigate(AppNavigation.Group(group.group!!.id!!, group))
                                             }
                                         },
                                         info = GroupInfo.LatestMessage

@@ -323,7 +323,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                                 onClick {
                                                     scope.launch {
                                                         api.createGroup(listOf(personId!!), reuse = true) {
-                                                            appNav.appNavigate(AppNavigation.Group(it.id!!))
+                                                            appNav.navigate(AppNavigation.Group(it.id!!))
                                                         }
                                                     }
                                                 }

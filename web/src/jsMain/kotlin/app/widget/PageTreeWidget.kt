@@ -410,7 +410,7 @@ fun PageTreeWidget(widgetId: String) {
                             } else {
                                 if (card.person == me?.id) {
                                     scope.launch {
-                                        appNav.appNavigate(AppNavigation.Page(card.id!!, card))
+                                        appNav.navigate(AppNavigation.Page(card.id!!, card))
                                     }
                                 } else {
                                     router.navigate("/page/${card.id!!}")
