@@ -117,6 +117,11 @@ class AiPhotoRequest(
 )
 
 @Serializable
+class AiSpeakRequest(
+    val text: String
+)
+
+@Serializable
 class AiPhotoResponse(
     val photo: String
 )

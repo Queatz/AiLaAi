@@ -3,6 +3,8 @@ import app.ailaai.api.ErrorBlock
 import app.ailaai.api.SuccessBlock
 import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
+import com.queatz.db.AiSpeakRequest
+import io.ktor.http.content.ByteArrayContent
 
 suspend fun Api.aiStyles(
     onError: ErrorBlock = null,
@@ -14,3 +16,9 @@ suspend fun Api.aiPhoto(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<AiPhotoResponse>
 ) = post("ai/photo", request, onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.aiSpeak(
+    request: AiSpeakRequest,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<ByteArrayContent>
+) = post("ai/speak", request, onError = onError, onSuccess = onSuccess)

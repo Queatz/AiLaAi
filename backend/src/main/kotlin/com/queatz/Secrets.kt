@@ -10,6 +10,7 @@ data class Secrets(
     val gms: SecretsGms,
     val apns: SecretsApns,
     val dezgo: SecretsDezgo,
+    val openAi: SecretsOpenAi,
     val videoSdk: SecretsVideoSdk,
 )
 
@@ -55,5 +56,10 @@ data class SecretsApns(
 
 @Serializable
 data class SecretsDezgo(
+    val key: String
+)
+
+@Serializable
+data class SecretsOpenAi(
     val key: String
 )
