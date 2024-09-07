@@ -4,7 +4,12 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -12,7 +17,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +38,9 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.EVENT_TIMELINE_CHANGED
+import androidx.media3.datasource.ByteArrayDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.android.awaitFrame
@@ -39,16 +52,41 @@ enum class PlaybackSpeed(val factor: Float) {
     Faster(2f),
 }
 
+private sealed class AudioSource {
+    data class Url(val url: String) : AudioSource()
+    data class Data(val data: ByteArray, val contentType: String?) : AudioSource()
+}
+
 @Composable
 fun Audio(
     url: String,
     modifier: Modifier = Modifier,
+    autoPlay: Boolean = false
+) {
+    Audio(AudioSource.Url(url), modifier, autoPlay)
+}
+
+@Composable
+fun Audio(
+    data: ByteArray,
+    contentType: String?,
+    modifier: Modifier = Modifier,
+    autoPlay: Boolean = false,
+) {
+    Audio(AudioSource.Data(data, contentType), modifier, autoPlay)
+}
+
+@Composable
+private fun Audio(
+    source: AudioSource,
+    modifier: Modifier = Modifier,
+    autoPlay: Boolean = false
 ) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             repeatMode = Player.REPEAT_MODE_OFF
-            playWhenReady = false
+            playWhenReady = autoPlay
             setWakeMode(C.WAKE_MODE_LOCAL)
             prepare()
         }
@@ -111,8 +149,23 @@ fun Audio(
         }
     }
 
-    LaunchedEffect(url) {
-        exoPlayer.setMediaItem(MediaItem.fromUri(url))
+    LaunchedEffect(source) {
+        when (source) {
+            is AudioSource.Url -> {
+                exoPlayer.setMediaItem(MediaItem.fromUri(source.url))
+            }
+            is AudioSource.Data -> {
+                val mediaSource = ProgressiveMediaSource.Factory({ ByteArrayDataSource(source.data) })
+                    .createMediaSource(MediaItem.Builder().let {
+                        if (source.contentType == null) {
+                            it
+                        } else {
+                            it.setMimeType(source.contentType)
+                        }
+                    }.build())
+                exoPlayer.setMediaSource(mediaSource)
+            }
+        }
     }
 
     DisposableEffect(Unit) {

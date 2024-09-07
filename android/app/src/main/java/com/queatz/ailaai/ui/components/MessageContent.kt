@@ -3,15 +3,44 @@ package com.queatz.ailaai.ui.components
 import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Reply
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,14 +66,25 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAllAttachments
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.ifNotEmpty
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.save
+import com.queatz.ailaai.extensions.share
+import com.queatz.ailaai.extensions.shareAudio
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.status
+import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.trade.ActiveTradeItem
 import com.queatz.ailaai.trade.TradeDialog
-import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
+import com.queatz.ailaai.ui.dialogs.SelectTextDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.permission.permissionRequester
@@ -52,8 +92,25 @@ import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryCard
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.*
-import io.ktor.http.*
+import com.queatz.db.AudioAttachment
+import com.queatz.db.Bot
+import com.queatz.db.Card
+import com.queatz.db.CardAttachment
+import com.queatz.db.GroupAttachment
+import com.queatz.db.GroupExtended
+import com.queatz.db.Message
+import com.queatz.db.Person
+import com.queatz.db.PhotosAttachment
+import com.queatz.db.ReplyAttachment
+import com.queatz.db.Sticker
+import com.queatz.db.StickerAttachment
+import com.queatz.db.Story
+import com.queatz.db.StoryAttachment
+import com.queatz.db.TradeAttachment
+import com.queatz.db.TradeExtended
+import com.queatz.db.UrlAttachment
+import com.queatz.db.VideosAttachment
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
 import trade
 
@@ -324,18 +381,11 @@ fun ColumnScope.MessageContent(
     }
 
     if (showSelectTextDialog != null) {
-        Alert(
+        SelectTextDialog(
             onDismissRequest = {
                 showSelectTextDialog = null
             },
-            dismissButton = null,
-            confirmButton = stringResource(R.string.close),
-            title = null,
-            text = showSelectTextDialog ?: "",
-            textStyle = MaterialTheme.typography.bodyLarge,
-            onConfirm = {
-                showSelectTextDialog = null
-            }
+            text = showSelectTextDialog ?: ""
         )
     }
 

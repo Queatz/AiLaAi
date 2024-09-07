@@ -31,6 +31,7 @@ fun Alert(
     confirmColor: Color? = null,
     textStyle: TextStyle = LocalTextStyle.current,
     properties: DialogProperties = DialogProperties(),
+    onDismiss: (() -> Unit)? = null,
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
@@ -38,7 +39,6 @@ fun Alert(
         properties = properties,
         title = if (title != null) {
             {
-
                 Text(title)
             }
         } else null,
@@ -62,7 +62,7 @@ fun Alert(
             {
                 TextButton(
                     {
-                        onDismissRequest()
+                        onDismiss?.invoke() ?: onDismissRequest()
                     }
                 ) {
                     Text(it)
