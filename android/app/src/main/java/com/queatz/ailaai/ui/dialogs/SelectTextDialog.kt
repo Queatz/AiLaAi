@@ -68,7 +68,9 @@ fun SelectTextDialog(
     }
 
     LaunchedEffect(autoSpeak) {
-        speak()
+        if (autoSpeak) {
+            speak()
+        }
     }
 
     DialogBase(onDismissRequest) {
