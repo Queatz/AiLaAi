@@ -9,10 +9,14 @@ import com.queatz.db.AiSpeakRequest
 import com.queatz.plugins.ai
 import com.queatz.plugins.openAi
 import com.queatz.plugins.respond
+import io.ktor.client.call.body
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.*
 
 fun Route.aiRoutes() {
@@ -44,9 +48,14 @@ fun Route.aiRoutes() {
         }
         
         post("/ai/speak") {
-            respond {
-                val request = call.receive<AiSpeakRequest>()
-                openAi.speak(request.text) ?: HttpStatusCode.InternalServerError
+            val request = call.receive<AiSpeakRequest>()
+            val response = openAi.speak(request.text)
+
+            if (response == null) {
+                respond { HttpStatusCode.InternalServerError }
+                return@post
+            } else {
+                call.respondBytes(response.body<ByteArray>(), ContentType.Audio.OGG)
             }
         }
     }

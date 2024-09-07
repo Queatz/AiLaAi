@@ -37,13 +37,14 @@ import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AiSpeakRequest
+import io.ktor.http.ContentType
 import io.ktor.http.content.ByteArrayContent
 import kotlinx.coroutines.launch
 
 @Composable
 fun SelectTextDialog(onDismissRequest: () -> Unit, text: String) {
     val scope = rememberCoroutineScope()
-    var audio by rememberStateOf<ByteArrayContent?>(null)
+    var audio by rememberStateOf<ByteArray?>(null)
     var isGeneratingAudio by rememberStateOf(false)
 
     DialogBase(onDismissRequest) {
@@ -64,7 +65,7 @@ fun SelectTextDialog(onDismissRequest: () -> Unit, text: String) {
                 }
 
                 audio?.let { audio ->
-                    Audio(audio.bytes(), audio.contentType?.toString(), autoPlay = true)
+                    Audio(audio, ContentType.Audio.OGG.toString(), autoPlay = true)
                 }
             }
             Row(

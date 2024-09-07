@@ -20,5 +20,5 @@ suspend fun Api.aiPhoto(
 suspend fun Api.aiSpeak(
     request: AiSpeakRequest,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<ByteArrayContent>
+    onSuccess: SuccessBlock<ByteArray>
 ) = post("ai/speak", request, onError = onError, onSuccess = onSuccess)

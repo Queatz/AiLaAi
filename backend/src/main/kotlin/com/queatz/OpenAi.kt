@@ -2,14 +2,13 @@ package com.queatz
 
 import com.queatz.plugins.secrets
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
-import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.contentType
 import io.ktor.http.withCharset
 import io.ktor.serialization.kotlinx.json.json
@@ -23,7 +22,7 @@ data class OpenAiSpeakBody(
     val input: String,
     val model: String = "tts-1-hd",
     val voice: String = "shimmer",
-    @SerialName("response_format") val format: String = "response_format",
+    @SerialName("response_format") val format: String = "opus",
     val speed: Double = 1.0
 )
 
@@ -42,14 +41,14 @@ class OpenAi {
     }
 
 
-    suspend fun speak(text: String): ByteArrayContent? = runCatching {
-        http.post("https://api.openai.com/v1/audio/generate") {
+    suspend fun speak(text: String): HttpResponse? = runCatching {
+        http.post("https://api.openai.com/v1/audio/speech") {
             bearerAuth(secrets.openAi.key)
             contentType(ContentType.Application.Json.withCharset(UTF_8))
             setBody(
                 OpenAiSpeakBody(input = text)
             )
-        }.body<ByteArrayContent>()
+        }
     }.onFailure {
         it.printStackTrace()
     }.getOrNull()
