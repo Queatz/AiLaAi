@@ -156,13 +156,7 @@ private fun Audio(
             }
             is AudioSource.Data -> {
                 val mediaSource = ProgressiveMediaSource.Factory({ ByteArrayDataSource(source.data) })
-                    .createMediaSource(MediaItem.Builder().let {
-                        if (source.contentType == null) {
-                            it
-                        } else {
-                            it.setMimeType(source.contentType)
-                        }
-                    }.build())
+                    .createMediaSource(MediaItem.fromUri(""))
                 exoPlayer.setMediaSource(mediaSource)
             }
         }

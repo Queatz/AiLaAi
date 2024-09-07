@@ -140,6 +140,7 @@ fun ColumnScope.MessageContent(
     var showDeleteMessageDialog by rememberStateOf(false)
     var showEditMessageDialog by rememberStateOf(false)
     var showSelectTextDialog by rememberStateOf<String?>(null)
+    var autoSpeakText by rememberStateOf(false)
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedTradeId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
@@ -300,6 +301,12 @@ fun ColumnScope.MessageContent(
                     onShowMessageDialog(false)
                 }
                 menuItem(stringResource(R.string.select_text)) {
+                    autoSpeakText = false
+                    showSelectTextDialog = message.text
+                    onShowMessageDialog(false)
+                }
+                menuItem(stringResource(R.string.speak)) {
+                    autoSpeakText = true
                     showSelectTextDialog = message.text
                     onShowMessageDialog(false)
                 }
@@ -385,7 +392,8 @@ fun ColumnScope.MessageContent(
             onDismissRequest = {
                 showSelectTextDialog = null
             },
-            text = showSelectTextDialog ?: ""
+            text = showSelectTextDialog ?: "",
+            autoSpeak = autoSpeakText
         )
     }
 

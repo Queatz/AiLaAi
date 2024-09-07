@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,11 +23,13 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
@@ -38,14 +41,35 @@ import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AiSpeakRequest
 import io.ktor.http.ContentType
-import io.ktor.http.content.ByteArrayContent
 import kotlinx.coroutines.launch
 
 @Composable
-fun SelectTextDialog(onDismissRequest: () -> Unit, text: String) {
+fun SelectTextDialog(
+    onDismissRequest: () -> Unit,
+    text: String,
+    autoSpeak: Boolean = false
+) {
     val scope = rememberCoroutineScope()
     var audio by rememberStateOf<ByteArray?>(null)
     var isGeneratingAudio by rememberStateOf(false)
+
+    fun speak() {
+        if (isGeneratingAudio) {
+            return
+        }
+
+        scope.launch {
+            isGeneratingAudio = true
+            api.aiSpeak(AiSpeakRequest(text.notBlank ?: return@launch)) {
+                audio = it
+            }
+            isGeneratingAudio = false
+        }
+    }
+
+    LaunchedEffect(autoSpeak) {
+        speak()
+    }
 
     DialogBase(onDismissRequest) {
         Column(
@@ -65,7 +89,14 @@ fun SelectTextDialog(onDismissRequest: () -> Unit, text: String) {
                 }
 
                 audio?.let { audio ->
-                    Audio(audio, ContentType.Audio.OGG.toString(), autoPlay = true)
+                    Card(
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .padding(1.pad)
+                            .clip(MaterialTheme.shapes.large)
+                    ) {
+                        Audio(audio, ContentType.Audio.OGG.toString(), autoPlay = true)
+                    }
                 }
             }
             Row(
@@ -76,13 +107,7 @@ fun SelectTextDialog(onDismissRequest: () -> Unit, text: String) {
                 if (audio == null) {
                     IconButton(
                         {
-                            scope.launch {
-                                isGeneratingAudio = true
-                                api.aiSpeak(AiSpeakRequest(text.notBlank ?: return@launch)) {
-                                    audio = it
-                                }
-                                isGeneratingAudio = false
-                            }
+                            speak()
                         }
                     ) {
                         if (isGeneratingAudio) {
