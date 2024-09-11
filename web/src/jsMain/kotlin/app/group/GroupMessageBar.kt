@@ -2,6 +2,7 @@ package app.group
 
 import Styles
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,14 @@ fun GroupMessageBar(group: GroupExtended, replyMessage: Message?, clearReplyMess
     val choosePhoto = rememberChoosePhotoDialog()
 
     val isGenerating = choosePhoto.isGenerating.collectAsState().value
+
+    var focus by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    LaunchedEffect(replyMessage) {
+        if (replyMessage != null) {
+            focus?.invoke()
+        }
+    }
 
     fun describePhoto() {
         choosePhoto.launch { photo ->
@@ -292,7 +301,10 @@ fun GroupMessageBar(group: GroupExtended, replyMessage: Message?, clearReplyMess
 
             ref { element ->
                 element.focus()
-                onDispose {}
+                focus = { element.focus() }
+                onDispose {
+                    focus = null
+                }
             }
         }
     }
