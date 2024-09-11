@@ -23,7 +23,7 @@ data class DateTimeSuggestion(
 )
 
 @Composable
-fun DateTimeSuggestions(onSelect: (Instant) -> Unit) {
+fun DateTimeSuggestions(modifier: Modifier = Modifier, onSelect: (Instant) -> Unit) {
     val state = rememberLazyListState()
     val now = Clock.System.now()
 
@@ -39,7 +39,7 @@ fun DateTimeSuggestions(onSelect: (Instant) -> Unit) {
     LazyRow(
         state = state,
         horizontalArrangement = Arrangement.spacedBy(1.pad),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .horizontalFadingEdge(state, 12f)
     ) {

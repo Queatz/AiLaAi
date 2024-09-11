@@ -5,8 +5,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.at
@@ -37,7 +39,17 @@ fun RescheduleDialog(onDismissRequest: () -> Unit, date: Instant, onUpdate: (Ins
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                DatePicker(dateState, title = null)
+                val recomposeScope = currentRecomposeScope
+                DatePicker(dateState, title = null, colors = DatePickerDefaults.colors(containerColor = Color.Transparent))
+                DateTimeSuggestions(
+                    modifier = Modifier
+                        .padding(horizontal = 3.pad)
+                        .padding(bottom = 1.pad)
+                ) {
+                    dateState.displayedMonthMillis = it.toEpochMilliseconds()
+                    dateState.selectedDateMillis = it.toEpochMilliseconds()
+                    recomposeScope.invalidate()
+                }
                 TimePicker(timeState)
             }
             Row(

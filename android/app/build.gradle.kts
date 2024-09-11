@@ -27,8 +27,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 91
-        versionName = "0.9.91"
+        versionCode = 92
+        versionName = "0.9.92"
 
         vectorDrawables {
             useSupportLibrary = true
