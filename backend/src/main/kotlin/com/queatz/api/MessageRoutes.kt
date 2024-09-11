@@ -60,7 +60,7 @@ fun Route.messageRoutes() {
                 if (message == null) {
                     HttpStatusCode.NotFound
                 } else {
-                    val member = db.document(Member::class, message.member!!)
+                    val member = message.member?.let { db.document(Member::class, it) }
                     val isMember = member?.gone != true && member?.from == me.id!!.asId(Person::class)
 
                     // Todo, also check group owner(s), since they can delete the message
