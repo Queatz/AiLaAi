@@ -37,6 +37,10 @@ fun GroupMessages(group: GroupExtended) {
         LoadMoreState()
     }
 
+    var replyMessage by remember {
+        mutableStateOf<Message?>(null)
+    }
+
     suspend fun reloadMessages() {
         api.messages(group.group!!.id!!) {
             messages = it
@@ -87,7 +91,7 @@ fun GroupMessages(group: GroupExtended) {
     } else {
         if (myMember != null) {
             if (group.group?.config?.messages == null || myMember.member?.host == true) {
-                GroupMessageBar(group) {
+                GroupMessageBar(group, replyMessage, { replyMessage = null }) {
                     reloadMessages()
                 }
             } else {
@@ -112,14 +116,17 @@ fun GroupMessages(group: GroupExtended) {
                 }
             }
         ) {
-            messages.forEachIndexed { index, it ->
+            messages.forEachIndexed { index, message ->
                 MessageItem(
-                    message = it,
+                    message = message,
                     previousMessage = if (index < messages.lastIndex) messages[index + 1] else null,
-                    member = group.members?.find { member -> member.member?.id == it.member },
-                    bot = group.bots?.find { bot -> bot.id == it.bot },
+                    member = group.members?.find { member -> member.member?.id == message.member },
+                    bot = group.bots?.find { bot -> bot.id == message.bot },
                     myMember = myMember,
-                    bots = group.bots ?: emptyList()
+                    bots = group.bots ?: emptyList(),
+                    onReply = {
+                        replyMessage = message
+                    }
                 ) {
                     scope.launch {
                         reloadMessages()

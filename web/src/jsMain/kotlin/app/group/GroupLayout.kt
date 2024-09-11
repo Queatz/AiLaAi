@@ -1,4 +1,9 @@
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import app.ailaai.api.group
 import app.group.GroupTopBar
 import com.queatz.db.GroupExtended
@@ -26,11 +31,11 @@ fun GroupLayout(
     if (showCards) {
         GroupCards(group)
     } else {
-        GroupMessages(group)
+        GroupMessages(group = group)
     }
 
     GroupTopBar(
-        group,
+        group = group,
         onGroupUpdated = onGroupUpdated,
         onGroupGone = onGroupGone,
         showCards = showCards,

@@ -87,6 +87,27 @@ object AppStyles : StyleSheet() {
         }
     }
 
+    val groupMessageReply by style {
+        display(DisplayStyle.Flex)
+        borderRadius(1.r)
+        margin(1.r, 1.r, 0.r, 1.r)
+        padding(.5.r)
+        border(1.px, LineStyle.Solid, Styles.colors.secondary)
+        backgroundColor(Styles.colors.background)
+        cursor("pointer")
+        overflow("hidden auto")
+        whiteSpace("pre-wrap")
+        maxHeight(6.r)
+        flexShrink(0)
+        flexDirection(FlexDirection.RowReverse)
+        alignItems(AlignItems.Center)
+        gap(.5.r)
+
+        dark(self) {
+            backgroundColor(Styles.colors.dark.background)
+        }
+    }
+
     val menu by style {
         padding(.5.r)
         backgroundColor(Color.white)

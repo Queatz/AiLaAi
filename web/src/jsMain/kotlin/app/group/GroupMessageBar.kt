@@ -2,7 +2,6 @@ package app.group
 
 import Styles
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,36 +15,37 @@ import app.ailaai.api.sendMedia
 import app.ailaai.api.sendMessage
 import app.dialog.rememberChoosePhotoDialog
 import app.menu.Menu
+import app.messaages.attachmentText
 import appString
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
 import com.queatz.db.PhotosAttachment
+import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
 import com.queatz.db.StickerAttachment
+import components.Icon
 import components.IconButton
 import json
-import kotlinx.browser.window
-import kotlinx.coroutines.awaitAnimationFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
-import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.rad
-import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -56,11 +56,9 @@ import pickPhotos
 import r
 import resize
 import toBytes
-import kotlin.math.PI
 
-@OptIn(ExperimentalComposeWebApi::class)
 @Composable
-fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
+fun GroupMessageBar(group: GroupExtended, replyMessage: Message?, clearReplyMessage: () -> Unit, reloadMessages: suspend () -> Unit) {
     val scope = rememberCoroutineScope()
 
     var messageText by remember {
@@ -85,8 +83,12 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
                 group.group!!.id!!,
                 Message(
                     attachment = json.encodeToString(PhotosAttachment(photos = listOf(photo))),
+                    attachments = replyMessage?.id?.let {
+                        listOf(json.encodeToString(ReplyAttachment(it)))
+                    }
                 )
             ) {
+                clearReplyMessage()
                 reloadMessages()
             }
         }
@@ -125,13 +127,19 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
         scope.launch {
             api.sendMessage(
                 group.group!!.id!!,
-                Message(text = text),
+                Message(
+                    text = text,
+                    attachments = replyMessage?.id?.let {
+                        listOf(json.encodeToString(ReplyAttachment(it)))
+                    }
+                ),
                 onError = {
                     if (messageText.isBlank()) {
                         messageText = text
                     }
                 }
             ) {
+                clearReplyMessage()
                 reloadMessages()
             }
 
@@ -151,9 +159,13 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
                             sticker.id,
                             sticker.message
                         )
-                    )
+                    ),
+                    attachments = replyMessage?.id?.let {
+                        listOf(json.encodeToString(ReplyAttachment(it)))
+                    }
                 )
             ) {
+                clearReplyMessage()
                 reloadMessages()
             }
 
@@ -282,6 +294,28 @@ fun GroupMessageBar(group: GroupExtended, reloadMessages: suspend () -> Unit) {
                 element.focus()
                 onDispose {}
             }
+        }
+    }
+
+    replyMessage?.let { replyMessage ->
+        Div({
+            classes(AppStyles.groupMessageReply)
+
+            onClick {
+                clearReplyMessage()
+            }
+        }) {
+            Icon("close")
+            Span({
+                style {
+                    flexGrow(1)
+                }
+            }) {
+                Text(replyMessage.text ?: replyMessage.attachmentText().orEmpty())
+            }
+            Icon("reply", styles = {
+                opacity(.5f)
+            })
         }
     }
 }

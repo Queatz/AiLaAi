@@ -39,7 +39,8 @@ fun MessageItem(
     bot: Bot?,
     myMember: MemberAndPerson?,
     bots: List<Bot>,
-    onUpdated: () -> Unit = {}
+    onReply: () -> Unit,
+    onUpdated: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val isMe = message.member == myMember?.member?.id
@@ -87,6 +88,9 @@ fun MessageItem(
 
         if (messageMenuTarget != null) {
             Menu({ messageMenuTarget = null }, messageMenuTarget!!) {
+                item(appString { reply }) {
+                    onReply()
+                }
                 if (message.member == myMember?.member?.id || myMember?.member?.host == true) {
                     item(appString { delete }) {
                         scope.launch {

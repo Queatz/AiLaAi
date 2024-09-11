@@ -432,7 +432,7 @@ fun AppPage() {
         }) {
             when (nav) {
                 NavPage.Groups -> GroupPage(
-                    group,
+                    nav = group,
                     onGroup = {
                         group = GroupNav.Selected(it)
                     },
