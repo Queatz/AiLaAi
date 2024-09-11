@@ -18,6 +18,7 @@ import com.queatz.ailaai.api.story
 import com.queatz.db.*
 import components.CardItem
 import components.Icon
+import components.IconButton
 import components.LinkifyText
 import components.LoadingText
 import ellipsize
@@ -71,7 +72,7 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
             } else {
                 alignItems(AlignItems.FlexStart)
             }
-            width(100.percent)
+//            width(100.percent)
         }
         title(
             "${message.createdAt?.let { formatDistanceToNow(Date(it.toEpochMilliseconds()), js("{ addSuffix: true }")) }}\n${message.createdAt?.let { Date(it.toEpochMilliseconds()) }.toString()}"
@@ -313,9 +314,9 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
 
                 is StickerAttachment -> {
                     StickerItem(
-                        attachment.photo!!,
-                        attachment.message,
-                        96.px,
+                        photo = attachment.photo!!,
+                        message = attachment.message,
+                        size = 96.px,
                         messageAlign = if (isMe) AlignItems.Start else AlignItems.End
                     ) {}
                 }

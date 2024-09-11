@@ -505,7 +505,7 @@ fun FriendsScreen() {
                                     AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
                                         Friends(
                                             people = remember(allGroups) {
-                                                allGroups.people().filter { it.id != me?.id }
+                                                allGroups.people().sortedByDescending { it.id == me?.id }
                                             },
                                             onLongClick = {
                                                 nav.appNavigate(AppNav.Profile(it.id!!))

@@ -75,6 +75,10 @@ object Strings {
         "Delete",
         "Xóa bỏ"
     )
+    val edit = Translation(
+        "Edit",
+        "Chỉnh sửa"
+    )
     val remove = Translation(
         "Remove",
         "Bỏ"

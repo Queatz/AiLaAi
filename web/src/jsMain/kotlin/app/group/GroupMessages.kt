@@ -120,7 +120,11 @@ fun GroupMessages(group: GroupExtended) {
                     bot = group.bots?.find { bot -> bot.id == it.bot },
                     myMember = myMember,
                     bots = group.bots ?: emptyList()
-                )
+                ) {
+                    scope.launch {
+                        reloadMessages()
+                    }
+                }
             }
         }
     }
