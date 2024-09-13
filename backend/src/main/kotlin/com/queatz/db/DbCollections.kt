@@ -167,5 +167,12 @@ fun collections() = listOf(
     GroupBotData::class.db {
         ensurePersistentIndex(listOf(GroupBotData::groupBot.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(GroupBotData::webhook.name), PersistentIndexOptions())
+    },
+    Status::class.db {
+        ensurePersistentIndex(listOf(Status::name.name), PersistentIndexOptions())
+    },
+    PersonStatus::class.db {
+        ensurePersistentIndex(listOf(PersonStatus::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(PersonStatus::status.name), PersistentIndexOptions())
     }
 )

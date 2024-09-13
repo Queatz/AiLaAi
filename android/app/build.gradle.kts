@@ -120,6 +120,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat-resources:1.7.0")
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
     implementation("dev.shreyaspatil:capturable:2.1.0")
+    implementation("com.github.skydoves:colorpicker-compose:1.1.2")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")

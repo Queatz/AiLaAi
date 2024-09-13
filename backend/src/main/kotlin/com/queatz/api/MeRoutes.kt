@@ -1,15 +1,40 @@
 package com.queatz.api
 
-import com.queatz.db.*
+import com.queatz.db.Card
+import com.queatz.db.Device
+import com.queatz.db.Invite
+import com.queatz.db.Person
+import com.queatz.db.PersonStatus
+import com.queatz.db.Profile
+import com.queatz.db.Transfer
+import com.queatz.db.allCardsOfCard
+import com.queatz.db.cardsOfPerson
+import com.queatz.db.collaborationsOfPerson
+import com.queatz.db.countStories
+import com.queatz.db.hiddenGroups
+import com.queatz.db.presenceOfPerson
+import com.queatz.db.profile
+import com.queatz.db.profileByUrl
+import com.queatz.db.recentStatuses
+import com.queatz.db.savedCardsOfPerson
+import com.queatz.db.storiesOfPerson
+import com.queatz.db.transferOfPerson
+import com.queatz.db.updateDevice
+import com.queatz.db.updateEquippedCards
 import com.queatz.notBlank
-import com.queatz.plugins.*
+import com.queatz.plugins.db
+import com.queatz.plugins.defaultNearbyMaxDistanceInMeters
+import com.queatz.plugins.me
+import com.queatz.plugins.respond
 import com.queatz.receiveFile
 import com.queatz.scatterGeo
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
+import io.ktor.server.request.receive
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import kotlinx.datetime.Clock
 import kotlin.random.Random
 
@@ -67,6 +92,27 @@ fun Route.meRoutes() {
                         code = (1..16).token()
                     )
                 )
+            }
+        }
+
+        post("/me/status") {
+            respond {
+                val me = me
+                val newStatus = call.receive<PersonStatus>()
+
+                db.insert(
+                    PersonStatus(
+                        note = newStatus.note?.trim()?.notBlank,
+                        person = me.id!!,
+                        status = newStatus.status
+                    )
+                )
+            }
+        }
+
+        get("/me/statuses") {
+            respond {
+                db.recentStatuses(me.id!!)
             }
         }
 

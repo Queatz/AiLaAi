@@ -16,9 +16,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -38,6 +42,7 @@ fun SearchField(
     singleLine: Boolean = true,
     useMaxWidth: Boolean = true,
     useMaxHeight: Boolean = false,
+    autoFocus: Boolean = false,
     icon: ImageVector? = null,
     imeAction: ImeAction = if (singleLine) ImeAction.Search else ImeAction.Default,
     onClear: () -> Unit = { onValueChange("") },
@@ -45,6 +50,14 @@ fun SearchField(
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current!!
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+        }
+    }
+
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(),
@@ -54,7 +67,7 @@ fun SearchField(
             .fillMaxWidth()
     ) {
         OutlinedTextField(
-            value,
+            value = value,
             onValueChange = onValueChange,
             placeholder = {
                 Text(
@@ -106,6 +119,7 @@ fun SearchField(
                 .then(if (useMaxHeight) Modifier.heightIn(max = 128.dp) else Modifier)
                 .clip(MaterialTheme.shapes.large)
                 .background(MaterialTheme.colorScheme.surface)
+                .focusRequester(focusRequester)
         )
     }
 }

@@ -1,0 +1,74 @@
+package com.queatz.ailaai.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.ui.theme.pad
+
+@Composable
+fun Status(
+    text: String? = null,
+    color: Color? = null,
+    block: @Composable () -> Unit
+) {
+    Box {
+        block()
+
+        Box(
+            modifier = Modifier.matchParentSize()
+        ) {
+            text?.notBlank?.let { text ->
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .offset(y = -1.pad)
+                        .align(Alignment.TopCenter)
+                        .shadow(3.dp, MaterialTheme.shapes.large)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.surfaceBright)
+                        .padding(vertical = .25f.pad, horizontal = .5f.pad)
+                        .zIndex(1f)
+                )
+            }
+
+            color?.let { color ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(.25f.pad)
+                        .size(12.dp)
+                        .shadow(3.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(color)
+                        .zIndex(1f)
+                )
+            }
+        }
+    }
+}

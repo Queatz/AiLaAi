@@ -16,6 +16,21 @@ class Person(
 ) : Model()
 
 @Serializable
+data class PersonStatus(
+    val person: String? = null,
+    val status: String? = null,
+    val note: String? = null,
+
+    val statusInfo: Status? = null
+) : Model()
+
+@Serializable
+data class Status(
+    val name: String? = null,
+    val color: String? = null
+) : Model()
+
+@Serializable
 class Settings(
     var person: String? = null,
     var language: String? = null

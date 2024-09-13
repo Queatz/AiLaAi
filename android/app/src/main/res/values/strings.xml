@@ -738,6 +738,10 @@
     <string name="offline_notes">Offline notes</string>
     <string name="discard_offline_note">Discard offline note?</string>
     <string name="speak">Speak</string>
+    <string name="set_status">Set status</string>
+    <string name="choose">Choose</string>
+    <string name="status">Status</string>
+    <string name="clear_status">Clear status</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

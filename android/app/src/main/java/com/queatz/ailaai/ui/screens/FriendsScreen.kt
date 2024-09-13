@@ -42,11 +42,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.createGroup
 import app.ailaai.api.exploreGroups
+import app.ailaai.api.friendStatuses
 import app.ailaai.api.groups
 import app.ailaai.api.groupsWith
 import app.ailaai.api.hiddenGroups
 import app.ailaai.api.myGeo
 import app.ailaai.api.people
+import app.ailaai.api.recentStatuses
 import app.ailaai.api.removeMember
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
@@ -91,6 +93,7 @@ import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.EditStatusDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
@@ -98,6 +101,8 @@ import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
+import com.queatz.db.PersonStatus
+import com.queatz.db.Status
 import com.queatz.db.people
 import com.queatz.push.GroupPushData
 import kotlinx.coroutines.CancellationException
@@ -146,6 +151,9 @@ fun FriendsScreen() {
     }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var myStatusDialog by rememberStateOf(false)
+    var statuses by rememberStateOf(emptyMap<String, PersonStatus?>())
+    var recentStatuses by rememberStateOf(emptyList<Status>())
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -158,6 +166,19 @@ fun FriendsScreen() {
         categories = allGroups
             .flatMap { it.group?.categories ?: emptyList() }
             .sortedDistinct()
+    }
+
+    suspend fun reloadStatuses() {
+        api.friendStatuses {
+            statuses = it.groupBy { it.person!! }.mapValues { it.value.firstOrNull() }
+        }
+        api.recentStatuses {
+            recentStatuses = it
+        }
+    }
+
+    LaunchedEffect(allGroups) {
+        reloadStatuses()
     }
 
     fun update() {
@@ -507,14 +528,26 @@ fun FriendsScreen() {
                                             people = remember(allGroups) {
                                                 allGroups.people().sortedByDescending { it.id == me?.id }
                                             },
+                                            statuses = statuses,
+                                            title = {
+                                                if (it.id == me?.id) {
+                                                    context.getString(R.string.set_status)
+                                                } else {
+                                                    null
+                                                }
+                                            },
                                             onLongClick = {
                                                 nav.appNavigate(AppNav.Profile(it.id!!))
                                             }
                                         ) { person ->
-                                            scope.launch {
-                                                api.groupsWith(listOf(me!!.id!!, person.id!!)) {
-                                                    showSharedGroupsDialogPerson = person
-                                                    showSharedGroupsDialog = it
+                                            if (person.id == me?.id) {
+                                                myStatusDialog = true
+                                            } else {
+                                                scope.launch {
+                                                    api.groupsWith(listOf(me!!.id!!, person.id!!)) {
+                                                        showSharedGroupsDialogPerson = person
+                                                        showSharedGroupsDialog = it
+                                                    }
                                                 }
                                             }
                                         }
@@ -556,8 +589,8 @@ fun FriendsScreen() {
                         }
                 ) {
                     SearchContent(
-                        locationSelector,
-                        isLoading,
+                        locationSelector = locationSelector,
+                        isLoading = isLoading,
                         categories = categories,
                         category = selectedCategory
                     ) {
@@ -641,6 +674,19 @@ fun FriendsScreen() {
             },
             omit = { it.id == me?.id }
         )
+    }
+
+    if (myStatusDialog) {
+        EditStatusDialog(
+            onDismissRequest = { myStatusDialog = false },
+            initialStatus = statuses[me!!.id!!],
+            recentStatuses = recentStatuses
+        ) {
+            myStatusDialog = false
+            scope.launch {
+                reloadStatuses()
+            }
+        }
     }
 }
 
