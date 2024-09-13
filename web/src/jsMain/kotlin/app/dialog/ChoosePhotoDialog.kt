@@ -110,6 +110,7 @@ private suspend fun choosePhotoDialog(
     onAiStyle: (String?) -> Unit,
     onFile: (file: File) -> Unit
 ): String? {
+    // todo: use inputWithListDialog
     val result = inputDialog(
         title = null,
         placeholder = application.appString { describePhoto },

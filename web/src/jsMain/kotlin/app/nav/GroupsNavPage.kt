@@ -15,10 +15,15 @@ import app.ailaai.api.createGroup
 import app.ailaai.api.friendStatuses
 import app.ailaai.api.group
 import app.ailaai.api.groups
+import app.ailaai.api.myStatus
+import app.ailaai.api.recentStatuses
 import app.ailaai.api.updateGroup
 import app.components.Spacer
 import app.dialog.dialog
+import app.dialog.editStatusDialog
 import app.dialog.inputDialog
+import app.dialog.inputWithListDialog
+import app.dialog.personStatusDialog
 import app.group.GroupItem
 import app.menu.Menu
 import appString
@@ -29,6 +34,7 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
 import com.queatz.db.PersonStatus
+import com.queatz.db.Status
 import com.queatz.db.people
 import components.IconButton
 import components.Loading
@@ -135,6 +141,8 @@ fun GroupsNavPage(
 
     var statuses by remember { mutableStateOf(emptyMap<String, PersonStatus?>()) }
 
+    var recentStatuses by remember { mutableStateOf(emptyList<Status>()) }
+
     LaunchedEffect(selected) {
         searchText = ""
         showSearch = false
@@ -188,6 +196,12 @@ fun GroupsNavPage(
         }
     }
 
+    LaunchedEffect(groups) {
+        api.recentStatuses {
+            recentStatuses = it
+        }
+    }
+
     // todo remove selectedGroup
     LaunchedEffect(selected) {
         push.events.collectLatest {
@@ -217,78 +231,25 @@ fun GroupsNavPage(
     fun onFriendClick(person: Person, sendMessage: Boolean = false) {
         val status = statuses[person.id!!]
 
-        if (status == null || sendMessage) {
-            // todo: send message instead
-            window.open("/profile/${person.id}", "_blank")
-        } else {
+        if (person.id == me?.id) {
             scope.launch {
-                val result = dialog(
-                    title = null,
-                    confirmButton = application.appString { profile },
-                    cancelButton = application.appString { close },
+                editStatusDialog(
+                    statuses = recentStatuses,
+                    initialStatus = status
                 ) {
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            flexDirection(FlexDirection.Column)
-                            alignItems(AlignItems.Center)
-                        }
-                    }) {
-                        ProfilePhoto(person = person, size = 54.px)
-                        Div({
-                            style {
-                                fontSize(18.px)
-                                paddingTop(.5.r)
-                            }
-                        }) {
-                            Text(person.name ?: application.appString { someone })
-                        }
-                        status.statusInfo?.let { status ->
-                            Div({
-                                style {
-                                    display(DisplayStyle.Flex)
-                                    gap(.25.r)
-                                    alignItems(AlignItems.Center)
-                                    fontSize(12.px)
-                                }
-                            }) {
-                                Div({
-                                    classes(Styles.personItemStatusIndicator)
-
-                                    style {
-                                        backgroundColor(Color(status.color ?: "#ffffff"))
-                                    }
-                                }) {}
-                                Span {
-                                    Text(status.name!!)
-                                }
-                            }
-                        }
-                        status.note?.let { note ->
-                            Div({
-                                style {
-                                    paddingTop(1.r)
-                                    fontSize(20.px)
-                                }
-                            }) {
-                                Text(note)
-                            }
-                        }
-                        Div({
-                            style {
-                                opacity(.5f)
-                                paddingBottom(1.r)
-                            }
-                        }) {
-                            Text(
-                                formatDistanceToNow(
-                                    Date(status.createdAt!!.toEpochMilliseconds()),
-                                    js("{ addSuffix: true }")
-                                )
-                            )
+                    scope.launch {
+                        api.myStatus(it) {
+                            reload(emit = false)
                         }
                     }
                 }
+            }
+        } else if (status == null || sendMessage) {
+            // todo: send message instead
+            window.open("/profile/${person.id}", "_blank")
+        } else  {
+            scope.launch {
+                val result = personStatusDialog(person, status)
 
                 if (result == true) {
                     onFriendClick(person, sendMessage = true)
