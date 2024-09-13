@@ -111,6 +111,7 @@ import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.LifecycleEffect
+import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.StartEffect
 import com.queatz.ailaai.helpers.StopEffect
 import com.queatz.ailaai.item.InventoryScreen
@@ -325,7 +326,6 @@ class MainActivity : AppCompatActivity() {
                     var showSignedOut by rememberStateOf(false)
                     val snackbarHostState = remember { SnackbarHostState() }
                     val scope = rememberCoroutineScope()
-                    val cantConnectString = stringResource(R.string.cant_connect)
                     val downloadString = stringResource(R.string.download)
                     val seeWhatsNewString = stringResource(R.string.see_whats_new)
                     var appUi by rememberStateOf(AppUi())
@@ -462,6 +462,10 @@ class MainActivity : AppCompatActivity() {
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                         }
+                    }
+
+                    ResumeEffect {
+                        connectivity.refresh()
                     }
 
                     if (showSignedOut) {
@@ -906,11 +910,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        connectivity.refresh()
     }
 
     override fun onUserInteraction() {

@@ -253,11 +253,9 @@ fun GroupsNavPage(
                                 }
                             }) {
                                 Div({
+                                    classes(Styles.personItemStatusIndicator)
+
                                     style {
-                                        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
-                                        width(12.px)
-                                        height(12.px)
-                                        borderRadius(6.px)
                                         backgroundColor(Color(status.color ?: "#ffffff"))
                                     }
                                 }) {}
@@ -440,14 +438,12 @@ fun GroupsNavPage(
                                                 // Status indicator
                                                 status.statusInfo?.let { status ->
                                                     Div({
+                                                        classes(Styles.personItemStatusIndicator)
+
                                                         style {
                                                             position(Absolute)
                                                             bottom(.125.r)
                                                             right(.125.r)
-                                                            width(12.px)
-                                                            height(12.px)
-                                                            borderRadius(6.px)
-                                                            property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
                                                             backgroundColor(Color(status.color ?: "#ffffff"))
                                                         }
                                                     }) {}

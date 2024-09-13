@@ -69,6 +69,7 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.rgba
+import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.textDecoration
 import org.jetbrains.compose.web.css.times
@@ -844,6 +845,13 @@ object Styles : StyleSheet() {
         dark(self) {
             backgroundColor(Color.black)
         }
+    }
+
+    val personItemStatusIndicator by style {
+        width(12.px)
+        height(12.px)
+        borderRadius(6.px)
+        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125), rgba(255, 255, 255, 0.5) 0px 2px 4px inset")
     }
 }
 
