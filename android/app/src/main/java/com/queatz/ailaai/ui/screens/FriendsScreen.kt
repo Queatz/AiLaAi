@@ -94,6 +94,7 @@ import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.EditStatusDialog
+import com.queatz.ailaai.ui.dialogs.PersonStatusDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
@@ -154,6 +155,7 @@ fun FriendsScreen() {
     var myStatusDialog by rememberStateOf(false)
     var statuses by rememberStateOf(emptyMap<String, PersonStatus?>())
     var recentStatuses by rememberStateOf(emptyList<Status>())
+    var showFriendStatusDialog by rememberStateOf<Pair<Person, PersonStatus?>?>(null)
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -309,7 +311,37 @@ fun FriendsScreen() {
         }
     }
 
+    fun onFriendClick(person: Person, sendMessage: Boolean = false) {
+        val status = statuses[person.id!!]
+
+        if (status != null && !sendMessage) {
+            showFriendStatusDialog = person to status
+        } else {
+            scope.launch {
+                api.groupsWith(listOf(me!!.id!!, person.id!!)) {
+                    showSharedGroupsDialogPerson = person
+                    showSharedGroupsDialog = it
+                }
+            }
+        }
+    }
+
     val tabs = listOf(MainTab.Friends, MainTab.Local)
+
+    showFriendStatusDialog?.let { (person, status) ->
+        PersonStatusDialog(
+            onDismissRequest = { showFriendStatusDialog = null },
+            person = person,
+            personStatus = status,
+            onMessageClick = {
+                onFriendClick(person, sendMessage = true)
+                showFriendStatusDialog = null
+            }
+        ) {
+            showFriendStatusDialog = null
+            nav.appNavigate(AppNav.Profile(person.id!!))
+        }
+    }
 
     if (showSharedGroupsDialog.isNotEmpty()) {
         ChooseGroupDialog(
@@ -543,12 +575,7 @@ fun FriendsScreen() {
                                             if (person.id == me?.id) {
                                                 myStatusDialog = true
                                             } else {
-                                                scope.launch {
-                                                    api.groupsWith(listOf(me!!.id!!, person.id!!)) {
-                                                        showSharedGroupsDialogPerson = person
-                                                        showSharedGroupsDialog = it
-                                                    }
-                                                }
+                                                onFriendClick(person)
                                             }
                                         }
                                     }

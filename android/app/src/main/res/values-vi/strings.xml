@@ -729,4 +729,5 @@
     <string name="offline_notes">Ghi chú ngoại tuyến</string>
     <string name="discard_offline_note">Xóa ghi chú ngoại tuyến?</string>
     <string name="speak">Nói ra</string>
+    <string name="clear_status">Xóa trạng thái</string>
 </resources>
