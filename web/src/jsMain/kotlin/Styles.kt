@@ -13,6 +13,7 @@ import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.StyleSheet
 import org.jetbrains.compose.web.css.alignContent
@@ -48,6 +49,7 @@ import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
+import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.media
 import org.jetbrains.compose.web.css.mediaMaxWidth
 import org.jetbrains.compose.web.css.mediaMinWidth
@@ -70,6 +72,7 @@ import org.jetbrains.compose.web.css.rgba
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.textDecoration
 import org.jetbrains.compose.web.css.times
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.transitions
 import org.jetbrains.compose.web.css.vh
@@ -822,6 +825,25 @@ object Styles : StyleSheet() {
         gap(.5.r)
         textAlign("center")
         cursor("pointer")
+    }
+
+    val personItemStatus by style {
+        position(Absolute)
+        top(0.r)
+        borderRadius(1.r)
+        padding(.25.r, .5.r)
+        maxWidth(100.percent)
+        property("margin-left", "auto")
+        property("margin-right", "auto")
+        backgroundColor(Color.white)
+        ellipsize()
+        fontSize(10.px)
+        boxSizing("border-box")
+        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+
+        dark(self) {
+            backgroundColor(Color.black)
+        }
     }
 }
 

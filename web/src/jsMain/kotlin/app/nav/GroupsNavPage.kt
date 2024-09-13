@@ -1,13 +1,23 @@
 package app.nav
 
 import IndicatorSource
-import androidx.compose.runtime.*
+import Styles
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.createGroup
+import app.ailaai.api.friendStatuses
 import app.ailaai.api.group
 import app.ailaai.api.groups
 import app.ailaai.api.updateGroup
 import app.components.Spacer
+import app.dialog.dialog
 import app.dialog.inputDialog
 import app.group.GroupItem
 import app.menu.Menu
@@ -17,6 +27,8 @@ import application
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
+import com.queatz.db.Person
+import com.queatz.db.PersonStatus
 import com.queatz.db.people
 import components.IconButton
 import components.Loading
@@ -35,8 +47,39 @@ import lib.formatDistanceToNowStrict
 import notBlank
 import opensavvy.compose.lazy.LazyColumn
 import opensavvy.compose.lazy.LazyRow
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.Position.Companion.Absolute
+import org.jetbrains.compose.web.css.Position.Companion.Relative
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.bottom
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.div
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflowX
+import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.paddingBottom
+import org.jetbrains.compose.web.css.paddingTop
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -58,7 +101,7 @@ fun GroupsNavPage(
     groupUpdates: Flow<Unit>,
     selected: GroupNav,
     onSelected: (GroupNav) -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
@@ -89,6 +132,8 @@ fun GroupsNavPage(
     var selectedCategory by remember {
         mutableStateOf<String?>(null)
     }
+
+    var statuses by remember { mutableStateOf(emptyMap<String, PersonStatus?>()) }
 
     LaunchedEffect(selected) {
         searchText = ""
@@ -137,6 +182,12 @@ fun GroupsNavPage(
         joins.reload()
     }
 
+    LaunchedEffect(groups) {
+        api.friendStatuses {
+            statuses = it.groupBy { it.person!! }.mapValues { it.value.firstOrNull() }
+        }
+    }
+
     // todo remove selectedGroup
     LaunchedEffect(selected) {
         push.events.collectLatest {
@@ -160,6 +211,91 @@ fun GroupsNavPage(
     LaunchedEffect(selected) {
         groupUpdates.collectLatest {
             reload()
+        }
+    }
+
+    fun onFriendClick(person: Person, sendMessage: Boolean = false) {
+        val status = statuses[person.id!!]
+
+        if (status == null || sendMessage) {
+            // todo: send message instead
+            window.open("/profile/${person.id}", "_blank")
+        } else {
+            scope.launch {
+                val result = dialog(
+                    title = null,
+                    confirmButton = application.appString { profile },
+                    cancelButton = application.appString { close },
+                ) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            alignItems(AlignItems.Center)
+                        }
+                    }) {
+                        ProfilePhoto(person = person, size = 54.px)
+                        Div({
+                            style {
+                                fontSize(18.px)
+                                paddingTop(.5.r)
+                            }
+                        }) {
+                            Text(person.name ?: application.appString { someone })
+                        }
+                        status.statusInfo?.let { status ->
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    gap(.25.r)
+                                    alignItems(AlignItems.Center)
+                                    fontSize(12.px)
+                                }
+                            }) {
+                                Div({
+                                    style {
+                                        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+                                        width(12.px)
+                                        height(12.px)
+                                        borderRadius(6.px)
+                                        backgroundColor(Color(status.color ?: "#ffffff"))
+                                    }
+                                }) {}
+                                Span {
+                                    Text(status.name!!)
+                                }
+                            }
+                        }
+                        status.note?.let { note ->
+                            Div({
+                                style {
+                                    paddingTop(1.r)
+                                    fontSize(20.px)
+                                }
+                            }) {
+                                Text(note)
+                            }
+                        }
+                        Div({
+                            style {
+                                opacity(.5f)
+                                paddingBottom(1.r)
+                            }
+                        }) {
+                            Text(
+                                formatDistanceToNow(
+                                    Date(status.createdAt!!.toEpochMilliseconds()),
+                                    js("{ addSuffix: true }")
+                                )
+                            )
+                        }
+                    }
+                }
+
+                if (result == true) {
+                    onFriendClick(person, sendMessage = true)
+                }
+            }
         }
     }
 
@@ -263,9 +399,7 @@ fun GroupsNavPage(
                     appText { noGroups }
                 }
             } else {
-                val people = remember(shownGroups) {
-                    shownGroups.people().filter { it.id != me?.id }
-                }
+                val people = remember(shownGroups) { shownGroups.people() }
 
                 LazyColumn {
                     if (!showSearch) {
@@ -284,10 +418,42 @@ fun GroupsNavPage(
                                         title(person.name.orEmpty())
 
                                         onClick {
-                                            window.open("/profile/${person.id}", "_blank")
+                                            onFriendClick(person)
                                         }
                                     }) {
-                                        ProfilePhoto(person, size = 54.px)
+                                        Div({
+                                            style {
+                                                position(Relative)
+                                            }
+                                        }) {
+                                            ProfilePhoto(person = person, size = 54.px)
+                                            statuses[person.id!!]?.let { status ->
+                                                // Status note
+                                                status.note?.let { note ->
+                                                    Div({
+                                                        classes(Styles.personItemStatus)
+                                                    }) {
+                                                        Text(note)
+                                                    }
+                                                }
+
+                                                // Status indicator
+                                                status.statusInfo?.let { status ->
+                                                    Div({
+                                                        style {
+                                                            position(Absolute)
+                                                            bottom(.125.r)
+                                                            right(.125.r)
+                                                            width(12.px)
+                                                            height(12.px)
+                                                            borderRadius(6.px)
+                                                            property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+                                                            backgroundColor(Color(status.color ?: "#ffffff"))
+                                                        }
+                                                    }) {}
+                                                }
+                                            }
+                                        }
                                         Div({
                                             style {
                                                 opacity(.5f)
@@ -296,7 +462,15 @@ fun GroupsNavPage(
                                         }) {
                                             person.seen?.let {
                                                 Text(
-                                                    if (differenceInMinutes(Date(), it.toJSDate(), js("{ roundingMethod: \"floor\" }")) < 1) {
+                                                    // todo: translate
+                                                    if (person.id == me?.id) {
+                                                        "Set status"
+                                                    } else if (differenceInMinutes(
+                                                            Date(),
+                                                            it.toJSDate(),
+                                                            js("{ roundingMethod: \"floor\" }")
+                                                        ) < 1
+                                                    ) {
                                                         appString { now }
                                                     } else {
                                                         formatDistanceToNowStrict(
