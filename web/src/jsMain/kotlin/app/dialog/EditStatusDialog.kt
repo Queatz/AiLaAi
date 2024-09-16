@@ -34,7 +34,11 @@ suspend fun editStatusDialog(
             selected.value?.id == it.id
         },
         onSelect = {
-            selected.value = it
+            if (selected.value?.id == it.id) {
+                selected.value = null
+            } else {
+                selected.value = it
+            }
         },
         itemContent = {
             Div({

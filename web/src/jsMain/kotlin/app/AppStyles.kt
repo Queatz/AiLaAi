@@ -264,7 +264,6 @@ object AppStyles : StyleSheet() {
     }
 
     val groupItemOnSurface by style {
-
     }
 
     val groupItemOnBackground by style {
@@ -290,7 +289,7 @@ object AppStyles : StyleSheet() {
         width(100.percent)
 
         desktop(self) {
-            child(self, className(groupItemCard)) style  {
+            child(self, className(groupItemCard)) style {
                 marginRight(1.r)
                 marginBottom(1.r)
             }
@@ -355,14 +354,40 @@ object AppStyles : StyleSheet() {
             "background-color" {
                 duration = 100.ms
             }
+            "border-radius" {
+                duration = 100.ms
+            }
         }
     }
 
     val groupItemSelected by style {
         backgroundColor(Styles.colors.background)
 
+        self + className(groupItemOnSurface) style {
+            backgroundColor(Color("rgb(255 255 255 / 50%)"))
+        }
+
         dark(self) {
             backgroundColor(Color.black)
+
+            self + className(groupItemOnSurface) style {
+                backgroundColor(Color.black)
+            }
+        }
+    }
+
+    val groupItemSelectedPrimary by style {
+        backgroundColor(Styles.colors.primary)
+        color(Color.white)
+
+        self + className(groupItem) + hover style {
+            backgroundColor(Styles.colors.primary)
+        }
+
+        dark(self) {
+            self + className(groupItem) + hover style {
+                backgroundColor(Styles.colors.primary)
+            }
         }
     }
 

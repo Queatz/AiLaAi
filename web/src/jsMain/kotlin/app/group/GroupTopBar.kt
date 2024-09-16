@@ -506,8 +506,8 @@ fun GroupTopBar(
             if (myMember != null) {
                 item(appString { invite }) {
                     scope.launch {
-                        friendsDialog(group.members?.mapNotNull { it.person?.id } ?: emptyList()) {
-                            addMember(it)
+                        friendsDialog(omit = group.members?.mapNotNull { it.person?.id } ?: emptyList()) {
+                            it.forEach { addMember(it) }
                         }
                     }
                 }

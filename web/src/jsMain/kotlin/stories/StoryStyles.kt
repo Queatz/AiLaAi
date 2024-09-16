@@ -78,8 +78,8 @@ object StoryStyles : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         position(Position.Relative)
-        width(100.percent)
-        maxWidth(32.r)
+        maxWidth(100.percent)
+        width(24.r)
         gap(1.r)
 
         child(self, className(AppStyles.groupItem)) style {

@@ -18,14 +18,27 @@ import application
 import com.queatz.db.Bot
 import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
-import components.Icon
 import components.IconButton
 import components.ProfilePhoto
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import notEmpty
-import org.jetbrains.compose.web.attributes.AutoComplete.Companion.on
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -40,6 +53,7 @@ fun MessageItem(
     myMember: MemberAndPerson?,
     bots: List<Bot>,
     onReply: () -> Unit,
+    onReplyInNewGroup: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -90,6 +104,9 @@ fun MessageItem(
             Menu({ messageMenuTarget = null }, messageMenuTarget!!) {
                 item(appString { reply }) {
                     onReply()
+                }
+                item(appString { replyInNewGroup }) {
+                    onReplyInNewGroup()
                 }
                 if (message.member == myMember?.member?.id || myMember?.member?.host == true) {
                     item(appString { delete }) {

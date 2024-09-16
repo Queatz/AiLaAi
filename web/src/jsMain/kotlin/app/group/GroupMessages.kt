@@ -1,12 +1,16 @@
 import androidx.compose.runtime.*
+import app.AppNavigation
 import app.AppStyles
 import app.ailaai.api.messages
 import app.ailaai.api.messagesBefore
+import app.appNav
 import app.components.LoadMore
 import app.components.LoadMoreState
+import app.dialog.replyInNewGroupDialog
 import app.group.GroupMessageBar
 import app.group.JoinGroupLayout
 import app.messaages.MessageItem
+import app.messaages.preview
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
 import components.Loading
@@ -17,6 +21,7 @@ import org.jetbrains.compose.web.dom.Div
 
 @Composable
 fun GroupMessages(group: GroupExtended) {
+    val nav = appNav
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
     val myMember = group.members?.find { it.person?.id == me!!.id }
@@ -117,6 +122,7 @@ fun GroupMessages(group: GroupExtended) {
             }
         ) {
             messages.forEachIndexed { index, message ->
+                val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { replyInNewGroup }
                 MessageItem(
                     message = message,
                     previousMessage = if (index < messages.lastIndex) messages[index + 1] else null,
@@ -126,6 +132,13 @@ fun GroupMessages(group: GroupExtended) {
                     bots = group.bots ?: emptyList(),
                     onReply = {
                         replyMessage = message
+                    },
+                    onReplyInNewGroup = {
+                        scope.launch {
+                            replyInNewGroupDialog(title, scope, group, message) {
+                                nav.navigate(AppNavigation.Group(it.id!!))
+                            }
+                        }
                     }
                 ) {
                     scope.launch {

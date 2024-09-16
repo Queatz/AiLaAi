@@ -806,6 +806,10 @@ object Strings {
         "Reply",
         "Trả lời"
     )
+    val replyInNewGroup = Translation(
+        "Reply in new group",
+        "Trả lời trong nhóm mới"
+    )
     val inlineReply = Translation(
         "reply",
         "câu trả lời"
