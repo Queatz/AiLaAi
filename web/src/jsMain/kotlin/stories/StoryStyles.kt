@@ -73,14 +73,21 @@ object StoryStyles : StyleSheet() {
         }
     }
 
+    val contentGroupsInMessage by style { }
+
     val contentGroups by style {
         boxSizing("border-box")
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         position(Position.Relative)
-        maxWidth(100.percent)
-        width(24.r)
+        width(100.percent)
+        maxWidth(32.r)
         gap(1.r)
+
+        self + className(contentGroupsInMessage) style {
+            maxWidth(100.percent)
+            width(24.r)
+        }
 
         child(self, className(AppStyles.groupItem)) style {
             self style {

@@ -26,6 +26,7 @@ class Ai {
 
     companion object {
         val styles = listOf(
+            "Flux (HD)" to ":flux",
             "Dreaming (HD)" to "dreamshaperxl_lightning_1024px",
             "Starlight (HD)" to "envy_starlight_xl_01_lightning_1024px",
             "Juggernaut 9 (HD)" to "juggernautxl_9_lightning_1024px",
@@ -60,6 +61,7 @@ class Ai {
         private const val endpoint = "https://api.dezgo.com/text2image"
         private const val endpointXl = "https://api.dezgo.com/text2image_sdxl"
         private const val endpointXlLightning = "https://api.dezgo.com/text2image_sdxl_lightning"
+        private const val endpointFlux = "https://api.dezgo.com/text2image_flux"
         private const val endpointRemoveBackground = "https://api.dezgo.com/remove-background"
         private const val height = 416
         private const val width = 608
@@ -88,38 +90,61 @@ class Ai {
     ): String {
         val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.random()
 
+        val isFlux = model == ":flux"
         val isXlLightning = model.endsWith("_lightning_1024px")
-        val isXl = model.endsWith("_1024px")
+        val isXl = model.endsWith("_1024px") || isFlux
 
         val height = if (isXl) heightXl else height
         val width = if (isXl) widthXl else width
 
-        val body = json.encodeToString(
-            DezgoPrompt(
-                prompt = prompts.joinToString { it.text },
-                negativePrompt = negativePrompt,
-                model = model,
-                steps = 25.takeIf { !isXlLightning },
-                refiner = true.takeIf { !isXlLightning },
-                guidance = if (isXlLightning) 2f else 7f,
-                height = if (aspect < 1.0) width else height,
-                width = if (aspect < 1.0) height else width,
-                transparentBackground = if (isXl) transparentBackground else null,
-                format = if (transparentBackground) "png" else "jpg"
-            )
-        )
+        val body = when {
+            isFlux -> {
+                json.encodeToString(
+                    DezgoFluxPrompt(
+                        prompt = prompts.joinToString { it.text },
+                        height = if (aspect < 1.0) width else height,
+                        width = if (aspect < 1.0) height else width,
+                        transparentBackground = transparentBackground,
+                        format = if (transparentBackground) "png" else "jpg"
+                    )
+                )
+            }
+            else -> {
+                json.encodeToString(
+                    DezgoPrompt(
+                        prompt = prompts.joinToString { it.text },
+                        negativePrompt = negativePrompt,
+                        model = model,
+                        steps = 25.takeIf { !isXlLightning },
+                        refiner = true.takeIf { !isXlLightning },
+                        guidance = if (isXlLightning) 2f else 7f,
+                        height = if (aspect < 1.0) width else height,
+                        width = if (aspect < 1.0) height else width,
+                        transparentBackground = if (isXl) transparentBackground else null,
+                        format = if (transparentBackground) "png" else "jpg"
+                    )
+                )
+            }
+        }
 
         Logger.getAnonymousLogger().info("Sending text-to-image prompt: $body")
 
-        return http.post(if (isXlLightning) endpointXlLightning else if (isXl) endpointXl else endpoint) {
+        return http.post(
+            when {
+                isFlux -> endpointFlux
+                isXlLightning -> endpointXlLightning
+                isXl -> endpointXl
+                else -> endpoint
+            }
+        ) {
             header("X-Dezgo-Key", secrets.dezgo.key)
             accept(ContentType.Image.JPEG)
             contentType(ContentType.Application.Json.withCharset(UTF_8))
             setBody(body)
         }.body<ByteArray>().let {
             save("$prefix-$model", it).let { path ->
-                // Dezgo doesn't support transparent for non XL models out of the box
-                if (transparentBackground == true && !isXl) {
+                // Dezgo doesn't support transparent for non-XL models out of the box
+                if (transparentBackground && !isXl) {
                     runCatching {
                         removeBackground(File(".$path"))
                     }.onFailure {
@@ -177,6 +202,17 @@ class Ai {
         return "${folder.drop(1)}/$fileName"
     }
 }
+
+@Serializable
+data class DezgoFluxPrompt(
+    val prompt: String,
+    @SerialName("transparent_background")
+    val transparentBackground: Boolean? = null,
+    val height: Int,
+    val width: Int,
+    val steps: Int = 8,
+    val format: String = "jpg",
+)
 
 @Serializable
 data class DezgoPrompt(

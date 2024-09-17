@@ -176,7 +176,7 @@ fun StoryContents(
                             comments != null,
                             appString { loadingComments }
                         ) {
-                            StoryComments(comments!!, max = 3) {
+                            StoryComments(comments!!, max = 2) {
                                 reloadComments()
                             }
                         }

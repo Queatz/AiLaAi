@@ -109,7 +109,7 @@ fun LazyGridScope.commentsItem(
                             reloadComments()
                         }
                     },
-                    max = 3
+                    max = 2
                 )
             }
         }

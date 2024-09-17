@@ -59,7 +59,12 @@ import resize
 import toBytes
 
 @Composable
-fun GroupMessageBar(group: GroupExtended, replyMessage: Message?, clearReplyMessage: () -> Unit, reloadMessages: suspend () -> Unit) {
+fun GroupMessageBar(
+    group: GroupExtended,
+    replyMessage: Message?,
+    clearReplyMessage: () -> Unit,
+    reloadMessages: suspend () -> Unit,
+) {
     val scope = rememberCoroutineScope()
 
     var messageText by remember {

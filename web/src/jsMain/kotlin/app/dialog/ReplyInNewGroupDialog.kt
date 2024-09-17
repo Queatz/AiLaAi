@@ -42,7 +42,7 @@ suspend fun replyInNewGroupDialog(
         )
         scope.launch {
             api.createGroup(it.map { it.id!! }) {
-                api.updateGroup(it.id!!, Group(description = "$groupName / $title")) { newGroup ->
+                api.updateGroup(it.id!!, Group(name = "⮡ $title")) { newGroup ->
                     api.sendMessage(newGroup.id!!, message = Message(
                         attachment = json.encodeToString(GroupAttachment(group = group.group!!.id!!))
                     ))

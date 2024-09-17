@@ -279,7 +279,7 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
 
                 is GroupAttachment -> {
                     Div({
-                        classes(StoryStyles.contentGroups)
+                        classes(StoryStyles.contentGroups, StoryStyles.contentGroupsInMessage)
                     }) {
                         attachment.group?.let { groupId ->
                             var group by remember(groupId) {

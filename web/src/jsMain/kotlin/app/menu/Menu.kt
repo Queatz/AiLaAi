@@ -61,11 +61,21 @@ fun Menu(
     content: @Composable MenuScope.() -> Unit
 ) {
     var y by remember { mutableStateOf(0) }
+    var measured by remember { mutableStateOf(false) }
+
+    fun keepInFrame(element: HTMLElement): Int {
+        val distance = element.getBoundingClientRect().bottom - window.innerHeight
+        return distance.toInt().coerceAtLeast(0)
+    }
 
     Div({
         classes(AppStyles.menu)
 
         style {
+            if (!measured) {
+                opacity(0)
+            }
+
             target.let { it.left + it.width to it.top + (if (above) 0.0 else it.height) }
                 .let { (left, top) ->
                     top((top - y).px)
@@ -87,13 +97,19 @@ fun Menu(
 
             if (above) {
                 y = menuElement.clientHeight
+            } else {
+                y = keepInFrame(menuElement)
             }
 
             menuElement.onresize = {
                 if (above) {
                     y = menuElement.clientHeight
+                } else {
+                    y = keepInFrame(menuElement)
                 }
             }
+
+            measured = true
 
             val resizeListener = EventListener { onDismissRequest() }
             document.addEventListener("click", clickListener)
