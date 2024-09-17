@@ -243,7 +243,7 @@ fun GroupMessageBar(group: GroupExtended, replyMessage: Message?, clearReplyMess
                 }
             } else {
                 IconButton("send", appString { sendMessage }, styles = { marginLeft(1.r) }) {
-                    // todo
+                    sendMessage()
                 }
             }
         }
