@@ -3,7 +3,12 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -33,6 +38,7 @@ fun MessageItem(
     me: String?,
     onUpdated: () -> Unit,
     onReply: (Message) -> Unit,
+    onReplyInNewGroup: (Message) -> Unit,
     onShowPhoto: (String) -> Unit
 ) {
     var showTime by rememberStateOf(false)
@@ -108,6 +114,7 @@ fun MessageItem(
                 getBot = getBot,
                 getMessage = getMessage,
                 onReply = onReply,
+                onReplyInNewGroup = onReplyInNewGroup,
                 onUpdated = onUpdated,
                 onShowPhoto = onShowPhoto,
                 selected = message in selectedMessages,

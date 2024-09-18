@@ -1,6 +1,5 @@
 package app.dialog
 
-import Strings.groupName
 import api
 import app.ailaai.api.createGroup
 import app.ailaai.api.sendMessage
@@ -13,6 +12,7 @@ import com.queatz.db.Group
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
+import com.queatz.db.ReplyAttachment
 import json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,20 +34,22 @@ suspend fun replyInNewGroupDialog(
     multiple = true,
     confirmButton = application.appString { reply }
 ) {
-    if (it.isNotEmpty()) {
+    scope.launch {
         val groupName = group.name(
             someone = application.appString { someone },
             emptyGroup = application.appString { newGroup },
             omit = application.me.value?.id?.inList() ?: emptyList()
         )
-        scope.launch {
-            api.createGroup(it.map { it.id!! }) {
-                api.updateGroup(it.id!!, Group(name = "⮡ $title")) { newGroup ->
-                    api.sendMessage(newGroup.id!!, message = Message(
-                        attachment = json.encodeToString(GroupAttachment(group = group.group!!.id!!))
-                    ))
-                    onGroup(newGroup)
-                }
+
+        api.createGroup(it.map { it.id!! }) {
+            api.updateGroup(it.id!!, Group(name = "⮡ $title ($groupName)")) { newGroup ->
+                api.sendMessage(
+                    newGroup.id!!, message = Message(
+                        attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),
+                        attachments = json.encodeToString(GroupAttachment(group = group.group!!.id!!)).inList()
+                    )
+                )
+                onGroup(newGroup)
             }
         }
     }

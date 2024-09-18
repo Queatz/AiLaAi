@@ -730,4 +730,5 @@
     <string name="discard_offline_note">Xóa ghi chú ngoại tuyến?</string>
     <string name="speak">Nói ra</string>
     <string name="clear_status">Xóa trạng thái</string>
+    <string name="reply_in_new_group">Trả lời trong nhóm mới</string>
 </resources>

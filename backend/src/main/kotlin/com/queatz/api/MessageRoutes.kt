@@ -64,7 +64,7 @@ fun Route.messageRoutes() {
                     val isMember = member?.gone != true && member?.from == me.id!!.asId(Person::class)
 
                     // Todo, also check group owner(s), since they can delete the message
-                    if (isMember || db.member(me.id!!, member!!.to!!)?.host == true) {
+                    if (isMember || db.member(me.id!!, message.group!!)?.host == true) {
                         db.delete(message)
                         HttpStatusCode.NoContent
                     } else {

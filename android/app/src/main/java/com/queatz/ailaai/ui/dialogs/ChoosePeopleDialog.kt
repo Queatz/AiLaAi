@@ -40,7 +40,7 @@ fun ChoosePeopleDialog(
 
     if (people != null) {
         LaunchedEffect(Unit) {
-            shownPeople = people
+            shownPeople = people.filter { !omit(it) }
         }
     } else {
         LaunchedEffect(Unit) {

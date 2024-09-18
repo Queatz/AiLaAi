@@ -742,6 +742,7 @@
     <string name="choose">Choose</string>
     <string name="status">Status</string>
     <string name="clear_status">Clear status</string>
+    <string name="reply_in_new_group">Reply in new group</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

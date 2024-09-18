@@ -122,7 +122,7 @@ fun GroupMessages(group: GroupExtended) {
             }
         ) {
             messages.forEachIndexed { index, message ->
-                val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { replyInNewGroup }
+                val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { reply }
                 MessageItem(
                     message = message,
                     previousMessage = if (index < messages.lastIndex) messages[index + 1] else null,

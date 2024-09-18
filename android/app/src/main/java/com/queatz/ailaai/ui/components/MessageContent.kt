@@ -128,6 +128,7 @@ fun ColumnScope.MessageContent(
     getBot: (String) -> Bot?,
     getMessage: suspend (String) -> Message?,
     onReply: (Message) -> Unit,
+    onReplyInNewGroup: (Message) -> Unit,
     onUpdated: () -> Unit,
     onShowPhoto: (String) -> Unit,
     isReply: Boolean = false,
@@ -235,6 +236,10 @@ fun ColumnScope.MessageContent(
             menuItem(stringResource(R.string.reply)) {
                 onShowMessageDialog(false)
                 onReply(message)
+            }
+            menuItem(stringResource(R.string.reply_in_new_group)) {
+                onShowMessageDialog(false)
+                onReplyInNewGroup(message)
             }
             if (attachedPhotos?.isNotEmpty() == true && selectedBitmap != null) {
 //                item(stringResource(R.string.send)) {
@@ -523,6 +528,7 @@ fun ColumnScope.MessageContent(
                     getBot = getBot,
                     getMessage = getMessage,
                     onReply = onReply,
+                    onReplyInNewGroup = onReplyInNewGroup,
                     onUpdated = {}, // todo delete from reply
                     onShowPhoto = onShowPhoto,
                     isReply = true

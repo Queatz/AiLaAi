@@ -93,6 +93,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
 import app.ailaai.api.group
 import app.ailaai.api.message
@@ -122,6 +123,7 @@ import com.queatz.ailaai.extensions.formatFuture
 import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.groupUrl
 import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.nullIfBlank
@@ -179,6 +181,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.theme.theme_call
 import com.queatz.db.Card
 import com.queatz.db.Group
+import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupEditsConfig
 import com.queatz.db.GroupExtended
 import com.queatz.db.GroupMessagesConfig
@@ -246,6 +249,7 @@ fun GroupScreen(groupId: String) {
     var showSnoozeDialog by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var stageReply by remember { mutableStateOf<Message?>(null) }
+    var showReplyInNewGroupDialog by remember { mutableStateOf<Message?>(null) }
     var showDescription by remember { mutableStateOf(ui.getShowDescription(groupId)) }
     val focusRequester = remember { FocusRequester() }
     var hasOlderMessages by rememberStateOf(true)
@@ -401,6 +405,29 @@ fun GroupScreen(groupId: String) {
         }
     }
 
+    val someone = stringResource(R.string.someone)
+    val emptyGroup = stringResource(R.string.empty_group_name)
+
+    suspend fun replyInNewGroup(title: String, message: Message, people: List<Person>) {
+        val groupName = groupExtended?.name(
+            someone = someone,
+            emptyGroup = emptyGroup,
+            omit = me?.id?.inList().orEmpty()
+        ).orEmpty()
+
+        api.createGroup(people.map { it.id!! }) {
+            api.updateGroup(it.id!!, Group(name = "⮡ $title ($groupName)")) { newGroup ->
+                api.sendMessage(
+                    newGroup.id!!, message = Message(
+                        attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),
+                        attachments = json.encodeToString(GroupAttachment(group = groupExtended!!.group!!.id!!)).inList()
+                    )
+                )
+                nav.appNavigate(AppNav.Group(newGroup.id!!))
+            }
+        }
+    }
+
     var newCard by rememberStateOf<Card?>(null)
 
     if (newCard != null) {
@@ -417,7 +444,6 @@ fun GroupScreen(groupId: String) {
             }
         }
     }
-
 
     StartEffect {
         reloadMessages()
@@ -882,6 +908,9 @@ fun GroupScreen(groupId: String) {
                                 }
                             },
                             onReply = { stageReply = it },
+                            onReplyInNewGroup = {
+                                showReplyInNewGroupDialog = it
+                            },
                             onShowPhoto = { showPhoto = it }
                         )
                     }
@@ -2033,6 +2062,22 @@ fun GroupScreen(groupId: String) {
                         showAudioRationale = false
                     },
                     stringResource(R.string.permission_request)
+                )
+            }
+
+            showReplyInNewGroupDialog?.let { message ->
+                val title = message.text?.notBlank ?: message.attachmentText(context)?.let { "\"$it\"" } ?: stringResource(R.string.reply)
+                ChoosePeopleDialog(
+                    onDismissRequest = { showReplyInNewGroupDialog = null },
+                    title = title,
+                    confirmFormatter = { stringResource(R.string.reply) },
+                    people = groupExtended?.members?.mapNotNull { it.person }.orEmpty(),
+                    allowNone = true,
+                    multiple = true,
+                    onPeopleSelected = {
+                        replyInNewGroup(title, message, it)
+                    },
+                    omit = { it.id == me?.id },
                 )
             }
 
