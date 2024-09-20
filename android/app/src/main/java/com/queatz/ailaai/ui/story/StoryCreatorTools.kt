@@ -39,7 +39,6 @@ import com.queatz.widgets.widgets.ImpactEffortTableData
 import createWidget
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import okhttp3.internal.cache2.Relay.Companion.edit
 
 @Composable
 fun StoryCreatorTools(
@@ -50,6 +49,7 @@ fun StoryCreatorTools(
     val scope = rememberCoroutineScope()
     var showCardSelectorDialog by rememberStateOf(false)
     var showCardGroupSelectorDialog by rememberStateOf(false)
+    var showAddProfilesDialog by rememberStateOf(false)
     var showCreateGroupDialog by rememberStateOf(false)
     var showWidgetsMenu by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
@@ -299,6 +299,21 @@ fun StoryCreatorTools(
         }
     }
 
+    if (showAddProfilesDialog) {
+        ChoosePeopleDialog(
+            onDismissRequest = { showAddProfilesDialog = false },
+            title = stringResource(R.string.people),
+            confirmFormatter = { stringResource(R.string.add) },
+            multiple = true,
+            onPeopleSelected = {
+                addPart(
+                    StoryContent.Profiles(it.map { it.id!! }.distinct())
+                )
+                showAddProfilesDialog = false
+            }
+        )
+    }
+
     Card {
         var viewport by remember { mutableStateOf(Size(0f, 0f)) }
         val scrollState = rememberScrollState()
@@ -336,6 +351,13 @@ fun StoryCreatorTools(
                 }
             ) {
                 Icon(Icons.Outlined.Map, null)
+            }
+            IconButton(
+                onClick = {
+                    showAddProfilesDialog = true
+                }
+            ) {
+                Icon(Icons.Outlined.PersonAdd, null)
             }
             IconButton(
                 onClick = {

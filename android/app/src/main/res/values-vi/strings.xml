@@ -132,6 +132,8 @@
     <string name="rename_group">Đổi tên của nhóm này</string>
     <string name="group_name">Tên của nhóm này</string>
     <string name="qr_code">Mã QR</string>
+    <string name="profile_setting">Cài đặt trang cá nhân</string>
+    <string name="show_open_groups">Hiển thị các nhóm mở mà mình là thành viên</string>
     <string name="group_not_found">Không được tìm thấy nhóm này</string>
     <string name="group_hidden">Nhóm ẩn đến khi tin nhắn mới được gửi</string>
     <string name="saved">Đã lưu</string>

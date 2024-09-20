@@ -60,6 +60,7 @@ import com.queatz.ailaai.ui.story.creator.buttonCreatorItem
 import com.queatz.ailaai.ui.story.creator.cardsCreatorItem
 import com.queatz.ailaai.ui.story.creator.groupsCreatorItem
 import com.queatz.ailaai.ui.story.creator.photosCreatorItem
+import com.queatz.ailaai.ui.story.creator.profilesCreatorItem
 import com.queatz.ailaai.ui.story.creator.sectionCreatorItem
 import com.queatz.ailaai.ui.story.creator.textCreatorItem
 import com.queatz.ailaai.ui.story.creator.titleCreatorItem
@@ -111,6 +112,14 @@ fun StoryCreatorScreen(
     val nav = nav
     val me = me
 
+    // Kotlin 2.0 upgrade stopped recompose.invalidate() from working
+    fun invalidate() {
+        val saved = storyContents
+        storyContents = emptyList()
+        recompose.invalidate()
+        storyContents = saved
+    }
+
     BackHandler(enabled = edited && !showBackDialog) {
         showBackDialog = true
     }
@@ -124,7 +133,7 @@ fun StoryCreatorScreen(
                     storyContents = listOf(
                         StoryContent.Title(story?.title ?: "", source.id)
                     ) + story!!.contents()
-                    recompose.invalidate()
+                    invalidate()
                 }
             }
 
@@ -132,7 +141,7 @@ fun StoryCreatorScreen(
                 api.card(source.id) {
                     card = it
                     storyContents = card?.content?.asStoryContents() ?: emptyList()
-                    recompose.invalidate()
+                    invalidate()
                 }
             }
 
@@ -140,7 +149,7 @@ fun StoryCreatorScreen(
                 api.profile(source.id) {
                     profile = it
                     storyContents = profile?.profile?.content?.asStoryContents() ?: emptyList()
-                    recompose.invalidate()
+                    invalidate()
                 }
             }
             else -> {}
@@ -162,7 +171,7 @@ fun StoryCreatorScreen(
             add(index, part)
         }
         edited = true
-        recompose.invalidate()
+        invalidate()
         currentFocus = index
     }
 
@@ -171,7 +180,7 @@ fun StoryCreatorScreen(
             removeAt(position)
         }
         edited = true
-        recompose.invalidate()
+        invalidate()
         currentFocus = (position - 1).coerceAtLeast(0)
     }
 
@@ -257,7 +266,7 @@ fun StoryCreatorScreen(
     fun <T : StoryContent> T.edit(block: T.() -> Unit) {
         block()
         edited = true
-        recompose.invalidate()
+        invalidate()
     }
 
     // todo make sealed class
@@ -320,7 +329,7 @@ fun StoryCreatorScreen(
         ) {
             storyContents = it
             edited = true
-            recompose.invalidate()
+            invalidate()
         }
     }
 
@@ -453,7 +462,16 @@ fun StoryCreatorScreen(
                 .padding(bottom = 1.pad)
                 .weight(1f)
         ) {
-            fun <T : StoryContent> creatorScope(part: T, partIndex: Int) = CreatorScope(source, part, partIndex, currentFocus, { currentFocus = it }, ::addPart, ::removePartAt, part::edit)
+            fun <T : StoryContent> creatorScope(part: T, partIndex: Int) = CreatorScope(
+                source = source,
+                part = part,
+                partIndex = partIndex,
+                currentFocus = currentFocus,
+                onCurrentFocus = { currentFocus = it },
+                add = ::addPart,
+                remove = ::removePartAt,
+                edit = part::edit
+            )
 
             storyContents.forEachIndexed { partIndex, part ->
                 when (part) {
@@ -474,6 +492,8 @@ fun StoryCreatorScreen(
                     is StoryContent.Widget -> widgetCreatorItem(creatorScope(part, partIndex))
 
                     is StoryContent.Button -> buttonCreatorItem(creatorScope(part, partIndex))
+
+                    is StoryContent.Profiles -> profilesCreatorItem(creatorScope(part, partIndex))
 
                     else -> {
                         // Not supported in the editor

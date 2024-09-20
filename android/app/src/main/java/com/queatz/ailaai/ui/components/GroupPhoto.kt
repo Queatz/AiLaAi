@@ -43,7 +43,7 @@ private fun Modifier.singlePhoto(size: Dp, padding: Dp, border: Boolean): Modifi
     this
         .padding(padding)
         .requiredSize(size)
-        .bordered(border)
+        .bordered(border, if (size > 64.dp) 4.dp else 2.dp)
         .clip(CircleShape)
         .background(MaterialTheme.colorScheme.secondaryContainer)
 }
@@ -88,7 +88,7 @@ fun GroupPhoto(
                 modifier = Modifier
                     .padding(padding)
                     .requiredSize(size)
-                    .bordered(border)
+                    .bordered(border, if (size > 64.dp) 4.dp else 2.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .then(modifier)
@@ -135,9 +135,9 @@ fun GroupPhoto(
     }
 }
 
-private fun Modifier.bordered(border: Boolean) = composed {
+private fun Modifier.bordered(border: Boolean, width: Dp) = composed {
     if (border) {
-        this.border(4.dp, MaterialTheme.colorScheme.background, CircleShape)
+        border(width, MaterialTheme.colorScheme.background, CircleShape)
     } else {
         this
     }

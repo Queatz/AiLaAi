@@ -33,6 +33,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
             null
         }
         "button" -> json.decodeFromJsonElement<StoryContent.Button>(content)
+        "profile" -> json.decodeFromJsonElement<StoryContent.Profiles>(content)
 
         else -> null
     }

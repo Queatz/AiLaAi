@@ -48,6 +48,7 @@ import com.queatz.ailaai.ui.story.contents.commentsItem
 import com.queatz.ailaai.ui.story.contents.dividerItem
 import com.queatz.ailaai.ui.story.contents.groupsItem
 import com.queatz.ailaai.ui.story.contents.photosItem
+import com.queatz.ailaai.ui.story.contents.profilesItem
 import com.queatz.ailaai.ui.story.contents.reactionsItem
 import com.queatz.ailaai.ui.story.contents.sectionItem
 import com.queatz.ailaai.ui.story.contents.textItem
@@ -210,6 +211,8 @@ fun StoryContents(
                     )
 
                     is StoryContent.Button -> buttonItem(content, onButtonClick)
+
+                    is StoryContent.Profiles -> profilesItem(content)
                 }
             }
         }

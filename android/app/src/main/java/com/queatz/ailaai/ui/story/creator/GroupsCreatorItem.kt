@@ -49,7 +49,7 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
         val context = LocalContext.current
         val me = me
         val nav = nav
-        var group by remember { mutableStateOf<GroupExtended?>(null) }
+        var group by remember(groupId) { mutableStateOf<GroupExtended?>(null) }
         var showGroupMenu by rememberStateOf(false)
         var showAddGroupDialog by rememberStateOf(false)
         var showCreateGroupDialog by rememberStateOf(false)
@@ -194,7 +194,7 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                         edit {
                             groups = groups.toMutableList().apply {
                                 removeAt(index)
-                            }
+                            }.toList()
                         }
                     }
                 }

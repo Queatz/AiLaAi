@@ -453,6 +453,23 @@ object Styles : StyleSheet() {
         }
     }
 
+    val profileCard by style {
+        elevated()
+        display(DisplayStyle.Flex)
+        overflow("hidden")
+        flexDirection(FlexDirection.Column)
+        cursor("pointer")
+        property("aspect-ratio", ".75")
+        alignItems(AlignItems.Center)
+
+        media(mediaMaxWidth(640.px)) {
+            self style {
+                width(100.percent)
+                margin(1.r / 2)
+            }
+        }
+    }
+
     @OptIn(ExperimentalComposeWebApi::class)
     val card by style {
         cardStyle()

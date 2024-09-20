@@ -704,6 +704,15 @@ fun ProfileScreen(personId: String) {
                                             showMyMenu = false
                                             updateHintDialog = true
                                         })
+                                        person?.let { person ->
+                                            val someoneString = stringResource(R.string.someone)
+                                            DropdownMenuItem({
+                                                Text(stringResource(R.string.share))
+                                            }, {
+                                                showMyMenu = false
+                                                profileUrl(person.id!!).shareAsUrl(context, person.name ?: someoneString)
+                                            })
+                                        }
                                         DropdownMenuItem({
                                             Text(stringResource(R.string.qr_code))
                                         }, {
@@ -761,8 +770,8 @@ fun ProfileScreen(personId: String) {
                                         DropdownMenuItem({
                                             Text(stringResource(R.string.share))
                                         }, {
-                                            profileUrl(person.id!!).shareAsUrl(context, person.name ?: someoneString)
                                             showMenu = false
+                                            profileUrl(person.id!!).shareAsUrl(context, person.name ?: someoneString)
                                         })
                                     }
                                     DropdownMenuItem({

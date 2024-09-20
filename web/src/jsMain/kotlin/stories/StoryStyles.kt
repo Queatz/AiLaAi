@@ -73,6 +73,21 @@ object StoryStyles : StyleSheet() {
         }
     }
 
+    val contentProfiles by style {
+        boxSizing("border-box")
+        display(DisplayStyle.Flex)
+        flexWrap(FlexWrap.Wrap)
+        position(Position.Relative)
+
+        child(self, className(Styles.profileCard)) style {
+            self style {
+                width(240.px)
+                marginRight(1.r)
+                marginBottom(1.r)
+            }
+        }
+    }
+
     val contentGroupsInMessage by style { }
 
     val contentGroups by style {

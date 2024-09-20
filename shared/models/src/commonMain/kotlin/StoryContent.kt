@@ -38,6 +38,8 @@ sealed class StoryContent {
     class Widget(var widget: Widgets, var id: String) : StoryContent()
     @Serializable
     class Button(var text: String, var script: String, var data: String?) : StoryContent()
+    @Serializable
+    class Profiles(var profiles: List<String>) : StoryContent()
 }
 
 @Serializable
@@ -67,6 +69,7 @@ fun StoryContent.partType() = when (this) {
     is StoryContent.Audio -> "audio"
     is StoryContent.Widget -> "widget"
     is StoryContent.Button -> "button"
+    is StoryContent.Profiles -> "profile"
     else -> throw NotImplementedError("$this is not a valid story part")
 }
 
@@ -79,5 +82,6 @@ fun StoryContent.isPart() = when (this) {
     is StoryContent.Audio -> true
     is StoryContent.Widget -> true
     is StoryContent.Button -> true
+    is StoryContent.Profiles -> true
     else -> false
 }

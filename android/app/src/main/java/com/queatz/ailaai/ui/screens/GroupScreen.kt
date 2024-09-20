@@ -127,8 +127,10 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.extensions.timeAgo
@@ -726,6 +728,21 @@ fun GroupScreen(groupId: String) {
                                     showManageDialog = true
                                 })
                             }
+                        }
+                        if (groupExtended?.group?.open == true) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.share))
+                            }, {
+                                showMenu = false
+                                groupUrl(groupId).shareAsUrl(
+                                    context = context,
+                                    name = groupExtended?.name(
+                                        context.getString(R.string.someone),
+                                        context.getString(R.string.empty_group_name),
+                                        me?.id?.inList().orEmpty()
+                                    )
+                                )
+                            })
                         }
                         DropdownMenuItem({
                             Text(stringResource(R.string.qr_code))

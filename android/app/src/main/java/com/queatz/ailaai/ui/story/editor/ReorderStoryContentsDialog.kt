@@ -18,17 +18,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.group
+import app.ailaai.api.profile
 import coil.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.Stub
 import com.queatz.ailaai.ui.story.WidgetStub
-import com.queatz.ailaai.ui.story.stringResource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
+import com.queatz.db.Person
 import com.queatz.db.StoryContent
 
 @Composable
@@ -199,6 +201,30 @@ fun ReorderStoryContentsDialog(
 
             is StoryContent.Button -> {
                 Stub(it.text)
+            }
+
+            is StoryContent.Profiles -> {
+                LazyRow {
+                    items(it.profiles, key = { it }) { profileId ->
+                        var person by remember { mutableStateOf<Person?>(null) }
+
+                        LaunchedEffect(profileId) {
+                            api.profile(profileId) { person = it.person }
+                        }
+
+                        GroupPhoto(
+                            person?.let { person ->
+                                listOf(
+                                    ContactPhoto(
+                                        person.name.orEmpty(),
+                                        person.photo,
+                                        person.seen
+                                    )
+                                )
+                            } ?: emptyList()
+                        )
+                    }
+                }
             }
 
             else -> {

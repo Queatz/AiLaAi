@@ -37,6 +37,7 @@ import components.CardItem
 import components.Icon
 import components.LinkifyText
 import components.LoadingText
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import lib.format
@@ -45,7 +46,6 @@ import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
@@ -61,6 +61,7 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import profile.ProfileCard
 import r
 import kotlin.js.Date
 
@@ -368,6 +369,18 @@ fun StoryContents(
                     }
                 }) {
                     Text(part.text)
+                }
+            }
+
+            is StoryContent.Profiles -> {
+                Div({
+                    classes(StoryStyles.contentProfiles)
+                }) {
+                    part.profiles.forEach { personId ->
+                        ProfileCard(personId) {
+                            window.open("/profile/$personId", "_blank")
+                        }
+                    }
                 }
             }
         }
