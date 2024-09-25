@@ -18,7 +18,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
             flexShrink(0)
         }
     }) {
-        IconButton("chat_bubble_outline", appString { groups }, styles = {
+        IconButton("forum", appString { groups }, styles = {
             if (nav == NavPage.Groups) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)
@@ -34,7 +34,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Cards)
         }
-        IconButton("home", appString { explore }, styles = {
+        IconButton("newspaper", appString { explore }, styles = {
             if (nav == NavPage.Stories) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)

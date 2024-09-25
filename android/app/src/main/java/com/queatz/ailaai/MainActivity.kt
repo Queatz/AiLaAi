@@ -38,9 +38,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -210,9 +210,9 @@ fun background(url: String?) {
 class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
-            NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.ChatBubbleOutline),
+            NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.Forum),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
-            NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.Home),
+            NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.Newspaper),
 //            NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
         )
