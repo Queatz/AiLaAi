@@ -73,7 +73,6 @@ fun ProfileCard(personProfile: PersonProfile, onClick: () -> Unit) {
                 personProfile.profile.photo?.let { cover ->
                     backgroundPosition("center")
                     backgroundSize("cover")
-                    backgroundAttachment("fixed")
                     backgroundImage("url('$baseUrl$cover')")
                 }
             }

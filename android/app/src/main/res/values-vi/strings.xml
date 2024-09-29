@@ -666,6 +666,12 @@
     <plurals name="x_replies">
         <item quantity="other">%1$s câu trả lời</item>
     </plurals>
+    <plurals name="level_x">
+        <item quantity="other">Cấp độ %1$s</item>
+    </plurals>
+    <plurals name="x_points">
+        <item quantity="other">%1$s xu</item>
+    </plurals>
     <string name="completed_trades">Các việc đổi đồ đã hoàn thành</string>
     <string name="subscribe">Đăng ký</string>
     <string name="unsubscribe">Hủy đăng ký</string>
@@ -733,4 +739,5 @@
     <string name="speak">Nói ra</string>
     <string name="clear_status">Xóa trạng thái</string>
     <string name="reply_in_new_group">Trả lời trong nhóm mới</string>
+    <string name="upgrade">Nâng cấp</string>
 </resources>

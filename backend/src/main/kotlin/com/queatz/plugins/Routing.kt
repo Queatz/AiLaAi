@@ -33,6 +33,7 @@ fun Application.configureRouting() {
         platformRoutes()
         signRoutes()
         meRoutes()
+        accountRoutes()
         cardRoutes()
         categoryRoutes()
         groupRoutes()

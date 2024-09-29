@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import account
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,7 +63,7 @@ import kotlinx.serialization.encodeToString
 fun SettingsScreen(
     appUi: AppUi,
     onAppUi: (AppUi) -> Unit,
-    updateMe: () -> Unit
+    updateMe: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -79,6 +81,7 @@ fun SettingsScreen(
     var profile by rememberSaveable(stateSaver = jsonSaver<PersonProfile?>()) {
         mutableStateOf(null)
     }
+    var points by rememberStateOf<Int?>(null)
     val me = me
 
     fun loadTransferCode() {
@@ -143,6 +146,12 @@ fun SettingsScreen(
         }
     }
 
+    ResumeEffect {
+        api.account {
+            points = it.points ?: 0
+        }
+    }
+
     if (inviteDialog) {
         InviteDialog(
             me?.name ?: context.getString(R.string.someone)
@@ -198,13 +207,13 @@ fun SettingsScreen(
             confirmButton = {
                 Button(
                     {
-                    exportData()
-                },
+                        exportData()
+                    },
                     enabled = !isExportingData
                 ) {
                     Text(stringResource(R.string.export_data))
                 }
-        })
+            })
     }
 
     if (signOutDialog) {
@@ -273,8 +282,12 @@ fun SettingsScreen(
                         }
                     } else if (transferCode.isNotBlank()) {
                         Text(stringResource(R.string.your_transfer_code_is))
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(
-                            1.pad)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(
+                                1.pad
+                            )
+                        ) {
                             SelectionContainer(
                                 modifier = Modifier
                                     .weight(1f)
@@ -447,6 +460,44 @@ fun SettingsScreen(
             modifier = Modifier
                 .verticalScroll(scrollState)
         ) {
+            DropdownMenuItem({
+                Column(modifier = Modifier.padding(1.pad)) {
+                    Text(
+                        text = if (points == null) stringResource(R.string.loading_points) else {
+                            pluralStringResource(R.plurals.x_points, points!!, points!!)
+                        },
+                        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+                    )
+                    Text(
+                        text = stringResource(R.string.account),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }, {
+                chooseLanguageDialog = true
+            })
+
+            DropdownMenuItem({
+                Column(modifier = Modifier.padding(1.pad)) {
+                    Text(
+                        stringResource(R.string.language),
+                        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
+                    )
+                    Text(
+                        when {
+                            appLanguage?.startsWith("vi") == true -> stringResource(R.string.language_vietnamese)
+                            appLanguage?.startsWith("zh") == true -> stringResource(R.string.language_chinese)
+                            else -> stringResource(R.string.language_english)
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }, {
+                chooseLanguageDialog = true
+            })
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -482,26 +533,6 @@ fun SettingsScreen(
                     }
                 }
             }
-
-            DropdownMenuItem({
-                Column(modifier = Modifier.padding(1.pad)) {
-                    Text(
-                        stringResource(R.string.language),
-                        style = MaterialTheme.typography.titleMedium.copy(lineHeight = 2.5.em)
-                    )
-                    Text(
-                        when {
-                            appLanguage?.startsWith("vi") == true -> stringResource(R.string.language_vietnamese)
-                            appLanguage?.startsWith("zh") == true -> stringResource(R.string.language_chinese)
-                            else -> stringResource(R.string.language_english)
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }, {
-                chooseLanguageDialog = true
-            })
 
             Column(
                 modifier = Modifier

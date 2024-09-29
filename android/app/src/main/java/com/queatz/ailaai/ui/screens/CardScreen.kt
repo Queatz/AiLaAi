@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Castle
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
@@ -66,6 +67,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -930,13 +932,15 @@ fun CardScreen(cardId: String) {
                                     showPhotoDialog = true
                                 }
 
-                                item(
-                                    Icons.Outlined.AutoAwesome,
-                                    stringResource(R.string.generate_photo),
-                                    isLoading = oldPhoto != null
-                                ) {
-                                    regeneratePhoto()
-                                    showMenu = false
+                                if (card.photo.isNullOrEmpty() && card.video.isNullOrEmpty()) {
+                                    item(
+                                        Icons.Outlined.AutoAwesome,
+                                        stringResource(R.string.generate_photo),
+                                        isLoading = oldPhoto != null
+                                    ) {
+                                        regeneratePhoto()
+                                        showMenu = false
+                                    }
                                 }
 
                                 val category = card.categories?.firstOrNull()
@@ -980,6 +984,16 @@ fun CardScreen(cardId: String) {
                                     Icons.Outlined.AddBox,
                                     stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
                                     selected = card.content?.notBlank != null
+                                ) {
+                                    nav.appNavigate(AppNav.EditCard(card.id!!))
+                                }
+
+                                val level = card.level ?: 0
+
+                                item(
+                                    Icons.Outlined.Castle,
+                                    if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(R.plurals.level_x, level, level),
+                                    selected = level > 0
                                 ) {
                                     nav.appNavigate(AppNav.EditCard(card.id!!))
                                 }

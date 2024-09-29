@@ -211,8 +211,8 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.Forum),
-            NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
             NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.Newspaper),
+            NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
 //            NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
         )

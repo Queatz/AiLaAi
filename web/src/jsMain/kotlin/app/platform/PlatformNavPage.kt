@@ -12,6 +12,7 @@ import application
 
 sealed class PlatformNav {
     data object None : PlatformNav()
+    data object Accounts : PlatformNav()
     data object Reviews : PlatformNav()
     data object Reports : PlatformNav()
     data object Stats : PlatformNav()
@@ -31,6 +32,10 @@ fun PlatformNavPage(
     NavTopBar(me, appString { platform }, onProfileClick = onProfileClick)
 
     NavMenu {
+        // todo: translate
+        NavMenuItem(null, "Accounts", selected = selected == PlatformNav.Accounts) {
+            onSelected(PlatformNav.Accounts)
+        }
         // todo: translate
         NavMenuItem(null, "Health", selected = selected == PlatformNav.Health) {
             onSelected(PlatformNav.Health)

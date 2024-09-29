@@ -16,6 +16,12 @@ class Person(
 ) : Model()
 
 @Serializable
+class Account(
+    var person: String? = null,
+    var points: Int? = null
+) : Model()
+
+@Serializable
 data class PersonStatus(
     val person: String? = null,
     val status: String? = null,
@@ -133,6 +139,7 @@ class Card(
     var pay: Pay? = null,
     var npc: Npc? = null,
     var active: Boolean? = null,
+    var level: Int? = null,
     var cardCount: Int? = null
 ) : Model()
 

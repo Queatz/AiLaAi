@@ -292,3 +292,13 @@ class GroupBotExtended(
     var bot: Bot? = null,
     var groupBot: GroupBot? = null
 )
+
+@Serializable
+class CardUpgradeBody(
+    var level: Int
+)
+
+@Serializable
+class PlatformAccountsPointsBody(
+    var add: Int
+)

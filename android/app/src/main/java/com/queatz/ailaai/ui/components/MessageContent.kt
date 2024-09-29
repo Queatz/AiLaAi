@@ -119,6 +119,7 @@ import trade
 fun ColumnScope.MessageContent(
     message: Message,
     isMe: Boolean,
+    isHost: Boolean,
     me: String?,
     showTime: Boolean,
     onShowTime: (Boolean) -> Unit,
@@ -321,7 +322,7 @@ fun ColumnScope.MessageContent(
                 }
             }
 
-            if (isMe && !isReply) {
+            if ((isMe || isHost) && !isReply) {
                 menuItem(stringResource(R.string.edit)) {
                     showEditMessageDialog = true
                     onShowMessageDialog(false)
@@ -519,6 +520,7 @@ fun ColumnScope.MessageContent(
                 MessageContent(
                     message = reply,
                     isMe = isMe,
+                    isHost = isHost,
                     me = me,
                     showTime = showReplyTime,
                     onShowTime = { showReplyTime = it },

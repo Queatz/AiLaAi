@@ -88,7 +88,20 @@ suspend fun Api.updateCard(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Card> = {},
 ) = post(
-    "cards/$id", card,
+    url = "cards/$id",
+    body = card,
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.upgradeCard(
+    id: String,
+    upgrade: CardUpgradeBody,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post(
+    url = "cards/$id/upgrade",
+    body = upgrade,
     onError = onError,
     onSuccess = onSuccess
 )

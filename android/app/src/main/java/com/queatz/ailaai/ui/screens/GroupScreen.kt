@@ -918,7 +918,7 @@ fun GroupScreen(groupId: String) {
                                 }
                                 message
                             },
-                            me = myMember?.member?.id,
+                            member = myMember?.member,
                             onUpdated = {
                                 scope.launch {
                                     reloadMessages()

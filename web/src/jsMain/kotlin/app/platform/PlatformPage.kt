@@ -10,6 +10,7 @@ fun PlatformPage(selected: PlatformNav) {
     FullPageLayout {
         when (selected) {
             is PlatformNav.None -> {}
+            is PlatformNav.Accounts -> AccountsPlatformPage()
             is PlatformNav.Health -> HealthPlatformPage()
             is PlatformNav.Config -> ConfigPlatformPage()
             is PlatformNav.Reports -> ReportsPlatformPage()

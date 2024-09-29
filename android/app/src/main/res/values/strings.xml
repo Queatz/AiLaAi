@@ -743,6 +743,9 @@
     <string name="status">Status</string>
     <string name="clear_status">Clear status</string>
     <string name="reply_in_new_group">Reply in new group</string>
+    <string name="upgrade">Upgrade</string>
+    <string name="account">Account</string>
+    <string name="loading_points">Loading points…</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
@@ -850,5 +853,13 @@
     <plurals name="x_replies">
         <item quantity="one">%1$s reply</item>
         <item quantity="other">%1$s replies</item>
+    </plurals>
+    <plurals name="level_x">
+        <item quantity="one">Level %1$s</item>
+        <item quantity="other">Level %1$s</item>
+    </plurals>
+    <plurals name="x_points">
+        <item quantity="one">%1$s point</item>
+        <item quantity="other">%1$s points</item>
     </plurals>
 </resources>

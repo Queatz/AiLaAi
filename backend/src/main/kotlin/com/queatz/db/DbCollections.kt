@@ -174,5 +174,9 @@ fun collections() = listOf(
     PersonStatus::class.db {
         ensurePersistentIndex(listOf(PersonStatus::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(PersonStatus::status.name), PersistentIndexOptions())
+    },
+    Account::class.db {
+        ensurePersistentIndex(listOf(Account::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Account::points.name), PersistentIndexOptions())
     }
 )

@@ -26,14 +26,6 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Groups)
         }
-        IconButton("map", appString { map }, styles = {
-            if (nav == NavPage.Cards) {
-                backgroundColor(Styles.colors.primary)
-                color(Color.white)
-            }
-        }) {
-            onNavClick(NavPage.Cards)
-        }
         IconButton("newspaper", appString { explore }, styles = {
             if (nav == NavPage.Stories) {
                 backgroundColor(Styles.colors.primary)
@@ -41,6 +33,14 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
             }
         }) {
             onNavClick(NavPage.Stories)
+        }
+        IconButton("map", appString { map }, styles = {
+            if (nav == NavPage.Cards) {
+                backgroundColor(Styles.colors.primary)
+                color(Color.white)
+            }
+        }) {
+            onNavClick(NavPage.Cards)
         }
         IconButton("calendar_month", appString { reminders }, styles = {
             if (nav == NavPage.Schedule) {

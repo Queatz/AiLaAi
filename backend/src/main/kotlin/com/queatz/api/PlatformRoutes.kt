@@ -1,8 +1,11 @@
 package com.queatz.api
 
+import com.queatz.accounts
 import com.queatz.db.Person
+import com.queatz.db.PlatformAccountsPointsBody
 import com.queatz.db.PlatformConfig
 import com.queatz.db.PlatformMeResponse
+import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.platform
@@ -48,6 +51,23 @@ fun Route.platformRoutes() {
                 }
 
                 db.update(config)
+            }
+        }
+
+        post("/platform/accounts/{id}/points") {
+            hosts {
+                val points = call.receive<PlatformAccountsPointsBody>().add
+
+                if (points < 1) {
+                    return@hosts HttpStatusCode.BadRequest.description("Cannot add less than 1 point")
+                }
+
+                accounts.addPoints(
+                    accounts.account(parameter("id")),
+                    points
+                )
+
+                HttpStatusCode.OK
             }
         }
     }

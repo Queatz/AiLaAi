@@ -22,6 +22,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.bot.BotProfileDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Bot
+import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
 
@@ -35,7 +36,7 @@ fun MessageItem(
     getPerson: (String) -> Person?,
     getBot: (String) -> Bot?,
     getMessage: suspend (String) -> Message?,
-    me: String?,
+    member: Member?,
     onUpdated: () -> Unit,
     onReply: (Message) -> Unit,
     onReplyInNewGroup: (Message) -> Unit,
@@ -44,7 +45,7 @@ fun MessageItem(
     var showTime by rememberStateOf(false)
     var showMessageDialog by rememberStateOf(false)
     var botDialog by rememberStateOf<String?>(null)
-    val isMe = me == message.member
+    val isMe = member?.id == message.member
     val nav = nav
 
     botDialog?.let { id ->
@@ -99,7 +100,8 @@ fun MessageItem(
             MessageContent(
                 message = message,
                 isMe = isMe,
-                me = me,
+                isHost = member?.host == true,
+                me = member?.id,
                 showTime = showTime,
                 onShowTime = {
                     if (selectedMessages.isEmpty()) {
