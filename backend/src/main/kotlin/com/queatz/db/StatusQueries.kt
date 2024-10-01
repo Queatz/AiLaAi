@@ -29,13 +29,17 @@ fun Db.recentStatuses(person: String) = list(
     Status::class,
     """
         let friends = ${friends(includeSelf = true)}
-        for friend in friends
-            for status in `${PersonStatus::class.collection()}`
-                filter status.${f(PersonStatus::person)} == friend._key
-                    and status.${f(PersonStatus::status)} != null
-                sort status.${f(PersonStatus::createdAt)} desc
-                limit 20
-                return distinct document('${Status::class.collection()}', status.${f(PersonStatus::status)})
+        let results = (
+            for friend in friends
+                for status in `${PersonStatus::class.collection()}`
+                    filter status.${f(PersonStatus::person)} == friend._key
+                        and status.${f(PersonStatus::status)} != null
+                    sort status.${f(PersonStatus::createdAt)} desc
+                    return distinct document('${Status::class.collection()}', status.${f(PersonStatus::status)})
+        )
+        for result in results
+            limit 20
+            return result
     """.trimIndent(),
     mapOf(
         "person" to person.asId(Person::class)
