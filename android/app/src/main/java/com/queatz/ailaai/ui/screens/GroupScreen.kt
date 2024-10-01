@@ -1419,17 +1419,20 @@ fun GroupScreen(groupId: String) {
                     onVideos = { videos ->
                         scope.launch {
                             api.sendVideosFromUri(
-                                context,
-                                groupId,
-                                videos,
-                                stageReply?.id?.let {
+                                context = context,
+                                group = groupId,
+                                videos = videos,
+                                onError = {
+                                    context.showDidntWork()
+                                },
+                                message = stageReply?.id?.let {
                                     Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
                                 },
                                 processingCallback = {
-
+                                    // todo
                                 },
                                 uploadCallback = {
-
+                                    // todo
                                 }
                             )
 

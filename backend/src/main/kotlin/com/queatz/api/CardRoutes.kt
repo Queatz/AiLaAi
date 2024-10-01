@@ -440,6 +440,24 @@ fun Route.cardRoutes() {
             }
         }
 
+        get("/cards/{id}/upgrade") {
+            respond {
+                val card = db.document(Card::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val currentLevel = card.level ?: 0
+                val account = accounts.account(me.id!!)
+
+                if (!accounts.canUpgradeCard(account, card)) {
+                    return@respond HttpStatusCode.BadRequest.description("Insufficient points")
+                }
+
+                CardUpgradeDetails(
+                    level = currentLevel + 1,
+                    points = accounts.upgradeCardCost(card),
+                    available = accounts.canUpgradeCard(account, card)
+                )
+            }
+        }
+
         post("/cards/{id}/photo") {
             respond {
                 val card = db.document(Card::class, parameter("id"))

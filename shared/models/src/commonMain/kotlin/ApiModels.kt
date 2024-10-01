@@ -299,6 +299,13 @@ class CardUpgradeBody(
 )
 
 @Serializable
+class CardUpgradeDetails(
+    var level: Int,
+    var points: Int,
+    var available: Boolean
+)
+
+@Serializable
 class PlatformAccountsPointsBody(
     var add: Int
 )

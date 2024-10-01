@@ -44,6 +44,7 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
+import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.InviteDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -432,6 +433,22 @@ fun SettingsScreen(
         }
 
         var chooseLanguageDialog by rememberStateOf(false)
+        var showPointsDialog by rememberStateOf(false)
+
+        if (showPointsDialog) {
+            Alert(
+                onDismissRequest = {
+                    showPointsDialog = false
+                },
+                title = stringResource(R.string.points),
+                text = stringResource(R.string.points_description),
+                dismissButton = null,
+                confirmButton = stringResource(R.string.close),
+                onConfirm = {
+                    showPointsDialog = false
+                }
+            )
+        }
 
         if (chooseLanguageDialog) {
             Dialog({
@@ -475,7 +492,7 @@ fun SettingsScreen(
                     )
                 }
             }, {
-                chooseLanguageDialog = true
+                showPointsDialog = true
             })
 
             DropdownMenuItem({

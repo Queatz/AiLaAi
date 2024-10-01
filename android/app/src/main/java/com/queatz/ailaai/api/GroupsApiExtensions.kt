@@ -2,13 +2,18 @@ package com.queatz.ailaai.api
 
 import android.content.Context
 import android.net.Uri
-import androidx.core.net.toFile
-import app.ailaai.api.*
+import app.ailaai.api.Api
+import app.ailaai.api.ErrorBlock
+import app.ailaai.api.ScaledVideo
+import app.ailaai.api.SuccessBlock
+import app.ailaai.api.sendAudio
+import app.ailaai.api.sendMedia
+import app.ailaai.api.sendVideos
 import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
 import com.queatz.ailaai.extensions.asScaledVideo
 import com.queatz.db.Message
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import java.io.File
 
 
@@ -61,12 +66,12 @@ suspend fun Api.sendVideosFromUri(
     val scaledVideos = try {
         videos.map {
             ScaledVideo(
-                it.asScaledVideo(
-                    context,
+                inputProvider = it.asScaledVideo(
+                    context = context,
                     progressCallback = processingCallback
                 ).asInputProvider(),
-                context.contentResolver.getType(it) ?: "video/*",
-                it.toFile().name
+                type = context.contentResolver.getType(it) ?: "video/*",
+                fileName = it.lastPathSegment
             )
         }
     } catch (e: Exception) {

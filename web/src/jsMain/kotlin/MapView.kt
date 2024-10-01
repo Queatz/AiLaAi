@@ -1,3 +1,4 @@
+import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,6 +70,11 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+data class CardMarker(
+    val card: Card,
+    val marker: mapboxgl.Marker
+)
+
 @Composable
 fun MapView(header: (@Composable () -> Unit)? = null) {
     var searchText by remember { mutableStateOf("") }
@@ -76,7 +82,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     var searchResults by remember { mutableStateOf(listOf<Card>()) }
     var geo by remember { mutableStateOf<Geo?>(null) }
     var map by remember { mutableStateOf<mapboxgl.Map?>(null) }
-    var markers by remember { mutableStateOf(emptyList<mapboxgl.Marker>()) }
+    var markers by remember { mutableStateOf(emptyList<CardMarker>()) }
     var selectedCard by remember { mutableStateOf<Card?>(null) }
     val scope = rememberCoroutineScope()
     val hasHash = remember { window.location.hash.isBlank() }
@@ -113,25 +119,34 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
         val nearDistance = 32
-        val cardPositions = markers.mapIndexed { index, it -> index to map!!.project(it.getLngLat()) }
+        val cardPositions = markers.mapIndexed { index, it ->
+            index to map!!.project(it.marker.getLngLat())
+        }
 
         markers.forEachIndexed { index, marker ->
             val pos = cardPositions[index].second
-            val groundDistance = cameraLngLat.distanceTo(marker.getLngLat())
+            val groundDistance = cameraLngLat.distanceTo(marker.marker.getLngLat())
 
-            val nearScale = if (cardPositions.any { it.first != index && it.second.near(pos, nearDistance / 4) }) {
-                .25f
-            } else if (cardPositions.any { it.first != index && it.second.near(pos, nearDistance) }) {
-                .5f
-            } else {
-                1f
+            val nearScale = when {
+                cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && it.second.near(pos, nearDistance) } -> {
+                    0f
+                }
+                cardPositions.any { it.first != index && markers[index].card <= markers[it.first].card && it.second.near(pos, nearDistance / 4) } -> {
+                    .25f
+                }
+                cardPositions.any { it.first != index && markers[index].card <= markers[it.first].card && it.second.near(pos, nearDistance) } -> {
+                    .5f
+                }
+                else -> {
+                    1f
+                }
             }
 
             val scale = 100.0 / sqrt(groundDistance.pow(2.0) + altitude.pow(2.0))
-            val element = marker.getElement().firstElementChild as HTMLElement
+            val element = marker.marker.getElement().firstElementChild as HTMLElement
             element.style.transform = "scale(${scale.coerceIn(0.125, 100.0) * nearScale})"
-            marker.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
-            val ele = marker.getElement() // for the following line
+            marker.marker.getElement().style.zIndex = (scale * 1000.0).toInt().toString()
+            val ele = marker.marker.getElement() // for the following line
             js("ele.style.pointerEvents = \"none\"")
         }
 
@@ -139,7 +154,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         scope.launch {
             delay(100)
             markers.forEach {
-                val ele = it.getElement() // for the following line
+                val ele = it.marker.getElement() // for the following line
                 js("ele.style.pointerEvents = \"none\"")
             }
         }
@@ -157,7 +172,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         map ?: return@LaunchedEffect
 
         markers.forEach {
-            it.remove()
+            it.marker.remove()
         }
 
         markers = shownCards.map { card ->
@@ -273,6 +288,8 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                             }) {}
                         }
                     }
+                }.let { marker ->
+                    CardMarker(card, marker)
                 }
         }
 
@@ -433,3 +450,5 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
         }
     }
 }
+
+private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0)

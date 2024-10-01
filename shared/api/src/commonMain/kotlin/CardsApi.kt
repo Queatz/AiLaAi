@@ -94,6 +94,16 @@ suspend fun Api.updateCard(
     onSuccess = onSuccess
 )
 
+suspend fun Api.upgradeCardDetails(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<CardUpgradeDetails>,
+) = get(
+    url = "cards/$id/upgrade",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.upgradeCard(
     id: String,
     upgrade: CardUpgradeBody,

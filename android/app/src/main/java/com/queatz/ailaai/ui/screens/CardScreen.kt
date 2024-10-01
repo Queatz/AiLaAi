@@ -87,6 +87,7 @@ import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.leaveCollaboration
 import app.ailaai.api.sendMessage
 import app.ailaai.api.updateCard
+import app.ailaai.api.upgradeCardDetails
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
@@ -125,6 +126,7 @@ import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.slideshow.slideshow
+import com.queatz.ailaai.ui.card.CardUpgradeDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardLayout
@@ -154,6 +156,7 @@ import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
+import com.queatz.db.CardUpgradeDetails
 import com.queatz.db.Message
 import com.queatz.db.Person
 import io.ktor.http.HttpStatusCode
@@ -190,6 +193,7 @@ fun CardScreen(cardId: String) {
     var openRemoveCollaboratorsDialog by rememberSavableStateOf(false)
     var openCollaboratorsDialog by rememberSavableStateOf(false)
     var openLeaveCollaboratorsDialog by rememberSavableStateOf(false)
+    var showUpgradeDialog by rememberSavableStateOf(false)
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>(emptyList())) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
@@ -995,7 +999,7 @@ fun CardScreen(cardId: String) {
                                     if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(R.plurals.level_x, level, level),
                                     selected = level > 0
                                 ) {
-                                    nav.appNavigate(AppNav.EditCard(card.id!!))
+                                    showUpgradeDialog = true
                                 }
                             }
                         }
@@ -1308,5 +1312,15 @@ fun CardScreen(cardId: String) {
             cardUrl(cardId),
             card?.name
         )
+    }
+
+    if (showUpgradeDialog) {
+        CardUpgradeDialog(
+            onDismissRequest = { showUpgradeDialog = false },
+            cardId = cardId,
+            currentLevel = card?.level ?: 0
+        ) {
+            reload()
+        }
     }
 }

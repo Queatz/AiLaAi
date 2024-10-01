@@ -357,12 +357,19 @@ fun MapScreen(
                     val shown = cards.any { c -> c.id == card.id }
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
 
-                    val nearScale = if (cardPositions.any { it.card != card && it.position.near(pos, nearDistance / 4) }) {
-                        .25f
-                    } else if (cardPositions.any { it.card != card && it.position.near(pos, nearDistance) }) {
-                        .5f
-                    } else {
-                        1f
+                    val nearScale = when {
+                        cardPositions.any { it.card != card && card < it.card && it.position.near(pos, nearDistance) } -> {
+                            0f
+                        }
+                        cardPositions.any { it.card != card && card <= it.card && it.position.near(pos, nearDistance / 4) } -> {
+                            .25f
+                        }
+                        cardPositions.any { it.card != card && card <= it.card && it.position.near(pos, nearDistance) } -> {
+                            .5f
+                        }
+                        else -> {
+                            1f
+                        }
                     }
 
                     val near = remember { Animatable(nearScale) }
@@ -376,98 +383,31 @@ fun MapScreen(
                         scale.animateTo(if (shown) 1f else 0f, spring(dampingRatio = Spring.DampingRatioLowBouncy))
                     }
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .wrapContentSize(unbounded = true)
-                            .onPlaced {
-                                placed = true
-                                size = it.size
-                            }
-                            .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
-                            .zIndex(1f + pos.y)
-                            .graphicsLayer(
-                                scaleX = s * scale.value * near.value,
-                                scaleY = s * scale.value * near.value,
-                                alpha = if (!placed) 0f else scale.value,
-                                transformOrigin = TransformOrigin(.5f, 1f)
-                            )
-
-                    ) {
-                        val isNpc = !card.npc?.photo.isNullOrBlank()
-
+                    if (near.value > 0f) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .padding(bottom = 1.pad)
-                                .clickable(
-                                    remember { MutableInteractionSource() },
-                                    null
-                                ) {
-                                    tryNav(pos) {
-                                        onCard(card.id!!)
-                                    }
+                                .wrapContentSize(unbounded = true)
+                                .onPlaced {
+                                    placed = true
+                                    size = it.size
                                 }
-                        ) {
-                            if (isNpc) {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(.5f.pad),
-                                    modifier = Modifier
-                                        .shadow(.5f.elevation, MaterialTheme.shapes.large)
-                                        .clip(MaterialTheme.shapes.large)
-                                        .background(MaterialTheme.colorScheme.background)
-                                        .padding(1.5f.pad)
-                                        .widthIn(max = 240.dp)
-                                ) {
-                                    Text(
-                                        buildAnnotatedString {
-                                            withStyle(MaterialTheme.typography.titleMedium.toSpanStyle()) {
-                                                append(card.npc?.name.orEmpty())
-                                            }
-                                            append(" ")
-                                            withStyle(MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary).toSpanStyle()) {
-                                                append(card.name.orEmpty())
-                                            }
-                                        }
-                                    )
-                                    card.npc?.text?.let {
-                                        Text(it)
-                                    }
-                                }
-                            } else {
-                                OutlinedText(
-                                    card.name ?: "",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .widthIn(max = 120.dp)
+                                .offset((pos.x - size.width / 2).px, (pos.y - size.height).px)
+                                .zIndex(1f + pos.y)
+                                .graphicsLayer(
+                                    scaleX = s * scale.value * near.value,
+                                    scaleY = s * scale.value * near.value,
+                                    alpha = if (!placed) 0f else scale.value,
+                                    transformOrigin = TransformOrigin(.5f, 1f)
                                 )
-                                card.categories?.firstOrNull()?.let { category ->
-                                    OutlinedText(
-                                        category,
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        outlineWidth = 4f,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .widthIn(max = 120.dp)
-                                    )
-                                }
-                            }
-                        }
 
-                        val photo = card.photo?.let(api::url)
+                        ) {
+                            val isNpc = !card.npc?.photo.isNullOrBlank()
 
-                        if (isNpc) {
-                            AsyncImage(
-                                model = api.url(card.npc!!.photo!!),
-                                contentDescription = "",
-                                contentScale = ContentScale.Inside,
-                                alignment = Alignment.Center,
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-                                    .requiredWidth(64.dp)
+                                    .padding(bottom = 1.pad)
                                     .clickable(
                                         remember { MutableInteractionSource() },
                                         null
@@ -476,33 +416,102 @@ fun MapScreen(
                                             onCard(card.id!!)
                                         }
                                     }
-                            )
-                        } else {
-                            AsyncImage(
-                                model = remember(photo) {
-                                    ImageRequest.Builder(context)
-                                        .data(photo)
-                                        .crossfade(true)
-                                        .size(64)
-                                        .build()
-                                },
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                alignment = Alignment.Center,
-                                modifier = Modifier
-                                    .requiredSize(32.dp)
-                                    .shadow(2.dp, CircleShape)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .border(1.5f.dp, MaterialTheme.colorScheme.background, CircleShape)
-                                    .padding(1.5f.dp)
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        tryNav(pos) {
-                                            onCard(card.id!!)
+                            ) {
+                                if (isNpc) {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(.5f.pad),
+                                        modifier = Modifier
+                                            .shadow(.5f.elevation, MaterialTheme.shapes.large)
+                                            .clip(MaterialTheme.shapes.large)
+                                            .background(MaterialTheme.colorScheme.background)
+                                            .padding(1.5f.pad)
+                                            .widthIn(max = 240.dp)
+                                    ) {
+                                        Text(
+                                            buildAnnotatedString {
+                                                withStyle(MaterialTheme.typography.titleMedium.toSpanStyle()) {
+                                                    append(card.npc?.name.orEmpty())
+                                                }
+                                                append(" ")
+                                                withStyle(MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary).toSpanStyle()) {
+                                                    append(card.name.orEmpty())
+                                                }
+                                            }
+                                        )
+                                        card.npc?.text?.let {
+                                            Text(it)
                                         }
                                     }
-                            )
+                                } else {
+                                    OutlinedText(
+                                        card.name ?: "",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .widthIn(max = 120.dp)
+                                    )
+                                    card.categories?.firstOrNull()?.let { category ->
+                                        OutlinedText(
+                                            category,
+                                            color = MaterialTheme.colorScheme.surfaceVariant,
+                                            outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            outlineWidth = 4f,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .widthIn(max = 120.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            val photo = card.photo?.let(api::url)
+
+                            if (isNpc) {
+                                AsyncImage(
+                                    model = api.url(card.npc!!.photo!!),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Inside,
+                                    alignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .requiredWidth(64.dp)
+                                        .clickable(
+                                            remember { MutableInteractionSource() },
+                                            null
+                                        ) {
+                                            tryNav(pos) {
+                                                onCard(card.id!!)
+                                            }
+                                        }
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = remember(photo) {
+                                        ImageRequest.Builder(context)
+                                            .data(photo)
+                                            .crossfade(true)
+                                            .size(64)
+                                            .build()
+                                    },
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    alignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .requiredSize(32.dp)
+                                        .shadow(2.dp, CircleShape)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                                        .border(1.5f.dp, MaterialTheme.colorScheme.background, CircleShape)
+                                        .padding(1.5f.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            tryNav(pos) {
+                                                onCard(card.id!!)
+                                            }
+                                        }
+                                )
+                            }
                         }
                     }
                 }
@@ -543,6 +552,8 @@ fun MapScreen(
         }
     }
 }
+
+private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0)
 
 @Composable
 fun OutlinedText(
