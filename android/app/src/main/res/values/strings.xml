@@ -750,6 +750,7 @@
     <string name="points_description">You will get points to spend on upgrading your pages as you contribute public
         content on Hi Town.
     </string>
+    <string name="downgrade">Downgrade</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

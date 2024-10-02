@@ -116,6 +116,28 @@ suspend fun Api.upgradeCard(
     onSuccess = onSuccess
 )
 
+suspend fun Api.downgradeCardDetails(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<CardDowngradeDetails>,
+) = get(
+    url = "cards/$id/downgrade",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.downgradeCard(
+    id: String,
+    downgrade: CardDowngradeBody,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post(
+    url = "cards/$id/downgrade",
+    body = downgrade,
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.deleteCard(
     id: String,
     onError: ErrorBlock = null,

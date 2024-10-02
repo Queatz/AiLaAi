@@ -126,6 +126,7 @@ import com.queatz.ailaai.services.SavedIcon
 import com.queatz.ailaai.services.ToggleSaveResult
 import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.slideshow.slideshow
+import com.queatz.ailaai.ui.card.CardDowngradeDialog
 import com.queatz.ailaai.ui.card.CardUpgradeDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
@@ -194,6 +195,7 @@ fun CardScreen(cardId: String) {
     var openCollaboratorsDialog by rememberSavableStateOf(false)
     var openLeaveCollaboratorsDialog by rememberSavableStateOf(false)
     var showUpgradeDialog by rememberSavableStateOf(false)
+    var showDowngradeDialog by rememberSavableStateOf(false)
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>(emptyList())) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
@@ -655,6 +657,12 @@ fun CardScreen(cardId: String) {
             menuItem(stringResource(R.string.change_owner)) {
                 openChangeOwner = true
                 showManageMenu = false
+            }
+            if ((card?.level ?: 0) > 0) {
+                menuItem(stringResource(R.string.downgrade)) {
+                    showDowngradeDialog = true
+                    showManageMenu = false
+                }
             }
             menuItem(stringResource(R.string.delete_card)) {
                 openDeleteCard = true
@@ -1312,6 +1320,16 @@ fun CardScreen(cardId: String) {
             cardUrl(cardId),
             card?.name
         )
+    }
+
+    if (showDowngradeDialog) {
+        CardDowngradeDialog(
+            onDismissRequest = { showDowngradeDialog = false },
+            cardId = cardId,
+            currentLevel = card?.level ?: 0
+        ) {
+            reload()
+        }
     }
 
     if (showUpgradeDialog) {

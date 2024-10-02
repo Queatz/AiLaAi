@@ -19,6 +19,16 @@ class Accounts {
         return upgradeCardCost(card) <= (account.points ?: 0)
     }
 
+    fun downgradeCardPointsRecovered(card: Card): Int {
+        return (card.level ?: 0).let { level ->
+            pow(level.coerceAtLeast(0))
+        }
+    }
+
+    fun canDowngradeCard(card: Card): Boolean {
+        return (card.level ?: 0) > 0
+    }
+
     fun upgradeCard(account: Account, card: Card): Boolean {
         val cost = upgradeCardCost(card)
 
@@ -26,8 +36,24 @@ class Accounts {
             return false
         }
 
-        account.points = account.points!! - cost
+        account.points = (account.points ?: 0) - cost
         card.level = (card.level ?: 0) + 1
+
+        db.update(account)
+        db.update(card)
+
+        return true
+    }
+
+    fun downgradeCard(account: Account, card: Card): Boolean {
+        if (!canDowngradeCard(card)) {
+            return false
+        }
+
+        val pointsRecovered = downgradeCardPointsRecovered(card)
+
+        account.points = (account.points ?: 0) + pointsRecovered
+        card.level = (card.level ?: 0) - 1
 
         db.update(account)
         db.update(card)

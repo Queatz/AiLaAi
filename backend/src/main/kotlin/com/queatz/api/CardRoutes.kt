@@ -458,6 +458,46 @@ fun Route.cardRoutes() {
             }
         }
 
+        post("/cards/{id}/downgrade") {
+            respond {
+                val body = call.receive<CardDowngradeBody>()
+                val card = db.document(Card::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val currentLevel = card.level ?: 0
+                val account = accounts.account(me.id!!)
+
+                if ((body.level + 1) != currentLevel) {
+                    return@respond HttpStatusCode.BadRequest.description("Level must decrease by exactly 1")
+                }
+
+                if (!accounts.canDowngradeCard(card)) {
+                    return@respond HttpStatusCode.BadRequest.description("Card is not upgraded")
+                }
+
+                if (accounts.downgradeCard(account, card)) {
+                    HttpStatusCode.OK
+                } else {
+                    HttpStatusCode.BadRequest
+                }
+            }
+        }
+
+        get("/cards/{id}/downgrade") {
+            respond {
+                val card = db.document(Card::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val currentLevel = card.level ?: 0
+                val account = accounts.account(me.id!!)
+
+                if (!accounts.canUpgradeCard(account, card)) {
+                    return@respond HttpStatusCode.BadRequest.description("Card is not upgraded")
+                }
+
+                CardDowngradeDetails(
+                    level = currentLevel - 1,
+                    points = accounts.downgradeCardPointsRecovered(card),
+                )
+            }
+        }
+
         post("/cards/{id}/photo") {
             respond {
                 val card = db.document(Card::class, parameter("id"))

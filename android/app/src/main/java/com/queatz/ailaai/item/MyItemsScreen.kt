@@ -1,5 +1,7 @@
 package com.queatz.ailaai.item
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -163,14 +165,23 @@ fun MyItemsScreen() {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            AppHeader(
-                stringResource(R.string.your_items),
-                {
-                    scrollToTop()
+            AppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.your_items),
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                scrollToTop()
+                            }
+                    )
                 },
-            ) {
-                // todo actions
-            }
+                navigationIcon = {
+                    BackButton()
+                }
+            )
             if (isLoading) {
                 Loading()
             } else {

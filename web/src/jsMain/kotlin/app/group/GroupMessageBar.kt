@@ -108,7 +108,7 @@ fun GroupMessageBar(
         }
     }
 
-    fun sendPhotos(files: List<File>, message: Message? = null) {
+    fun sendPhotos(files: List<File>) {
         isSending = true
         scope.launch {
             try {
@@ -117,8 +117,15 @@ fun GroupMessageBar(
                 api.sendMedia(
                     group.group!!.id!!,
                     photos,
-                    message
+                    replyMessage?.let { replyMessage ->
+                        Message(
+                            attachments = replyMessage.id?.let {
+                                listOf(json.encodeToString(ReplyAttachment(it)))
+                            }
+                        )
+                    }
                 ) {
+                    clearReplyMessage()
                     reloadMessages()
                 }
             } catch (e: Throwable) {

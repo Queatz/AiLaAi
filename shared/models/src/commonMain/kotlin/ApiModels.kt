@@ -299,10 +299,21 @@ class CardUpgradeBody(
 )
 
 @Serializable
+class CardDowngradeBody(
+    var level: Int
+)
+
+@Serializable
 class CardUpgradeDetails(
     var level: Int,
     var points: Int,
     var available: Boolean
+)
+
+@Serializable
+class CardDowngradeDetails(
+    var level: Int,
+    var points: Int
 )
 
 @Serializable
