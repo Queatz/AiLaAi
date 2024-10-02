@@ -209,10 +209,10 @@ fun StoriesScreen() {
                     .swipeMainTabs {
                         when (emptyList<Unit>().swipe(Unit, it)) {
                             is SwipeResult.Previous -> {
-                                nav.appNavigate(AppNav.Explore)
+                                nav.appNavigate(AppNav.Messages)
                             }
                             is SwipeResult.Next -> {
-                                nav.appNavigate(AppNav.Schedule)
+                                nav.appNavigate(AppNav.Explore)
                             }
                             is SwipeResult.Select<*> -> {
                                 // Impossible

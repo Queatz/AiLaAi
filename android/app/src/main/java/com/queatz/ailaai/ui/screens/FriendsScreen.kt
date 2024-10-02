@@ -504,7 +504,7 @@ fun FriendsScreen() {
                             }
 
                             is SwipeResult.Next -> {
-                                nav.appNavigate(AppNav.Explore)
+                                nav.appNavigate(AppNav.Stories)
                             }
 
                             is SwipeResult.Select<*> -> {
