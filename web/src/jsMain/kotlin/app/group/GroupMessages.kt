@@ -1,4 +1,11 @@
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import app.AppNavigation
 import app.AppStyles
 import app.ailaai.api.messages
@@ -12,11 +19,15 @@ import app.group.JoinGroupLayout
 import app.messaages.MessageItem
 import app.messaages.preview
 import com.queatz.db.GroupExtended
+import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
 import components.Loading
+import components.ProfilePhoto
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
@@ -123,6 +134,24 @@ fun GroupMessages(group: GroupExtended) {
         ) {
             messages.forEachIndexed { index, message ->
                 val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { reply }
+
+                val members = group.members ?: emptyList()
+                val nextMessage = if (index > 0) messages[index - 1] else null
+
+                val seenUntilHere = members.filter {
+                    it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(nextMessage))
+                }
+
+                seenUntilHere.notEmpty?.let { members ->
+                    Div({
+                        classes(AppStyles.seenUntilLayout)
+                    }) {
+                        members.forEach {
+                            ProfilePhoto(it.person!!, size = 18.px, fontSize = 12.px)
+                        }
+                    }
+                }
+
                 MessageItem(
                     message = message,
                     previousMessage = if (index < messages.lastIndex) messages[index + 1] else null,
@@ -149,3 +178,5 @@ fun GroupMessages(group: GroupExtended) {
         }
     }
 }
+
+private fun MemberAndPerson.hasSeen(message: Message) = (member?.seen ?: Instant.DISTANT_PAST) >= message.createdAt!!

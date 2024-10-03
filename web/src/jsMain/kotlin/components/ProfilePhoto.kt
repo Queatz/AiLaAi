@@ -23,6 +23,7 @@ import org.jetbrains.compose.web.dom.Text
 fun ProfilePhoto(
     person: Person,
     size: CSSNumeric = 36.px,
+    fontSize: CSSNumeric? = null,
     title: String? = null,
     border: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -32,6 +33,7 @@ fun ProfilePhoto(
         photo = person.photo,
         name = person.name,
         size = size,
+        fontSize = fontSize,
         title = title,
         border = border,
         onClick = onClick,

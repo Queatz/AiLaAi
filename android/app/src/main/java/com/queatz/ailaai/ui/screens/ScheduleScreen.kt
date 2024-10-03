@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.minutes
 
 private val viewKey = stringPreferencesKey("schedule.view")
 
@@ -182,6 +183,13 @@ fun ScheduleScreen() {
     LaunchedEffect(view, range) {
         reload()
         updates.collectLatest {
+            reload()
+        }
+    }
+
+    LaunchedEffect(view, range) {
+        while (true) {
+            delay(15.minutes)
             reload()
         }
     }

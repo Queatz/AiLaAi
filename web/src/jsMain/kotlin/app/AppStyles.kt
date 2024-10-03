@@ -11,6 +11,13 @@ import r
 
 object AppStyles : StyleSheet() {
 
+    val seenUntilLayout by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.RowReverse)
+        gap(.5.r)
+        padding(.5.r, 1.r)
+    }
+
     val notificationsLayout by style {
         position(Position.Fixed)
         left(0.r)

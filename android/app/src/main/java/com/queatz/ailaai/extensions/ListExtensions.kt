@@ -6,7 +6,8 @@ sealed class SwipeResult {
     class Select<E>(val item: E) : SwipeResult()
 }
 
-val <T> List<T>.ifNotEmpty get() = takeIf { isNotEmpty() }
+val <T> List<T>.notEmpty get() = takeIf { isNotEmpty() }
+val <T> List<T>.ifNotEmpty @Deprecated("Use .notEmpty") get() = notEmpty
 
 fun List<String>.filterNotBlank() = filter { it.isNotBlank() }
 

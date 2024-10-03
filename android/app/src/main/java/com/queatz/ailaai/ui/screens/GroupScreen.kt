@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -126,8 +127,10 @@ import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.profileUrl
+import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.shareAsUrl
@@ -155,10 +158,12 @@ import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.Dropdown
+import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.IconAndCount
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.MessageItem
+import com.queatz.ailaai.ui.components.ProfileImage
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
@@ -189,6 +194,7 @@ import com.queatz.db.GroupExtended
 import com.queatz.db.GroupMessagesConfig
 import com.queatz.db.JoinRequestAndPerson
 import com.queatz.db.Member
+import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.PhotosAttachment
@@ -889,9 +895,33 @@ fun GroupScreen(groupId: String) {
                     }
                 }
                 LazyColumn(reverseLayout = true, state = state, modifier = Modifier.weight(1f)) {
-                    itemsIndexed(messages, key = { _, it -> it.id!! }) { index, it ->
+                    itemsIndexed(messages, key = { _, it -> it.id!! }) { index, message ->
+                        val members = groupExtended?.members ?: emptyList()
+                        val nextMessage = if (index > 0) messages[index - 1] else null
+
+                        val seenUntilHere = members.filter {
+                            it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(nextMessage))
+                        }
+
+                        seenUntilHere.notEmpty?.asReversed()?.let { members ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.End),
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(horizontal = 1.pad)
+                            ) {
+                                members.forEach {
+                                    ProfileImage(
+                                        it.person?.photo,
+                                        it.person?.name.orEmpty(),
+                                        size = 18.dp
+                                    ) {}
+                                }
+                            }
+                        }
+
                         MessageItem(
-                            message = it,
+                            message = message,
                             previousMessage = index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
                             selectedMessages = selectedMessages,
                             onSelectedChange = { message, selected ->
@@ -2122,3 +2152,5 @@ fun Person.seenText(active: String) = seen?.timeAgo()?.let { timeAgo ->
 }
 
 fun Person.seenText() = seen?.timeAgo()?.lowercase()
+
+private fun MemberAndPerson.hasSeen(message: Message) = (member?.seen ?: Instant.DISTANT_PAST) >= message.createdAt!!

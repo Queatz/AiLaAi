@@ -26,7 +26,7 @@ class Ai {
 
     companion object {
         val styles = listOf(
-            "Flux (HD)" to ":flux",
+            "Flux (Text Rendering, HD)" to ":flux",
             "Dreaming (HD)" to "dreamshaperxl_lightning_1024px",
             "Starlight (HD)" to "envy_starlight_xl_01_lightning_1024px",
             "Juggernaut 9 (HD)" to "juggernautxl_9_lightning_1024px",

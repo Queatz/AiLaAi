@@ -741,4 +741,5 @@
     <string name="reply_in_new_group">Trả lời trong nhóm mới</string>
     <string name="upgrade">Nâng cấp</string>
     <string name="points">Xu</string>
+    <string name="downgrade">Hạ cấp</string>
 </resources>

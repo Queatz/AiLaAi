@@ -446,10 +446,6 @@ fun Route.cardRoutes() {
                 val currentLevel = card.level ?: 0
                 val account = accounts.account(me.id!!)
 
-                if (!accounts.canUpgradeCard(account, card)) {
-                    return@respond HttpStatusCode.BadRequest.description("Insufficient points")
-                }
-
                 CardUpgradeDetails(
                     level = currentLevel + 1,
                     points = accounts.upgradeCardCost(card),
