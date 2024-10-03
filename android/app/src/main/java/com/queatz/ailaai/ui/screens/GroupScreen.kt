@@ -910,12 +910,16 @@ fun GroupScreen(groupId: String) {
                                 modifier = Modifier.fillMaxWidth()
                                     .padding(horizontal = 1.pad)
                             ) {
-                                members.forEach {
+                                members.forEach { member ->
                                     ProfileImage(
-                                        it.person?.photo,
-                                        it.person?.name.orEmpty(),
+                                        member.person?.photo,
+                                        member.person?.name.orEmpty(),
                                         size = 18.dp
-                                    ) {}
+                                    ) {
+                                        if (member.person != null) {
+                                            nav.appNavigate(AppNav.Profile(member.person!!.id!!))
+                                        }
+                                    }
                                 }
                             }
                         }
