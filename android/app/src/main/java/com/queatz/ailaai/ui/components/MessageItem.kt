@@ -75,7 +75,7 @@ fun MessageItem(
                             PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
                         ) {
                             if (message.member != null) {
-                                nav.appNavigate(AppNav.Profile(message.member!!.let(getPerson)!!.id!!))
+                                nav.appNavigate(AppNav.Profile(message.member?.let(getPerson)?.id ?: return@ProfileImage))
                             }
                         }
                     }
