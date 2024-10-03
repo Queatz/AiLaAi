@@ -15,7 +15,9 @@ object AppStyles : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.RowReverse)
         gap(.5.r)
-        padding(.5.r, 1.r)
+        padding(.5.r, 1.r, 0.r, 1.r)
+        overflowX("hidden")
+        flexWrap(FlexWrap.Wrap)
     }
 
     val notificationsLayout by style {
