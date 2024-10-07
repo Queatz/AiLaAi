@@ -26,7 +26,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Groups)
         }
-        IconButton("newspaper", appString { explore }, styles = {
+        IconButton("newspaper", appString { posts }, styles = {
             if (nav == NavPage.Stories) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)
