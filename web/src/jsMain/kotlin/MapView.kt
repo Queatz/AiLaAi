@@ -76,7 +76,7 @@ data class CardMarker(
 )
 
 @Composable
-fun MapView(header: (@Composable () -> Unit)? = null) {
+fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) {
     var searchText by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(listOf<Card>()) }
@@ -355,7 +355,7 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
     Div({
         classes(Styles.mapContainer)
     }) {
-        if (shownCards.isNotEmpty()) {
+        if (showList && shownCards.isNotEmpty()) {
             Div({
                 classes(Styles.navContainer, Styles.mapList)
             }) {
@@ -395,7 +395,8 @@ fun MapView(header: (@Composable () -> Unit)? = null) {
                     boxSizing("border-box")
                 }
             }) {
-                SearchField(searchText, appString { search },
+                // todo: translate
+                SearchField(searchText, "Search for people, places, services, and more",
                     shadow = true,
                     styles = {
                     }) {

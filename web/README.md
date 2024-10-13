@@ -47,6 +47,9 @@ apt install certbot nodejs npm nginx python3-certbot-nginx
 server {
     server_name <enter server host>;
     root /root/ui;
+    gzip on;
+    gzip_types text/plain application/javascript;
+
     listen 80;
 
     location / {

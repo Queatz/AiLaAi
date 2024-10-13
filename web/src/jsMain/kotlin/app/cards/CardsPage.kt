@@ -128,7 +128,7 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
                             flexDirection(FlexDirection.Column)
                         }
                     }) {
-                        MapView()
+                        MapView(showList = false)
                     }
                 } else {
                     if (cards.isEmpty()) {
