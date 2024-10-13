@@ -280,32 +280,6 @@ for group, myMember in outbound @person graph `${Member::class.graph()}`
         return true
 ) == true"""
 
-fun Db.cards(geo: List<Double>, search: String? = null, offset: Int = 0, limit: Int = 20) = list(
-    Card::class,
-    """
-        for x in @@collection
-            filter x.${f(Card::active)} == true
-                and x.${f(Card::parent)} == null
-                and x.${f(Card::geo)} != null
-                and x.${f(Card::offline)} != true
-                and (@search == null or contains(lower(x.${f(Card::name)}), @search) or contains(lower(x.${f(Card::location)}), @search) or contains(lower(x.${f(Card::conversation)}), @search))
-            sort distance(x.${f(Card::geo)}[0], x.${f(Card::geo)}[1], @geo[0], @geo[1])
-            limit @offset, @limit
-            return merge(
-                x,
-                {
-                    cardCount: count(for card in @@collection filter card.${f(Card::active)} == true && card.${f(Card::parent)} == x._key return true)
-                }
-            )
-    """.trimIndent(),
-    mapOf(
-        "geo" to geo,
-        "search" to search?.lowercase(),
-        "offset" to offset,
-        "limit" to limit
-    )
-)
-
 /**
  * @card The card
  * @person The current user

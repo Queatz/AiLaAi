@@ -61,8 +61,9 @@ abstract class Api {
         client: HttpClient = httpClient,
     ): R = client.post("$baseUrl/${url}") {
         onUpload { bytesSentTotal, contentLength ->
+            val contentLength = contentLength ?: 0L
             val progress =
-                if (contentLength > 0) (bytesSentTotal.toDouble() / contentLength.toDouble()).toFloat() else 0f
+                if (contentLength > 0L) (bytesSentTotal.toDouble() / contentLength.toDouble()).toFloat() else 0f
             progressCallback?.invoke(progress)
         }
 
