@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material3.Icon
@@ -77,10 +78,12 @@ fun PersonStatusDialog(
                                     .background(status.statusInfo?.color?.toColorInt()?.let { Color(it) } ?: MaterialTheme.colorScheme.background)
                                     .zIndex(1f)
                             )
-                            Text(
-                                text = status.statusInfo?.name.orEmpty(),
-                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
-                            )
+                            SelectionContainer {
+                                Text(
+                                    text = status.statusInfo?.name.orEmpty(),
+                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
+                                )
+                            }
                         }
                         status.note?.let { note ->
                             Text(
