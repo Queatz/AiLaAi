@@ -1,5 +1,7 @@
 package components
 
+import Strings.orEnterTransferCode
+import Strings.signIn
 import androidx.compose.runtime.*
 import api
 import app.ailaai.api.wildReply
@@ -10,6 +12,7 @@ import com.queatz.db.*
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import notEmpty
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
@@ -24,11 +27,13 @@ fun CardReply(
     cardConversation: ConversationItem?,
     stack: MutableList<ConversationItem>,
     replyMessage: String,
+    replyMessageContact: String,
     isReplying: List<ConversationItem>?,
     onCardConversation: (ConversationItem?) -> Unit,
     onMessageSent: () -> Unit,
     onIsReplying: (List<ConversationItem>?) -> Unit,
     onReplyMessage: (String) -> Unit,
+    onReplyMessageContact: (String) -> Unit,
     isLastElement: Boolean
 ) {
     val me by application.me.collectAsState()
@@ -64,8 +69,6 @@ fun CardReply(
     }
 
     if (isReplying != null) {
-        val includeContactString = appString { includeContact }
-        // todo can be EditField
         TextArea(replyMessage) {
             classes(Styles.textarea)
             style {
@@ -74,13 +77,12 @@ fun CardReply(
                 marginBottom(1.r)
             }
 
-            if (me == null) {
-                placeholder(includeContactString)
-            }
-
             if (isSendingReply) {
                 disabled()
             }
+
+            // todo: translate
+            placeholder("Enter your message")
 
             onInput {
                 onReplyMessage(it.value)
@@ -91,6 +93,34 @@ fun CardReply(
             ref {
                 it.focus()
                 onDispose {}
+            }
+        }
+        if (me == null) {
+            Div({
+                style {
+                    fontWeight("bold")
+                }
+            }) {
+                // todo: translate
+                Text("How would you like to be contacted?")
+            }
+            Input(InputType.Text) {
+                classes(Styles.textarea)
+                style {
+                    width(100.percent)
+                    marginBottom(1.r)
+                }
+
+                // todo: translate
+                placeholder("Your phone number or email")
+
+                onInput {
+                    onReplyMessageContact(it.value)
+                }
+
+                if (isSendingReply) {
+                    disabled()
+                }
             }
         }
         Div({
@@ -112,7 +142,7 @@ fun CardReply(
                         sendMessage()
                     }
                 }
-                if (isSendingReply || replyMessage.isBlank()) {
+                if (isSendingReply || replyMessage.isBlank() || replyMessageContact.isBlank()) {
                     disabled()
                 }
             }) {

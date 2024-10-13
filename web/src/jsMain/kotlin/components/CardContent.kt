@@ -31,12 +31,14 @@ fun CardContent(card: Card, showOpenCardInNewTab: Boolean = false) {
     var cardConversation by remember { mutableStateOf<ConversationItem?>(null) }
     var isReplying by remember { mutableStateOf<List<ConversationItem>?>(null) }
     var replyMessage by remember { mutableStateOf("") }
+    var replyMessageContact by remember { mutableStateOf("") }
     val stack = remember { mutableListOf<ConversationItem>() }
     val cardOptions = remember(card) { card.getOptions() }
 
     LaunchedEffect(card) {
         isReplying = null
         replyMessage = ""
+        replyMessageContact = ""
         cardConversation = card.getConversation()
         stack.clear()
     }
@@ -114,12 +116,14 @@ fun CardContent(card: Card, showOpenCardInNewTab: Boolean = false) {
             cardConversation,
             stack,
             replyMessage,
+            replyMessageContact,
             isReplying,
             onCardConversation = {
                 cardConversation = it
             },
             onMessageSent = {
                 replyMessage = ""
+                replyMessageContact = ""
                 isReplying = null
             },
             onIsReplying = {
@@ -127,6 +131,9 @@ fun CardContent(card: Card, showOpenCardInNewTab: Boolean = false) {
             },
             onReplyMessage = {
                 replyMessage = it
+            },
+            onReplyMessageContact = {
+                replyMessageContact = it
             },
             isLastElement = card.content?.asStoryContents()?.isNotEmpty() != true
         )

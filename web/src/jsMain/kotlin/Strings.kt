@@ -252,11 +252,6 @@ object Strings {
         "Trang cá nhân",
         "Профиль"
     )
-    val includeContact = Translation(
-        "Be sure to include a way to contact you!",
-        "Bạn lại nhớ gồm một cách để liên lạc bạn!",
-        "Обязательно укажите способ связи с вами!"
-    )
     val didntWork = Translation(
         "That didn't work",
         "Điều đó đã không làm được",
