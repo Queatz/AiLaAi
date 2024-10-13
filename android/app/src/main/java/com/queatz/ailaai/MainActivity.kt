@@ -88,6 +88,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.navigation.NavDeepLink
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -101,6 +102,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
+import com.queatz.ailaai.data.appDomains
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
@@ -807,9 +809,7 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable(
                                                 "card/{id}",
-                                                deepLinks = listOf(
-                                                    navDeepLink { uriPattern = "$appDomain/page/{id}" },
-                                                    navDeepLink { uriPattern = "$appDomain/card/{id}" })
+                                                deepLinks = deeplink("/page/{id}", "/card/{id}")
                                             ) {
                                                 CardScreen(it.arguments!!.getString("id")!!)
                                             }
@@ -825,7 +825,7 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable(
                                                 "group/{id}",
-                                                deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/group/{id}" })
+                                                deepLinks = deeplink("/group/{id}")
                                             ) {
                                                 GroupScreen(it.arguments!!.getString("id")!!)
                                             }
@@ -923,6 +923,12 @@ private fun Modifier.safePadding(enabled: Boolean) = then(
         WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
     )
 )
+
+private fun deeplink(vararg urls: String): List<NavDeepLink> = urls.flatMap { url ->
+    appDomains.map { domain ->
+        navDeepLink { uriPattern = "$domain$url" }
+    }
+}
 
 data class NavButton(
     val route: AppNav,

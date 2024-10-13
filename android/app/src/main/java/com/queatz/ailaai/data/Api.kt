@@ -35,7 +35,11 @@ val json = Json {
 
 val api = Api()
 
-const val appDomain = "https://ailaai.app"
+const val appDomain = "https://hitown.chat"
+val appDomains = listOf(
+    appDomain,
+    "https://ailaai.app"
+)
 
 class Api : app.ailaai.api.Api() {
 
