@@ -19,8 +19,8 @@ val Int.px: Dp
 
 val Dp.px: Int
     @Composable get() {
-    return (value * LocalDensity.current.density).roundToInt()
-}
+        return (value * LocalDensity.current.density).roundToInt()
+    }
 
 private val decimalFormat = DecimalFormat("#,###.##")
 

@@ -45,7 +45,7 @@ fun audioRecorder(
     onIsRecordingAudio: (Boolean) -> Unit,
     onRecordingAudioDuration: (Long) -> Unit,
     onPermissionDenied: () -> Unit,
-    onAudio: suspend (File) -> Unit,
+    onAudio: suspend (File) -> Boolean,
 ): AudioRecorderControl {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -123,10 +123,10 @@ fun audioRecorder(
 
     fun stopRecording() {
         trackDurationJob?.cancel()
-        onIsRecordingAudio(false)
 
         try {
             audioRecorder?.stop()
+            onIsRecordingAudio(false)
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
@@ -141,9 +141,14 @@ fun audioRecorder(
     fun sendActiveRecording() {
         stopRecording()
         scope.launch {
-            onAudio(audioOutputFile ?: return@launch)
-            audioOutputFile?.delete()
-            audioOutputFile = null
+            repeat(times = 3) {
+                val success = onAudio(audioOutputFile ?: return@launch)
+                if (success) {
+                    audioOutputFile?.delete()
+                    audioOutputFile = null
+                    return@launch
+                }
+            }
         }
     }
 

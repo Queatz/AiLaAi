@@ -2,18 +2,22 @@ package com.queatz.ailaai.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -92,6 +96,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.ailaai.api.createGroup
@@ -129,7 +134,6 @@ import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.nullIfBlank
-import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
@@ -158,7 +162,6 @@ import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.Dropdown
-import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.IconAndCount
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.Loading
@@ -218,6 +221,7 @@ import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.serialization.encodeToString
+import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
@@ -358,12 +362,15 @@ fun GroupScreen(groupId: String) {
             showAudioRationale = true
         }
     ) { file ->
+        var success = false
         api.sendAudioFromUri(groupId, file, stageReply?.id?.let {
             Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
         }) {
+            success = true
             stageReply = null
             reloadMessages()
         }
+        success
     }
 
     suspend fun loadMore() {
@@ -924,46 +931,84 @@ fun GroupScreen(groupId: String) {
                             }
                         }
 
-                        MessageItem(
-                            message = message,
-                            previousMessage = index.takeIf { it < messages.lastIndex }?.let { it + 1 }?.let { messages[it] },
-                            selectedMessages = selectedMessages,
-                            onSelectedChange = { message, selected ->
-                                if (searchMessages != null) {
-                                    searchMessages = null
-                                }
+                        val offsetX = remember { Animatable(0f) }
+                        var releaseDrag by rememberStateOf(false)
+                        val replySlideThreshold = 96.dp.px
 
-                                selectedMessages = if (selected) {
-                                    selectedMessages + message
-                                } else {
-                                    selectedMessages - message
-                                }
-                            },
-                            getPerson = {
-                                groupExtended?.members?.find { member -> member.member?.id == it }?.person
-                            },
-                            getBot = {
-                                groupExtended?.bots?.find { bot -> bot.id == it }
-                            },
-                            getMessage = { messageId ->
-                                var message: Message? = messages.find { it.id == messageId }
-                                api.message(messageId) {
-                                    message = it
-                                }
-                                message
-                            },
-                            member = myMember?.member,
-                            onUpdated = {
+                        LaunchedEffect(offsetX.value) {
+                            if (offsetX.value.absoluteValue > replySlideThreshold && !releaseDrag) {
+                                releaseDrag = true
+                                stageReply = message
+                                focusRequester.requestFocus()
                                 scope.launch {
-                                    reloadMessages()
+                                    offsetX.animateTo(0f)
                                 }
-                            },
-                            onReply = { stageReply = it },
-                            onReplyInNewGroup = {
-                                showReplyInNewGroupDialog = it
-                            },
-                            onShowPhoto = { showPhoto = it }
-                        )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .draggable(
+                                    orientation = Orientation.Horizontal,
+                                    state = rememberDraggableState { delta ->
+                                        if (!releaseDrag) {
+                                            scope.launch {
+                                                offsetX.snapTo(offsetX.value + delta)
+                                            }
+                                        }
+                                    },
+                                    onDragStopped = {
+                                        scope.launch {
+                                            offsetX.animateTo(0f)
+                                            releaseDrag = false
+                                        }
+                                    }
+                                )
+                                .offset { IntOffset(offsetX.value.toInt(), 0) }
+                        ) {
+                            MessageItem(
+                                message = message,
+                                previousMessage = index.takeIf { it < messages.lastIndex }?.let { it + 1 }
+                                    ?.let { messages[it] },
+                                selectedMessages = selectedMessages,
+                                onSelectedChange = { message, selected ->
+                                    if (searchMessages != null) {
+                                        searchMessages = null
+                                    }
+
+                                    selectedMessages = if (selected) {
+                                        selectedMessages + message
+                                    } else {
+                                        selectedMessages - message
+                                    }
+                                },
+                                getPerson = {
+                                    groupExtended?.members?.find { member -> member.member?.id == it }?.person
+                                },
+                                getBot = {
+                                    groupExtended?.bots?.find { bot -> bot.id == it }
+                                },
+                                getMessage = { messageId ->
+                                    var message: Message? = messages.find { it.id == messageId }
+                                    api.message(messageId) {
+                                        message = it
+                                    }
+                                    message
+                                },
+                                member = myMember?.member,
+                                onUpdated = {
+                                    scope.launch {
+                                        reloadMessages()
+                                    }
+                                },
+                                onReply = { stageReply = it },
+                                onReplyInNewGroup = {
+                                    showReplyInNewGroupDialog = it
+                                },
+                                onShowPhoto = { showPhoto = it }
+                            )
+                        }
                     }
                     item {
                         AnimatedVisibility(hasOlderMessages && messages.isNotEmpty()) {
