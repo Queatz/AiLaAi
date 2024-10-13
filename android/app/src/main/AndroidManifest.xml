@@ -122,6 +122,9 @@
         <receiver android:name=".CallReceiver"
                   android:exported="false" />
 
+        <receiver android:name=".ReplyReceiver"
+                  android:exported="false" />
+
         <service
                 android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
                 android:enabled="false"

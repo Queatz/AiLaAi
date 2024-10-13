@@ -46,6 +46,7 @@ fun Push.receive(data: MessagePushData) {
             intent = deeplinkIntent,
             channel = Notifications.Messages,
             groupKey = makeGroupKey(data.group.id!!),
+            replyInGroup = data.group.id!!,
             title = groupName ?: personName,
             text = buildString {
                 if (groupName != null) {

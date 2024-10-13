@@ -12,16 +12,32 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
+import androidx.core.os.bundleOf
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.queatz.ailaai.R
+import com.queatz.ailaai.ReplyReceiver
+import com.queatz.ailaai.ReplyReceiver.Companion.KEY_REPLY
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.push.receive
 import com.queatz.db.Person
-import com.queatz.push.*
+import com.queatz.push.CallPushData
+import com.queatz.push.CallStatusPushData
+import com.queatz.push.CollaborationPushData
+import com.queatz.push.CommentPushData
+import com.queatz.push.CommentReplyPushData
+import com.queatz.push.GroupPushData
+import com.queatz.push.JoinRequestPushData
+import com.queatz.push.MessagePushData
+import com.queatz.push.PushAction
+import com.queatz.push.PushDataData
+import com.queatz.push.ReminderPushData
+import com.queatz.push.StoryPushData
+import com.queatz.push.TradePushData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -113,7 +129,8 @@ class Push {
         title: String,
         text: String,
         style: NotificationCompat.Style? = null,
-        sound: Uri? = null
+        sound: Uri? = null,
+        replyInGroup: String? = null
     ) {
         if (!notificationManager.areNotificationsEnabled()) {
             return
@@ -131,11 +148,46 @@ class Push {
             .setContentIntent(
                 TaskStackBuilder.create(context).run {
                     addNextIntentWithParentStack(intent)
-                    getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                    getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or (if (replyInGroup == null) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_MUTABLE))
                 }
             ).let {
                 if (sound != null) {
                     it.setSound(sound)
+                } else {
+                    it
+                }
+            }.let {
+                if (replyInGroup != null) {
+                    val replyIntent = Intent(context, ReplyReceiver::class.java).apply {
+                        putExtras(
+                            bundleOf(
+                                ReplyReceiver.KEY_GROUP_ID to replyInGroup,
+                                ReplyReceiver.KEY_NOTIFICATION_KEY to groupKey,
+                            )
+                        )
+                    }
+                    val replyPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        replyIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    )
+
+                    val remoteInput = RemoteInput.Builder(KEY_REPLY)
+                        .setLabel(context.getString(R.string.reply))
+                        .build()
+
+                    val replyAction = NotificationCompat.Action.Builder(
+                        null,
+                        context.getString(R.string.reply),
+                        replyPendingIntent
+                    ).addRemoteInput(remoteInput)
+                        .setAllowGeneratedReplies(true)
+                        .build()
+
+                    it.addAction(
+                        replyAction
+                    )
                 } else {
                     it
                 }
