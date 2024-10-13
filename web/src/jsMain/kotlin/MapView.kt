@@ -7,11 +7,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.ailaai.api.cards
+import app.cards.MapList
+import app.cards.mapListDialog
 import app.components.Spacer
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import components.CardContent
 import components.CardListItem
+import components.Icon
 import components.SearchField
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -26,6 +29,7 @@ import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.alignSelf
@@ -43,6 +47,7 @@ import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
@@ -362,18 +367,8 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                 Div({
                     classes(Styles.navContent)
                 }) {
-                    LazyColumn({
-                        style {
-                            gap(.5.r)
-                            alignItems(AlignItems.Stretch)
-                            padding(.5.r)
-                        }
-                    }) {
-                        items(shownCards, key = { it.id!! }) { card ->
-                            CardListItem(card) {
-                                selectedCard = if (selectedCard?.id == card.id) null else card
-                            }
-                        }
+                    MapList(shownCards) { card ->
+                        selectedCard = if (selectedCard?.id == card.id) null else card
                     }
                 }
             }
@@ -446,6 +441,33 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                             CardContent(it, showOpenCardInNewTab = true)
                         }
                     }
+                }
+            }
+        } else {
+            Div({
+                classes(Styles.mobileOnly)
+
+                style {
+                    alignItems(AlignItems.Center)
+                    justifyContent(JustifyContent.Center)
+                    property("z-index", "10")
+                    alignSelf(AlignSelf.Stretch)
+                    padding(2.r, 1.r)
+                }
+            }) {
+                Button({
+                    classes(Styles.button)
+
+                    onClick {
+                        scope.launch {
+                            mapListDialog(shownCards) { card ->
+                                window.open("/page/${card.id}", target = "_blank")
+                            }
+                        }
+                    }
+                }) {
+                    Icon("list")
+                    Text("View list")
                 }
             }
         }

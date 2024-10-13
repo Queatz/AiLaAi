@@ -124,6 +124,22 @@ object Styles : StyleSheet() {
         }
     }
 
+    val desktopOnly by style {
+        display(DisplayStyle.Flex)
+
+        mobile(self) {
+            display(DisplayStyle.None)
+        }
+    }
+
+    val mobileOnly by style {
+        display(DisplayStyle.Flex)
+
+        desktop(self) {
+            display(DisplayStyle.None)
+        }
+    }
+
     val mainContainer by style {
         position(Position.Relative)
         width(100.vw)

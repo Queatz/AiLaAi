@@ -77,6 +77,8 @@ fun AppHeader(
                 }
             }
             Span({
+                classes(Styles.desktopOnly)
+
                 style {
                     paddingLeft(1.r)
                     fontSize(24.px)
