@@ -18,6 +18,7 @@ object AppStyles : StyleSheet() {
         padding(.5.r, 1.r, 0.r, 1.r)
         overflowX("hidden")
         flexWrap(FlexWrap.Wrap)
+        flexShrink(0)
     }
 
     val notificationsLayout by style {

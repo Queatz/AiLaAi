@@ -47,7 +47,7 @@ fun LazyListScope.Period(
             PeriodEmpty()
         }
     } else {
-        itemsIndexed(events, key = { _, it -> "${it.reminder.id}:${it.date}:${it.occurrence?.id}" }) { index, event ->
+        itemsIndexed(events, key = { index, it -> "${it.reminder.id}:${it.date}:${it.occurrence?.id ?: "[$index]" }" }) { index, event ->
             Row(
                 verticalAlignment = Alignment.Top,
                 modifier = Modifier
