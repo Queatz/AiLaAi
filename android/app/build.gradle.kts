@@ -94,7 +94,7 @@ dependencies {
 
     // Compose
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:${versions.compose}")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
@@ -113,7 +113,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -126,13 +126,12 @@ dependencies {
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
     implementation("at.bluesource.choicesdk:choicesdk-maps:${versions.choiceSdk}")
     implementation("at.bluesource.choicesdk:choicesdk-messaging:${versions.choiceSdk}")
-    implementation("com.huawei.hms:base:6.11.0.301")
-    implementation("com.huawei.hms:maps:6.11.0.304")
+    implementation("com.huawei.hms:base:6.13.0.300")
+    implementation("com.huawei.hms:maps:6.11.2.301")
     implementation("com.huawei.hms:push:6.11.0.300")
-    implementation("com.huawei.hms:scan:2.11.0.300")
-    implementation("com.huawei.hms:hianalytics:6.10.0.303")
-    implementation("com.huawei.hms:hwid:6.11.0.300")
-    implementation("com.huawei.hms:location:6.11.0.301")
+    implementation("com.huawei.hms:scan:2.12.0.301")
+    implementation("com.huawei.hms:hwid:6.12.0.300")
+    implementation("com.huawei.hms:location:6.12.0.300")
 
     // Media
     implementation("androidx.exifinterface:exifinterface:1.3.7")
