@@ -46,14 +46,14 @@ fun CardReply(
     suspend fun sendMessage() {
         isSendingReply = true
         val body = WildReplyBody(
-            message = replyMessage,
+            message = "$replyMessage\n\n$replyMessageContact",
             conversation = isReplying!!.map { it.title }.filter { it.isNotBlank() }
                 .notEmpty?.joinToString(" → "),
             card = card.id!!,
             device = api.device
         )
         api.wildReply(
-            body,
+            reply = body,
             onError = {
                 scope.launch {
                     dialog(didntWorkString, cancelButton = null)

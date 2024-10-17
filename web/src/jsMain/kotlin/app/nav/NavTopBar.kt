@@ -12,7 +12,12 @@ import org.w3c.dom.HTMLDivElement
 import r
 
 @Composable
-fun NavTopBar(me: Person?, title: String, onProfileClick: () -> Unit, actions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {}) {
+fun NavTopBar(
+    me: Person?,
+    title: String,
+    onProfileClick: () -> Unit,
+    actions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
+) {
     Div({
         style {
             display(DisplayStyle.Flex)

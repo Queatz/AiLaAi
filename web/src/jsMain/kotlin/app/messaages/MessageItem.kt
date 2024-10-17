@@ -105,26 +105,11 @@ fun MessageItem(
                 item(appString { reply }) {
                     onReply()
                 }
+
                 item(appString { replyInNewGroup }) {
                     onReplyInNewGroup()
                 }
-                if (message.member == myMember?.member?.id || myMember?.member?.host == true) {
-                    item(appString { delete }) {
-                        scope.launch {
-                            dialog(
-                                // todo: translate
-                                title = "Delete this message?",
-                                confirmButton = application.appString { delete }
-                            ).let {
-                                if (it == true) {
-                                    api.deleteMessage(message = message.id!!) {
-                                        onUpdated()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+
                 if (message.member == myMember?.member?.id) {
                     item(appString { edit }) {
                         scope.launch {
@@ -137,6 +122,24 @@ fun MessageItem(
                             ).let {
                                 if (it != null) {
                                     api.updateMessage(id = message.id!!, messageUpdate = Message(text = it)) {
+                                        onUpdated()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (message.member == myMember?.member?.id || myMember?.member?.host == true) {
+                    item(appString { delete }) {
+                        scope.launch {
+                            dialog(
+                                // todo: translate
+                                title = "Delete this message?",
+                                confirmButton = application.appString { delete }
+                            ).let {
+                                if (it == true) {
+                                    api.deleteMessage(message = message.id!!) {
                                         onUpdated()
                                     }
                                 }

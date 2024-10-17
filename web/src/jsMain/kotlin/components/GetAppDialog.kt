@@ -35,6 +35,21 @@ suspend fun getAppDialog() {
                 }
 
                 onClick {
+                    window.open("https://play.google.com/store/apps/details?id=com.ailaai.app", target = "_blank")
+                }
+            }) {
+                Icon("android")
+                // todo: translate
+                Text("Google Play")
+            }
+            Button({
+                classes(Styles.outlineButton, Styles.outlineButtonAlt)
+
+                style {
+                    borderRadius(1.r)
+                }
+
+                onClick {
                     window.open("/ailaai.apk", target = "_blank")
                 }
             }) {
@@ -56,21 +71,6 @@ suspend fun getAppDialog() {
                 Icon("ios")
                 // todo: translate
                 Text("App Store")
-            }
-            Button({
-                classes(Styles.outlineButton, Styles.outlineButtonAlt)
-
-                style {
-                    borderRadius(1.r)
-                }
-
-                onClick {
-                    window.open("https://play.google.com/store/apps/details?id=com.ailaai.app", target = "_blank")
-                }
-            }) {
-                Icon("android")
-                // todo: translate
-                Text("Google Play")
             }
         }
     }
