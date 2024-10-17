@@ -149,7 +149,7 @@ dependencies {
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 
     // VideoSDK
-    implementation("live.videosdk:rtc-android-sdk:0.1.32") {
+    implementation("live.videosdk:rtc-android-sdk:0.1.36") {
         exclude("androidx.core")
         exclude("com.android.support")
     }
