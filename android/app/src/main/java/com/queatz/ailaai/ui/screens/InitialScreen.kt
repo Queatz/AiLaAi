@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush.Companion.linearGradient
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -137,6 +139,12 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 )
             )
     ) {
+        Image(
+            painterResource(R.mipmap.ic_app),
+            null,
+            modifier = Modifier
+                .padding(bottom = 1.pad)
+        )
         Text(
             stringResource(R.string.hello),
             color = MaterialTheme.colorScheme.onBackground,

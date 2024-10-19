@@ -25,6 +25,7 @@
     <string name="add_a_card">Tạo trang mới</string>
     <string name="you_have_no_groups">Bạn hiện không có nhóm nào.</string>
     <string name="search">Tìm kiếm</string>
+    <string name="search_map">Tìm kiếm người, địa điểm, dịch vụ và nhiều hơn nữa</string>
     <string name="open_settings">Mở cài đặt</string>
     <string name="location_disabled_description">Quyền vị trí bị tắt trong cài đặt.</string>
     <string name="camera_disabled_description">Quyền chụp ảnh bị tắt trong cài đặt.</string>
@@ -743,4 +744,5 @@
     <string name="points">Xu</string>
     <string name="downgrade">Hạ cấp</string>
     <string name="message_sent">Tin nhắn được gửi</string>
+    <string name="what_shall_people_call_you">Tên bạn là gì?</string>
 </resources>

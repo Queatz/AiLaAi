@@ -139,7 +139,7 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
                     when (step) {
                         WelcomeStep.SetName -> {
                             Text(
-                                "What shall people call you?",
+                                stringResource(R.string.what_shall_people_call_you),
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )

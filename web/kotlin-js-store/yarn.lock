@@ -318,10 +318,10 @@
   dependencies:
     "@types/node" "*"
 
-"@videosdk.live/js-sdk@0.0.90":
-  version "0.0.90"
-  resolved "https://registry.yarnpkg.com/@videosdk.live/js-sdk/-/js-sdk-0.0.90.tgz#59820742f138da78ed0dc7bdb57849d548432b4d"
-  integrity sha512-GiUoJtrhiKW7ibE9uCx8HrBM9cHQ+OKj632dkU3FSJg3c8TaESEUmo4iNRi3oRcrLCjX55zxFk7BzDhlLtOl/Q==
+"@videosdk.live/js-sdk@0.0.98":
+  version "0.0.98"
+  resolved "https://registry.yarnpkg.com/@videosdk.live/js-sdk/-/js-sdk-0.0.98.tgz#d1ef18b7dcb98e493087b058923f96d6eb3fadc7"
+  integrity sha512-we07wdHOq+6kUu0VVEFlWD4tmLVb2zGsUYoyUP+amJ1pMBDXQh3CCNsXiLP1bKVx77Zhz29SmAg8aTiRRwYo/w==
 
 "@vvo/tzdb@6.141.0":
   version "6.141.0"

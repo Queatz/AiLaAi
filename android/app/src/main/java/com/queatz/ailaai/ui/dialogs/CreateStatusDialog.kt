@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -85,6 +86,7 @@ fun CreateStatusDialog(
                 Spacer(Modifier.height(1.pad))
                 HsvColorPicker(
                     modifier = Modifier
+                        .widthIn(360.dp)
                         .fillMaxWidth()
                         .aspectRatio(1f)
                         .padding(10.dp),

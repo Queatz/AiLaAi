@@ -39,6 +39,7 @@
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
     <string name="camera_disabled_description">The camera permission is disabled in settings.</string>
     <string name="search">Search</string>
+    <string name="search_map">Search for people, places, services, and more</string>
     <string name="search_people_and_groups">Search people and groups</string>
     <string name="explore">Explore</string>
     <string name="messages">Messages</string>
@@ -752,6 +753,7 @@
     </string>
     <string name="downgrade">Downgrade</string>
     <string name="message_sent">Message sent</string>
+    <string name="what_shall_people_call_you">What shall people call you?</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

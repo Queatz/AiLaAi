@@ -464,18 +464,18 @@ fun ExploreScreen() {
                             .onPlaced { viewportHeight = it.boundsInParent().size.height.toInt() }
                     ) {
                         SearchContent(
-                            locationSelector,
-                            isLoading,
-                            filters,
-                            categories,
-                            selectedCategory
+                            locationSelector = locationSelector,
+                            isLoading = isLoading,
+                            filters = filters,
+                            categories = categories,
+                            category = selectedCategory
                         ) {
                             selectedCategory = it
                         }
                         SearchFieldAndAction(
                             value,
                             { value = it },
-                            placeholder = stringResource(R.string.search),
+                            placeholder = stringResource(R.string.search_map),
                             action = {
                                 Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
                             },

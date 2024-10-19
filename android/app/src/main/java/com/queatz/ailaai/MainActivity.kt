@@ -554,20 +554,20 @@ class MainActivity : AppCompatActivity() {
                                                                 .scale(scale)
                                                         )
                                                         // todo reusable icon IconAndCount
-//                                                        if (item.route == AppNav.Inventory && activeTrades > 0) {
-//                                                            Text(
-//                                                                activeTrades.toString(),
-//                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                                                style = MaterialTheme.typography.labelSmall,
-//                                                                fontWeight = FontWeight.Bold,
-//                                                                modifier = Modifier
-//                                                                    .offset(2.pad, -.5f.pad)
-//                                                                    .align(Alignment.TopEnd)
-//                                                                    .clip(CircleShape)
-//                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-//                                                                    .padding(1.pad, .25f.pad)
-//                                                            )
-//                                                        }
+                                                        if (item.route == AppNav.Explore && activeTrades > 0) {
+                                                            Text(
+                                                                activeTrades.toString(),
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                fontWeight = FontWeight.Bold,
+                                                                modifier = Modifier
+                                                                    .offset(2.pad, -.5f.pad)
+                                                                    .align(Alignment.TopEnd)
+                                                                    .clip(CircleShape)
+                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                                    .padding(1.pad, .25f.pad)
+                                                            )
+                                                        }
                                                         // todo reusable icon IconAndCount
                                                         if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
@@ -647,7 +647,7 @@ class MainActivity : AppCompatActivity() {
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
-                                                        if (item.route == AppNav.Inventory && activeTrades > 0) {
+                                                        if (item.route == AppNav.Explore && activeTrades > 0) {
                                                             Text(
                                                                 activeTrades.toString(),
                                                                 fontWeight = FontWeight.Bold
