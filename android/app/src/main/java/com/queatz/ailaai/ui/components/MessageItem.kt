@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +41,7 @@ fun MessageItem(
     onUpdated: () -> Unit,
     onReply: (Message) -> Unit,
     onReplyInNewGroup: (Message) -> Unit,
-    onShowPhoto: (String) -> Unit
+    onShowPhoto: (String) -> Unit,
 ) {
     var showTime by rememberStateOf(false)
     var showMessageDialog by rememberStateOf(false)
@@ -52,18 +53,20 @@ fun MessageItem(
         BotProfileDialog({ botDialog = null }, id)
     }
 
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .combinedClickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = {
-                showTime = !showTime
-            },
-            onLongClick = {
-                showMessageDialog = true
-            }
-        )) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(1.pad)
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {
+                    showTime = !showTime
+                },
+                onLongClick = {
+                    showMessageDialog = true
+                }
+            )) {
         if (!isMe) {
             if (previousMessage?.member != message.member) {
                 when {
@@ -75,7 +78,11 @@ fun MessageItem(
                             PaddingValues(1.pad, 1.pad, 0.dp, 1.pad),
                         ) {
                             if (message.member != null) {
-                                nav.appNavigate(AppNav.Profile(message.member?.let(getPerson)?.id ?: return@ProfileImage))
+                                nav.appNavigate(
+                                    AppNav.Profile(
+                                        message.member?.let(getPerson)?.id ?: return@ProfileImage
+                                    )
+                                )
                             }
                         }
                     }
