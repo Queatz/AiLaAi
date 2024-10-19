@@ -1,12 +1,19 @@
 package app.platform
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.platformAccountsByPoints
 import app.ailaai.api.platformAddPoints
 import app.ailaai.api.profile
 import app.dialog.dialog
 import app.dialog.inputDialog
+import com.queatz.db.Account
 import com.queatz.db.PersonProfile
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
@@ -16,6 +23,7 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -25,6 +33,9 @@ import r
 @Composable
 fun AccountsPlatformPage() {
     val scope = rememberCoroutineScope()
+    var accountsByPoints by remember {
+        mutableStateOf(emptyList<Account>())
+    }
 
     fun addPoints(account: PersonProfile) {
         scope.launch {
@@ -91,6 +102,12 @@ fun AccountsPlatformPage() {
         }
     }
 
+    LaunchedEffect(Unit) {
+        api.platformAccountsByPoints {
+            accountsByPoints = it
+        }
+    }
+
     Div({
         style {
             fontSize(18.px)
@@ -117,6 +134,18 @@ fun AccountsPlatformPage() {
             ) {
                 // todo: translate
                 Text("Add points")
+            }
+        }
+        Div {
+            accountsByPoints.forEach { account ->
+                Div({
+                    style {
+                        padding(1.r)
+                    }
+                }) {
+                    // todo: translate
+                    Text("id: ${account.person} (${account.points} points)")
+                }
             }
         }
     }

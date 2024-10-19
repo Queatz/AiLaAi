@@ -11,3 +11,14 @@ fun Db.account(person: String) = one(
         "person" to person
     )
 )
+
+fun Db.accountsByPoints() = list(
+    Account::class,
+    """
+        for account in @@collection
+            filter account.${f(Account::points)} > 0
+            sort account.${f(Account::points)} desc
+            limit 100
+            return account
+    """.trimIndent()
+)

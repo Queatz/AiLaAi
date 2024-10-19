@@ -5,6 +5,7 @@ import com.queatz.db.Person
 import com.queatz.db.PlatformAccountsPointsBody
 import com.queatz.db.PlatformConfig
 import com.queatz.db.PlatformMeResponse
+import com.queatz.db.accountsByPoints
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
@@ -52,6 +53,12 @@ fun Route.platformRoutes() {
                 }
 
                 db.update(config)
+            }
+        }
+
+        get("/platform/points/accounts") {
+            hosts {
+                db.accountsByPoints()
             }
         }
 
