@@ -31,9 +31,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Close
@@ -43,13 +47,21 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsPaused
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Reply
+import androidx.compose.material.icons.outlined.Report
+import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -161,6 +173,7 @@ import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.CardToolbar
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.IconAndCount
 import com.queatz.ailaai.ui.components.LinkifyText
@@ -435,7 +448,8 @@ fun GroupScreen(groupId: String) {
                 api.sendMessage(
                     newGroup.id!!, message = Message(
                         attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),
-                        attachments = json.encodeToString(GroupAttachment(group = groupExtended!!.group!!.id!!)).inList()
+                        attachments = json.encodeToString(GroupAttachment(group = groupExtended!!.group!!.id!!))
+                            .inList()
                     )
                 )
                 nav.appNavigate(AppNav.Group(newGroup.id!!))
@@ -696,136 +710,148 @@ fun GroupScreen(groupId: String) {
                     }
 
                     Dropdown(showMenu, { showMenu = false }) {
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.members))
-                        }, {
-                            showMenu = false
-                            showGroupMembers = true
-                        })
-                        if (myMember != null) {
-                            if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.create_reminder))
-                                }, {
-                                    showMenu = false
-                                    showNewReminderWithDialog = true
-                                })
-                            }
-                            if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.trade))
-                                }, {
-                                    showMenu = false
-                                    showTradeWithDialog = true
-                                })
-                            }
-                        }
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.cards))
-                        }, {
-                            showMenu = false
-                            showCards = !showCards
-                        })
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.send))
-                        }, {
-                            showMenu = false
-                            showSendDialog = true
-                        })
-                        if (myMember != null) {
-                            if (myMember.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts) {
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.manage))
-                                }, {
-                                    showMenu = false
-                                    showManageDialog = true
-                                })
-                            }
-                        }
-                        if (groupExtended?.group?.open == true) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.share))
-                            }, {
+                        CardToolbar {
+                            item(
+                                icon = Icons.Outlined.Group,
+                                name = stringResource(R.string.members)
+                            ) {
                                 showMenu = false
-                                groupUrl(groupId).shareAsUrl(
-                                    context = context,
-                                    name = groupExtended?.name(
-                                        context.getString(R.string.someone),
-                                        context.getString(R.string.empty_group_name),
-                                        me?.id?.inList().orEmpty()
-                                    )
-                                )
-                            })
-                        }
-                        DropdownMenuItem({
-                            Text(stringResource(R.string.qr_code))
-                        }, {
-                            showMenu = false
-                            showQrCodeDialog = true
-                        })
-                        if (myMember != null) {
-                            val hidden = myMember.member?.hide == true
-                            DropdownMenuItem({
-                                Text(
-                                    if (hidden) stringResource(R.string.show) else stringResource(
-                                        R.string.hide
-                                    )
-                                )
-                            }, {
-                                val hide = !hidden
-                                scope.launch {
-                                    api.updateMember(myMember.member!!.id!!, Member(hide = hide)) {
-                                        if (hide) {
-                                            context.toast(R.string.group_hidden)
-                                            nav.popBackStack()
-                                        }
+                                showGroupMembers = true
+                            }
+                            item(
+                                icon = Icons.Outlined.Map,
+                                name = stringResource(R.string.cards)
+                            ) {
+                                showMenu = false
+                                showCards = !showCards
+                            }
+                            if (myMember != null) {
+                                if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                                    item(
+                                        icon = Icons.Outlined.CalendarMonth,
+                                        name = stringResource(R.string.create_reminder)
+                                    ) {
+                                        showMenu = false
+                                        showNewReminderWithDialog = true
                                     }
                                 }
-                                showMenu = false
-                            })
-                            if (isSnoozed) {
-                                DropdownMenuItem({
-                                    Column {
-                                        Text(stringResource(R.string.unsnooze))
-                                        Text(
-                                            if (myMember.member?.snoozed == true) {
-                                                stringResource(R.string.indefinitely)
-                                            } else {
-                                                stringResource(
-                                                    R.string.until_x,
-                                                    myMember.member?.snoozedUntil?.formatFuture() ?: ""
-                                                )
-                                            },
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.secondary
-                                        )
+                                if (groupExtended?.members?.any { it.person?.id != me?.id } == true) {
+                                    item(
+                                        icon = Icons.Outlined.Rocket,
+                                        name = stringResource(R.string.trade)
+                                    ) {
+                                        showMenu = false
+                                        showTradeWithDialog = true
                                     }
-                                }, {
-                                    showMenu = false
-                                    snooze(false)
-                                })
-                            } else {
-                                DropdownMenuItem({ Text(stringResource(R.string.snooze)) }, {
-                                    showMenu = false
-                                    showSnoozeDialog = true
-                                })
+                                }
                             }
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.search))
-                            }, {
+                            item(
+                                icon = Icons.AutoMirrored.Default.Send,
+                                name = stringResource(R.string.send)
+                            ) {
                                 showMenu = false
-                                searchMessages = ""
-                            })
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.leave))
-                            }, {
+                                showSendDialog = true
+                            }
+                            if (myMember != null) {
+                                if (myMember.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts) {
+                                    item(
+                                        icon = Icons.Outlined.ManageAccounts,
+                                        name = stringResource(R.string.manage)
+                                    ) {
+                                        showMenu = false
+                                        showManageDialog = true
+                                    }
+                                }
+                            }
+                            if (groupExtended?.group?.open == true) {
+                                item(
+                                    icon = Icons.Outlined.Share,
+                                    name = stringResource(R.string.share)
+                                ) {
+                                    showMenu = false
+                                    groupUrl(groupId).shareAsUrl(
+                                        context = context,
+                                        name = groupExtended?.name(
+                                            context.getString(R.string.someone),
+                                            context.getString(R.string.empty_group_name),
+                                            me?.id?.inList().orEmpty()
+                                        )
+                                    )
+                                }
+                            }
+                            item(
+                                icon = Icons.Outlined.QrCode2,
+                                name = stringResource(R.string.qr_code)
+                            ) {
                                 showMenu = false
-                                showLeaveGroup = true
-                            })
-                            DropdownMenuItem({ Text(stringResource(R.string.report)) }, {
-                                showMenu = false
-                                showReportDialog = true
-                            })
+                                showQrCodeDialog = true
+                            }
+                            if (myMember != null) {
+                                val hidden = myMember.member?.hide == true
+                                item(
+                                    icon = Icons.Outlined.Visibility,
+                                    name = if (hidden) stringResource(R.string.show) else stringResource(
+                                        R.string.hide
+                                    )
+                                ) {
+                                    val hide = !hidden
+                                    scope.launch {
+                                        api.updateMember(myMember.member!!.id!!, Member(hide = hide)) {
+                                            if (hide) {
+                                                context.toast(R.string.group_hidden)
+                                                nav.popBackStack()
+                                            }
+                                        }
+                                    }
+                                    showMenu = false
+                                }
+                                if (isSnoozed) {
+                                    item(
+                                        icon = Icons.Outlined.NotificationsPaused,
+                                        name = if (myMember.member?.snoozed == true) {
+                                            stringResource(R.string.indefinitely)
+                                        } else {
+                                            stringResource(
+                                                R.string.until_x,
+                                                myMember.member?.snoozedUntil?.formatFuture() ?: ""
+                                            )
+                                        },
+                                        selected = true
+                                    ) {
+                                        showMenu = false
+                                        snooze(false)
+                                    }
+                                } else {
+                                    item(
+                                        icon = Icons.Outlined.NotificationsActive,
+                                        name = stringResource(R.string.snooze)
+                                    ) {
+                                        showMenu = false
+                                        showSnoozeDialog = true
+                                    }
+                                }
+                                item(
+                                    icon = Icons.Outlined.Search,
+                                    name = stringResource(R.string.search)
+                                ) {
+                                    showMenu = false
+                                    searchMessages = ""
+                                }
+                                item(
+                                    icon = Icons.AutoMirrored.Outlined.Logout,
+                                    name = stringResource(R.string.leave)
+                                ) {
+                                    showMenu = false
+                                    showLeaveGroup = true
+                                }
+                                item(
+                                    icon = Icons.Outlined.Report,
+                                    name = stringResource(R.string.report)
+                                ) {
+                                    showMenu = false
+                                    showReportDialog = true
+                                }
+                            }
                         }
                     }
                 },
@@ -907,7 +933,9 @@ fun GroupScreen(groupId: String) {
                         val nextMessage = if (index > 0) messages[index - 1] else null
 
                         val seenUntilHere = members.filter {
-                            it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(nextMessage))
+                            it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(
+                                nextMessage
+                            ))
                         }
 
                         seenUntilHere.notEmpty?.asReversed()?.let { members ->
@@ -1301,8 +1329,8 @@ fun GroupScreen(groupId: String) {
                                                     when (show) {
                                                         true -> IconButton({ send() }) {
                                                             Icon(
-                                                                Icons.Default.Send,
-                                                                Icons.Default.Send.name,
+                                                                Icons.AutoMirrored.Default.Send,
+                                                                Icons.AutoMirrored.Default.Send.name,
                                                                 tint = MaterialTheme.colorScheme.primary
                                                             )
                                                         }
@@ -1376,7 +1404,7 @@ fun GroupScreen(groupId: String) {
                                         }
                                     ) {
                                         Icon(
-                                            if (isRecordingAudio) Icons.Default.Send else Icons.Outlined.Mic,
+                                            if (isRecordingAudio) Icons.AutoMirrored.Default.Send else Icons.Outlined.Mic,
                                             stringResource(R.string.record_audio),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -2165,7 +2193,8 @@ fun GroupScreen(groupId: String) {
             }
 
             showReplyInNewGroupDialog?.let { message ->
-                val title = message.text?.notBlank ?: message.attachmentText(context)?.let { "\"$it\"" } ?: stringResource(R.string.reply)
+                val title = message.text?.notBlank ?: message.attachmentText(context)?.let { "\"$it\"" }
+                ?: stringResource(R.string.reply)
                 ChoosePeopleDialog(
                     onDismissRequest = { showReplyInNewGroupDialog = null },
                     title = title,
