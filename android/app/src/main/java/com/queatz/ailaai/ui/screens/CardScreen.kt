@@ -52,7 +52,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,7 +86,6 @@ import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.leaveCollaboration
 import app.ailaai.api.sendMessage
 import app.ailaai.api.updateCard
-import app.ailaai.api.upgradeCardDetails
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
@@ -157,7 +155,6 @@ import com.queatz.ailaai.ui.state.jsonSaver
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
-import com.queatz.db.CardUpgradeDetails
 import com.queatz.db.Message
 import com.queatz.db.Person
 import io.ktor.http.HttpStatusCode
@@ -352,7 +349,6 @@ fun CardScreen(cardId: String) {
 
     val isMine = me?.id == card?.person && !slideshowActive
     val isMineOrIAmACollaborator = (isMine || card?.collaborators?.contains(me?.id) == true) && !slideshowActive
-    val recomposeScope = currentRecomposeScope
 
     fun reload() {
         scope.launch {
@@ -580,7 +576,7 @@ fun CardScreen(cardId: String) {
         EditCardLocationDialog(card!!, nav.context as Activity, {
             openLocationDialog = false
         }, {
-            recomposeScope.invalidate()
+            reload()
         })
     }
 
@@ -588,7 +584,7 @@ fun CardScreen(cardId: String) {
         EditCardDialog(card!!, {
             openEditDialog = false
         }) {
-            recomposeScope.invalidate()
+            reload()
         }
     }
 
