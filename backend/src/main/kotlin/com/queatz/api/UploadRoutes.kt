@@ -24,12 +24,16 @@ fun Route.uploadRoutes() {
                     removeBackground = params.containsKey("removeBackground")
                 }
 
-                val file = File(".$it")
-
-                if (removeBackground && !file.hasTransparency()) {
+                if (removeBackground) {
                     runCatching {
-                        urls = urls.map {
-                            ai.removeBackground(file)
+                        urls = urls.map { url ->
+                            val file = File(".$url")
+
+                            if (file.hasTransparency()) {
+                                url
+                            } else {
+                                ai.removeBackground(file)
+                            }
                         }
                     }.onFailure {
                         it.printStackTrace()

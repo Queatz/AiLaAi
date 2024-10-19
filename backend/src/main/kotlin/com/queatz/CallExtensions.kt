@@ -1,38 +1,46 @@
 package com.queatz
 
-import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.util.pipeline.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.receiveMultipart
+import io.ktor.server.routing.RoutingContext
+import io.ktor.utils.io.readRemaining
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import java.io.File
 import kotlin.random.Random
 
-fun List<PartData>.toMap() = buildMap {
-    this@toMap.mapNotNull { it as? PartData.FormItem }.forEach {
-        if (it.name != null) {
-            put(it.name!!, it.value)
-        }
-    }
+suspend fun RoutingContext.launch(block: suspend CoroutineScope.() -> Unit) = coroutineScope {
+    this.launch(block = block)
 }
 
-
-fun PipelineContext<*, ApplicationCall>.parameter(name: String) = call.parameters[name]!!
+fun RoutingContext.parameter(name: String) = call.parameters[name]!!
 
 suspend fun ApplicationCall.receiveFiles(
     param: String,
     prefix: String,
     onFileNames: suspend (fileNames: List<String>, params: Map<String, String>) -> Unit
 ) {
-    val parts = receiveMultipart().readAllParts()
-
     val match = "$param\\[(\\d+)]".toRegex()
-    val (fileItems, params) = parts.partition {
-        match.matches(it.name ?: return@partition false)
-    }.let {
-        it.first.mapNotNull { it as? PartData.FileItem } to it.second.toMap()
+    val fileItems = mutableListOf<Pair<ByteArray, String?>>()
+    val params = mutableMapOf<String, String>()
+    receiveMultipart().forEachPart { part ->
+        if (match.matches(part.name.orEmpty())) {
+            (part as? PartData.FileItem)?.let { file ->
+                fileItems += file.readBytes() to file.originalFileName
+            }
+        } else {
+            (part as? PartData.FormItem)?.let {
+                params.put(it.name ?: return@let, it.value)
+            }
+        }
+        part.dispose()
     }
 
     if (fileItems.isEmpty()) {
@@ -45,9 +53,9 @@ suspend fun ApplicationCall.receiveFiles(
 
         val urls = withContext(Dispatchers.IO) {
             fileItems.map { fileItem ->
-                val fileName = "$prefix-${Random.nextInt(10000000, 99999999)}-${fileItem.originalFileName}"
+                val fileName = "$prefix-${Random.nextInt(10000000, 99999999)}-${fileItem.second}"
                 val file = File("$folder/$fileName")
-                file.outputStream().write(fileItem.streamProvider().readBytes())
+                file.writeBytes(fileItem.first)
                 "${folder.drop(1)}/$fileName"
             }
         }
@@ -58,11 +66,25 @@ suspend fun ApplicationCall.receiveFiles(
     }
 }
 
-suspend fun ApplicationCall.receiveFile(param: String, prefix: String, onFileName: suspend (fileName: String, params: Map<String, String>) -> Unit) {
-    val parts = receiveMultipart().readAllParts()
-
-    val fileItem = parts.find { it.name == param } as? PartData.FileItem
-    val params = parts.filter { it.name != param }.toMap()
+suspend fun ApplicationCall.receiveFile(
+    param: String,
+    prefix: String,
+    onFileName: suspend (fileName: String, params: Map<String, String>) -> Unit,
+) {
+    var fileItem: Pair<ByteArray, String?>? = null
+    val params = mutableMapOf<String, String>()
+    receiveMultipart().forEachPart { part ->
+        if (part.name == param && part is PartData.FileItem) {
+            if (fileItem == null) {
+                fileItem = part.readBytes() to part.originalFileName
+            }
+        } else {
+            (part as? PartData.FormItem)?.let {
+                params.put(it.name ?: return@let, it.value)
+            }
+        }
+        part.dispose()
+    }
 
     if (fileItem == null) {
         HttpStatusCode.BadRequest.description("Missing '$param'")
@@ -72,15 +94,17 @@ suspend fun ApplicationCall.receiveFile(param: String, prefix: String, onFileNam
             File(folder).mkdirs()
         }
 
-        val fileName = "$prefix-${Random.nextInt(100_000_000, 999_999_999)}-${fileItem.originalFileName}"
+        val fileName = "$prefix-${Random.nextInt(100_000_000, 999_999_999)}-${fileItem!!.second}"
         val file = File("$folder/$fileName")
 
         withContext(Dispatchers.IO) {
-            file.outputStream().write(fileItem.streamProvider().readBytes())
+            file.writeBytes(fileItem!!.first)
         }
 
-        onFileName("${folder.drop(1)}/$fileName", params)
+        onFileName("${folder.drop(1)}/$fileName", params.toMap())
 
         HttpStatusCode.NoContent
     }
 }
+
+private suspend fun PartData.FileItem.readBytes() = provider().readRemaining().readByteArray()

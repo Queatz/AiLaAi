@@ -5,6 +5,7 @@ import com.queatz.plugins.configureRouting
 import com.queatz.plugins.configureSecurity
 import com.queatz.plugins.configureSerialization
 import io.ktor.server.application.Application
+import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import java.util.TimeZone
@@ -14,14 +15,16 @@ fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
     embeddedServer(
-        Netty,
-        port = 8080,
-        host = "0.0.0.0",
+        factory = Netty,
         module = Application::module,
         configure = {
-            requestQueueLimit = 1024
+            connector {
+                port = 8080
+                host = "0.0.0.0"
+            }
+
             runningLimit = 1024
-            responseWriteTimeoutSeconds = 60
+            responseWriteTimeoutSeconds = 120
         }
     ).start(wait = true)
 }

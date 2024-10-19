@@ -231,7 +231,7 @@ private fun Trade.isSame(trade: Trade): Boolean = note == trade.note &&
             it.first.items!!.toSet() == it.second.items!!.toSet()
         }
 
-private fun PipelineContext<*, ApplicationCall>.updateTrade(
+private fun RoutingContext.updateTrade(
     trade: Trade,
     block: Trade.() -> Unit
 ): TradeExtended? {

@@ -67,7 +67,7 @@ fun File.hasTransparency(): Boolean {
             for (y in 0 until image.height) {
                 val pixel = image.getRGB(x, y)
                 val alpha = (pixel shr 24) and 0xff
-                if (alpha < 255) {
+                if (alpha == 127) {
                     return true
                 }
             }

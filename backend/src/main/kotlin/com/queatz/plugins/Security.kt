@@ -6,6 +6,7 @@ import com.queatz.db.Person
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.*
 
 private val jwt = object {
@@ -45,12 +46,12 @@ fun jwt(id: String) = JWT.create()
     //.withExpiresAt(Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(180)))
     .sign(Algorithm.HMAC256(jwt.secret))!!
 
-val PipelineContext<*, ApplicationCall>.me
+val RoutingContext.me
     get() = call.principal<JWTPrincipal>()!!
         .getClaim("id", String::class)!!
         .let { db.document(Person::class, it) }!!
 
-val PipelineContext<*, ApplicationCall>.meOrNull
+val RoutingContext.meOrNull
     get() = call.principal<JWTPrincipal>()
         ?.getClaim("id", String::class)
         ?.let { db.document(Person::class, it) }

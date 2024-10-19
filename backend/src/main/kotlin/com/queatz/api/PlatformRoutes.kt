@@ -16,6 +16,7 @@ import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
@@ -73,7 +74,7 @@ fun Route.platformRoutes() {
     }
 }
 
-internal suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.hosts(block: () -> T) {
+internal suspend inline fun <reified T : Any> RoutingContext.hosts(block: () -> T) {
     respond {
         if (me.isPlatformHost()) {
             block()

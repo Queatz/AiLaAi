@@ -81,6 +81,6 @@ fun Application.configureRouting() {
     }
 }
 
-suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.respond(block: () -> T) {
+suspend inline fun <reified T : Any> RoutingContext.respond(block: () -> T) {
     call.respond(block())
 }

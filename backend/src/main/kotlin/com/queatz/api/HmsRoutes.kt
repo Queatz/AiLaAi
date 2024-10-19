@@ -2,6 +2,7 @@ package com.queatz.api
 
 import com.queatz.db.DeviceType
 import com.queatz.db.deleteDevice
+import com.queatz.launch
 import com.queatz.plugins.db
 import com.queatz.plugins.respond
 import io.ktor.http.*
