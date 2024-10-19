@@ -35,7 +35,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 
 @Composable
-fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Reminder) -> Unit) {
+fun AddReminderLayout(
+    modifier: Modifier = Modifier,
+    onReminder: suspend (Reminder) -> Unit,
+) {
     val scope = rememberCoroutineScope()
     var value by rememberStateOf("")
     var isAdding by rememberStateOf(false)
@@ -126,7 +129,7 @@ fun AddReminderLayout(modifier: Modifier = Modifier, onReminder: suspend (Remind
 
     if (showScheduleReminder) {
         ScheduleReminderDialog(
-            {
+            onDismissRequest = {
                 showScheduleReminder = false
             },
             initialReminder = Reminder(

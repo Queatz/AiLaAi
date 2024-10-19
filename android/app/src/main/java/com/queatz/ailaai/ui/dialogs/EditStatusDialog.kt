@@ -30,7 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
@@ -43,6 +45,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -98,6 +101,7 @@ fun EditStatusDialog(
                     singleLine = false,
                     placeholder = stringResource(R.string.note),
                     useMaxHeight = true,
+                    useMaxWidth = false,
                     autoFocus = true
                 )
                 LazyColumn(
@@ -207,6 +211,20 @@ fun StatusButton(onClick: () -> Unit, selected: Boolean = false, status: Status)
                                 .shadow(3.dp, CircleShape)
                                 .clip(CircleShape)
                                 .background(Color(status.color!!.toColorInt()))
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            Color.White.copy(alpha = .5f),
+                                            Color.White.copy(alpha = 0f)
+                                        ),
+                                        center = Offset(
+                                            4.5f.dp.px.toFloat(),
+                                            4.5f.dp.px.toFloat()
+                                        ),
+                                        radius = 9.dp.px.toFloat()
+                                    ),
+                                    shape = CircleShape
+                                )
                         } else {
                             Modifier.border(BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), CircleShape)
                         }

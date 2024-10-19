@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.ui.theme.pad
 
 @Composable
@@ -66,6 +69,20 @@ fun Status(
                         .shadow(3.dp, CircleShape)
                         .clip(CircleShape)
                         .background(color)
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = .5f),
+                                    Color.White.copy(alpha = 0f)
+                                ),
+                                center = Offset(
+                                    4.5f.dp.px.toFloat(),
+                                    4.5f.dp.px.toFloat()
+                                ),
+                                radius = 9.dp.px.toFloat()
+                            ),
+                            shape = CircleShape
+                        )
                         .zIndex(1f)
                 )
             }

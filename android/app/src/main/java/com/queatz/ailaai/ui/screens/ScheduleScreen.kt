@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.ailaai.api.newReminder
 import app.ailaai.api.occurrences
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -39,6 +40,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import kotlin.time.Duration.Companion.minutes
 
 private val viewKey = stringPreferencesKey("schedule.view")
@@ -85,6 +88,8 @@ fun ScheduleScreen() {
     }
 
     var showMenu by rememberStateOf(false)
+    var isAddingReminder by rememberStateOf(false)
+    var showScheduleReminder by rememberStateOf<Instant?>(null)
     var range by remember(view) {
         mutableStateOf(
             initialRange()
@@ -200,6 +205,40 @@ fun ScheduleScreen() {
         }
     }
 
+    suspend fun addReminder(reminder: Reminder? = null) {
+        isAddingReminder = true
+        api.newReminder(
+            Reminder(
+                title = reminder?.title?.trim(),
+                start = reminder?.start ?: Clock.System.now().startOfMinute(),
+                end = reminder?.end,
+                schedule = reminder?.schedule,
+                timezone = TimeZone.currentSystemDefault().id,
+                utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0),
+            )
+        ) {
+            reload()
+        }
+        isAddingReminder = false
+    }
+
+    showScheduleReminder?.let { start ->
+        ScheduleReminderDialog(
+            onDismissRequest = {
+                showScheduleReminder = null
+            },
+            showTitle = true,
+            initialReminder = Reminder(
+                title = "",
+                start = start
+            ),
+            confirmText = stringResource(R.string.add_reminder)
+        ) {
+            addReminder(it)
+            showScheduleReminder = null
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -302,13 +341,16 @@ fun ScheduleScreen() {
                         }
 
                         Period(
-                            view,
-                            start,
-                            end,
-                            events.filter {
+                            view = view,
+                            start = start,
+                            end = end,
+                            events = events.filter {
                                 it.date >= start && it.date < end
                             },
                             onExpand = onExpand,
+                            onCreateReminder = {
+                                showScheduleReminder = it
+                            },
                             onUpdated = {
                                 scope.launch { updates.emit(it.reminder) }
                             }

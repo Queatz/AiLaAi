@@ -19,10 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -36,6 +39,7 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.hex
+import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -59,7 +63,8 @@ fun CreateStatusDialog(
 
     DialogBase(onDismissRequest) {
         DialogLayout(
-            scrollable = false,
+            scrollable = true,
+            horizontalAlignment = Alignment.CenterHorizontally,
             content = {
                 Row(
                     verticalAlignment = CenterVertically,
@@ -72,6 +77,20 @@ fun CreateStatusDialog(
                             .shadow(3.dp, CircleShape)
                             .clip(CircleShape)
                             .background(color)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = .5f),
+                                        Color.White.copy(alpha = 0f)
+                                    ),
+                                    center = Offset(
+                                        4.5f.dp.px.toFloat(),
+                                        4.5f.dp.px.toFloat()
+                                    ),
+                                    radius = 9.dp.px.toFloat()
+                                ),
+                                shape = CircleShape
+                            )
                             .zIndex(1f)
                     )
                     SearchField(
@@ -80,13 +99,14 @@ fun CreateStatusDialog(
                         placeholder = stringResource(R.string.status),
                         imeAction = ImeAction.Default,
                         showClear = false,
-                        autoFocus = true
+                        autoFocus = true,
+                        useMaxWidth = false
                     )
                 }
                 Spacer(Modifier.height(1.pad))
                 HsvColorPicker(
                     modifier = Modifier
-                        .widthIn(360.dp)
+                        .widthIn(max = 240.dp)
                         .fillMaxWidth()
                         .aspectRatio(1f)
                         .padding(10.dp),
@@ -103,7 +123,7 @@ fun CreateStatusDialog(
                     borderSize = 2.dp,
                     wheelRadius = 9.dp,
                     borderColor = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.height(24.dp)
+                    modifier = Modifier.height(24.dp).widthIn(max = 240.dp)
                 )
             }
         ) {
