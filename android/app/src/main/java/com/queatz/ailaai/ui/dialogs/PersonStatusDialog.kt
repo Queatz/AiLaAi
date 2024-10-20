@@ -95,21 +95,21 @@ fun PersonStatusDialog(
                                     )
                                     .zIndex(1f)
                             )
-                            SelectionContainer {
+                            Text(
+                                text = status.statusInfo?.name.orEmpty(),
+                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
+                            )
+                        }
+                        SelectionContainer {
+                            status.note?.let { note ->
                                 Text(
-                                    text = status.statusInfo?.name.orEmpty(),
-                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
+                                    text = note,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .padding(top = 2.pad)
                                 )
                             }
-                        }
-                        status.note?.let { note ->
-                            Text(
-                                text = note,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .padding(top = 2.pad)
-                            )
                         }
                         Text(
                             text = status.createdAt!!.timeAgo(),

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.margin
@@ -138,13 +139,28 @@ fun AccountsPlatformPage() {
         }
         Div {
             accountsByPoints.forEach { account ->
+                var profile by remember { mutableStateOf<PersonProfile?>(null) }
+
                 Div({
                     style {
                         padding(1.r)
+                        cursor("pointer")
+                    }
+
+                    onClick {
+                        scope.launch {
+                            api.profile(account.person!!) {
+                                profile = it
+                            }
+                        }
                     }
                 }) {
                     // todo: translate
-                    Text("id: ${account.person} (${account.points} points)")
+                    Text("${account.person} (${account.points} points)")
+
+                    profile?.let { profile ->
+                        Text(" - ${profile.person.name}")
+                    }
                 }
             }
         }
