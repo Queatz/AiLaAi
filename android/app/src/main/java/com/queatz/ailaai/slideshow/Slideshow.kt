@@ -56,6 +56,7 @@ class Slideshow {
         cardId: String,
         slideDuration: Duration = 1.minutes
     ) {
+        cancelUserInteraction()
         context.toast(R.string.slideshow_started)
         slideshowJob?.cancel()
         _active.value = true
