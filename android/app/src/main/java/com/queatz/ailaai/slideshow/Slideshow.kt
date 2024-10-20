@@ -54,7 +54,7 @@ class Slideshow {
 
     fun start(
         cardId: String,
-        slideDuration: Duration = 1.minutes
+        slideDuration: Duration = 2.minutes
     ) {
         cancelUserInteraction()
         context.toast(R.string.slideshow_started)

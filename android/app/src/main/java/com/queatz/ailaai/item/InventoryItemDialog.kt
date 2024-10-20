@@ -52,7 +52,7 @@ fun InventoryItemDialog(
     }
 
     DialogBase(
-        onDismissRequest
+        onDismissRequest = onDismissRequest
     ) {
         DialogLayout(
             content = {

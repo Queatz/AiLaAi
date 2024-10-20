@@ -315,21 +315,21 @@ fun ExploreScreen() {
     showInventoryItemDialog?.let { item ->
         val quantity = item.inventoryItem?.quantity ?: 0.0
         TradeItemDialog(
-            {
+            onDismissRequest = {
                 showInventoryItemDialog = null
             },
-            item,
+            inventoryItem = item,
             initialQuantity = quantity,
             maxQuantity = quantity,
             isAdd = true,
             isMine = true,
             enabled = true,
             confirmButton = stringResource(R.string.pick_up),
-            onQuantity = {
+            onQuantity = { quantity ->
                 scope.launch {
                     api.takeInventory(
                         item.inventoryItem!!.inventory!!,
-                        listOf(TakeInventoryItem(item.inventoryItem!!.id!!, it))
+                        listOf(TakeInventoryItem(item.inventoryItem!!.id!!, quantity))
                     ) {
                         showInventory?.let {
                             api.inventory(it) {

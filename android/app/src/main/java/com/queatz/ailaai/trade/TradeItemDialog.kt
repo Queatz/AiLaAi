@@ -16,6 +16,7 @@ import com.queatz.ailaai.extensions.isNumericTextInput
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.item.InventoryItemDetails
+import com.queatz.ailaai.item.ofInventoryItem
 import com.queatz.ailaai.item.upTo
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -49,7 +50,7 @@ fun TradeItemDialog(
     }
 
     DialogBase(
-        onDismissRequest
+        onDismissRequest = onDismissRequest
     ) {
         DialogLayout(
             content = {
@@ -75,6 +76,21 @@ fun TradeItemDialog(
                                 KeyboardType.Number
                             }
                         ),
+                        trailingIcon = {
+                            TextButton(
+                                onClick = {
+                                    quantity = (inventoryItem.inventoryItem?.quantity ?: 0.0).formatItemQuantity()
+                                },
+                                enabled = quantity != (inventoryItem.inventoryItem?.quantity ?: 0.0).formatItemQuantity(),
+                                modifier = Modifier
+                                    .padding(end = 1.pad)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.all),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        },
                         enabled = enabled,
                         modifier = Modifier
                             .padding(vertical = 1.pad)
@@ -96,7 +112,7 @@ fun TradeItemDialog(
                     if (isAdd) {
                         Button(
                             {
-                                onQuantity(quantity)
+                                onQuantity(quantity.ofInventoryItem(inventoryItem.inventoryItem!!))
                             },
                             enabled = enabled && quantity > 0.0
                         ) {
@@ -105,7 +121,7 @@ fun TradeItemDialog(
                     } else if (isMine) {
                         Button(
                             {
-                                onQuantity(quantity)
+                                onQuantity(quantity.ofInventoryItem(inventoryItem.inventoryItem!!))
                             },
                             enabled = enabled
                         ) {
