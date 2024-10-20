@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
@@ -28,6 +29,7 @@ import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
+import java.lang.IllegalStateException
 
 suspend fun LazyGridState.scrollToTop() {
     if (firstVisibleItemIndex > 2) {
@@ -335,4 +337,10 @@ class MaxAspectRatioModifier(
             placeable.placeRelative(IntOffset.Zero)
         }
     }
+}
+
+fun FocusRequester.tryRequestFocus() = try {
+    requestFocus()
+} catch (e: IllegalStateException) {
+    // ignored
 }

@@ -156,6 +156,7 @@ import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.extensions.tryRequestFocus
 import com.queatz.ailaai.group.GroupCards
 import com.queatz.ailaai.group.GroupJoinRequest
 import com.queatz.ailaai.group.SendGroupDialog
@@ -967,7 +968,7 @@ fun GroupScreen(groupId: String) {
                             if (offsetX.value.absoluteValue > replySlideThreshold && !releaseDrag) {
                                 releaseDrag = true
                                 stageReply = message
-                                focusRequester.requestFocus()
+                                focusRequester.tryRequestFocus()
                                 scope.launch {
                                     offsetX.animateTo(0f)
                                 }
@@ -1081,7 +1082,7 @@ fun GroupScreen(groupId: String) {
 
                     stageReply = null
                     sendMessage = ""
-                    focusRequester.requestFocus()
+                    focusRequester.tryRequestFocus()
                 }
 
                 fun sendSticker(sticker: Sticker) {
@@ -1212,7 +1213,7 @@ fun GroupScreen(groupId: String) {
                                                 val searchFocusRequester = remember { FocusRequester() }
 
                                                 LaunchedEffect(Unit) {
-                                                    searchFocusRequester.requestFocus()
+                                                    searchFocusRequester.tryRequestFocus()
                                                 }
 
                                                 OutlinedTextField(
@@ -1467,7 +1468,7 @@ fun GroupScreen(groupId: String) {
                                 modifier = Modifier.fillMaxSize()
                             ) { sticker ->
                                 showMore = false
-                                focusRequester.requestFocus()
+                                focusRequester.tryRequestFocus()
                                 sendSticker(sticker)
                             }
                             FloatingActionButton(
