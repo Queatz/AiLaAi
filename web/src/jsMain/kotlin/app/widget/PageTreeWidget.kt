@@ -1,7 +1,7 @@
 package app.widget
 
+import Strings.none
 import Styles
-import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,7 +69,6 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -137,6 +136,13 @@ fun PageTreeWidget(widgetId: String) {
     }
     val tagCount = remember(data) {
         data?.tags?.values?.flatten()?.groupingBy { it }?.eachCount()
+    }
+    val noTagCount = remember(cards, data) {
+        val taggedCards = data?.tags?.entries?.filter { it.value.isNotEmpty() }?.map { it.key } ?: emptyList()
+
+        cards.count { card ->
+            card.id !in taggedCards
+        }
     }
     val allTags = remember(data) {
         data?.tags?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
@@ -279,7 +285,13 @@ fun PageTreeWidget(widgetId: String) {
                     marginTop = 0.r,
                     // todo: translate
                     title = "Tap to filter",
-                    formatCount = { tagCount?.get(it)?.toString() ?: "" },
+                    formatCount = { tag ->
+                        if (tag == null) {
+                            noTagCount.toString()
+                        } else {
+                            tagCount?.get(tag)?.toString() ?: ""
+                        }
+                    },
                     showNoTag = true,
                     onClick = {
                         tagFilter = if (tagFilter == it) null else it
@@ -488,7 +500,7 @@ fun Tags(
     marginTop: CSSSizeValue<*> = 1.r,
     title: String,
     onClick: (tag: TagFilter) -> Unit,
-    formatCount: ((tag: String) -> String?)? = null,
+    formatCount: ((tag: String?) -> String?)? = null,
     showNoTag: Boolean = false,
     content: @Composable () -> Unit = {}
 ) {
@@ -513,9 +525,10 @@ fun Tags(
         }
 
         if (tags.isNotEmpty() && showNoTag) {
-            // todo: Translate
             TagButton(
+                // todo: Translate
                 tag = "No tag",
+                count = formatCount?.invoke(null),
                 title = title,
                 selected = selected == TagFilter.Untagged,
                 outline = true,
