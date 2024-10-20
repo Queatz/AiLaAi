@@ -754,34 +754,6 @@ fun CardScreen(cardId: String) {
                     val cardString = stringResource(R.string.card)
 
                     Dropdown(showMenu, { showMenu = false }) {
-                        if (isMine) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.manage))
-                            }, {
-                                showManageMenu = true
-                                showMenu = false
-                            })
-                            if (card?.collaborators?.isNotEmpty() != true) {
-                                DropdownMenuItem({
-                                    Text(stringResource(R.string.add_collaborators))
-                                }, {
-                                    openAddCollaboratorDialog = true
-                                    showMenu = false
-                                })
-                            }
-                        }
-                        if (isMineOrIAmACollaborator && (card?.collaborators?.isNotEmpty() == true)) {
-                            DropdownMenuItem({
-                                Text(stringResource(R.string.collaborators))
-                            }, {
-                                if (isMine) {
-                                    openRemoveCollaboratorsDialog = true
-                                } else {
-                                    openCollaboratorsDialog = true
-                                }
-                                showMenu = false
-                            })
-                        }
                         card?.let { card ->
                             DropdownMenuItem({
                                 Text(stringResource(R.string.view_profile))
@@ -812,6 +784,34 @@ fun CardScreen(cardId: String) {
                                     showMenu = false
                                 })
                             }
+                        }
+                        if (isMine) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.manage))
+                            }, {
+                                showManageMenu = true
+                                showMenu = false
+                            })
+                            if (card?.collaborators?.isNotEmpty() != true) {
+                                DropdownMenuItem({
+                                    Text(stringResource(R.string.add_collaborators))
+                                }, {
+                                    openAddCollaboratorDialog = true
+                                    showMenu = false
+                                })
+                            }
+                        }
+                        if (isMineOrIAmACollaborator && (card?.collaborators?.isNotEmpty() == true)) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.collaborators))
+                            }, {
+                                if (isMine) {
+                                    openRemoveCollaboratorsDialog = true
+                                } else {
+                                    openCollaboratorsDialog = true
+                                }
+                                showMenu = false
+                            })
                         }
                         DropdownMenuItem({
                             Text(stringResource(R.string.send_card))
