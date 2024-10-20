@@ -754,6 +754,7 @@
     <string name="downgrade">Downgrade</string>
     <string name="message_sent">Message sent</string>
     <string name="what_shall_people_call_you">What shall people call you?</string>
+    <string name="scan_me">Scan me!</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

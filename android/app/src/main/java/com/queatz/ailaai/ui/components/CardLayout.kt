@@ -40,6 +40,7 @@ fun CardLayout(
     showAuthors: Boolean = true,
     aspect: Float = 1.5f,
     onClick: () -> Unit = {},
+    onReply: ((List<String>) -> Unit)? = null,
     scope: CoroutineScope,
     elevation: Int = 1,
     showDistance: LatLng? = null,
@@ -92,9 +93,9 @@ fun CardLayout(
                 )
             }
         }
-        card?.let {
+        card?.let { card ->
             CardConversation(
-                card,
+                card = card,
                 interactable = true,
                 showTitle = showTitle,
                 largeTitle = largeTitle,
@@ -106,10 +107,14 @@ fun CardLayout(
                     nav.appNavigate(AppNav.Explore)
                 },
                 onReply = { conversation ->
-                    scope.launch {
-                        it.reply(conversation) { groupId ->
-                            nav.appNavigate(AppNav.Group(groupId))
+                    if (onReply == null) {
+                        scope.launch {
+                            card.reply(conversation) { groupId ->
+                                nav.appNavigate(AppNav.Group(groupId))
+                            }
                         }
+                    } else {
+                        onReply(conversation)
                     }
                 },
                 onTitleClick = {

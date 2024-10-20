@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -68,6 +69,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -224,6 +226,16 @@ fun CardScreen(cardId: String) {
     var showSourceDialog by rememberStateOf(false)
     val slideshowActive by slideshow.active.collectAsState()
     val userIsInactive by slideshow.userIsInactive.collectAsState()
+    var showScanMe by rememberStateOf(false)
+
+    LaunchedEffect(showScanMe) {
+        if (showScanMe) {
+            slideshow.cancelUserInteraction()
+            delay(2.seconds)
+            showScanMe = false
+            slideshow.cancelUserInteraction()
+        }
+    }
 
     background(card?.background?.takeIf { slideshowActive }?.let(api::url))
 
@@ -671,7 +683,7 @@ fun CardScreen(cardId: String) {
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
     ) {
-        val showAppBar = !slideshowActive || !userIsInactive
+        val showAppBar = (!slideshowActive || !userIsInactive) && !showScanMe
 
         AnimatedVisibility(showAppBar) {
             AppBar(
@@ -1016,7 +1028,14 @@ fun CardScreen(cardId: String) {
                         aspect = aspect,
                         scope = scope,
                         elevation = elevation,
-                        playVideo = playVideo
+                        playVideo = playVideo,
+                        onReply = if (slideshowActive) {
+                            { conversation ->
+                                showScanMe = true
+                            }
+                        } else {
+                            null
+                        }
                     )
                 }
             }
@@ -1123,21 +1142,40 @@ fun CardScreen(cardId: String) {
                     }
 
                     Crossfade(
-                        userIsInactive,
+                        targetState = userIsInactive || showScanMe,
                         modifier = Modifier
                             .align(if (isLandscape) Alignment.BottomEnd else Alignment.BottomStart)
                             .padding(1.pad)
-                    ) {
-                        if (it) {
-                            Image(
-                                qrCode.asImageBitmap(),
-                                contentDescription = null,
+                    ) { state ->
+                        if (state) {
+                            Box(
                                 modifier = Modifier
                                     .shadow(16.dp, MaterialTheme.shapes.medium)
                                     .clip(MaterialTheme.shapes.medium)
                                     .background(Color.White)
                                     .padding(.5f.pad)
-                            )
+                            ) {
+                                Image(
+                                    qrCode.asImageBitmap(),
+                                    contentDescription = null
+                                )
+
+                                if (showScanMe) {
+                                    Text(
+                                        text = stringResource(R.string.scan_me),
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Black
+                                        ),
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .rotate(-45f)
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .background(Color.White)
+                                            .padding(.5f.pad)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

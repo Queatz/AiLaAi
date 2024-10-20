@@ -45,6 +45,7 @@ class Slideshow {
     private var slideshowJob: Job? = null
     private var userInteractionTimeoutJob: Job? = null
 
+    private val userInteractionTapTimeout: Duration = 1.seconds
     private val userInteractionTimeout: Duration = 30.seconds
 
     fun init(context: Context) {
@@ -107,11 +108,17 @@ class Slideshow {
     }
 
     fun onUserInteraction() {
-        _userIsInactive.value = false
         userInteractionTimeoutJob?.cancel()
         userInteractionTimeoutJob = scope.launch {
+            delay(userInteractionTapTimeout)
+            _userIsInactive.value = false
             delay(userInteractionTimeout)
             _userIsInactive.value = true
         }
+    }
+
+    fun cancelUserInteraction() {
+        _userIsInactive.value = true
+        userInteractionTimeoutJob?.cancel()
     }
 }
