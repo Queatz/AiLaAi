@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.toJSDate
 import lib.differenceInMinutes
 import lib.formatDistanceToNowStrict
@@ -59,6 +60,7 @@ import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.bottom
+import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.div
 import org.jetbrains.compose.web.css.justifyContent
@@ -71,8 +73,11 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.top
+import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
@@ -80,6 +85,7 @@ import push
 import r
 import sortedDistinct
 import kotlin.js.Date
+import kotlin.time.Duration.Companion.minutes
 
 sealed class GroupNav {
     data object None : GroupNav()
@@ -394,7 +400,16 @@ fun GroupsNavPage(
                                                             right(.125.r)
                                                             backgroundColor(Color(status.color ?: "#ffffff"))
                                                         }
-                                                    }) {}
+                                                    }) {
+                                                        if (person.seen?.let { it < Clock.System.now() - 30.minutes } == true) {
+                                                            Span({
+                                                                classes(Styles.personItemStatusIndicatorText)
+                                                            }) {
+                                                                // todo: translate
+                                                                Text("z")
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }

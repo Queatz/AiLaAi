@@ -317,10 +317,12 @@ fun FriendsScreen() {
         if (status != null && !sendMessage) {
             showFriendStatusDialog = person to status
         } else {
-            scope.launch {
-                api.groupsWith(listOf(me!!.id!!, person.id!!)) {
-                    showSharedGroupsDialogPerson = person
-                    showSharedGroupsDialog = it
+            me?.let { me ->
+                scope.launch {
+                    api.groupsWith(listOf(me.id!!, person.id!!)) {
+                        showSharedGroupsDialogPerson = person
+                        showSharedGroupsDialog = it
+                    }
                 }
             }
         }

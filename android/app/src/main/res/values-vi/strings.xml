@@ -746,4 +746,5 @@
     <string name="message_sent">Tin nhắn được gửi</string>
     <string name="what_shall_people_call_you">Tên bạn là gì?</string>
     <string name="scan_me">Quét mã này!</string>
+    <string name="z">z</string>
 </resources>

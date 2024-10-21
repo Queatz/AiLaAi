@@ -2,17 +2,12 @@ package com.queatz.ailaai.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,19 +16,26 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.ui.screens.OutlinedText
 import com.queatz.ailaai.ui.theme.pad
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun Status(
     text: String? = null,
     color: Color? = null,
+    seen: Instant? = null,
     block: @Composable () -> Unit
 ) {
     Box {
@@ -64,11 +66,9 @@ fun Status(
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(.25f.pad)
                         .size(12.dp)
                         .shadow(3.dp, CircleShape)
-                        .clip(CircleShape)
-                        .background(color)
+                        .background(color, CircleShape)
                         .background(
                             brush = Brush.radialGradient(
                                 colors = listOf(
@@ -85,6 +85,17 @@ fun Status(
                         )
                         .zIndex(1f)
                 )
+                if (seen?.let { it < Clock.System.now() - 30.minutes } == true) {
+                    OutlinedText(
+                        stringResource(R.string.z),
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(.25f.pad)
+                            .offset(3.dp, -1.dp)
+                            .zIndex(1f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }

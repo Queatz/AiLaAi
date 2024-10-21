@@ -25,15 +25,16 @@ fun Friends(
         onLongClick = onLongClick,
         onClick = onClick,
         modifier = modifier,
-        photo = {
-            val status = statuses[it.id!!]
+        photo = { person ->
+            val status = statuses[person.id!!]
 
             Status(
                 text = status?.note,
-                color = status?.statusInfo?.color?.toColorInt()?.let { Color(it) }
+                color = status?.statusInfo?.color?.toColorInt()?.let { Color(it) },
+                seen = person.seen
             ) {
                 GroupPhoto(
-                    photos = ContactPhoto(it.name ?: "", it.photo, it.seen).inList(),
+                    photos = ContactPhoto(person.name ?: "", person.photo, person.seen).inList(),
                     padding = 0.dp,
                     size = 54.dp
                 )

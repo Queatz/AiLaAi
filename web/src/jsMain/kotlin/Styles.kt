@@ -76,6 +76,7 @@ import org.jetbrains.compose.web.css.times
 import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.transitions
+import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.vh
 import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.css.whiteSpace
@@ -880,6 +881,18 @@ object Styles : StyleSheet() {
         }
     }
 
+    val personItemStatusIndicatorText by style {
+        position(Absolute)
+        top(-11.px)
+        right(-1.px)
+        color(Color.white)
+        property("text-shadow", "1px 0px 0px black, -1px 0px 0px black, 0px 1px 0px black, 0px -1px 0px black")
+
+        dark(self) {
+            color(Color.black)
+            property("text-shadow", "1px 0px 0px white, -1px 0px 0px white, 0px 1px 0px white, 0px -1px 0px white")
+        }
+    }
     val personItemStatusIndicator by style {
         width(12.px)
         height(12.px)
