@@ -202,6 +202,13 @@ class Call(
     var participants: Int? = null,
 ) : Model()
 
+@Serializable
+class CardVisit(
+    var card: String? = null,
+    var isOwner: Boolean? = null,
+    var isWild: Boolean? = null
+) : Model()
+
 enum class PayFrequency {
     Hourly,
     Daily,

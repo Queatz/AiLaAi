@@ -7,6 +7,7 @@ import com.queatz.db.CardDowngradeBody
 import com.queatz.db.CardDowngradeDetails
 import com.queatz.db.CardUpgradeBody
 import com.queatz.db.CardUpgradeDetails
+import com.queatz.db.CardVisit
 import com.queatz.db.ConversationItem
 import com.queatz.db.Person
 import com.queatz.db.Search
@@ -55,12 +56,19 @@ fun Route.cardRoutes() {
             respond {
                 val card = db.document(Card::class, parameter("id"))
 
-                if (card == null) {
+                if (card == null || !card.isActiveOrMine(meOrNull)) {
                     HttpStatusCode.NotFound
-                } else if (card.isActiveOrMine(meOrNull)) {
-                    card
                 } else {
-                    HttpStatusCode.NotFound
+                    if (card.active == true) {
+                        db.insert(
+                            CardVisit(
+                                card = card.id,
+                                isOwner = card.person == meOrNull?.id,
+                                isWild = meOrNull == null
+                            )
+                        )
+                    }
+                    card
                 }
             }
         }
