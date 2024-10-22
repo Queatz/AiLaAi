@@ -13,6 +13,7 @@ fun StickerItem(
     size: CSSNumeric = 64.px,
     title: String? = null,
     messageAlign: AlignItems = AlignItems.Start,
+    onMessageShown: ((Boolean) -> Unit)? = null,
     onClick: () -> Unit
 ) {
     var showMessage by remember {
@@ -34,9 +35,11 @@ fun StickerItem(
         }
         onMouseEnter {
             showMessage = true
+            onMessageShown?.invoke(showMessage)
         }
         onMouseLeave {
             showMessage = false
+            onMessageShown?.invoke(showMessage)
         }
         if (title != null) {
             title(title)

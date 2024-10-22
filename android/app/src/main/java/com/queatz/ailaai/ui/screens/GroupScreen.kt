@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -887,10 +888,6 @@ fun GroupScreen(groupId: String) {
                 } else {
                     AnimatedVisibility(showDescription && groupExtended?.group?.description?.isBlank() == false) {
                         OutlinedCard(
-                            onClick = {
-                                showDescription = false
-                                ui.setShowDescription(groupId, showDescription)
-                            },
                             shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.outlinedCardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
@@ -900,28 +897,38 @@ fun GroupScreen(groupId: String) {
                             modifier = Modifier
                                 .padding(1.pad)
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-                                val textScrollState = rememberScrollState()
-                                LinkifyText(
-                                    groupExtended?.group?.description ?: "",
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .heightIn(max = 128.dp)
-                                        .verticalScroll(textScrollState)
-                                        .onPlaced { viewport = it.boundsInParent().size }
-                                        .fadingEdge(viewport, textScrollState)
-                                        .padding(1.5f.pad)
-                                )
-                                Icon(
-                                    Icons.Outlined.Close,
-                                    null,
-                                    modifier = Modifier
-                                        .padding(end = 1.5f.pad)
-                                )
+                            SelectionContainer {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                                    val textScrollState = rememberScrollState()
+                                    LinkifyText(
+                                        groupExtended?.group?.description ?: "",
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .heightIn(max = 128.dp)
+                                            .verticalScroll(textScrollState)
+                                            .onPlaced { viewport = it.boundsInParent().size }
+                                            .fadingEdge(viewport, textScrollState)
+                                            .padding(1.5f.pad)
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            showDescription = false
+                                            ui.setShowDescription(groupId, showDescription)
+                                        },
+                                        modifier = Modifier
+                                            .padding(end = 1.5f.pad)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Close,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

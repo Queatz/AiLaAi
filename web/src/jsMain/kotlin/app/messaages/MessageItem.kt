@@ -165,13 +165,19 @@ fun MessageItem(
             onMouseEnter { showOptionsMenuButton = true }
             onMouseLeave { showOptionsMenuButton = false }
         }) {
-            // todo: translate
-            IconButton("more_vert", "Options", background = true, styles = {
-                opacity(if (showOptionsMenuButton || messageMenuTarget != null) 1f else 0f)
-            }) {
-                messageMenuTarget = if (messageMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
+            var showingSticker by remember { mutableStateOf(false) }
+            if (!showingSticker) {
+                // todo: translate
+                IconButton("more_vert", "Options", background = true, styles = {
+                    opacity(if (showOptionsMenuButton || messageMenuTarget != null) 1f else 0f)
+                }) {
+                    messageMenuTarget =
+                        if (messageMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
+                }
             }
-            MessageContent(message, myMember)
+            MessageContent(message, myMember) {
+                showingSticker = it
+            }
         }
         message.bots?.notEmpty?.let {
             MessageBots(bots, it, isMine = isMe)

@@ -18,7 +18,6 @@ import com.queatz.ailaai.api.story
 import com.queatz.db.*
 import components.CardItem
 import components.Icon
-import components.IconButton
 import components.LinkifyText
 import components.LoadingText
 import ellipsize
@@ -37,7 +36,12 @@ import kotlin.js.Date
 
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
-fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolean = false) {
+fun MessageContent(
+    message: Message,
+    myMember: MemberAndPerson?,
+    isReply: Boolean = false,
+    onShowingStickerMessage: ((Boolean) -> Unit)? = null
+) {
     val scope = rememberCoroutineScope()
     val isMe = message.member == myMember?.member?.id
 
@@ -317,7 +321,8 @@ fun MessageContent(message: Message, myMember: MemberAndPerson?, isReply: Boolea
                         photo = attachment.photo!!,
                         message = attachment.message,
                         size = 96.px,
-                        messageAlign = if (isMe) AlignItems.Start else AlignItems.End
+                        messageAlign = if (isMe) AlignItems.Start else AlignItems.End,
+                        onMessageShown = onShowingStickerMessage
                     ) {}
                 }
 
