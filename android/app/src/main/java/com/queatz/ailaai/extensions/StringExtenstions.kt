@@ -48,7 +48,9 @@ fun String.launchUrl(context: Context) {
             Intent(
                 Intent.ACTION_VIEW,
                 Uri.parse(ensureScheme)
-            )
+            ).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
         )
     } catch (t: Throwable) {
         context.showDidntWork()

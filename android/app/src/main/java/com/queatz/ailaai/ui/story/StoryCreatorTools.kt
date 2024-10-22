@@ -29,6 +29,7 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
+import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.dialogs.*
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.widget.AddWidgetDialog
@@ -372,10 +373,7 @@ fun StoryCreatorTools(
                 }
             ) {
                 if (isGeneratingPhoto) {
-                    CircularProgressIndicator(
-                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    LoadingIcon()
                 } else {
                     Icon(Icons.Outlined.Photo, null)
                 }
@@ -386,10 +384,7 @@ fun StoryCreatorTools(
                 }
             ) {
                 if (isUploadingAudio) {
-                    CircularProgressIndicator(
-                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    LoadingIcon()
                 } else {
                     Icon(Icons.Outlined.PlayCircle, null)
                 }

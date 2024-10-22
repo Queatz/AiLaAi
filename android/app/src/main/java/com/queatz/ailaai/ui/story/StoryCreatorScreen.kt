@@ -55,6 +55,7 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.story.creator.audioCreatorItem
 import com.queatz.ailaai.ui.story.creator.buttonCreatorItem
 import com.queatz.ailaai.ui.story.creator.cardsCreatorItem
@@ -369,10 +370,7 @@ fun StoryCreatorScreen(
                 }
             ) {
                 if (isLoadingMenu) {
-                    CircularProgressIndicator(
-                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    LoadingIcon()
                 } else {
                     Icon(
                         Icons.Outlined.MoreVert,

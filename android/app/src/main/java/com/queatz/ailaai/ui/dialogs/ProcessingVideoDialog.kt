@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
+import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.theme.pad
 
 enum class ProcessingVideoStage {
@@ -45,11 +46,7 @@ fun ProcessingVideoDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val animatedProgress: Float by animateFloatAsState(progress)
-                CircularProgressIndicator(
-                    strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                    modifier = Modifier.size(24.dp),
-                    progress = animatedProgress
-                )
+                LoadingIcon(animatedProgress)
                 Text(
                     stringResource(R.string.please_wait),
                     modifier = Modifier

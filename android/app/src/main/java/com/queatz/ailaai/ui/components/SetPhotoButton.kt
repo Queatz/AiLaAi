@@ -148,10 +148,7 @@ fun SetPhotoButton(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (isGeneratingPhoto) {
-                        CircularProgressIndicator(
-                            strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        LoadingIcon()
                     } else {
                         Icon(
                             Icons.Outlined.CameraAlt, ""

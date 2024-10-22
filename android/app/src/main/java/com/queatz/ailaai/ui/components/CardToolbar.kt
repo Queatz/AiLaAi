@@ -43,10 +43,7 @@ class CardToolbarScope internal constructor() {
                     .width(54.dp)
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    LoadingIcon()
                 } else {
                     Icon(
                         icon,

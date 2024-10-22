@@ -179,6 +179,7 @@ import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.IconAndCount
 import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.components.MessageItem
 import com.queatz.ailaai.ui.components.ProfileImage
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
@@ -701,10 +702,7 @@ fun GroupScreen(groupId: String) {
                         showMenu = !showMenu
                     }) {
                         if (isGeneratingGroupBackground || isGeneratingGroupPhoto) {
-                            CircularProgressIndicator(
-                                strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            LoadingIcon()
                         } else {
                             Icon(Icons.Outlined.MoreVert, stringResource(R.string.more))
                         }
@@ -1419,10 +1417,7 @@ fun GroupScreen(groupId: String) {
                                             }
                                         ) {
                                             if (isGeneratingPhoto) {
-                                                CircularProgressIndicator(
-                                                    strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
+                                                LoadingIcon()
                                             } else {
                                                 Icon(
                                                     Icons.Outlined.CameraAlt,

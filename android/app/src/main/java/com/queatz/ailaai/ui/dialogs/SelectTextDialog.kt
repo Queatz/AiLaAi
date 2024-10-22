@@ -38,6 +38,7 @@ import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.DialogBase
+import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AiSpeakRequest
 import io.ktor.http.ContentType
@@ -113,10 +114,7 @@ fun SelectTextDialog(
                         }
                     ) {
                         if (isGeneratingAudio) {
-                            CircularProgressIndicator(
-                                strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            LoadingIcon()
                         } else {
                             Icon(Icons.AutoMirrored.Outlined.VolumeUp, stringResource(R.string.speak))
                         }

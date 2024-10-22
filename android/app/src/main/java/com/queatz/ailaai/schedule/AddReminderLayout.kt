@@ -5,7 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +28,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.FloatingButton
+import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.components.SearchField
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
@@ -78,9 +81,9 @@ fun AddReminderLayout(
                 .wrapContentWidth()
         ) {
             SearchField(
-                value,
-                { value = it },
-                stringResource(R.string.add_reminder),
+                value = value,
+                onValueChange = { value = it },
+                placeholder = stringResource(R.string.add_reminder),
                 showClear = false,
                 imeAction = ImeAction.Done,
                 onAction = {
@@ -111,7 +114,9 @@ fun AddReminderLayout(
             onLongClickLabel = stringResource(R.string.schedule_reminder),
             modifier = Modifier.padding(start = 2.pad)
         ) {
-            if (value.isNotBlank()) {
+            if (isAdding) {
+                LoadingIcon()
+            } else if (value.isNotBlank()) {
                 Box {
                     Icon(Icons.Outlined.Add, stringResource(R.string.add_reminder))
                     Icon(Icons.Outlined.Schedule, stringResource(R.string.schedule_reminder), modifier = Modifier
