@@ -14,6 +14,7 @@ import com.queatz.db.Search
 import com.queatz.db.SearchSource
 import com.queatz.db.allCardsOfCard
 import com.queatz.db.asKey
+import com.queatz.db.cardVisits
 import com.queatz.db.cardsOfCard
 import com.queatz.db.explore
 import com.queatz.db.group
@@ -48,7 +49,10 @@ import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.datetime.Clock
+import kotlinx.datetime.toInstant
 import kotlin.reflect.KMutableProperty1
+import kotlin.time.Duration.Companion.days
 
 fun Route.cardRoutes() {
     authenticate(optional = true) {
@@ -740,6 +744,24 @@ fun Route.cardRoutes() {
                 } else {
                     db.unsaveCard(person.id!!, card.id!!)
                     HttpStatusCode.OK
+                }
+            }
+        }
+
+        get("/cards/{id}/visits") {
+            respond {
+                val card = db.document(Card::class, parameter("id"))
+                val person = me
+
+                if (card == null) {
+                    HttpStatusCode.NotFound
+                } else if (card.person!!.asKey() != person.id) {
+                    HttpStatusCode.Forbidden
+                } else {
+                    db.cardVisits(
+                        card.id!!,
+                        call.parameters["since"]?.toInstant() ?: (Clock.System.now() - 1.days)
+                    )
                 }
             }
         }

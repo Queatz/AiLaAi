@@ -1,5 +1,7 @@
 package com.queatz.db
 
+import kotlinx.datetime.Instant
+
 /**
  * @person The current user
  */
@@ -316,5 +318,20 @@ fun Db.allCardsOfCard(card: String) = list(
     """.trimIndent(),
     mapOf(
         "card" to card
+    )
+)
+
+fun Db.cardVisits(card: String, since: Instant) = list(
+    CardVisit::class,
+    """
+        for visit in @@collection
+            filter visit.${f(CardVisit::card)} == @card
+                and visit.${f(CardVisit::createdAt)} >= @since
+            sort visit.${f(CardVisit::createdAt)} desc
+            return visit
+    """.trimIndent(),
+    mapOf(
+        "card" to card,
+        "since" to since
     )
 )
