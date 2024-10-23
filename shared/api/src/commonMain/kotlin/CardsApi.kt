@@ -3,6 +3,7 @@ package app.ailaai.api
 import com.queatz.db.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import kotlinx.datetime.Instant
 
 suspend fun Api.cards(
     geo: Geo,
@@ -242,6 +243,20 @@ suspend fun Api.cardPeople(
     onSuccess: SuccessBlock<List<Person>> = {},
 ) = get(
     "cards/$card/people",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.cardVisits(
+    card: String,
+    since: Instant,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<CardVisit>> = {},
+) = get(
+    url = "cards/$card/visits",
+    parameters = mapOf(
+        "since" to since.toString()
+    ),
     onError = onError,
     onSuccess = onSuccess
 )

@@ -162,7 +162,8 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
 
                         WelcomeStep.SetPhoto -> {
                             Text(
-                                "Let people find you in town.",
+                                // todo: translate
+                                "Let people recognize you out in town.",
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )
@@ -187,6 +188,7 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
 
                         WelcomeStep.SetIntroduction -> {
                             Text(
+                                // todo: translate
                                 "Share anything else you'd like to say.",
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -213,6 +215,7 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ) {
+                                // todo: translate
                                 Text("Here's what you can do in town.")
                                 Spacer(Modifier.height(1.pad))
                                 Text("Create groups", style = MaterialTheme.typography.titleMedium)

@@ -128,6 +128,7 @@ import com.queatz.ailaai.services.saves
 import com.queatz.ailaai.slideshow.slideshow
 import com.queatz.ailaai.ui.card.CardDowngradeDialog
 import com.queatz.ailaai.ui.card.CardUpgradeDialog
+import com.queatz.ailaai.ui.card.PageStatisticsDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardLayout
@@ -182,6 +183,7 @@ fun CardScreen(cardId: String) {
     var notFound by rememberStateOf(false)
     var showMenu by rememberStateOf(false)
     var showManageMenu by rememberStateOf(false)
+    var showStatisticsDialog by rememberStateOf(false)
     var openDeleteCard by rememberStateOf(false)
     var openLocationDialog by rememberStateOf(false)
     var showReportDialog by rememberStateOf(false)
@@ -238,6 +240,12 @@ fun CardScreen(cardId: String) {
     }
 
     background(card?.background?.takeIf { slideshowActive }?.let(api::url))
+
+    if (showStatisticsDialog && card != null) {
+        PageStatisticsDialog(card!!) {
+            showStatisticsDialog = false
+        }
+    }
 
     if (showPhotoDialog) {
         ChoosePhotoDialog(
@@ -790,6 +798,12 @@ fun CardScreen(cardId: String) {
                                 Text(stringResource(R.string.manage))
                             }, {
                                 showManageMenu = true
+                                showMenu = false
+                            })
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.statistics))
+                            }, {
+                                showStatisticsDialog = true
                                 showMenu = false
                             })
                             if (card?.collaborators?.isNotEmpty() != true) {

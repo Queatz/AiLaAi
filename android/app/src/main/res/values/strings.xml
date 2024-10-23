@@ -756,6 +756,9 @@
     <string name="what_shall_people_call_you">What shall people call you?</string>
     <string name="scan_me">Scan me!</string>
     <string name="z">z</string>
+    <string name="statistics">Statistics</string>
+    <string name="explore_local_groups">Explore local groups</string>
+    <string name="visits">Visits</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
@@ -871,5 +874,13 @@
     <plurals name="x_points">
         <item quantity="one">%1$s point</item>
         <item quantity="other">%1$s points</item>
+    </plurals>
+    <plurals name="x_visits_since_x">
+        <item quantity="one">%1$s visit since %2$s</item>
+        <item quantity="other">%1$s visits since %2$s</item>
+    </plurals>
+    <plurals name="x_views">
+        <item quantity="one">%1$s view</item>
+        <item quantity="other">%1$s views</item>
     </plurals>
 </resources>

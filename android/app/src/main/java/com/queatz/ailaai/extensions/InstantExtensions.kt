@@ -115,6 +115,8 @@ fun Instant.formatFuture() = when {
 
 fun Instant.formatDate() = format("EEEE, MMMM d")
 
+fun Instant.formatDateStamp() = format("MM/dd")
+
 @Composable
 fun Instant.formatDateAndTime() = "${format("EEEE, MMMM d")} ${stringResource(R.string.inline_at)} ${format("h:mm a")}"
 

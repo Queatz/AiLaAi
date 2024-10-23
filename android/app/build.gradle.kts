@@ -121,6 +121,7 @@ dependencies {
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
     implementation("dev.shreyaspatil:capturable:2.1.0")
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
+    implementation("io.github.ehsannarmani:compose-charts:0.0.14")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")

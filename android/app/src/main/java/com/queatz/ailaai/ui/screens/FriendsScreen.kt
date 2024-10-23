@@ -18,7 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +41,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.createGroup
 import app.ailaai.api.exploreGroups
@@ -59,6 +62,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -222,8 +226,8 @@ fun FriendsScreen() {
             MainTab.Local -> {
                 if (geo != null) {
                     api.exploreGroups(
-                        geo!!.toGeo(),
-                        searchText,
+                        geo = geo!!.toGeo(),
+                        search = searchText,
                         public = true,
                         onError = {
                             if (!passive && it !is CancellationException) {
@@ -540,7 +544,7 @@ fun FriendsScreen() {
                     } else if (results.isEmpty()) {
                         item {
                             Text(
-                                stringResource(
+                                text = stringResource(
                                     if (searchText.isBlank()) when (tab) {
                                         MainTab.Friends -> R.string.you_have_no_groups
                                         else -> R.string.no_groups_nearby
@@ -549,6 +553,48 @@ fun FriendsScreen() {
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(2.pad)
                             )
+
+                            if (tab == MainTab.Friends) {
+                                var localCategories by mutableStateOf(emptyList<String>())
+                                LaunchedEffect(geo) {
+                                    if (geo != null) {
+                                        api.exploreGroups(
+                                            geo = geo!!.toGeo(),
+                                            public = true,
+                                            onError = {}
+                                        ) {
+                                            localCategories = it.mapNotNull { it.group?.categories }.flatten().distinct()
+                                        }
+                                    }
+                                }
+
+                                Button(
+                                    onClick = {
+                                        setTab(MainTab.Local)
+                                    }
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(1.pad),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Outlined.Search, null)
+                                        Column {
+                                            Text(
+                                                text = stringResource(R.string.explore_local_groups),
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                            localCategories.notEmpty?.let {
+                                                Text(
+                                                    text = it.joinToString(),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } else {
                             item {
@@ -594,13 +640,13 @@ fun FriendsScreen() {
                             }
                         ) {
                             ContactItem(
-                                it,
-                                {
+                                item = it,
+                                onChange = {
                                     scope.launch {
                                         reloadFlow.emit(true)
                                     }
                                 },
-                                when (tab) {
+                                info = when (tab) {
                                     MainTab.Friends -> GroupInfo.LatestMessage
                                     else -> GroupInfo.Members
                                 },

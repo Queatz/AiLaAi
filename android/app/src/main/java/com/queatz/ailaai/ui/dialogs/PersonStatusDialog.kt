@@ -68,37 +68,39 @@ fun PersonStatusDialog(
                         textAlign = TextAlign.Center
                     )
                     personStatus?.let { status ->
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.CenterHorizontally),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(.25f.pad)
-                                    .size(12.dp)
-                                    .shadow(3.dp, CircleShape)
-                                    .clip(CircleShape)
-                                    .background(status.statusInfo?.color?.toColorInt()?.let { Color(it) } ?: MaterialTheme.colorScheme.background)
-                                    .background(
-                                        brush = Brush.radialGradient(
-                                            colors = listOf(
-                                                Color.White.copy(alpha = .5f),
-                                                Color.White.copy(alpha = 0f)
+                        status.statusInfo?.let { info ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.CenterHorizontally),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(.25f.pad)
+                                        .size(12.dp)
+                                        .shadow(3.dp, CircleShape)
+                                        .clip(CircleShape)
+                                        .background(info.color?.toColorInt()?.let { Color(it) } ?: MaterialTheme.colorScheme.background)
+                                        .background(
+                                            brush = Brush.radialGradient(
+                                                colors = listOf(
+                                                    Color.White.copy(alpha = .5f),
+                                                    Color.White.copy(alpha = 0f)
+                                                ),
+                                                center = Offset(
+                                                    4.5f.dp.px.toFloat(),
+                                                    4.5f.dp.px.toFloat()
+                                                ),
+                                                radius = 9.dp.px.toFloat()
                                             ),
-                                            center = Offset(
-                                                4.5f.dp.px.toFloat(),
-                                                4.5f.dp.px.toFloat()
-                                            ),
-                                            radius = 9.dp.px.toFloat()
-                                        ),
-                                        shape = CircleShape
-                                    )
-                                    .zIndex(1f)
-                            )
-                            Text(
-                                text = status.statusInfo?.name.orEmpty(),
-                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
-                            )
+                                            shape = CircleShape
+                                        )
+                                        .zIndex(1f)
+                                )
+                                Text(
+                                    text = info.name.orEmpty(),
+                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
+                                )
+                            }
                         }
                         SelectionContainer {
                             status.note?.let { note ->
