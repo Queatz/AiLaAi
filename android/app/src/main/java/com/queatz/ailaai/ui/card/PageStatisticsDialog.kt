@@ -2,12 +2,13 @@ package com.queatz.ailaai.ui.card
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import com.queatz.ailaai.extensions.formatDate
 import com.queatz.ailaai.extensions.formatDateStamp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.startOfDay
+import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Loading
@@ -49,6 +51,7 @@ import ir.ehsannarmani.compose_charts.models.PopupProperties
 import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PageStatisticsDialog(
     card: Card,
@@ -73,6 +76,10 @@ fun PageStatisticsDialog(
     ) {
         DialogLayout(
             content = {
+                var myVisits by rememberStateOf(false)
+                var anonymousVisits by rememberStateOf(false)
+                var othersVisits by rememberStateOf(false)
+
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -93,18 +100,51 @@ fun PageStatisticsDialog(
 
                     // todo checkboxes for include My visits, Anonymous visits only, Hi Town user visits only here
 
-                    val barData = remember(visits) {
+                    FlowRow {
+                        Check(myVisits, { myVisits = it }) {
+                            Text(stringResource(R.string.me))
+                        }
+                        Check(anonymousVisits, { anonymousVisits = it }) {
+                            Text(stringResource(R.string.anonymous))
+                        }
+                        Check(othersVisits, { othersVisits = it }) {
+                            Text(stringResource(R.string.others))
+                        }
+                    }
+
+                    val allBarData = remember(visits) {
                         visits.groupBy { it.createdAt!!.startOfDay() }
                     }
 
-                    val max = (barData.entries.maxOfOrNull { (_, value) -> value.size } ?: 0) / 5 * 5 + 10
+                    val barData = remember(
+                        allBarData,
+                        myVisits,
+                        anonymousVisits,
+                        othersVisits
+                    ) {
+                        allBarData.let {
+                            if (!myVisits && !anonymousVisits && !othersVisits) {
+                                it
+                            } else {
+                                it.mapValues { (key, value) ->
+                                    value.filter {
+                                        (it.isOwner == true && myVisits) ||
+                                        (it.isOwner != true && it.isWild != true && othersVisits) ||
+                                        (it.isOwner != true && it.isWild == true && anonymousVisits)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    val max = (allBarData.entries.maxOfOrNull { (_, value) -> value.size } ?: 0) / 5 * 5 + 10
 
                     val bars = remember(since) {
                         val now = Clock.System.now().startOfDay()
                         (0..<7).map {
                             now - it.days
                         }
-                    }.asReversed()//.let { it + it + it + it + it + it + it }
+                    }.asReversed()
 
                     if (bars.isNotEmpty()) {
                         ColumnChart(

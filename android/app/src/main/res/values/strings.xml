@@ -759,6 +759,8 @@
     <string name="statistics">Statistics</string>
     <string name="explore_local_groups">Explore local groups</string>
     <string name="visits">Visits</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="others">Others</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

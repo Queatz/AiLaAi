@@ -454,12 +454,14 @@ fun CardScreen(cardId: String) {
         }
     }
 
-    ResumeEffect {
+    ResumeEffect(skipFirst = true) {
         reload()
         reloadCards()
     }
 
     LaunchedEffect(oldPhoto) {
+        if (oldPhoto == null) return@LaunchedEffect
+
         var tries = 0
         while (tries++ < 5 && oldPhoto != null) {
             delay(3.seconds)
