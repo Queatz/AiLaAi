@@ -41,6 +41,7 @@ import org.jetbrains.compose.web.css.backgroundSize
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
@@ -49,6 +50,7 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
+import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
@@ -60,7 +62,9 @@ import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Br
@@ -438,7 +442,32 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                 }) {
                     Div {
                         selectedCard?.let {
-                            CardContent(it, showOpenCardInNewTab = true)
+                            CardContent(it)
+                        }
+                    }
+                    Button({
+                        classes(Styles.button)
+
+                        style {
+                            position(Position.Absolute)
+                            top(1.r)
+                            right(1.r)
+                        }
+
+                        onClick { event ->
+                            window.open("/page/${selectedCard!!.id!!}", target = "_blank")
+                        }
+                    }) {
+                        Span {
+                            appText { openPage }
+                        }
+                        Span({
+                            classes("material-symbols-outlined")
+                            style {
+                                paddingLeft(1.r)
+                            }
+                        }) {
+                            Text("open_in_new")
                         }
                     }
                 }

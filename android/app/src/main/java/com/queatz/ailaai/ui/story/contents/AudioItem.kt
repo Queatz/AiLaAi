@@ -21,7 +21,7 @@ fun LazyGridScope.audioItem(content: StoryContent.Audio) {
                     .clip(MaterialTheme.shapes.large)
             ) {
                 Audio(
-                    api.url(content.audio),
+                    url = api.url(content.audio),
                     modifier = Modifier
                         .fillMaxSize()
                 )

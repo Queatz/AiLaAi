@@ -1,6 +1,10 @@
 package com.queatz.ailaai.extensions
 
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createBitmap
 import android.graphics.BitmapShader
@@ -22,12 +26,10 @@ import androidx.core.graphics.drawable.toBitmapOrNull
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.queatz.ailaai.data.api
-import io.ktor.http.*
+import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -233,6 +235,41 @@ suspend fun Bitmap.save(context: Context): Uri? {
     }
 
     return uri
+}
+
+suspend fun File.saveAudio(context: Context, contentType: String): Boolean {
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, this@saveAudio.name)
+        put(MediaStore.MediaColumns.MIME_TYPE, contentType)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_RECORDINGS)
+            put(MediaStore.Video.Media.IS_PENDING, 1)
+        } else {
+            put(
+                MediaStore.MediaColumns.DATA,
+                "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RECORDINGS).absolutePath}${File.separator}${this@saveAudio.name}"
+            )
+        }
+    }
+
+    val contentResolver = context.contentResolver
+
+    val uri = withContext(Dispatchers.IO) {
+        contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)?.also {
+            contentResolver.openOutputStream(it)?.use {
+                it.write(this@saveAudio.readBytes())
+            }
+        }
+    } ?: return false
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        contentValues.clear()
+        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0)
+
+        contentResolver.update(uri, contentValues, null, null)
+    }
+
+    return true
 }
 
 suspend fun String.downloadAudio(context: Context): Uri? {

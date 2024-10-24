@@ -57,7 +57,7 @@ fun PageStatisticsDialog(
     card: Card,
     onDismissRequest: () -> Unit,
 ) {
-    val since by rememberStateOf(Clock.System.now().startOfDay() - 7.days)
+    val since by rememberStateOf(Clock.System.now().startOfDay() - 6.days)
     var visits by rememberStateOf<List<CardVisit>>(emptyList())
     var isLoading by rememberStateOf(false)
     val scope = rememberCoroutineScope()
@@ -182,7 +182,9 @@ fun PageStatisticsDialog(
                                 enabled = true,
                                 contentBuilder = {
                                     it.toInt().format()
-                                }
+                                },
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                textStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
                             ),
                             indicatorProperties = HorizontalIndicatorProperties(
                                 enabled = true,

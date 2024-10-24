@@ -10,6 +10,10 @@ data class Translation(
 )
 
 object Strings {
+    val openPage = Translation(
+        en = "Open page",
+        vn = "Mở trang"
+    )
     val posts = Translation(
         en = "Posts",
         vn = "Bài viết"

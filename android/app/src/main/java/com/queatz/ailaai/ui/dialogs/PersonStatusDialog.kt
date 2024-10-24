@@ -40,6 +40,7 @@ import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.GroupPhoto
+import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import com.queatz.db.PersonStatus
@@ -104,7 +105,7 @@ fun PersonStatusDialog(
                         }
                         SelectionContainer {
                             status.note?.let { note ->
-                                Text(
+                                LinkifyText(
                                     text = note,
                                     style = MaterialTheme.typography.bodyLarge,
                                     textAlign = TextAlign.Center,

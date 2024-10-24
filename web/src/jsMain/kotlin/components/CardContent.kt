@@ -26,7 +26,7 @@ import r
 import stories.asStoryContents
 
 @Composable
-fun CardContent(card: Card, showOpenCardInNewTab: Boolean = false) {
+fun CardContent(card: Card) {
     val router = Router.current
     var cardConversation by remember { mutableStateOf<ConversationItem?>(null) }
     var isReplying by remember { mutableStateOf<List<ConversationItem>?>(null) }
@@ -71,23 +71,6 @@ fun CardContent(card: Card, showOpenCardInNewTab: Boolean = false) {
                     }
                 }) {
                     Text("person")
-                }
-                if (showOpenCardInNewTab) {
-                    Span({
-                        classes("material-symbols-outlined")
-                        title(openInNewTabString)
-                        style {
-                            cursor("pointer")
-                            opacity(.5f)
-                            marginLeft(.25.r)
-                            property("vertical-align", "text-bottom")
-                        }
-                        onClick { event ->
-                            window.open("/page/${card.id}", target = "_blank")
-                        }
-                    }) {
-                        Text("open_in_new")
-                    }
                 }
             }
             card.categories?.firstOrNull()?.let { category ->

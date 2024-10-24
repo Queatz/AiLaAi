@@ -14,6 +14,7 @@ import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
+import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.StyleSheet
 import org.jetbrains.compose.web.css.alignContent
@@ -413,6 +414,7 @@ object Styles : StyleSheet() {
         flexDirection(FlexDirection.Column)
         alignItems(AlignItems.Stretch)
         overflowX("hidden")
+        overflowY("auto")
         property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
         backgroundColor(Color.white)
         borderRadius(1.r)
@@ -812,7 +814,11 @@ object Styles : StyleSheet() {
         }
     }
 
+    val mapPanelContainer by style {
+    }
+
     val mapPanel by style {
+        position(Relative)
         marginBottom(1.r)
 
         // Show above map controls

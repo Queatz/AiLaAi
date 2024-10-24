@@ -45,7 +45,8 @@ fun audioRecorder(
     onIsRecordingAudio: (Boolean) -> Unit,
     onRecordingAudioDuration: (Long) -> Unit,
     onPermissionDenied: () -> Unit,
-    onAudio: suspend (File) -> Boolean,
+    onFailed: suspend (File) -> Unit,
+    onAudio: suspend (File) -> Boolean
 ): AudioRecorderControl {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -142,13 +143,14 @@ fun audioRecorder(
         stopRecording()
         scope.launch {
             repeat(times = 3) {
-                val success = onAudio(audioOutputFile ?: return@launch)
+                var success = onAudio(audioOutputFile ?: return@launch)
                 if (success) {
                     audioOutputFile?.delete()
                     audioOutputFile = null
                     return@launch
                 }
             }
+            onFailed(audioOutputFile ?: return@launch)
         }
     }
 

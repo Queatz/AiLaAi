@@ -34,9 +34,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Call
@@ -63,12 +62,15 @@ import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -76,7 +78,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
@@ -111,6 +112,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
@@ -149,6 +151,7 @@ import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.saveAudio
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.extensions.showDidntWork
@@ -174,6 +177,7 @@ import com.queatz.ailaai.services.stickers
 import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.AppBar
+import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardToolbar
 import com.queatz.ailaai.ui.components.Dropdown
@@ -224,24 +228,29 @@ import com.queatz.db.StickerAttachment
 import com.queatz.db.Trade
 import com.queatz.db.TradeAttachment
 import createTrade
+import io.ktor.http.ContentType
 import io.ktor.utils.io.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.Instant
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.serialization.encodeToString
+import java.io.File
 import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
@@ -274,6 +283,7 @@ fun GroupScreen(groupId: String) {
     var isGeneratingGroupPhoto by rememberStateOf(false)
     var showJoinDialog by rememberStateOf(false)
     var showAudioRationale by rememberStateOf(false)
+    var showFailedToSendAudio by rememberStateOf<File?>(null)
     var showSnoozeDialog by rememberStateOf(false)
     var showPhoto by remember { mutableStateOf<String?>(null) }
     var stageReply by remember { mutableStateOf<Message?>(null) }
@@ -282,6 +292,7 @@ fun GroupScreen(groupId: String) {
     val focusRequester = remember { FocusRequester() }
     var hasOlderMessages by rememberStateOf(true)
     var isRecordingAudio by rememberStateOf(false)
+    var isSendingAudio by rememberStateOf(false)
     var showMore by rememberStateOf(false)
     var recordingAudioDuration by rememberStateOf(0L)
     var maxInputAreaHeight by rememberStateOf(0f)
@@ -371,14 +382,9 @@ fun GroupScreen(groupId: String) {
         }
     }
 
-    val audioRecorder = audioRecorder(
-        onIsRecordingAudio = { isRecordingAudio = it },
-        onRecordingAudioDuration = { recordingAudioDuration = it },
-        onPermissionDenied = {
-            showAudioRationale = true
-        }
-    ) { file ->
+    suspend fun sendAudio(file: File): Boolean {
         var success = false
+        isSendingAudio = true
         api.sendAudioFromUri(groupId, file, stageReply?.id?.let {
             Message(attachments = listOf(json.encodeToString(ReplyAttachment(it))))
         }) {
@@ -386,7 +392,21 @@ fun GroupScreen(groupId: String) {
             stageReply = null
             reloadMessages()
         }
-        success
+        isSendingAudio = false
+        return success
+    }
+
+    val audioRecorder = audioRecorder(
+        onIsRecordingAudio = { isRecordingAudio = it },
+        onRecordingAudioDuration = { recordingAudioDuration = it },
+        onPermissionDenied = {
+            showAudioRationale = true
+        },
+        onFailed = {
+            showFailedToSendAudio = it
+        }
+    ) { file ->
+        sendAudio(file)
     }
 
     suspend fun loadMore() {
@@ -1409,11 +1429,15 @@ fun GroupScreen(groupId: String) {
                                             }
                                         }
                                     ) {
-                                        Icon(
-                                            if (isRecordingAudio) Icons.AutoMirrored.Default.Send else Icons.Outlined.Mic,
-                                            stringResource(R.string.record_audio),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                        if (isSendingAudio) {
+                                            LoadingIcon()
+                                        } else {
+                                            Icon(
+                                                if (isRecordingAudio) Icons.AutoMirrored.Default.Send else Icons.Outlined.Mic,
+                                                stringResource(R.string.record_audio),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
                                 }
                                 AnimatedVisibility(!showTools) {
@@ -2183,6 +2207,111 @@ fun GroupScreen(groupId: String) {
                     onIsGeneratingPhoto = {
                         isGeneratingGroupBackground = it
                     }
+                )
+            }
+
+            showFailedToSendAudio?.let { audio ->
+                var audioBytes by rememberStateOf(byteArrayOf())
+                var isSending by rememberStateOf(false)
+
+                LaunchedEffect(audio) {
+                    withContext(Dispatchers.IO) {
+                        audioBytes = audio.readBytes()
+                    }
+                }
+
+                AlertDialog(
+                    onDismissRequest = {
+                        showFailedToSendAudio = null
+                    },
+                    title = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(1.pad),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                Icons.Outlined.Warning,
+                                null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                stringResource(R.string.failed_to_send_audio_message),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    audio.delete()
+                                }
+                                showFailedToSendAudio = null
+                            }
+                        ) {
+                            Text(stringResource(R.string.discard_recording), color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    isSending = true
+                                    if (sendAudio(showFailedToSendAudio!!)) {
+                                        audio.delete()
+                                        showFailedToSendAudio = null
+                                    }
+                                    isSending = false
+                                }
+                            },
+                            enabled = !isSending
+                        ) {
+                            Text(stringResource(R.string.retry))
+                        }
+                    },
+                    text = {
+                        if (audioBytes.isNotEmpty()) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(1.pad),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Card(
+                                    shape = MaterialTheme.shapes.large,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(MaterialTheme.shapes.large)
+                                        .height(48.dp)
+                                ) {
+                                    Audio(audioBytes, ContentType.Audio.MP4.toString())
+                                }
+                                IconButton(
+                                    onClick = {
+                                        scope.launch {
+                                            if (
+                                                runCatching {
+                                                    audio.saveAudio(context, ContentType.Audio.MP4.toString())
+                                                }.onFailure {
+                                                    it.printStackTrace()
+                                                }.getOrDefault(false)
+                                            ) {
+                                                audio.delete()
+                                                showFailedToSendAudio = null
+                                                context.toast(context.getString(R.string.saved))
+                                            } else {
+                                                context.toast(context.getString(R.string.didnt_work))
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Icon(Icons.Default.FileDownload, stringResource(R.string.download))
+                                }
+                            }
+                        }
+                    },
+                    properties = DialogProperties(
+                        dismissOnClickOutside = false,
+                        dismissOnBackPress = false
+                    )
                 )
             }
 
