@@ -27,6 +27,7 @@ import app.menu.Menu
 import appString
 import appText
 import application
+import baseUrl
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
@@ -37,6 +38,7 @@ import com.queatz.db.people
 import components.IconButton
 import components.Loading
 import components.ProfilePhoto
+import ellipsize
 import indicator
 import joins
 import kotlinx.browser.window
@@ -59,10 +61,15 @@ import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.backgroundImage
+import org.jetbrains.compose.web.css.backgroundPosition
+import org.jetbrains.compose.web.css.backgroundSize
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
-import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.div
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
@@ -73,9 +80,8 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.right
-import org.jetbrains.compose.web.css.top
-import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
@@ -242,7 +248,7 @@ fun GroupsNavPage(
             window.open("/profile/${person.id}", "_blank")
         } else  {
             scope.launch {
-                val result = personStatusDialog(person, status)
+                val result = personStatusDialog(person, status, scope)
 
                 if (result == true) {
                     onFriendClick(person, sendMessage = true)
@@ -381,11 +387,32 @@ fun GroupsNavPage(
                                             ProfilePhoto(person = person, size = 54.px)
                                             statuses[person.id!!]?.let { status ->
                                                 // Status note
-                                                status.note?.let { note ->
+                                                if (status.note != null || status.photo != null) {
                                                     Div({
                                                         classes(Styles.personItemStatus)
                                                     }) {
-                                                        Text(note)
+                                                        status.photo?.let { photo ->
+                                                            Div({
+                                                                style {
+                                                                    backgroundImage("url($baseUrl${photo})")
+                                                                    backgroundPosition("center")
+                                                                    backgroundSize("cover")
+                                                                    borderRadius(0.25.r)
+                                                                    height(.75.r)
+                                                                    width(.75.r)
+                                                                    flexShrink(0)
+                                                                }
+                                                            }) {}
+                                                        }
+                                                        status.note?.let { note ->
+                                                            Span({
+                                                                style {
+                                                                    ellipsize()
+                                                                }
+                                                            }) {
+                                                                Text(note)
+                                                            }
+                                                        }
                                                     }
                                                 }
 

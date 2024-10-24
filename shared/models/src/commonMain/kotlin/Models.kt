@@ -26,6 +26,7 @@ data class PersonStatus(
     val person: String? = null,
     val status: String? = null,
     val note: String? = null,
+    val photo: String? = null,
 
     val statusInfo: Status? = null
 ) : Model()

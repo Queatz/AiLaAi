@@ -46,8 +46,10 @@ import kotlinx.coroutines.launch
 fun SetPhotoButton(
     photoText: String,
     photo: String,
+    modifier: Modifier = Modifier,
     aspect: Double = 1.5,
     transparentBackground: Boolean = false,
+    onRemove: (() -> Unit)? = null,
     onPhoto: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -61,7 +63,7 @@ fun SetPhotoButton(
 
     if (showPhotoDialog) {
         PhotoDialog(
-            {
+            onDismissRequest = {
                 showPhotoDialog = false
             },
             initialMedia = Media.Photo(photo),
@@ -78,6 +80,12 @@ fun SetPhotoButton(
             imagesOnly = true,
             aspect = aspect,
             transparentBackground = transparentBackground,
+            onRemove = onRemove?.let { onRemove ->
+                {
+                    onRemove()
+                    choosePhotoDialog = false
+                }
+            },
             onPhotos = { photos ->
                 scope.launch {
                     isGeneratingPhoto = true
@@ -97,7 +105,7 @@ fun SetPhotoButton(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         if (photo.isNotBlank() && !isGeneratingPhoto) {

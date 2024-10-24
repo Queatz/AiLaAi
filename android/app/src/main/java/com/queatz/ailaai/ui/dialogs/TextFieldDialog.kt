@@ -34,6 +34,7 @@ fun TextFieldDialog(
     placeholder: String = "",
     showDismiss: Boolean = false,
     dismissButtonText: String? = null,
+    onDismiss: (() -> Unit)? = onDismissRequest,
     requireModification: Boolean = true,
     requireNotBlank: Boolean = false,
     valueFormatter: ((String) -> String?)? = null,
@@ -110,7 +111,7 @@ fun TextFieldDialog(
             ) {
                 if (showDismiss) {
                     TextButton({
-                        onDismissRequest()
+                        onDismiss?.invoke() ?: onDismissRequest()
                     }) {
                         Text(dismissButtonText ?: stringResource(R.string.close), color = MaterialTheme.colorScheme.secondary)
                     }

@@ -103,6 +103,7 @@ fun Route.meRoutes() {
                 db.insert(
                     PersonStatus(
                         note = newStatus.note?.trim()?.notBlank,
+                        photo = newStatus.photo?.notBlank,
                         person = me.id!!,
                         status = newStatus.status
                     )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -20,6 +21,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,15 +30,19 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.toColorInt
+import coil.compose.AsyncImage
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.px
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -51,8 +58,20 @@ fun PersonStatusDialog(
     person: Person,
     personStatus: PersonStatus?,
     onMessageClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
 ) {
+    var showPhotoDialog by rememberStateOf(false)
+
+    if (showPhotoDialog) {
+        PhotoDialog(
+            onDismissRequest = {
+                showPhotoDialog = false
+            },
+            initialMedia = Media.Photo(personStatus!!.photo!!),
+            medias = listOf(Media.Photo(personStatus!!.photo!!))
+        )
+    }
+
     DialogBase(onDismissRequest) {
         DialogLayout(
             content = {
@@ -80,7 +99,8 @@ fun PersonStatusDialog(
                                         .size(12.dp)
                                         .shadow(3.dp, CircleShape)
                                         .clip(CircleShape)
-                                        .background(info.color?.toColorInt()?.let { Color(it) } ?: MaterialTheme.colorScheme.background)
+                                        .background(info.color?.toColorInt()?.let { Color(it) }
+                                            ?: MaterialTheme.colorScheme.background)
                                         .background(
                                             brush = Brush.radialGradient(
                                                 colors = listOf(
@@ -102,6 +122,21 @@ fun PersonStatusDialog(
                                     style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
                                 )
                             }
+                        }
+                        status.photo?.let { photo ->
+                            AsyncImage(
+                                model = photo.let(api::url),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .padding(top = 2.pad)
+                                    .requiredSize(64.dp)
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .clickable {
+                                        showPhotoDialog = true
+                                    }
+                            )
                         }
                         SelectionContainer {
                             status.note?.let { note ->

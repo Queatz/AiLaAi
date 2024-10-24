@@ -46,8 +46,8 @@ fun NpcDialog(
             scrollable = true,
             content = {
                 SetPhotoButton(
-                    npc.text.orEmpty(),
-                    npc.photo.orEmpty(),
+                    photoText = npc.text.orEmpty(),
+                    photo = npc.photo.orEmpty(),
                     aspect = .75,
                     transparentBackground = true
                 ) {

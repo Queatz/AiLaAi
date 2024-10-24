@@ -56,6 +56,7 @@ fun ChoosePhotoDialog(
     aspect: Double = 1.5,
     transparentBackground: Boolean = false,
     onDismissRequest: () -> Unit,
+    onRemove: (() -> Unit)? = null,
     onIsGeneratingPhoto: (Boolean) -> Unit = {},
     onPhotos: (List<Uri>) -> Unit,
     onVideos: (List<Uri>) -> Unit = {},
@@ -161,7 +162,7 @@ fun ChoosePhotoDialog(
     }
 
     TextFieldDialog(
-        {
+        onDismissRequest = {
             onDismissRequest()
         },
         title = null,
@@ -170,6 +171,9 @@ fun ChoosePhotoDialog(
         requireNotBlank = true,
         requireModification = false,
         placeholder = stringResource(R.string.describe_photo),
+        dismissButtonText = if (onRemove != null) stringResource(R.string.remove) else null,
+        showDismiss = onRemove != null,
+        onDismiss = onRemove,
         extraContent = {
             CardToolbar {
                 item(Icons.Outlined.Photo, stringResource(R.string.set_photo)) {

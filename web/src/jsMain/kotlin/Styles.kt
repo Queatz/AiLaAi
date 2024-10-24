@@ -869,6 +869,9 @@ object Styles : StyleSheet() {
     }
 
     val personItemStatus by style {
+        display(DisplayStyle.Flex)
+        gap(.25.r)
+        alignItems(AlignItems.Center)
         position(Absolute)
         top(0.r)
         borderRadius(1.r)

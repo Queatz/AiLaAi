@@ -30,6 +30,7 @@ fun Friends(
 
             Status(
                 text = status?.note,
+                photo = status?.photo,
                 color = status?.statusInfo?.color?.toColorInt()?.let { Color(it) },
                 seen = person.seen
             ) {

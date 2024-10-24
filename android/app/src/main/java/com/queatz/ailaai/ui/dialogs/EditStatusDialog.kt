@@ -45,11 +45,13 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.SearchField
+import com.queatz.ailaai.ui.components.SetPhotoButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.PersonStatus
 import com.queatz.db.Status
@@ -64,6 +66,7 @@ fun EditStatusDialog(
 ) {
     val scope = rememberCoroutineScope()
     var note by rememberStateOf(initialStatus?.note ?: "")
+    var photo by rememberStateOf<String?>(initialStatus?.photo)
     var selectedStatus by rememberStateOf(initialStatus?.statusInfo)
     var customStatusDialog by rememberStateOf(false)
     var customStatuses by rememberStateOf(emptyList<Status>())
@@ -94,6 +97,22 @@ fun EditStatusDialog(
             content = {
                 val state = rememberLazyListState()
                 var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+
+                SetPhotoButton(
+                    photoText = listOfNotNull(
+                        selectedStatus?.name?.notBlank,
+                        note.notBlank
+                    ).joinToString(": "),
+                    photo = photo.orEmpty(),
+                    onRemove = if (photo == null) null else {
+                        {
+                            photo = null
+                        }
+                    },
+                    modifier = Modifier.padding(bottom = 1.pad)
+                ) {
+                    photo = it
+                }
 
                 SearchField(
                     value = note,
@@ -171,7 +190,8 @@ fun EditStatusDialog(
                             api.myStatus(
                                 PersonStatus(
                                     note = note,
-                                    status = selectedStatus?.id
+                                    status = selectedStatus?.id,
+                                    photo = photo?.notBlank
                                 )
                             ) {
                                 onUpdated()
