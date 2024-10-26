@@ -1,6 +1,5 @@
 package app.widget
 
-import Strings.none
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,7 +12,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.AppNavigation
-import app.AppStyles
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.newCard
@@ -21,6 +19,7 @@ import app.appNav
 import app.cards.NewCardInput
 import app.components.Empty
 import app.dialog.inputDialog
+import app.dialog.inputSelectDialog
 import app.nav.NavSearchInput
 import app.softwork.routingcompose.Router
 import appString
@@ -30,7 +29,6 @@ import com.queatz.db.Widget
 import com.queatz.widgets.widgets.PageTreeData
 import components.Icon
 import components.getConversation
-import focusable
 import isMine
 import json
 import kotlinx.browser.window
@@ -46,6 +44,7 @@ import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.color
@@ -58,11 +57,11 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
-import org.jetbrains.compose.web.css.maxHeight
-import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.percent
@@ -109,10 +108,13 @@ fun PageTreeWidget(widgetId: String) {
     var tagFilter by remember(widgetId) {
         mutableStateOf<TagFilter?>(null)
     }
+    var stageFilter by remember(widgetId) {
+        mutableStateOf<TagFilter?>(null)
+    }
     var data by remember(widgetId) {
         mutableStateOf<PageTreeData?>(null)
     }
-    val shownCards = remember(cards, search, tagFilter) {
+    val shownCards = remember(cards, search, tagFilter, stageFilter) {
         if (search.isNotBlank()) {
             cards.filter {
                 it.name?.contains(search, ignoreCase = true) == true
@@ -132,6 +134,19 @@ fun PageTreeWidget(widgetId: String) {
             } else {
                 it
             }
+        }.let {
+            val stage = (stageFilter as? TagFilter.Tag)?.tag
+            if (stageFilter != null) {
+                it.filter {
+                    data?.stages?.get(it.id!!) == stage
+                }
+            } else if (stageFilter is TagFilter.Untagged) {
+                it.filter {
+                    data?.stages?.get(it.id!!) == null
+                }
+            } else {
+                it
+            }
         }
     }
     val tagCount = remember(data) {
@@ -146,6 +161,19 @@ fun PageTreeWidget(widgetId: String) {
     }
     val allTags = remember(data) {
         data?.tags?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
+    }
+    val allStages = remember(data) {
+        data?.stages?.values?.distinct()?.sorted()?.sortedDescending()
+    }
+    val stageCount = remember(data) {
+        data?.stages?.values?.groupingBy { it }?.eachCount()
+    }
+    val noStageCount = remember(cards, data) {
+        val stagedCards = data?.stages?.entries?.filter { it.value.isNotEmpty() }?.map { it.key } ?: emptyList()
+
+        cards.count { card ->
+            card.id !in stagedCards
+        }
     }
 
     suspend fun reload() {
@@ -198,51 +226,39 @@ fun PageTreeWidget(widgetId: String) {
         }
     }
 
-    fun addTag(card: Card) {
+    fun setStage(card: Card) {
         scope.launch {
-            // todo: translate
-            val tag = inputDialog(null, confirmButton = "Add tag") { resolve, value, onValue ->
-                Div({
-                    style {
-                        overflowY("auto")
-                        maxHeight(16.r)
+            val stage = inputSelectDialog(
+                // todo: translate
+                confirmButton = "Update",
+                items = allStages
+            )
+
+            if (stage != null) {
+                api.updateWidget(widgetId, Widget(data = json.encodeToString(data!!.copy(stages = data!!.stages.toMutableMap().apply {
+                    if (stage.isNotBlank()) {
+                        put(card.id!!, stage.trim())
+                    } else {
+                        remove(card.id!!)
                     }
-                }) {
-                    allTags?.let {
-                        if (value.isNotBlank()) {
-                            it.filter { it.contains(value, ignoreCase = true) }
-                        } else {
-                            it
-                        }
-                    }?.forEach { tag ->
-                        Div({
-                            classes(
-                                listOf(AppStyles.groupItem, AppStyles.groupItemOnSurface)
-                            )
-
-                            style {
-                                backgroundColor(tagColor(tag))
-                                marginTop(.5.r)
-                            }
-
-                            onClick {
-                                onValue(tag)
-                                resolve(true)
-                            }
-
-                            focusable()
-                        }) {
-                            Div {
-                                Div({
-                                    classes(AppStyles.groupItemName)
-                                }) {
-                                    Text(tag)
-                                }
-                            }
-                        }
-                    }
+                })))) {
+                    widget = it
+                    data = json.decodeFromString<PageTreeData>(it.data!!)
                 }
             }
+        }
+    }
+
+    fun addTag(card: Card) {
+        scope.launch {
+            val tag = inputSelectDialog(
+                // todo: translate
+                confirmButton = "Add tag",
+                items = allTags,
+                itemStyle = { tag ->
+                    backgroundColor(tagColor(tag))
+                }
+            )
 
             if (!tag.isNullOrBlank()) {
                 api.updateWidget(widgetId, Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
@@ -277,6 +293,45 @@ fun PageTreeWidget(widgetId: String) {
                     marginBottom(1.r)
                 }
             )
+
+            allStages?.notEmpty?.let { stages ->
+                Div({
+                    style {
+                        marginTop(1.r)
+                        display(DisplayStyle.Flex)
+                        flexWrap(FlexWrap.Wrap)
+                        gap(.5.r)
+                    }
+                }) {
+                    stages.forEach { stage ->
+                        TagButton(
+                            tag = stage,
+                            // todo: translate
+                            title = "Tap to filter",
+                            selected = stage == (stageFilter as? TagFilter.Tag)?.tag,
+                            outline = true,
+                            count = stageCount?.get(stage)?.toString() ?: "",
+                            onClick = {
+                                stageFilter = if ((stageFilter as? TagFilter.Tag)?.tag == stage) null else TagFilter.Tag(stage)
+                            }
+                        )
+                    }
+                    if (stages.isNotEmpty()) {
+                        TagButton(
+                            // todo: Translate
+                            tag = "New",
+                            count = noStageCount.toString(),
+                            // todo: Translate
+                            title = "Tap to filter",
+                            selected = stageFilter == TagFilter.Untagged,
+                            outline = true,
+                            onClick = {
+                                stageFilter = if (stageFilter == TagFilter.Untagged) null else TagFilter.Untagged
+                            }
+                        )
+                    }
+                }
+            }
 
             allTags?.notEmpty?.let { tags ->
                 Tags(
@@ -402,6 +457,37 @@ fun PageTreeWidget(widgetId: String) {
                                     }
                                     Text(if (votes == 1) "vote" else "votes")
                                 }
+                            }
+                        }
+                    }
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            marginRight(1.r)
+                            textAlign("center")
+                            justifyContent(JustifyContent.Center)
+                            alignItems(AlignItems.Center)
+                            cursor("pointer")
+                        }
+
+                        // todo: translate
+                        title("Stage")
+
+                        onClick {
+                            setStage(card)
+                        }
+                    }) {
+                        val stage = data?.stages?.get(card.id!!)
+                        if (stage == null) {
+                            // todo: translate
+                            Span({
+                                style {
+                                    opacity(.5f)
+                                }
+                            }){ Text("New") }
+                        } else {
+                            Span {
+                                Text(stage)
                             }
                         }
                     }
