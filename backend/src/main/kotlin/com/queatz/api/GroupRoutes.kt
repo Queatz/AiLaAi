@@ -25,6 +25,7 @@ fun Route.groupRoutes() {
                 val person = meOrNull
                 db.group(person?.id, parameter("id"))?.also { group ->
                     person?.let { me ->
+                        // Mark group as seen
                         group.members?.find { it.person?.id == me.id }?.member?.let { member ->
                             member.seen = Clock.System.now()
                             db.update(member)
@@ -36,13 +37,21 @@ fun Route.groupRoutes() {
 
         get("/groups/{id}/messages") {
             respond {
-                db.group(meOrNull?.id, parameter("id"))?.let {
+                db.group(meOrNull?.id, parameter("id"))?.let { group ->
                     db.messages(
-                        it.group!!.id!!,
+                        group.group!!.id!!,
                         call.parameters["before"]?.toInstant(),
                         call.parameters["limit"]?.toInt() ?: 20,
                         call.parameters["search"]?.notBlank,
-                    )
+                    ).also {
+                        // Mark group as seen
+                        meOrNull?.let { me ->
+                            group.members?.find { it.person?.id == me.id }?.member?.let { member ->
+                                member.seen = Clock.System.now()
+                                db.update(member)
+                            }
+                        }
+                    }
                 } ?: HttpStatusCode.NotFound
             }
         }

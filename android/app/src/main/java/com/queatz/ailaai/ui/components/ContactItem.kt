@@ -159,7 +159,7 @@ fun ContactItem(
                                 R.string.you_x,
                                 it
                             )
-                        } else if (groupExtended.members!!.size > 2) {
+                        } else if (!groupExtended.group?.name.isNullOrBlank() || groupExtended.members!!.size > 2) {
                             stringResource(
                                 R.string.x_x,
                                 groupExtended.members!!

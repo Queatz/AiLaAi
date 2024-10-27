@@ -2382,6 +2382,9 @@ fun GroupScreen(groupId: String) {
                     title = title,
                     confirmFormatter = { stringResource(R.string.reply) },
                     people = groupExtended?.members?.mapNotNull { it.person }.orEmpty(),
+                    initiallySelected = groupExtended?.members?.filter {
+                        it.hasSeen(message)
+                    }?.mapNotNull { it.person }.orEmpty(),
                     allowNone = true,
                     multiple = true,
                     onPeopleSelected = {
@@ -2413,4 +2416,5 @@ fun Person.seenText(active: String) = seen?.timeAgo()?.let { timeAgo ->
 
 fun Person.seenText() = seen?.timeAgo()?.lowercase()
 
-private fun MemberAndPerson.hasSeen(message: Message) = (member?.seen ?: Instant.DISTANT_PAST) >= message.createdAt!!
+private fun MemberAndPerson.hasSeen(message: Message) =
+    (member?.seen ?: Instant.DISTANT_PAST) >= message.createdAt!!

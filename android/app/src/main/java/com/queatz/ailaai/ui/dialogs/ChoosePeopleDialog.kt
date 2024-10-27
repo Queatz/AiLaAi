@@ -24,6 +24,7 @@ fun ChoosePeopleDialog(
     people: List<Person>? = null,
     allowNone: Boolean = false,
     multiple: Boolean = true,
+    initiallySelected: List<Person> = listOf(),
     onPeopleSelected: suspend (List<Person>) -> Unit,
     extraButtons: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
@@ -35,7 +36,7 @@ fun ChoosePeopleDialog(
     var allGroups by remember { mutableStateOf(listOf<GroupExtended>()) }
     var scannedPeople by remember { mutableStateOf(listOf<Person>()) }
     var shownPeople by remember { mutableStateOf(listOf<Person>()) }
-    var selected by remember { mutableStateOf(listOf<Person>()) }
+    var selected by remember { mutableStateOf(initiallySelected) }
     val state = rememberLazyListState()
 
     if (people != null) {
