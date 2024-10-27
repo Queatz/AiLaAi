@@ -1,5 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
+import android.app.PendingIntent
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
@@ -33,10 +35,12 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddToHomeScreen
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.CameraAlt
@@ -114,6 +118,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
 import app.ailaai.api.group
@@ -127,6 +135,7 @@ import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
+import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.sendAudioFromUri
 import com.queatz.ailaai.api.sendMediaFromUri
@@ -137,7 +146,9 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAttachment
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.asOvalBitmap
 import com.queatz.ailaai.extensions.attachmentText
+import com.queatz.ailaai.extensions.cardUrl
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.formatFuture
@@ -453,6 +464,36 @@ fun GroupScreen(groupId: String) {
     suspend fun reload() {
         api.group(groupId) {
             groupExtended = it
+        }
+    }
+
+    fun addToHomescreen() {
+        scope.launch {
+            val pinShortcutInfo = ShortcutInfoCompat.Builder(context, "group/$groupId")
+                .setIcon(
+                    groupExtended?.group?.photo?.let { api.url(it) }?.asOvalBitmap(context)?.let { IconCompat.createWithBitmap(it) }
+                        ?: IconCompat.createWithResource(context, R.mipmap.ic_app)
+                )
+                .setShortLabel(groupExtended?.group?.name ?: context.getString(R.string.app_name))
+                .setIntent(Intent(context, MainActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                    data = groupUrl(groupExtended!!.group!!.id!!).toUri()
+                })
+                .build()
+            val pinnedShortcutCallbackIntent =
+                ShortcutManagerCompat.createShortcutResultIntent(context, pinShortcutInfo)
+            val successCallback = PendingIntent.getBroadcast(
+                context,
+                0,
+                pinnedShortcutCallbackIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+            ShortcutManagerCompat.requestPinShortcut(
+                context,
+                pinShortcutInfo,
+                successCallback.intentSender
+            )
         }
     }
 
@@ -863,6 +904,15 @@ fun GroupScreen(groupId: String) {
                                 ) {
                                     showMenu = false
                                     showLeaveGroup = true
+                                }
+                                if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
+                                    item(
+                                        icon = Icons.AutoMirrored.Outlined.AddToHomeScreen,
+                                        name = stringResource(R.string.add_to_homescreen)
+                                    ) {
+                                        showMenu = false
+                                        addToHomescreen()
+                                    }
                                 }
                                 item(
                                     icon = Icons.Outlined.Report,
