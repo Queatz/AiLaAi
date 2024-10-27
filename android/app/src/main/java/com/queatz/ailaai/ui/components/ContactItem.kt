@@ -154,10 +154,24 @@ fun ContactItem(
             val description = when (info) {
                 GroupInfo.LatestMessage -> {
                     groupExtended.latestMessage?.preview(context)?.let {
-                        if (groupExtended.latestMessage!!.member == myMember?.member?.id) stringResource(
-                            R.string.you_x,
+                        if (groupExtended.latestMessage!!.member == myMember?.member?.id) {
+                            stringResource(
+                                R.string.you_x,
+                                it
+                            )
+                        } else if (groupExtended.members!!.size > 2) {
+                            stringResource(
+                                R.string.x_x,
+                                groupExtended.members!!
+                                    .find { it.member?.id == groupExtended.latestMessage!!.member }
+                                    ?.person
+                                    ?.name
+                                    ?: stringResource(R.string.someone),
+                                it
+                            )
+                        } else {
                             it
-                        ) else it
+                        }
                     } ?: stringResource(
                         if (people.size == 1) R.string.connected_ago else R.string.created_ago,
                         groupExtended.group!!.createdAt!!.timeAgo().lowercase()

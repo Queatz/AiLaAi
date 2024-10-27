@@ -87,6 +87,7 @@
     <string name="delete_message_description">Tin nhắn này sẽ bị xóa đối với mọi người trong nhóm.</string>
     <string name="code_expired">Mã hết hạn hoặc không tồn tại</string>
     <string name="you_x">Bạn: %1$s</string>
+    <string name="x_x">%1$s: %2$s</string>
     <string name="you">Bạn</string>
     <string name="at_a_location">Tại một vị trí nào đó</string>
     <string name="inside_another_card">Trong trang</string>

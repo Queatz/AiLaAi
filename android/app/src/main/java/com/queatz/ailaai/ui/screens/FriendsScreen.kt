@@ -631,7 +631,7 @@ fun FriendsScreen() {
                             }
 
                         items(
-                            results,
+                            items = results,
                             key = {
                                 when (it) {
                                     is SearchResult.Connect -> "connect:${it.person.id}"
