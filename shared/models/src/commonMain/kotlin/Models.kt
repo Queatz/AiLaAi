@@ -137,6 +137,7 @@ class Card(
     var conversation: String? = null,
     var content: String? = null,
     var options: String? = null,
+    var url: String? = null,
     var pay: Pay? = null,
     var npc: Npc? = null,
     var active: Boolean? = null,

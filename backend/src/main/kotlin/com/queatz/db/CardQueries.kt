@@ -335,3 +335,20 @@ fun Db.cardVisits(card: String, since: Instant) = list(
         "since" to since
     )
 )
+
+/**
+ * @url The card url
+ */
+fun Db.cardByUrl(url: String) = one(
+    Card::class,
+    """
+        for x in @@collection
+            filter x._key == @url
+                or lower(x.${f(Card::url)}) == @url
+            limit 1
+            return x
+    """.trimIndent(),
+    mapOf(
+        "url" to url.lowercase()
+    )
+)

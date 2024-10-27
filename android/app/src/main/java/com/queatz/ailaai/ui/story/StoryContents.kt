@@ -36,7 +36,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.url
+import com.queatz.ailaai.extensions.idOrUrl
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -138,7 +138,7 @@ fun StoryContents(
                 TextButton(
                     {
                         showOpenWidgetDialog = false
-                        Card().apply { id = (source as StorySource.Card).id }.url.launchUrl(context)
+                        Card().apply { id = (source as StorySource.Card).id }.idOrUrl.launchUrl(context)
                     }
                 ) {
                     Text(stringResource(R.string.open_card))

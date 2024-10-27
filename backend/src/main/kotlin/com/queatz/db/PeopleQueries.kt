@@ -208,12 +208,12 @@ fun Db.profileByUrl(url: String) = one(
     Profile::class,
     """
     for x in @@collection
-        filter x.${f(Profile::url)} == @url
+        filter lower(x.${f(Profile::url)}) == @url
         limit 1
         return x
     """.trimIndent(),
     mapOf(
-        "url" to url
+        "url" to url.lowercase()
     )
 )
 

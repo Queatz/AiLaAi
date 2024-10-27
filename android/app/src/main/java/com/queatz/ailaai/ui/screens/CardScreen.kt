@@ -86,8 +86,10 @@ import app.ailaai.api.cardsCards
 import app.ailaai.api.createGroup
 import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.leaveCollaboration
+import app.ailaai.api.profile
 import app.ailaai.api.sendMessage
 import app.ailaai.api.updateCard
+import app.ailaai.api.updateProfile
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
@@ -96,6 +98,7 @@ import com.queatz.ailaai.api.uploadCardVideoFromUri
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.background
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.appNavigate
@@ -104,6 +107,7 @@ import com.queatz.ailaai.extensions.bitmapResource
 import com.queatz.ailaai.extensions.cardUrl
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.hint
+import com.queatz.ailaai.extensions.idOrUrl
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.name
@@ -150,6 +154,7 @@ import com.queatz.ailaai.ui.dialogs.ProcessingVideoDialog
 import com.queatz.ailaai.ui.dialogs.ProcessingVideoStage
 import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
 import com.queatz.ailaai.ui.dialogs.buildQrBitmap
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -160,6 +165,7 @@ import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.Message
 import com.queatz.db.Person
+import com.queatz.db.Profile
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -189,6 +195,7 @@ fun CardScreen(cardId: String) {
     var showReportDialog by rememberStateOf(false)
     var openEditDialog by rememberStateOf(false)
     var openChangeOwner by rememberStateOf(false)
+    var openChangeUrl by rememberStateOf(false)
     var showQrCode by rememberSavableStateOf(false)
     var showSendDialog by rememberSavableStateOf(false)
     var openAddCollaboratorDialog by rememberSavableStateOf(false)
@@ -230,6 +237,18 @@ fun CardScreen(cardId: String) {
     val userIsInactive by slideshow.userIsInactive.collectAsState()
     var showScanMe by rememberStateOf(false)
 
+    fun reload() {
+        scope.launch {
+            api.card(cardId) { card = it }
+        }
+    }
+
+    fun reloadCards() {
+        scope.launch {
+            api.cardsCards(cardId) { cards = it }
+        }
+    }
+
     LaunchedEffect(showScanMe) {
         if (showScanMe) {
             slideshow.cancelUserInteraction()
@@ -240,6 +259,41 @@ fun CardScreen(cardId: String) {
     }
 
     background(card?.background?.takeIf { slideshowActive }?.let(api::url))
+
+    if (openChangeUrl && card != null) {
+        TextFieldDialog(
+            onDismissRequest = { openChangeUrl = false },
+            title = stringResource(R.string.page_url),
+            button = stringResource(R.string.update),
+            singleLine = true,
+            initialValue = card?.url ?: "",
+            bottomContent = { url ->
+                if (url.isNotBlank()) {
+                    Text(
+                        text = "$appDomain/page/$url",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+            }
+        ) { value ->
+            api.updateCard(
+                card?.id!!,
+                Card(url = value.trim()),
+                onError = {
+                    if (it.status == HttpStatusCode.Conflict) {
+                        context.toast(R.string.url_already_in_use)
+                    }
+                }
+            ) {
+                openChangeUrl = false
+                scope.launch {
+                    reload()
+                }
+            }
+        }
+    }
 
     if (showStatisticsDialog && card != null) {
         PageStatisticsDialog(card!!) {
@@ -369,18 +423,6 @@ fun CardScreen(cardId: String) {
 
     val isMine = me?.id == card?.person && !slideshowActive
     val isMineOrIAmACollaborator = (isMine || card?.collaborators?.contains(me?.id) == true) && !slideshowActive
-
-    fun reload() {
-        scope.launch {
-            api.card(cardId) { card = it }
-        }
-    }
-
-    fun reloadCards() {
-        scope.launch {
-            api.cardsCards(cardId) { cards = it }
-        }
-    }
 
     fun generatePhoto() {
         scope.launch {
@@ -672,6 +714,10 @@ fun CardScreen(cardId: String) {
                 showManageMenu = false
             }
         ) {
+            menuItem(stringResource(R.string.page_url)) {
+                openChangeUrl = true
+                showManageMenu = false
+            }
             menuItem(stringResource(R.string.change_owner)) {
                 openChangeOwner = true
                 showManageMenu = false
@@ -730,7 +776,10 @@ fun CardScreen(cardId: String) {
                                 IconButton({
                                     toggleShowTools()
                                 }) {
-                                    Icon(if (showTools) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, stringResource(R.string.tools))
+                                    Icon(
+                                        if (showTools) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                                        stringResource(R.string.tools)
+                                    )
                                 }
                             }
                             IconButton({
@@ -861,13 +910,13 @@ fun CardScreen(cardId: String) {
                         DropdownMenuItem({
                             Text(stringResource(R.string.share))
                         }, {
-                            cardUrl(cardId).shareAsUrl(context, card?.name ?: cardString)
+                            card!!.idOrUrl.shareAsUrl(context, card?.name ?: cardString)
                             showMenu = false
                         })
                         DropdownMenuItem({
                             Text(stringResource(R.string.copy_link))
                         }, {
-                            cardUrl(cardId).copyToClipboard(context, card?.name ?: cardString)
+                            card!!.idOrUrl.copyToClipboard(context, card?.name ?: cardString)
                             context.toast(textCopied)
                             showMenu = false
                         })
@@ -904,7 +953,7 @@ fun CardScreen(cardId: String) {
             aspect: Float,
             scope: CoroutineScope,
             elevation: Int = 1,
-            playVideo: Boolean = false
+            playVideo: Boolean = false,
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(
@@ -1028,7 +1077,11 @@ fun CardScreen(cardId: String) {
 
                                 item(
                                     Icons.Outlined.Castle,
-                                    if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(R.plurals.level_x, level, level),
+                                    if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(
+                                        R.plurals.level_x,
+                                        level,
+                                        level
+                                    ),
                                     selected = level > 0
                                 ) {
                                     showUpgradeDialog = true
@@ -1126,7 +1179,8 @@ fun CardScreen(cardId: String) {
                                 CardLayout(
                                     card = it,
                                     showTitle = true,
-                                    hideCreators = card?.person?.inList()?.let { it + (card?.collaborators ?: emptyList()) },
+                                    hideCreators = card?.person?.inList()
+                                        ?.let { it + (card?.collaborators ?: emptyList()) },
                                     onClick = {
                                         nav.appNavigate(AppNav.Page(it.id!!))
                                     },

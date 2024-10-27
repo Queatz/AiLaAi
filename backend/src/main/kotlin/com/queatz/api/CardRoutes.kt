@@ -13,7 +13,9 @@ import com.queatz.db.Person
 import com.queatz.db.Search
 import com.queatz.db.SearchSource
 import com.queatz.db.allCardsOfCard
+import com.queatz.db.asId
 import com.queatz.db.asKey
+import com.queatz.db.cardByUrl
 import com.queatz.db.cardVisits
 import com.queatz.db.cardsOfCard
 import com.queatz.db.explore
@@ -22,6 +24,7 @@ import com.queatz.db.member
 import com.queatz.db.people
 import com.queatz.db.peopleDevices
 import com.queatz.db.saveCard
+import com.queatz.db.storyByUrl
 import com.queatz.db.unsaveCard
 import com.queatz.launch
 import com.queatz.notBlank
@@ -74,6 +77,14 @@ fun Route.cardRoutes() {
                     }
                     card
                 }
+            }
+        }
+
+        get("/urls/cards/{url}") {
+            respond {
+                db.cardByUrl(parameter("url"))
+                    ?.takeIf { it.active == true || it.person == meOrNull?.id }
+                    ?: HttpStatusCode.NotFound
             }
         }
 
@@ -228,6 +239,14 @@ fun Route.cardRoutes() {
 
                     if (update.parent != null && update.equipped == true) {
                         return@respond HttpStatusCode.BadRequest.description("Card cannot be equipped and have a parent")
+                    }
+
+                    if (update.url != null && card.url != update.url) {
+                        val url = update.url!!.urlize()
+                        if (db.cardByUrl(url) != null) {
+                            return@respond HttpStatusCode.Conflict.description("URL is already in use")
+                        }
+                        card.url = url
                     }
 
                     val parentCard = card.parent?.let { parent -> db.document(Card::class, parent) }

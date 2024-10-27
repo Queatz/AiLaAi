@@ -41,8 +41,8 @@ fun TextFieldDialog(
     keyboardOptions: KeyboardOptions? = null,
     align: TextAlign = TextAlign.Start,
     maxLength: Int? = null,
-    extraContent: (@Composable ColumnScope.() -> Unit)? = null,
-    bottomContent: (@Composable ColumnScope.() -> Unit)? = null,
+    extraContent: (@Composable ColumnScope.(value: String) -> Unit)? = null,
+    bottomContent: (@Composable ColumnScope.(value: String) -> Unit)? = null,
     onSubmit: suspend (value: String) -> Unit,
 ) {
     var disableSubmit by remember { mutableStateOf(requireModification) }
@@ -63,7 +63,7 @@ fun TextFieldDialog(
                     modifier = Modifier.padding(bottom = 1.pad)
                 )
             }
-            extraContent?.invoke(this)
+            extraContent?.invoke(this, text)
             val focusRequester = remember { FocusRequester() }
 
             LaunchedEffect(Unit) {
@@ -103,7 +103,7 @@ fun TextFieldDialog(
                     .padding(bottom = 1.pad)
                     .focusRequester(focusRequester)
             )
-            bottomContent?.invoke(this)
+            bottomContent?.invoke(this, text)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
                 verticalAlignment = Alignment.Bottom,

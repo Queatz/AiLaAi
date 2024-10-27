@@ -11,7 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.card
+import app.ailaai.api.cardByUrl
 import app.ailaai.api.cardsCards
+import app.softwork.routingcompose.Router
 import appString
 import application
 import baseUrl
@@ -51,26 +53,46 @@ import webBaseUrl
 
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
-fun CardPage(cardId: String, onError: () -> Unit = {}, cardLoaded: (card: Card) -> Unit) {
+fun CardPage(
+    cardId: String? = null,
+    url: String? = null,
+    onError: () -> Unit = {},
+    cardLoaded: (card: Card) -> Unit,
+) {
+    var cardId by remember { mutableStateOf(cardId) }
     var isLoading by remember { mutableStateOf(false) }
     var card by remember { mutableStateOf<Card?>(null) }
     var cards by remember { mutableStateOf<List<Card>>(emptyList()) }
     val layout by application.layout.collectAsState()
+    val router = Router.current
 
     application.layout.collectAsState()
 
     application.background(card?.background?.let { "$baseUrl$it" })
 
-    LaunchedEffect(cardId) {
+    LaunchedEffect(cardId, url) {
+        if (card != null && card?.id == cardId) {
+            return@LaunchedEffect
+        }
         isLoading = true
         card = null
         cards = emptyList()
         try {
-            api.card(cardId) {
-                card = it
+            if (cardId != null) {
+                api.card(cardId!!) {
+                    card = it
+                }
+            } else if (url != null) {
+                api.cardByUrl(url) {
+                    cardId = it.id!!
+                    card = it
+                }
+            } else {
+                router.navigate("/")
+                return@LaunchedEffect
             }
             cardLoaded(card!!)
-            api.cardsCards(cardId) {
+            api.cardsCards(card!!.id!!) {
                 cards = it
             }
         } catch (e: Throwable) {

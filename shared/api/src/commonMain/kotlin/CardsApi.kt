@@ -37,6 +37,16 @@ suspend fun Api.card(
     onSuccess = onSuccess
 )
 
+suspend fun Api.cardByUrl(
+    url: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<Card>,
+) = get(
+    "urls/cards/$url",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.cardsCards(
     id: String,
     onError: ErrorBlock = null,

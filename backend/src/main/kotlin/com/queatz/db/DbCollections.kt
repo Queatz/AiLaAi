@@ -71,6 +71,7 @@ fun collections() = listOf(
     Card::class.db {
         ensurePersistentIndex(listOf(Card::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Card::parent.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Card::url.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Card::active.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Card::name.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Card::location.name), PersistentIndexOptions())

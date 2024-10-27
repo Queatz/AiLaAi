@@ -15,7 +15,7 @@ import com.queatz.db.Message
 import com.queatz.db.PayFrequency
 import kotlinx.serialization.encodeToString
 
-val Card.url get() = "$appDomain/page/$id"
+val Card.idOrUrl get() = "$appDomain/page/${url ?: id}"
 
 fun cardUrl(id: String) = "$appDomain/page/$id"
 fun storyUrl(urlOrId: String) = "$appDomain/story/$urlOrId"

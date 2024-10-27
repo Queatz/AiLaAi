@@ -303,4 +303,4 @@ fun Route.storyRoutes() {
     }
 }
 
-fun String.urlize() = "\\W+".toRegex().replace(trim().lowercase(), "-").trim('-').encodeURLPathPart()
+fun String.urlize() = "\\W+".toRegex().replace(trim(), "-").trim('-').encodeURLPathPart()

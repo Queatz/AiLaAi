@@ -161,11 +161,11 @@ fun SettingsScreen(
 
     if (urlDialog) {
         TextFieldDialog(
-            { urlDialog = false },
-            stringResource(R.string.your_profile_url),
-            stringResource(R.string.update),
-            true,
-            profile?.profile?.url ?: "",
+            onDismissRequest = { urlDialog = false },
+            title = stringResource(R.string.your_profile_url),
+            button = stringResource(R.string.update),
+            singleLine = true,
+            initialValue = profile?.profile?.url ?: "",
         ) { value ->
             api.updateProfile(
                 Profile(url = value.trim()),

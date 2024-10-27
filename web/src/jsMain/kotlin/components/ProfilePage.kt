@@ -131,7 +131,7 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
             }
         } else {
             api.profileByUrl(
-                url!!,
+                url = url!!,
                 onError = {
                     // todo show not found page
                     router.navigate("/")

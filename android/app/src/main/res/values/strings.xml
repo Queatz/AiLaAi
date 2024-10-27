@@ -763,6 +763,7 @@
     <string name="others">Others</string>
     <string name="retry">Retry</string>
     <string name="failed_to_send_audio_message">Failed to send audio message</string>
+    <string name="page_url">Page URL</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

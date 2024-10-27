@@ -33,19 +33,19 @@ fun Db.story(person: String?, story: String) = one(
 )
 
 /**
- * @story The story id
+ * @url The story url
  */
 fun Db.storyByUrl(person: String?, url: String) = one(
     Story::class,
     """
         for x in @@collection
             filter x._key == @url
-                or x.${f(Story::url)} == @url
+                or lower(x.${f(Story::url)}) == @url
             limit 1
             return ${storyExtended(person, "x")}
     """.trimIndent(),
     mapOf(
-        "url" to url
+        "url" to url.lowercase()
     )
 )
 

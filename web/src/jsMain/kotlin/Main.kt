@@ -181,7 +181,7 @@ fun main() {
                 }
 
                 route("page") {
-                    string { cardId ->
+                    string { cardIdOrUrl ->
                         Background({
                             classes(Styles.background)
                         }) {
@@ -192,7 +192,7 @@ fun main() {
                                     router.navigate("/profile/$personId")
                                 }
                             })
-                            CardPage(cardId, onError = { parentCardId = null }) {
+                            CardPage(url = cardIdOrUrl, onError = { parentCardId = null }) {
                                 title = it.name
                                 parentCardId = it.parent
                                 personId = if (it.equipped == true) it.person else null
