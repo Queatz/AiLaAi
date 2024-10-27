@@ -212,11 +212,15 @@ fun Route.meRoutes() {
                 }
 
                 if (update.url != null && profile.url != update.url) {
-                    val url = update.url!!.urlize()
-                    if (db.profileByUrl(url) != null) {
-                        return@respond HttpStatusCode.Conflict.description("URL is already in use")
+                    if (update.url.isNullOrBlank()) {
+                        profile.url = null
+                    } else {
+                        val url = update.url!!.urlize()
+                        if (db.profileByUrl(url) != null) {
+                            return@respond HttpStatusCode.Conflict.description("URL is already in use")
+                        }
+                        profile.url = url
                     }
-                    profile.url = url
                 }
 
                 db.update(profile)

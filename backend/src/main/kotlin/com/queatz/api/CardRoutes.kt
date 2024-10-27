@@ -242,11 +242,15 @@ fun Route.cardRoutes() {
                     }
 
                     if (update.url != null && card.url != update.url) {
-                        val url = update.url!!.urlize()
-                        if (db.cardByUrl(url) != null) {
-                            return@respond HttpStatusCode.Conflict.description("URL is already in use")
+                        if (update.url.isNullOrBlank()) {
+                            card.url = null
+                        } else {
+                            val url = update.url!!.urlize()
+                            if (db.cardByUrl(url) != null) {
+                                return@respond HttpStatusCode.Conflict.description("URL is already in use")
+                            }
+                            card.url = url
                         }
-                        card.url = url
                     }
 
                     val parentCard = card.parent?.let { parent -> db.document(Card::class, parent) }
