@@ -1,5 +1,6 @@
 package app.widget
 
+import Strings.filter
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,7 +115,33 @@ fun PageTreeWidget(widgetId: String) {
     var data by remember(widgetId) {
         mutableStateOf<PageTreeData?>(null)
     }
-    val shownCards = remember(cards, search, tagFilter, stageFilter) {
+    val searchedCards = remember(cards, search) {
+        if (search.isNotBlank()) {
+            cards.filter {
+                it.name?.contains(search, ignoreCase = true) == true
+            }
+        } else {
+            cards
+        }
+    }
+    val stageCount = remember(data, searchedCards) {
+        data?.stages?.filterKeys { id ->
+            searchedCards.any { it.id == id }
+        }?.values?.groupingBy { it }?.eachCount()
+    }
+    val noStageCount = remember(searchedCards, data) {
+        val stagedCards = data?.stages?.entries?.filter { it.value.isNotEmpty() }?.map { it.key } ?: emptyList()
+
+        cards.count { card ->
+            card.id !in stagedCards && searchedCards.any { card.id == it.id }
+        }
+    }
+    val allStages = remember(data, searchedCards) {
+        data?.stages?.filterKeys { id ->
+            searchedCards.any { it.id == id }
+        }?.values?.distinct()?.sorted()?.sortedDescending()
+    }
+    val stagedCards = remember(searchedCards, stageFilter) {
         if (search.isNotBlank()) {
             cards.filter {
                 it.name?.contains(search, ignoreCase = true) == true
@@ -122,57 +149,63 @@ fun PageTreeWidget(widgetId: String) {
         } else {
             cards
         }.let {
-            val tag = (tagFilter as? TagFilter.Tag)?.tag
-            if (tag != null) {
-                it.filter {
-                    data?.tags?.get(it.id!!)?.contains(tag) == true
-                }
-            } else if (tagFilter is TagFilter.Untagged) {
-                it.filter {
-                    data?.tags?.get(it.id!!).isNullOrEmpty()
-                }
-            } else {
-                it
-            }
-        }.let {
             val stage = (stageFilter as? TagFilter.Tag)?.tag
-            if (stageFilter != null) {
-                it.filter {
-                    data?.stages?.get(it.id!!) == stage
+            when {
+                stageFilter != null -> {
+                    it.filter {
+                        data?.stages?.get(it.id!!) == stage
+                    }
                 }
-            } else if (stageFilter is TagFilter.Untagged) {
-                it.filter {
-                    data?.stages?.get(it.id!!) == null
+
+                stageFilter is TagFilter.Untagged -> {
+                    it.filter {
+                        data?.stages?.get(it.id!!) == null
+                    }
                 }
-            } else {
-                it
+
+                else -> {
+                    it
+                }
             }
         }
     }
-    val tagCount = remember(data) {
-        data?.tags?.values?.flatten()?.groupingBy { it }?.eachCount()
+    val tagCount = remember(data, stagedCards) {
+        data?.tags?.filterKeys { id ->
+            stagedCards.any { it.id == id }
+        }?.values?.flatten()?.groupingBy { it }?.eachCount()
     }
-    val noTagCount = remember(cards, data) {
+    val noTagCount = remember(stagedCards, data) {
         val taggedCards = data?.tags?.entries?.filter { it.value.isNotEmpty() }?.map { it.key } ?: emptyList()
 
-        cards.count { card ->
-            card.id !in taggedCards
+        stagedCards.count { card ->
+            card.id !in taggedCards && stagedCards.any { card.id == it.id }
         }
     }
-    val allTags = remember(data) {
-        data?.tags?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
+    val allTags = remember(data, stagedCards) {
+        data?.tags?.filterKeys { id ->
+            stagedCards.any { it.id == id }
+        }?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
     }
-    val allStages = remember(data) {
-        data?.stages?.values?.distinct()?.sorted()?.sortedDescending()
-    }
-    val stageCount = remember(data) {
-        data?.stages?.values?.groupingBy { it }?.eachCount()
-    }
-    val noStageCount = remember(cards, data) {
-        val stagedCards = data?.stages?.entries?.filter { it.value.isNotEmpty() }?.map { it.key } ?: emptyList()
+    val shownCards = remember(stagedCards, tagFilter) {
+        stagedCards.let {
+            val tag = (tagFilter as? TagFilter.Tag)?.tag
+            when {
+                tag != null -> {
+                    it.filter {
+                        data?.tags?.get(it.id!!)?.contains(tag) == true
+                    }
+                }
 
-        cards.count { card ->
-            card.id !in stagedCards
+                tagFilter is TagFilter.Untagged -> {
+                    it.filter {
+                        data?.tags?.get(it.id!!).isNullOrEmpty()
+                    }
+                }
+
+                else -> {
+                    it
+                }
+            }
         }
     }
 
@@ -217,9 +250,12 @@ fun PageTreeWidget(widgetId: String) {
 
     fun removeTag(card: Card, tag: String) {
         scope.launch {
-            api.updateWidget(widgetId, Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
-                put(card.id!!, getOrElse(card.id!!) { emptyList() } - tag)
-            })))) {
+            api.updateWidget(
+                widgetId,
+                Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
+                    put(card.id!!, getOrElse(card.id!!) { emptyList() } - tag)
+                })))
+            ) {
                 widget = it
                 data = json.decodeFromString<PageTreeData>(it.data!!)
             }
@@ -235,13 +271,16 @@ fun PageTreeWidget(widgetId: String) {
             )
 
             if (stage != null) {
-                api.updateWidget(widgetId, Widget(data = json.encodeToString(data!!.copy(stages = data!!.stages.toMutableMap().apply {
-                    if (stage.isNotBlank()) {
-                        put(card.id!!, stage.trim())
-                    } else {
-                        remove(card.id!!)
-                    }
-                })))) {
+                api.updateWidget(
+                    widgetId,
+                    Widget(data = json.encodeToString(data!!.copy(stages = data!!.stages.toMutableMap().apply {
+                        if (stage.isNotBlank()) {
+                            put(card.id!!, stage.trim())
+                        } else {
+                            remove(card.id!!)
+                        }
+                    })))
+                ) {
                     widget = it
                     data = json.decodeFromString<PageTreeData>(it.data!!)
                 }
@@ -261,9 +300,12 @@ fun PageTreeWidget(widgetId: String) {
             )
 
             if (!tag.isNullOrBlank()) {
-                api.updateWidget(widgetId, Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
-                    put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag.trim()).distinct())
-                })))) {
+                api.updateWidget(
+                    widgetId,
+                    Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
+                        put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag.trim()).distinct())
+                    })))
+                ) {
                     widget = it
                     data = json.decodeFromString<PageTreeData>(it.data!!)
                 }
@@ -312,7 +354,8 @@ fun PageTreeWidget(widgetId: String) {
                             outline = true,
                             count = stageCount?.get(stage)?.toString() ?: "",
                             onClick = {
-                                stageFilter = if ((stageFilter as? TagFilter.Tag)?.tag == stage) null else TagFilter.Tag(stage)
+                                stageFilter =
+                                    if ((stageFilter as? TagFilter.Tag)?.tag == stage) null else TagFilter.Tag(stage)
                             }
                         )
                     }
@@ -400,63 +443,61 @@ fun PageTreeWidget(widgetId: String) {
                             }
                         }
 
-                        if (votes != 0 || me == null) {
-                            Div({
-                                style {
-                                    if (me != null) {
-                                        cursor("pointer")
-                                        marginTop(.5.r)
-                                    }
-                                    display(DisplayStyle.Flex)
-                                    flexDirection(FlexDirection.Column)
-                                    alignItems(AlignItems.Center)
-                                }
-
+                        Div({
+                            style {
                                 if (me != null) {
-                                    // todo: translate
-                                    title("Edit votes")
-
-                                    onClick {
-                                        it.stopPropagation()
-
-                                        scope.launch {
-                                            val result = inputDialog(
-                                                // todo: translate
-                                                "Votes",
-                                                confirmButton = application.appString { update },
-                                                defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
-                                            )
-
-                                            result ?: return@launch
-
-                                            save(
-                                                data!!.copy(
-                                                    votes = data!!.votes.toMutableMap().apply {
-                                                        put(card.id!!, result.toIntOrNull() ?: 0)
-                                                    }
-                                                )
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    // todo: translate
-                                    title("Sign in to vote")
+                                    cursor("pointer")
+                                    marginTop(.5.r)
                                 }
-                            }) {
-                                if (me != null) {
-                                    // todo: translate
-                                    Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
-                                } else {
-                                    Div({
-                                        style {
-                                            fontSize(24.px)
-                                            fontWeight("bold")
-                                        }
-                                    }) {
-                                        Text(votes.toLocaleString())
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Column)
+                                alignItems(AlignItems.Center)
+                            }
+
+                            if (me != null) {
+                                // todo: translate
+                                title("Edit votes")
+
+                                onClick {
+                                    it.stopPropagation()
+
+                                    scope.launch {
+                                        val result = inputDialog(
+                                            // todo: translate
+                                            "Votes",
+                                            confirmButton = application.appString { update },
+                                            defaultValue = data!!.votes[card.id!!]?.toString() ?: "0"
+                                        )
+
+                                        result ?: return@launch
+
+                                        save(
+                                            data!!.copy(
+                                                votes = data!!.votes.toMutableMap().apply {
+                                                    put(card.id!!, result.toIntOrNull() ?: 0)
+                                                }
+                                            )
+                                        )
                                     }
-                                    Text(if (votes == 1) "vote" else "votes")
                                 }
+                            } else {
+                                // todo: translate
+                                title("Sign in to vote")
+                            }
+                        }) {
+                            if (me != null) {
+                                // todo: translate
+                                Text("${votes.toLocaleString()} ${if (votes == 1) "vote" else "votes"}")
+                            } else {
+                                Div({
+                                    style {
+                                        fontSize(24.px)
+                                        fontWeight("bold")
+                                    }
+                                }) {
+                                    Text(votes.toLocaleString())
+                                }
+                                Text(if (votes == 1) "vote" else "votes")
                             }
                         }
                     }
@@ -484,7 +525,7 @@ fun PageTreeWidget(widgetId: String) {
                                 style {
                                     opacity(.5f)
                                 }
-                            }){ Text("New") }
+                            }) { Text("New") }
                         } else {
                             Span {
                                 Text(stage)
@@ -588,7 +629,7 @@ fun Tags(
     onClick: (tag: TagFilter) -> Unit,
     formatCount: ((tag: String?) -> String?)? = null,
     showNoTag: Boolean = false,
-    content: @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
 ) {
     Div({
         style {
@@ -635,7 +676,7 @@ fun TagButton(
     selected: Boolean,
     count: String? = null,
     outline: Boolean = false,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Button(
         {
