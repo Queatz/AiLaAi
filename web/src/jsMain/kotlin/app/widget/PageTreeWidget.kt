@@ -508,14 +508,18 @@ fun PageTreeWidget(widgetId: String) {
                             textAlign("center")
                             justifyContent(JustifyContent.Center)
                             alignItems(AlignItems.Center)
-                            cursor("pointer")
+                            if (me != null) {
+                                cursor("pointer")
+                            }
                         }
 
                         // todo: translate
                         title("Stage")
 
                         onClick {
-                            setStage(card)
+                            if (me != null) {
+                                setStage(card)
+                            }
                         }
                     }) {
                         val stage = data?.stages?.get(card.id!!)
