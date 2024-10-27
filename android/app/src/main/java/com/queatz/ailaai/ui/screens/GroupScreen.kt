@@ -1075,6 +1075,9 @@ fun GroupScreen(groupId: String) {
                                 message = message,
                                 previousMessage = index.takeIf { it < messages.lastIndex }?.let { it + 1 }
                                     ?.let { messages[it] },
+                                initiallyShowTime = nextMessage?.createdAt?.let {
+                                    (message.createdAt!! + 1.hours) < it
+                                } ?: false,
                                 selectedMessages = selectedMessages,
                                 onSelectedChange = { message, selected ->
                                     if (searchMessages != null) {

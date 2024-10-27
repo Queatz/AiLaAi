@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -32,6 +33,7 @@ import com.queatz.db.Person
 fun MessageItem(
     message: Message,
     previousMessage: Message?,
+    initiallyShowTime: Boolean = false,
     selectedMessages: Set<Message>,
     onSelectedChange: (Message, Boolean) -> Unit,
     getPerson: (String) -> Person?,
@@ -43,7 +45,9 @@ fun MessageItem(
     onReplyInNewGroup: (Message) -> Unit,
     onShowPhoto: (String) -> Unit,
 ) {
-    var showTime by rememberStateOf(false)
+    var showTime by remember(initiallyShowTime, message) {
+        mutableStateOf(initiallyShowTime)
+    }
     var showMessageDialog by rememberStateOf(false)
     var botDialog by rememberStateOf<String?>(null)
     val isMe = member?.id == message.member
