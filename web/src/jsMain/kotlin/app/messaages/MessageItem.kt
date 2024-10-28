@@ -52,6 +52,7 @@ fun MessageItem(
     bot: Bot?,
     myMember: MemberAndPerson?,
     bots: List<Bot>,
+    canReply: Boolean,
     onReply: () -> Unit,
     onReplyInNewGroup: () -> Unit,
     onUpdated: () -> Unit
@@ -102,8 +103,10 @@ fun MessageItem(
 
         if (messageMenuTarget != null) {
             Menu({ messageMenuTarget = null }, messageMenuTarget!!) {
-                item(appString { reply }) {
-                    onReply()
+                if (canReply) {
+                    item(appString { reply }) {
+                        onReply()
+                    }
                 }
 
                 item(appString { replyInNewGroup }) {

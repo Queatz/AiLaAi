@@ -128,6 +128,7 @@ fun ColumnScope.MessageContent(
     getPerson: (String) -> Person?,
     getBot: (String) -> Bot?,
     getMessage: suspend (String) -> Message?,
+    canReply: Boolean,
     onReply: (Message) -> Unit,
     onReplyInNewGroup: (Message) -> Unit,
     onUpdated: () -> Unit,
@@ -234,9 +235,11 @@ fun ColumnScope.MessageContent(
                 onShowMessageDialog(false)
             }
         ) {
-            menuItem(stringResource(R.string.reply)) {
-                onShowMessageDialog(false)
-                onReply(message)
+            if (canReply) {
+                menuItem(stringResource(R.string.reply)) {
+                    onShowMessageDialog(false)
+                    onReply(message)
+                }
             }
             menuItem(stringResource(R.string.reply_in_new_group)) {
                 onShowMessageDialog(false)

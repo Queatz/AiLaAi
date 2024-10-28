@@ -19,6 +19,7 @@ import app.group.JoinGroupLayout
 import app.messaages.MessageItem
 import app.messaages.preview
 import com.queatz.db.GroupExtended
+import com.queatz.db.GroupMessagesConfig
 import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
 import components.Loading
@@ -159,6 +160,7 @@ fun GroupMessages(group: GroupExtended) {
                     bot = group.bots?.find { bot -> bot.id == message.bot },
                     myMember = myMember,
                     bots = group.bots ?: emptyList(),
+                    canReply = group.group?.config?.messages != GroupMessagesConfig.Hosts,
                     onReply = {
                         replyMessage = message
                     },

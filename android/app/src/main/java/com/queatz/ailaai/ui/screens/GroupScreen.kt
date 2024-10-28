@@ -1109,6 +1109,7 @@ fun GroupScreen(groupId: String) {
                                         reloadMessages()
                                     }
                                 },
+                                canReply = groupExtended.group?.config?.messages != GroupMessagesConfig.Hosts,
                                 onReply = { stageReply = it },
                                 onReplyInNewGroup = {
                                     showReplyInNewGroupDialog = it
