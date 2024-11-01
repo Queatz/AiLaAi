@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Reply
 import androidx.compose.material3.AlertDialog
@@ -532,6 +533,7 @@ fun ColumnScope.MessageContent(
                     getPerson = getPerson,
                     getBot = getBot,
                     getMessage = getMessage,
+                    canReply = canReply,
                     onReply = onReply,
                     onReplyInNewGroup = onReplyInNewGroup,
                     onUpdated = {}, // todo delete from reply
@@ -540,7 +542,7 @@ fun ColumnScope.MessageContent(
                 )
             }
             Icon(
-                Icons.Outlined.Reply,
+                Icons.AutoMirrored.Outlined.Reply,
                 null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .5f),
                 modifier = Modifier

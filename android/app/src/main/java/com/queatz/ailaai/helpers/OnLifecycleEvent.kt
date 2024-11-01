@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -37,7 +38,7 @@ fun LifecycleEffect(onEvent: suspend (event: Lifecycle.Event) -> Unit) {
 
 @Composable
 fun ResumeEffect(skipFirst: Boolean = false, block: suspend () -> Unit) {
-    var isFirst by remember(skipFirst) { mutableStateOf(true) }
+    var isFirst by rememberSaveable(skipFirst) { mutableStateOf(true) }
     LifecycleEffect {
         if (it == Lifecycle.Event.ON_RESUME) {
             if (skipFirst && isFirst) {
@@ -51,7 +52,7 @@ fun ResumeEffect(skipFirst: Boolean = false, block: suspend () -> Unit) {
 
 @Composable
 fun StartEffect(skipFirst: Boolean = false, block: suspend () -> Unit) {
-    var isFirst by remember(skipFirst) { mutableStateOf(true) }
+    var isFirst by rememberSaveable(skipFirst) { mutableStateOf(true) }
     LifecycleEffect {
         if (it == Lifecycle.Event.ON_START) {
             if (skipFirst && isFirst) {
@@ -65,7 +66,7 @@ fun StartEffect(skipFirst: Boolean = false, block: suspend () -> Unit) {
 
 @Composable
 fun StopEffect(skipFirst: Boolean = false, block: suspend () -> Unit) {
-    var isFirst by remember(skipFirst) { mutableStateOf(true) }
+    var isFirst by rememberSaveable(skipFirst) { mutableStateOf(true) }
     LifecycleEffect {
         if (it == Lifecycle.Event.ON_STOP) {
             if (skipFirst && isFirst) {

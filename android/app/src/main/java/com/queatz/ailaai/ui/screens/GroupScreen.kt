@@ -469,15 +469,21 @@ fun GroupScreen(groupId: String) {
 
     fun addToHomescreen() {
         scope.launch {
+            val groupExtended = groupExtended ?: return@launch
+
             val pinShortcutInfo = ShortcutInfoCompat.Builder(context, "group/$groupId")
                 .setIcon(
-                    groupExtended?.group?.photo?.let { api.url(it) }?.asOvalBitmap(context)?.let { IconCompat.createWithBitmap(it) }
+                    groupExtended.group?.photo?.let { api.url(it) }?.asOvalBitmap(context)?.let { IconCompat.createWithBitmap(it) }
                         ?: IconCompat.createWithResource(context, R.mipmap.ic_app)
                 )
-                .setShortLabel(groupExtended?.group?.name ?: context.getString(R.string.app_name))
+                .setShortLabel(groupExtended.name(
+                    someone = context.getString(R.string.someone),
+                    emptyGroup = context.getString(R.string.app_name),
+                    omit =  me?.id?.inList() ?: emptyList()
+                ))
                 .setIntent(Intent(context, MainActivity::class.java).apply {
                     action = Intent.ACTION_VIEW
-                    data = groupUrl(groupExtended!!.group!!.id!!).toUri()
+                    data = groupUrl(groupExtended.group!!.id!!).toUri()
                 })
                 .build()
             val pinnedShortcutCallbackIntent =
@@ -1109,7 +1115,7 @@ fun GroupScreen(groupId: String) {
                                         reloadMessages()
                                     }
                                 },
-                                canReply = groupExtended.group?.config?.messages != GroupMessagesConfig.Hosts,
+                                canReply = groupExtended?.group?.config?.messages != GroupMessagesConfig.Hosts,
                                 onReply = { stageReply = it },
                                 onReplyInNewGroup = {
                                     showReplyInNewGroupDialog = it

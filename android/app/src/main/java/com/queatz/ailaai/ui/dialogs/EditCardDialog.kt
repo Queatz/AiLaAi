@@ -162,7 +162,9 @@ fun EditCardDialog(
                 if (backstack.isNotEmpty()) {
                     TextButton(
                         {
-                            cardConversation = backstack.removeLast()
+                            backstack.removeLastOrNull()?.let {
+                                cardConversation = it
+                            }
                             invalidate()
                         }
                     ) {

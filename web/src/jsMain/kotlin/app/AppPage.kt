@@ -381,16 +381,19 @@ fun AppPage() {
                     )
 
                     NavPage.Schedule -> ScheduleNavPage(
-                        reminderUpdates,
-                        reminder,
-                        { reminder = it },
-                        {
+                        reminderUpdates = reminderUpdates,
+                        reminder = reminder,
+                        onReminder = { reminder = it },
+                        onUpdate = {
                             scope.launch {
                                 reminderUpdates.emit(it)
+
+                                // This will reload the list
+                                goToToday.emit(Unit)
                             }
                         },
-                        scheduleView,
-                        {
+                        view = scheduleView,
+                        onViewClick = {
                             reminder = null
 
                             if (scheduleView == it) {
@@ -399,7 +402,7 @@ fun AppPage() {
                                 scheduleView = it
                             }
                         },
-                        {
+                        onProfileClick = {
                             nav = NavPage.Profile
                         }
                     )
@@ -449,10 +452,10 @@ fun AppPage() {
                 )
 
                 NavPage.Schedule -> SchedulePage(
-                    scheduleView,
-                    reminder,
-                    goToToday,
-                    { reminder = it },
+                    view = scheduleView,
+                    reminder = reminder,
+                    goToToday = goToToday,
+                    onReminder = { reminder = it },
                     onUpdate = {
                         scope.launch {
                             reminderUpdates.emit(it)
