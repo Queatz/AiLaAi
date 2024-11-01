@@ -41,6 +41,9 @@ fun InfoPage(page: String) {
                     "open-source" -> {
                         OpenSourcePage()
                     }
+                    "use-cases" -> {
+                        UseCasesPage()
+                    }
                     else -> Router.current.navigate("/")
                 }
             }

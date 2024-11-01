@@ -348,15 +348,16 @@ object Styles : StyleSheet() {
         marginTop(1.r)
         backgroundColor(Color("#f7f7f7"))
         property("z-index", "1")
+        whiteSpace("nowrap")
+        overflowX("auto")
+        width(100.vw)
 
         dark(self) {
             backgroundColor(colors.dark.background)
         }
 
-        media(mediaMaxWidth(640.px)) {
-            self style {
-                flexDirection(FlexDirection.Column)
-            }
+        mobile(self) {
+            justifyContent(JustifyContent.Start)
         }
     }
 

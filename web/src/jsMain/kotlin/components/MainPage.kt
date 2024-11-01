@@ -1,5 +1,6 @@
 import androidx.compose.runtime.Composable
 import app.AppPage
+import components.AppFooter
 import components.AppHeader
 import org.jetbrains.compose.web.dom.Div
 
@@ -12,6 +13,7 @@ fun MainPage() {
             MapView {
                 AppHeader(appString { appName }, background = false, showDownloadApp = true)
             }
+            AppFooter()
         }
     } else {
         AppPage()

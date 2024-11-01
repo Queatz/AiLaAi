@@ -7,7 +7,10 @@ import org.jetbrains.compose.web.dom.*
 fun OpenSourcePage() {
     Div {
         H1 {
-            Text("Ai là ai is Open Source")
+            Text("Open Source")
+        }
+        Div {
+            Text("Hi Town runs the latest version of Ai là ai.")
         }
         A("https://github.com/Queatz/AiLaAi") {
             Text("Go to GitHub")
