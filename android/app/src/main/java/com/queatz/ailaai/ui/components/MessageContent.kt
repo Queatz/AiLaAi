@@ -757,7 +757,7 @@ fun ColumnScope.MessageContent(
                 ContactItem(
                     SearchResult.Group(attachedGroup!!),
                     onChange = {},
-                    info = GroupInfo.LatestMessage,
+                    info = GroupInfo.Members,
                 )
             }
         }

@@ -308,7 +308,7 @@ fun MessageContent(
                                                 appNav.navigate(AppNavigation.Group(group.group!!.id!!, group))
                                             }
                                         },
-                                        info = GroupInfo.LatestMessage
+                                        info = GroupInfo.Members
                                     )
                                 }
                             }
