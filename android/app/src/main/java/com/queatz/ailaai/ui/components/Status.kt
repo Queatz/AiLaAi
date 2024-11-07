@@ -58,7 +58,7 @@ fun Status(
                     modifier = Modifier
                         .offset(y = -1.pad)
                         .align(Alignment.TopCenter)
-                        .shadow(3.dp, MaterialTheme.shapes.medium)
+                        .shadow(3.dp, MaterialTheme.shapes.large)
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.surfaceBright)
                         .padding(vertical = .25f.pad, horizontal = .5f.pad)

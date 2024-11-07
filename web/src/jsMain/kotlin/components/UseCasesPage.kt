@@ -27,7 +27,9 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.vw
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.*
 import r
@@ -73,8 +75,8 @@ fun UseCasesPage() {
                 Div {
                     Img(src = "$baseUrl/${useCase.photo}", attrs = {
                         style {
-                            height(16.r)
-                            width(24.r)
+                            width(33.vw)
+                            property("aspect-ratio", "1.5")
                             borderRadius(2.r)
                         }
                     })
@@ -82,7 +84,8 @@ fun UseCasesPage() {
                 Div({
                     style {
                         flexGrow(1)
-                        padding(1.r)
+                        paddingLeft(1.r)
+                        paddingRight(1.r)
                     }
                 }) {
                     Div({

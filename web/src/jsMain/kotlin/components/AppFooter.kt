@@ -8,6 +8,7 @@ import app.softwork.routingcompose.Router
 import appString
 import appText
 import application
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.color
@@ -39,12 +40,7 @@ fun AppFooter() {
         Span({
             classes(Styles.menuButton)
             onClick {
-                scope.launch {
-                    dialog(
-                        title = "Whitepaper coming soon",
-                        cancelButton = null
-                    )
-                }
+                window.open("/Hi Town Whitepaper.pdf", target = "_blank")
             }
         }) {
             Text("Whitepaper")

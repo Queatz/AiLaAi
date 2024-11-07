@@ -100,8 +100,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
-    implementation("androidx.compose.material3:material3:1.3.0")
-    implementation("androidx.compose.material3:material3-window-size-class:1.3.0")
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
@@ -111,17 +111,17 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.appcompat:appcompat-resources:1.7.0")
     implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
     implementation("dev.shreyaspatil:capturable:2.1.0")
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
-    implementation("io.github.ehsannarmani:compose-charts:0.0.14")
+    implementation("io.github.ehsannarmani:compose-charts:0.0.15")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
