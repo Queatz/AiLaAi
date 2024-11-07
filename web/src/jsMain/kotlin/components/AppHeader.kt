@@ -162,7 +162,7 @@ fun AppHeader(
                         router.navigate("/signin")
                     }
                 }) {
-                    appText { signIn }
+                    appText { signUp }
                 }
             } else {
                 // todo show profile icon
