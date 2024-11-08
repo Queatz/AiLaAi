@@ -54,7 +54,7 @@ fun GroupMessages(group: GroupExtended) {
         LoadMoreState()
     }
 
-    var replyMessage by remember {
+    var replyMessage by remember(group.group?.id) {
         mutableStateOf<Message?>(null)
     }
 

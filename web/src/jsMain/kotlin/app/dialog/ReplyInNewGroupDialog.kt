@@ -42,7 +42,7 @@ suspend fun replyInNewGroupDialog(
         )
 
         api.createGroup(it.map { it.id!! }) {
-            api.updateGroup(it.id!!, Group(name = "⮡ $title ($groupName)")) { newGroup ->
+            api.updateGroup(it.id!!, Group(name = "Re: $title ($groupName)")) { newGroup ->
                 api.sendMessage(
                     newGroup.id!!, message = Message(
                         attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),
