@@ -45,6 +45,7 @@ import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorCount
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
@@ -189,7 +190,7 @@ fun PageStatisticsDialog(
                             indicatorProperties = HorizontalIndicatorProperties(
                                 enabled = true,
                                 textStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onBackground),
-                                count = if (max < 20) 2 else 5,
+                                count = IndicatorCount.CountBased(if (max < 20) 2 else 5), // todo: use step based
                                 padding = 1.pad,
                                 contentBuilder = {
                                     it.toInt().format()
