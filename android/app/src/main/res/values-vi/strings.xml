@@ -749,4 +749,5 @@
     <string name="scan_me">Quét mã này!</string>
     <string name="z">z</string>
     <string name="explore_local_groups">Explore local groups</string>
+    <string name="my_qr">Mã QR của tôi</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +39,12 @@ fun String.buildQrBitmap(logo: Bitmap?, size: Int = 500) = ScanUtil.buildBitmap(
 )
 
 @Composable
-fun QrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
+fun QrCodeDialog(
+    onDismissRequest: () -> Unit,
+    url: String,
+    name: String?,
+    title: String? = null,
+) {
     val scope = rememberCoroutineScope()
     val logo = bitmapResource(R.drawable.ic_notification)
     val qrCode = remember {
@@ -56,6 +62,14 @@ fun QrCodeDialog(onDismissRequest: () -> Unit, url: String, name: String?) {
                     1.pad
                 )
         ) {
+            title?.let { title ->
+                Text(
+                    text = title,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 1.pad)
+                )
+            }
             Image(qrCode.asImageBitmap(), contentDescription = null, modifier = Modifier.background(Color.White))
             Row(
                 horizontalArrangement = Arrangement.Center,

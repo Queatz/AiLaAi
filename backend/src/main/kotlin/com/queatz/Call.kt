@@ -26,6 +26,7 @@ import io.ktor.server.util.toGMTDate
 import io.ktor.util.date.toJvmDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
@@ -101,7 +102,7 @@ class Call {
 
     fun start(scope: CoroutineScope) {
         scope.launch {
-            while (Thread.currentThread().isAlive) {
+            while (scope.isActive) {
                 try {
                     val token = jwt(1.hours)
 

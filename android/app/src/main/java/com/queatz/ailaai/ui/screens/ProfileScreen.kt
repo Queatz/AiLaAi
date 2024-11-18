@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -208,11 +209,12 @@ fun ProfileScreen(personId: String) {
 
     if (showQrCodeDialog) {
         QrCodeDialog(
-            {
+            onDismissRequest = {
                 showQrCodeDialog = false
             },
-            profileUrl(personId),
-            person?.name
+            url = profileUrl(personId),
+            name = person?.name,
+            title = stringResource(R.string.my_qr)
         )
     }
 
@@ -712,7 +714,7 @@ fun ProfileScreen(personId: String) {
                                             })
                                         }
                                         DropdownMenuItem({
-                                            Text(stringResource(R.string.qr_code))
+                                            Text(stringResource(R.string.my_qr))
                                         }, {
                                             showMyMenu = false
                                             showQrCodeDialog = true
@@ -724,6 +726,19 @@ fun ProfileScreen(personId: String) {
                                             showProfileSettingDialog = true
                                         })
                                     }
+                                }
+                                IconButton(
+                                    {
+                                        showQrCodeDialog = true
+                                    },
+                                    Modifier
+                                        .size(42.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.QrCode2,
+                                        stringResource(R.string.my_qr),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                                 IconButton(
                                     {

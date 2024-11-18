@@ -84,8 +84,8 @@ class Call {
                 val meeting = VideoSDK.initMeeting(
                     json.encodeToDynamic(
                         VideoSdkInitMeetingBody(
-                            it.call.room!!,
-                            me.name ?: application.appString { someone }
+                            meetingId = it.call.room!!,
+                            name = me.name ?: application.appString { someone }
                         )
                     )
                 )
@@ -94,21 +94,25 @@ class Call {
                     enabledStreams.update {
                         it + (stream.kind as String)
                     }
-                    if (stream.kind == "video") {
-                        val mediaStream = MediaStream()
-                        mediaStream.addTrack(stream.track)
-                        // todo: set stream kind?
-                        active.value = active.value!!.copy(localVideo = mediaStream)
-                    } else if (stream.kind == "audio") {
-                        val mediaStream = MediaStream()
-                        mediaStream.addTrack(stream.track)
-                        // todo: set stream kind?
-                        active.value = active.value!!.copy(localAudio = mediaStream)
-                    } else if (stream.kind == "share") {
-                        val mediaStream = MediaStream()
-                        mediaStream.addTrack(stream.track)
-                        // todo: set stream kind?
-                        active.value = active.value!!.copy(localShare = mediaStream)
+                    when (stream.kind) {
+                        "video" -> {
+                            val mediaStream = MediaStream()
+                            mediaStream.addTrack(stream.track)
+                            // todo: set stream kind?
+                            active.value = active.value!!.copy(localVideo = mediaStream)
+                        }
+                        "audio" -> {
+                            val mediaStream = MediaStream()
+                            mediaStream.addTrack(stream.track)
+                            // todo: set stream kind?
+                            active.value = active.value!!.copy(localAudio = mediaStream)
+                        }
+                        "share" -> {
+                            val mediaStream = MediaStream()
+                            mediaStream.addTrack(stream.track)
+                            // todo: set stream kind?
+                            active.value = active.value!!.copy(localShare = mediaStream)
+                        }
                     }
                     Unit
                 }
@@ -117,12 +121,16 @@ class Call {
                     enabledStreams.update {
                         it - (stream.kind as String)
                     }
-                    if (stream.kind == "video") {
-                        active.value = active.value!!.copy(localVideo = null)
-                    } else if (stream.kind == "audio") {
-                        active.value = active.value!!.copy(localAudio = null)
-                    } else if (stream.kind == "share") {
-                        active.value = active.value!!.copy(localShare = null)
+                    when (stream.kind) {
+                        "video" -> {
+                            active.value = active.value!!.copy(localVideo = null)
+                        }
+                        "audio" -> {
+                            active.value = active.value!!.copy(localAudio = null)
+                        }
+                        "share" -> {
+                            active.value = active.value!!.copy(localShare = null)
+                        }
                     }
                     Unit
                 }
@@ -133,9 +141,9 @@ class Call {
                         mediaStream.addTrack(stream.track)
                         active.value = active.value!!.copy(
                             streams = active.value!!.streams + GroupCallParticipant(
-                                participant,
-                                mediaStream,
-                                stream.kind
+                                participant = participant,
+                                stream = mediaStream,
+                                kind = stream.kind
                             )
                         )
                         Unit
@@ -163,14 +171,15 @@ class Call {
                 meeting.join()
 
                 active.value = GroupCall(
-                    group,
-                    meeting
+                    group = group,
+                    meeting = meeting
                 )
             }
         }
     }
 
     fun end() {
+        // todo: remove listeners with .off()
         active.value?.meeting?.leave()
         active.value = null
     }

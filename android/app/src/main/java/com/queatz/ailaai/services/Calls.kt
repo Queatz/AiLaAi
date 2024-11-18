@@ -246,9 +246,9 @@ class Calls {
 
                             active.value = active.value!!.copy(
                                 streams = active.value!!.streams + GroupCallParticipant(
-                                    participant,
-                                    stream!!.track,
-                                    stream!!.kind
+                                    participant = participant,
+                                    stream = stream!!.track,
+                                    kind = stream!!.kind
                                 )
                             )
                         }
@@ -349,6 +349,7 @@ class Calls {
             return
         }
 
+        meeting?.removeAllListeners()
         meeting?.leave()
         meeting = null
         active.value = null

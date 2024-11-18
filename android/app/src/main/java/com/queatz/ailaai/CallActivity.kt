@@ -136,8 +136,8 @@ class CallActivity : AppCompatActivity() {
                         group?.let { group ->
                             activeCall?.let { active ->
                                 CallScreen(
-                                    group,
-                                    active,
+                                    group = group,
+                                    active = active,
                                     isInPipMode = isInPipMode,
                                     cameraEnabled = calls.enabled("video"),
                                     micEnabled = calls.enabled("audio"),

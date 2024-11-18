@@ -1,6 +1,5 @@
 package app.widget
 
-import Strings.filter
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,10 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
-import app.AppNavigation
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.newCard
+import app.ailaai.api.updateCard
 import app.appNav
 import app.cards.NewCardInput
 import app.components.Empty
@@ -213,6 +212,18 @@ fun PageTreeWidget(widgetId: String) {
         api.cardsCards(data?.card ?: return) {
             cards = it
         }
+    }
+
+    suspend fun saveCard(cardId: String, card: Card) {
+        api.updateCard(cardId, card) {
+            reload()
+        }
+    }
+
+    suspend fun saveConversation(card: Card, value: String) {
+        val conversation = card.getConversation()
+        conversation.message = value
+        saveCard(card.id!!, Card(conversation = json.encodeToString(conversation)))
     }
 
     fun newSubCard(inCardId: String, name: String, active: Boolean) {
@@ -542,8 +553,13 @@ fun PageTreeWidget(widgetId: String) {
                             flexGrow(1)
                         }
 
-                        // todo: translate
-                        title("Open page")
+                        if (card.person == me?.id) {
+                            // todo: translate
+                            title("Edit")
+                        } else {
+                            // todo: translate
+                            title("Open page")
+                        }
 
                         onClick { event ->
                             event.stopPropagation()
@@ -553,7 +569,16 @@ fun PageTreeWidget(widgetId: String) {
                             } else {
                                 if (card.person == me?.id) {
                                     scope.launch {
-                                        appNav.navigate(AppNavigation.Page(card.id!!, card))
+                                        val result = inputDialog(
+                                            title = application.appString { details },
+                                            singleLine = false,
+                                            confirmButton = application.appString { update },
+                                            defaultValue = card.getConversation().message
+                                        )
+
+                                        if (result != null) {
+                                            saveConversation(card, result)
+                                        }
                                     }
                                 } else {
                                     router.navigate("/page/${card.id!!}")
@@ -565,6 +590,25 @@ fun PageTreeWidget(widgetId: String) {
                             style {
                                 fontWeight("bold")
                                 fontSize(18.px)
+                            }
+
+                            onClick { event ->
+                                event.stopPropagation()
+
+                                if (card.person == me?.id) {
+                                    scope.launch {
+                                        val result = inputDialog(
+                                            title = application.appString { title },
+                                            singleLine = false,
+                                            confirmButton = application.appString { update },
+                                            defaultValue = card.name.orEmpty()
+                                        )
+
+                                        if (result != null) {
+                                            saveCard(card.id!!, Card(name = result))
+                                        }
+                                    }
+                                }
                             }
                         }) {
                             Text(card.name ?: "")

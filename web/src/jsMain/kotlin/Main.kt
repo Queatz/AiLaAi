@@ -162,36 +162,24 @@ fun main() {
                     }
                 }
 
-                // Deprecated
-                route("card") {
-                    string { cardId ->
-                        AppHeader(appName, showBack = parentCardId != null, onBack = {
-                            router.navigate("/page/$parentCardId")
-                        })
-                        CardPage(cardId, onError = { parentCardId = null }) {
-                            title = it.name
-                            parentCardId = it.parent
-                        }
-                        AppFooter()
-                    }
-
-                    noMatch {
-                        router.navigate("/")
-                    }
-                }
-
                 route("page") {
                     string { cardIdOrUrl ->
                         Background({
                             classes(Styles.background)
                         }) {
-                            AppHeader(appName, showBack = parentCardId != null || personId != null, onBack = {
-                                if (parentCardId != null) {
-                                    router.navigate("/page/$parentCardId")
-                                } else if (personId != null) {
-                                    router.navigate("/profile/$personId")
+                            val me by application.me.collectAsState()
+                            AppHeader(
+                                title = appName,
+                                showBack = parentCardId != null || personId != null,
+                                showDownloadApp = me == null,
+                                onBack = {
+                                    if (parentCardId != null) {
+                                        router.navigate("/page/$parentCardId")
+                                    } else if (personId != null) {
+                                        router.navigate("/profile/$personId")
+                                    }
                                 }
-                            })
+                            )
                             CardPage(url = cardIdOrUrl, onError = { parentCardId = null }) {
                                 title = it.name
                                 parentCardId = it.parent

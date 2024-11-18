@@ -103,10 +103,9 @@ fun ImpactEffortTable(widgetId: String) {
         val conversation = card.getConversation()
         conversation.message = value
         api.updateCard(card.id!!, Card(conversation = json.encodeToString(conversation))) {
-
-        }
-        api.cardsCards(data?.card ?: return) {
-            cards = it
+            api.cardsCards(data?.card ?: return@updateCard) {
+                cards = it
+            }
         }
     }
 
