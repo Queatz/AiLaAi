@@ -121,6 +121,10 @@ fun Route.reminderRoutes() {
                         reminder.open = update.open
                     }
 
+                    if (update.categories != null) {
+                        reminder.categories = update.categories
+                    }
+
                     if (update.attachment != null) {
                         reminder.attachment = update.attachment
                     }

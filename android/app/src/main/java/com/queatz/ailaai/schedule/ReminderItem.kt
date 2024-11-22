@@ -13,6 +13,7 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
@@ -30,15 +31,15 @@ fun ReminderItem(reminder: Reminder) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(1.pad)
+                .padding(2.pad)
         ) {
             Text(
-                reminder.title ?: stringResource(R.string.add_reminder),
+                text = reminder.title ?: stringResource(R.string.new_reminder),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                bulletedString(reminder.scheduleText, reminder.note),
+                text = bulletedString(reminder.scheduleText, reminder.categories?.firstOrNull(), reminder.note?.notBlank),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary,
             )

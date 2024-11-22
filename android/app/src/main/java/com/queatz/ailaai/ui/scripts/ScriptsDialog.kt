@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -17,8 +18,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -38,6 +42,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import app.ailaai.api.createScript
@@ -46,13 +51,18 @@ import app.ailaai.api.scripts
 import app.ailaai.api.updateScript
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.CardToolbar
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.Alert
+import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Script
 import kotlinx.coroutines.launch
@@ -66,10 +76,11 @@ private sealed class ScriptsDialogState {
     data class AddData(val script: Script) : ScriptsDialogState()
 }
 
-private val templates = listOf(
-    Script(
-        name = "Call a JSON API",
-        source = """
+private val templates by lazy {
+    listOf(
+        Script(
+            name = "Call a JSON API",
+            source = """
             @Serializable
             data class Stats(val activePeople24Hours: Int)
             
@@ -79,10 +90,10 @@ private val templates = listOf(
                 text("There are currently ${"$"}{stats.activePeople24Hours} active people")
             }
         """.trimIndent()
-    ),
-    Script(
-        name = "POST JSON to an API",
-        source = """
+        ),
+        Script(
+            name = "POST JSON to an API",
+            source = """
             @Serializable
             data class Request(val channel: String)
             
@@ -96,10 +107,10 @@ private val templates = listOf(
                 }
             }
         """.trimIndent()
-    ),
-    Script(
-        name = "Import a library",
-        source = """
+        ),
+        Script(
+            name = "Import a library",
+            source = """
             @file:Repository("https://jitpack.io")
             @file:DependsOn("com.github.cosinekitty:astronomy:v2.1.19")
             
@@ -126,10 +137,10 @@ private val templates = listOf(
                 text("${"$"}emoji The moon is currently ${"$"}percent% illuminated")
             }
         """.trimIndent()
-    ),
-    Script(
-        name = "Counting button",
-        source = """
+        ),
+        Script(
+            name = "Counting button",
+            source = """
             val count = data?.toIntOrNull() ?: 0
             
             render {
@@ -137,10 +148,10 @@ private val templates = listOf(
                 button("+1", script = self, data = "${"$"}{count + 1}")
             }
         """.trimIndent()
-    ),
-    Script(
-        name = "Roll a dice",
-        source = """
+        ),
+        Script(
+            name = "Roll a dice",
+            source = """
             import kotlin.random.*
             
             render {
@@ -148,10 +159,10 @@ private val templates = listOf(
                 button("Roll again", self)
             }
         """.trimIndent()
-    ),
-    Script(
-        name = "Text adventure",
-        source = """
+        ),
+        Script(
+            name = "Text adventure",
+            source = """
             data class Location(
                 val name: String,
                 val details: String,
@@ -176,8 +187,10 @@ private val templates = listOf(
                 }
             }
         """.trimIndent()
-    ),
-)
+        ),
+    )
+}
+
 
 enum class NewScriptDecision {
     AddData,
@@ -195,7 +208,7 @@ fun ScriptsDialog(
     onDismissRequest: () -> Unit,
     previewScriptAction: PreviewScriptAction = PreviewScriptAction.None,
     onNewScript: suspend (Script) -> NewScriptDecision = { NewScriptDecision.None },
-    onScriptWithData: suspend (script: Script, data: String) -> Unit = { _, _ -> }
+    onScriptWithData: suspend (script: Script, data: String) -> Unit = { _, _ -> },
 ) {
     val me = me
     val scope = rememberCoroutineScope()
@@ -213,6 +226,7 @@ fun ScriptsDialog(
     )
     var scriptData by rememberStateOf("")
     var showHelp by rememberStateOf(false)
+    val isMine = (state as? ScriptsDialogState.Preview)?.script?.person == me?.id
 
     fun createScript(name: String, source: String) {
         isLoading = true
@@ -222,6 +236,7 @@ fun ScriptsDialog(
                     NewScriptDecision.AddData -> {
                         state = ScriptsDialogState.AddData(it)
                     }
+
                     else -> {
                         state = ScriptsDialogState.Select
                     }
@@ -298,7 +313,7 @@ fun ScriptsDialog(
                         )
 
                         OutlinedTextField(
-                            scriptSource,
+                            value = scriptSource,
                             onValueChange = { scriptSource = it },
                             label = { Text(stringResource(R.string.script_source)) },
                             shape = MaterialTheme.shapes.large,
@@ -341,7 +356,7 @@ fun ScriptsDialog(
                         }
 
                         OutlinedTextField(
-                            search,
+                            value = search,
                             onValueChange = { search = it },
                             label = { Text(stringResource(R.string.search_scripts)) },
                             shape = MaterialTheme.shapes.large,
@@ -361,16 +376,29 @@ fun ScriptsDialog(
                                 .weight(1f)
                         ) {
                             items(scripts) {
-                                Text(
-                                    it.name?.notBlank ?: stringResource(R.string.new_script),
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(MaterialTheme.shapes.large)
                                         .clickable {
-                                            state = ScriptsDialogState.Preview(it, (state as ScriptsDialogState.Search).onlyMine)
+                                            state = ScriptsDialogState.Preview(
+                                                script = it,
+                                                fromOnlyMine = (state as ScriptsDialogState.Search).onlyMine
+                                            )
                                         }
                                         .padding(1.pad)
-                                )
+                                ) {
+                                    Text(
+                                        text = it.name?.notBlank ?: stringResource(R.string.new_script),
+                                    )
+                                    it.categories?.firstOrNull()?.let { category ->
+                                        Text(
+                                            text = category,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -400,7 +428,7 @@ fun ScriptsDialog(
 
                     is ScriptsDialogState.AddData -> {
                         OutlinedTextField(
-                            scriptData,
+                            value = scriptData,
                             onValueChange = { scriptData = it },
                             label = { Text(stringResource(R.string.script_data)) },
                             shape = MaterialTheme.shapes.large,
@@ -418,12 +446,104 @@ fun ScriptsDialog(
                                 .weight(1f)
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            Text(
-                                script.name?.notBlank ?: stringResource(R.string.new_script),
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier
-                                    .padding(bottom = 1.pad)
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(bottom = 1.pad)
+                                ) {
+                                    Text(
+                                        text = script.name?.notBlank ?: stringResource(R.string.new_script),
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                    val category = script.categories?.firstOrNull()
+                                    if (!script.description.isNullOrBlank() || category != null) {
+                                        Text(
+                                            text = bulletedString(category, script.description),
+                                            maxLines = 3,
+                                            overflow = TextOverflow.Ellipsis,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                }
+                                if (isMine) {
+                                    var showMenu by rememberStateOf(false)
+                                    var showSetCategory by rememberStateOf(false)
+                                    var showDescription by rememberStateOf(false)
+                                    val fromOnlyMine = (state as ScriptsDialogState.Preview).fromOnlyMine
+
+                                    if (showDescription) {
+                                        TextFieldDialog(
+                                            onDismissRequest = {
+                                                showDescription = false
+                                            },
+                                            title = stringResource(R.string.description),
+                                            initialValue = script.description.orEmpty(),
+                                            button = stringResource(R.string.update),
+                                            showDismiss = true,
+                                            dismissButtonText = stringResource(R.string.cancel)
+                                        ) { description ->
+                                            scope.launch {
+                                                api.updateScript(script.id!!, Script(description = description)) {
+                                                    showDescription = false
+                                                    state = ScriptsDialogState.Preview(it, fromOnlyMine = fromOnlyMine)
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (showSetCategory) {
+                                        ChooseCategoryDialog(
+                                            onDismissRequest = {
+                                                showSetCategory = false
+                                            },
+                                            preselect = script.categories?.firstOrNull(),
+                                        ) {
+                                            scope.launch {
+                                                api.updateScript(script.id!!, Script(categories = it?.inList())) {
+                                                    state = ScriptsDialogState.Preview(it, fromOnlyMine = fromOnlyMine)
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            showMenu = true
+                                        },
+                                    ) {
+                                        Icon(Icons.Outlined.MoreVert, null)
+
+                                        Dropdown(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false }
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(stringResource(R.string.description))
+                                                },
+                                                onClick = {
+                                                    showMenu = false
+                                                    showDescription = true
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(stringResource(R.string.set_category))
+                                                },
+                                                onClick = {
+                                                    showMenu = false
+                                                    showSetCategory = true
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                             SelectionContainer {
                                 Text(script.source ?: "")
                             }
@@ -456,6 +576,7 @@ fun ScriptsDialog(
                             Text(stringResource(R.string.go_back))
                         }
                     }
+
                     is ScriptsDialogState.Templates -> {
                         TextButton(
                             {
@@ -465,6 +586,7 @@ fun ScriptsDialog(
                             Text(stringResource(R.string.go_back))
                         }
                     }
+
                     is ScriptsDialogState.Search -> {
                         TextButton(
                             {
@@ -474,6 +596,7 @@ fun ScriptsDialog(
                             Text(stringResource(R.string.go_back))
                         }
                     }
+
                     else -> {
                         TextButton(
                             {
@@ -491,14 +614,14 @@ fun ScriptsDialog(
                             {
                                 if (scriptId == null) {
                                     createScript(
-                                        scriptName,
-                                        scriptSource
+                                        name = scriptName,
+                                        source = scriptSource
                                     )
                                 } else {
                                     updateScript(
-                                        scriptId,
-                                        scriptName,
-                                        scriptSource
+                                        scriptId = scriptId,
+                                        name = scriptName,
+                                        source = scriptSource
                                     )
                                 }
                             },
@@ -515,7 +638,7 @@ fun ScriptsDialog(
 
                     is ScriptsDialogState.AddData -> {
                         TextButton(
-                            {
+                            onClick = {
                                 isLoading = true
                                 scope.launch {
                                     onScriptWithData(
@@ -545,7 +668,7 @@ fun ScriptsDialog(
                         when (previewScriptAction) {
                             PreviewScriptAction.AddData -> {
                                 TextButton(
-                                    {
+                                    onClick = {
                                         state = ScriptsDialogState.AddData((state as ScriptsDialogState.Preview).script)
                                     },
                                     enabled = !isLoading
@@ -553,26 +676,27 @@ fun ScriptsDialog(
                                     Text(stringResource(R.string.next))
                                 }
                             }
-                            PreviewScriptAction.Edit -> {
-                                if ((state as ScriptsDialogState.Preview).script.person == me?.id)
-                                TextButton(
-                                    {
-                                        scriptName = (state as ScriptsDialogState.Preview).script.name ?: ""
-                                        scriptSource = (state as ScriptsDialogState.Preview).script.source ?: ""
-                                        state = ScriptsDialogState.EditScript((state as ScriptsDialogState.Preview).script.id!!)
-                                    },
-                                    enabled = !isLoading
-                                ) {
-                                    Text(stringResource(R.string.edit))
-                                }
-                            }
-                            else -> {
 
+                            PreviewScriptAction.Edit -> {
+                                if (isMine)
+                                    TextButton(
+                                        onClick = {
+                                            scriptName = (state as ScriptsDialogState.Preview).script.name ?: ""
+                                            scriptSource = (state as ScriptsDialogState.Preview).script.source ?: ""
+                                            state =
+                                                ScriptsDialogState.EditScript((state as ScriptsDialogState.Preview).script.id!!)
+                                        },
+                                        enabled = !isLoading
+                                    ) {
+                                        Text(stringResource(R.string.edit))
+                                    }
                             }
+
+                            else -> Unit
                         }
                     }
 
-                    else -> {}
+                    else -> Unit
                 }
             }
         )

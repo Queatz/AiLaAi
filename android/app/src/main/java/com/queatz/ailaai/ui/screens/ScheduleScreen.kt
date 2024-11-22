@@ -59,6 +59,12 @@ fun ScheduleScreen() {
     val context = LocalContext.current
     val nav = nav
 
+    var selectedCategory by rememberStateOf<String?>(null)
+
+    val categories = remember(events) {
+        events.mapNotNull { it.reminder.categories }.flatten().sortedDistinct()
+    }
+
     LaunchedEffect(events) {
         cache = events
     }
@@ -270,8 +276,8 @@ fun ScheduleScreen() {
                 ) {
                     Icon(Icons.Outlined.MoreVert, null)
                     ScheduleMenu(
-                        showMenu,
-                        { showMenu = false },
+                        show = showMenu,
+                        onDismissRequest = { showMenu = false },
                         view = view,
                         onView = {
                             if (view == it) {
@@ -299,6 +305,11 @@ fun ScheduleScreen() {
             if (isLoading) {
                 Loading()
             } else {
+                val shownEvents = if (selectedCategory == null) {
+                    events
+                } else {
+                    events.filter { it.reminder.categories?.contains(selectedCategory) == true }
+                }
                 LazyColumn(
                     state = state,
                     modifier = Modifier.fillMaxSize(),
@@ -309,7 +320,7 @@ fun ScheduleScreen() {
                         bottom = 1.pad + 80.dp
                     )
                 ) {
-                    if (events.isNotEmpty()) {
+                    if (shownEvents.isNotEmpty()) {
                         item(contentType = -1) {
                             var isInitial by remember {
                                 mutableStateOf(true)
@@ -325,7 +336,7 @@ fun ScheduleScreen() {
                     }
 
                     var today = shownRange.first
-                    while (events.any { it.date >= today }) {
+                    while (shownEvents.any { it.date >= today }) {
                         val start = when (view) {
                             Daily -> today.startOfDay()
                             Weekly -> today.startOfWeek()
@@ -344,7 +355,7 @@ fun ScheduleScreen() {
                             view = view,
                             start = start,
                             end = end,
-                            events = events.filter {
+                            events = shownEvents.filter {
                                 it.date >= start && it.date < end
                             },
                             onExpand = onExpand,
@@ -359,7 +370,7 @@ fun ScheduleScreen() {
                         today = end
                     }
 
-                    if (events.isNotEmpty()) {
+                    if (shownEvents.isNotEmpty()) {
                         item(contentType = -1) {
                             LoadMore(true, permanent = true, contentPadding = 1.pad) {
                                 range = range.first to (range.second + view.duration)
@@ -369,11 +380,24 @@ fun ScheduleScreen() {
                 }
             }
         }
-        AddReminderLayout(
+        PageInput(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
         ) {
-            updates.emit(it)
+            Categories(
+                categories = categories,
+                category = selectedCategory,
+                visible = categories.isNotEmpty()
+            ) {
+                selectedCategory = if (it == selectedCategory) {
+                    null
+                } else {
+                    it
+                }
+            }
+            AddReminderLayout {
+                updates.emit(it)
+            }
         }
     }
 }

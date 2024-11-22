@@ -361,6 +361,7 @@ class Story(
     var person: String? = null,
     var title: String? = null,
     var url: String? = null,
+    var categories: List<String>? = null,
     var background: String? = null,
     var geo: List<Double>? = null,
     var publishDate: Instant? = null,
@@ -383,6 +384,7 @@ class Reminder(
     var people: List<String>? = null,
     var groups: List<String>? = null,
     var attachment: String? = null,
+    var categories: List<String>? = null,
     var open: Boolean? = null,
     var title: String? = null,
     var note: String? = null,
@@ -415,6 +417,7 @@ class Script(
     var person: String? = null,
     var name: String? = null,
     var description: String? = null,
+    var categories: List<String>? = null,
     var source: String? = null
 ) : Model()
 

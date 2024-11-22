@@ -754,7 +754,7 @@ fun CardScreen(cardId: String) {
 
                             card?.hint?.notBlank?.let {
                                 Text(
-                                    it,
+                                    text = it,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     style = MaterialTheme.typography.labelMedium,
@@ -968,8 +968,8 @@ fun CardScreen(cardId: String) {
                                 modifier = Modifier.padding(bottom = 1.pad)
                             ) {
                                 item(
-                                    if (active) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
-                                    if (activeCommitted) stringResource(R.string.posted) else stringResource(R.string.not_posted),
+                                    icon = if (active) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                                    name = if (activeCommitted) stringResource(R.string.posted) else stringResource(R.string.not_posted),
                                     selected = active
                                 ) {
                                     active = !active
@@ -983,8 +983,8 @@ fun CardScreen(cardId: String) {
                                 }
 
                                 item(
-                                    Icons.Outlined.Place,
-                                    when {
+                                    icon = Icons.Outlined.Place,
+                                    name = when {
                                         card.parent != null -> stringResource(R.string.inside_another_card)
                                         card.group != null -> stringResource(R.string.in_a_group)
                                         card.equipped == true -> stringResource(R.string.on_profile)
@@ -1003,15 +1003,15 @@ fun CardScreen(cardId: String) {
                                 }
 
                                 item(
-                                    Icons.Outlined.Edit,
-                                    stringResource(R.string.edit)
+                                    icon = Icons.Outlined.Edit,
+                                    name = stringResource(R.string.edit)
                                 ) {
                                     openEditDialog = true
                                 }
 
                                 item(
-                                    Icons.Outlined.CameraAlt,
-                                    stringResource(R.string.set_photo),
+                                    icon = Icons.Outlined.CameraAlt,
+                                    name = stringResource(R.string.set_photo),
                                     isLoading = isGeneratingPhoto
                                 ) {
                                     showPhotoDialog = true
@@ -1019,8 +1019,8 @@ fun CardScreen(cardId: String) {
 
                                 if (card.photo.isNullOrEmpty() && card.video.isNullOrEmpty()) {
                                     item(
-                                        Icons.Outlined.AutoAwesome,
-                                        stringResource(R.string.generate_photo),
+                                        icon = Icons.Outlined.AutoAwesome,
+                                        name = stringResource(R.string.generate_photo),
                                         isLoading = oldPhoto != null
                                     ) {
                                         regeneratePhoto()
@@ -1030,8 +1030,8 @@ fun CardScreen(cardId: String) {
 
                                 val category = card.categories?.firstOrNull()
                                 item(
-                                    Icons.Outlined.Category,
-                                    category ?: stringResource(R.string.set_category),
+                                    icon = Icons.Outlined.Category,
+                                    name = category ?: stringResource(R.string.set_category),
                                     selected = category != null
                                 ) {
                                     showSetCategory = true
@@ -1039,8 +1039,8 @@ fun CardScreen(cardId: String) {
                                 }
 
                                 item(
-                                    Icons.Outlined.Wallpaper,
-                                    stringResource(R.string.background),
+                                    icon = Icons.Outlined.Wallpaper,
+                                    name = stringResource(R.string.background),
                                     selected = !card.background.isNullOrBlank(),
                                     isLoading = isGeneratingBackground
                                 ) {
@@ -1048,8 +1048,8 @@ fun CardScreen(cardId: String) {
                                 }
 
                                 item(
-                                    Icons.Outlined.Payments,
-                                    stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay),
+                                    icon = Icons.Outlined.Payments,
+                                    name = stringResource(if (card.pay == null) R.string.add_pay else R.string.change_pay),
                                     selected = card.pay != null
                                 ) {
                                     showPay = true
@@ -1057,8 +1057,8 @@ fun CardScreen(cardId: String) {
                                 }
 
                                 item(
-                                    Icons.Outlined.Man,
-                                    stringResource(if (card.npc == null) R.string.add_npc else R.string.npc),
+                                    icon = Icons.Outlined.Man,
+                                    name = stringResource(if (card.npc == null) R.string.add_npc else R.string.npc),
                                     selected = card.npc != null
                                 ) {
                                     showNpc = true
@@ -1066,8 +1066,8 @@ fun CardScreen(cardId: String) {
                                 }
 
                                 item(
-                                    Icons.Outlined.AddBox,
-                                    stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
+                                    icon = Icons.Outlined.AddBox,
+                                    name = stringResource(if (card.content?.notBlank == null) R.string.add_content else R.string.content),
                                     selected = card.content?.notBlank != null
                                 ) {
                                     nav.appNavigate(AppNav.EditCard(card.id!!))
@@ -1076,8 +1076,8 @@ fun CardScreen(cardId: String) {
                                 val level = card.level ?: 0
 
                                 item(
-                                    Icons.Outlined.Castle,
-                                    if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(
+                                    icon = Icons.Outlined.Castle,
+                                    name = if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(
                                         R.plurals.level_x,
                                         level,
                                         level

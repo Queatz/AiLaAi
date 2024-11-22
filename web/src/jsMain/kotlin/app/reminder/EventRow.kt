@@ -1,5 +1,6 @@
 package app.reminder
 
+import Strings.details
 import Styles
 import androidx.compose.runtime.*
 import api
@@ -9,6 +10,7 @@ import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.Menu
 import app.page.*
+import bulletedString
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
 import focusable
@@ -49,10 +51,11 @@ fun EventRow(
 
     fun edit() {
         scope.launch {
-            // todo translate
             val note = inputDialog(
-                "Edit note",
-                "",
+                // todo translate
+                title = "Edit note",
+                placeholder = "",
+                // todo translate
                 confirmButton = "Update",
                 defaultValue = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: ""
             )
@@ -188,25 +191,29 @@ fun EventRow(
                     }
                 }
             }) {
-                val details = note.notBlank?.let { " • $it" } ?: ""
+                Text(
+                    bulletedString(
+                        when (view) {
+                            ScheduleView.Daily -> {
+                                format(date, "h:mm a")
+                            }
 
-                when (view) {
-                    ScheduleView.Daily -> {
-                        Text("${format(date, "h:mm a")}$details")
-                    }
+                            ScheduleView.Weekly -> {
+                                format(date, "MMMM do, EEEE, h:mm a")
+                            }
 
-                    ScheduleView.Weekly -> {
-                        Text("${format(date, "MMMM do, EEEE, h:mm a")}$details")
-                    }
+                            ScheduleView.Monthly -> {
+                                format(date, "do, EEEE, h:mm a")
+                            }
 
-                    ScheduleView.Monthly -> {
-                        Text("${format(date, "do, EEEE, h:mm a")}$details")
-                    }
-
-                    ScheduleView.Yearly -> {
-                        Text("${format(date, "MMMM do, EEEE, h:mm a")}$details")
-                    }
-                }
+                            ScheduleView.Yearly -> {
+                                format(date, "MMMM do, EEEE, h:mm a")
+                            }
+                        },
+                        event.reminder.categories?.firstOrNull(),
+                        note.notBlank
+                    )
+                )
             }
         }
         Div({

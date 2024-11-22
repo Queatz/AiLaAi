@@ -357,6 +357,9 @@ fun StoryContents(
                     Widgets.Web -> {
                         WebWidget(part.id)
                     }
+                    Widgets.Form -> {
+                        // todo render + handle form
+                    }
                 }
             }
 

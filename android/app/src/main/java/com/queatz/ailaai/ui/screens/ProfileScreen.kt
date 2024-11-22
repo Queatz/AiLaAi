@@ -68,6 +68,7 @@ import app.ailaai.api.createMember
 import app.ailaai.api.equippedItems
 import app.ailaai.api.profile
 import app.ailaai.api.profileCards
+import app.ailaai.api.sendMessage
 import app.ailaai.api.subscribe
 import app.ailaai.api.unsubscribe
 import app.ailaai.api.updateMe
@@ -80,6 +81,7 @@ import com.queatz.ailaai.api.updateProfilePhotoFromUri
 import com.queatz.ailaai.api.updateProfileVideoFromUri
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
@@ -93,6 +95,7 @@ import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.shareAsUrl
+import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.helpers.ResumeEffect
@@ -134,9 +137,12 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Member
+import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.Profile
 import com.queatz.db.ProfileStats
+import com.queatz.db.ProfilesAttachment
+import com.queatz.db.StoryAttachment
 import com.queatz.db.Trade
 import createTrade
 import kotlinx.coroutines.Job
@@ -145,6 +151,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -171,6 +178,7 @@ fun ProfileScreen(personId: String) {
     var showCoverPhotoDialog by rememberStateOf(false)
     var showProfilePhotoDialog by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
+    var showSendDialog by rememberStateOf(false)
     var showProfileSettingDialog by rememberStateOf(false)
     var chooseBackground by rememberStateOf(false)
     var isLoadingBackground by rememberStateOf(false)
@@ -445,6 +453,45 @@ fun ProfileScreen(personId: String) {
         )
     }
 
+    if (showSendDialog) {
+        val someone = stringResource(R.string.someone)
+        val emptyGroup = stringResource(R.string.empty_group_name)
+        val sent = stringResource(R.string.sent)
+
+        ChooseGroupDialog(
+            onDismissRequest = {
+                showSendDialog = false
+            },
+            title = stringResource(R.string.send_profile),
+            confirmFormatter = defaultConfirmFormatter(
+                none = R.string.send_profile,
+                one = R.string.send_profile_to_group,
+                two = R.string.send_profile_to_groups,
+                many = R.string.send_profile_to_x_groups
+            ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
+        ) { groups ->
+            coroutineScope {
+                var hasError = false
+                groups.map { group ->
+                    async {
+                        api.sendMessage(
+                            group = group.id!!,
+                            message = Message(attachment = json.encodeToString(ProfilesAttachment(personId.inList()))),
+                            onError = {
+                                hasError = true
+                            }
+                        )
+                    }
+                }.awaitAll()
+                if (hasError) {
+                    context.showDidntWork()
+                } else {
+                    context.toast(sent)
+                }
+            }
+        }
+    }
+
     ResumeEffect {
         if (cards.isEmpty() || person == null || profile == null) {
             isLoading = true
@@ -598,7 +645,7 @@ fun ProfileScreen(personId: String) {
                                     }
                             ) {
                                 Video(
-                                    video.let(api::url),
+                                    url = video.let(api::url),
                                     isPlaying = isAtTop,
                                     modifier = Modifier
                                         .fillMaxSize()

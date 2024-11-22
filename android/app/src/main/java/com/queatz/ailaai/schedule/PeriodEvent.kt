@@ -25,6 +25,7 @@ import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -191,8 +192,9 @@ fun PeriodEvent(
                     bulletedString(
                         if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(
                             view
-                        ),
-                        event.occurrence?.note ?: event.reminder.note
+                        )?.notBlank,
+                        event.reminder.categories?.firstOrNull(),
+                        (event.occurrence?.note ?: event.reminder.note)?.notBlank
                     ),
                     style = MaterialTheme.typography.labelSmall.let {
                         if (done) {

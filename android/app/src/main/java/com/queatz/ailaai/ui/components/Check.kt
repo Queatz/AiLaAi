@@ -16,7 +16,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun Check(
     checked: Boolean,
-    onCheckChanged: (Boolean) -> Unit,
+    onCheckChange: (Boolean) -> Unit,
     padding: PaddingValues = PaddingValues(end = 2.pad),
     label: @Composable () -> Unit
 ) {
@@ -26,11 +26,11 @@ fun Check(
         modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .clickable {
-                onCheckChanged(!checked)
+                onCheckChange(!checked)
             }
             .padding(padding)
     ) {
-        Checkbox(checked, onCheckChanged)
+        Checkbox(checked, onCheckChange)
         label()
     }
 }

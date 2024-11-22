@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -50,6 +51,7 @@ import com.queatz.ailaai.ui.components.CardToolbar
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
+import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -69,6 +71,7 @@ fun ReminderScreen(reminderId: String) {
     var showAddPerson by rememberStateOf(false)
     var showReschedule by rememberStateOf(false)
     var showEditTitle by rememberStateOf(false)
+    var showCategory by rememberStateOf(false)
     var showDelete by rememberStateOf(false)
     var showLeave by rememberStateOf(false)
     var reminder by rememberStateOf<Reminder?>(null)
@@ -104,6 +107,25 @@ fun ReminderScreen(reminderId: String) {
 
     LaunchedEffect(Unit) {
         reload()
+    }
+
+    if (showCategory) {
+        ChooseCategoryDialog(
+            onDismissRequest = {
+                showCategory = false
+            },
+            preselect = reminder?.categories?.firstOrNull(),
+        ) {
+            scope.launch {
+                api.updateReminder(reminderId, Reminder(
+                    categories = it.inList()
+                )) {
+                    api.reminder(reminderId) {
+                        reminder = it
+                    }
+                }
+            }
+        }
     }
 
     if (showAddPerson) {
@@ -279,6 +301,14 @@ fun ReminderScreen(reminderId: String) {
                             stringResource(R.string.rename)
                         ) {
                             showEditTitle = true
+                        }
+                        val category = reminder?.categories?.firstOrNull()
+                        item(
+                            Icons.Outlined.Category,
+                            category ?: stringResource(R.string.set_category),
+                                    selected = category != null
+                        ) {
+                            showCategory = true
                         }
                         if (reminder?.person == me?.id) {
                             item(

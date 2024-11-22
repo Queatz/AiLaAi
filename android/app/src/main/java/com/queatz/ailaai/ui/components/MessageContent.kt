@@ -57,6 +57,7 @@ import androidx.core.graphics.drawable.toBitmapOrNull
 import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
+import app.ailaai.api.profile
 import app.ailaai.api.sticker
 import app.ailaai.api.updateMessage
 import coil.compose.AsyncImage
@@ -89,6 +90,7 @@ import com.queatz.ailaai.ui.dialogs.SelectTextDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.permission.permissionRequester
+import com.queatz.ailaai.ui.profile.ProfileCard
 import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryCard
@@ -101,7 +103,9 @@ import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
 import com.queatz.db.Person
+import com.queatz.db.PersonProfile
 import com.queatz.db.PhotosAttachment
+import com.queatz.db.ProfilesAttachment
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
 import com.queatz.db.StickerAttachment
@@ -151,6 +155,7 @@ fun ColumnScope.MessageContent(
     var attachedStoryId by remember { mutableStateOf<String?>(null) }
     var attachedGroupId by remember { mutableStateOf<String?>(null) }
     var attachedPhotos by remember { mutableStateOf<List<String>?>(null) }
+    var attachedProfileIds by remember { mutableStateOf<List<String>?>(null) }
     var attachedVideos by remember { mutableStateOf<List<String>?>(null) }
     var attachedSticker by remember { mutableStateOf<Sticker?>(null) }
     var attachedTrade by remember { mutableStateOf<TradeExtended?>(null) }
@@ -207,6 +212,10 @@ fun ColumnScope.MessageContent(
 
                 is GroupAttachment -> {
                     attachedGroupId = attachment.group
+                }
+
+                is ProfilesAttachment -> {
+                    attachedProfileIds = attachment.profiles
                 }
 
                 is TradeAttachment -> {
@@ -763,9 +772,27 @@ fun ColumnScope.MessageContent(
         }
     }
 
+    attachedProfileIds?.also { attachedProfileIds ->
+        attachedProfileIds.forEach { personId ->
+            var profile by rememberStateOf<PersonProfile?>(null)
+
+            LaunchedEffect(Unit) {
+                api.profile(personId) {
+                    profile = it
+                }
+            }
+
+            profile?.let {
+                ProfileCard(it) {
+                    nav.appNavigate(AppNav.Profile(personId))
+                }
+            }
+        }
+    }
+
     attachedStoryId?.also { storyId ->
         StoryCard(
-            attachedStory,
+            story = attachedStory,
             isLoading = !attachedStoryNotFound,
             modifier = Modifier.padding(1.pad).then(
                 if (isReply) {

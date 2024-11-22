@@ -19,6 +19,7 @@ private fun String.asMessageAttachment(): MessageAttachment? {
         when (jsonElement.jsonObject["type"]?.jsonPrimitive?.contentOrNull) {
             "reply" -> json.decodeFromJsonElement<ReplyAttachment>(jsonElement)
             "card" -> json.decodeFromJsonElement<CardAttachment>(jsonElement)
+            "profiles" -> json.decodeFromJsonElement<ProfilesAttachment>(jsonElement)
             "photos" -> json.decodeFromJsonElement<PhotosAttachment>(jsonElement)
             "audio" -> json.decodeFromJsonElement<AudioAttachment>(jsonElement)
             "videos" -> json.decodeFromJsonElement<VideosAttachment>(jsonElement)

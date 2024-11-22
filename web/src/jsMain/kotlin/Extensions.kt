@@ -207,3 +207,5 @@ fun <T> List<T>.sortedDistinct(): List<T> = groupingBy { it }.eachCount().let { 
         occurrences[it] ?: 0
     }
 }
+
+fun bulletedString(vararg items: String?) = items.filterNotNull().joinToString(" • ")

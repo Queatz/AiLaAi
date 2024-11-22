@@ -750,4 +750,5 @@
     <string name="z">z</string>
     <string name="explore_local_groups">Explore local groups</string>
     <string name="my_qr">Mã QR của tôi</string>
+    <string name="description">Mô tả</string>
 </resources>

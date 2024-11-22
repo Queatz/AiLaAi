@@ -1,0 +1,5 @@
+#! /bin/bash
+
+sftp 'root@hitown.chat:/root/ui' <<< $'put "build/kotlin-webpack/js/productionExecutable/ailaai.js"'
+
+

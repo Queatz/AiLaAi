@@ -69,6 +69,7 @@ import com.queatz.ailaai.ui.components.MainTabs
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.db.Card
@@ -473,8 +474,8 @@ fun ExploreScreen() {
                             selectedCategory = it
                         }
                         SearchFieldAndAction(
-                            value,
-                            { value = it },
+                            value = value,
+                            valueChange = { value = it },
                             placeholder = stringResource(R.string.search_map),
                             action = {
                                 Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
@@ -532,11 +533,11 @@ fun ExploreScreen() {
                         }
                 ) {
                     SearchContent(
-                        locationSelector,
-                        isLoading,
-                        filters,
-                        categories,
-                        selectedCategory
+                        locationSelector = locationSelector,
+                        isLoading = isLoading,
+                        filters = filters,
+                        categories = categories,
+                        category = selectedCategory
                     ) {
                         selectedCategory = it
                     }
@@ -545,4 +546,3 @@ fun ExploreScreen() {
         }
     }
 }
-

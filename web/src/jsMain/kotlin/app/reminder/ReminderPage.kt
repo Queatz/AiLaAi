@@ -14,6 +14,7 @@ import app.dialog.searchDialog
 import app.menu.Menu
 import appString
 import application
+import bulletedString
 import com.queatz.db.Reminder
 import focusable
 import kotlinx.coroutines.launch
@@ -208,8 +209,11 @@ fun ReminderPage(
         ReminderEvents(reminder)
     }
     PageTopBar(
-        reminder.title ?: appString { newGroup },
-        reminder.scheduleText
+        title = reminder.title ?: appString { newGroup },
+        description = bulletedString(
+            reminder.categories?.firstOrNull(),
+            reminder.scheduleText
+        )
     ) {
         menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
     }

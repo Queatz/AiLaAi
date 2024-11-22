@@ -1,0 +1,5 @@
+#! /bin/bash
+
+sftp 'root@ailaai.app:/root/ui' <<< $'put "app/release/ailaai.apk"'
+
+

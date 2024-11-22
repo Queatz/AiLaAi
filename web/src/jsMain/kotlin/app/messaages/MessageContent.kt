@@ -29,6 +29,7 @@ import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import org.w3c.dom.HTMLVideoElement
+import profile.ProfileCard
 import r
 import stories.StoryStyles
 import stories.textContent
@@ -310,6 +311,20 @@ fun MessageContent(
                                         },
                                         info = GroupInfo.Members
                                     )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is ProfilesAttachment -> {
+                    attachment.profiles?.let { profileIds ->
+                        Div({
+                            classes(StoryStyles.contentProfiles)
+                        }) {
+                            profileIds.forEach { personId ->
+                                ProfileCard(personId) {
+                                    window.open("/profile/$personId", "_blank")
                                 }
                             }
                         }

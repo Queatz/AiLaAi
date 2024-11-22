@@ -34,9 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.fadingEdge
-import com.queatz.ailaai.extensions.launchUrl
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.idOrUrl
+import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
@@ -138,7 +138,9 @@ fun StoryContents(
                 TextButton(
                     {
                         showOpenWidgetDialog = false
-                        Card().apply { id = (source as StorySource.Card).id }.idOrUrl.launchUrl(context)
+                        Card().apply {
+                            id = (source as StorySource.Card).id
+                        }.idOrUrl.shareAsUrl(context = context, name = null)
                     }
                 ) {
                     Text(stringResource(R.string.open_card))
@@ -179,12 +181,12 @@ fun StoryContents(
                     is StoryContent.Comments -> commentsItem(content, onCommentFocused)
 
                     is StoryContent.Reactions -> reactionsItem(
-                        content,
-                        context,
-                        scope,
-                        me,
-                        onCommentFocused,
-                        onReloadRequest
+                        content = content,
+                        context = context,
+                        scope = scope,
+                        me = me,
+                        onCommentFocused = onCommentFocused,
+                        onReactionChange = onReloadRequest
                     )
 
                     is StoryContent.Title -> titleItem(content, actions)
@@ -204,10 +206,10 @@ fun StoryContents(
                     is StoryContent.Audio -> audioItem(content)
 
                     is StoryContent.Widget -> widgetItem(
-                        content,
-                        source,
-                        { fullscreenWebView = it },
-                        { showOpenWidgetDialog = it }
+                        content = content,
+                        source = source,
+                        fullscreenWebView = { fullscreenWebView = it },
+                        showOpenWidgetDialog = { showOpenWidgetDialog = it }
                     )
 
                     is StoryContent.Button -> buttonItem(content, onButtonClick)

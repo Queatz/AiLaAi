@@ -71,7 +71,7 @@ fun ProfileSettingsDialog(
                     }
                     Check(
                         checked = profileConfig.showGroups ?: true,
-                        onCheckChanged = {
+                        onCheckChange = {
                             profileConfig.showGroups = it
                             modified()
                         },

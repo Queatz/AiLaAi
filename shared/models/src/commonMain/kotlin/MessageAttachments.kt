@@ -10,6 +10,13 @@ class CardAttachment(
 }
 
 @Serializable
+class ProfilesAttachment(
+    var profiles: List<String>? = null
+) : MessageAttachment() {
+    override val type = "profiles"
+}
+
+@Serializable
 class PhotosAttachment(
     var photos: List<String>? = null
 ) : MessageAttachment() {

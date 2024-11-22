@@ -33,3 +33,8 @@ fun <T> List<T>.sortedDistinct(): List<T> = groupingBy { it }.eachCount().let { 
         occurrences[it] ?: 0
     }
 }
+
+fun <T> List<T>.replace(index: Int, item: T): List<T> = toMutableList().apply {
+    removeAt(index)
+    add(index, item)
+}.toList()

@@ -3,6 +3,7 @@ package app.reminder
 import androidx.compose.runtime.Composable
 import app.AppStyles
 import asNaturalList
+import bulletedString
 import com.queatz.db.*
 import focusable
 import format
@@ -46,7 +47,12 @@ fun ReminderItem(reminder: Reminder, selected: Boolean, onSelected: () -> Unit) 
             Div({
                 classes(AppStyles.groupItemMessage)
             }) {
-                Text(reminder.scheduleText)
+                Text(
+                    bulletedString(
+                        reminder.categories?.firstOrNull(),
+                        reminder.scheduleText
+                    )
+                )
             }
             reminder.note?.notBlank?.let {
                 Div({

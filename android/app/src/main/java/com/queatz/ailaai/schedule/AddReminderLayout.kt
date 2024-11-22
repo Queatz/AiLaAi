@@ -73,7 +73,7 @@ fun AddReminderLayout(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .padding(2.pad)
+            .padding(horizontal = 2.pad)
     ) {
         Box(
             modifier = Modifier

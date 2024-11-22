@@ -26,18 +26,21 @@ fun WidgetStub(
     val noData = stringResource(R.string.no_data)
 
     LaunchedEffect(part) {
-        if (part.widget == Widgets.Script) {
-            api.widget(part.id) { widget ->
-                try {
-                    json.decodeFromString<ScriptData>(widget.data!!).let { data ->
-                        api.script(data.script!!) { script ->
-                            description = "${script.name} (${data.data?.notBlank ?: noData})"
+        when (part.widget) {
+            Widgets.Script -> {
+                api.widget(part.id) { widget ->
+                    try {
+                        json.decodeFromString<ScriptData>(widget.data!!).let { data ->
+                            api.script(data.script!!) { script ->
+                                description = "${script.name} (${data.data?.notBlank ?: noData})"
+                            }
                         }
+                    } catch (_: Throwable) {
+                        // Ignored
                     }
-                } catch (_: Throwable) {
-                    // Ignored
                 }
             }
+            else -> Unit
         }
     }
 

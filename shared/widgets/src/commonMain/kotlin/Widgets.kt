@@ -4,5 +4,6 @@ enum class Widgets {
     ImpactEffortTable,
     PageTree,
     Script,
-    Web
+    Web,
+    Form
 }

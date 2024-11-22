@@ -38,7 +38,13 @@ fun LocalDate.previous(dayOfWeek: DayOfWeek) = this + DatePeriod(
     }
 )
 
-fun Instant.plus(days: Int = 0, weeks: Int = 0, months: Int = 0, years: Int = 0, zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+fun Instant.plus(
+    days: Int = 0,
+    weeks: Int = 0,
+    months: Int = 0,
+    years: Int = 0,
+    zone: TimeZone = TimeZone.currentSystemDefault(),
+) = toLocalDateTime(zone).let {
     (LocalDate(it.year, it.month, it.dayOfMonth) + DatePeriod(days = days + weeks * 7, months = months, years = years)).atTime(it.time)
 }.toInstant(zone)
 

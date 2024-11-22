@@ -19,14 +19,14 @@ fun AddScriptWidgetDialog(
     onWidget: (widget: Widget) -> Unit
 ) {
     ScriptsDialog(
-        onDismissRequest,
+        onDismissRequest = onDismissRequest,
         previewScriptAction = PreviewScriptAction.AddData,
         onNewScript = {
             NewScriptDecision.AddData
         },
         onScriptWithData = { script: Script, data: String? ->
             api.createWidget(
-                Widgets.Script,
+                widget = Widgets.Script,
                 data = json.encodeToString(ScriptData(script.id!!, data))
             ) {
                 onWidget(it)

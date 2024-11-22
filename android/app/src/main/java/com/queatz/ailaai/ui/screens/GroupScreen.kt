@@ -40,7 +40,6 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AddToHomeScreen
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.CameraAlt
@@ -1672,11 +1671,11 @@ fun GroupScreen(groupId: String) {
 
             if (showCategoryDialog) {
                 ChooseCategoryDialog(
-                    {
+                    onDismissRequest = {
                         showCategoryDialog = false
                     },
                     preselect = groupExtended?.group?.categories?.firstOrNull(),
-                    { category ->
+                    onCategory = { category ->
                         scope.launch {
                             api.updateGroup(
                                 groupId,

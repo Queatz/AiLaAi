@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -27,7 +26,6 @@ import com.queatz.ailaai.api.uploadCardContentPhotosFromUri
 import com.queatz.ailaai.api.uploadProfileContentPhotosFromUri
 import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.Menu

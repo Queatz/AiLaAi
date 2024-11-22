@@ -95,6 +95,14 @@ fun Route.scriptRoutes() {
                     script.source = scriptUpdated.source
                 }
 
+                if (scriptUpdated.description != null) {
+                    script.description = scriptUpdated.description
+                }
+
+                if (scriptUpdated.categories != null) {
+                    script.categories = scriptUpdated.categories
+                }
+
                 db.update(script)
             }
         }

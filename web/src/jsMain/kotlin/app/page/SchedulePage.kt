@@ -96,7 +96,7 @@ fun SchedulePage(
 
     if (reminder != null) {
         ReminderPage(
-            reminder,
+            reminder = reminder,
             onUpdate = { onUpdate(it) },
             onDelete = { onDelete(it) }
         )
@@ -184,10 +184,10 @@ fun SchedulePage(
                 }
 
                 Period(
-                    view,
-                    start,
-                    end,
-                    if (isLoading) null else events.filter { event ->
+                    view = view,
+                    start = start,
+                    end = end,
+                    events = if (isLoading) null else events.filter { event ->
                         (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(event.date, end)
                     },
                     onUpdate = {
@@ -266,8 +266,8 @@ fun Period(
         } else {
             events.forEach { event ->
                 EventRow(
-                    view,
-                    event,
+                    view = view,
+                    event = event,
                     onUpdate = {
                         onUpdate(event)
                     },

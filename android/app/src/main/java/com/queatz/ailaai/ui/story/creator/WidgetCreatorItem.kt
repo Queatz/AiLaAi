@@ -13,7 +13,9 @@ import com.queatz.ailaai.ui.story.CreatorScope
 import com.queatz.ailaai.ui.story.WidgetStub
 import com.queatz.db.StoryContent
 
-fun LazyGridScope.widgetCreatorItem(creatorScope: CreatorScope<StoryContent.Widget>) = with(creatorScope) {
+fun LazyGridScope.widgetCreatorItem(
+    creatorScope: CreatorScope<StoryContent.Widget>
+) = with(creatorScope) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         var showWidgetMenu by rememberStateOf(false)
 

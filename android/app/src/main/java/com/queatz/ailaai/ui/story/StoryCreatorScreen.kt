@@ -513,6 +513,7 @@ val Widgets.stringResource
             Widgets.PageTree -> R.string.page_tree
             Widgets.Script -> R.string.script
             Widgets.Web -> R.string.website
+            Widgets.Form -> R.string.form
             else -> R.string.widget
         }
     )

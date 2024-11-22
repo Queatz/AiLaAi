@@ -193,18 +193,18 @@ fun StoryCreatorTools(
             showWidgetsMenu = false
         }) {
             // todo add search here
-            menuItem(stringResource(R.string.script)) {
+            menuItem(Widgets.Script.stringResource) {
                 addWidget = Widgets.Script
                 showWidgetsMenu = false
             }
-            menuItem(stringResource(R.string.website)) {
+            menuItem(Widgets.Web.stringResource) {
                 addWidget = Widgets.Web
                 showWidgetsMenu = false
             }
-            menuItem(stringResource(R.string.impact_effort_table)) {
+            menuItem(Widgets.ImpactEffortTable.stringResource) {
                 scope.launch {
                     api.createWidget(
-                        Widgets.ImpactEffortTable,
+                        widget = Widgets.ImpactEffortTable,
                         data = json.encodeToString(ImpactEffortTableData(card = (source as? StorySource.Card)?.id))
                     ) {
                         addPart(StoryContent.Widget(it.widget!!, it.id!!))
@@ -212,8 +212,12 @@ fun StoryCreatorTools(
                 }
                 showWidgetsMenu = false
             }
-            menuItem(stringResource(R.string.page_tree)) {
+            menuItem(Widgets.PageTree.stringResource) {
                 addWidget = Widgets.PageTree
+                showWidgetsMenu = false
+            }
+            menuItem(Widgets.Form.stringResource) {
+                addWidget = Widgets.Form
                 showWidgetsMenu = false
             }
         }

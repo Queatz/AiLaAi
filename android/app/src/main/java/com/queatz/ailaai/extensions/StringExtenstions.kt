@@ -33,6 +33,7 @@ import kotlinx.datetime.Clock
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.random.Random
 
 fun String.isNumericTextInput(allowDecimal: Boolean = true): Boolean {
     return isEmpty() || if (allowDecimal) (this == DecimalFormatSymbols.getInstance().decimalSeparator.toString() || toItemQuantity() != null) else toIntOrNull() != null
@@ -41,6 +42,8 @@ fun String.isNumericTextInput(allowDecimal: Boolean = true): Boolean {
 fun String.wordCount() = if (isBlank()) 0 else trim().split("\\W+".toRegex()).size
 
 fun bulletedString(vararg items: String?) = items.filterNotNull().joinToString(" • ")
+
+fun IntRange.token() = joinToString("") { Random.nextInt(35).toString(36) }
 
 val String.ensureScheme get() = if (contains("://")) this else "https://$this"
 
@@ -55,6 +58,7 @@ fun String.launchUrl(context: Context) {
             }
         )
     } catch (t: Throwable) {
+        t.printStackTrace()
         context.showDidntWork()
     }
 }

@@ -8,6 +8,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.widget.form.EditFormDialog
 import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.PageTreeData
@@ -30,7 +31,7 @@ fun AddWidgetDialog(
         }
         Widgets.Web -> {
             TextFieldDialog(
-                onDismissRequest,
+                onDismissRequest = onDismissRequest,
                 title = stringResource(R.string.url),
                 button = stringResource(R.string.add),
                 singleLine = true,
@@ -39,7 +40,7 @@ fun AddWidgetDialog(
             ) { url ->
                 scope.launch {
                     api.createWidget(
-                        Widgets.Web,
+                        widget = Widgets.Web,
                         data = json.encodeToString(WebData(url = url))
                     ) {
                         onWidget(it)
@@ -49,11 +50,11 @@ fun AddWidgetDialog(
         }
         Widgets.PageTree -> {
             ChooseCardDialog(
-                onDismissRequest
+                onDismissRequest = onDismissRequest
             ) { card ->
                 scope.launch {
                     api.createWidget(
-                        Widgets.PageTree,
+                        widget = Widgets.PageTree,
                         data = json.encodeToString(PageTreeData(card = card))
                     ) {
                         onWidget(it)
@@ -61,8 +62,22 @@ fun AddWidgetDialog(
                 }
             }
         }
+        Widgets.Form -> {
+            EditFormDialog(
+                onDismissRequest = onDismissRequest
+            ) {
+                scope.launch {
+                    api.createWidget(
+                        widget = Widgets.Form
+                    ) {
+                        onWidget(it)
+                    }
+                }
+            }
+        }
         else -> {
-            // Unsupported widget
+            Throwable().printStackTrace()
+            // Unsupported widget. Should never get here
         }
     }
 }

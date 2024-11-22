@@ -290,7 +290,7 @@ fun ScheduleNavPage(
         } else {
             LazyColumn {
                 items(shownReminders, key = { it.id!! }) {
-                    ReminderItem(it, selected = reminder?.id == it.id) {
+                    ReminderItem(reminder = it, selected = reminder?.id == it.id) {
                         onReminder(it)
                     }
                 }
