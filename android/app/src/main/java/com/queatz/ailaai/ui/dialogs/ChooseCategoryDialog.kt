@@ -15,6 +15,8 @@ import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.geoKey
 import kotlinx.coroutines.flow.first
 
+private var _categoriesCache = emptyList<String>()
+
 @Composable
 fun ChooseCategoryDialog(
     onDismissRequest: () -> Unit,
@@ -24,7 +26,7 @@ fun ChooseCategoryDialog(
     val context = LocalContext.current
     var isLoading by rememberStateOf(false)
     var searchText by remember { mutableStateOf("") }
-    var allCategories by remember { mutableStateOf(listOf<String>()) }
+    var allCategories by remember { mutableStateOf(_categoriesCache) }
     var categories by remember { mutableStateOf(listOf<String>()) }
     var selected by remember { mutableStateOf(preselect?.inList() ?: listOf()) }
 
@@ -37,7 +39,7 @@ fun ChooseCategoryDialog(
 
         val geo = LatLng.getFactory().create(savedGeo[0], savedGeo[1])
 
-        isLoading = true
+        isLoading = allCategories.isEmpty()
         api.categories(geo.toGeo()) {
             allCategories = it
         }
