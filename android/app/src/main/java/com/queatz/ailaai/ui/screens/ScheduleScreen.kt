@@ -109,6 +109,17 @@ fun ScheduleScreen() {
         MutableSharedFlow<Reminder>()
     }
 
+    fun toTop() {
+        scope.launch {
+            state.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType != -1 }?.index?.let {
+                state.animateScrollToItem(
+                    index = it,
+                    scrollOffset = 0
+                )
+            }
+        }
+    }
+
     suspend fun reload() {
         val range = range
         api.occurrences(
@@ -170,10 +181,10 @@ fun ScheduleScreen() {
                     }.forEach { date ->
                         add(
                             ReminderEvent(
-                                it.reminder,
-                                date,
-                                ReminderEventType.Occur,
-                                null
+                                reminder = it.reminder,
+                                date = date,
+                                event = ReminderEventType.Occur,
+                                occurrence = null
                             )
                         )
                     }
@@ -182,12 +193,7 @@ fun ScheduleScreen() {
 
             if (scrollToTop) {
                 delay(100)
-                state.layoutInfo.visibleItemsInfo.firstOrNull { it.contentType != -1 }?.index?.let {
-                    state.animateScrollToItem(
-                        it,
-                        0
-                    )
-                }
+                toTop()
             }
         }
         isLoading = false
@@ -310,10 +316,12 @@ fun ScheduleScreen() {
             if (isLoading || view == null) {
                 Loading()
             } else {
-                val shownEvents = if (selectedCategory == null) {
-                    events
-                } else {
-                    events.filter { it.reminder.categories?.contains(selectedCategory) == true }
+                val shownEvents = remember(selectedCategory, events) {
+                    if (selectedCategory == null) {
+                        events
+                    } else {
+                        events.filter { it.reminder.categories?.contains(selectedCategory) == true }
+                    }
                 }
                 LazyColumn(
                     state = state,
@@ -333,6 +341,7 @@ fun ScheduleScreen() {
                             LoadMore(true, permanent = true, contentPadding = 1.pad) {
                                 if (isInitial) {
                                     isInitial = false
+                                    toTop()
                                 } else {
                                     range = (range.first - view.duration) to range.second
                                 }
