@@ -122,7 +122,7 @@ fun AppPage() {
     }
 
     var scheduleView by remember {
-        mutableStateOf(ScheduleView.Monthly)
+        mutableStateOf(ScheduleView.Daily)
     }
 
     val goToToday = remember {

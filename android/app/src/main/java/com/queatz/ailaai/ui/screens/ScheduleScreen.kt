@@ -54,7 +54,7 @@ fun ScheduleScreen() {
     val onExpand = remember { MutableSharedFlow<Unit>() }
     val scope = rememberCoroutineScope()
     var isLoading by rememberStateOf(true)
-    var view by rememberStateOf(Monthly)
+    var view by rememberStateOf<ScheduleView?>(null)
     val state = rememberLazyListState()
     val context = LocalContext.current
     val nav = nav
@@ -73,19 +73,23 @@ fun ScheduleScreen() {
         context.dataStore.data.first()[viewKey]?.let {
             runCatching {
                 view = ScheduleView.valueOf(it)
+            }.onFailure {
+                view = ScheduleView.Daily
             }
+        } ?: let {
+            view = ScheduleView.Daily
         }
     }
 
     fun initialRange(): Pair<Instant, Instant> {
         val now = Clock.System.now().startOfDay()
 
-        return when (view) {
+        return when (view ?: Daily) {
             Daily -> now.startOfDay()
             Weekly -> now.startOfWeek()
             Monthly -> now.startOfMonth()
             Yearly -> now.startOfYear()
-        } to when (view) {
+        } to when (view ?: Daily) {
             Daily -> now.plus(days = Daily.range)
             Weekly -> now.plus(weeks = Weekly.range)
             Monthly -> now.plus(months = Monthly.range)
@@ -97,9 +101,7 @@ fun ScheduleScreen() {
     var isAddingReminder by rememberStateOf(false)
     var showScheduleReminder by rememberStateOf<Instant?>(null)
     var range by remember(view) {
-        mutableStateOf(
-            initialRange()
-        )
+        mutableStateOf(initialRange())
     }
     var shownRange by rememberStateOf(range)
 
@@ -278,7 +280,7 @@ fun ScheduleScreen() {
                     ScheduleMenu(
                         show = showMenu,
                         onDismissRequest = { showMenu = false },
-                        view = view,
+                        view = view ?: Daily,
                         onView = {
                             if (view == it) {
                                 range = initialRange()
@@ -302,7 +304,10 @@ fun ScheduleScreen() {
                 modifier = Modifier
                     .padding(horizontal = 1.pad)
             )
-            if (isLoading) {
+
+            val view = view
+
+            if (isLoading || view == null) {
                 Loading()
             } else {
                 val shownEvents = if (selectedCategory == null) {
