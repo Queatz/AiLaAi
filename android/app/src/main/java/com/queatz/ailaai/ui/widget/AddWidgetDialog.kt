@@ -11,6 +11,8 @@ import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.widget.form.EditFormDialog
 import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
+import com.queatz.widgets.widgets.FormData
+import com.queatz.widgets.widgets.FormOptions
 import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.WebData
 import createWidget
@@ -68,7 +70,8 @@ fun AddWidgetDialog(
             ) {
                 scope.launch {
                     api.createWidget(
-                        widget = Widgets.Form
+                        widget = Widgets.Form,
+                        data = json.encodeToString(FormData(options = FormOptions(enableAnonymousReplies = true)))
                     ) {
                         onWidget(it)
                     }

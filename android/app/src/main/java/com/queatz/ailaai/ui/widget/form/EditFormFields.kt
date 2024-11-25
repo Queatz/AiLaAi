@@ -10,51 +10,64 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.replace
-import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.extensions.token
 import com.queatz.ailaai.ui.components.Check
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormField
 import com.queatz.widgets.widgets.FormFieldData
 import com.queatz.widgets.widgets.FormFieldType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
 import org.burnoutcrew.reorderable.ItemPosition
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorder
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
+import java.util.logging.Logger
 
 @Composable
 fun EditFormFields(
     formFields: List<FormField>,
+    onFormFields: (List<FormField>) -> Unit,
+    formData: FormData,
+    onFormData: (FormData) -> Unit,
     modifier: Modifier = Modifier,
     onMove: (from: ItemPosition, to: ItemPosition) -> Unit,
+    onDrag: (from: ItemPosition, to: ItemPosition) -> Boolean,
     onAdd: SharedFlow<Unit>,
-    onFormFields: (List<FormField>) -> Unit
+    add: (FormField) -> Unit,
 ) {
     val reorderState = rememberReorderableLazyListState(
-        onMove = onMove
+        onMove = onMove,
+        canDragOver = onDrag
     )
 
     LaunchedEffect(Unit) {
@@ -92,6 +105,74 @@ fun EditFormFields(
                     }
                 )
             }
+        }
+
+        item {
+            var showAddMenu by rememberStateOf(false)
+
+            OutlinedButton(
+                onClick = {
+                    showAddMenu = true
+                }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Text(stringResource(R.string.add))
+
+                Dropdown(
+                    onDismissRequest = {
+                        showAddMenu = false
+                    },
+                    expanded = showAddMenu
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(R.string.text))
+                        },
+                        onClick = {
+                            showAddMenu = false
+                            add(
+                                FormField(
+                                    type = FormFieldType.Text,
+                                    data = FormFieldData.Text((1..8).token(), "", "")
+                                )
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(R.string.input))
+                        },
+                        onClick = {
+                            showAddMenu = false
+                            add(
+                                FormField(
+                                    type = FormFieldType.Input,
+                                    data = FormFieldData.Input((1..8).token(), false, "", "", "", "")
+                                )
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(R.string.checkbox))
+                        },
+                        onClick = {
+                            showAddMenu = false
+                            add(
+                                FormField(
+                                    type = FormFieldType.Checkbox,
+                                    data = FormFieldData.Checkbox((1..8).token(), false, "", "", false)
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+
+            EditForm(
+                formData = formData,
+                onFormData = onFormData
+            )
         }
     }
 }

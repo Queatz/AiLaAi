@@ -730,7 +730,7 @@ class MainActivity : AppCompatActivity() {
 
                                         NavHost(
                                             navController,
-                                            startDestination ?: AppNav.Messages.route,
+                                            startDestination ?: AppNav.Explore.route,
                                             modifier = Modifier
                                                 .padding(it)
                                                 .fillMaxSize()

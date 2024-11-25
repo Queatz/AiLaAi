@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,7 +24,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.token
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Dropdown
@@ -35,8 +32,6 @@ import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormField
-import com.queatz.widgets.widgets.FormFieldData
-import com.queatz.widgets.widgets.FormFieldType
 import createWidget
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -73,7 +68,6 @@ fun EditFormDialog(
             scrollable = false,
             content = {
                 var showMenu by rememberStateOf(false)
-                var showAddMenu by rememberStateOf(false)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -117,6 +111,10 @@ fun EditFormDialog(
                             fields = it
                         )
                     },
+                    formData = formData,
+                    onFormData = {
+                        formData = it
+                    },
                     onMove = { from: ItemPosition, to: ItemPosition ->
                         formData = formData.copy(
                             fields = formData.fields.toMutableList().apply {
@@ -124,76 +122,14 @@ fun EditFormDialog(
                             }.toList()
                         )
                     },
+                    onDrag = { draggedOver, dragging ->
+                        draggedOver.index <= formData.fields.lastIndex && dragging.index <= formData.fields.lastIndex
+                    },
                     onAdd = onAdd,
+                    add = ::add,
                     modifier = Modifier
                         .weight(1f)
                         .padding(bottom = 1.pad)
-                )
-
-                OutlinedButton(
-                    onClick = {
-                        showAddMenu = true
-                    }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Text(stringResource(R.string.add))
-
-                    Dropdown(
-                        onDismissRequest = {
-                            showAddMenu = false
-                        },
-                        expanded = showAddMenu
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(stringResource(R.string.text))
-                            },
-                            onClick = {
-                                showAddMenu = false
-                                add(
-                                    FormField(
-                                        type = FormFieldType.Text,
-                                        data = FormFieldData.Text((1..8).token(), "", "")
-                                    )
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(stringResource(R.string.input))
-                            },
-                            onClick = {
-                                showAddMenu = false
-                                add(
-                                    FormField(
-                                        type = FormFieldType.Input,
-                                        data = FormFieldData.Input((1..8).token(), false, "", "", "", "")
-                                    )
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(stringResource(R.string.checkbox))
-                            },
-                            onClick = {
-                                showAddMenu = false
-                                add(
-                                    FormField(
-                                        type = FormFieldType.Checkbox,
-                                        data = FormFieldData.Checkbox((1..8).token(), false, "", "", false)
-                                    )
-                                )
-                            }
-                        )
-                    }
-                }
-
-                EditForm(
-                    formData = formData,
-                    onFormData = {
-                        formData = it
-                    }
                 )
             },
             actions = {

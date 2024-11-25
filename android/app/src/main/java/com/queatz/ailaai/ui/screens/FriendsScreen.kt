@@ -284,7 +284,7 @@ fun FriendsScreen() {
         reloadFlow.emit(true)
     }
 
-    LaunchedEffect(selectedCategory) {
+    LaunchedEffect(selectedCategory, searchText) {
         update()
     }
 
