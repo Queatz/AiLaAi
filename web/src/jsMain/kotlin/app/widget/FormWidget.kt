@@ -1,5 +1,6 @@
 package app.widget
 
+import Strings.submit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,6 +20,7 @@ import app.widget.form.FormFieldTitle
 import appString
 import application
 import baseUrl
+import com.queatz.db.RunWidgetBody
 import com.queatz.db.Widget
 import com.queatz.widgets.FormValue
 import com.queatz.widgets.widgets.FormData
@@ -28,6 +30,7 @@ import components.Icon
 import json
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -65,6 +68,7 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import pickPhotos
 import r
+import runWidget
 import toBytes
 import widget
 
@@ -102,43 +106,47 @@ fun FormWidget(widgetId: String) {
     data?.let { data ->
         val me by application.me.collectAsState()
         val isEnabled = data.options?.enableAnonymousReplies == true || me != null
-        var formValues by remember(data) {
-            mutableStateOf(
-                buildMap {
-                    data.fields.forEach { field ->
-                        val fieldData = field.data
-                        put(
-                            fieldData.key,
-                            when (fieldData) {
-                                is FormFieldData.Text -> return@forEach
-                                is FormFieldData.Checkbox -> {
-                                    FormValue(
-                                        key = fieldData.key,
-                                        title = fieldData.title,
-                                        value = JsonPrimitive(fieldData.initialValue)
-                                    )
-                                }
-
-                                is FormFieldData.Input -> {
-                                    FormValue(
-                                        key = fieldData.key,
-                                        title = fieldData.title,
-                                        value = JsonPrimitive(fieldData.initialValue)
-                                    )
-                                }
-
-                                is FormFieldData.Photos -> {
-                                    FormValue(
-                                        key = fieldData.key,
-                                        title = fieldData.title,
-                                        value = JsonArray(emptyList())
-                                    )
-                                }
+        val initialFormValues = remember(data) {
+            buildMap {
+                data.fields.forEach { field ->
+                    val fieldData = field.data
+                    put(
+                        fieldData.key,
+                        when (fieldData) {
+                            is FormFieldData.Text -> return@forEach
+                            is FormFieldData.Checkbox -> {
+                                FormValue(
+                                    key = fieldData.key,
+                                    title = fieldData.title,
+                                    type = FormFieldType.Checkbox,
+                                    value = JsonPrimitive(fieldData.initialValue)
+                                )
                             }
-                        )
-                    }
+
+                            is FormFieldData.Input -> {
+                                FormValue(
+                                    key = fieldData.key,
+                                    title = fieldData.title,
+                                    type = FormFieldType.Input,
+                                    value = JsonPrimitive(fieldData.initialValue)
+                                )
+                            }
+
+                            is FormFieldData.Photos -> {
+                                FormValue(
+                                    key = fieldData.key,
+                                    title = fieldData.title,
+                                    type = FormFieldType.Photos,
+                                    value = JsonArray(emptyList())
+                                )
+                            }
+                        }
+                    )
                 }
-            )
+            }
+        }
+        var formValues by remember(data) {
+            mutableStateOf(initialFormValues)
         }
 
         val enableSubmit = remember(formValues) {
@@ -148,6 +156,34 @@ fun FormWidget(widgetId: String) {
                     is FormFieldData.Input -> !field.required || (formValues[field.key]!!.value as JsonPrimitive).content.isNotBlank()
                     is FormFieldData.Photos -> !field.required || (formValues[field.key]!!.value as JsonArray).isNotEmpty()
                     else -> true
+                }
+            }
+        }
+
+        fun submit() {
+            if (!enableSubmit) return
+
+            scope.launch {
+                api.runWidget(
+                    id = widgetId,
+                    data = RunWidgetBody(json.encodeToString(formValues.values.toList())),
+                    onError = {
+                        dialog(
+                            // todo: translate
+                            title = "There was an error submitting the form.",
+                            cancelButton = null
+                        ) {
+                            // todo: translate
+                            Text("Please try again or contact the form owner.")
+                        }
+                    }
+                ) {
+                    formValues = initialFormValues
+                    dialog(
+                        // todo: translate
+                        title = "Form submitted!",
+                        cancelButton = null
+                    )
                 }
             }
         }
@@ -306,6 +342,10 @@ fun FormWidget(widgetId: String) {
 
                 if (!isEnabled || !enableSubmit) {
                     disabled()
+                }
+
+                onClick {
+                    submit()
                 }
             }) {
                 Text(data.submitButtonText ?: appString { submit })

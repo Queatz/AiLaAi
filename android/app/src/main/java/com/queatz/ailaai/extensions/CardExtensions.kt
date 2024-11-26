@@ -51,8 +51,8 @@ val PayFrequency.appString @Composable get() = when (this) {
 suspend fun Card.reply(conversation: List<String>, onSuccess: (groupId: String) -> Unit = {}) {
     api.cardGroup(id!!) { group ->
         api.sendMessage(
-            group.id!!,
-            Message(
+            group = group.id!!,
+            message = Message(
                 text = conversation.filterNotBlank().ifNotEmpty?.joinToString(" → "),
                 attachment = json.encodeToString(CardAttachment(id!!))
             )
