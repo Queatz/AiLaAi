@@ -6,8 +6,9 @@ import kotlinx.serialization.Serializable
 data class FormData(
     val fields: List<FormField> = emptyList(),
     val options: FormOptions? = null,
-    val group: String? = null,
+    val groups: List<String>? = null,
     val script: String? = null,
+    val page: String? = null,
     val submitButtonText: String? = null,
 )
 
@@ -44,11 +45,21 @@ sealed class FormFieldData {
     ) : FormFieldData()
 
     @Serializable
+    data class Photos(
+        override val key: String,
+        val required: Boolean,
+        val title: String,
+        val description: String,
+        val photos: List<String>,
+    ) : FormFieldData()
+
+    @Serializable
     data class Checkbox(
         override val key: String,
         val required: Boolean,
         val title: String,
         val description: String,
+        val label: String,
         val initialValue: Boolean,
     ) : FormFieldData()
 }
@@ -57,5 +68,6 @@ sealed class FormFieldData {
 enum class FormFieldType {
     Text,
     Input,
-    Checkbox
+    Checkbox,
+    Photos
 }

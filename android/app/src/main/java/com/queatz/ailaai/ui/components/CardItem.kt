@@ -54,6 +54,7 @@ fun CardItem(
     card: Card?,
     modifier: Modifier = Modifier,
     isChoosing: Boolean = false,
+    placeholder: String? = null,
     playVideo: Boolean = true
 ) {
     Card(
@@ -87,7 +88,13 @@ fun CardItem(
                 },
             contentAlignment = Alignment.BottomCenter
         ) {
-            if (card != null) {
+            if (card == null) {
+                placeholder?.notBlank?.let { placeholder ->
+                    EmptyText(
+                        placeholder
+                    )
+                }
+            } else {
                 if (card.video != null) {
                     Video(
                         card.video!!.let(api::url),

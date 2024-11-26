@@ -1,25 +1,44 @@
 package com.queatz.ailaai.ui.widget.form
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import app.ailaai.api.card
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.Check
+import com.queatz.ailaai.ui.components.ChooseGroups
+import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Card
+import com.queatz.db.Group
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormOptions
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditForm(
+    shareToGroups: List<Group>,
     formData: FormData,
     onFormData: (FormData) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     var showEditSubmitButtonTextDialog by rememberStateOf(false)
 
     val submitButtonText = formData.submitButtonText?.notBlank
@@ -30,6 +49,7 @@ fun EditForm(
             onDismissRequest = {
                 showEditSubmitButtonTextDialog = false
             },
+            // todo: translate
             title = "Edit submit button",
             button = stringResource(R.string.update),
             singleLine = true,
@@ -46,6 +66,94 @@ fun EditForm(
         }
     }
 
+    DialogDivider()
+
+    Text(
+        // todo: translate
+        text = "Edit submit button:",
+        modifier = Modifier.padding(bottom = 1.pad),
+        style = MaterialTheme.typography.labelMedium
+    )
+
+    Button(
+        onClick = {
+            showEditSubmitButtonTextDialog = true
+        },
+        colors = ButtonDefaults.filledTonalButtonColors()
+    ) {
+        Text(submitButtonText)
+    }
+
+    DialogDivider()
+
+    Text(
+        // todo: translate
+        text = "Form submissions will be created under this page:",
+        modifier = Modifier.padding(bottom = 1.pad),
+        style = MaterialTheme.typography.labelMedium
+    )
+
+    var showCardDialog by rememberStateOf(false)
+    var card by remember { mutableStateOf<Card?>(null) }
+    if (showCardDialog) {
+        ChooseCardDialog(
+            onDismissRequest = {
+                showCardDialog = false
+            },
+        ) { page ->
+            scope.launch {
+                api.card(page) {
+                    card = it
+                }
+                onFormData(
+                    formData.copy(
+                        page = page
+                    )
+                )
+            }
+            showCardDialog = false
+        }
+    }
+
+    CardItem(
+        onClick = {
+            showCardDialog = true
+        },
+        onCategoryClick = {},
+        card = card,
+        isChoosing = true,
+        placeholder = stringResource(R.string.choose_page),
+        modifier = Modifier.fillMaxWidth(.75f)
+    )
+
+    DialogDivider()
+
+    Text(
+        // todo: translate
+        text = "Forward form submissions:",
+        modifier = Modifier.padding(bottom = 1.pad),
+        style = MaterialTheme.typography.labelMedium
+    )
+
+    ChooseGroups(
+        groups = shareToGroups,
+    ) { groups ->
+        onFormData(
+            formData.copy(
+                groups = groups.map { it.id!! }
+            )
+        )
+    }
+
+    DialogDivider()
+
+    Text(
+        // todo: translate
+        text = stringResource(R.string.options_),
+        modifier = Modifier.padding(bottom = 1.pad),
+        style = MaterialTheme.typography.labelMedium
+    )
+
     Check(
         checked = formData.options?.enableAnonymousReplies == true,
         onCheckChange = {
@@ -60,12 +168,9 @@ fun EditForm(
     ) {
         Text(stringResource(R.string.enable_anonymous_replies))
     }
-    Button(
-        onClick = {
-            showEditSubmitButtonTextDialog = true
-        },
-        colors = ButtonDefaults.filledTonalButtonColors()
-    ) {
-        Text(submitButtonText)
-    }
+}
+
+@Composable
+private fun DialogDivider() {
+    HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 1.pad))
 }

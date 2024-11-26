@@ -869,6 +869,10 @@ object Strings {
         "Now",
         "Bây giờ"
     )
+    val submit = Translation(
+        "Submit",
+        "Nộp"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

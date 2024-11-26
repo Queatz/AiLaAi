@@ -49,7 +49,7 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
 
         if (showReorderDialog) {
             ReorderDialog(
-                { showReorderDialog = false },
+                onDismissRequest = { showReorderDialog = false },
                 onMove = { from, to ->
                     edit {
                         cards = cards.toMutableList().apply {
@@ -122,7 +122,7 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
         }
 
         CardItem(
-            {
+            onClick = {
                 showCardMenu = true
             },
             onCategoryClick = {},

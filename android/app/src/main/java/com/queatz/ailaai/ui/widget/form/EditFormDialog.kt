@@ -4,11 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,28 +16,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
-import com.queatz.ailaai.data.api
-import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
-import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.Widget
-import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormField
-import createWidget
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import org.burnoutcrew.reorderable.ItemPosition
 
 @Composable
 fun EditFormDialog(
     onDismissRequest: () -> Unit,
-    initialFormData: FormData = FormData(),
-    onWidget: (widget: Widget) -> Unit
+    initialFormData: FormData,
+    onFormData: suspend (formData: FormData) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     var formData by rememberStateOf(initialFormData)
@@ -67,41 +55,15 @@ fun EditFormDialog(
         DialogLayout(
             scrollable = false,
             content = {
-                var showMenu by rememberStateOf(false)
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(top = 1.pad)
                 ) {
                     Text(
                         text = stringResource(R.string.form),
                         style = MaterialTheme.typography.titleLarge
                     )
-                    IconButton(
-                        onClick = {
-                            showMenu = true
-                        },
-                    ) {
-                        Icon(Icons.Outlined.MoreVert, null)
-
-                        Dropdown(
-                            onDismissRequest = {
-                                showMenu = false
-                            },
-                            expanded = showMenu
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(stringResource(R.string.reorder))
-                                },
-                                onClick = {
-                                    showMenu = false
-                                    // todo
-                                }
-                            )
-                        }
-                    }
                 }
 
                 EditFormFields(
@@ -144,12 +106,7 @@ fun EditFormDialog(
                     onClick = {
                         scope.launch {
                             isLoading = true
-                            api.createWidget(
-                                widget = Widgets.Form,
-                                data = json.encodeToString(formData)
-                            ) {
-                                onWidget(it)
-                            }
+                            onFormData(formData)
                             isLoading = false
                             onDismissRequest()
                         }

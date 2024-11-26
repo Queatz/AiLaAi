@@ -300,7 +300,7 @@ fun EditCardLocationDialog(
                                 ) {
                                     items(shownCards, { it.id!! }) {
                                         CardItem(
-                                            {
+                                            onClick = {
                                                 parentCard = it
                                                 card.parent = it.id
                                             },

@@ -29,6 +29,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
+import com.queatz.ailaai.ui.components.ChooseGroups
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -53,7 +54,6 @@ fun PublishStoryDialog(
     val context = LocalContext.current
     var publishEnabled by rememberStateOf(false)
     var showLocationDialog by rememberStateOf(false)
-    var showGroupsDialog by rememberStateOf(false)
     var shareToGroups by rememberStateOf<List<Group>?>(null)
     var geo by rememberStateOf(story.geo?.toLatLng())
     var shareToGeo by rememberStateOf(story.geo?.toLatLng())
@@ -125,7 +125,7 @@ fun PublishStoryDialog(
     }
 
     AlertDialog(
-        onDismissRequest,
+        onDismissRequest = onDismissRequest,
         properties = DialogProperties(
             decorFitsSystemWindows = Build.VERSION.SDK_INT < Build.VERSION_CODES.S, // Dialogs missing scrim
             usePlatformDefaultWidth = false
@@ -198,8 +198,8 @@ fun PublishStoryDialog(
                     ) {
                         val peopleNearby = stringResource(R.string.inline_people_nearby)
                         Icon(
-                            Icons.Outlined.Place,
-                            null,
+                            imageVector = Icons.Outlined.Place,
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(end = 1.pad)
                         )
@@ -213,7 +213,7 @@ fun PublishStoryDialog(
                             }
                         )
                         Icon(
-                            Icons.Outlined.Close,
+                            imageVector = Icons.Outlined.Close,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
@@ -222,46 +222,13 @@ fun PublishStoryDialog(
                         )
                     }
                 }
-                if (!shareToGroups.isNullOrEmpty()) {
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = if (shareToGroups?.size == 1) Alignment.CenterVertically else Alignment.Top,
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.medium)
-                            .clickable {
-                                showGroupsDialog = true
-                            }
-                            .padding(vertical = .5f.pad)
-                    ) {
-                        Icon(
-                            Icons.Outlined.Forum,
-                            null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(end = 1.pad)
-                        )
-                        Text(
-                            buildAnnotatedString {
-                                append(stringResource(R.string.shared_in_))
-                                append(" ")
-                                shareToGroups?.forEachIndexed { index, group ->
-                                    if (index > 0) append(", ")
-                                    bold {
-                                        append(group.name ?: "")
-                                    }
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f, fill = false)
-                        )
-                        Icon(
-                            Icons.Outlined.Edit,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(horizontal = .5f.pad)
-                                .size(16.dp)
-                        )
-                    }
+
+                ChooseGroups(
+                    groups = shareToGroups.orEmpty(),
+                    hint = stringResource(R.string.share_to_groups_description)
+                ) {
+                    shareToGroups = it
+                    onGroupsChanged(it)
                 }
 
                 if (shareToGeo == null) {
@@ -274,23 +241,7 @@ fun PublishStoryDialog(
                         Text(stringResource(R.string.add_a_location))
                     }
                     Text(
-                        stringResource(R.string.add_a_location_description),
-                        color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                if (shareToGroups.isNullOrEmpty()) {
-                    OutlinedButton(
-                        onClick = {
-                            showGroupsDialog = true
-                        }
-                    ) {
-                        Icon(Icons.Outlined.GroupAdd, null, modifier = Modifier.padding(end = 1.pad))
-                        Text(stringResource(R.string.share_to_groups))
-                    }
-                    Text(
-                        stringResource(R.string.share_to_groups_description),
+                        text = stringResource(R.string.add_a_location_description),
                         color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -348,29 +299,6 @@ fun PublishStoryDialog(
             geo = it
             shareToGeo = it
             onLocationChanged(it)
-        }
-    }
-
-    if (showGroupsDialog) {
-        val someone = stringResource(R.string.someone)
-        val emptyGroup = stringResource(R.string.empty_group_name)
-        ChooseGroupDialog(
-            {
-                showGroupsDialog = false
-            },
-            title = stringResource(R.string.share),
-            confirmFormatter = defaultConfirmFormatter(
-                R.string.choose_none,
-                R.string.choose_x,
-                R.string.choose_x_and_x,
-                R.string.choose_x_groups
-            ) { it.name(someone, emptyGroup, omit = me?.id?.let(::listOf) ?: emptyList()) },
-            filter = { it.isGroupLike() },
-            allowNone = true,
-            preselect = shareToGroups
-        ) {
-            shareToGroups = it
-            onGroupsChanged(it)
         }
     }
 }

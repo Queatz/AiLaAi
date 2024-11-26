@@ -8,11 +8,11 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.widget.form.EditFormDialog
 import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.FormData
-import com.queatz.widgets.widgets.FormOptions
 import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.WebData
 import createWidget
@@ -22,6 +22,7 @@ import kotlinx.serialization.encodeToString
 @Composable
 fun AddWidgetDialog(
     onDismissRequest: () -> Unit,
+    source: StorySource,
     widget: Widgets,
     onWidget: (widget: Widget) -> Unit
 ) {
@@ -31,6 +32,7 @@ fun AddWidgetDialog(
         Widgets.Script -> {
             AddScriptWidgetDialog(onDismissRequest, onWidget)
         }
+
         Widgets.Web -> {
             TextFieldDialog(
                 onDismissRequest = onDismissRequest,
@@ -50,6 +52,7 @@ fun AddWidgetDialog(
                 }
             }
         }
+
         Widgets.PageTree -> {
             ChooseCardDialog(
                 onDismissRequest = onDismissRequest
@@ -64,20 +67,23 @@ fun AddWidgetDialog(
                 }
             }
         }
+
         Widgets.Form -> {
             EditFormDialog(
-                onDismissRequest = onDismissRequest
-            ) {
+                onDismissRequest = onDismissRequest,
+                initialFormData = FormData(page = (source as? StorySource.Card)?.id)
+            ) { data ->
                 scope.launch {
                     api.createWidget(
                         widget = Widgets.Form,
-                        data = json.encodeToString(FormData(options = FormOptions(enableAnonymousReplies = true)))
+                        data = json.encodeToString(data)
                     ) {
                         onWidget(it)
                     }
                 }
             }
         }
+
         else -> {
             Throwable().printStackTrace()
             // Unsupported widget. Should never get here

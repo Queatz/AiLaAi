@@ -752,4 +752,5 @@
     <string name="my_qr">Mã QR của tôi</string>
     <string name="description">Mô tả</string>
     <string name="form">Mẫu đơn</string>
+    <string name="choose_page">Chọn trang</string>
 </resources>

@@ -62,9 +62,13 @@ fun StoryCreatorTools(
     var addWidget by rememberStateOf<Widgets?>(null)
 
     addWidget?.let {
-        AddWidgetDialog({
-            addWidget = null
-        }, it) { widget ->
+        AddWidgetDialog(
+            onDismissRequest = {
+                addWidget = null
+            },
+            source = source,
+            widget = it
+        ) { widget ->
             addPart(StoryContent.Widget(widget.widget!!, widget.id!!))
             addWidget = null
         }

@@ -19,6 +19,7 @@ import app.components.TextBox
 import app.dialog.photoDialog
 import app.group.GroupInfo
 import app.group.GroupItem
+import app.widget.FormWidget
 import app.widget.ImpactEffortTable
 import app.widget.PageTreeWidget
 import app.widget.ScriptWidget
@@ -358,7 +359,7 @@ fun StoryContents(
                         WebWidget(part.id)
                     }
                     Widgets.Form -> {
-                        // todo render + handle form
+                        FormWidget(part.id)
                     }
                 }
             }

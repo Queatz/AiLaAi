@@ -32,13 +32,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.ailaai.api.group
+import app.ailaai.api.groups
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.replace
 import com.queatz.ailaai.extensions.token
 import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Group
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormField
 import com.queatz.widgets.widgets.FormFieldData
@@ -65,6 +70,18 @@ fun EditFormFields(
     onAdd: SharedFlow<Unit>,
     add: (FormField) -> Unit,
 ) {
+    var shareToGroups by rememberStateOf<List<Group>?>(null)
+
+    LaunchedEffect(formData.groups) {
+        shareToGroups = formData.groups?.mapNotNull {
+            var group: Group? = null
+            api.group(it) {
+                group = it.group
+            }
+            group
+        }
+    }
+
     val reorderState = rememberReorderableLazyListState(
         onMove = onMove,
         canDragOver = onDrag
@@ -74,7 +91,7 @@ fun EditFormFields(
         onAdd.collect {
             delay(100)
             reorderState.listState.animateScrollToItem(
-                (reorderState.listState.layoutInfo.totalItemsCount - 1).coerceAtLeast(0)
+                (reorderState.listState.layoutInfo.totalItemsCount - 1 - 1).coerceAtLeast(0)
             )
         }
     }
@@ -147,7 +164,7 @@ fun EditFormFields(
                             add(
                                 FormField(
                                     type = FormFieldType.Input,
-                                    data = FormFieldData.Input((1..8).token(), false, "", "", "", "")
+                                    data = FormFieldData.Input((1..8).token(), true, "", "", "", "")
                                 )
                             )
                         }
@@ -161,7 +178,21 @@ fun EditFormFields(
                             add(
                                 FormField(
                                     type = FormFieldType.Checkbox,
-                                    data = FormFieldData.Checkbox((1..8).token(), false, "", "", false)
+                                    data = FormFieldData.Checkbox((1..8).token(), false, "", "", "", false)
+                                )
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(R.string.photo))
+                        },
+                        onClick = {
+                            showAddMenu = false
+                            add(
+                                FormField(
+                                    type = FormFieldType.Photos,
+                                    data = FormFieldData.Photos((1..8).token(), true, "", "", listOf())
                                 )
                             )
                         }
@@ -170,6 +201,7 @@ fun EditFormFields(
             }
 
             EditForm(
+                shareToGroups = shareToGroups.orEmpty(),
                 formData = formData,
                 onFormData = onFormData
             )
@@ -216,6 +248,7 @@ fun EditFormField(
                             FormFieldType.Text -> stringResource(R.string.text)
                             FormFieldType.Input -> stringResource(R.string.input)
                             FormFieldType.Checkbox -> stringResource(R.string.checkbox)
+                            FormFieldType.Photos -> stringResource(R.string.photo)
                         },
                         style = MaterialTheme.typography.labelMedium
                     )
@@ -236,7 +269,7 @@ fun EditFormField(
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
                             label = {
-                                Text(stringResource(R.string.text))
+                                Text(stringResource(R.string.title))
                             },
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Sentences,
@@ -252,9 +285,66 @@ fun EditFormField(
                                 )
                             }
                         )
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.description))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Text).description,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Text).copy(
+                                            description = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
                     }
 
                     FormFieldType.Input -> {
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.title))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Input).title,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Input).copy(
+                                            title = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.description))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Input).description,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Input).copy(
+                                            description = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
                             label = {
@@ -310,6 +400,44 @@ fun EditFormField(
                                 )
                             }
                         )
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.description))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Checkbox).description,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Checkbox).copy(
+                                            description = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.label))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Checkbox).label,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Checkbox).copy(
+                                            label = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
                         Check(
                             checked = (formField.data as FormFieldData.Checkbox).initialValue,
                             onCheckChange = {
@@ -322,7 +450,7 @@ fun EditFormField(
                                 )
                             }
                         ) {
-                            Text(stringResource(R.string.inital_value))
+                            Text(stringResource(R.string.initally_checked))
                         }
                         Check(
                             checked = (formField.data as FormFieldData.Checkbox).required,
@@ -330,6 +458,61 @@ fun EditFormField(
                                 onFormField(
                                     formField.copy(
                                         data = (formField.data as FormFieldData.Checkbox).copy(
+                                            required = it
+                                        )
+                                    )
+                                )
+                            }
+                        ) {
+                            Text(stringResource(R.string.required))
+                        }
+                    }
+
+                    FormFieldType.Photos -> {
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.title))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Photos).title,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Photos).copy(
+                                            title = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
+                        OutlinedTextField(
+                            shape = MaterialTheme.shapes.large,
+                            label = {
+                                Text(stringResource(R.string.description))
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                            ),
+                            value = (formField.data as FormFieldData.Photos).description,
+                            onValueChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Photos).copy(
+                                            description = it
+                                        )
+                                    )
+                                )
+                            }
+                        )
+                        Check(
+                            checked = (formField.data as FormFieldData.Photos).required,
+                            onCheckChange = {
+                                onFormField(
+                                    formField.copy(
+                                        data = (formField.data as FormFieldData.Photos).copy(
                                             required = it
                                         )
                                     )

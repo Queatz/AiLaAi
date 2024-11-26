@@ -98,6 +98,21 @@ object Styles : StyleSheet() {
         }
     }
 
+    val formContent by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Stretch)
+        width(100.percent)
+        boxSizing("border-box")
+        maxWidth(800.px)
+        elevated()
+        padding(0.r, 1.r, 1.r, 1.r)
+
+        dark(self) {
+            border(1.px, LineStyle.Solid, Color.black)
+        }
+    }
+
     fun CSSBuilder.cardStyle() {
         borderRadius(2.r)
         backgroundColor(colors.background)

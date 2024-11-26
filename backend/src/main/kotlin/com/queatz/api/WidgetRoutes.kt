@@ -33,6 +33,23 @@ fun Route.widgetRoutes() {
                 HttpStatusCode.OK
             }
         }
+
+        post("/widgets/{id}/run") {
+            respond {
+                val widget = db.widget(me.id!!, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                when (widget.widget) {
+                    Widgets.Form -> {
+                        // todo create page
+                        // todo send to groups
+
+                        HttpStatusCode.OK
+                    }
+                    else -> HttpStatusCode.BadRequest.description("Widget cannot be run")
+                }
+            }
+        }
     }
 
     authenticate {

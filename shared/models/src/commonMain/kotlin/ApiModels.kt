@@ -169,6 +169,12 @@ data class SearchGroupBody(val people: List<String>)
 data class CreateWidgetBody(val widget: Widgets, val data: String? = null)
 
 @Serializable
+data class RunWidgetBody(val data: String? = null)
+
+@Serializable
+data class RunWidgetResponse(val data: String? = null)
+
+@Serializable
 data class MintItemBody(
     val quantity: Double
 )
