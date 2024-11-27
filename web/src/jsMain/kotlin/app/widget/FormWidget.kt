@@ -1,6 +1,6 @@
 package app.widget
 
-import Strings.submit
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,7 +26,6 @@ import com.queatz.widgets.FormValue
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormFieldData
 import com.queatz.widgets.widgets.FormFieldType
-import components.Icon
 import json
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
@@ -35,33 +34,20 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
 import org.jetbrains.compose.web.attributes.disabled
-import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.alignSelf
-import org.jetbrains.compose.web.css.background
-import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexWrap
-import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontStyle
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginTop
-import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.paddingLeft
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -104,6 +90,9 @@ fun FormWidget(widgetId: String) {
     }
 
     data?.let { data ->
+        // Forms without a page cannot be submitted
+        data.page ?: return@let
+
         val me by application.me.collectAsState()
         val isEnabled = data.options?.enableAnonymousReplies == true || me != null
         val initialFormValues = remember(data) {

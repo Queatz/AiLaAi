@@ -1,4 +1,4 @@
-package components
+package app.info
 import androidx.compose.runtime.Composable
 import appText
 import org.jetbrains.compose.web.css.*

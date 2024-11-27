@@ -1,4 +1,4 @@
-package components
+package app.info
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,6 +10,7 @@ import api
 import app.ailaai.api.cardsCards
 import baseUrl
 import com.queatz.db.Card
+import components.getConversation
 import kotlinx.browser.window
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -22,10 +23,7 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.gridArea
-import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.px
@@ -55,6 +53,7 @@ fun UseCasesPage() {
         }
     }) {
         H1 {
+            // todo: translate
             Text("Hi Town Use Cases")
         }
         useCases.forEachIndexed { index, useCase ->

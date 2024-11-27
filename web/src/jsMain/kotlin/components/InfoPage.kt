@@ -4,11 +4,18 @@ import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import app.cards.CardsPageStyles.layout
+import app.info.AccountDeletionPage
+import app.info.UseCasesPage
 import app.softwork.routingcompose.Router
 import application
 import mainContent
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignSelf
+import org.jetbrains.compose.web.css.alignSelf
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import r
 
@@ -43,6 +50,9 @@ fun InfoPage(page: String) {
                     }
                     "use-cases" -> {
                         UseCasesPage()
+                    }
+                    "account-deletion" -> {
+                        AccountDeletionPage()
                     }
                     else -> Router.current.navigate("/")
                 }

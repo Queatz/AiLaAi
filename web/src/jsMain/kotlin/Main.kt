@@ -11,6 +11,8 @@ import app.call.CallLayout
 import app.call.CallStyles
 import app.components.Background
 import app.group.GroupCoverPage
+import app.info.PrivacyPage
+import app.info.TosPage
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import app.widget.WidgetStyles
@@ -19,11 +21,9 @@ import components.AppHeader
 import components.CardPage
 import components.InfoPage
 import components.NotificationsLayout
-import components.PrivacyPage
 import components.ProfilePage
 import components.SigninPage
 import components.StoryPage
-import components.TosPage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -180,7 +180,10 @@ fun main() {
                                     }
                                 }
                             )
-                            CardPage(url = cardIdOrUrl, onError = { parentCardId = null }) {
+                            CardPage(
+                                url = cardIdOrUrl,
+                                onError = { parentCardId = null }
+                            ) {
                                 title = it.name
                                 parentCardId = it.parent
                                 personId = if (it.equipped == true) it.person else null

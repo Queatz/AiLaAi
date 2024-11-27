@@ -2,6 +2,8 @@ package com.queatz.api
 
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
+import com.queatz.db.CardOptions
+import com.queatz.db.ConversationItem
 import com.queatz.db.CreateWidgetBody
 import com.queatz.db.Message
 import com.queatz.db.RunWidgetBody
@@ -127,6 +129,7 @@ fun Route.widgetRoutes() {
                             person = formOwner,
                             // todo: translate
                             name = submitter?.let { "Submission from ${submitter.name ?: "Someone"}" } ?: "Anonymous submission",
+                            options = json.encodeToString(CardOptions(enableReplies = false)),
                             content = content
                         ).let {
                             db.insert(it)
