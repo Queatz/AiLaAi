@@ -58,7 +58,7 @@ fun EditFormDialog(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().padding(top = 1.pad)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = stringResource(R.string.form),
@@ -91,7 +91,7 @@ fun EditFormDialog(
                     add = ::add,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(bottom = 1.pad)
+                        .padding(vertical = 1.pad)
                 )
             },
             actions = {

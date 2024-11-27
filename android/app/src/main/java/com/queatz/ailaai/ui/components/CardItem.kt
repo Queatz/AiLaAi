@@ -91,7 +91,9 @@ fun CardItem(
             if (card == null) {
                 placeholder?.notBlank?.let { placeholder ->
                     EmptyText(
-                        placeholder
+                        placeholder,
+                        modifier = Modifier.fillMaxHeight()
+                            .align(Alignment.Center)
                     )
                 }
             } else {

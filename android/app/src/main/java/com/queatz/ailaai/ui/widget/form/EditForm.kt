@@ -8,6 +8,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -95,22 +96,28 @@ fun EditForm(
 
     var showCardDialog by rememberStateOf(false)
     var card by remember { mutableStateOf<Card?>(null) }
+
+    LaunchedEffect(formData.page) {
+        if (formData.page == null) {
+            card = null
+        } else {
+            api.card(formData.page!!) {
+                card = it
+            }
+        }
+    }
+
     if (showCardDialog) {
         ChooseCardDialog(
             onDismissRequest = {
                 showCardDialog = false
             },
         ) { page ->
-            scope.launch {
-                api.card(page) {
-                    card = it
-                }
-                onFormData(
-                    formData.copy(
-                        page = page
-                    )
+            onFormData(
+                formData.copy(
+                    page = page
                 )
-            }
+            )
             showCardDialog = false
         }
     }
@@ -172,5 +179,5 @@ fun EditForm(
 
 @Composable
 private fun DialogDivider() {
-    HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 1.pad))
+    HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(vertical = 2.pad))
 }

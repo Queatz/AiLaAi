@@ -24,6 +24,7 @@ import com.queatz.ailaai.ReplyReceiver.Companion.KEY_REPLY
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.push.receive
+import com.queatz.db.Bot
 import com.queatz.db.Person
 import com.queatz.push.CallPushData
 import com.queatz.push.CallStatusPushData
@@ -113,11 +114,15 @@ class Push {
             }
         }
 
-    internal fun personNameOrYou(person: Person?, inline: Boolean = true): String {
+    internal fun personNameOrYou(person: Person?, bot: Bot? = null, inline: Boolean = true): String {
         return if (person?.id == meId) {
             context.getString(if (inline) R.string.inline_you else R.string.you)
+        } else if (person != null) {
+            person.name ?: context.getString(if (inline) R.string.inline_someone else R.string.someone)
+        } else if (bot != null) {
+            bot.name ?: context.getString(R.string.app_name)
         } else {
-            person?.name ?: context.getString(if (inline) R.string.inline_someone else R.string.someone)
+            context.getString(R.string.app_name)
         }
     }
 

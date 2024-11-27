@@ -11,7 +11,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun EmptyText(text: String, modifier: Modifier = Modifier) {
     Text(
-        text,
+        text = text,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(2.pad).fillMaxWidth().then(modifier)
     )

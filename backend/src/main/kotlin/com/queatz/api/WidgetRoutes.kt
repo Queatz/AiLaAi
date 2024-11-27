@@ -8,6 +8,8 @@ import com.queatz.db.RunWidgetBody
 import com.queatz.db.RunWidgetResponse
 import com.queatz.db.StoryContent
 import com.queatz.db.Widget
+import com.queatz.db.asKey
+import com.queatz.db.group
 import com.queatz.db.member
 import com.queatz.db.toJsonStoryContent
 import com.queatz.db.widget
@@ -16,6 +18,7 @@ import com.queatz.plugins.db
 import com.queatz.plugins.json
 import com.queatz.plugins.me
 import com.queatz.plugins.meOrNull
+import com.queatz.plugins.notify
 import com.queatz.plugins.respond
 import com.queatz.widgets.FormValue
 import com.queatz.widgets.Widgets
@@ -27,6 +30,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -130,14 +134,26 @@ fun Route.widgetRoutes() {
 
                         data.groups?.forEach { groupId ->
                             // Verify form owner is a member of the destination group
+                            val group = db.group(formOwner, groupId)
                             val member = db.member(formOwner, groupId)
 
-                            if (member != null) {
+                            if (member != null && group != null) {
                                 Message(
-                                    text = submission.name,
                                     attachment = json.encodeToString(CardAttachment(submission.id!!)),
-                                    group = member.to!!
-                                )
+                                    group = group.group!!.id!!
+                                ).let {
+                                    db.insert(it)
+                                }.let {
+                                    group.group!!.seen = Clock.System.now()
+                                    db.update(group.group!!)
+                                    notify.message(
+                                        group = group.group!!,
+                                        message = Message(
+                                            text = it.text,
+                                            attachment = it.attachment
+                                        )
+                                    )
+                                }
                             }
                         }
 
