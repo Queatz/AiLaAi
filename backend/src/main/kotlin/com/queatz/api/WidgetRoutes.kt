@@ -6,8 +6,11 @@ import com.queatz.db.CardOptions
 import com.queatz.db.ConversationItem
 import com.queatz.db.CreateWidgetBody
 import com.queatz.db.Message
+import com.queatz.db.RunScriptBody
 import com.queatz.db.RunWidgetBody
 import com.queatz.db.RunWidgetResponse
+import com.queatz.db.Script
+import com.queatz.db.ScriptResult
 import com.queatz.db.StoryContent
 import com.queatz.db.Widget
 import com.queatz.db.asKey
@@ -22,6 +25,7 @@ import com.queatz.plugins.me
 import com.queatz.plugins.meOrNull
 import com.queatz.plugins.notify
 import com.queatz.plugins.respond
+import com.queatz.scripts.RunScript
 import com.queatz.widgets.FormValue
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.FormData
@@ -32,6 +36,8 @@ import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
@@ -129,7 +135,7 @@ fun Route.widgetRoutes() {
                             person = formOwner,
                             // todo: translate
                             name = submitter?.let { "Submission from ${submitter.name ?: "Someone"}" } ?: "Anonymous submission",
-                            options = json.encodeToString(CardOptions(enableReplies = false)),
+                            options = json.encodeToString(CardOptions(enableReplies = false, enableAnonymousReplies = false)),
                             content = content
                         ).let {
                             db.insert(it)
@@ -160,8 +166,23 @@ fun Route.widgetRoutes() {
                             }
                         }
 
+                        val scriptResult = if (data.script != null) {
+                            db.document(Script::class, data.script!!)?.let { script ->
+                                withContext(Dispatchers.IO) {
+                                    RunScript(
+                                        script = script,
+                                        data = body.data!!
+                                    ).run(person = submitter)
+                                }
+                            }
+                        } else {
+                            null
+                        }
+
                         // Success
-                        RunWidgetResponse(data = null)
+                        RunWidgetResponse(
+                            content = scriptResult?.content
+                        )
                     }
                     else -> HttpStatusCode.BadRequest.description("Widget cannot be run")
                 }

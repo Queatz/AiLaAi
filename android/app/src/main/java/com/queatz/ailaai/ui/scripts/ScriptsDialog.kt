@@ -332,75 +332,15 @@ fun ScriptsDialog(
                     }
 
                     is ScriptsDialogState.Search -> {
-                        val focusRequester = remember { FocusRequester() }
-                        var search by rememberStateOf("")
-                        var scripts by rememberStateOf(emptyList<Script>())
-
-                        LaunchedEffect(Unit) {
-                            focusRequester.requestFocus()
-                        }
-
-                        LaunchedEffect(search) {
-                            if ((state as ScriptsDialogState.Search).onlyMine) {
-                                api.myScripts {
-                                    scripts = it.filter {
-                                        it.name?.contains(search, ignoreCase = true) == true ||
-                                                it.description?.contains(search, ignoreCase = true) == true
-                                    }
-                                }
-                            } else {
-                                api.scripts(search.notBlank) {
-                                    scripts = it
-                                }
+                        SearchScriptsLayout(
+                            onlyMine = (state as ScriptsDialogState.Search).onlyMine,
+                            onScript = {
+                                state = ScriptsDialogState.Preview(
+                                    script = it,
+                                    fromOnlyMine = (state as ScriptsDialogState.Search).onlyMine
+                                )
                             }
-                        }
-
-                        OutlinedTextField(
-                            value = search,
-                            onValueChange = { search = it },
-                            label = { Text(stringResource(R.string.search_scripts)) },
-                            shape = MaterialTheme.shapes.large,
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Sentences
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 1.pad)
-                                .focusRequester(focusRequester)
                         )
-
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(1.pad),
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
-                            items(scripts) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(MaterialTheme.shapes.large)
-                                        .clickable {
-                                            state = ScriptsDialogState.Preview(
-                                                script = it,
-                                                fromOnlyMine = (state as ScriptsDialogState.Search).onlyMine
-                                            )
-                                        }
-                                        .padding(1.pad)
-                                ) {
-                                    Text(
-                                        text = it.name?.notBlank ?: stringResource(R.string.new_script),
-                                    )
-                                    it.categories?.firstOrNull()?.let { category ->
-                                        Text(
-                                            text = category,
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.secondary
-                                        )
-                                    }
-                                }
-                            }
-                        }
                     }
 
                     is ScriptsDialogState.Templates -> {

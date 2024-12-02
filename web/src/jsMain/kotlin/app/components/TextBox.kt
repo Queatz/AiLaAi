@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.StyleScope
@@ -26,6 +27,7 @@ fun TextBox(
     placeholder: String = "",
     selectAll: Boolean = false,
     inline: Boolean = false,
+    disabled: Boolean = false,
     styles: StyleScope.() -> Unit = {},
     onConfirm: () -> Unit = {}
 ) {
@@ -52,6 +54,10 @@ fun TextBox(
         }
 
         placeholder(placeholder)
+
+        if (disabled) {
+            disabled()
+        }
 
         onKeyDown {
             if (it.key == "Enter" && it.ctrlKey) {

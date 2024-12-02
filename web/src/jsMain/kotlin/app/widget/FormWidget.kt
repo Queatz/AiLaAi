@@ -10,7 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.AppNavigation
+import app.ailaai.api.runScript
 import app.ailaai.api.uploadPhotos
+import app.appNav
 import app.components.Spacer
 import app.dialog.dialog
 import app.widget.form.FormFieldCheckbox
@@ -20,12 +23,16 @@ import app.widget.form.FormFieldTitle
 import appString
 import application
 import baseUrl
+import com.queatz.db.RunScriptBody
 import com.queatz.db.RunWidgetBody
+import com.queatz.db.StoryContent
 import com.queatz.db.Widget
 import com.queatz.widgets.FormValue
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormFieldData
 import com.queatz.widgets.widgets.FormFieldType
+import components.Icon
+import components.Loading
 import json
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
@@ -33,6 +40,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
+import notEmpty
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -48,6 +56,9 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -55,6 +66,7 @@ import org.jetbrains.compose.web.dom.Text
 import pickPhotos
 import r
 import runWidget
+import stories.StoryContents
 import toBytes
 import widget
 
@@ -74,6 +86,10 @@ fun FormWidget(widgetId: String) {
         mutableStateOf<FormData?>(null)
     }
 
+    var scriptResult by remember {
+        mutableStateOf<List<StoryContent>?>(null)
+    }
+
     LaunchedEffect(widgetId) {
         isLoading = true
         api.widget(widgetId) {
@@ -89,7 +105,39 @@ fun FormWidget(widgetId: String) {
         isLoading = false
     }
 
-    data?.let { data ->
+    scriptResult?.notEmpty?.let { content ->
+        StoryContents(
+            storyContent = content,
+            onGroupClick = {
+                scope.launch {
+                    appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
+                }
+            },
+            onButtonClick = { script, data ->
+                scope.launch {
+                    api.runScript(script, RunScriptBody(data)) {
+                        scriptResult = it.content
+                    }
+                }
+            }
+        )
+        Button({
+            classes(Styles.outlineButton)
+
+            style {
+                marginTop(1.r)
+                alignSelf(AlignSelf.FlexStart)
+            }
+
+            onClick {
+                scriptResult = null
+            }
+        }) {
+            Icon("undo")
+            // todo: translate
+            Text("Restart")
+        }
+    } ?: data?.let { data ->
         // Forms without a page cannot be submitted
         data.page ?: return@let
 
@@ -134,6 +182,7 @@ fun FormWidget(widgetId: String) {
                 }
             }
         }
+
         var formValues by remember(data) {
             mutableStateOf(initialFormValues)
         }
@@ -153,6 +202,7 @@ fun FormWidget(widgetId: String) {
             if (!enableSubmit) return
 
             scope.launch {
+                isLoading = true
                 api.runWidget(
                     id = widgetId,
                     data = RunWidgetBody(json.encodeToString(formValues.values.toList())),
@@ -168,12 +218,17 @@ fun FormWidget(widgetId: String) {
                     }
                 ) {
                     formValues = initialFormValues
-                    dialog(
-                        // todo: translate
-                        title = "Form submitted!",
-                        cancelButton = null
-                    )
+                    if (it.content == null) {
+                        dialog(
+                            // todo: translate
+                            title = "Form submitted!",
+                            cancelButton = null
+                        )
+                    } else {
+                        scriptResult = it.content
+                    }
                 }
+                isLoading = false
             }
         }
 
@@ -329,7 +384,7 @@ fun FormWidget(widgetId: String) {
                     alignSelf(AlignSelf.FlexStart)
                 }
 
-                if (!isEnabled || !enableSubmit) {
+                if (!isEnabled || !enableSubmit || isLoading) {
                     disabled()
                 }
 
@@ -337,7 +392,14 @@ fun FormWidget(widgetId: String) {
                     submit()
                 }
             }) {
-                Text(data.submitButtonText ?: appString { submit })
+                Text(
+                    if (isLoading) {
+                        // todo: translate
+                        "Submitting…"
+                    } else {
+                        data.submitButtonText ?: appString { submit }
+                    }
+                )
             }
 
             if (!isEnabled) {

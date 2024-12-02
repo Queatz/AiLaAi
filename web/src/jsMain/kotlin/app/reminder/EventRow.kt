@@ -1,29 +1,41 @@
 package app.reminder
 
-import Strings.details
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
-import app.ailaai.api.deleteReminderOccurrence
 import app.ailaai.api.updateReminderOccurrence
-import app.dialog.dialog
 import app.dialog.inputDialog
-import app.menu.Menu
-import app.page.*
+import app.page.ReminderEvent
+import app.page.ReminderEventType
+import app.page.SchedulePageStyles
+import app.page.ScheduleView
+import app.page.updateDate
 import bulletedString
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
 import focusable
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toKotlinInstant
-import lib.format
 import notBlank
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.textDecoration
+import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
-import parseDateTime
 
 @Composable
 fun EventRow(
@@ -63,51 +75,10 @@ fun EventRow(
             if (note == null) return@launch
 
             api.updateReminderOccurrence(
-                event.reminder.id!!, event.updateDate, ReminderOccurrence(
-                note = note
-            )) {
-                onUpdate()
-            }
-        }
-    }
-
-    fun delete() {
-        scope.launch {
-            // todo translate
-            val result = dialog("Delete this occurrence?", confirmButton = "Yes, delete")
-
-            if (result != true) return@launch
-
-            api.deleteReminderOccurrence(
-                event.reminder.id!!,
-                event.occurrence?.occurrence ?: event.date.toKotlinInstant()
-            ) {
-                onUpdate()
-            }
-        }
-    }
-
-    fun reschedule() {
-        scope.launch {
-            var date by mutableStateOf(format(event.date, "yyyy-MM-dd"))
-            var time by mutableStateOf(format(event.date, "HH:mm"))
-            // todo translate
-            val result = dialog("Reschedule occurrence", confirmButton = "Update") {
-                ReminderDateTime(
-                    date,
-                    time,
-                    { date = it },
-                    { time = it },
-                )
-            }
-
-            if (result != true) return@launch
-
-            api.updateReminderOccurrence(
-                event.reminder.id!!,
-                event.updateDate,
-                ReminderOccurrence(
-                    date = parseDateTime(date, time, event.date).toKotlinInstant()
+                id = event.reminder.id!!,
+                occurrence = event.updateDate,
+                update = ReminderOccurrence(
+                    note = note
                 )
             ) {
                 onUpdate()
@@ -115,23 +86,18 @@ fun EventRow(
         }
     }
 
-    menuTarget?.let { target ->
-        Menu({ menuTarget = null }, target) {
-            if (showOpen) {
-                // todo: translate
-                item("Open") {
-                    onOpenReminder()
-                }
-            }
-            // todo: translate
-            item("Reschedule") {
-                reschedule()
-            }
-            // todo: translate
-            item("Delete") {
-                delete()
-            }
-        }
+    menuTarget?.let {
+        EventMenu(
+            onDismissRequest = {
+                menuTarget = null
+            },
+            scope = scope,
+            showOpen = showOpen,
+            event = event,
+            menuTarget = it,
+            onUpdate = onUpdate,
+            onOpen = onOpenReminder
+        )
     }
 
     val eventType = event.event
@@ -139,7 +105,6 @@ fun EventRow(
     val done = event.occurrence?.done ?: false
     // todo: translate
     val text = event.reminder.title?.notBlank ?: "New reminder"
-    val note = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: ""
 
     Div({
         classes(SchedulePageStyles.row)
@@ -193,25 +158,9 @@ fun EventRow(
             }) {
                 Text(
                     bulletedString(
-                        when (view) {
-                            ScheduleView.Daily -> {
-                                format(date, "h:mm a")
-                            }
-
-                            ScheduleView.Weekly -> {
-                                format(date, "MMMM do, EEEE, h:mm a")
-                            }
-
-                            ScheduleView.Monthly -> {
-                                format(date, "do, EEEE, h:mm a")
-                            }
-
-                            ScheduleView.Yearly -> {
-                                format(date, "MMMM do, EEEE, h:mm a")
-                            }
-                        },
+                        date.formatSecondary(view),
                         event.reminder.categories?.firstOrNull(),
-                        note.notBlank
+                        event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank
                     )
                 )
             }

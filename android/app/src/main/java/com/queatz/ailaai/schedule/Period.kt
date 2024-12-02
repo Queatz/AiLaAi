@@ -101,14 +101,14 @@ fun LazyListScope.Period(
             ) {
                 PeriodDateTime(view, event.date, event.occurrence?.done == true)
                 PeriodEvent(
-                    view,
-                    event,
+                    view = view,
+                    event = event,
                     showOpen = true,
                     showFullTime = false,
-                    onExpand,
+                    onExpand = onExpand,
                     modifier = Modifier
                         .weight(1f),
-                    onUpdated
+                    onUpdated = onUpdated
                 )
             }
         }

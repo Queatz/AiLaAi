@@ -15,6 +15,9 @@ external fun differenceInMinutes(date: Date, otherDate: Date, options: dynamic =
 external fun format(date: Date, format: String, options: dynamic = definedExternally): String
 external fun parse(string: String, format: String, date: Date): Date
 
+external fun addMilliseconds(date: Date, amount: Double): Date
+external fun addSeconds(date: Date, amount: Double): Date
+external fun addMinues(date: Date, amount: Double): Date
 external fun addHours(date: Date, amount: Double): Date
 external fun addDays(date: Date, amount: Double): Date
 external fun addWeeks(date: Date, amount: Double): Date

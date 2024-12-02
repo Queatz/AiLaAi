@@ -52,7 +52,6 @@ fun CardContent(card: Card) {
             Div {
                 NameAndLocation(card.name, card.hint)
                 val viewProfileString = appString { viewProfile }
-                val openInNewTabString = appString { openInNewTab }
                 Span({
                     classes("material-symbols-outlined")
                     title(viewProfileString)
@@ -94,13 +93,13 @@ fun CardContent(card: Card) {
             }
         }
         CardReply(
-            card,
-            cardOptions,
-            cardConversation,
-            stack,
-            replyMessage,
-            replyMessageContact,
-            isReplying,
+            card = card,
+            cardOptions = cardOptions,
+            cardConversation = cardConversation,
+            stack = stack,
+            replyMessage = replyMessage,
+            replyMessageContact = replyMessageContact,
+            isReplying = isReplying,
             onCardConversation = {
                 cardConversation = it
             },

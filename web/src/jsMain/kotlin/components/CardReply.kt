@@ -1,23 +1,43 @@
 package components
 
-import Strings.orEnterTransferCode
-import Strings.signIn
-import androidx.compose.runtime.*
+import Styles
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.wildReply
 import app.dialog.dialog
 import appString
 import application
-import com.queatz.db.*
-import kotlinx.browser.window
+import com.queatz.db.Card
+import com.queatz.db.CardOptions
+import com.queatz.db.ConversationAction
+import com.queatz.db.ConversationItem
+import com.queatz.db.WildReplyBody
 import kotlinx.coroutines.launch
 import notEmpty
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.css.*
-import org.jetbrains.compose.web.dom.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Input
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.TextArea
 import r
 
 @Composable
@@ -192,7 +212,10 @@ fun CardReply(
                 }
             }
         }
-        if (cardConversation?.items.isNullOrEmpty() && ((me != null && cardOptions?.enableReplies != false) || cardOptions?.enableAnonymousReplies != false)) {
+        if (
+            cardConversation?.items.isNullOrEmpty() &&
+            ((me != null && cardOptions?.enableReplies != false) || cardOptions?.enableAnonymousReplies != false)
+        ) {
             Button({
                 classes(Styles.button)
                 onClick {

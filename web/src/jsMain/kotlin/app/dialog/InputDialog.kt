@@ -67,8 +67,8 @@ suspend fun inputDialog(
             }
         } else {
             TextBox(
-                value,
-                {
+                value = value,
+                onValue = {
                     value = it
                     text = it
                 },

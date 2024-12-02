@@ -105,7 +105,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
@@ -124,7 +126,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                     }
 
@@ -146,7 +150,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
@@ -165,7 +171,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
@@ -184,7 +192,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         Check(
                             checked = (formField.data as FormFieldData.Input).required,
@@ -220,7 +230,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
@@ -239,7 +251,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
@@ -258,7 +272,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         Check(
                             checked = (formField.data as FormFieldData.Checkbox).initialValue,
@@ -308,7 +324,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         OutlinedTextField(
                             shape = MaterialTheme.shapes.large,
@@ -327,7 +345,9 @@ fun EditFormField(
                                         )
                                     )
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
                         )
                         Check(
                             checked = (formField.data as FormFieldData.Photos).required,

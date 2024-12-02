@@ -1,12 +1,9 @@
 package app.widget.form
 
-import Styles
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.web.attributes.disabled
-import org.jetbrains.compose.web.attributes.placeholder
+import app.components.TextBox
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.TextArea
 
 @Composable
 fun FormFieldInput(
@@ -15,20 +12,14 @@ fun FormFieldInput(
     placeholder: String,
     isEnabled: Boolean
 ) {
-    TextArea(value) {
-        classes(Styles.textarea)
-        style {
+
+    TextBox(
+        value = value,
+        onValue = onValue,
+        placeholder = placeholder,
+        disabled = !isEnabled,
+        styles = {
             width(100.percent)
         }
-
-        placeholder(placeholder)
-
-        onInput {
-            onValue(it.value)
-        }
-
-        if (!isEnabled) {
-            disabled()
-        }
-    }
+    )
 }

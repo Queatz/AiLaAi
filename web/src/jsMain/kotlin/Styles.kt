@@ -5,6 +5,7 @@ import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.AlignContent
 import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.CSSBuilder
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -19,6 +20,7 @@ import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.StyleSheet
 import org.jetbrains.compose.web.css.alignContent
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.alignSelf
 import org.jetbrains.compose.web.css.backgroundAttachment
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
@@ -96,6 +98,49 @@ object Styles : StyleSheet() {
         object dark {
             val background = Color("#18191a")
         }
+    }
+
+    val calendarLine by style {
+        position(Absolute)
+        left(0.r)
+        right(0.r)
+        height(1.px)
+
+        dark(self) {
+            backgroundColor(rgba(255, 255, 255, .125))
+        }
+    }
+
+    val calendarColumnTitleHidden by style { }
+
+    @OptIn(ExperimentalComposeWebApi::class)
+    val calendarColumnTitle by style {
+        fontSize(12.px)
+        opacity(.8f)
+        textAlign("center")
+        padding(.25f.r, .5f.r)
+        alignSelf(AlignSelf.Center)
+        elevated()
+
+        self + className(calendarColumnTitleHidden) style {
+            opacity(0)
+        }
+
+        transitions {
+            "opacity" {
+                duration = 200.ms
+            }
+        }
+    }
+
+    val calendarEvent by style {
+        boxSizing("border-box")
+        padding(.125.r)
+        fontSize(12.px)
+        overflow("hidden")
+        elevated()
+        borderRadius(.25.r)
+        cursor("pointer")
     }
 
     val formContent by style {

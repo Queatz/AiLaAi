@@ -14,6 +14,7 @@ import app.ailaai.api.newReminder
 import app.ailaai.api.reminders
 import app.components.Spacer
 import app.page.ScheduleView
+import app.page.ScheduleViewType
 import app.reminder.EditReminderSchedule
 import app.reminder.EditSchedule
 import app.reminder.ReminderItem
@@ -65,6 +66,8 @@ fun ScheduleNavPage(
     onReminder: (Reminder?) -> Unit,
     onUpdate: (Reminder) -> Unit,
     view: ScheduleView,
+    viewType: ScheduleViewType,
+    onViewTypeClick: (ScheduleViewType) -> Unit,
     onViewClick: (ScheduleView) -> Unit,
     onProfileClick: () -> Unit
 ) {
@@ -178,10 +181,19 @@ fun ScheduleNavPage(
     }
 
     NavTopBar(me, appString { this.reminders }, onProfileClick) {
-        IconButton("search", appString { search }, styles = {
+        IconButton("search", appString { search }) {
+            showSearch = !showSearch
+        }
+        // todo: translate
+        IconButton(if (viewType == ScheduleViewType.Schedule) "view_agenda" else "view_week", "Switch view", styles = {
             marginRight(.5.r)
         }) {
-            showSearch = !showSearch
+            onViewTypeClick(
+                when (viewType) {
+                    ScheduleViewType.Schedule -> ScheduleViewType.Calendar
+                    else -> ScheduleViewType.Schedule
+                }
+            )
         }
     }
 

@@ -66,7 +66,7 @@ fun PeriodEvent(
 
     if (showDelete) {
         AlertDialog(
-            {
+            onDismissRequest = {
                 showDelete = false
             },
             title = {

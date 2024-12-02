@@ -1,6 +1,7 @@
 package app.menu
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -10,6 +11,8 @@ import components.Icon
 import focusable
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -20,6 +23,10 @@ import org.w3c.dom.events.EventListener
 import org.w3c.dom.events.MouseEvent
 import parents
 import r
+
+private val onMenuOpened by lazy {
+    MutableSharedFlow<Unit>()
+}
 
 class MenuScope {
     @Composable
@@ -66,6 +73,15 @@ fun Menu(
     fun keepInFrame(element: HTMLElement): Int {
         val distance = element.getBoundingClientRect().bottom - window.innerHeight
         return distance.toInt().coerceAtLeast(0)
+    }
+
+    // Close when other menus are opened
+    LaunchedEffect(Unit) {
+        onMenuOpened.emit(Unit)
+        delay(100)
+        onMenuOpened.collect {
+            onDismissRequest()
+        }
     }
 
     Div({

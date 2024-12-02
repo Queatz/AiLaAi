@@ -13,6 +13,7 @@ import com.queatz.ailaai.ui.widget.form.EditFormDialog
 import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.FormData
+import com.queatz.widgets.widgets.FormOptions
 import com.queatz.widgets.widgets.PageTreeData
 import com.queatz.widgets.widgets.WebData
 import createWidget
@@ -71,15 +72,16 @@ fun AddWidgetDialog(
         Widgets.Form -> {
             EditFormDialog(
                 onDismissRequest = onDismissRequest,
-                initialFormData = FormData(page = (source as? StorySource.Card)?.id)
+                initialFormData = FormData(
+                    page = (source as? StorySource.Card)?.id,
+                    options = FormOptions(enableAnonymousReplies = true)
+                )
             ) { data ->
-                scope.launch {
-                    api.createWidget(
-                        widget = Widgets.Form,
-                        data = json.encodeToString(data)
-                    ) {
-                        onWidget(it)
-                    }
+                api.createWidget(
+                    widget = Widgets.Form,
+                    data = json.encodeToString(data)
+                ) {
+                    onWidget(it)
                 }
             }
         }

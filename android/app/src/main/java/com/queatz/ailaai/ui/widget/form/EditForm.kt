@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.card
+import app.ailaai.api.script
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.notBlank
@@ -24,11 +25,13 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.ChooseGroups
+import com.queatz.ailaai.ui.components.ChooseScript
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Group
+import com.queatz.db.Script
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormOptions
 import kotlinx.coroutines.launch
@@ -148,6 +151,37 @@ fun EditForm(
         onFormData(
             formData.copy(
                 groups = groups.map { it.id!! }
+            )
+        )
+    }
+
+    DialogDivider()
+
+    Text(
+        // todo: translate
+        text = "Run a script:",
+        modifier = Modifier.padding(bottom = 1.pad),
+        style = MaterialTheme.typography.labelMedium
+    )
+
+    var script by rememberStateOf<Script?>(null)
+
+    LaunchedEffect(formData.script) {
+        if (formData.script == null) {
+            script = null
+        } else {
+            api.script(formData.script!!) {
+                script = it
+            }
+        }
+    }
+
+    ChooseScript(
+        script = script,
+    ) { script ->
+        onFormData(
+            formData.copy(
+                script = script?.id
             )
         )
     }

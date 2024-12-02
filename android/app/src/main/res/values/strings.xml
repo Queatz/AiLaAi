@@ -782,6 +782,8 @@
     <string name="label">Label</string>
     <string name="choose_page">Choose page</string>
     <string name="options_">Options:</string>
+    <string name="select_script">Select script</string>
+    <string name="run">Run</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

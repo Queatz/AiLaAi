@@ -26,6 +26,7 @@ import app.nav.StoriesNavPage
 import app.nav.StoryNav
 import app.page.SchedulePage
 import app.page.ScheduleView
+import app.page.ScheduleViewType
 import app.page.StoriesPage
 import app.platform.PlatformNav
 import app.platform.PlatformNavPage
@@ -123,6 +124,10 @@ fun AppPage() {
 
     var scheduleView by remember {
         mutableStateOf(ScheduleView.Daily)
+    }
+
+    var scheduleViewType by remember {
+        mutableStateOf(ScheduleViewType.Schedule)
     }
 
     val goToToday = remember {
@@ -402,6 +407,10 @@ fun AppPage() {
                                 scheduleView = it
                             }
                         },
+                        viewType = scheduleViewType,
+                        onViewTypeClick = {
+                            scheduleViewType = it
+                        },
                         onProfileClick = {
                             nav = NavPage.Profile
                         }
@@ -453,6 +462,7 @@ fun AppPage() {
 
                 NavPage.Schedule -> SchedulePage(
                     view = scheduleView,
+                    viewType = scheduleViewType,
                     reminder = reminder,
                     goToToday = goToToday,
                     onReminder = { reminder = it },

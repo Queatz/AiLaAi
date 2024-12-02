@@ -172,7 +172,9 @@ data class CreateWidgetBody(val widget: Widgets, val data: String? = null)
 data class RunWidgetBody(val data: String? = null)
 
 @Serializable
-data class RunWidgetResponse(val data: String? = null)
+data class RunWidgetResponse(
+    val content: List<StoryContent>? = null
+)
 
 @Serializable
 data class MintItemBody(
