@@ -14,6 +14,7 @@ import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.PhotosAttachment
+import com.queatz.db.ProfilesAttachment
 import com.queatz.db.StickerAttachment
 import com.queatz.db.StoryAttachment
 import com.queatz.db.TradeAttachment
@@ -97,6 +98,9 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     }
     is TradeAttachment -> {
         context.resources.getString(R.string.sent_a_trade)
+    }
+    is ProfilesAttachment -> {
+        context.resources.getString(R.string.sent_a_profile)
     }
     else -> null
 }

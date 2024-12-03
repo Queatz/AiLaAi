@@ -301,6 +301,7 @@
     <string name="sent_a_group">Đã gửi nhóm</string>
     <string name="sent_a_link">Đã gửi liên kết</string>
     <string name="sent_a_trade">Đã gửi việc đổi đồ</string>
+    <string name="sent_a_profile">Đã gửi trang cá nhân</string>
     <string name="save_changes">Lưu những thay đổi?</string>
     <string name="all_changes_will_be_lost">Những thay đổi sẽ bị mất</string>
     <string name="remove_all">Bỏ tất cả</string>

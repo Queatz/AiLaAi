@@ -315,6 +315,7 @@
     <string name="sent_a_group">Sent a group</string>
     <string name="sent_a_link">Sent a link</string>
     <string name="sent_a_trade">Sent a trade</string>
+    <string name="sent_a_profile">Sent a profile</string>
     <string name="save_changes">Save changes?</string>
     <string name="all_changes_will_be_lost">All changes will be lost.</string>
     <string name="remove_all">Remove all</string>

@@ -661,6 +661,10 @@ object Strings {
         "Timezone",
         "Múi giờ"
     )
+    val duration = Translation(
+        "Duration",
+        "Khoảng thời gian"
+    )
     val openInNewTab = Translation(
         "Open in new tab",
         "Mở ra trong tab mới"

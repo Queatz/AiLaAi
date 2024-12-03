@@ -158,7 +158,16 @@ fun EventRow(
             }) {
                 Text(
                     bulletedString(
-                        date.formatSecondary(view),
+                        date.formatSecondary(view).let {
+                            val duration = (event.occurrence?.duration ?: event.reminder.duration)?.let {
+                                it.formatDuration()
+                            }
+                            if (duration == null) {
+                                it
+                            } else {
+                                "$it ($duration)"
+                            }
+                        },
                         event.reminder.categories?.firstOrNull(),
                         event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank
                     )

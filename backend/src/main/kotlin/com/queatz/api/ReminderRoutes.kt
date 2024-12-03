@@ -141,6 +141,10 @@ fun Route.reminderRoutes() {
                         reminder.utcOffset = update.utcOffset
                     }
 
+                    if (update.duration != null) {
+                        reminder.duration = update.duration
+                    }
+
                     // TODO need a way for the user to delete
                     if (update.end != null) {
                         reminder.end = update.end?.startOfSecond()
@@ -181,11 +185,17 @@ fun Route.reminderRoutes() {
                 if (occurrenceUpdate.date != null) {
                     occurrence.date = occurrenceUpdate.date?.startOfSecond()
                 }
+
                 if (occurrenceUpdate.note != null) {
                     occurrence.note = occurrenceUpdate.note
                 }
+
                 if (occurrenceUpdate.done != null) {
                     occurrence.done = occurrenceUpdate.done
+                }
+
+                if (occurrenceUpdate.duration != null) {
+                    occurrence.duration = occurrenceUpdate.duration
                 }
 
                 db.update(occurrence)

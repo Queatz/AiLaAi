@@ -1,5 +1,6 @@
 package app.reminder
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,17 +16,20 @@ import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.textDecoration
+import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun CalendarEvent(
     event: ReminderEvent,
     view: ScheduleView,
+    millisecondsIn1Rem: Double,
     onUpdate: () -> Unit,
     onOpen: () -> Unit
 ) {
@@ -51,28 +55,39 @@ fun CalendarEvent(
 
     val titleString = event.reminder.title ?: "New reminder"
     val info = bulletedString(
-        event.date.formatSecondary(view),
+        titleString,
+        event.date.formatSecondary(view).let {
+            val duration = (event.occurrence?.duration ?: event.reminder.duration)?.let {
+                it.formatDuration()
+            }
+            if (duration == null) {
+                it
+            } else {
+                "$it ($duration)"
+            }
+        },
         event.reminder.categories?.firstOrNull(),
         event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank
     )
     val done = event.occurrence?.done ?: false
+    val duration = (event.occurrence?.duration ?: event.reminder.duration ?: 0)
 
     Div({
         classes(Styles.calendarEvent)
 
         style {
-            // todo: reminder duration
-            height(1.r)
-            minHeight(1.r)
-            maxHeight(1.r)
+            val h = ((duration / millisecondsIn1Rem)).coerceAtLeast(1.0).r
+            height(h)
+            minHeight(h)
+            maxHeight(h)
 
-           if (done) {
-               textDecoration("line-through")
-           }
+            if (done) {
+                textDecoration("line-through")
+            }
         }
 
         title(
-            "$titleString\n\n$info"
+            info
         )
 
         onClick {
@@ -81,14 +96,14 @@ fun CalendarEvent(
         }
     }) {
         Span({
-            if (done) {
-                style {
+            style {
+                if (done) {
                     opacity(.5)
                 }
+                whiteSpace("pre-wrap")
             }
         }) {
-            // todo: translate
-            Text(titleString)
+            Text(info)
         }
     }
 }

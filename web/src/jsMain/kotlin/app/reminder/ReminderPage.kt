@@ -1,6 +1,7 @@
 package app.reminder
 
 import LocalConfiguration
+import Strings.duration
 import androidx.compose.runtime.*
 import api
 import app.AppStyles
@@ -22,11 +23,18 @@ import lib.RawTimeZone
 import lib.rawTimeZones
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.NumberInput
+import org.jetbrains.compose.web.dom.RangeInput
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.TextInput
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
 import kotlin.js.Date
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun ReminderPage(
@@ -109,6 +117,89 @@ fun ReminderPage(
                     )
                 ) {
                     onUpdate(it)
+                }
+            }
+
+            val durationString = appString { duration }
+
+            item(durationString) {
+                scope.launch {
+                    var duration = reminder.duration ?: 0L
+
+                    val result = dialog(
+                        title = durationString,
+                        confirmButton = application.appString { confirm }
+                    ) {
+                        var hours by remember {
+                            mutableStateOf(
+                                duration.milliseconds.inWholeHours
+                            )
+                        }
+                        var minutes by remember {
+                            mutableStateOf(
+                                duration.milliseconds.inWholeMinutes - hours.hours.inWholeMinutes
+                            )
+                        }
+
+                        LaunchedEffect(hours, minutes) {
+                            duration = hours.hours.inWholeMilliseconds + minutes.minutes.inWholeMilliseconds
+
+                            if (hours == 24L) {
+                                minutes = 0L
+                            }
+                        }
+
+                        H3 {
+                            // todo: translate
+                            Text("Hours")
+                        }
+                        NumberInput(
+                            value = hours,
+                            min = 0,
+                            max = 24,
+                            attrs = {
+                                classes(Styles.dateTimeInput)
+
+                                style {
+                                    padding(1.r)
+                                }
+
+                                onInput {
+                                    runCatching {
+                                        hours = (it.value?.toLong() ?: 0L).coerceIn(0L..24L)
+                                    }
+                                }
+                            }
+                        )
+                        H3 {
+                            // todo: translate
+                            Text("Minutes")
+                        }
+                        NumberInput(
+                            value = minutes,
+                            min = 0,
+                            max = 59,
+                            attrs = {
+                                classes(Styles.dateTimeInput)
+                                style {
+                                    padding(1.r)
+                                }
+
+                                onInput {
+                                    minutes = (it.value?.toLong() ?: 0L).coerceIn(0L..59L)
+                                }
+                            }
+                        )
+                    }
+
+                    if (result != null) {
+                        api.updateReminder(
+                            id = reminder.id!!,
+                            reminder = Reminder(duration = duration),
+                        ) {
+                            onUpdate(it)
+                        }
+                    }
                 }
             }
 

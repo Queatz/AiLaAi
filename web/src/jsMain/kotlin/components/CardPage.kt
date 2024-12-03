@@ -59,10 +59,10 @@ fun CardPage(
     onError: () -> Unit = {},
     cardLoaded: (card: Card) -> Unit,
 ) {
-    var cardId by remember { mutableStateOf(cardId) }
-    var isLoading by remember { mutableStateOf(false) }
-    var card by remember { mutableStateOf<Card?>(null) }
-    var cards by remember { mutableStateOf<List<Card>>(emptyList()) }
+    var cardId by remember(cardId, url) { mutableStateOf(cardId) }
+    var isLoading by remember(cardId, url) { mutableStateOf(false) }
+    var card by remember(cardId, url) { mutableStateOf<Card?>(null) }
+    var cards by remember(cardId, url) { mutableStateOf<List<Card>>(emptyList()) }
     val layout by application.layout.collectAsState()
     val router = Router.current
 
@@ -151,9 +151,12 @@ fun CardPage(
                 classes(Styles.content)
             }) {
                 cards.forEach { card ->
-                    CardItem(card, styles = {
-                        margin(1.r)
-                    })
+                    CardItem(
+                        card = card,
+                        styles = {
+                            margin(1.r)
+                        }
+                    )
                 }
             }
         }

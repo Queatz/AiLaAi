@@ -1,8 +1,14 @@
+1.0.0
+======
+
+ - See status timeline
+ - Set reminder durations
+ - Send profiles to your groups
+
 0.9.99
 ======
 
  - Forms can now run scripts
- - Send profiles to your groups
  - See and share your status timeline
  - Reuse previous statuses
 

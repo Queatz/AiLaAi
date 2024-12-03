@@ -14,7 +14,14 @@ import kotlinx.coroutines.awaitAnimationFrame
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.StyleScope
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.rad
+import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text

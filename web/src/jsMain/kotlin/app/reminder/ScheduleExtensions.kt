@@ -8,6 +8,25 @@ import lib.isToday
 import lib.isTomorrow
 import lib.isYesterday
 import kotlin.js.Date
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+
+@Composable
+fun Long.formatDuration(): String? {
+    if (this <= 0) {
+        return null
+    }
+
+    val hours = milliseconds.inWholeHours
+    val minutes = milliseconds.inWholeMinutes - hours.hours.inWholeMinutes
+
+    return listOfNotNull(
+        // todo: translate
+        hours.takeIf { it > 0 }?.let { if (it == 1L) "$it hour" else "$it hours" },
+        // todo: translate
+        minutes.takeIf { it > 0 }?.let { if (it == 1L) "$it minute" else "$it minutes" },
+    ).joinToString()
+}
 
 @Composable
 fun Date.formatSecondary(view: ScheduleView) = when (view) {

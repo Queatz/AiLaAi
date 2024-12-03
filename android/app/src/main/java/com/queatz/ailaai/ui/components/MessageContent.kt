@@ -783,8 +783,24 @@ fun ColumnScope.MessageContent(
             }
 
             profile?.let {
-                ProfileCard(it) {
-                    nav.appNavigate(AppNav.Profile(personId))
+                Box(
+                    modifier = Modifier.padding(1.pad).widthIn(max = 240.dp).then(
+                        if (isReply) {
+                            Modifier
+                        } else {
+                            when (isMe) {
+                                true -> Modifier.padding(start = 8.pad)
+                                    .align(Alignment.End)
+
+                                false -> Modifier.padding(end = 8.pad)
+                                    .align(Alignment.Start)
+                            }
+                        }
+                    )
+                ) {
+                    ProfileCard(it) {
+                        nav.appNavigate(AppNav.Profile(personId))
+                    }
                 }
             }
         }

@@ -754,6 +754,12 @@ fun ProfileScreen(personId: String) {
                                         person?.let { person ->
                                             val someoneString = stringResource(R.string.someone)
                                             DropdownMenuItem({
+                                                Text(stringResource(R.string.send))
+                                            }, {
+                                                showMyMenu = false
+                                                showSendDialog = true
+                                            })
+                                            DropdownMenuItem({
                                                 Text(stringResource(R.string.share))
                                             }, {
                                                 showMyMenu = false
@@ -827,6 +833,12 @@ fun ProfileScreen(personId: String) {
                                     })
                                     person?.let { person ->
                                         val someoneString = stringResource(R.string.someone)
+                                        DropdownMenuItem({
+                                            Text(stringResource(R.string.send))
+                                        }, {
+                                            showMenu = false
+                                            showSendDialog = true
+                                        })
                                         DropdownMenuItem({
                                             Text(stringResource(R.string.share))
                                         }, {

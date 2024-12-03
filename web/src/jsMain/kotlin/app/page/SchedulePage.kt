@@ -1,9 +1,11 @@
 package app.page
 
+import Strings.now
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -19,6 +21,7 @@ import app.reminder.formatSecondary
 import app.reminder.formatTitle
 import app.reminder.toEvents
 import appString
+import application
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
@@ -45,6 +48,7 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
@@ -388,6 +392,33 @@ fun SchedulePage(
                             }
                         }
 
+                        // Now line
+
+                        val now = Date()
+
+                        if (isAfter(now, columnInfo.start) && isBefore(now, columnInfo.end)) {
+                            var tickTock by remember { mutableStateOf(false) }
+                            LaunchedEffect(Unit) {
+                                while (true) {
+                                    delay(1.minutes)
+                                    tickTock = !tickTock
+                                }
+                            }
+                            key(tickTock) {
+                                Div({
+                                    classes(Styles.calendarLine, Styles.calendarLineNow)
+
+                                    style {
+                                        height(3.px)
+                                        borderRadius(1.r)
+                                        top(((now.getTime() - columnInfo.start.getTime()) / millisecondsIn1Rem).r)
+                                    }
+
+                                    title(application.appString { this.now })
+                                })
+                            }
+                        }
+
                         // Events
 
                         columnInfo.events.forEach { event ->
@@ -404,6 +435,7 @@ fun SchedulePage(
                                 CalendarEvent(
                                     event = event,
                                     view = view,
+                                    millisecondsIn1Rem = millisecondsIn1Rem,
                                     onUpdate = {
                                         scope.launch {
                                             changes.emit(Unit)

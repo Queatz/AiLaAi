@@ -390,6 +390,7 @@ class Reminder(
     var note: String? = null,
     var start: Instant? = null,
     var end: Instant? = null,
+    var duration: Long? = null,
     var timezone: String? = null,
     var utcOffset: Double? = null,
     var schedule: ReminderSchedule? = null
@@ -400,6 +401,7 @@ class ReminderOccurrence(
     var reminder: String? = null,
     var occurrence: Instant? = null,
     var date: Instant? = null,
+    var duration: Long? = null,
     var note: String? = null,
     var done: Boolean? = null,
     var gone: Boolean? = null,

@@ -100,11 +100,18 @@ object Styles : StyleSheet() {
         }
     }
 
+    val calendarLineNow by style { }
+
     val calendarLine by style {
         position(Absolute)
         left(0.r)
         right(0.r)
         height(1.px)
+        backgroundColor(rgba(0, 0, 0, .125))
+
+        self + className(calendarLineNow) style {
+            backgroundColor(colors.red)
+        }
 
         dark(self) {
             backgroundColor(rgba(255, 255, 255, .125))
@@ -135,7 +142,7 @@ object Styles : StyleSheet() {
 
     val calendarEvent by style {
         boxSizing("border-box")
-        padding(.125.r)
+        padding(0.r, .125.r)
         fontSize(12.px)
         overflow("hidden")
         elevated()

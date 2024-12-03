@@ -4,9 +4,8 @@ package app.ailaai.api
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import com.queatz.db.ReminderOccurrences
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
 
 
 suspend fun Api.reminders(

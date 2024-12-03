@@ -79,12 +79,12 @@ fun EditReminderSchedule(
     }
 
     ReminderDateTime(
-        schedule.date,
-        schedule.time,
-        { schedule.date = it },
-        { schedule.time = it },
-        disabled,
-        {
+        date = schedule.date,
+        time = schedule.time,
+        onDate = { schedule.date = it },
+        onTime = { schedule.time = it },
+        disabled = disabled,
+        styles = {
             padding(.5.r, .5.r, 1.r, .5.r)
         }
     )

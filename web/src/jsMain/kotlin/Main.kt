@@ -45,7 +45,7 @@ import stories.StoryStyles
 const val baseUrl = "https://api.ailaai.app"
 
 //const val baseUrl = "http://0.0.0.0:8080"
-const val webBaseUrl = "https://ailaai.app"
+const val webBaseUrl = "https://hitown.chat"
 
 val json = Json {
     encodeDefaults = true

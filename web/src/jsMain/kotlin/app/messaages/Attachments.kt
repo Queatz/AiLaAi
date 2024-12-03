@@ -72,6 +72,10 @@ fun Message.attachmentText(): String? = when (val attachment = getAttachment()) 
         // todo: translate
         "Sent a sticker"
     }
+    is ProfilesAttachment -> {
+        // todo: translate
+        "Sent a profile"
+    }
     else -> null
 }
 
