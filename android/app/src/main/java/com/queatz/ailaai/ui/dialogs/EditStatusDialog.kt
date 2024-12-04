@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,6 +50,8 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.scrollToTop
+import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.SearchField
@@ -70,35 +70,11 @@ fun EditStatusDialog(
 ) {
     val scope = rememberCoroutineScope()
     var note by rememberStateOf(initialStatus?.note ?: "")
-    var photo by rememberStateOf<String?>(initialStatus?.photo)
+    var photo by rememberStateOf(initialStatus?.photo)
     var selectedStatus by rememberStateOf(initialStatus?.statusInfo)
-    var customStatusDialog by rememberStateOf(false)
-    var statusHistoryDialog by rememberStateOf(false)
     var customStatuses by rememberStateOf(emptyList<Status>())
     var isSaving by rememberStateOf(false)
-
-    LaunchedEffect(recentStatuses) {
-        if (selectedStatus != null) {
-            selectedStatus = (customStatuses + recentStatuses).find { it.id == selectedStatus?.id }
-        }
-    }
-
-    if (customStatusDialog) {
-        CreateStatusDialog(
-            onDismissRequest = {
-                customStatusDialog = false
-            },
-            initialColor = Color.White
-        ) {
-            customStatuses = it.inList() + customStatuses
-            customStatusDialog = false
-            selectedStatus = it
-        }
-    }
-
-    if (statusHistoryDialog) {
-
-    }
+    val me = me
 
     DialogBase(onDismissRequest) {
         DialogLayout(
@@ -106,6 +82,36 @@ fun EditStatusDialog(
             content = {
                 val state = rememberLazyListState()
                 var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                var customStatusDialog by rememberStateOf(false)
+                var showStatusHistory by rememberStateOf(false)
+
+                LaunchedEffect(recentStatuses) {
+                    if (selectedStatus != null) {
+                        selectedStatus = (customStatuses + recentStatuses).find { it.id == selectedStatus?.id }
+                    }
+                }
+
+                LaunchedEffect(note) {
+                    if (showStatusHistory) {
+                        showStatusHistory = false
+                    }
+                }
+
+                if (customStatusDialog) {
+                    CreateStatusDialog(
+                        onDismissRequest = {
+                            customStatusDialog = false
+                        },
+                        initialColor = Color.White
+                    ) {
+                        customStatuses = it.inList() + customStatuses
+                        customStatusDialog = false
+                        selectedStatus = it
+                        scope.launch {
+                            state.scrollToTop()
+                        }
+                    }
+                }
 
                 SetPhotoButton(
                     photoText = listOfNotNull(
@@ -134,42 +140,64 @@ fun EditStatusDialog(
                     endIcon = Icons.Outlined.History,
                     endIconTitle = stringResource(R.string.history),
                     onEndAction = {
-                        statusHistoryDialog = true
+                        showStatusHistory = !showStatusHistory
                     }
                 )
-                LazyColumn(
-                    state = state,
-                    modifier = Modifier
-                        .padding(vertical = 1.pad)
-                        .fillMaxWidth()
-                        .heightIn(max = 140.dp)
-                        .onPlaced { viewport = it.boundsInParent().size }
-                        .fadingEdge(viewport, state, 6f)
-                ) {
-                    items(customStatuses + recentStatuses) { status ->
-                        val selected = selectedStatus == status
-                        StatusButton(
-                            onClick = {
-                                if (selected) {
-                                    selectedStatus = null
-                                } else {
-                                    selectedStatus = status
-                                }
-                            },
-                            selected = selected,
-                            status = status
-                        )
-                    }
 
-                    item {
-                        StatusButton(
-                            onClick = {
-                                customStatusDialog = true
-                            },
-                            status = Status(
-                                name = stringResource(R.string.custom)
+                if (showStatusHistory) {
+                    Statuses(
+                        personId = me!!.id!!,
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .padding(vertical = 1.pad)
+                            .fillMaxWidth()
+                    ) { status ->
+                        showStatusHistory = false
+                        note = status.note.orEmpty()
+                        photo = status.photo
+                        selectedStatus = status.statusInfo
+                        scope.launch {
+                            state.scrollToTop()
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        state = state,
+                        modifier = Modifier
+                            .padding(vertical = 1.pad)
+                            .fillMaxWidth()
+                            .heightIn(max = 140.dp)
+                            .onPlaced { viewport = it.boundsInParent().size }
+                            .fadingEdge(viewport, state, 6f)
+                    ) {
+                        items((selectedStatus.inList() + customStatuses + recentStatuses).distinct()) { status ->
+                            val selected = selectedStatus == status
+                            StatusButton(
+                                onClick = {
+                                    if (selected) {
+                                        selectedStatus = null
+                                    } else {
+                                        selectedStatus = status
+                                    }
+                                    scope.launch {
+                                        state.scrollToTop()
+                                    }
+                                },
+                                selected = selected,
+                                status = status
                             )
-                        )
+                        }
+
+                        item {
+                            StatusButton(
+                                onClick = {
+                                    customStatusDialog = true
+                                },
+                                status = Status(
+                                    name = stringResource(R.string.custom)
+                                )
+                            )
+                        }
                     }
                 }
             },

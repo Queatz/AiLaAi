@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -135,12 +136,26 @@ fun SetPhotoButton(
                             showPhotoDialog = true
                         }
                 )
-                OutlinedButton(
-                    {
-                        choosePhotoDialog = true
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(1.pad),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(R.string.change_photo))
+                    OutlinedButton(
+                        {
+                            choosePhotoDialog = true
+                        }
+                    ) {
+                        Text(stringResource(R.string.change_photo))
+                    }
+                    onRemove?.let { onRemove ->
+                        OutlinedButton(
+                            {
+                                onRemove()
+                            }
+                        ) {
+                            Text(stringResource(R.string.remove))
+                        }
+                    }
                 }
             }
         } else {
