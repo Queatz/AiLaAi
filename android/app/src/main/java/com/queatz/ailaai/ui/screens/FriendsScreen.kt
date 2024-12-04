@@ -316,11 +316,7 @@ fun FriendsScreen() {
     }
 
     fun onFriendClick(person: Person, sendMessage: Boolean = false) {
-        val status = statuses[person.id!!]
-
-        if (status != null && !sendMessage) {
-            showFriendStatusDialog = person to status
-        } else {
+        if (sendMessage) {
             me?.let { me ->
                 scope.launch {
                     api.groupsWith(listOf(me.id!!, person.id!!)) {
@@ -329,6 +325,8 @@ fun FriendsScreen() {
                     }
                 }
             }
+        } else {
+            showFriendStatusDialog = person to statuses[person.id!!]
         }
     }
 

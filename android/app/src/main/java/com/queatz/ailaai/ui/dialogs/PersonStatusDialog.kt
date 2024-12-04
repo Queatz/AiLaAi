@@ -1,56 +1,55 @@
 package com.queatz.ailaai.ui.dialogs
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.core.graphics.toColorInt
-import coil.compose.AsyncImage
+import app.ailaai.api.statusesOfPerson
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.contactPhoto
+import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.inList
-import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.GroupPhoto
-import com.queatz.ailaai.ui.components.LinkifyText
+import com.queatz.ailaai.ui.components.LoadMore
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import com.queatz.db.PersonStatus
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun PersonStatusDialog(
@@ -60,109 +59,107 @@ fun PersonStatusDialog(
     onMessageClick: () -> Unit,
     onProfileClick: () -> Unit,
 ) {
-    var showPhotoDialog by rememberStateOf(false)
+    val scope = rememberCoroutineScope()
+    var showPhotoDialog by rememberStateOf<String?>(null)
+    var statuses by rememberStateOf(personStatus.inList())
+    var hasMore by rememberStateOf(true)
+    val loadMore = remember {
+        MutableSharedFlow<Unit>()
+    }
 
-    if (showPhotoDialog) {
+    suspend fun loadNext() {
+        api.statusesOfPerson(person.id!!, offset = statuses.size) {
+            if (it.isEmpty()) {
+                hasMore = false
+            } else {
+                statuses += it
+            }
+        }
+    }
+
+    LaunchedEffect(person) {
+        loadNext()
+        loadMore.collect {
+            loadNext()
+        }
+    }
+
+    if (showPhotoDialog != null) {
+        val media = Media.Photo(showPhotoDialog!!)
         PhotoDialog(
             onDismissRequest = {
-                showPhotoDialog = false
+                showPhotoDialog = null
             },
-            initialMedia = Media.Photo(personStatus!!.photo!!),
-            medias = listOf(Media.Photo(personStatus!!.photo!!))
+            initialMedia = media,
+            medias = media.inList()
         )
     }
 
     DialogBase(onDismissRequest) {
         DialogLayout(
+            scrollable = false,
             content = {
+                val state = rememberLazyListState()
+                var viewport by remember { mutableStateOf(Size(0f, 0f)) }
+                val alpha by animateFloatAsState(if (state.firstVisibleItemIndex == 0) .5f else 1f)
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
                 ) {
-                    GroupPhoto(person.contactPhoto().inList(), modifier = Modifier.clickable {
-                        onProfileClick()
-                    })
+                    GroupPhoto(
+                        photos = person.contactPhoto().inList(),
+                        modifier = Modifier.clickable {
+                            onProfileClick()
+                        }
+                    )
                     Text(
                         text = person.name ?: stringResource(R.string.someone),
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center
                     )
-                    personStatus?.let { status ->
-                        status.statusInfo?.let { info ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(.5f.pad, Alignment.CenterHorizontally),
-                                verticalAlignment = Alignment.CenterVertically
+                    LazyColumn(
+                        state = state,
+                        modifier = Modifier
+                            .onPlaced { viewport = it.boundsInParent().size }
+                            .fadingEdge(viewport, state, 6f)
+                            .weight(1f, fill = false)
+                    ) {
+                        itemsIndexed(statuses) { index, status ->
+                            PersonStatusItem(
+                                status = status,
+                                modifier = if (index == 0) {
+                                    Modifier
+                                } else {
+                                    Modifier.alpha(alpha)
+                                }
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(.25f.pad)
-                                        .size(12.dp)
-                                        .shadow(3.dp, CircleShape)
-                                        .clip(CircleShape)
-                                        .background(info.color?.toColorInt()?.let { Color(it) }
-                                            ?: MaterialTheme.colorScheme.background)
-                                        .background(
-                                            brush = Brush.radialGradient(
-                                                colors = listOf(
-                                                    Color.White.copy(alpha = .5f),
-                                                    Color.White.copy(alpha = 0f)
-                                                ),
-                                                center = Offset(
-                                                    4.5f.dp.px.toFloat(),
-                                                    4.5f.dp.px.toFloat()
-                                                ),
-                                                radius = 9.dp.px.toFloat()
-                                            ),
-                                            shape = CircleShape
-                                        )
-                                        .zIndex(1f)
-                                )
-                                Text(
-                                    text = info.name.orEmpty(),
-                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onBackground)
+                                showPhotoDialog = status.photo!!
+                            }
+                            if (index != statuses.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 2.pad).alpha(alpha)
                                 )
                             }
                         }
-                        status.photo?.let { photo ->
-                            AsyncImage(
-                                model = photo.let(api::url),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .padding(top = 2.pad)
-                                    .requiredSize(64.dp)
-                                    .clip(MaterialTheme.shapes.large)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .clickable {
-                                        showPhotoDialog = true
-                                    }
-                            )
-                        }
-                        SelectionContainer {
-                            status.note?.let { note ->
-                                LinkifyText(
-                                    text = note,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .padding(top = 2.pad)
-                                )
+
+                        item {
+                            LoadMore(hasMore = hasMore, contentPadding = 1.pad) {
+                                scope.launch {
+                                    loadMore.emit(Unit)
+                                }
                             }
                         }
-                        Text(
-                            text = status.createdAt!!.timeAgo(),
-                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(vertical = .5f.pad)
-                        )
                     }
                 }
             },
             actions = {
                 IconButton(onClick = onMessageClick) {
                     Icon(
-                        Icons.AutoMirrored.Outlined.Message,
-                        stringResource(R.string.message),
+                        imageVector = Icons.AutoMirrored.Outlined.Message,
+                        contentDescription = stringResource(R.string.message),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

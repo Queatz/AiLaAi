@@ -21,6 +21,19 @@ suspend fun Api.groupsOfPerson(
     onSuccess: SuccessBlock<List<GroupExtended>>,
 ) = get("people/$personId/groups", onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.statusesOfPerson(
+    personId: String,
+    offset: Int = 0,
+    limit: Int = 20,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<PersonStatus>>,
+) = get(
+    url = "people/$personId/statuses",
+    parameters = mapOf("offset" to offset.toString(), "limit" to limit.toString()),
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.storiesOfPerson(
     personId: String,
     onError: ErrorBlock = null,

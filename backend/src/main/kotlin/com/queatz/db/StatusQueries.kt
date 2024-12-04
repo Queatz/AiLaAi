@@ -46,7 +46,28 @@ fun Db.recentStatuses(person: String) = list(
     )
 )
 
-fun Db.friends(personVar: String = "@person", includeSelf: Boolean = false) = """
+fun Db.statusesOfPerson(person: String, offset: Int = 0, limit: Int = 20) = list(
+    PersonStatus::class,
+    """
+        for status in @@collection
+            filter status.${f(PersonStatus::person)} == @person
+            sort status.${f(PersonStatus::createdAt)} desc
+            limit @offset, @limit
+            return merge(
+                status,
+                {
+                    ${f(PersonStatus::statusInfo)}: (status.${f(PersonStatus::status)} != null ? document('${Status::class.collection()}', status.${f(PersonStatus::status)}) : null)
+                }
+            )
+    """.trimIndent(),
+    mapOf(
+        "person" to person,
+        "offset" to offset,
+        "limit" to limit
+    )
+)
+
+private fun Db.friends(personVar: String = "@person", includeSelf: Boolean = false) = """
     (
         for group, edge in outbound $personVar graph `${Member::class.graph()}`
             filter edge.${f(Member::gone)} != true

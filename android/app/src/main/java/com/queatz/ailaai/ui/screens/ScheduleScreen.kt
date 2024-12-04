@@ -338,7 +338,7 @@ fun ScheduleScreen() {
                             var isInitial by remember {
                                 mutableStateOf(true)
                             }
-                            LoadMore(true, permanent = true, contentPadding = 1.pad) {
+                            LoadMore(hasMore = true, permanent = true, contentPadding = 1.pad) {
                                 if (isInitial) {
                                     isInitial = false
                                     toTop()

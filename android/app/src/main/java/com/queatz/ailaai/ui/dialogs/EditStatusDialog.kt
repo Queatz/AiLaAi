@@ -15,7 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -69,6 +73,7 @@ fun EditStatusDialog(
     var photo by rememberStateOf<String?>(initialStatus?.photo)
     var selectedStatus by rememberStateOf(initialStatus?.statusInfo)
     var customStatusDialog by rememberStateOf(false)
+    var statusHistoryDialog by rememberStateOf(false)
     var customStatuses by rememberStateOf(emptyList<Status>())
     var isSaving by rememberStateOf(false)
 
@@ -89,6 +94,10 @@ fun EditStatusDialog(
             customStatusDialog = false
             selectedStatus = it
         }
+    }
+
+    if (statusHistoryDialog) {
+
     }
 
     DialogBase(onDismissRequest) {
@@ -121,7 +130,12 @@ fun EditStatusDialog(
                     placeholder = stringResource(R.string.note),
                     useMaxHeight = true,
                     useMaxWidth = false,
-                    autoFocus = true
+                    autoFocus = true,
+                    endIcon = Icons.Outlined.History,
+                    endIconTitle = stringResource(R.string.history),
+                    onEndAction = {
+                        statusHistoryDialog = true
+                    }
                 )
                 LazyColumn(
                     state = state,

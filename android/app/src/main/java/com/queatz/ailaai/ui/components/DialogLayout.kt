@@ -27,7 +27,7 @@ fun DialogLayout(
         Row(
             horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+            modifier = Modifier.fillMaxWidth().wrapContentHeight().weight(1f, fill = false)
         ) {
             actions()
         }

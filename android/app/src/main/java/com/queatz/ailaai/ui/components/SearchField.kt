@@ -44,7 +44,10 @@ fun SearchField(
     useMaxHeight: Boolean = false,
     autoFocus: Boolean = false,
     icon: ImageVector? = null,
+    endIcon: ImageVector? = null,
+    endIconTitle: String? = null,
     imeAction: ImeAction = if (singleLine) ImeAction.Search else ImeAction.Default,
+    onEndAction: () -> Unit = {},
     onClear: () -> Unit = { onValueChange("") },
     onAction: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -86,12 +89,13 @@ fun SearchField(
             ),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                keyboardController.hide()
-                onAction()
-            }, onDone = {
-                keyboardController.hide()
-                onAction()
-            }),
+                    keyboardController.hide()
+                    onAction()
+                }, onDone = {
+                    keyboardController.hide()
+                    onAction()
+                }
+            ),
             leadingIcon = if (icon != null) {
                 {
                     Icon(icon, contentDescription = null)
@@ -102,12 +106,24 @@ fun SearchField(
             trailingIcon = if (showClear && value.isNotEmpty()) {
                 {
                     Icon(
-                        Icons.Outlined.Close,
-                        stringResource(R.string.clear),
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = stringResource(R.string.clear),
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.medium)
                             .clickable {
                                 onClear()
+                            }
+                    )
+                }
+            } else if (endIcon != null) {
+                {
+                    Icon(
+                        imageVector = endIcon,
+                        contentDescription = endIconTitle,
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .clickable {
+                                onEndAction()
                             }
                     )
                 }

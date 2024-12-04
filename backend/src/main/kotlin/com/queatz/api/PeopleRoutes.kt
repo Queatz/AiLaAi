@@ -84,6 +84,23 @@ fun Route.peopleRoutes() {
             }
         }
 
+        get("/people/{id}/statuses") {
+            respond {
+                val person = db.document(Person::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                // todo support search
+                val offset = call.parameters["offset"]?.toIntOrNull() ?: 0
+                val limit = call.parameters["limit"]?.toIntOrNull() ?: 20
+
+                db.statusesOfPerson(
+                    person = person.id!!,
+                    offset = offset,
+                    limit = limit
+                )
+            }
+        }
+
         get("/people/{id}/stories") {
             respond {
                 val person = db.document(Person::class, parameter("id"))
