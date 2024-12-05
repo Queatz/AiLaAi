@@ -1,6 +1,5 @@
 package app.page
 
-import Strings.now
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,9 +21,11 @@ import app.reminder.formatTitle
 import app.reminder.toEvents
 import appString
 import application
+import bulletedString
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
+import format
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toKotlinInstant
 import lib.addDays
 import lib.addMilliseconds
+import lib.addMinutes
 import lib.addMonths
 import lib.addWeeks
 import lib.addYears
@@ -40,6 +42,7 @@ import lib.isAfter
 import lib.isBefore
 import lib.isEqual
 import lib.startOfDay
+import lib.startOfMinute
 import lib.startOfMonth
 import lib.startOfWeek
 import lib.startOfYear
@@ -72,6 +75,7 @@ import r
 import kotlin.js.Date
 import kotlin.math.ceil
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -400,7 +404,11 @@ fun SchedulePage(
                             var tickTock by remember { mutableStateOf(false) }
                             LaunchedEffect(Unit) {
                                 while (true) {
-                                    delay(1.minutes)
+                                    // Delay until start of next minute
+                                    val now = Date()
+                                    delay(
+                                        (startOfMinute(addMinutes(now, 1.0)).getTime() - now.getTime()).milliseconds + 1.seconds
+                                    )
                                     tickTock = !tickTock
                                 }
                             }
@@ -414,7 +422,12 @@ fun SchedulePage(
                                         top(((now.getTime() - columnInfo.start.getTime()) / millisecondsIn1Rem).r)
                                     }
 
-                                    title(application.appString { this.now })
+                                    title(
+                                        bulletedString(
+                                            application.appString { this.now },
+                                            now.format()
+                                        )
+                                    )
                                 })
                             }
                         }

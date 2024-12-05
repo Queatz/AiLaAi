@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.dialogs
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -23,6 +24,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import app.ailaai.api.deleteStatus
 import app.ailaai.api.statusesOfPerson
 import com.queatz.ailaai.R
@@ -43,6 +45,7 @@ fun Statuses(
     personId: String,
     modifier: Modifier = Modifier,
     initialValue: List<PersonStatus> = emptyList(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     onStatus: (PersonStatus) -> Unit
 ) {
     val me = me
@@ -87,6 +90,7 @@ fun Statuses(
 
     LazyColumn(
         state = state,
+        contentPadding = contentPadding,
         modifier = modifier
             .onPlaced { viewport = it.boundsInParent().size }
             .fadingEdge(viewport, state, 6f)

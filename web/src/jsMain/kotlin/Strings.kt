@@ -867,7 +867,7 @@ object Strings {
     )
     val groupBots = Translation(
         "Group bots",
-        "Mở bot"
+        "Bot của nhóm"
     )
     val now = Translation(
         "Now",

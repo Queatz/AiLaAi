@@ -17,7 +17,7 @@ external fun parse(string: String, format: String, date: Date): Date
 
 external fun addMilliseconds(date: Date, amount: Double): Date
 external fun addSeconds(date: Date, amount: Double): Date
-external fun addMinues(date: Date, amount: Double): Date
+external fun addMinutes(date: Date, amount: Double): Date
 external fun addHours(date: Date, amount: Double): Date
 external fun addDays(date: Date, amount: Double): Date
 external fun addWeeks(date: Date, amount: Double): Date
@@ -35,6 +35,7 @@ external fun isToday(date: Date): Boolean
 external fun isTomorrow(date: Date): Boolean
 external fun isThisYear(date: Date): Boolean
 
+external fun startOfMinute(date: Date): Date
 external fun startOfDay(date: Date): Date
 external fun startOfWeek(date: Date): Date
 external fun startOfMonth(date: Date): Date

@@ -71,6 +71,7 @@ fun CalendarEvent(
     )
     val done = event.occurrence?.done ?: false
     val duration = (event.occurrence?.duration ?: event.reminder.duration ?: 0)
+    var element by remember { mutableStateOf<HTMLElement?>(null) }
 
     Div({
         classes(Styles.calendarEvent)
@@ -86,13 +87,19 @@ fun CalendarEvent(
             }
         }
 
-        title(
-            info
-        )
+        title(info)
+
+        ref {
+            element = it
+
+            onDispose {
+                element = null
+            }
+        }
 
         onClick {
             it.stopPropagation()
-            menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
+            menuTarget = if (menuTarget == null) element?.getBoundingClientRect() else null
         }
     }) {
         Span({
