@@ -62,6 +62,13 @@ fun NotificationsLayout() {
                     }
                 }
             }
+
+            if (activeNotifications.size >= 3) {
+                // todo: translate
+                IconButton("mop", title = "Clear all", background = true) {
+                    notifications.clearAll()
+                }
+            }
         }
     }
 }

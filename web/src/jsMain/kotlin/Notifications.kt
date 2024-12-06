@@ -28,4 +28,10 @@ class Notifications {
             it - notification
         }
     }
+
+    fun clearAll() {
+        _notifications.update {
+            emptyList()
+        }
+    }
 }
