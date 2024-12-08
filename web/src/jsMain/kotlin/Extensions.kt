@@ -1,6 +1,7 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.web.attributes.SelectAttrsScope
 import kotlinx.browser.document
+import kotlinx.browser.window
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
 import lib.Qr
@@ -21,6 +22,15 @@ import kotlin.js.Promise
 import kotlin.math.min
 import kotlin.math.round
 import kotlin.random.Random
+
+fun Double.toRem(): Double {
+    val rootFontSizePx = document.documentElement?.let {
+        window.getComputedStyle(it).fontSize.removeSuffix("px").toDoubleOrNull()
+    } ?: 16.0
+    return this / rootFontSizePx
+}
+
+fun Long.quantize(step: Long) = this / step * step
 
 @Composable
 fun <T> List<T>.asNaturalList(transform: (T) -> String) = when (size) {

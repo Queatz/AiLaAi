@@ -9,9 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.web.events.SyntheticDragEvent
 import api
 import app.FullPageLayout
 import app.ailaai.api.occurrences
+import app.ailaai.api.updateReminderOccurrence
 import app.components.FlexColumns
 import app.reminder.CalendarEvent
 import app.reminder.Period
@@ -26,12 +28,16 @@ import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
 import format
+import io.ktor.http.ContentType
+import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinInstant
+import kotlinx.serialization.Serializable
 import lib.addDays
 import lib.addMilliseconds
 import lib.addMinutes
@@ -71,7 +77,11 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.HTMLElement
+import parseDateTime
+import quantize
 import r
+import toRem
 import kotlin.js.Date
 import kotlin.math.ceil
 import kotlin.time.Duration.Companion.hours
@@ -122,6 +132,12 @@ private data class ColumnInfo(
     val start: Date,
     val end: Date,
     val events: List<ReminderEvent>
+)
+
+@Serializable
+data class ReminderDragData(
+    val reminder: String,
+    val occurrence: Instant
 )
 
 @OptIn(ExperimentalComposeWebApi::class)
@@ -207,6 +223,20 @@ fun SchedulePage(
             events = it.toEvents()
         }
         isLoading = false
+    }
+
+    fun moveOccurrance(dragData: ReminderDragData, toDate: Instant) {
+        scope.launch {
+            api.updateReminderOccurrence(
+                id = dragData.reminder,
+                occurrence = dragData.occurrence,
+                update = ReminderOccurrence(
+                    date = toDate
+                )
+            ) {
+                reload()
+            }
+        }
     }
 
     LaunchedEffect(view, offset) {
@@ -337,8 +367,14 @@ fun SchedulePage(
                             ScheduleView.Weekly -> 1.hours
                             ScheduleView.Monthly -> 1.hours
                             ScheduleView.Yearly -> 1.hours
-                        }.inWholeMilliseconds.toDouble()
+                        }.inWholeMilliseconds
                     }
+
+                    var dropTo by remember {
+                        mutableStateOf<Long?>(null)
+                    }
+
+                    // Events
 
                     FlexColumns(
                         columnCount = range[view]!!,
@@ -347,10 +383,40 @@ fun SchedulePage(
                             width(100.percent)
                             height(100.percent)
                         },
-                        columnStyle = { index ->
-                            height(
-                                ((columnInfos[index].end.getTime() - columnInfos[index].start.getTime()) / millisecondsIn1Rem).r
-                            )
+                        columnAttrs = { index ->
+                            style {
+                                height(
+                                    ((columnInfos[index].end.getTime() - columnInfos[index].start.getTime()) / millisecondsIn1Rem).r
+                                )
+                            }
+
+                            // Required for onDrop to work
+                            onDragOver {
+                                it.preventDefault()
+                                dropTo = it.dragToDate(columnInfos[index], millisecondsIn1Rem)
+                            }
+
+                            onDragLeave {
+                                dropTo = null
+                            }
+
+                            onDragEnd {
+                                dropTo = null
+                            }
+
+                            onDrop {
+                                it.preventDefault()
+
+                                dropTo = null
+
+                                val toDate = it.dragToDate(columnInfos[index], millisecondsIn1Rem) ?: return@onDrop
+                                moveOccurrance(
+                                    dragData = json.decodeFromString<ReminderDragData>(
+                                        it.dataTransfer!!.getData(ContentType.Application.Json.toString())
+                                    ),
+                                    toDate = Instant.fromEpochMilliseconds(toDate)
+                                )
+                            }
                         }
                     ) { index ->
                         val columnInfo = columnInfos[index]
@@ -428,6 +494,23 @@ fun SchedulePage(
                                             now.format()
                                         )
                                     )
+                                })
+                            }
+                        }
+
+                        // Drop line
+
+                        dropTo?.let { dropTo ->
+                            if (isAfter(Date(dropTo), columnInfo.start) && isBefore(Date(dropTo), columnInfo.end)) {
+                                Div({
+                                    classes(Styles.calendarLine, Styles.calendarLineDrop)
+
+                                    style {
+                                        height(2.px)
+                                        opacity(.5f)
+                                        borderRadius(1.r)
+                                        top(((dropTo - columnInfo.start.getTime()) / millisecondsIn1Rem).r)
+                                    }
                                 })
                             }
                         }
@@ -558,4 +641,12 @@ fun SchedulePage(
             }
         }
     }
+}
+
+private fun SyntheticDragEvent.dragToDate(columnInfo: ColumnInfo, millisecondsIn1Rem: Long): Long? {
+    val dropTarget = (currentTarget ?: target) as? HTMLElement ?: return null
+    val boundingRect = dropTarget.getBoundingClientRect()
+    val y = clientY - boundingRect.top
+
+    return (columnInfo.start.getTime() + y.toRem() * millisecondsIn1Rem).toLong().quantize(15 * 60 * 1000)
 }

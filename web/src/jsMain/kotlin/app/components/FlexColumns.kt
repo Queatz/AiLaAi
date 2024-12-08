@@ -1,6 +1,7 @@
 package app.components
 
 import androidx.compose.runtime.Composable
+import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.CSSSizeValue
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -16,6 +17,7 @@ import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.dom.Div
+import org.w3c.dom.HTMLDivElement
 import r
 
 @Composable
@@ -23,7 +25,7 @@ fun FlexColumns(
     columnCount: Int = 3,
     padding: CSSSizeValue<*> = 1.r,
     style: StyleScope.() -> Unit = {},
-    columnStyle: StyleScope.(index: Int) -> Unit = {},
+    columnAttrs: AttrsScope<HTMLDivElement>.(index: Int) -> Unit = {},
     content: @Composable (index: Int) -> Unit
 ) {
     Div({
@@ -46,8 +48,9 @@ fun FlexColumns(
                     padding(padding)
                     boxSizing("border-box")
                     position(Position.Relative)
-                    columnStyle(index)
                 }
+
+                columnAttrs(index)
             }) {
                 content(index)
             }

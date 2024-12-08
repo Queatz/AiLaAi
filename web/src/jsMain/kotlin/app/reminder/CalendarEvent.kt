@@ -7,10 +7,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import app.page.ReminderDragData
 import app.page.ReminderEvent
 import app.page.ScheduleView
+import app.page.updateDate
 import bulletedString
+import io.ktor.http.ContentType
+import json
+import kotlinx.serialization.encodeToString
 import notBlank
+import org.jetbrains.compose.web.attributes.Draggable
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.minHeight
@@ -23,13 +29,12 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
-import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun CalendarEvent(
     event: ReminderEvent,
     view: ScheduleView,
-    millisecondsIn1Rem: Double,
+    millisecondsIn1Rem: Long,
     onUpdate: () -> Unit,
     onOpen: () -> Unit
 ) {
@@ -53,6 +58,7 @@ fun CalendarEvent(
         )
     }
 
+    // todo: translate
     val titleString = event.reminder.title ?: "New reminder"
     val info = bulletedString(
         titleString,
@@ -77,7 +83,7 @@ fun CalendarEvent(
         classes(Styles.calendarEvent)
 
         style {
-            val h = ((duration / millisecondsIn1Rem)).coerceAtLeast(1.0).r
+            val h = ((duration.toDouble() / millisecondsIn1Rem.toDouble())).coerceAtLeast(1.0).r
             height(h)
             minHeight(h)
             maxHeight(h)
@@ -88,6 +94,15 @@ fun CalendarEvent(
         }
 
         title(info)
+
+        draggable(Draggable.True)
+
+        onDragStart { dragEvent ->
+            dragEvent.dataTransfer?.setData(
+                format = ContentType.Application.Json.toString(),
+                data = json.encodeToString(ReminderDragData(event.reminder.id!!, event.updateDate))
+            )
+        }
 
         ref {
             element = it

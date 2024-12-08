@@ -102,6 +102,8 @@ object Styles : StyleSheet() {
 
     val calendarLineNow by style { }
 
+    val calendarLineDrop by style { }
+
     val calendarLine by style {
         position(Absolute)
         left(0.r)
@@ -111,6 +113,10 @@ object Styles : StyleSheet() {
 
         self + className(calendarLineNow) style {
             backgroundColor(colors.red)
+        }
+
+        self + className(calendarLineDrop) style {
+            backgroundColor(colors.primary)
         }
 
         dark(self) {
