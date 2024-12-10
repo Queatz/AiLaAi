@@ -63,12 +63,7 @@ fun CalendarEvent(
     val info = bulletedString(
         titleString,
         event.date.formatSecondary(view).let {
-            val duration = (event.occurrence?.duration ?: event.reminder.duration)?.let {
-                it.formatDuration()
-            }
-            if (duration == null) {
-                it
-            } else {
+            (event.occurrence?.duration ?: event.reminder.duration)?.formatDuration()?.let { duration ->
                 "$it ($duration)"
             }
         },

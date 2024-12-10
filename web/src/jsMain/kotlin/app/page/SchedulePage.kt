@@ -10,11 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.web.events.SyntheticDragEvent
+import androidx.compose.web.events.SyntheticMouseEvent
 import api
 import app.FullPageLayout
+import app.ailaai.api.newReminder
 import app.ailaai.api.occurrences
 import app.ailaai.api.updateReminderOccurrence
 import app.components.FlexColumns
+import app.dialog.inputDialog
 import app.reminder.CalendarEvent
 import app.reminder.Period
 import app.reminder.ReminderPage
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJSDate
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.serialization.Serializable
 import lib.addDays
@@ -47,11 +51,14 @@ import lib.addYears
 import lib.isAfter
 import lib.isBefore
 import lib.isEqual
+import lib.rawTimeZones
 import lib.startOfDay
 import lib.startOfMinute
 import lib.startOfMonth
 import lib.startOfWeek
 import lib.startOfYear
+import lib.systemTimezone
+import notBlank
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -64,6 +71,7 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -417,6 +425,37 @@ fun SchedulePage(
                                     toDate = Instant.fromEpochMilliseconds(toDate)
                                 )
                             }
+
+                            onClick {
+                                val toDate = it.dragToDate(columnInfos[index], millisecondsIn1Rem) ?: return@onClick
+                                val start = Instant.fromEpochMilliseconds(toDate)
+
+                                dropTo = toDate
+
+                                scope.launch {
+                                    inputDialog(
+                                        title = start.toJSDate().format(),
+                                        confirmButton = application.appString { createReminder }
+                                    )?.notBlank?.let { reminderTitle ->
+                                        val timezone = systemTimezone
+
+                                        api.newReminder(
+                                            reminder = Reminder(
+                                                title = reminderTitle,
+                                                start = start,
+                                                timezone = timezone,
+                                                utcOffset = rawTimeZones.toList()
+                                                    .firstOrNull { it.name == timezone }?.rawOffsetInMinutes?.toDouble()
+                                                    ?.div(60.0) ?: 0.0,
+                                            )
+                                        ) {
+                                            reload()
+                                        }
+                                    }
+
+                                    dropTo = null
+                                }
+                            }
                         }
                     ) { index ->
                         val columnInfo = columnInfos[index]
@@ -643,7 +682,7 @@ fun SchedulePage(
     }
 }
 
-private fun SyntheticDragEvent.dragToDate(columnInfo: ColumnInfo, millisecondsIn1Rem: Long): Long? {
+private fun SyntheticMouseEvent.dragToDate(columnInfo: ColumnInfo, millisecondsIn1Rem: Long): Long? {
     val dropTarget = (currentTarget ?: target) as? HTMLElement ?: return null
     val boundingRect = dropTarget.getBoundingClientRect()
     val y = clientY - boundingRect.top

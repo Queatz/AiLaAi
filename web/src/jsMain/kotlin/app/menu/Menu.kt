@@ -28,9 +28,15 @@ private val onMenuOpened by lazy {
     MutableSharedFlow<Unit>()
 }
 
-class MenuScope {
+class MenuScope(val onDismissRequest: () -> Unit) {
     @Composable
-    fun item(title: String, selected: Boolean = false, icon: String? = null, onIconClick: (() -> Unit)? = null, onClick: () -> Unit) {
+    fun item(
+        title: String,
+        selected: Boolean = false,
+        icon: String? = null,
+        onIconClick: (() -> Unit)? = null,
+        onClick: () -> Unit
+    ) {
         Div({
             classes(
                 if (selected) {
@@ -43,6 +49,8 @@ class MenuScope {
             focusable()
 
             onClick {
+                it.stopPropagation()
+                onDismissRequest()
                 onClick()
             }
         }) {
@@ -100,6 +108,7 @@ fun Menu(
         }
 
         onClick {
+            it.stopPropagation()
             onDismissRequest()
         }
 
@@ -137,7 +146,7 @@ fun Menu(
             }
         }
     }) {
-        MenuScope().content()
+        MenuScope(onDismissRequest = onDismissRequest).content()
     }
 }
 
@@ -153,7 +162,7 @@ fun InlineMenu(
             onDismissRequest()
         }
     }) {
-        MenuScope().content()
+        MenuScope(onDismissRequest = onDismissRequest).content()
     }
 }
 
