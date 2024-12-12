@@ -1,5 +1,7 @@
 import org.jetbrains.compose.web.css.StyleScope
 
-fun StyleScope.shadow() {
-    property("box-shadow", "2px 2px 16px rgba(0, 0, 0, 0.125)")
+
+
+fun StyleScope.shadow(elevation: Int = 1) {
+    property("box-shadow", "${elevation}px ${elevation}px ${elevation * 4}px rgba(0, 0, 0, 0.125)")
 }

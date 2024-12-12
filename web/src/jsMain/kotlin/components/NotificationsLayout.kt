@@ -72,7 +72,7 @@ fun NotificationsLayout() {
                     title = "Clear all",
                     background = true,
                     styles = {
-                        shadow()
+                        shadow(elevation = 2)
                     }
                 ) {
                     notifications.clearAll()

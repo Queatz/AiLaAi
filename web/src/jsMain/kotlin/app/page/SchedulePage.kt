@@ -89,6 +89,7 @@ import org.w3c.dom.HTMLElement
 import parseDateTime
 import quantize
 import r
+import shadow
 import toRem
 import kotlin.js.Date
 import kotlin.math.ceil
@@ -650,6 +651,7 @@ fun SchedulePage(
                                 translateY(-50.percent)
                             }
                             opacity(.8f)
+                            shadow()
                         }
                     ) {
                         move(-1.0)
@@ -672,6 +674,7 @@ fun SchedulePage(
                                 translateY(-50.percent)
                             }
                             opacity(.8f)
+                            shadow()
                         }
                     ) {
                         move(1.0)
