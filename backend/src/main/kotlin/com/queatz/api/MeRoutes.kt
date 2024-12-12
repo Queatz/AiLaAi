@@ -317,6 +317,10 @@ fun Route.meRoutes() {
                     person.language = update.language?.trim()
                 }
 
+                if (update.utcOffset != null) {
+                    person.utcOffset = update.utcOffset
+                }
+
                 db.update(person)
             }
         }

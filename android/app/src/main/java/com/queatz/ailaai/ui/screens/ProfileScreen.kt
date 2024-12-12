@@ -30,14 +30,12 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -86,10 +84,13 @@ import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.fadingEdge
+import com.queatz.ailaai.extensions.formatCurrentLocalTime
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.isGroupLike
 import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.next
+import com.queatz.ailaai.extensions.nextWrap
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.profileUrl
 import com.queatz.ailaai.extensions.rememberAutoplayIndex
@@ -142,7 +143,6 @@ import com.queatz.db.Person
 import com.queatz.db.Profile
 import com.queatz.db.ProfileStats
 import com.queatz.db.ProfilesAttachment
-import com.queatz.db.StoryAttachment
 import com.queatz.db.Trade
 import createTrade
 import kotlinx.coroutines.Job
@@ -153,6 +153,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
+
+enum class ProfileInfo {
+    Seen,
+    LocalTime,
+    Location
+}
 
 @Composable
 fun ProfileScreen(personId: String) {
@@ -191,7 +197,7 @@ fun ProfileScreen(personId: String) {
     var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
     val me = me
     val nav = nav
-    var showProfileLocation by rememberStateOf(false)
+    var showProfileInfo by rememberStateOf(ProfileInfo.Seen)
 
     val setPhotoState = remember(person == null) {
         ChoosePhotoDialogState(mutableStateOf(person?.name ?: ""))
@@ -204,14 +210,14 @@ fun ProfileScreen(personId: String) {
     val context = LocalContext.current
 
     LaunchedEffect(profile) {
+        val profileInfos = listOfNotNull(
+            ProfileInfo.Seen,
+            ProfileInfo.LocalTime.takeIf { person?.utcOffset != null },
+            ProfileInfo.Location.takeIf { !profile?.location.isNullOrBlank() },
+        )
         while (true) {
-            showProfileLocation = false
             delay(5.seconds)
-
-            if (!profile?.location.isNullOrBlank()) {
-                showProfileLocation = true
-                delay(5.seconds)
-            }
+            showProfileInfo = profileInfos.nextWrap(showProfileInfo, 1)
         }
     }
 
@@ -933,28 +939,32 @@ fun ProfileScreen(personId: String) {
                                     textAlign = TextAlign.Center
                                 )
                                 Crossfade(
-                                    showProfileLocation,
+                                    targetState = showProfileInfo,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(bottom = .5f.pad)
                                 ) {
-                                    if (it) {
-                                        Text(profile?.location.orEmpty(),
-                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
-                                            color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                    } else {
-                                        Text(person?.seen?.timeAgo()?.let { timeAgo ->
-                                            "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
-                                        } ?: "",
-                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
-                                            color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
+                                    val text = when (it) {
+                                        ProfileInfo.Seen -> {
+                                            person?.seen?.timeAgo()?.let { timeAgo ->
+                                                "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
+                                            }.orEmpty()
+                                        }
+                                        ProfileInfo.LocalTime -> {
+                                            stringResource(R.string.x_local_time, formatCurrentLocalTime(person?.utcOffset ?: 0.0))
+                                        }
+                                        ProfileInfo.Location -> {
+                                            profile?.location.orEmpty()
+                                        }
                                     }
+
+                                    Text(
+                                        text = text,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
+                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
                                 if (!isMe) {
                                     Row(

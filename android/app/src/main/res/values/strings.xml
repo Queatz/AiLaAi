@@ -788,6 +788,7 @@
     <string name="delete_this_status">Delete this status?</string>
     <string name="pin">Pin</string>
     <string name="unpin">Unpin</string>
+    <string name="x_local_time">%1$s local time</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

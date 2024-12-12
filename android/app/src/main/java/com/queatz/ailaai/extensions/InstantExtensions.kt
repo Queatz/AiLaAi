@@ -14,6 +14,8 @@ import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import java.time.Duration
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -21,6 +23,12 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toKotlinDuration
+
+fun formatCurrentLocalTime(offsetHours: Double): String = DateTimeFormatter.ofPattern("MMMM d, h:mm a").format(
+    ZonedDateTime.now(
+        UtcOffset(hours = offsetHours.toInt(), minutes = (offsetHours - offsetHours.toInt()).hours.inWholeMinutes.toInt()).toJavaZoneOffset()
+    )
+)
 
 suspend fun delayUntilNextMinute() = delay(
     now().let { now -> (now + 1.minutes).startOfMinute() - now }

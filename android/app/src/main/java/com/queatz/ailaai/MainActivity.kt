@@ -161,6 +161,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
 
@@ -398,6 +401,15 @@ class MainActivity : AppCompatActivity() {
                             joins.reload()
                             mePresence.reload()
                             trading.reload()
+                        }
+                    }
+
+                    LaunchedEffect(me) {
+                        me?.utcOffset?.let {
+                            val utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0)
+                            if (it != utcOffset) {
+                                api.updateMe(Person(utcOffset = utcOffset))
+                            }
                         }
                     }
 

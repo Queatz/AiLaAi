@@ -16,6 +16,9 @@ fun <T> T?.inList() = this?.let(::listOf) ?: emptyList<T>()
 fun <E> List<E>.next(current: E, offset: Int): E =
     get((indexOf(current) + offset).coerceIn(indices))
 
+fun <E> List<E>.nextWrap(current: E, offset: Int): E =
+    get((indexOf(current) + offset).mod(size))
+
 fun <E> List<E>.swipe(current: E, offset: Int): SwipeResult {
     val index = indexOf(current).let { if (it == -1) 0 else it } + offset
 

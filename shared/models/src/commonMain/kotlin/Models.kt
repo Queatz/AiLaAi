@@ -12,6 +12,7 @@ class Person(
     var inviter: String? = null,
     var seen: Instant? = null,
     var language: String? = null,
+    var utcOffset: Double? = null,
     var source: PersonSource? = null
 ) : Model()
 
