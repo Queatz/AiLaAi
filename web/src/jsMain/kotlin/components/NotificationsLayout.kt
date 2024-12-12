@@ -7,6 +7,7 @@ import app.AppStyles
 import notifications
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import shadow
 
 @Composable
 fun NotificationsLayout() {
@@ -64,8 +65,16 @@ fun NotificationsLayout() {
             }
 
             if (activeNotifications.size >= 3) {
-                // todo: translate
-                IconButton("mop", title = "Clear all", background = true) {
+                IconButton(
+                    // todo: translate
+                    name = "mop",
+                    // todo: translate
+                    title = "Clear all",
+                    background = true,
+                    styles = {
+                        shadow()
+                    }
+                ) {
                     notifications.clearAll()
                 }
             }
