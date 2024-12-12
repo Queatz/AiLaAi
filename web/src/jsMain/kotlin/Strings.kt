@@ -705,6 +705,14 @@ object Strings {
         "Hide",
         "Ẩn"
     )
+    val pin = Translation(
+        "Pin",
+        "Ghím"
+    )
+    val unpin = Translation(
+        "Unpin",
+        "Bỏ ghím"
+    )
     val leave = Translation(
         "Leave",
         "Rời khỏi"

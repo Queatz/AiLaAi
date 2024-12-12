@@ -170,6 +170,8 @@ fun GroupsNavPage(
             } else {
                 it.filter { it.group?.categories?.contains(selectedCategory) == true }
             }
+        }.sortedByDescending {
+            it.pin == true
         }
     }
 
@@ -474,7 +476,7 @@ fun GroupsNavPage(
                     }
                     items(shownGroups, key = { it.group!!.id!! }) { group ->
                         GroupItem(
-                            group,
+                            group = group,
                             selected = (selected as? GroupNav.Selected)?.group?.group?.id == group.group?.id,
                             showInCall = true,
                             onSelected = {

@@ -14,7 +14,9 @@ import app.AppStyles
 import app.PageTopBar
 import app.ailaai.api.createMember
 import app.ailaai.api.newCard
+import app.ailaai.api.pinGroup
 import app.ailaai.api.removeMember
+import app.ailaai.api.unpinGroup
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import app.bots.addBotDialog
@@ -559,6 +561,19 @@ fun GroupTopBar(
                                         showSettings()
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+                item(appString { if (group.pin == true) unpin else pin }) {
+                    scope.launch {
+                        if (group.pin == true) {
+                            api.unpinGroup(group.group!!.id!!) {
+                                onGroupUpdated()
+                            }
+                        } else {
+                            api.pinGroup(group.group!!.id!!) {
+                                onGroupUpdated()
                             }
                         }
                     }
