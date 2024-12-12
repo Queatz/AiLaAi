@@ -9,7 +9,7 @@ fun Db.openGroupsOfPerson(person: String, offset: Int = 0, limit: Int = 20) = qu
                 and group.${f(Group::open)} == true
             sort groupMember.${f(Member::seen)} desc
             limit @offset, @limit
-            return ${groupExtended()}
+            return ${groupExtended(person)}
     """.trimIndent(),
     mapOf(
         "person" to person.asId(Person::class),
@@ -237,7 +237,7 @@ fun Db.presenceOfPerson(person: String) = one(
     )
 )!!
 
-fun Db.groupExtended(groupVar: String = "group") = """{
+fun Db.groupExtended(personKey: String? = null, groupVar: String = "group") = """{
     $groupVar,
     ${f(GroupExtended::members)}: (
         for person, member in inbound $groupVar graph `${Member::class.graph()}`
@@ -261,5 +261,12 @@ fun Db.groupExtended(groupVar: String = "group") = """{
             return message
     ),
     ${f(GroupExtended::cardCount)}: count(for groupCard in `${Card::class.collection()}` filter groupCard.${f(Card::active)} == true and groupCard.${f(Card::group)} == $groupVar._key return true),
-    ${f(GroupExtended::botCount)}: count(for groupBot in `${GroupBot::class.collection()}` filter groupBot.${f(GroupBot::active)} == true and groupBot.${f(GroupBot::group)} == $groupVar._key return true)
+    ${f(GroupExtended::botCount)}: count(for groupBot in `${GroupBot::class.collection()}` filter groupBot.${f(GroupBot::active)} == true and groupBot.${f(GroupBot::group)} == $groupVar._key return true),
+    ${f(GroupExtended::pin)}: ${pinned(personKey, groupVar)}
 }"""
+
+fun Db.pinned(personKey: String?, groupVar: String) = if (personKey == null) {
+    false.toString()
+} else {
+    """count(for groupPin in `${GroupPin::class.collection()}` filter groupPin.${f(GroupPin::person)} == "$personKey" and groupPin.${f(GroupPin::group)} == $groupVar._key return true) != 0"""
+}

@@ -393,6 +393,20 @@ fun Route.groupRoutes() {
             }
         }
 
+        post("/groups/{id}/pin") {
+            respond {
+                db.pinGroup(me.id!!, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                HttpStatusCode.OK
+            }
+        }
+
+        post("/groups/{id}/unpin") {
+            respond {
+                db.unpinGroup(me.id!!, parameter("id"))
+                HttpStatusCode.OK
+            }
+        }
+
         get("/groups/{id}/bots") {
             respond {
                 db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound

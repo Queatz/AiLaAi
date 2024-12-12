@@ -25,7 +25,8 @@ class GroupExtended(
     var bots: List<Bot>? = null,
     var cardCount: Int? = null,
     var botCount: Int? = null,
-    var latestMessage: Message? = null
+    var latestMessage: Message? = null,
+    var pin: Boolean? = null
 )
 
 @Serializable

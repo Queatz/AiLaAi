@@ -95,6 +95,12 @@ class Save(
 ) : Model()
 
 @Serializable
+class GroupPin(
+    var person: String? = null,
+    var group: String? = null
+) : Model()
+
+@Serializable
 class Transfer(
     var person: String? = null,
     var code: String? = null

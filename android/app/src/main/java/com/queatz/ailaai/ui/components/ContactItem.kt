@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.createGroup
+import app.ailaai.api.pinGroup
+import app.ailaai.api.unpinGroup
 import app.ailaai.api.updateMember
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -73,6 +75,20 @@ fun ContactItem(
         ) {
             val groupExtended = (item as? SearchResult.Group)?.groupExtended
             if (groupExtended != null) {
+                menuItem(stringResource(if (groupExtended.pin == true) R.string.unpin else R.string.pin)) {
+                    showMenu = false
+                    scope.launch {
+                        if (groupExtended.pin == true) {
+                            api.unpinGroup(groupExtended.group!!.id!!) {
+                                onChange()
+                            }
+                        } else {
+                            api.pinGroup(groupExtended.group!!.id!!) {
+                                onChange()
+                            }
+                        }
+                    }
+                }
                 menuItem(stringResource(R.string.hide)) {
                     showMenu = false
                     scope.launch {
@@ -153,28 +169,31 @@ fun ContactItem(
 
             val description = when (info) {
                 GroupInfo.LatestMessage -> {
-                    groupExtended.latestMessage?.preview(context)?.let {
-                        if (groupExtended.latestMessage!!.member == myMember?.member?.id) {
-                            stringResource(
-                                R.string.you_x,
+                    bulletedString(
+                        "📌".takeIf { groupExtended.pin == true },
+                        groupExtended.latestMessage?.preview(context)?.let {
+                            if (groupExtended.latestMessage!!.member == myMember?.member?.id) {
+                                stringResource(
+                                    R.string.you_x,
+                                    it
+                                )
+                            } else if (!groupExtended.group?.name.isNullOrBlank() || groupExtended.members!!.size > 2) {
+                                stringResource(
+                                    R.string.x_x,
+                                    groupExtended.members!!
+                                        .find { it.member?.id == groupExtended.latestMessage!!.member }
+                                        ?.person
+                                        ?.name
+                                        ?: stringResource(R.string.someone),
+                                    it
+                                )
+                            } else {
                                 it
-                            )
-                        } else if (!groupExtended.group?.name.isNullOrBlank() || groupExtended.members!!.size > 2) {
-                            stringResource(
-                                R.string.x_x,
-                                groupExtended.members!!
-                                    .find { it.member?.id == groupExtended.latestMessage!!.member }
-                                    ?.person
-                                    ?.name
-                                    ?: stringResource(R.string.someone),
-                                it
-                            )
-                        } else {
-                            it
-                        }
-                    } ?: stringResource(
-                        if (people.size == 1) R.string.connected_ago else R.string.created_ago,
-                        groupExtended.group!!.createdAt!!.timeAgo().lowercase()
+                            }
+                        } ?: stringResource(
+                            if (people.size == 1) R.string.connected_ago else R.string.created_ago,
+                            groupExtended.group!!.createdAt!!.timeAgo().lowercase()
+                        )
                     )
                 }
 

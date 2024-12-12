@@ -5,6 +5,43 @@ import kotlinx.datetime.Instant
 
 /**
  * @person The current user
+ * @group The group to pin
+ */
+fun Db.pinGroup(person: String, group: String) = one(
+    GroupPin::class,
+    """
+            upsert { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group }
+                insert { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group, ${f(GroupPin::createdAt)}: DATE_ISO8601(DATE_NOW()) }
+                update { ${f(GroupPin::person)}: @person, ${f(GroupPin::group)}: @group}
+                in @@collection
+                return NEW || OLD
+        """,
+    mapOf(
+        "person" to person,
+        "group" to group
+    )
+)
+
+/**
+ * @person The current user
+ * @group The group to unpin
+ */
+fun Db.unpinGroup(person: String, group: String) = query(
+    GroupPin::class,
+    """
+            for x in `${GroupPin::class.collection()}`
+                filter x.${f(GroupPin::person)} == @person
+                    and x.${f(GroupPin::group)} == @group
+                remove x in `${GroupPin::class.collection()}`
+        """,
+    mapOf(
+        "person" to person,
+        "group" to group
+    )
+)
+
+/**
+ * @person The current user
  */
 fun Db.groups(person: String) = query(
     GroupExtended::class,
@@ -13,7 +50,7 @@ fun Db.groups(person: String) = query(
             filter edge.${f(Member::hide)} != true
                 and edge.${f(Member::gone)} != true
             sort group.${f(Group::seen)} desc
-            return ${groupExtended()}
+            return ${groupExtended(person)}
     """.trimIndent(),
     mapOf(
         "person" to person.asId(Person::class)
@@ -59,7 +96,7 @@ fun Db.openGroups(
             filter ${if (public) "(d != null and d <= @nearbyMaxDistance)" else isFriendGroup()}
             sort d == null, d, group.${f(Group::seen)} desc
             limit @offset, @limit
-            return ${groupExtended()}
+            return ${groupExtended(person)}
     """.trimIndent(),
     mapOf(
         "geo" to geo,
@@ -134,7 +171,7 @@ fun Db.group(person: String?, group: String) = query(
         } else ""
     })
             limit 1
-            return ${groupExtended()}
+            return ${groupExtended(person)}
     """.trimIndent(),
     buildMap {
         if (person != null) {
@@ -154,7 +191,7 @@ fun Db.hiddenGroups(me: String) = query(
             filter edge.${f(Member::hide)} == true
                 and edge.${f(Member::gone)} != true
             sort group.${f(Group::seen)} desc
-            return ${groupExtended()}
+            return ${groupExtended(me)}
     """.trimIndent(),
     mapOf(
         "person" to me.asId(Person::class)

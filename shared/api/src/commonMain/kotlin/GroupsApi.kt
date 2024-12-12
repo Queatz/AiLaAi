@@ -83,15 +83,13 @@ suspend fun Api.createGroup(
     reuse: Boolean = false,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Group>,
-) =
-    post("groups", CreateGroupBody(people.toSet().toList(), reuse), onError = onError, onSuccess = onSuccess)
+) = post("groups", CreateGroupBody(people.toSet().toList(), reuse), onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.groupsWith(
     people: List<String>,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<GroupExtended>>,
-) =
-    post("groups/search", SearchGroupBody(people.toSet().toList()), onError = onError, onSuccess = onSuccess)
+) = post("groups/search", SearchGroupBody(people.toSet().toList()), onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.updateGroup(
     id: String,
@@ -99,6 +97,18 @@ suspend fun Api.updateGroup(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Group> = {},
 ) = post("groups/$id", groupUpdate, onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.pinGroup(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post("groups/$id/pin", onError = onError, onSuccess = onSuccess)
+
+suspend fun Api.unpinGroup(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post("groups/$id/unpin", onError = onError, onSuccess = onSuccess)
 
 suspend fun Api.sendMedia(
     group: String,

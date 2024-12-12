@@ -182,5 +182,9 @@ fun collections() = listOf(
     },
     CardVisit::class.db {
         ensurePersistentIndex(listOf(CardVisit::card.name), PersistentIndexOptions())
+    },
+    GroupPin::class.db {
+        ensurePersistentIndex(listOf(GroupPin::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GroupPin::group.name), PersistentIndexOptions())
     }
 )
