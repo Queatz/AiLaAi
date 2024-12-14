@@ -277,6 +277,10 @@ fun GroupsNavPage(
     }
 
     NavTopBar(me, appString { this.groups }, onProfileClick = onProfileClick) {
+        IconButton("search", appString { search }, styles = {
+        }) {
+            showSearch = !showSearch
+        }
         IconButton("filter_list", appString { filter }, count = selectedCategory?.let { 1 } ?: 0, styles = {
         }) {
             filterMenuTarget = if (filterMenuTarget == null) {
@@ -284,10 +288,6 @@ fun GroupsNavPage(
             } else {
                 null
             }
-        }
-        IconButton("search", appString { search }, styles = {
-        }) {
-            showSearch = !showSearch
         }
 
         val createGroup = appString { createGroup }

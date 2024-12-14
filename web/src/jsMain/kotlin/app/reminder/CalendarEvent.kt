@@ -65,7 +65,7 @@ fun CalendarEvent(
         event.date.formatSecondary(view).let {
             (event.occurrence?.duration ?: event.reminder.duration)?.formatDuration()?.let { duration ->
                 "$it ($duration)"
-            }
+            } ?: it
         },
         event.reminder.categories?.firstOrNull(),
         event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank

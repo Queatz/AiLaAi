@@ -707,11 +707,11 @@ object Strings {
     )
     val pin = Translation(
         "Pin",
-        "Ghím"
+        "Ghim"
     )
     val unpin = Translation(
         "Unpin",
-        "Bỏ ghím"
+        "Bỏ ghim"
     )
     val leave = Translation(
         "Leave",

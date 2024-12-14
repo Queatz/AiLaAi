@@ -960,7 +960,7 @@ fun ProfileScreen(personId: String) {
 
                                     Text(
                                         text = text,
-                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 9.sp),
+                                        style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier.fillMaxWidth()

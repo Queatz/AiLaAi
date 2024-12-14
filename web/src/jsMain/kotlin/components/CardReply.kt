@@ -162,7 +162,7 @@ fun CardReply(
                         sendMessage()
                     }
                 }
-                if (isSendingReply || replyMessage.isBlank() || replyMessageContact.isBlank()) {
+                if (isSendingReply || replyMessage.isBlank() || (me == null && replyMessageContact.isBlank())) {
                     disabled()
                 }
             }) {
