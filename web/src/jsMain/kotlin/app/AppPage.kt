@@ -49,11 +49,13 @@ import com.queatz.push.StoryPushData
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import lib.hidden
+import notBlank
 import notifications
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -116,6 +118,10 @@ fun AppPage() {
 
     val reminderUpdates = remember {
         MutableSharedFlow<Reminder>()
+    }
+
+    var reminderSearch by remember {
+        mutableStateOf<String?>(null)
     }
 
     var story by remember {
@@ -413,6 +419,9 @@ fun AppPage() {
                         },
                         onProfileClick = {
                             nav = NavPage.Profile
+                        },
+                        onSearchChange = {
+                            reminderSearch = it.notBlank
                         }
                     )
 
@@ -464,6 +473,7 @@ fun AppPage() {
                     view = scheduleView,
                     viewType = scheduleViewType,
                     reminder = reminder,
+                    search = reminderSearch,
                     goToToday = goToToday,
                     onReminder = { reminder = it },
                     onUpdate = {

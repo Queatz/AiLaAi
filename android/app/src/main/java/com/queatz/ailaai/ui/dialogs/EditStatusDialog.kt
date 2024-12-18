@@ -152,6 +152,7 @@ fun EditStatusDialog(
                         modifier = Modifier
                             .weight(1f, fill = false)
                             .padding(vertical = 1.pad)
+                            .heightIn(max = 140.dp)
                             .fillMaxWidth()
                     ) { status ->
                         showStatusHistory = false

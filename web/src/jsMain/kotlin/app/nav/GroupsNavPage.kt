@@ -389,7 +389,7 @@ fun GroupsNavPage(
                                             ProfilePhoto(person = person, size = 54.px)
                                             statuses[person.id!!]?.let { status ->
                                                 // Status note
-                                                if (status.note != null || status.photo != null) {
+                                                if (status.note?.notBlank != null || status.photo?.notBlank != null) {
                                                     Div({
                                                         classes(Styles.personItemStatus)
                                                     }) {

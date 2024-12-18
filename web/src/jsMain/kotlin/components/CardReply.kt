@@ -19,6 +19,7 @@ import com.queatz.db.ConversationAction
 import com.queatz.db.ConversationItem
 import com.queatz.db.WildReplyBody
 import kotlinx.coroutines.launch
+import notBlank
 import notEmpty
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
@@ -66,7 +67,10 @@ fun CardReply(
     suspend fun sendMessage() {
         isSendingReply = true
         val body = WildReplyBody(
-            message = "$replyMessage\n\n$replyMessageContact",
+            message = listOfNotNull(
+                replyMessage,
+                replyMessageContact.notBlank
+            ).joinToString("\n\n"),
             conversation = isReplying!!.map { it.title }.filter { it.isNotBlank() }
                 .notEmpty?.joinToString(" → "),
             card = card.id!!,

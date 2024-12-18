@@ -106,7 +106,7 @@ class ShareActivity : AppCompatActivity() {
                         modifier = Modifier.fillMaxSize()
                     ) {
                         ChooseGroupDialog(
-                            {
+                            onDismissRequest = {
                                 finish()
                             },
                             title = content.title(),

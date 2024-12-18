@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lib.rawTimeZones
 import lib.systemTimezone
+import notBlank
 import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
@@ -69,7 +70,8 @@ fun ScheduleNavPage(
     viewType: ScheduleViewType,
     onViewTypeClick: (ScheduleViewType) -> Unit,
     onViewClick: (ScheduleView) -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onSearchChange: (String) -> Unit
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
@@ -101,6 +103,10 @@ fun ScheduleNavPage(
     LaunchedEffect(reminder, view) {
         searchText = ""
         showSearch = false
+    }
+
+    LaunchedEffect(searchText) {
+        onSearchChange(searchText)
     }
 
     val shownReminders = remember(reminders, searchText) {

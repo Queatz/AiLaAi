@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.web.events.SyntheticDragEvent
 import androidx.compose.web.events.SyntheticMouseEvent
 import api
 import app.FullPageLayout
@@ -71,7 +70,6 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.left
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -86,7 +84,6 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
-import parseDateTime
 import quantize
 import r
 import shadow
@@ -155,6 +152,7 @@ fun SchedulePage(
     view: ScheduleView,
     viewType: ScheduleViewType,
     reminder: Reminder?,
+    search: String?,
     goToToday: Flow<Unit>,
     onReminder: (Reminder?) -> Unit,
     onUpdate: (Reminder) -> Unit,
@@ -178,6 +176,18 @@ fun SchedulePage(
 
     var offset by remember {
         mutableStateOf(startOfDay(Date()))
+    }
+
+    val shownEvents = remember(events, search) {
+        if (search.isNullOrBlank()) {
+            events
+        } else {
+            events.filter {
+                it.reminder.title?.contains(search, ignoreCase = true) == true ||
+                it.occurrence?.note?.contains(search, ignoreCase = true) == true ||
+                it.reminder.note?.contains(search, ignoreCase = true) == true
+            }
+        }
     }
 
     LaunchedEffect(view) {
@@ -234,7 +244,7 @@ fun SchedulePage(
         isLoading = false
     }
 
-    fun moveOccurrance(dragData: ReminderDragData, toDate: Instant) {
+    fun moveOccurrence(dragData: ReminderDragData, toDate: Instant) {
         scope.launch {
             api.updateReminderOccurrence(
                 id = dragData.reminder,
@@ -314,7 +324,7 @@ fun SchedulePage(
                             view = view,
                             start = start,
                             end = end,
-                            events = if (isLoading) null else events.filter { event ->
+                            events = if (isLoading) null else shownEvents.filter { event ->
                                 (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(event.date, end)
                             },
                             onUpdate = {
@@ -359,7 +369,7 @@ fun SchedulePage(
                             ScheduleView.Yearly -> addYears(start, 1.0)
                         }
 
-                        val result = if (isLoading) emptyList() else events.filter { event ->
+                        val result = if (isLoading) emptyList() else shownEvents.filter { event ->
                             (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(
                                 event.date,
                                 end
@@ -419,7 +429,7 @@ fun SchedulePage(
                                 dropTo = null
 
                                 val toDate = it.dragToDate(columnInfos[index], millisecondsIn1Rem) ?: return@onDrop
-                                moveOccurrance(
+                                moveOccurrence(
                                     dragData = json.decodeFromString<ReminderDragData>(
                                         it.dataTransfer!!.getData(ContentType.Application.Json.toString())
                                     ),
