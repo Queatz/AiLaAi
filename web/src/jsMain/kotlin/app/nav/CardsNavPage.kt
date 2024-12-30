@@ -39,7 +39,12 @@ enum class CardFilter {
 }
 
 @Composable
-fun CardsNavPage(cardUpdates: Flow<Card>, nav: CardNav, onSelected: (CardNav) -> Unit, onProfileClick: () -> Unit) {
+fun CardsNavPage(
+    cardUpdates: Flow<Card>,
+    nav: CardNav,
+    onSelected: (CardNav) -> Unit,
+    onProfileClick: () -> Unit
+) {
     val cardId = (nav as? CardNav.Selected)?.card?.id
     val subCardId = (nav as? CardNav.Selected)?.subCard?.id
 

@@ -885,6 +885,10 @@ object Strings {
         "Submit",
         "Nộp"
     )
+    val scripts = Translation(
+        "Scripts",
+        "Tập lệnh"
+    )
 }
 
 fun getString(string: Translation, language: String) = when (language) {

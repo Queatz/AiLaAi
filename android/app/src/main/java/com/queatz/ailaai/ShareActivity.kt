@@ -17,6 +17,7 @@ import app.ailaai.api.me
 import app.ailaai.api.sendMessage
 import com.queatz.ailaai.api.sendMediaFromUri
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -111,7 +112,12 @@ class ShareActivity : AppCompatActivity() {
                             },
                             title = content.title(),
                             confirmFormatter = content.confirmFormatter(me),
-                            infoFormatter = { it.seenText(context.getString(R.string.active), me) }
+                            infoFormatter = { group ->
+                                bulletedString(
+                                    "\uD83D\uDCCC".takeIf { group.pin == true },
+                                    group.seenText(context.getString(R.string.active), me)
+                                )
+                            }
                         ) { groups ->
                             send(groups)
                         }

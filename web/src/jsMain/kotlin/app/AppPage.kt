@@ -31,6 +31,9 @@ import app.page.StoriesPage
 import app.platform.PlatformNav
 import app.platform.PlatformNavPage
 import app.platform.PlatformPage
+import app.scripts.ScriptsNav
+import app.scripts.ScriptsNavPage
+import app.scripts.ScriptsPage
 import app.widget.WidgetStyles
 import appString
 import application
@@ -38,6 +41,7 @@ import asNaturalList
 import call
 import com.queatz.db.Card
 import com.queatz.db.Reminder
+import com.queatz.db.Script
 import com.queatz.db.Story
 import com.queatz.push.CallPushData
 import com.queatz.push.CommentPushData
@@ -49,7 +53,6 @@ import com.queatz.push.StoryPushData
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -77,7 +80,8 @@ enum class NavPage {
     Cards,
     Stories,
     Profile,
-    Platform
+    Platform,
+    Scripts,
 }
 
 @Composable
@@ -114,6 +118,10 @@ fun AppPage() {
 
     val storyUpdates = remember {
         MutableSharedFlow<Story>()
+    }
+
+    val scriptUpdates = remember {
+        MutableSharedFlow<Script>()
     }
 
     val reminderUpdates = remember {
@@ -154,6 +162,10 @@ fun AppPage() {
 
     var platform by remember {
         mutableStateOf<PlatformNav>(PlatformNav.None)
+    }
+
+    var script by remember {
+        mutableStateOf<ScriptsNav>(ScriptsNav.None)
     }
 
     LaunchedEffect(nav) {
@@ -381,8 +393,8 @@ fun AppPage() {
             }) {
                 when (nav) {
                     NavPage.Groups -> GroupsNavPage(
-                        groupUpdates,
-                        group,
+                        groupUpdates = groupUpdates,
+                        selected = group,
                         onSelected = {
                             group = it
                         },
@@ -436,14 +448,27 @@ fun AppPage() {
                         },
                         onPlatformClick = {
                             nav = NavPage.Platform
+                        },
+                        onScriptsClick = {
+                            nav = NavPage.Scripts
                         }
                     )
                     NavPage.Platform -> PlatformNavPage(
                         onProfileClick = {
                             nav = NavPage.Profile
                         },
-                        platform,
-                        { platform = it }
+                        selected = platform,
+                        onSelected = { platform = it }
+                    )
+                    NavPage.Scripts -> ScriptsNavPage(
+                        updates = scriptUpdates,
+                        selected = script,
+                        onSelected = {
+                            script = it
+                        },
+                        onProfileClick = {
+                            nav = NavPage.Profile
+                        }
                     )
                 }
             }
@@ -496,7 +521,7 @@ fun AppPage() {
                 }
 
                 NavPage.Stories -> StoriesPage(
-                    story,
+                    selected = story,
                     onStoryUpdated = {
                         scope.launch {
                             storyUpdates.emit(it)
@@ -513,6 +538,12 @@ fun AppPage() {
                 }
 
                 NavPage.Platform -> PlatformPage(platform)
+
+                NavPage.Scripts -> ScriptsPage(script) {
+                    scope.launch {
+                        scriptUpdates.emit(it)
+                    }
+                }
             }
         }
     }

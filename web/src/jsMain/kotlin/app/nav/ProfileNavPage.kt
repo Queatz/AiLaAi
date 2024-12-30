@@ -37,7 +37,11 @@ import r
 import webBaseUrl
 
 @Composable
-fun ProfileNavPage(onProfileClick: () -> Unit, onPlatformClick: () -> Unit) {
+fun ProfileNavPage(
+    onProfileClick: () -> Unit,
+    onPlatformClick: () -> Unit,
+    onScriptsClick: () -> Unit,
+) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
 
@@ -149,7 +153,11 @@ fun ProfileNavPage(onProfileClick: () -> Unit, onPlatformClick: () -> Unit) {
         val signOut = appString { signOut }
         val signOutQuestion = appString { signOutQuestion }
 
-        if (true || isPlatformHost) {
+        NavMenuItem("history_edu", appString { scripts }) {
+            onScriptsClick()
+        }
+
+        if (isPlatformHost) {
             NavMenuItem("guardian", appString { platform }) {
                 onPlatformClick()
             }

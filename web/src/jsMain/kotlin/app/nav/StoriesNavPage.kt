@@ -74,10 +74,10 @@ fun StoriesNavPage(
     }
     if (filterMenuTarget != null) {
         Menu(
-            {
+            onDismissRequest = {
                 filterMenuTarget = null
             },
-            filterMenuTarget!!
+            target = filterMenuTarget!!
         ) {
             item(appString { published }, icon = if (StoryFilter.Published in filters) "check" else null) {
                 if (StoryFilter.Published in filters) {
@@ -236,7 +236,11 @@ fun StoriesNavPage(
 }
 
 @Composable
-fun StoryItem(story: Story, selected: Boolean, onSelected: () -> Unit) {
+fun StoryItem(
+    story: Story,
+    selected: Boolean,
+    onSelected: () -> Unit
+) {
     Div({
         classes(
             listOf(AppStyles.groupItem) + if (selected) {
