@@ -466,6 +466,11 @@ fun AppPage() {
                         onSelected = {
                             script = it
                         },
+                        onCreated = {
+                            scope.launch {
+                                scriptUpdates.emit(it)
+                            }
+                        },
                         onProfileClick = {
                             nav = NavPage.Profile
                         }

@@ -75,11 +75,13 @@ fun PageTopBar(
             }
         }
         actions()
-        IconButton("more_vert", appString { options }, styles = {
-            flexShrink(0)
-            fontWeight("bold")
-        }) {
-            onMenu?.invoke(it)
+        onMenu?.let { onMenu ->
+            IconButton("more_vert", appString { options }, styles = {
+                flexShrink(0)
+                fontWeight("bold")
+            }) {
+                onMenu(it)
+            }
         }
     }
 }
