@@ -103,8 +103,8 @@ fun ScheduleReminderDialog(
                     }
 
                     OutlinedTextField(
-                        title,
-                        {
+                        value = title,
+                        onValueChange = {
                             title = it
                             reminder.title = it
                         },
@@ -122,7 +122,7 @@ fun ScheduleReminderDialog(
                     )
                 }
                 OutlinedButton(
-                    {
+                    onClick = {
                         showStart = true
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -138,7 +138,7 @@ fun ScheduleReminderDialog(
                 }
                 if (reoccurs) {
                     OutlinedButton(
-                        {
+                        onClick = {
                             showHours = true
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -151,7 +151,7 @@ fun ScheduleReminderDialog(
                         )
                     }
                     OutlinedButton(
-                        {
+                        onClick = {
                             showDays = true
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -198,7 +198,7 @@ fun ScheduleReminderDialog(
                 }
                 if (until) {
                     OutlinedButton(
-                        {
+                        onClick = {
                             showEnd = true
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -217,14 +217,14 @@ fun ScheduleReminderDialog(
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()
             ) {
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
                 TextButton(
-                    {
+                    onClick = {
                         scope.launch {
                             isLoading = true
                             onUpdate(
@@ -302,7 +302,7 @@ fun ScheduleReminderDialog(
             (1..31).forEach {
                 val checked = reminder.schedule?.days?.contains(it) == true
                 menuItem(
-                    stringResource(R.string.day_of_the_month, it.ordinal),
+                    title = stringResource(R.string.day_of_the_month, it.ordinal),
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
@@ -325,7 +325,7 @@ fun ScheduleReminderDialog(
             run {
                 val checked = reminder.schedule?.days?.contains(-1) == true
                 menuItem(
-                    stringResource(R.string.last_day_of_the_month),
+                    title = stringResource(R.string.last_day_of_the_month),
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
@@ -355,7 +355,7 @@ fun ScheduleReminderDialog(
             (1..5).forEach {
                 val checked = reminder.schedule?.weeks?.contains(it) == true
                 menuItem(
-                    stringResource(R.string.x_week, it.ordinal),
+                    title = stringResource(R.string.x_week, it.ordinal),
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
@@ -383,7 +383,7 @@ fun ScheduleReminderDialog(
             (1..12).forEach {
                 val checked = reminder.schedule?.months?.contains(it) == true
                 menuItem(
-                    it.monthName,
+                    title = it.monthName,
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
                     if (reminder.schedule == null) {
@@ -406,10 +406,10 @@ fun ScheduleReminderDialog(
 
     if (showStart) {
         RescheduleDialog(
-            {
+            onDismissRequest = {
                 showStart = false
             },
-            reminder.start ?: Clock.System.now()
+            date = reminder.start ?: Clock.System.now()
         ) {
             reminder.start = it
             invalidate()
@@ -418,10 +418,10 @@ fun ScheduleReminderDialog(
 
     if (showEnd) {
         RescheduleDialog(
-            {
+            onDismissRequest = {
                 showEnd = false
             },
-            reminder.end ?: Clock.System.now()
+            date = reminder.end ?: Clock.System.now()
         ) {
             reminder.end = it
             invalidate()

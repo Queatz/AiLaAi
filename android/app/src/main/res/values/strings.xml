@@ -789,6 +789,10 @@
     <string name="pin">Pin</string>
     <string name="unpin">Unpin</string>
     <string name="x_local_time">%1$s local time</string>
+    <string name="in_2_days">In 2 days</string>
+    <string name="in_an_hour">In an hour</string>
+    <string name="in_2_weeks">In 2 weeks</string>
+    <string name="in_2_months">In 2 months</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
