@@ -492,7 +492,7 @@ fun FriendsScreen() {
             enabled = tab == MainTab.Local,
             rationale = {
                 // todo: translate
-                DisplayText("Join and host groups in your town.")
+                DisplayText("Join and host groups in your area.")
             }
         ) {
             var h by rememberStateOf(80.dp.px)

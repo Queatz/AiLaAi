@@ -104,7 +104,7 @@ fun ContactItem(
     }
 
     ContactItem(
-        {
+        onClick = {
             scope.launch {
                 when (item) {
                     is SearchResult.Connect -> {
@@ -121,14 +121,14 @@ fun ContactItem(
                 }
             }
         },
-        {
+        onLongClick = {
             if (item is SearchResult.Group) {
                 showMenu = true
             }
         },
-        item,
-        info,
-        coverPhoto
+        item = item,
+        info = info,
+        coverPhoto = coverPhoto
     )
 }
 
@@ -171,24 +171,20 @@ fun ContactItem(
                 GroupInfo.LatestMessage -> {
                     bulletedString(
                         "📌".takeIf { groupExtended.pin == true },
-                        groupExtended.latestMessage?.preview(context)?.let {
+                        groupExtended.latestMessage?.preview(context)?.let { messagePreview ->
                             if (groupExtended.latestMessage!!.member == myMember?.member?.id) {
                                 stringResource(
                                     R.string.you_x,
-                                    it
+                                    messagePreview
                                 )
                             } else if (!groupExtended.group?.name.isNullOrBlank() || groupExtended.members!!.size > 2) {
                                 stringResource(
                                     R.string.x_x,
-                                    groupExtended.members!!
-                                        .find { it.member?.id == groupExtended.latestMessage!!.member }
-                                        ?.person
-                                        ?.name
-                                        ?: stringResource(R.string.someone),
-                                    it
+                                    groupExtended.latestMessagePersonOrBotName,
+                                    messagePreview
                                 )
                             } else {
-                                it
+                                messagePreview
                             }
                         } ?: stringResource(
                             if (people.size == 1) R.string.connected_ago else R.string.created_ago,
@@ -358,6 +354,12 @@ fun ContactResult(
         }
     }
 }
+
+val GroupExtended.latestMessagePersonOrBotName
+    @Composable get() =
+        (members?.find { it.member?.id == latestMessage!!.member }?.person?.name)
+            ?: (bots?.find { it.id == latestMessage!!.bot }?.name)
+            ?: stringResource(R.string.someone)
 
 private fun Message.preview(context: Context): String? {
     return text?.nullIfBlank ?: attachmentText(context)
