@@ -147,7 +147,6 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.asOvalBitmap
 import com.queatz.ailaai.extensions.attachmentText
-import com.queatz.ailaai.extensions.cardUrl
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.formatFuture
@@ -189,7 +188,7 @@ import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.Audio
 import com.queatz.ailaai.ui.components.BackButton
-import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.IconAndCount
 import com.queatz.ailaai.ui.components.LinkifyText
@@ -776,7 +775,7 @@ fun GroupScreen(groupId: String) {
                     }
 
                     Dropdown(showMenu, { showMenu = false }) {
-                        CardToolbar {
+                        Toolbar {
                             item(
                                 icon = Icons.Outlined.Group,
                                 name = stringResource(R.string.members)
@@ -1692,8 +1691,8 @@ fun GroupScreen(groupId: String) {
 
             if (showGroupMembers) {
                 PeopleDialog(
-                    stringResource(R.string.members),
-                    {
+                    title = stringResource(R.string.members),
+                    onDismissRequest = {
                         showGroupMembers = false
                     },
                     people = allMembers.map { it.person!! },
@@ -1708,7 +1707,7 @@ fun GroupScreen(groupId: String) {
                     actions = {
                         if (myMember?.member?.host == true) {
                             IconButton(
-                                {
+                                onClick = {
                                     showInviteMembers = true
                                 }
                             ) {
@@ -1719,7 +1718,7 @@ fun GroupScreen(groupId: String) {
                     extraButtons = {
                         if (myMember?.member != null) {
                             TextButton(
-                                {
+                                onClick = {
                                     showManageGroupMembersMenu = true
                                 }
                             ) {

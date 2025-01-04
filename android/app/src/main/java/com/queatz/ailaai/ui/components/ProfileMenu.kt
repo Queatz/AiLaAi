@@ -35,7 +35,7 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
     }
 
     Menu(onDismissRequest = onDismissRequest) {
-        CardToolbar {
+        Toolbar {
             me?.let { me ->
                 item(
                     icon = Icons.Outlined.Person,

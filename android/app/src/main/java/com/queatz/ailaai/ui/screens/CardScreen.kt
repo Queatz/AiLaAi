@@ -86,10 +86,8 @@ import app.ailaai.api.cardsCards
 import app.ailaai.api.createGroup
 import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.leaveCollaboration
-import app.ailaai.api.profile
 import app.ailaai.api.sendMessage
 import app.ailaai.api.updateCard
-import app.ailaai.api.updateProfile
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
@@ -136,7 +134,7 @@ import com.queatz.ailaai.ui.card.PageStatisticsDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardLayout
-import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
@@ -165,7 +163,6 @@ import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.Message
 import com.queatz.db.Person
-import com.queatz.db.Profile
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -964,7 +961,7 @@ fun CardScreen(cardId: String) {
                         var activeCommitted by remember { mutableStateOf(active) }
 
                         AnimatedVisibility(showTools) {
-                            CardToolbar(
+                            Toolbar(
                                 modifier = Modifier.padding(bottom = 1.pad)
                             ) {
                                 item(

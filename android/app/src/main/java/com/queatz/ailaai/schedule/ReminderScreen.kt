@@ -47,7 +47,7 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
-import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
@@ -277,7 +277,7 @@ fun ReminderScreen(reminderId: String) {
                     .fillMaxSize()
             ) {
                 item {
-                    CardToolbar {
+                    Toolbar {
                         item(
                             Icons.Outlined.PersonAdd,
                             stringResource(R.string.invite_someone)

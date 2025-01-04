@@ -46,8 +46,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import app.ailaai.api.createScript
-import app.ailaai.api.myScripts
-import app.ailaai.api.scripts
 import app.ailaai.api.updateScript
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
@@ -56,7 +54,7 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
-import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Dropdown
@@ -262,7 +260,7 @@ fun ScriptsDialog(
             content = {
                 when (state) {
                     is ScriptsDialogState.Select -> {
-                        CardToolbar {
+                        Toolbar {
                             item(
                                 Icons.Outlined.Add,
                                 stringResource(R.string.new_script)

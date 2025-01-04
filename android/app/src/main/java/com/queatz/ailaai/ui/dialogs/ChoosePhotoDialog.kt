@@ -34,7 +34,7 @@ import com.queatz.ailaai.extensions.isVideo
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.uri
-import com.queatz.ailaai.ui.components.CardToolbar
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.db.AiPhotoRequest
 import kotlinx.coroutines.CoroutineScope
@@ -175,7 +175,7 @@ fun ChoosePhotoDialog(
         showDismiss = onRemove != null,
         onDismiss = onRemove,
         extraContent = {
-            CardToolbar {
+            Toolbar {
                 item(Icons.Outlined.Photo, stringResource(R.string.set_photo)) {
                     launcher.launch(PickVisualMediaRequest(if (imagesOnly) ActivityResultContracts.PickVisualMedia.ImageOnly else ActivityResultContracts.PickVisualMedia.ImageAndVideo))
                 }
