@@ -1706,12 +1706,14 @@ fun GroupScreen(groupId: String) {
                         }"
                     },
                     actions = {
-                        IconButton(
-                            {
-                                showInviteMembers = true
+                        if (myMember?.member?.host == true) {
+                            IconButton(
+                                {
+                                    showInviteMembers = true
+                                }
+                            ) {
+                                Icon(Icons.Outlined.Add, stringResource(R.string.invite_someone))
                             }
-                        ) {
-                            Icon(Icons.Outlined.Add, stringResource(R.string.invite_someone))
                         }
                     },
                     extraButtons = {

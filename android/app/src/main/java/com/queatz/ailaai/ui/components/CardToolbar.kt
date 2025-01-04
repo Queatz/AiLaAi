@@ -29,6 +29,7 @@ class CardToolbarScope internal constructor() {
     fun item(
         icon: ImageVector,
         name: String,
+        count: Int = 0,
         color: Color? = null,
         selected: Boolean = false,
         isLoading: Boolean = false,
@@ -46,8 +47,8 @@ class CardToolbarScope internal constructor() {
                     LoadingIcon()
                 } else {
                     Icon(
-                        icon,
-                        "",
+                        imageVector = icon,
+                        contentDescription = "",
                         tint = if (selected) MaterialTheme.colorScheme.primary else (color ?: MaterialTheme.colorScheme.onSurfaceVariant)
                     )
                 }

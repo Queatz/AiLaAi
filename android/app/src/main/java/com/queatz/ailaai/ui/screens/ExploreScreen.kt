@@ -13,13 +13,11 @@ import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Payments
-import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,13 +54,11 @@ import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.item.InventoryDialog
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.services.trading
 import com.queatz.ailaai.trade.TradeItemDialog
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardList
 import com.queatz.ailaai.ui.components.CardsBar
 import com.queatz.ailaai.ui.components.DisplayText
-import com.queatz.ailaai.ui.components.IconAndCount
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.MainTab
 import com.queatz.ailaai.ui.components.MainTabs
@@ -142,7 +138,6 @@ fun ExploreScreen() {
     var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
     var showBar by rememberStateOf(true)
     val mapControl = remember { MapControl() }
-    val activeTrades by trading.activeTrades.collectAsState()
 
     suspend fun reloadInventories() {
         if (showAsMap && (mapGeo ?: geo) != null) {
@@ -356,8 +351,8 @@ fun ExploreScreen() {
     }
 
     LocationScaffold(
-        geo,
-        locationSelector,
+        geo = geo,
+        locationSelector = locationSelector,
         appHeader = {
             AppHeader(
                 if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
@@ -395,14 +390,6 @@ fun ExploreScreen() {
                     showAsMap = !showAsMap
                 }) {
                     Icon(if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map, stringResource(R.string.map))
-                }
-                IconAndCount(
-                    icon = {
-                        Icon(Icons.Outlined.Rocket, stringResource(R.string.inventory))
-                    },
-                    count = activeTrades.size
-                ) {
-                    nav.appNavigate(AppNav.Inventory)
                 }
                 ScanQrCodeButton()
             }

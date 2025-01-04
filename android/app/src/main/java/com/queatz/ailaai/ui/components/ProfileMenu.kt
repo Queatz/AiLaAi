@@ -27,7 +27,7 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
 
     if (showScriptsDialog) {
         ScriptsDialog(
-            {
+            onDismissRequest = {
                 showScriptsDialog = false
             },
             previewScriptAction = PreviewScriptAction.Edit
