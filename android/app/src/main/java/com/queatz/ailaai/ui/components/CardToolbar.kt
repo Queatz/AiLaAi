@@ -26,7 +26,6 @@ class ToolbarScope internal constructor() {
     fun item(
         icon: ImageVector,
         name: String,
-        count: Int = 0,
         color: Color? = null,
         selected: Boolean = false,
         isLoading: Boolean = false,

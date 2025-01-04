@@ -245,7 +245,6 @@ class MainActivity : AppCompatActivity() {
                 slideshow.navController = navController
 
                 var newMessages by rememberStateOf(0)
-                var activeTrades by rememberStateOf(0)
                 val presence by mePresence.rememberPresence()
 
                 LifecycleEffect {
@@ -386,12 +385,6 @@ class MainActivity : AppCompatActivity() {
                             messages.new.collectLatest {
                                 newMessages = it
                             }
-                        }
-                    }
-
-                    LaunchedEffect(me) {
-                        trading.activeTrades.collectLatest {
-                            activeTrades = it.size
                         }
                     }
 
@@ -566,21 +559,6 @@ class MainActivity : AppCompatActivity() {
                                                                 .scale(scale)
                                                         )
                                                         // todo reusable icon IconAndCount
-                                                        if (item.route == AppNav.Explore && activeTrades > 0) {
-                                                            Text(
-                                                                activeTrades.toString(),
-                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                fontWeight = FontWeight.Bold,
-                                                                modifier = Modifier
-                                                                    .offset(2.pad, -.5f.pad)
-                                                                    .align(Alignment.TopEnd)
-                                                                    .clip(CircleShape)
-                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                                                    .padding(1.pad, .25f.pad)
-                                                            )
-                                                        }
-                                                        // todo reusable icon IconAndCount
                                                         if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
@@ -656,12 +634,6 @@ class MainActivity : AppCompatActivity() {
                                                         if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
-                                                                fontWeight = FontWeight.Bold
-                                                            )
-                                                        }
-                                                        if (item.route == AppNav.Explore && activeTrades > 0) {
-                                                            Text(
-                                                                activeTrades.toString(),
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
