@@ -1717,7 +1717,7 @@ fun GroupScreen(groupId: String) {
                         }
                     },
                     extraButtons = {
-                        if (myMember?.member?.host == true) {
+                        if (myMember?.member != null) {
                             TextButton(
                                 {
                                     showManageGroupMembersMenu = true
