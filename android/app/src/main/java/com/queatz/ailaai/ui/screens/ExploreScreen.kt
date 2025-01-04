@@ -431,7 +431,7 @@ fun ExploreScreen() {
                         if (cards.isNotEmpty()) {
                             AnimatedVisibility(showBar) {
                                 CardsBar(
-                                    cardsOfCategory,
+                                    cards = cardsOfCategory,
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     onLongClick = {

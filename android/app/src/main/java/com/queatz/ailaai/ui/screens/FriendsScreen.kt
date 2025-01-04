@@ -454,8 +454,8 @@ fun FriendsScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppHeader(
-            stringResource(R.string.groups),
-            {
+            title = stringResource(R.string.groups),
+            onTitleClick = {
                 scope.launch {
                     state.scrollToTop()
                 }
@@ -463,7 +463,7 @@ fun FriendsScreen() {
         ) {
             var showMenu by rememberStateOf(false)
             IconButton(
-                {
+                onClick = {
                     showMenu = true
                 }
             ) {
@@ -480,15 +480,15 @@ fun FriendsScreen() {
             ScanQrCodeButton()
         }
         MainTabs(
-            tab,
-            {
+            tab = tab,
+            onTab = {
                 setTab(it)
             },
             tabs = tabs
         )
         LocationScaffold(
-            geo,
-            locationSelector,
+            geo = geo,
+            locationSelector = locationSelector,
             enabled = tab == MainTab.Local,
             rationale = {
                 // todo: translate

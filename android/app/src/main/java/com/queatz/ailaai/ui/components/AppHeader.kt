@@ -33,15 +33,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.LocalAppState
 import com.queatz.ailaai.R
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
-import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.theme.pad
@@ -59,7 +56,6 @@ fun ColumnScope.AppHeader(
 ) {
     val context = LocalContext.current
     val hasConnectivity = connectivity.hasConnectivity
-    val nav = nav
     val me = me
     val apiIsReachable = LocalAppState.current.apiIsReachable
 
@@ -70,6 +66,7 @@ fun ColumnScope.AppHeader(
     ) {
         var offlineNote by rememberStateOf("")
         var showClearDialog by rememberStateOf(false)
+        var showProfileMenu by rememberStateOf(false)
 
         LaunchedEffect(Unit) {
             offlineNote = context.dataStore.data.first()[offlineNoteKey].orEmpty()
@@ -79,6 +76,12 @@ fun ColumnScope.AppHeader(
             delay(0.125.seconds)
             context.dataStore.edit {
                 it[offlineNoteKey] = offlineNote
+            }
+        }
+
+        if (showProfileMenu) {
+            ProfileMenu {
+                showProfileMenu = false
             }
         }
 
@@ -146,12 +149,12 @@ fun ColumnScope.AppHeader(
                                 size = 40.dp,
                                 modifier = Modifier
                                     .clickable {
-                                        nav.appNavigate(AppNav.Profile(me.id!!))
+                                        showProfileMenu = true
                                     }
                             )
                         } else {
                             IconButton({
-                                nav.appNavigate(AppNav.Profile(me.id!!))
+                                showProfileMenu = true
                             }) {
                                 Icon(Icons.Outlined.AccountCircle, Icons.Outlined.Settings.name)
                             }

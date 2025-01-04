@@ -190,6 +190,10 @@ fun SchedulePage(
         }
     }
 
+    LaunchedEffect(viewType) {
+        onReminder(null)
+    }
+
     LaunchedEffect(view) {
         offset = startOfDay(Date())
         goToToday.collectLatest {

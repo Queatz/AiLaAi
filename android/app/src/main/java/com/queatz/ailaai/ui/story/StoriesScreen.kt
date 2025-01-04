@@ -1,13 +1,11 @@
 package com.queatz.ailaai.ui.story
 
 import android.app.Activity
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,11 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +32,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.myGeo
-import app.ailaai.api.myScripts
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -63,11 +58,8 @@ import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.swipeMainTabs
-import com.queatz.ailaai.ui.scripts.PreviewScriptAction
-import com.queatz.ailaai.ui.scripts.ScriptsDialog
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.pad
-import com.queatz.db.Script
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import kotlinx.coroutines.CancellationException
@@ -83,9 +75,9 @@ fun StoriesScreen() {
     val context = LocalContext.current
     var geo by remember { mutableStateOf<LatLng?>(null) }
     val locationSelector = locationSelector(
-        geo,
-        { geo = it },
-        nav.context as Activity
+        geo = geo,
+        onGeoChange = { geo = it },
+        activity = nav.context as Activity
     )
     var stories by remember { mutableStateOf(cache) }
     val storyContents = remember(stories) {
@@ -100,16 +92,8 @@ fun StoriesScreen() {
     }
     var isLoading by rememberStateOf(stories.isEmpty())
     val nav = nav
-    var myScripts by rememberStateOf(emptyList<Script>())
-    var showScriptsDialog by rememberStateOf(false)
     var showShareAThought by rememberStateOf(true)
     val isAtTop by state.isAtTop()
-
-    LaunchedEffect(Unit) {
-        api.myScripts {
-            myScripts = it
-        }
-    }
 
     LaunchedEffect(stories) {
         cache = stories
@@ -149,31 +133,14 @@ fun StoriesScreen() {
         reload()
     }
 
-    @Composable
-    fun RowScope.ScriptsButton() {
-        AnimatedVisibility(myScripts.isNotEmpty() && isAtTop) {
-            IconButton(
-                onClick = {
-                    showScriptsDialog = true
-                }
-            ) {
-                Icon(
-                    Icons.Outlined.HistoryEdu,
-                    stringResource(R.string.scripts)
-                )
-            }
-        }
-    }
-
     LocationScaffold(
-        geo,
-        locationSelector,
+        geo = geo,
+        locationSelector = locationSelector,
         appHeader = {
             AppHeader(
                 title = stringResource(R.string.posts),
                 onTitleClick = {}
             ) {
-                ScriptsButton()
                 ScanQrCodeButton()
             }
         },
@@ -182,15 +149,6 @@ fun StoriesScreen() {
             DisplayText("Share and discover what's new in town.")
         }
     ) {
-        if (showScriptsDialog) {
-            ScriptsDialog(
-                {
-                    showScriptsDialog = false
-                },
-                previewScriptAction = PreviewScriptAction.Edit
-            )
-        }
-
         Column {
             AppHeader(
                 stringResource(R.string.posts),
@@ -200,7 +158,6 @@ fun StoriesScreen() {
                     }
                 }
             ) {
-                ScriptsButton()
                 ScanQrCodeButton()
             }
             Box(

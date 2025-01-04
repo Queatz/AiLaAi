@@ -799,19 +799,6 @@ fun ProfileScreen(personId: String) {
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                IconButton(
-                                    {
-                                        nav.appNavigate(AppNav.Settings)
-                                    },
-                                    Modifier
-                                        .size(42.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Outlined.Settings,
-                                        stringResource(R.string.settings),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         } else {
                             IconButton(
