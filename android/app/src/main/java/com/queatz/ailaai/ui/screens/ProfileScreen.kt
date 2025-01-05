@@ -29,7 +29,6 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.QrCode2
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +58,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.ailaai.api.activeCardsOfPerson
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
@@ -918,7 +916,7 @@ fun ProfileScreen(personId: String) {
                                     .align(Alignment.Center)
                             ) {
                                 Text(
-                                    person?.name
+                                    text = person?.name
                                         ?: (if (isMe) stringResource(R.string.add_your_name) else stringResource(R.string.someone)),
                                     color = if (isMe && person?.name?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
                                     style = MaterialTheme.typography.titleLarge,

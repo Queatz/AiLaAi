@@ -167,6 +167,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.serialization.encodeToString
+import java.util.logging.Logger
 import kotlin.time.Duration.Companion.seconds
 
 private val appTabKey = stringPreferencesKey("app.tab")
@@ -401,9 +402,11 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     LaunchedEffect(me) {
-                        me?.utcOffset?.let {
-                            val utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0)
-                            if (it != utcOffset) {
+                        val utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0)
+                        me?.utcOffset.let { oldUtcOffset ->
+                            Logger.getAnonymousLogger().info("oldUtcOffset = $oldUtcOffset utcOffset = $utcOffset")
+                            if (oldUtcOffset != utcOffset) {
+                                Logger.getAnonymousLogger().info("Updated utcOffset")
                                 api.updateMe(Person(utcOffset = utcOffset))
                             }
                         }
