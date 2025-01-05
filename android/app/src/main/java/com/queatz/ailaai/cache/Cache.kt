@@ -11,6 +11,7 @@ val cache by lazy {
 }
 
 enum class CacheKey {
+    Me,
     Groups
 }
 
@@ -29,4 +30,8 @@ class Cache {
             json.decodeFromString<T>(it.value)
         }
     }.getOrNull()
+
+    fun remove(key: CacheKey) {
+        db.box<CacheDbModel>().query(CacheDbModel_.key.equal(key.name)).build().remove()
+    }
 }

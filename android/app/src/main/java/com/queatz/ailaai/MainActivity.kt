@@ -100,6 +100,8 @@ import app.ailaai.api.me
 import app.ailaai.api.updateMe
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.queatz.ailaai.cache.CacheKey
+import com.queatz.ailaai.cache.cache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.appDomains
@@ -326,7 +328,7 @@ class MainActivity : AppCompatActivity() {
                         showWelcomeDialog = isSignUp
                     }
                 } else {
-                    var me by remember { mutableStateOf<Person?>(null) }
+                    var me by remember { mutableStateOf<Person?>(cache.get(CacheKey.Me)) }
                     var showSignedOut by rememberStateOf(false)
                     val snackbarHostState = remember { SnackbarHostState() }
                     val scope = rememberCoroutineScope()
@@ -365,6 +367,7 @@ class MainActivity : AppCompatActivity() {
                         }) {
                             apiIsReachable = true
                             me = it
+                            cache.put(CacheKey.Me, me!!)
                             push.setMe(me!!.id!!)
                             calls.setMe(me!!.id!!)
                             updateAppLanguage(me)
@@ -488,6 +491,7 @@ class MainActivity : AppCompatActivity() {
                                     {
                                         known = false
                                         me = null
+                                        cache.remove(CacheKey.Me)
                                         showSignedOut = false
                                     }
                                 ) {
@@ -701,14 +705,15 @@ class MainActivity : AppCompatActivity() {
                                                 scope.launch {
                                                     api.me {
                                                         me = it
+                                                        cache.put(CacheKey.Me, me!!)
                                                     }
                                                 }
                                             }
                                         }
 
                                         NavHost(
-                                            navController,
-                                            startDestination ?: AppNav.Explore.route,
+                                            navController = navController,
+                                            startDestination = startDestination ?: AppNav.Explore.route,
                                             modifier = Modifier
                                                 .padding(it)
                                                 .fillMaxSize()

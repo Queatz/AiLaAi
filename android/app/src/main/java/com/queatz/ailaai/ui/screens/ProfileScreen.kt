@@ -89,7 +89,6 @@ import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.isGroupLike
 import com.queatz.ailaai.extensions.name
-import com.queatz.ailaai.extensions.next
 import com.queatz.ailaai.extensions.nextWrap
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.profileUrl
