@@ -9,6 +9,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
         classpath("com.huawei.agconnect:agcp:1.9.1.300")
         classpath("com.google.gms:google-services:4.4.2")
+        classpath("io.objectbox:objectbox-gradle-plugin:4.0.3")
     }
 }
 

@@ -545,18 +545,12 @@ class MainActivity : AppCompatActivity() {
                                     ) {
                                         menuItems.forEach { item ->
                                             val selected = navController.currentDestination?.route == item.route.route
-                                            val scale by animateFloatAsState(
-                                                if (selected && !appUi.showNavLabels) 1.25f else 1f,
-                                                spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)
-                                            )
                                             NavigationBarItem(
                                                 icon = {
                                                     Box {
                                                         Icon(
                                                             if (selected) item.selectedIcon ?: item.icon else item.icon,
-                                                            contentDescription = null,
-                                                            modifier = Modifier
-                                                                .scale(scale)
+                                                            contentDescription = null
                                                         )
                                                         // todo reusable icon IconAndCount
                                                         if (item.route == AppNav.Messages && newMessages > 0) {

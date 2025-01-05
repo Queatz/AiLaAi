@@ -16,6 +16,7 @@ import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.db.db
 import com.queatz.ailaai.services.calls
 import com.queatz.ailaai.services.connectivity
 import com.queatz.ailaai.services.push
@@ -54,6 +55,7 @@ class Application : android.app.Application() {
         }
 
         ChoiceSdk.init(this)
+        db.init(this)
         api.init(this)
         push.init(this)
         ui.init(this)

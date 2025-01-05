@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import android.provider.SyncStateContract.Helpers.update
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,6 +59,8 @@ import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.cache.CacheKey
+import com.queatz.ailaai.cache.cache
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.appNavigate
@@ -120,16 +123,24 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
-private var cache = mutableMapOf<MainTab, List<GroupExtended>>()
+private var tabCache = mutableMapOf<MainTab, List<GroupExtended>>()
 
 @Composable
 fun FriendsScreen() {
+    fun tabCache(tab: MainTab) = when (tab) {
+        MainTab.Friends -> {
+            tabCache[tab] ?: cache.get<List<GroupExtended>>(CacheKey.Groups) ?: emptyList()
+        }
+        else -> {
+            tabCache[tab] ?: emptyList()
+        }
+    }
+
     val context = LocalContext.current
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
     var allHiddenGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
     var allPeople by remember { mutableStateOf(emptyList<Person>()) }
-    var results by remember { mutableStateOf(emptyList<SearchResult>()) }
     var createGroupName by remember { mutableStateOf("") }
     var showCreateGroupName by rememberStateOf(false)
     var showCreateGroupMembers by rememberStateOf(false)
@@ -139,17 +150,17 @@ fun FriendsScreen() {
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
     var tab by rememberSavableStateOf(MainTab.Friends)
-    var allGroups by remember { mutableStateOf(
-        cache[tab] ?: emptyList()
-    ) }
+    var allGroups by remember {
+        mutableStateOf(tabCache(tab))
+    }
     var isLoading by rememberStateOf(allGroups.isEmpty())
     var geo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
     val me = me
     val locationSelector = locationSelector(
-        geo,
-        { geo = it },
-        nav.context as Activity
+        geo = geo,
+        onGeoChange = { geo = it },
+        activity = nav.context as Activity
     )
     val reloadFlow = remember {
         MutableSharedFlow<Boolean>()
@@ -168,7 +179,8 @@ fun FriendsScreen() {
     }
 
     LaunchedEffect(allGroups) {
-        cache[tab] = allGroups
+        tabCache[tab] = allGroups
+        cache.put(CacheKey.Groups, allGroups)
         categories = allGroups
             .flatMap { it.group?.categories ?: emptyList() }
             .sortedDistinct()
@@ -187,12 +199,17 @@ fun FriendsScreen() {
         reloadStatuses()
     }
 
-    fun update() {
-        results = allPeople
+    val results = remember(
+        allPeople,
+        searchText,
+        allGroups,
+        selectedCategory
+    ) {
+        allPeople
             .map { SearchResult.Connect(it) } +
                 searchText.trim().let { text ->
                     (if (text.isBlank()) allGroups else allGroups.filter {
-                        (it.group?.name?.contains(text, true) ?: false) ||
+                        (it.group?.name?.contains(text, true) == true) ||
                                 it.members?.any {
                                     it.person?.id != me?.id && it.person?.name?.contains(
                                         text,
@@ -242,7 +259,6 @@ fun FriendsScreen() {
 
             else -> {}
         }
-        update()
         isLoading = false
         scope.launch {
             joins.reload()
@@ -267,11 +283,6 @@ fun FriendsScreen() {
         reloadFlow.emit(true)
     }
 
-// Todo: is there a nice way to ask upfront
-//    LaunchedEffect(Unit) {
-//        requestNotifications()
-//    }
-
     LaunchedEffect(searchText) {
         if (searchText.isBlank()) {
             allPeople = emptyList()
@@ -280,12 +291,7 @@ fun FriendsScreen() {
                 allPeople = it
             }
         }
-        update()
         reloadFlow.emit(true)
-    }
-
-    LaunchedEffect(selectedCategory, searchText) {
-        update()
     }
 
     var skipFirst by rememberStateOf(geo != null)
@@ -304,9 +310,8 @@ fun FriendsScreen() {
 
     fun setTab(it: MainTab) {
         tab = it
-        allGroups = cache[tab] ?: emptyList()
+        allGroups = tabCache(tab)
         allPeople = emptyList()
-        update()
         isLoading = allGroups.isEmpty()
         selectedCategory = null
         scope.launch {
@@ -378,7 +383,7 @@ fun FriendsScreen() {
 
     if (selectedHiddenGroups.isNotEmpty()) {
         AlertDialog(
-            {
+            onDismissRequest = {
                 selectedHiddenGroups = emptyList()
             },
             title = {

@@ -11,6 +11,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
     id("com.ailaai.shared.config")
+    id("io.objectbox")
 }
 
 val properties = Properties()

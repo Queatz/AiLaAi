@@ -38,6 +38,7 @@ import com.queatz.ailaai.appLanguage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.db.db
 import com.queatz.ailaai.extensions.*
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.me
@@ -225,6 +226,7 @@ fun SettingsScreen(
             if (biometricsSucceeded) {
                 scope.launch {
                     api.signOut()
+                    db.clear()
                     updateMe()
                     signOutDialog = false
                 }

@@ -3,6 +3,7 @@
 
  - Pin groups
  - See local time on profiles
+ - Groups are cached for faster access
 
 0.9.99
 ======
