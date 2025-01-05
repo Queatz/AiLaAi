@@ -3,7 +3,7 @@ package app.cards
 import androidx.compose.runtime.Composable
 import com.queatz.db.Card
 import components.CardListItem
-import opensavvy.compose.lazy.LazyColumn
+import components.LazyColumn
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.gap
@@ -22,7 +22,7 @@ fun MapList(
             padding(.5.r)
         }
     }) {
-        items(cards, key = { it.id!! }) { card ->
+        items(cards) { card ->
             CardListItem(card) {
                 onSelected(card)
             }

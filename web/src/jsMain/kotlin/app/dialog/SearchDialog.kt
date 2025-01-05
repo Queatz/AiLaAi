@@ -4,10 +4,9 @@ import Configuration
 import LocalConfiguration
 import androidx.compose.runtime.*
 import app.nav.NavSearchInput
-import appString
 import application
+import components.LazyColumn
 import components.Loading
-import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import r
@@ -43,11 +42,11 @@ suspend fun <T : Any> searchDialog(
 
     CompositionLocalProvider(LocalConfiguration provides configuration) {
         NavSearchInput(
-            value,
-            {
+            value = value,
+            onChange = {
                 value = it
             },
-            placeholder = appString { search },
+            placeholder = placeholder,
             styles = {
                 margin(0.r)
                 width(28.r)

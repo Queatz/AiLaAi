@@ -26,14 +26,13 @@ import appText
 import application
 import com.queatz.db.Reminder
 import components.IconButton
+import components.LazyColumn
 import components.Loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lib.rawTimeZones
 import lib.systemTimezone
-import notBlank
-import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
@@ -334,7 +333,7 @@ fun ScheduleNavPage(
             Loading()
         } else {
             LazyColumn {
-                items(shownReminders, key = { it.id!! }) {
+                items(shownReminders) {
                     ReminderItem(reminder = it, selected = reminder?.id == it.id) {
                         onReminder(it)
                     }

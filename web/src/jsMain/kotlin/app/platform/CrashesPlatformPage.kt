@@ -10,6 +10,7 @@ import api
 import app.ailaai.api.crashes
 import com.queatz.db.Crash
 import components.IconButton
+import components.LazyColumn
 import components.Loading
 import format
 import json
@@ -17,7 +18,6 @@ import kotlinx.browser.window
 import kotlinx.datetime.toJSDate
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -58,7 +58,7 @@ fun CrashesPlatformPage() {
         Loading()
     } else {
         LazyColumn {
-            items(crashes, key = { it.id!! }) { crash ->
+            items(crashes) { crash ->
                 val details = remember {
                     json.decodeFromString<JsonObject>(crash.details.orEmpty())
                 }

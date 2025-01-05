@@ -1,4 +1,3 @@
-import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,7 +12,6 @@ import app.components.Spacer
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import components.CardContent
-import components.CardListItem
 import components.Icon
 import components.SearchField
 import kotlinx.browser.document
@@ -23,7 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.dom.addClass
 import lib.getCameraLngLat
 import lib.mapboxgl
-import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
 import org.jetbrains.compose.web.css.Color
@@ -41,7 +38,6 @@ import org.jetbrains.compose.web.css.backgroundSize
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
-import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
@@ -50,7 +46,6 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
-import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY

@@ -11,11 +11,11 @@ import api
 import app.ailaai.api.reports
 import com.queatz.db.Report
 import components.IconButton
+import components.LazyColumn
 import components.Loading
 import format
 import kotlinx.browser.window
 import kotlinx.datetime.toJSDate
-import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -63,7 +63,7 @@ fun ReportsPlatformPage() {
             }
         }) {
             LazyColumn {
-                items(reports, key = { it.id!! }) { report ->
+                items(reports) { report ->
                     Div({
                         style {
                             fontSize(18.px)

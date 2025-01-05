@@ -36,6 +36,8 @@ import com.queatz.db.PersonStatus
 import com.queatz.db.Status
 import com.queatz.db.people
 import components.IconButton
+import components.LazyColumn
+import components.LazyRow
 import components.Loading
 import components.ProfilePhoto
 import ellipsize
@@ -51,8 +53,6 @@ import kotlinx.datetime.toJSDate
 import lib.differenceInMinutes
 import lib.formatDistanceToNowStrict
 import notBlank
-import opensavvy.compose.lazy.LazyColumn
-import opensavvy.compose.lazy.LazyRow
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -371,7 +371,7 @@ fun GroupsNavPage(
                                     marginBottom(1.r)
                                 }
                             }) {
-                                items(people, key = { it.id!! }) { person ->
+                                items(people) { person ->
                                     Div({
                                         classes(Styles.personItem)
 
@@ -474,7 +474,7 @@ fun GroupsNavPage(
                             }
                         }
                     }
-                    items(shownGroups, key = { it.group!!.id!! }) { group ->
+                    items(shownGroups) { group ->
                         GroupItem(
                             group = group,
                             selected = (selected as? GroupNav.Selected)?.group?.group?.id == group.group?.id,

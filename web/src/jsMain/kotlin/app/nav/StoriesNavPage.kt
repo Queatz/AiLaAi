@@ -16,6 +16,7 @@ import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import com.queatz.db.toJsonStoryContent
 import components.IconButton
+import components.LazyColumn
 import components.Loading
 import focusable
 import json
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import notBlank
-import opensavvy.compose.lazy.LazyColumn
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -220,7 +220,7 @@ fun StoriesNavPage(
                 }
             } else {
                 LazyColumn {
-                    items(shownStories, key = { it.id!! }) {
+                    items(shownStories) {
                         StoryItem(it, it == (selected as? StoryNav.Selected)?.story) {
                             onSelected(
                                 StoryNav.Selected(
