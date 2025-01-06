@@ -64,7 +64,7 @@ fun NotificationsLayout() {
                 }
             }
 
-            if (activeNotifications.size >= 3) {
+            if (activeNotifications.size >= 2) {
                 IconButton(
                     // todo: translate
                     name = "mop",

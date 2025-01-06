@@ -195,6 +195,7 @@ fun ProfileScreen(personId: String) {
     val me = me
     val nav = nav
     var showProfileInfo by rememberStateOf(ProfileInfo.Seen)
+    val isMe = me?.id == personId
 
     val setPhotoState = remember(person == null) {
         ChoosePhotoDialogState(mutableStateOf(person?.name ?: ""))
@@ -225,7 +226,7 @@ fun ProfileScreen(personId: String) {
             },
             url = profileUrl(personId),
             name = person?.name,
-            title = stringResource(R.string.my_qr)
+            title = if (isMe) stringResource(R.string.my_qr) else stringResource(R.string.qr_code)
         )
     }
 
@@ -600,8 +601,6 @@ fun ProfileScreen(personId: String) {
             }
         )
     }
-
-    val isMe = me?.id == personId
 
     Box {
         LazyVerticalGrid(
