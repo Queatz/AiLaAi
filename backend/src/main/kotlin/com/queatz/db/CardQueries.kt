@@ -88,7 +88,7 @@ fun Db.cardsOfGroup(me: String?, group: String) = list(
             return merge(
                 x,
                 {
-                    cardCount: count(for card in @@collection filter ((@me != null && card.${f(Card::person)} == @me) or card.${f(Card::active)} == true) && card.${f(Card::parent)} == x._key return true)
+                    ${f(Card::cardCount)}: count(for card in @@collection filter ((@me != null && card.${f(Card::person)} == @me) or card.${f(Card::active)} == true) && card.${f(Card::parent)} == x._key return true)
                 }
             )
     """.trimIndent(),

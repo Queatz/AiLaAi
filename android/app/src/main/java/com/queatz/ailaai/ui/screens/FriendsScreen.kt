@@ -225,7 +225,7 @@ fun FriendsScreen() {
     }
 
     suspend fun reload(passive: Boolean = false) {
-        isLoading = !passive || results.isEmpty()
+        isLoading = (!passive && tabCache[tab].isNullOrEmpty()) || results.isEmpty()
         when (tab) {
             MainTab.Friends -> {
                 api.groups(
