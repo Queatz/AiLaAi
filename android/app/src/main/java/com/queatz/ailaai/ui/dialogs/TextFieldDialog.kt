@@ -22,7 +22,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 @Composable
 fun TextFieldDialog(
@@ -58,7 +57,7 @@ fun TextFieldDialog(
         ) {
             if (title != null) {
                 Text(
-                    title,
+                    text = title,
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 1.pad)
                 )
@@ -70,7 +69,7 @@ fun TextFieldDialog(
                 focusRequester.requestFocus()
             }
             OutlinedTextField(
-                text,
+                value = text,
                 onValueChange = {
                     if (valueFormatter == null) {
                         if (maxLength == null || it.length < maxLength) {
@@ -110,14 +109,19 @@ fun TextFieldDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (showDismiss) {
-                    TextButton({
-                        onDismiss?.invoke() ?: onDismissRequest()
-                    }) {
-                        Text(dismissButtonText ?: stringResource(R.string.close), color = MaterialTheme.colorScheme.secondary)
+                    TextButton(
+                        onClick = {
+                            onDismiss?.invoke() ?: onDismissRequest()
+                        }
+                    ) {
+                        Text(
+                            text = dismissButtonText ?: stringResource(R.string.close),
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
                 TextButton(
-                    {
+                    onClick = {
                         disableSubmit = true
 
                         coroutineScope.launch {
@@ -136,4 +140,3 @@ fun TextFieldDialog(
         }
     }
 }
-

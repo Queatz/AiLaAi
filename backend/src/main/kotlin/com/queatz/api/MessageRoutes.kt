@@ -5,14 +5,18 @@ import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.ReactBody
+import com.queatz.db.Story
 import com.queatz.db.asId
 import com.queatz.db.group
 import com.queatz.db.member
+import com.queatz.db.message
 import com.queatz.db.react
+import com.queatz.db.reactionsOf
 import com.queatz.db.unreact
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
+import com.queatz.plugins.meOrNull
 import com.queatz.plugins.notify
 import com.queatz.plugins.respond
 import io.ktor.http.HttpStatusCode
@@ -26,7 +30,7 @@ fun Route.messageRoutes() {
     authenticate {
         get("/messages/{id}") {
             respond {
-                val message = db.document(Message::class, parameter("id"))
+                val message = db.message(meOrNull?.id?.asId(Person::class), parameter("id"))
                 val member = message?.group?.let { db.member(me.id!!, it) }
 
                 if (message == null || member == null) {
@@ -93,6 +97,12 @@ fun Route.messageRoutes() {
                 }
 
                 HttpStatusCode.NoContent
+            }
+        }
+
+        get("/messages/{id}/reactions") {
+            respond {
+                db.reactionsOf(parameter("id").asId(Message::class))
             }
         }
 

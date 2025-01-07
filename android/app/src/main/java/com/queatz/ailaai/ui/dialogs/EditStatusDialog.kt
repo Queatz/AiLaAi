@@ -222,7 +222,7 @@ fun EditStatusDialog(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {

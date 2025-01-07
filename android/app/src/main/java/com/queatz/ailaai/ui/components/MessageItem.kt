@@ -128,6 +128,7 @@ fun MessageItem(
                 getBot = getBot,
                 getMessage = getMessage,
                 canReply = canReply,
+                canReact = member != null,
                 onReply = onReply,
                 onReplyInNewGroup = onReplyInNewGroup,
                 onUpdated = onUpdated,

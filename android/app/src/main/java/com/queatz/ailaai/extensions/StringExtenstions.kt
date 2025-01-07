@@ -63,7 +63,7 @@ fun String.launchUrl(context: Context) {
     }
 }
 
-val String.nullIfBlank get() = takeIf { it.isNotBlank() }
+val String.nullIfBlank @Deprecated("Use .notBlank") get() = takeIf { it.isNotBlank() }
 
 fun String.sendEmail(context: Context, subject: String? = null) {
     val intent = Intent(Intent.ACTION_SENDTO)

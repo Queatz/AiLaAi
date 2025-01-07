@@ -284,6 +284,19 @@ fun Db.groupsWith(people: List<String>, exact: Boolean = false) = query(
     )
 )
 
+fun Db.message(personId: String?, message: String) = one(
+    Message::class,
+    """
+        for x in @@collection
+            filter x._key == @message
+            limit 1
+            return ${messageWithReactions(personId = personId)}
+    """.trimIndent(),
+    mapOf(
+        "message" to message
+    )
+)
+
 fun Db.messages(
     personId: String?,
     group: String,
@@ -299,7 +312,7 @@ fun Db.messages(
             ${if (search != null) "and contains(lower(x.${f(Message::text)}), @search)" else ""}
             sort x.${f(Message::createdAt)} desc
             limit @limit
-            return ${messageWithReactions(personId)}
+            return ${messageWithReactions(personId = personId)}
     """.trimIndent(),
     mapOf(
         "group" to group,
@@ -312,6 +325,8 @@ fun Db.messages(
 private fun Db.messageWithReactions(personId: String?, messageVar: String = "x") = """
     merge(
         $messageVar,
-        ${f(Message::reactions)}: ${reactions(personId, "$messageVar._id")}
+        {
+            "${f(Message::reactions)}": ${reactions(personId?.let { "\"$it\"" }, "$messageVar._id")}            
+        }
     )
 """.trimIndent()

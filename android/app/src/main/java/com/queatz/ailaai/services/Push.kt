@@ -153,7 +153,10 @@ class Push {
             .setContentIntent(
                 TaskStackBuilder.create(context).run {
                     addNextIntentWithParentStack(intent)
-                    getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or (if (replyInGroup == null) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_MUTABLE))
+                    getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT or (if (replyInGroup == null) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_MUTABLE)
+                    )
                 }
             ).let {
                 if (sound != null) {
@@ -232,21 +235,72 @@ enum class Notifications(
     val importance: Int,
     val category: String,
 ) {
-    Calls(R.string.calls, R.string.calls_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_CALL),
-    OngoingCalls(R.string.ongoing_calls, R.string.calls_notification_channel_description, NotificationManager.IMPORTANCE_LOW, NotificationCompat.CATEGORY_CALL),
-    Reminders(R.string.reminders, R.string.reminders_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_REMINDER),
-    Messages(R.string.messages, R.string.messages_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_MESSAGE),
-    Host(R.string.host, R.string.host_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
-    Collaboration(R.string.collaboration, R.string.collaboration_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
-    Trade(R.string.trade, R.string.trade_notification_channel_description, NotificationManager.IMPORTANCE_HIGH, NotificationCompat.CATEGORY_SOCIAL),
-    Subscriptions(R.string.subscriptions, R.string.subscription_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
-    Comments(R.string.comments, R.string.comments_notification_channel_description, NotificationManager.IMPORTANCE_DEFAULT, NotificationCompat.CATEGORY_SOCIAL),
+    Calls(
+        R.string.calls,
+        R.string.calls_notification_channel_description,
+        NotificationManager.IMPORTANCE_HIGH,
+        NotificationCompat.CATEGORY_CALL
+    ),
+    OngoingCalls(
+        R.string.ongoing_calls,
+        R.string.calls_notification_channel_description,
+        NotificationManager.IMPORTANCE_LOW,
+        NotificationCompat.CATEGORY_CALL
+    ),
+    Reminders(
+        R.string.reminders,
+        R.string.reminders_notification_channel_description,
+        NotificationManager.IMPORTANCE_HIGH,
+        NotificationCompat.CATEGORY_REMINDER
+    ),
+    Messages(
+        R.string.messages,
+        R.string.messages_notification_channel_description,
+        NotificationManager.IMPORTANCE_HIGH,
+        NotificationCompat.CATEGORY_MESSAGE
+    ),
+    Host(
+        R.string.host,
+        R.string.host_notification_channel_description,
+        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
+    Collaboration(
+        R.string.collaboration,
+        R.string.collaboration_notification_channel_description,
+        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
+    Trade(
+        R.string.trade,
+        R.string.trade_notification_channel_description,
+        NotificationManager.IMPORTANCE_HIGH,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
+    Subscriptions(
+        R.string.subscriptions,
+        R.string.subscription_notification_channel_description,
+        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
+    Comments(
+        R.string.comments,
+        R.string.comments_notification_channel_description,
+        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
     ;
+
     val key get() = name.lowercase()
 }
 
-val Int.priority: Int get() = when (this) {
-    NotificationManager.IMPORTANCE_HIGH -> NotificationCompat.PRIORITY_HIGH
-    NotificationManager.IMPORTANCE_LOW -> NotificationCompat.PRIORITY_LOW
-    else -> NotificationCompat.PRIORITY_DEFAULT
-}
+val Int.priority: Int
+    get() = when (this) {
+        NotificationManager.IMPORTANCE_HIGH -> NotificationCompat.PRIORITY_HIGH
+        NotificationManager.IMPORTANCE_LOW -> NotificationCompat.PRIORITY_LOW
+        else -> NotificationCompat.PRIORITY_DEFAULT
+    }
+
+fun Push.isTopGroup(groupId: String?) = latestEvent == Lifecycle.Event.ON_RESUME &&
+        navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
+        navController?.currentBackStackEntry?.arguments?.getString("id") == groupId

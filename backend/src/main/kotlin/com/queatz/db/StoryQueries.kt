@@ -6,12 +6,12 @@ fun Db.storyExtended(person: String?, storyVal: String) = """
     merge(
         $storyVal,
         {
-            ${f(Story::authors)}: (
+            "${f(Story::authors)}": (
                 for author in ${Person::class.collection()}
                     filter author._key == $storyVal.${f(Story::person)}
                     return author
             ),
-            ${f(Story::reactions)}: ${reactions(person?.let { "\"$it\"" }, "$storyVal._id")}
+            "${f(Story::reactions)}": ${reactions(person?.let { "\"$it\"" }, "$storyVal._id")}
         }
     )
 """.trimIndent()

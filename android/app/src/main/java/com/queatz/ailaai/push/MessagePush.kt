@@ -11,15 +11,12 @@ import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.nullIfBlank
 import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.Push
+import com.queatz.ailaai.services.isTopGroup
 import com.queatz.push.MessagePushData
 import kotlinx.coroutines.launch
 
 fun Push.receive(data: MessagePushData) {
-    if (
-        latestEvent == Lifecycle.Event.ON_RESUME &&
-        navController?.currentBackStackEntry?.destination?.route == "group/{id}" &&
-        navController?.currentBackStackEntry?.arguments?.getString("id") == data.group.id
-    ) {
+    if (isTopGroup(data.group.id)) {
         // todo switch to push.events
         scope.launch {
             latestMessageFlow.emit(data.group.id)

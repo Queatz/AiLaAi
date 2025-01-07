@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
@@ -25,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Reply
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -37,7 +35,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
@@ -58,9 +54,9 @@ import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
 import app.ailaai.api.profile
+import app.ailaai.api.reactToMessage
 import app.ailaai.api.sticker
 import app.ailaai.api.updateMessage
-import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.queatz.ailaai.AppNav
@@ -70,8 +66,8 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAllAttachments
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
-import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.save
 import com.queatz.ailaai.extensions.share
@@ -80,6 +76,7 @@ import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
+import com.queatz.ailaai.message.MessageReactions
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.trade.ActiveTradeItem
@@ -106,6 +103,8 @@ import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 import com.queatz.db.PhotosAttachment
 import com.queatz.db.ProfilesAttachment
+import com.queatz.db.ReactBody
+import com.queatz.db.Reaction
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
 import com.queatz.db.StickerAttachment
@@ -134,6 +133,7 @@ fun ColumnScope.MessageContent(
     getBot: (String) -> Bot?,
     getMessage: suspend (String) -> Message?,
     canReply: Boolean,
+    canReact: Boolean,
     onReply: (Message) -> Unit,
     onReplyInNewGroup: (Message) -> Unit,
     onUpdated: () -> Unit,
@@ -174,10 +174,10 @@ fun ColumnScope.MessageContent(
 
     if (showStoragePermissionDialog) {
         RationaleDialog(
-            {
+            onDismissRequest = {
                 showStoragePermissionDialog = false
             },
-            stringResource(R.string.permission_request)
+            message = stringResource(R.string.permission_request)
         )
     }
 
@@ -230,6 +230,7 @@ fun ColumnScope.MessageContent(
                         id = attachment.sticker
                     }
                 }
+
                 is UrlAttachment -> {
                     attachedUrls += attachment
                 }
@@ -241,11 +242,27 @@ fun ColumnScope.MessageContent(
         val messageString = stringResource(R.string.message)
         val savedString = stringResource(R.string.saved)
         Menu(
-            {
+            onDismissRequest = {
                 onShowMessageDialog(false)
             }
         ) {
-            if (canReply) {
+            if (canReact) {
+                ReactLayout(
+                    modifier = Modifier.padding(1.pad)
+                ) { reaction ->
+                    scope.launch {
+                        api.reactToMessage(
+                            id = message.id!!,
+                            react = ReactBody(Reaction(reaction = reaction))
+                        ) {
+                            onShowMessageDialog(false)
+                            onUpdated()
+                        }
+                    }
+                }
+            }
+
+                if (canReply) {
                 menuItem(stringResource(R.string.reply)) {
                     onShowMessageDialog(false)
                     onReply(message)
@@ -369,7 +386,7 @@ fun ColumnScope.MessageContent(
     if (showDeleteMessageDialog) {
         var disableSubmit by rememberStateOf(false)
         AlertDialog(
-            {
+            onDismissRequest = {
                 showDeleteMessageDialog = false
             },
             title = {
@@ -543,6 +560,7 @@ fun ColumnScope.MessageContent(
                     getBot = getBot,
                     getMessage = getMessage,
                     canReply = canReply,
+                    canReact = canReact,
                     onReply = onReply,
                     onReplyInNewGroup = onReplyInNewGroup,
                     onUpdated = {}, // todo delete from reply
@@ -563,25 +581,30 @@ fun ColumnScope.MessageContent(
     }
 
     attachedCardId?.let {
-        Box(modifier = Modifier
-            .padding(1.pad)
-            .widthIn(max = 320.dp)
-            .let {
-                if (isReply) {
-                    it
-                } else {
+        Box(
+            modifier = Modifier
+                .padding(1.pad)
+                .widthIn(max = 320.dp)
+                .then(
                     when (isMe) {
-                        true -> it.padding(start = 12.pad)
-                            .align(Alignment.End)
+                        isReply -> {
+                            Modifier
+                        }
 
-                        false -> it.padding(end = 12.pad)
-                            .align(Alignment.Start)
+                        isMe -> {
+                            Modifier.padding(start = 12.pad)
+                                .align(Alignment.End)
+                        }
+
+                        else -> {
+                            Modifier.padding(end = 12.pad)
+                                .align(Alignment.Start)
+                        }
                     }
-                }
-            }
+                )
         ) {
             CardItem(
-                {
+                onClick = {
                     nav.appNavigate(AppNav.Page(it))
                 },
                 onCategoryClick = {
@@ -594,7 +617,7 @@ fun ColumnScope.MessageContent(
         }
     }
 
-    attachedPhotos?.ifNotEmpty?.let { photos ->
+    attachedPhotos?.notEmpty?.let { photos ->
         Column(
             verticalArrangement = Arrangement.spacedBy(1.pad),
             horizontalAlignment = if (isMe) Alignment.End else Alignment.Start,
@@ -629,7 +652,7 @@ fun ColumnScope.MessageContent(
         }
     }
 
-    attachedVideos?.ifNotEmpty?.let { videos ->
+    attachedVideos?.notEmpty?.let { videos ->
         Column(
             verticalArrangement = Arrangement.spacedBy(1.pad),
             horizontalAlignment = if (isMe) Alignment.End else Alignment.Start,
@@ -830,7 +853,7 @@ fun ColumnScope.MessageContent(
         }
     }
 
-    attachedUrls.ifNotEmpty?.let { urls ->
+    attachedUrls.notEmpty?.let { urls ->
         Column(
             verticalArrangement = Arrangement.spacedBy(1.pad),
             modifier = Modifier
@@ -940,9 +963,42 @@ fun ColumnScope.MessageContent(
         )
     }
 
-    AnimatedVisibility(showTime, modifier = Modifier.align(if (isMe) Alignment.End else Alignment.Start)) {
+    val hasReactions = message.reactions?.all?.isNotEmpty() == true
+
+    AnimatedVisibility(
+        visible = hasReactions,
+        modifier = Modifier
+            .align(if (isMe) Alignment.End else Alignment.Start)
+    ) {
+        MessageReactions(
+            message = message,
+            alignment = if (isMe) Alignment.End else Alignment.Start,
+            modifier = Modifier
+                .padding(horizontal = 1.pad).let {
+                if (isReply) {
+                    it.padding(bottom = 1.pad)
+                } else {
+                    it.padding(bottom = .5f.pad)
+                }
+            }
+        ) {
+            onUpdated()
+        }
+    }
+
+    AnimatedVisibility(
+        visible = showTime,
+        modifier = Modifier
+            .align(if (isMe) Alignment.End else Alignment.Start)
+    ) {
         Text(
-            "${message.createdAt!!.timeAgo()}, ${message.member?.let { getPerson(it)?.name } ?: message.bot?.let { getBot(it)?.name } ?: stringResource(R.string.someone)}",
+            "${message.createdAt!!.timeAgo()}, ${
+                message.member?.let { getPerson(it)?.name } ?: message.bot?.let {
+                    getBot(
+                        it
+                    )?.name
+                } ?: stringResource(R.string.someone)
+            }",
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodySmall,
             textAlign = if (isMe) TextAlign.End else TextAlign.Start,
@@ -957,40 +1013,4 @@ fun ColumnScope.MessageContent(
                 }
         )
     }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PhotoItem(photo: String, onClick: () -> Unit, onLongClick: () -> Unit) {
-    var aspect by remember(photo) {
-        mutableFloatStateOf(0.75f)
-    }
-    var isLoaded by remember(photo) {
-        mutableStateOf(false)
-    }
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(api.url(photo))
-            .crossfade(true)
-            .build(),
-        alpha = if (isLoaded) 1f else .125f,
-//        placeholder = rememberVectorPainter(Icons.Outlined.Photo),
-        contentScale = ContentScale.Fit,
-        onSuccess = {
-            isLoaded = true
-            aspect = it.result.drawable.intrinsicWidth.toFloat() / it.result.drawable.intrinsicHeight.toFloat()
-        },
-        contentDescription = "",
-        alignment = Alignment.Center,
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.large)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            )
-            .heightIn(min = 80.dp, max = 320.dp)
-            .widthIn(min = 80.dp, max = 320.dp)
-            .aspectRatio(aspect)
-    )
 }

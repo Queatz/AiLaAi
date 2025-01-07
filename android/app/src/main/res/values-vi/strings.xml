@@ -757,4 +757,7 @@
     <string name="choose_page">Chọn trang</string>
     <string name="set_status">Đặt trạng thái</string>
     <string name="account">Tài khoản</string>
+    <string name="zero">0</string>
+    <string name="react">Phản ứng</string>
+    <string name="inline_reacted_x_to_x">Phản ứng với %1$s đến %2$s</string>
 </resources>
