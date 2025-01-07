@@ -26,7 +26,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun AddReactionDialog(onDismissRequest: () -> Unit, onReaction: (String) -> Unit) {
     TextFieldDialog(
-        onDismissRequest,
+        onDismissRequest = onDismissRequest,
         title = null,
         button = stringResource(R.string.add),
         requireNotBlank = true,

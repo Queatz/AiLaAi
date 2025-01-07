@@ -225,13 +225,13 @@ fun Route.storyRoutes() {
                     db.unreact(
                         from = me.id!!.asId(Person::class),
                         to = story.id!!.asId(Story::class),
-                        reaction = react.reaction.reaction!!
+                        reaction = react.reaction.reaction!!.take(64)
                     )
                 } else {
                     db.react(
                         from = me.id!!.asId(Person::class),
                         to = story.id!!.asId(Story::class),
-                        reaction = react.reaction.reaction!!,
+                        reaction = react.reaction.reaction!!.take(64),
                         comment = react.reaction.comment
                     )
                 }

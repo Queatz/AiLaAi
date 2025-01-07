@@ -77,7 +77,7 @@ fun Route.messageRoutes() {
                     db.unreact(
                         from = me.id!!.asId(Person::class),
                         to = message.id!!.asId(Message::class),
-                        reaction = react.reaction.reaction!!
+                        reaction = react.reaction.reaction!!.take(64)
                     )
 
                     notifyReaction(me, group.group!!, message, react)
@@ -85,7 +85,7 @@ fun Route.messageRoutes() {
                     db.react(
                         from = me.id!!.asId(Person::class),
                         to = message.id!!.asId(Message::class),
-                        reaction = react.reaction.reaction!!,
+                        reaction = react.reaction.reaction!!.take(64),
                         comment = react.reaction.comment
                     )
 
