@@ -58,7 +58,16 @@ class MenuScope(val onDismissRequest: () -> Unit) {
                 Text(title)
             }
             if (icon != null) {
-                Icon(icon, onClick = onIconClick) {
+                Icon(
+                    name = icon,
+                    onClick = if (onIconClick == null) {
+                        null
+                    } else {
+                        {
+                            onDismissRequest()
+                            onIconClick()
+                        }
+                    }) {
                     flexShrink(0)
                     marginLeft(1.r)
                     opacity(.5)

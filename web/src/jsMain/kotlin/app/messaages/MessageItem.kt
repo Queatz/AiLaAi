@@ -13,6 +13,7 @@ import app.ailaai.api.updateMessage
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.Menu
+import app.reaction.allReactionsDialog
 import appString
 import application
 import com.queatz.db.Bot
@@ -61,6 +62,7 @@ fun MessageItem(
 ) {
     val scope = rememberCoroutineScope()
     val isMe = message.member == myMember?.member?.id
+    val hasReactions = !message.reactions?.all.isNullOrEmpty()
 
     Div({
         classes(
@@ -106,7 +108,19 @@ fun MessageItem(
         if (messageMenuTarget != null) {
             Menu({ messageMenuTarget = null }, messageMenuTarget!!) {
                 if (canReact) {
-                    item(appString { react }, icon = "add_reaction") {
+                    item(
+                        title = appString { react },
+                        icon = if (hasReactions) "visibility" else "add_reaction",
+                        onIconClick = if (hasReactions) {
+                            {
+                                scope.launch {
+                                    allReactionsDialog(message.id!!)
+                                }
+                            }
+                        } else {
+                            null
+                        }
+                    ) {
                         onReact()
                     }
                 }
