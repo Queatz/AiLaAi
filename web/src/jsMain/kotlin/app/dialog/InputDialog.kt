@@ -14,6 +14,7 @@ import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import r
+import kotlin.js.Promise.Companion.resolve
 
 suspend fun inputDialog(
     title: String?,
@@ -22,6 +23,7 @@ suspend fun inputDialog(
     cancelButton: String? = application.appString { cancel },
     defaultValue: String = "",
     singleLine: Boolean = true,
+    maxLength: Int? = null,
     inputStyles: StyleScope.() -> Unit = {},
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     actions: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
@@ -41,16 +43,16 @@ suspend fun inputDialog(
         }
 
         topContent(resolve, value) {
-            value = it
-            text = it
+            value = it.take(maxLength ?: Int.MAX_VALUE)
+            text = it.take(maxLength ?: Int.MAX_VALUE)
         }
 
         if (singleLine) {
             NavSearchInput(
-                value,
-                {
-                    value = it
-                    text = it
+                value = value,
+                onChange = {
+                    value = it.take(maxLength ?: Int.MAX_VALUE)
+                    text = it.take(maxLength ?: Int.MAX_VALUE)
                 },
                 placeholder = placeholder,
                 selectAll = true,
@@ -69,8 +71,8 @@ suspend fun inputDialog(
             TextBox(
                 value = value,
                 onValue = {
-                    value = it
-                    text = it
+                    value = it.take(maxLength ?: Int.MAX_VALUE)
+                    text = it.take(maxLength ?: Int.MAX_VALUE)
                 },
                 placeholder = placeholder,
                 selectAll = false,
@@ -85,8 +87,8 @@ suspend fun inputDialog(
             }
         }
         content(resolve, value) {
-            value = it
-            text = it
+            value = it.take(maxLength ?: Int.MAX_VALUE)
+            text = it.take(maxLength ?: Int.MAX_VALUE)
         }
     }
 

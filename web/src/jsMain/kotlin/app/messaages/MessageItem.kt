@@ -53,7 +53,9 @@ fun MessageItem(
     myMember: MemberAndPerson?,
     bots: List<Bot>,
     canReply: Boolean,
+    canReact: Boolean,
     onReply: () -> Unit,
+    onReact: () -> Unit,
     onReplyInNewGroup: () -> Unit,
     onUpdated: () -> Unit
 ) {
@@ -103,6 +105,11 @@ fun MessageItem(
 
         if (messageMenuTarget != null) {
             Menu({ messageMenuTarget = null }, messageMenuTarget!!) {
+                if (canReact) {
+                    item(appString { react }, icon = "add_reaction") {
+                        onReact()
+                    }
+                }
                 if (canReply) {
                     item(appString { reply }) {
                         onReply()
@@ -178,7 +185,11 @@ fun MessageItem(
                         if (messageMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
                 }
             }
-            MessageContent(message, myMember) {
+            MessageContent(
+                message = message,
+                myMember = myMember,
+                onUpdated = onUpdated
+            ) {
                 showingSticker = it
             }
         }

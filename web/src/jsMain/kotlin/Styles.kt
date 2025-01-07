@@ -100,6 +100,12 @@ object Styles : StyleSheet() {
         }
     }
 
+    val reactionsLayout by style {
+        display(DisplayStyle.Flex)
+        flexWrap(FlexWrap.Wrap)
+        gap(.5f.r)
+    }
+
     val calendarLineNow by style { }
 
     val calendarLineDrop by style { }
@@ -666,6 +672,8 @@ object Styles : StyleSheet() {
     }
 
     val outlineButtonAlt by style {}
+    val outlineButtonSmall by style {}
+    val outlineButtonTonal by style {}
 
     val outlineButton by style {
         borderRadius(2.r)
@@ -687,6 +695,15 @@ object Styles : StyleSheet() {
             color(Color.black)
         }
 
+        self + className(outlineButtonTonal) style {
+            backgroundColor(colors.background)
+        }
+
+        self + className(outlineButtonSmall) style {
+            padding(0.r, 1.r)
+            minHeight(2.r)
+        }
+
         self + disabled style {
             opacity(.5)
         }
@@ -694,6 +711,10 @@ object Styles : StyleSheet() {
         dark(self) {
             self + className(outlineButtonAlt) style {
                 color(Color.white)
+            }
+
+            self + className(outlineButtonTonal) style {
+                backgroundColor(colors.dark.background)
             }
         }
     }

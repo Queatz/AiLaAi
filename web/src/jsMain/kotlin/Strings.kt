@@ -821,6 +821,10 @@ object Strings {
         "Reply",
         "Trả lời"
     )
+    val react = Translation(
+        "React",
+        "Phản ứng"
+    )
     val replyInNewGroup = Translation(
         "Reply in new group",
         "Trả lời trong nhóm mới"

@@ -8,6 +8,7 @@ import app.AppStyles
 import app.StickerItem
 import app.ailaai.api.group
 import app.ailaai.api.message
+import app.ailaai.api.reactToMessage
 import app.appNav
 import app.dialog.photoDialog
 import app.group.GroupInfo
@@ -41,6 +42,7 @@ fun MessageContent(
     message: Message,
     myMember: MemberAndPerson?,
     isReply: Boolean = false,
+    onUpdated: () -> Unit,
     onShowingStickerMessage: ((Boolean) -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
@@ -110,7 +112,12 @@ fun MessageContent(
                 }) {
                     Text("reply")
                 }
-                MessageContent(reply, myMember, isReply = true)
+                MessageContent(
+                    message = reply,
+                    myMember = myMember,
+                    onUpdated = onUpdated,
+                    isReply = true
+                )
             }
         }
 
@@ -363,6 +370,27 @@ fun MessageContent(
             }) {
                 LinkifyText(text)
             }
+        }
+
+        if (!message.reactions?.all.isNullOrEmpty()) {
+            MessageReactions(
+                reactions = message.reactions!!,
+                isMe = isMe,
+                onReact = { reaction ->
+                    scope.launch {
+                        api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction))) {
+                            onUpdated()
+                        }
+                    }
+                },
+                onRemoveReaction = { reaction ->
+                    scope.launch {
+                        api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction), remove = true)) {
+                            onUpdated()
+                        }
+                    }
+                }
+            )
         }
     }
 }

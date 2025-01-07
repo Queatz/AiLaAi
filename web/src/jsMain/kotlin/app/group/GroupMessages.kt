@@ -10,6 +10,7 @@ import app.AppNavigation
 import app.AppStyles
 import app.ailaai.api.messages
 import app.ailaai.api.messagesBefore
+import app.ailaai.api.reactToMessage
 import app.appNav
 import app.components.LoadMore
 import app.components.LoadMoreState
@@ -18,10 +19,13 @@ import app.group.GroupMessageBar
 import app.group.JoinGroupLayout
 import app.messaages.MessageItem
 import app.messaages.preview
+import app.reaction.addReactionDialog
 import com.queatz.db.GroupExtended
 import com.queatz.db.GroupMessagesConfig
 import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
+import com.queatz.db.ReactBody
+import com.queatz.db.Reaction
 import components.Loading
 import components.ProfilePhoto
 import kotlinx.coroutines.flow.collectLatest
@@ -161,8 +165,20 @@ fun GroupMessages(group: GroupExtended) {
                     myMember = myMember,
                     bots = group.bots ?: emptyList(),
                     canReply = group.group?.config?.messages != GroupMessagesConfig.Hosts,
+                    canReact = myMember != null,
                     onReply = {
                         replyMessage = message
+                    },
+                    onReact = {
+                       scope.launch {
+                           val reaction = addReactionDialog()?.notBlank
+
+                           if (reaction != null) {
+                               api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction))) {
+                                   reloadMessages()
+                               }
+                           }
+                       }
                     },
                     onReplyInNewGroup = {
                         scope.launch {
