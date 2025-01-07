@@ -34,6 +34,7 @@ import com.queatz.push.CommentReplyPushData
 import com.queatz.push.GroupPushData
 import com.queatz.push.JoinRequestPushData
 import com.queatz.push.MessagePushData
+import com.queatz.push.MessageReactionPushData
 import com.queatz.push.PushAction
 import com.queatz.push.PushDataData
 import com.queatz.push.ReminderPushData
@@ -82,8 +83,6 @@ class Push {
             return
         }
 
-        Log.d("PUSH", "Got push: ${data["action"]}")
-
         val action = data["action"]!!
         val push = data["data"]!!
 
@@ -91,6 +90,7 @@ class Push {
             // todo isn't this automatic already?
             when (PushAction.valueOf(action)) {
                 PushAction.Message -> receive(parse<MessagePushData>(push))
+                PushAction.MessageReaction -> receive(parse<MessageReactionPushData>(push))
                 PushAction.Collaboration -> receive(parse<CollaborationPushData>(push))
                 PushAction.JoinRequest -> receive(parse<JoinRequestPushData>(push))
                 PushAction.Group -> receive(parse<GroupPushData>(push))

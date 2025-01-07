@@ -1,15 +1,26 @@
 package com.queatz.api
 
-import com.queatz.db.*
+import com.queatz.db.Group
+import com.queatz.db.Member
+import com.queatz.db.Message
+import com.queatz.db.Person
+import com.queatz.db.ReactBody
+import com.queatz.db.asId
+import com.queatz.db.group
+import com.queatz.db.member
+import com.queatz.db.react
+import com.queatz.db.unreact
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
+import com.queatz.plugins.notify
 import com.queatz.plugins.respond
-import io.ktor.http.*
-import io.ktor.server.application.call
-import io.ktor.server.auth.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 
 fun Route.messageRoutes() {
     authenticate {
@@ -53,6 +64,38 @@ fun Route.messageRoutes() {
             }
         }
 
+        post("/messages/{id}/react") {
+            respond {
+                val message = db.document(Message::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                // Ensure the user is a member
+                val group = db.group(me.id!!, message.group!!) ?: return@respond HttpStatusCode.NotFound
+
+                val react = call.receive<ReactBody>()
+
+                if (react.remove == true) {
+                    db.unreact(
+                        from = me.id!!.asId(Person::class),
+                        to = message.id!!.asId(Message::class),
+                        reaction = react.reaction.reaction!!
+                    )
+
+                    notifyReaction(me, group.group!!, message, react)
+                } else {
+                    db.react(
+                        from = me.id!!.asId(Person::class),
+                        to = message.id!!.asId(Message::class),
+                        reaction = react.reaction.reaction!!,
+                        comment = react.reaction.comment
+                    )
+
+                    notifyReaction(me, group.group!!, message, react)
+                }
+
+                HttpStatusCode.NoContent
+            }
+        }
+
         post("/messages/{id}/delete") {
             respond {
                 val message = db.document(Message::class, parameter("id"))
@@ -74,4 +117,13 @@ fun Route.messageRoutes() {
             }
         }
     }
+}
+
+private fun notifyReaction(me: Person, group: Group, message: Message, react: ReactBody) {
+    notify.messageReaction(
+        group = group,
+        person = me,
+        message = message,
+        react = react
+    )
 }

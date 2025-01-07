@@ -29,6 +29,7 @@ data class PersonStatus(
     val note: String? = null,
     val photo: String? = null,
 
+    // Transient from db
     val statusInfo: Status? = null
 ) : Model()
 
@@ -149,6 +150,8 @@ class Card(
     var npc: Npc? = null,
     var active: Boolean? = null,
     var level: Int? = null,
+
+    // Transient from db
     var cardCount: Int? = null
 ) : Model()
 
@@ -320,7 +323,10 @@ class Message(
     var attachment: String? = null,
     var attachments: List<String>? = null,
     var bot: String? = null,
-    var bots: List<BotMessageStatus>? = null
+    var bots: List<BotMessageStatus>? = null,
+
+    // Transient from db
+    var reactions: ReactionSummary? = null
 ) : Model()
 
 @Serializable
@@ -344,6 +350,8 @@ class StickerPack(
     var description: String? = null,
     var person: String? = null,
     var active: Boolean? = null,
+
+    // Transient from db
     var stickers: List<Sticker>? = null
 ) : Model()
 
@@ -374,6 +382,8 @@ class Story(
     var publishDate: Instant? = null,
     var published: Boolean? = null,
     var content: String? = null,
+
+    // Transient from db
     var authors: List<Person>? = null,
     var reactions: ReactionSummary? = null
 ) : Model()

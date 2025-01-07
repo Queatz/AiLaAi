@@ -10,6 +10,7 @@ import com.queatz.db.Member
 import com.queatz.db.MemberDevice
 import com.queatz.db.Message
 import com.queatz.db.Person
+import com.queatz.db.ReactBody
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderOccurrence
 import com.queatz.db.Story
@@ -30,6 +31,7 @@ import com.queatz.push.GroupPushData
 import com.queatz.push.JoinRequestEvent
 import com.queatz.push.JoinRequestPushData
 import com.queatz.push.MessagePushData
+import com.queatz.push.MessageReactionPushData
 import com.queatz.push.PushAction
 import com.queatz.push.PushData
 import com.queatz.push.ReminderPushData
@@ -224,6 +226,36 @@ class Notify {
         notifyGroupMembers(person, group, pushData)
     }
 
+    fun messageReaction(
+        person: Person,
+        group: Group,
+        message: Message,
+        react: ReactBody
+    ) {
+        val pushData = PushData(
+            PushAction.MessageReaction,
+            MessageReactionPushData(
+                group = Group().apply {
+                    id = group.id
+                    name = group.name
+                },
+                person = Person().apply {
+                    name = person.name
+                    id = person.id
+                },
+                message = Message(
+                    text = message.text?.ellipsize(),
+                    attachment = message.attachment,
+                ).apply {
+                    id = message.id
+                },
+                react = react
+            )
+        )
+
+        notifyGroupMembers(person, group, pushData)
+    }
+
     fun newJoinRequest(person: Person, joinRequest: JoinRequest, group: Group) {
         val pushData = PushData(
             PushAction.JoinRequest,
@@ -307,6 +339,7 @@ fun PushData.show(show: Boolean) = PushData(
     action,
     data?.let {
         when (it) {
+            is MessageReactionPushData -> it.copy(show = show)
             is MessagePushData -> it.copy(show = show)
             is CallPushData -> it.copy(show = show)
             else -> data

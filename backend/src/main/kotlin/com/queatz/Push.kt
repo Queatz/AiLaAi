@@ -265,6 +265,7 @@ class Push {
                                                 is TradePushData -> it
                                                 is CommentPushData -> it
                                                 is CommentReplyPushData -> it
+                                                is MessageReactionPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

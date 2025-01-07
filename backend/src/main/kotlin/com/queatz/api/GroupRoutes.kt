@@ -39,6 +39,7 @@ fun Route.groupRoutes() {
             respond {
                 db.group(meOrNull?.id, parameter("id"))?.let { group ->
                     db.messages(
+                        meOrNull?.id?.asId(Person::class),
                         group.group!!.id!!,
                         call.parameters["before"]?.toInstant(),
                         call.parameters["limit"]?.toInt() ?: 20,

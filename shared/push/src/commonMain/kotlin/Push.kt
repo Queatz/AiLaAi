@@ -15,6 +15,7 @@ enum class PushAction {
     Story,
     Comment,
     CommentReply,
+    MessageReaction,
 }
 
 enum class StoryEvent {
@@ -69,6 +70,15 @@ data class MessagePushData(
     val person: Person? = null,
     val bot: Bot? = null,
     val message: Message,
+    val show: Boolean? = null
+) : PushDataData()
+
+@Serializable
+data class MessageReactionPushData(
+    val group: Group,
+    val person: Person? = null,
+    val message: Message? = null,
+    val react: ReactBody? = null,
     val show: Boolean? = null
 ) : PushDataData()
 

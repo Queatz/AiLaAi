@@ -6,7 +6,12 @@ package com.queatz.db
  * @param reaction The reaction
  * @param comment The person's comment, or null
  */
-fun Db.react(from: String, to: String, reaction: String, comment: String?) = one(
+fun Db.react(
+    from: String,
+    to: String,
+    reaction: String,
+    comment: String?
+) = one(
     Reaction::class,
     """
         upsert { _from: @from, _to: @to, reaction: @reaction }
@@ -23,7 +28,11 @@ fun Db.react(from: String, to: String, reaction: String, comment: String?) = one
     )
 )
 
-fun Db.unreact(from: String, to: String, reaction: String) = query(
+fun Db.unreact(
+    from: String,
+    to: String,
+    reaction: String
+) = query(
     Reaction::class,
     """
         for reaction in `${Reaction::class.collection()}`
@@ -54,14 +63,17 @@ fun Db.reactionsOf(to: String) = query(
     )
 )
 
-fun Db.reactions(person: String?, to: String) = """
+fun Db.reactions(
+    person: String?,
+    to: String
+) = """
     {
         "${f(ReactionSummary::all)}": ${allReactions(to)},
         "${f(ReactionSummary::mine)}": ${person?.let { myReactions(it, to) }}
     }
 """.trimIndent()
 
-fun Db.myReactions(person: String, to: String) = """
+private fun Db.myReactions(person: String, to: String) = """
     (
         for reaction in ${Reaction::class.collection()}
             filter reaction._from == $person
@@ -70,7 +82,7 @@ fun Db.myReactions(person: String, to: String) = """
     )
 """.trimIndent()
 
-fun Db.allReactions(to: String) = """
+private fun Db.allReactions(to: String) = """
     (
         for entity, reaction in inbound $to graph `${Reaction::class.graph()}`
             collect text = reaction.${f(Reaction::reaction)} with count into count
