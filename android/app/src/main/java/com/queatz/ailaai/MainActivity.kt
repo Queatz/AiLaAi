@@ -7,9 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -45,7 +42,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
@@ -56,7 +52,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -70,7 +65,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -522,11 +516,11 @@ class MainActivity : AppCompatActivity() {
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation))
+                                        .background(MaterialTheme.colorScheme.background)
                                         .background(
                                             verticalGradient(
                                                 listOf(
-                                                    MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation),
+                                                    MaterialTheme.colorScheme.background,
                                                     MaterialTheme.colorScheme.tertiaryContainer
                                                 )
                                             )
@@ -534,7 +528,7 @@ class MainActivity : AppCompatActivity() {
                                         .height(height.px)
                                         .fillMaxWidth()
                                         .align(Alignment.BottomCenter)
-                                ) {}
+                                )
                             }
                         }
                     }
@@ -546,9 +540,19 @@ class MainActivity : AppCompatActivity() {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Bottom
                             ) {
+                                if (showNavigation && !isLandscape) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(1.dp)
+                                            .fillMaxWidth()
+                                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = .5f))
+                                    )
+                                }
+
                                 AnimatedVisibility(showNavigation && !isLandscape) {
                                     NavigationBar(
-                                        modifier = Modifier.height(54.dp)
+                                        containerColor = MaterialTheme.colorScheme.background,
+                                        modifier = Modifier.height(53.dp) // 54 - 1 border
                                     ) {
                                         menuItems.forEach { item ->
                                             val selected = navController.currentDestination?.route == item.route.route
