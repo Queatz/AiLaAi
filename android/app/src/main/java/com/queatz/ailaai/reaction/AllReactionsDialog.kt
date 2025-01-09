@@ -41,7 +41,11 @@ fun AllReactionsDialog(
                 reaction.reaction!!.createdAt!!.shortAgo(context),
                 reaction.reaction!!.comment,
                 if (onEditReactionComment != null && reaction.person?.id == meId) {
-                    context.getString(R.string.tap_to_edit)
+                    if (reaction.reaction!!.comment.isNullOrBlank()) {
+                        context.getString(R.string.tap_to_add_a_comment)
+                    } else {
+                        context.getString(R.string.tap_to_edit_comment)
+                    }
                 } else {
                     null
                 }

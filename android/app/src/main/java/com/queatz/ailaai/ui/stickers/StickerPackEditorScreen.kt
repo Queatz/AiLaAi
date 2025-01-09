@@ -98,7 +98,7 @@ fun StickerPackEditorScreen(stickerPackId: String) {
 
     showStickerMessageDialog?.let { sticker ->
         TextFieldDialog(
-            {
+            onDismissRequest = {
                 showStickerMessageDialog = null
             },
             title = stringResource(R.string.message_noun),
@@ -115,7 +115,7 @@ fun StickerPackEditorScreen(stickerPackId: String) {
 
     showDeleteStickerDialog?.let { sticker ->
         Alert(
-            { showDeleteStickerDialog = null },
+            onDismissRequest = { showDeleteStickerDialog = null },
             title = stringResource(R.string.delete_sticker),
             text = stringResource(R.string.you_cannot_undo_this_sticker),
             dismissButton = stringResource(R.string.cancel),
@@ -139,7 +139,7 @@ fun StickerPackEditorScreen(stickerPackId: String) {
 
     if (showRenameDialog) {
         TextFieldDialog(
-            {
+            onDismissRequest = {
                 showRenameDialog = false
             },
             title = stringResource(R.string.rename_sticker_pack),

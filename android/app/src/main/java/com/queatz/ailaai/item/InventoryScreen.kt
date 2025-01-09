@@ -367,7 +367,7 @@ fun InventoryScreen() {
         val someone = stringResource(R.string.someone)
         val item = showStartTradeDialogItem
         ChoosePeopleDialog(
-            {
+            onDismissRequest = {
                 showStartTradeDialog = false
                 showStartTradeDialogItem = null
             },

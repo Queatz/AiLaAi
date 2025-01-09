@@ -34,6 +34,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
         title: String,
         selected: Boolean = false,
         icon: String? = null,
+        iconTitle: String? = null,
         onIconClick: (() -> Unit)? = null,
         onClick: () -> Unit
     ) {
@@ -60,6 +61,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
             if (icon != null) {
                 Icon(
                     name = icon,
+                    title = iconTitle,
                     onClick = if (onIconClick == null) {
                         null
                     } else {

@@ -486,7 +486,7 @@ object Strings {
         "Không có lời nhắc"
     )
     val createReminder = Translation(
-        "New reminder",
+        "Create reminder",
         "Tạo lời nhắc"
     )
     val hourly = Translation(

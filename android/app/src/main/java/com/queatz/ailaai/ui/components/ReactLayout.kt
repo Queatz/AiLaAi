@@ -15,15 +15,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -38,11 +35,6 @@ fun ReactLayout(
     onReaction: (String) -> Unit
 ) {
     var value by remember { mutableStateOf("") }
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 
     Column(
         modifier = modifier
@@ -89,7 +81,6 @@ fun ReactLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 1.pad)
-                .focusRequester(focusRequester)
         )
     }
 }

@@ -111,6 +111,8 @@ fun MessageItem(
                     item(
                         title = appString { react },
                         icon = if (hasReactions) "visibility" else "add_reaction",
+                        // todo: translate
+                        iconTitle = if (hasReactions) "View reactions" else null,
                         onIconClick = if (hasReactions) {
                             {
                                 scope.launch {

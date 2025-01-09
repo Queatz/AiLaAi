@@ -149,8 +149,8 @@ fun LazyGridScope.reactionsItem(
                     onReact = { reaction ->
                         scope.launch {
                             api.reactToStory(
-                                content.story,
-                                ReactBody(Reaction(reaction = reaction))
+                                id = content.story,
+                                react = ReactBody(Reaction(reaction = reaction))
                             ) {
                                 commentOnReaction = reaction
                                 sendComment = ""
@@ -164,8 +164,8 @@ fun LazyGridScope.reactionsItem(
                     onRemoveReaction = { reaction ->
                         scope.launch {
                             api.reactToStory(
-                                content.story,
-                                ReactBody(
+                                id = content.story,
+                                react = ReactBody(
                                     reaction = Reaction(
                                         reaction = reaction
                                     ),

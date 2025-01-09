@@ -17,8 +17,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -27,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.formatMini
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.rememberLongClickInteractionSource
+import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.ReactionSummary
 import kotlinx.coroutines.launch
@@ -52,6 +56,22 @@ fun Reactions(
     val pad = if (isSmall) .25f.pad else .5f.pad
     val buttonModifier = if (isSmall) Modifier.height(36.dp) else Modifier
     val contentPadding = if (isSmall) PaddingValues(horizontal = 1.pad) else ButtonDefaults.ContentPadding
+    var showRemoveReactionDialog by rememberStateOf<String?>(null)
+
+    showRemoveReactionDialog?.let { reaction ->
+        Alert(
+            onDismissRequest = {
+                showRemoveReactionDialog = null
+            },
+            title = stringResource(R.string.remove_x, reaction),
+            text = null,
+            dismissButton = stringResource(R.string.cancel),
+            confirmButton = stringResource(R.string.remove),
+            confirmColor = MaterialTheme.colorScheme.error
+        ) {
+            onRemoveReaction(reaction)
+        }
+    }
 
     FlowRow(
         verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
@@ -115,7 +135,7 @@ fun Reactions(
                         ) {
                             scope.launch {
                                 if (mine) {
-                                    onRemoveReaction(reaction.reaction)
+                                    showRemoveReactionDialog = reaction.reaction
                                 } else {
                                     onShowAllReactions()
                                 }

@@ -111,7 +111,9 @@ import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.Video
+import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
@@ -178,6 +180,7 @@ fun ProfileScreen(personId: String) {
     var showReportDialog by rememberStateOf(false)
     var showSourceDialog by rememberStateOf(false)
     var showInviteDialog by rememberStateOf(false)
+    var showStartTradeDialog by rememberStateOf(false)
     var showCoverPhotoDialog by rememberStateOf(false)
     var showProfilePhotoDialog by rememberStateOf(false)
     var showQrCodeDialog by rememberStateOf(false)
@@ -305,16 +308,37 @@ fun ProfileScreen(personId: String) {
         ViewSourceDialog({ showSourceDialog = false }, profile?.content)
     }
 
-    fun trade() {
+    fun trade(tradeWith: List<String>) {
         scope.launch {
             api.createTrade(
                 Trade().apply {
-                    people = listOf(me!!.id!!, personId)
+                    people = me!!.id!!.inList() + tradeWith
                 }
             ) {
                 showTradeDialog = it
             }
         }
+    }
+
+    if (showStartTradeDialog) {
+        val someone = stringResource(R.string.someone)
+        ChoosePeopleDialog(
+            onDismissRequest = {
+                showStartTradeDialog = false
+            },
+            title = stringResource(R.string.trade),
+            confirmFormatter = defaultConfirmFormatter(
+                R.string.trade,
+                R.string.trade_with_x,
+                R.string.trade_with_x_and_x,
+                R.string.trade_with_x_people
+            ) { it.name ?: someone },
+            omit = { it.id == me?.id },
+            initiallySelected = person.inList(),
+            onPeopleSelected = {
+                trade(it.map { it.id!! })
+            }
+        )
     }
 
     suspend fun reloadCards() {
@@ -956,7 +980,7 @@ fun ProfileScreen(personId: String) {
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         OutlinedButton(
-                                            {
+                                            onClick = {
                                                 scope.launch {
                                                     api.createGroup(
                                                         listOf(me!!.id!!, personId),
@@ -970,14 +994,14 @@ fun ProfileScreen(personId: String) {
                                             Text(stringResource(R.string.message), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         }
                                         OutlinedButton(
-                                            {
-                                                trade()
+                                            onClick = {
+                                                showStartTradeDialog = true
                                             }
                                         ) {
                                             Text(stringResource(R.string.trade), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         }
                                         OutlinedButton(
-                                            {
+                                            onClick = {
                                                 scope.launch {
                                                     isSubscribing = true
                                                     if (subscribed) {
