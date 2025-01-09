@@ -5,7 +5,10 @@ import androidx.compose.material.icons.outlined.HistoryEdu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
@@ -15,6 +18,8 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.services.connectivity
+import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.scripts.PreviewScriptAction
 import com.queatz.ailaai.ui.scripts.ScriptsDialog
@@ -24,6 +29,7 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
     val me = me
     val nav = nav
     var showScriptsDialog by rememberStateOf(false)
+    val hasConnectivity = connectivity.hasConnectivity
 
     if (showScriptsDialog) {
         ScriptsDialog(
@@ -36,6 +42,8 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
 
     Menu(onDismissRequest = onDismissRequest) {
         Toolbar {
+            val showOfflineNote by ui.showOfflineNote.collectAsState()
+
             me?.let { me ->
                 item(
                     icon = Icons.Outlined.Person,
@@ -57,6 +65,17 @@ fun ProfileMenu(onDismissRequest: () -> Unit) {
                 name = stringResource(R.string.scripts),
             ) {
                 showScriptsDialog = true
+            }
+            item(
+                icon = if (hasConnectivity) Icons.Outlined.Wifi else Icons.Outlined.WifiOff,
+                name = if (!showOfflineNote) {
+                    stringResource(R.string.show_offline_notes)
+                } else {
+                    stringResource(R.string.hide_offline_notes)
+                },
+            ) {
+                ui.showOfflineNote(!showOfflineNote)
+                onDismissRequest()
             }
             item(
                 icon = Icons.Outlined.Settings,

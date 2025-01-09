@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ import com.queatz.ailaai.extensions.ContactPhoto
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.services.connectivity
+import com.queatz.ailaai.services.ui
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.delay
@@ -58,6 +60,7 @@ fun ColumnScope.AppHeader(
     val me = me
     val hasConnectivity = connectivity.hasConnectivity
     val apiIsReachable = LocalAppState.current.apiIsReachable
+    val showOfflineNotes by ui.showOfflineNote.collectAsState()
 
     Column(
         modifier = Modifier
@@ -101,7 +104,7 @@ fun ColumnScope.AppHeader(
             }
         }
 
-        AnimatedVisibility(offlineNote.isNotEmpty() || !apiIsReachable || !hasConnectivity) {
+        AnimatedVisibility(offlineNote.isNotEmpty() || !apiIsReachable || !hasConnectivity || showOfflineNotes) {
             SearchField(
                 value = offlineNote,
                 onValueChange = { offlineNote = it },

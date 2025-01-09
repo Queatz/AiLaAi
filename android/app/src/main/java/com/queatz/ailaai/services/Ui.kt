@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.queatz.ailaai.dataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -19,6 +21,9 @@ class Ui {
     private lateinit var context: Context
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    private val _showOfflineNote = MutableStateFlow(false)
+    val showOfflineNote = _showOfflineNote.asStateFlow()
+
     private val hiddenDescriptions = mutableSetOf<String>()
 
     fun init(context: Context) {
@@ -28,6 +33,10 @@ class Ui {
                 context.dataStore.data.first()[hiddenDescriptionsKey] ?: emptySet()
             )
         }
+    }
+
+    fun showOfflineNote(show: Boolean) {
+        _showOfflineNote.value = show
     }
 
     fun setShowDescription(groupId: String, showDescription: Boolean) {
