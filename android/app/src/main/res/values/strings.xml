@@ -798,7 +798,8 @@
     <string name="zero">0</string>
     <string name="react">React</string>
     <string name="inline_reacted_x_to_x">reacted %1$s to %2$s</string>
-    <string name="remove_x">Remove %1$s?</string>
+    <string name="remove_your_reaction">Remove your reaction?</string>
+    <string name="use_status">Use this status</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

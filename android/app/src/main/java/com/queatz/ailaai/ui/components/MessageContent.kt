@@ -250,13 +250,15 @@ fun ColumnScope.MessageContent(
                 ReactLayout(
                     modifier = Modifier.padding(1.pad)
                 ) { reaction ->
-                    scope.launch {
-                        api.reactToMessage(
-                            id = message.id!!,
-                            react = ReactBody(Reaction(reaction = reaction))
-                        ) {
-                            onShowMessageDialog(false)
-                            onUpdated()
+                    if (reaction.isNotBlank()) {
+                        scope.launch {
+                            api.reactToMessage(
+                                id = message.id!!,
+                                react = ReactBody(Reaction(reaction = reaction))
+                            ) {
+                                onShowMessageDialog(false)
+                                onUpdated()
+                            }
                         }
                     }
                 }

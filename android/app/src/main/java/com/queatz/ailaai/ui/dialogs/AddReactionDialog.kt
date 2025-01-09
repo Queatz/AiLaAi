@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.dialogs
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.components.ReactQuickLayout
 
 @Composable
@@ -21,6 +22,8 @@ fun AddReactionDialog(
             ReactQuickLayout(onReaction = onReaction)
         }
     ) { prompt ->
-        onReaction(prompt.trim())
+        prompt.trim().notBlank?.let {
+            onReaction(it)
+        }
     }
 }

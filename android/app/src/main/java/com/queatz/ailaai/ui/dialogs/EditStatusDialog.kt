@@ -215,7 +215,8 @@ fun EditStatusDialog(
                                 }
                                 isSaving = false
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
                         Text(stringResource(R.string.clear_status))
                     }
@@ -224,7 +225,8 @@ fun EditStatusDialog(
                 TextButton(
                     onClick = {
                         onDismissRequest()
-                    }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Text(stringResource(R.string.close))
                 }
@@ -254,7 +256,11 @@ fun EditStatusDialog(
 }
 
 @Composable
-fun StatusButton(onClick: () -> Unit, selected: Boolean = false, status: Status) {
+fun StatusButton(
+    onClick: () -> Unit,
+    selected: Boolean = false,
+    status: Status
+) {
     TextButton(
         onClick = onClick,
         border = if (selected) ButtonDefaults.outlinedButtonBorder() else null,

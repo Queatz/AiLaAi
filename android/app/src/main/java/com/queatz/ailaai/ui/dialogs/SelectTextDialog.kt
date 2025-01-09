@@ -123,7 +123,7 @@ fun SelectTextDialog(
                     Spacer(Modifier.weight(1f))
                 }
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {

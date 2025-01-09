@@ -1,19 +1,17 @@
 package app.reaction
 
+import Styles
 import androidx.compose.runtime.remember
 import app.dialog.inputDialog
-import application
-import com.queatz.db.StoryContent.Button
 import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -51,7 +49,7 @@ suspend fun addReactionDialog() = inputDialog(
             }
         }) {
             common.forEach { reaction ->
-                org.jetbrains.compose.web.dom.Button(
+                Button(
                     {
                         classes(Styles.outlineButton)
 

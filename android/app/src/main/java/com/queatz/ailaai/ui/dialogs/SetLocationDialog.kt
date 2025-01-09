@@ -76,7 +76,7 @@ fun SetLocationDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {

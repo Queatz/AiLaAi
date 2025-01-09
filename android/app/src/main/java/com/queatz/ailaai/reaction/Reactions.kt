@@ -63,12 +63,13 @@ fun Reactions(
             onDismissRequest = {
                 showRemoveReactionDialog = null
             },
-            title = stringResource(R.string.remove_x, reaction),
-            text = null,
+            title = stringResource(R.string.remove_your_reaction),
+            text = reaction,
             dismissButton = stringResource(R.string.cancel),
             confirmButton = stringResource(R.string.remove),
             confirmColor = MaterialTheme.colorScheme.error
         ) {
+            showRemoveReactionDialog = null
             onRemoveReaction(reaction)
         }
     }

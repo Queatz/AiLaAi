@@ -55,8 +55,8 @@ fun ColumnScope.AppHeader(
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     val context = LocalContext.current
-    val hasConnectivity = connectivity.hasConnectivity
     val me = me
+    val hasConnectivity = connectivity.hasConnectivity
     val apiIsReachable = LocalAppState.current.apiIsReachable
 
     Column(

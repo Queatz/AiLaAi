@@ -14,7 +14,6 @@ import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import r
-import kotlin.js.Promise.Companion.resolve
 
 suspend fun inputDialog(
     title: String?,

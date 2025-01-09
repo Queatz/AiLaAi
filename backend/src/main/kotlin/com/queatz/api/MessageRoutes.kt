@@ -77,6 +77,10 @@ fun Route.messageRoutes() {
 
                 val react = call.receive<ReactBody>()
 
+                if (react.reaction.reaction.isNullOrBlank()) {
+                    return@respond HttpStatusCode.BadRequest.description("Missing 'reaction.reaction' in body")
+                }
+
                 if (react.remove == true) {
                     db.unreact(
                         from = me.id!!.asId(Person::class),

@@ -24,22 +24,24 @@ data class DateTimeSuggestion(
 )
 
 @Composable
-fun DateTimeSuggestions(modifier: Modifier = Modifier, onSelect: (Instant) -> Unit) {
+fun DateTimeSuggestions(
+    modifier: Modifier = Modifier,
+    onSelect: (Instant) -> Unit
+) {
     val state = rememberLazyListState()
     val now = Clock.System.now()
 
-    val suggestions =
-        listOf(
-            DateTimeSuggestion(stringResource(R.string.now), now),
-            DateTimeSuggestion(stringResource(R.string.in_an_hour), now + 1.hours),
-            DateTimeSuggestion(stringResource(R.string.tomorrow), now + 1.days),
-            DateTimeSuggestion(stringResource(R.string.in_2_days), now + 2.days),
-            DateTimeSuggestion(stringResource(R.string.in_a_week), now + 7.days),
-            DateTimeSuggestion(stringResource(R.string.in_2_weeks), now + 14.days),
-            DateTimeSuggestion(stringResource(R.string.in_a_month), now + 30.days),
-            DateTimeSuggestion(stringResource(R.string.in_2_months), now + 60.days),
-            DateTimeSuggestion(stringResource(R.string.in_a_year), now + 365.days)
-        )
+    val suggestions = listOf(
+        DateTimeSuggestion(stringResource(R.string.now), now),
+        DateTimeSuggestion(stringResource(R.string.in_an_hour), now + 1.hours),
+        DateTimeSuggestion(stringResource(R.string.tomorrow), now + 1.days),
+        DateTimeSuggestion(stringResource(R.string.in_2_days), now + 2.days),
+        DateTimeSuggestion(stringResource(R.string.in_a_week), now + 7.days),
+        DateTimeSuggestion(stringResource(R.string.in_2_weeks), now + 14.days),
+        DateTimeSuggestion(stringResource(R.string.in_a_month), now + 30.days),
+        DateTimeSuggestion(stringResource(R.string.in_2_months), now + 60.days),
+        DateTimeSuggestion(stringResource(R.string.in_a_year), now + 365.days)
+    )
 
     LazyRow(
         state = state,

@@ -32,6 +32,7 @@ fun RescheduleDialog(
     onUpdate: (Instant) -> Unit
 ) {
     val dateState = rememberDatePickerState(
+        initialDisplayedMonthMillis = date.toEpochMilliseconds(),
         initialSelectedDateMillis = date.toEpochMilliseconds(),
         initialDisplayMode = DisplayMode.Input
     )

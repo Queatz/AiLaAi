@@ -22,6 +22,9 @@ import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.maxWidth
+import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -71,6 +74,8 @@ suspend fun allReactionsDialog(messageId: String) = dialog(
                     style {
                         display(DisplayStyle.Flex)
                         flexDirection(FlexDirection.Column)
+                        overflow("hidden")
+                        maxWidth(100.percent)
                     }
                 }) {
                     Div({

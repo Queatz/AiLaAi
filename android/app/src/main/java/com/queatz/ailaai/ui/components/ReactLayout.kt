@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.theme.pad
 
 @Composable
@@ -35,6 +36,12 @@ fun ReactLayout(
     onReaction: (String) -> Unit
 ) {
     var value by remember { mutableStateOf("") }
+
+    fun send() {
+        value.trim().notBlank?.let {
+            onReaction(it)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -54,7 +61,7 @@ fun ReactLayout(
             ),
             keyboardActions = KeyboardActions(
                 onSend = {
-                    onReaction(value.trim())
+                    send()
                 }
             ),
             trailingIcon = {
@@ -62,7 +69,7 @@ fun ReactLayout(
                     when (show) {
                         true -> IconButton(
                             onClick = {
-                                onReaction(value.trim())
+                                send()
                             }
                         ) {
                             Icon(
@@ -72,7 +79,7 @@ fun ReactLayout(
                             )
                         }
 
-                        false -> {}
+                        false -> Unit
                     }
                 }
             },

@@ -83,7 +83,7 @@ fun ProfileSettingsDialog(
             },
             actions = {
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {

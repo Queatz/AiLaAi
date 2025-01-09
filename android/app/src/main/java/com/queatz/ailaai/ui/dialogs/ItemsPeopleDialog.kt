@@ -66,7 +66,7 @@ fun <T> ItemsPeopleDialog(
             ) {
                 extraButtons()
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {

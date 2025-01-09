@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-private class ConnectivityObserver(val context: Context) {
+private class ConnectivityObserver(context: Context) {
 
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -22,6 +22,10 @@ private class ConnectivityObserver(val context: Context) {
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             _isConnected.value = true
+        }
+
+        override fun onUnavailable() {
+            _isConnected.value = false
         }
 
         override fun onLost(network: Network) {

@@ -92,14 +92,16 @@ fun LazyGridScope.reactionsItem(
                         showAddReactionDialog = false
                     }
                 ) { reaction ->
-                    scope.launch {
-                        api.reactToStory(
-                            id = content.story,
-                            react = ReactBody(Reaction(reaction = reaction))
-                        ) {
-                            commentOnReaction = reaction
-                            sendComment = ""
-                            onReactionChange()
+                    if (reaction.isNotBlank()) {
+                        scope.launch {
+                            api.reactToStory(
+                                id = content.story,
+                                react = ReactBody(Reaction(reaction = reaction))
+                            ) {
+                                commentOnReaction = reaction
+                                sendComment = ""
+                                onReactionChange()
+                            }
                         }
                     }
                     showAddReactionDialog = false

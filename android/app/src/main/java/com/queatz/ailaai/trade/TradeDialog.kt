@@ -436,7 +436,7 @@ fun TradeDialog(
                             {
                                 confirmUnconfirm()
                             },
-                            enabled = enableConfirm
+                            enabled = true
                         ) {
                             Text(
                                 stringResource(

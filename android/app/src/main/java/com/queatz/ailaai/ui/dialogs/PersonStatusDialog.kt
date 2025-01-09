@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.GroupPhoto
@@ -34,11 +37,29 @@ fun PersonStatusDialog(
     personStatus: PersonStatus?,
     onMessageClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onUseStatus: (PersonStatus) -> Unit,
 ) {
     DialogBase(onDismissRequest) {
         DialogLayout(
             scrollable = false,
             content = {
+                var showStatusMenu by rememberStateOf<PersonStatus?>(null)
+
+                showStatusMenu?.let { status ->
+                    Menu(
+                        onDismissRequest = {
+                            showStatusMenu = null
+                        }
+                    ) {
+                        menuItem(
+                            title = stringResource(R.string.use_status)
+                        ) {
+                            onUseStatus(status)
+                            showStatusMenu = null
+                        }
+                    }
+                }
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -63,7 +84,7 @@ fun PersonStatusDialog(
                             .weight(1f, fill = false)
                             .heightIn(max = 240.dp)
                     ) {
-                        // todo set as my status
+                        showStatusMenu = it
                     }
                 }
             },

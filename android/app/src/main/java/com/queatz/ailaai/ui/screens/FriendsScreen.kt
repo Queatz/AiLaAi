@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
-import android.provider.SyncStateContract.Helpers.update
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -170,6 +169,7 @@ fun FriendsScreen() {
     var myStatusDialog by rememberStateOf(false)
     var statuses by rememberStateOf(emptyMap<String, PersonStatus?>())
     var recentStatuses by rememberStateOf(emptyList<Status>())
+    var initialStatus by rememberStateOf<PersonStatus?>(null)
     var showFriendStatusDialog by rememberStateOf<Pair<Person, PersonStatus?>?>(null)
 
     LaunchedEffect(geo) {
@@ -345,11 +345,17 @@ fun FriendsScreen() {
             onMessageClick = {
                 onFriendClick(person, sendMessage = true)
                 showFriendStatusDialog = null
+            },
+            onProfileClick = {
+                showFriendStatusDialog = null
+                nav.appNavigate(AppNav.Profile(person.id!!))
+            },
+            onUseStatus = {
+                initialStatus = it
+                myStatusDialog = true
+                showFriendStatusDialog = null
             }
-        ) {
-            showFriendStatusDialog = null
-            nav.appNavigate(AppNav.Profile(person.id!!))
-        }
+        )
     }
 
     if (showSharedGroupsDialog.isNotEmpty()) {
@@ -757,13 +763,17 @@ fun FriendsScreen() {
     if (myStatusDialog) {
         EditStatusDialog(
             onDismissRequest = { myStatusDialog = false },
-            initialStatus = statuses[me!!.id!!],
+            initialStatus = initialStatus ?: statuses[me!!.id!!],
             recentStatuses = recentStatuses
         ) {
             myStatusDialog = false
             scope.launch {
                 reloadStatuses()
             }
+        }
+    } else {
+        LaunchedEffect(Unit) {
+            initialStatus = null
         }
     }
 }
