@@ -530,6 +530,11 @@ fun SchedulePage(
                                         (startOfMinute(addMinutes(now, 1.0)).getTime() - now.getTime()).milliseconds + 1.seconds
                                     )
                                     tickTock = !tickTock
+
+                                    // Auto-advance next day
+                                    if (startOfDay(now) != startOfDay(Date())) {
+                                        offset = startOfDay(Date())
+                                    }
                                 }
                             }
                             key(tickTock) {
