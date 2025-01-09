@@ -51,7 +51,7 @@ fun Push.receive(data: MessageReactionPushData) {
             title = groupName ?: personName,
             text = buildString {
                 if (groupName != null) {
-                    append("$personName: ")
+                    append("$personName ")
                 }
                 append(
                     context.getString(

@@ -14,17 +14,21 @@ import application
 import bulletedString
 import com.queatz.db.ReactionAndPerson
 import components.Loading
+import components.ProfilePhoto
 import kotlinx.browser.window
 import lib.formatDistanceToNow
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import r
 import kotlin.js.Date
 
 suspend fun allReactionsDialog(messageId: String) = dialog(
+    // todo: show count in title
     // todo: translate
     title = "Message reactions",
     cancelButton = null,
@@ -49,7 +53,11 @@ suspend fun allReactionsDialog(messageId: String) = dialog(
         reactions.forEach { reaction ->
             Div(
                 {
-                    classes(AppStyles.groupItem)
+                    classes(AppStyles.groupItem, AppStyles.groupItemOnSurface)
+
+                    style {
+                        gap(1.r)
+                    }
 
                     onClick {
                         window.open("/profile/${reaction.person!!.id}", "_blank")
@@ -58,6 +66,7 @@ suspend fun allReactionsDialog(messageId: String) = dialog(
                     title(application.appString { viewProfile })
                 }
             ) {
+                ProfilePhoto(reaction.person!!)
                 Div({
                     style {
                         display(DisplayStyle.Flex)

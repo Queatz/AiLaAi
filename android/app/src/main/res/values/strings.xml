@@ -795,7 +795,7 @@
     <string name="in_2_months">In 2 months</string>
     <string name="zero">0</string>
     <string name="react">React</string>
-    <string name="inline_reacted_x_to_x">Reacted %1$s to %2$s</string>
+    <string name="inline_reacted_x_to_x">reacted %1$s to %2$s</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
