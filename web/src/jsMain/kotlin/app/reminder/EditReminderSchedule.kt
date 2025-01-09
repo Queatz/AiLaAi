@@ -103,6 +103,7 @@ fun EditReminderSchedule(
                 disabled()
             }
         }
+        // todo: translate
         Text("Reoccurs")
     }
     if (schedule.reoccurs) {

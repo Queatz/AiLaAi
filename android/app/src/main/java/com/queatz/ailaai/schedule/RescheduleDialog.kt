@@ -21,8 +21,11 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.random.Random.Default.nextLong
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,9 +34,13 @@ fun RescheduleDialog(
     date: Instant,
     onUpdate: (Instant) -> Unit
 ) {
+    // DatePicker shows the local date over in the UTC timezone
+    // We want to select the local date in the user's local timezone
+    val localOffset = date.offsetIn(TimeZone.currentSystemDefault()).totalSeconds.seconds.inWholeMilliseconds
+
     val dateState = rememberDatePickerState(
-        initialDisplayedMonthMillis = date.toEpochMilliseconds(),
-        initialSelectedDateMillis = date.toEpochMilliseconds(),
+        initialDisplayedMonthMillis = date.toEpochMilliseconds() + localOffset,
+        initialSelectedDateMillis = date.toEpochMilliseconds() + localOffset,
         initialDisplayMode = DisplayMode.Input
     )
     val timeState = rememberTimePickerState(
@@ -64,8 +71,8 @@ fun RescheduleDialog(
                         .padding(horizontal = 3.pad)
                         .padding(bottom = 1.pad)
                 ) {
-                    dateState.displayedMonthMillis = it.toEpochMilliseconds()
-                    dateState.selectedDateMillis = it.toEpochMilliseconds()
+                    dateState.displayedMonthMillis = it.toEpochMilliseconds() + localOffset
+                    dateState.selectedDateMillis = it.toEpochMilliseconds() + localOffset
                     timeState.hour = it.hour()
                     timeState.minute = it.minute()
                     timeKey = nextLong()

@@ -335,7 +335,7 @@ fun GroupsNavPage(
                 padding(1.r / 2)
             }
         }) {
-            if (!showSearch) {
+            if (!showSearch && selectedCategory == null) {
 //                NavMenuItem("group", "Friends", selected = selected is GroupNav.Friends) {
 //                    onSelected(GroupNav.Friends)
 //                }
@@ -362,7 +362,7 @@ fun GroupsNavPage(
                 val people = remember(shownGroups) { shownGroups.people() }
 
                 LazyColumn {
-                    if (!showSearch) {
+                    if (!showSearch && selectedCategory == null) {
                         item {
                             LazyRow({
                                 classes(Styles.personList)
@@ -474,6 +474,7 @@ fun GroupsNavPage(
                             }
                         }
                     }
+
                     items(shownGroups) { group ->
                         GroupItem(
                             group = group,
