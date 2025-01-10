@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
-import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.theme.pad
 
 private fun Modifier.multiPhoto(size: Dp, padding: Dp): Modifier = composed {
@@ -65,7 +65,7 @@ fun GroupPhoto(
         ) {}
     } else if (photos.size == 1) {
         val contact = photos.firstOrNull()
-        val photo = contact?.photo?.nullIfBlank?.let { api.url(it) }
+        val photo = contact?.photo?.notBlank?.let { api.url(it) }
         if (photo == null) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -114,7 +114,7 @@ fun GroupPhoto(
                             .multiPhoto(size, padding)
                     ) {
                         Text(
-                            show[index].name.take(1),
+                            text = show[index].name.take(1),
                             style = if (size >= 64.dp) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
                             textAlign = TextAlign.Center
                         )

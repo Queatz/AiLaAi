@@ -92,7 +92,7 @@ fun CardItem(
             if (card == null) {
                 placeholder?.notBlank?.let { placeholder ->
                     EmptyText(
-                        placeholder,
+                        text = placeholder,
                         modifier = Modifier.fillMaxHeight()
                             .align(Alignment.Center)
                     )
@@ -100,7 +100,7 @@ fun CardItem(
             } else {
                 if (card.video != null) {
                     Video(
-                        card.video!!.let(api::url),
+                        url = card.video!!.let(api::url),
                         modifier = Modifier.matchParentSize().clip(MaterialTheme.shapes.large),
                         isPlaying = playVideo
                     )
@@ -124,7 +124,7 @@ fun CardItem(
                             .background(
                                 ShaderBrush(
                                     ImageShader(
-                                        ImageBitmap.imageResource(R.drawable.bkg),
+                                        image = ImageBitmap.imageResource(R.drawable.bkg),
                                         tileModeX = TileMode.Repeated,
                                         tileModeY = TileMode.Repeated
                                     )
@@ -192,7 +192,7 @@ fun CardItem(
                 ) {
                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                     CardConversation(
-                        card,
+                        card = card,
                         interactable = !isChoosing,
                         onReply = onReply,
                         selectingText = {
