@@ -41,5 +41,4 @@ dependencies {
     implementation("io.ktor:ktor-client-java:${versions.ktor}")
     implementation("io.ktor:ktor-server-caching-headers-jvm:${versions.ktor}")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}")
-    testImplementation("io.ktor:ktor-server-tests-jvm:${versions.ktor}")
 }

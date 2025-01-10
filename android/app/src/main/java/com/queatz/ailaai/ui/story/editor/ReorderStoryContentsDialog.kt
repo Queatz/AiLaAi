@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.group
 import app.ailaai.api.profile
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto

@@ -29,8 +29,9 @@ import app.ailaai.api.createGroup
 import app.ailaai.api.pinGroup
 import app.ailaai.api.unpinGroup
 import app.ailaai.api.updateMember
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api

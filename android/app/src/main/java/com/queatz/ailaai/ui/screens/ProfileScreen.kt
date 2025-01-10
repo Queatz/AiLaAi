@@ -69,7 +69,7 @@ import app.ailaai.api.subscribe
 import app.ailaai.api.unsubscribe
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.updateMyPhotoFromUri

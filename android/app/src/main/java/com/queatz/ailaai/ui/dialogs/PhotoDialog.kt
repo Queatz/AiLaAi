@@ -11,7 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -19,13 +25,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.graphics.drawable.toBitmapOrNull
-import coil.compose.AsyncImage
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.toBitmap
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.save
+import com.queatz.ailaai.extensions.share
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.ui.components.Video
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.theme.pad
@@ -75,9 +86,9 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                     context.imageLoader.execute(
                         ImageRequest.Builder(context)
                             .data(selectedBitmap!!)
-                            .target { drawable ->
+                            .target { image ->
                                 scope.launch {
-                                    drawable.toBitmapOrNull()?.share(context, null)
+                                    image.toBitmap().share(context, null)
                                 }
                             }
                             .build()
@@ -91,8 +102,8 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
                     context.imageLoader.execute(
                         ImageRequest.Builder(context)
                             .data(selectedBitmap!!)
-                            .target { drawable ->
-                                drawable.toBitmapOrNull()?.let { bitmap ->
+                            .target { image ->
+                                image.toBitmap().let { bitmap ->
                                     writeExternalStoragePermissionRequester.use(
                                         onPermanentlyDenied = {
                                             showStoragePermissionDialog = true

@@ -20,8 +20,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.queatz.ailaai.data.api
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -43,7 +44,7 @@ fun PhotoItem(photo: String, onClick: () -> Unit, onLongClick: () -> Unit) {
         contentScale = ContentScale.Companion.Fit,
         onSuccess = {
             isLoaded = true
-            aspect = it.result.drawable.intrinsicWidth.toFloat() / it.result.drawable.intrinsicHeight.toFloat()
+            aspect = it.result.image.width.toFloat() / it.result.image.height.toFloat()
         },
         contentDescription = "",
         alignment = Alignment.Companion.Center,

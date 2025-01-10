@@ -92,8 +92,9 @@ import app.ailaai.api.ErrorBlock
 import app.ailaai.api.groups
 import app.ailaai.api.me
 import app.ailaai.api.updateMe
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.queatz.ailaai.cache.CacheKey
 import com.queatz.ailaai.cache.cache
 import com.queatz.ailaai.data.api

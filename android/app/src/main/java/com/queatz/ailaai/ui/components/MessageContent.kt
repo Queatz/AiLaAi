@@ -49,7 +49,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmapOrNull
 import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
@@ -57,8 +56,9 @@ import app.ailaai.api.profile
 import app.ailaai.api.reactToMessage
 import app.ailaai.api.sticker
 import app.ailaai.api.updateMessage
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
@@ -284,9 +284,9 @@ fun ColumnScope.MessageContent(
                         context.imageLoader.execute(
                             ImageRequest.Builder(context)
                                 .data(selectedBitmap!!)
-                                .target { drawable ->
+                                .target { image ->
                                     scope.launch {
-                                        drawable.toBitmapOrNull()?.share(context, null)
+                                        image.toBitmap().share(context, null)
                                     }
                                 }
                                 .build()
@@ -299,8 +299,8 @@ fun ColumnScope.MessageContent(
                         context.imageLoader.execute(
                             ImageRequest.Builder(context)
                                 .data(selectedBitmap!!)
-                                .target { drawable ->
-                                    drawable.toBitmapOrNull()?.let { bitmap ->
+                                .target { image ->
+                                    image.toBitmap().let { bitmap ->
                                         writeExternalStoragePermissionRequester.use(
                                             onPermanentlyDenied = {
                                                 showStoragePermissionDialog = true

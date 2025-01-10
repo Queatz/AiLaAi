@@ -165,7 +165,7 @@ class Push {
                 if (sound != null) {
                     it.setSound(sound)
                 } else if (alarm) {
-                    val alarmSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    val alarmSoundUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                     it.setSound(alarmSoundUri)
                 } else {
                     it

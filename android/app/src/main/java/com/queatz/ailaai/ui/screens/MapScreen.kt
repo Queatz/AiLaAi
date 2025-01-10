@@ -70,9 +70,10 @@ import at.bluesource.choicesdk.maps.common.CameraUpdateFactory
 import at.bluesource.choicesdk.maps.common.LatLng
 import at.bluesource.choicesdk.maps.common.Map
 import at.bluesource.choicesdk.maps.common.MapFragment
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState

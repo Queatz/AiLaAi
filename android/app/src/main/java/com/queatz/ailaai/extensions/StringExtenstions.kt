@@ -22,9 +22,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.applyCanvas
-import androidx.core.graphics.drawable.toBitmapOrNull
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.toBitmap
 import com.queatz.ailaai.data.api
 import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
@@ -133,7 +134,7 @@ suspend fun String.asOvalBitmap(context: Context, size: Int = 256): Bitmap? {
                     .build()
             )
 
-            val originalBitmap = result.drawable?.toBitmapOrNull()
+            val originalBitmap = result.image?.toBitmap()
                 ?: return@withContext null
 
             val bitmapRatio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
