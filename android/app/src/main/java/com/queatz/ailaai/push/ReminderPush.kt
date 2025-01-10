@@ -18,11 +18,12 @@ fun Push.receive(data: ReminderPushData) {
 
     if (data.show != false) {
         send(
-            deeplinkIntent,
-            Notifications.Reminders,
+            intent = deeplinkIntent,
+            channel = if (data.reminder.alarm == true) Notifications.Alarms else Notifications.Reminders,
             groupKey = "reminders/${data.reminder.id}",
             title = data.reminder.title ?: "",
-            text = data.occurrence?.note ?: data.reminder.note ?: ""
+            text = data.occurrence?.note ?: data.reminder.note ?: "",
+            alarm = data.reminder.alarm == true
         )
     }
 }

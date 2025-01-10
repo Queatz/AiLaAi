@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.StringRes
@@ -135,6 +137,7 @@ class Push {
         text: String,
         style: NotificationCompat.Style? = null,
         sound: Uri? = null,
+        alarm: Boolean = false,
         replyInGroup: String? = null
     ) {
         if (!notificationManager.areNotificationsEnabled()) {
@@ -161,6 +164,9 @@ class Push {
             ).let {
                 if (sound != null) {
                     it.setSound(sound)
+                } else if (alarm) {
+                    val alarmSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    it.setSound(alarmSoundUri)
                 } else {
                     it
                 }
@@ -224,6 +230,16 @@ class Push {
                 channel.importance
             )
             notificationChannel.description = context.getString(channel.description)
+
+            if (channel.alarm) {
+                val alarmSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                notificationChannel.setSound(alarmSoundUri, audioAttributes)
+            }
+
             notificationManager.createNotificationChannel(notificationChannel)
         }
     }
@@ -234,6 +250,7 @@ enum class Notifications(
     @StringRes val description: Int,
     val importance: Int,
     val category: String,
+    val alarm: Boolean = false
 ) {
     Calls(
         R.string.calls,
@@ -252,6 +269,13 @@ enum class Notifications(
         R.string.reminders_notification_channel_description,
         NotificationManager.IMPORTANCE_HIGH,
         NotificationCompat.CATEGORY_REMINDER
+    ),
+    Alarms(
+        R.string.alarms,
+        R.string.reminders_notification_channel_description,
+        NotificationManager.IMPORTANCE_MAX,
+        NotificationCompat.CATEGORY_ALARM,
+        alarm = true
     ),
     Messages(
         R.string.messages,

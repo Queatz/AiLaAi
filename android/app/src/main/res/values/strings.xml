@@ -802,6 +802,9 @@
     <string name="use_status">Use this status</string>
     <string name="show_offline_notes">Show offline notes</string>
     <string name="hide_offline_notes">Hide offline notes</string>
+    <string name="alarm_off">Alarm off</string>
+    <string name="alarm_on">Alarm on</string>
+    <string name="alarms">Alarms</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

@@ -133,6 +133,10 @@ fun Route.reminderRoutes() {
                         reminder.start = update.start?.startOfSecond()
                     }
 
+                    if (update.alarm != null) {
+                        reminder.alarm = update.alarm
+                    }
+
                     if (update.timezone != null) {
                         reminder.timezone = update.timezone
                     }

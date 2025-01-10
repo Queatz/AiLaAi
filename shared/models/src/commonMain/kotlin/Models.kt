@@ -408,6 +408,7 @@ class Reminder(
     var start: Instant? = null,
     var end: Instant? = null,
     var duration: Long? = null,
+    var alarm: Boolean? = null,
     var timezone: String? = null,
     var utcOffset: Double? = null,
     var schedule: ReminderSchedule? = null

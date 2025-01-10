@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.AlarmOff
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
@@ -88,7 +90,7 @@ fun ReminderScreen(reminderId: String) {
         }
 
         api.reminderOccurrences(
-            reminderId,
+            id = reminderId,
             start = reminder!!.start!!,
             end = reminder!!.end ?: Clock.System.now()
         ) {
@@ -103,6 +105,18 @@ fun ReminderScreen(reminderId: String) {
             reloadEvents()
         }
         isLoading = false
+    }
+
+    fun toggleAlarm() {
+        scope.launch {
+            val alarm = reminder?.alarm != true
+            api.updateReminder(
+                id = reminderId,
+                reminder = Reminder(alarm = alarm)
+            ) {
+                reminder = it
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -143,8 +157,8 @@ fun ReminderScreen(reminderId: String) {
             ) { it.name ?: someone },
             onPeopleSelected = { people ->
                 api.updateReminder(
-                    reminderId,
-                    Reminder(people = ((reminder!!.people ?: emptyList()) + people.map { it.id!! }).distinct())
+                    id = reminderId,
+                    reminder = Reminder(people = ((reminder!!.people ?: emptyList()) + people.map { it.id!! }).distinct())
                 ) {
                     reload()
                 }
@@ -301,6 +315,13 @@ fun ReminderScreen(reminderId: String) {
                             stringResource(R.string.rename)
                         ) {
                             showEditTitle = true
+                        }
+                        item(
+                            icon = if (reminder?.alarm == true) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
+                            name = if (reminder?.alarm == true) stringResource(R.string.alarm_on) else stringResource(R.string.alarm_off),
+                            selected = reminder?.alarm == true
+                        ) {
+                            toggleAlarm()
                         }
                         val category = reminder?.categories?.firstOrNull()
                         item(

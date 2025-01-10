@@ -212,6 +212,7 @@ fun AppPage() {
             val data = it.data as? ReminderPushData
             if (data?.show == true) {
                 playNotificationSound = true
+                // todo: reminder as alarm
                 notifications.add(
                     Notification(
                         null,

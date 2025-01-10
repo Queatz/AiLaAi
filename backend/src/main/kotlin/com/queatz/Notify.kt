@@ -75,6 +75,7 @@ class Notify {
                     attachment = reminder.attachment
                     title = reminder.title
                     note = reminder.note
+                    alarm = reminder.alarm
                     start = reminder.start
                     end = reminder.end
                     timezone = reminder.timezone
