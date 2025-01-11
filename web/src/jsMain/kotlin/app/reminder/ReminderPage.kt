@@ -93,8 +93,8 @@ fun ReminderPage(
 
                     if (result == true) {
                         api.updateReminder(
-                            reminder.id!!,
-                            Reminder(
+                            id = reminder.id!!,
+                            reminder = Reminder(
                                 start = schedule.start,
                                 end = schedule.end,
                                 schedule = schedule.reminderSchedule
@@ -102,6 +102,28 @@ fun ReminderPage(
                         ) {
                             onUpdate(it)
                         }
+                    }
+                }
+            }
+
+            item(
+                if (reminder.alarm == true) {
+                    // todo: translate
+                    "Turn off alarm"
+                } else {
+                    // todo: translate
+                    "Turn on alarm"
+                },
+                icon = "alarm".takeIf { reminder.alarm == true }
+            ) {
+                scope.launch {
+                    api.updateReminder(
+                        id = reminder.id!!,
+                        reminder = Reminder(
+                            alarm = reminder.alarm != true
+                        )
+                    ) {
+                        onUpdate(it)
                     }
                 }
             }

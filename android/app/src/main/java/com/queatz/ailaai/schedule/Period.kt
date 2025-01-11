@@ -46,7 +46,7 @@ fun LazyListScope.Period(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                start.formatTitle(context, view),
+                text = start.formatTitle(context, view),
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier

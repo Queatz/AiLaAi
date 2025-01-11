@@ -158,6 +158,7 @@ fun EventRow(
             }) {
                 Text(
                     bulletedString(
+                        "⏰".takeIf { event.reminder.alarm == true },
                         date.formatSecondary(view).let {
                             val duration = (event.occurrence?.duration ?: event.reminder.duration)?.let {
                                 it.formatDuration()

@@ -272,13 +272,13 @@ fun ScheduleScreen() {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
-                stringResource(R.string.reminders),
-                {
+                title = stringResource(R.string.reminders),
+                onTitleClick = {
                     scrollToTop()
                 },
             ) {
                 IconButton(
-                    {
+                    onClick = {
                         showMenu = true
                     }
                 ) {

@@ -26,6 +26,7 @@ import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
@@ -99,7 +100,7 @@ fun PeriodEvent(
 
     if (showEditNote) {
         TextFieldDialog(
-            {
+            onDismissRequest = {
                 showEditNote = false
             },
             title = stringResource(R.string.edit_note),
@@ -119,16 +120,16 @@ fun PeriodEvent(
 
     if (showReschedule) {
         RescheduleDialog(
-            {
+            onDismissRequest = {
                 showReschedule = false
             },
-            event.date
+            date = event.date
         ) {
             scope.launch {
                 api.updateReminderOccurrence(
-                    event.reminder.id!!,
-                    event.updateDate,
-                    ReminderOccurrence(date = it)
+                    id = event.reminder.id!!,
+                    occurrence = event.updateDate,
+                    update = ReminderOccurrence(date = it)
                 ) {
                     onUpdated(event)
                     showEditNote = false
@@ -160,7 +161,7 @@ fun PeriodEvent(
             (event.reminder.person!!.inList() + (event.reminder.people ?: emptyList()))
                 .distinct()
                 .filter { it != me?.id }
-                .ifNotEmpty
+                .notEmpty
                 ?.mapNotNull { authors.get(it)?.contactPhoto() }
                 ?.sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
                 ?.let { people ->
@@ -172,7 +173,7 @@ fun PeriodEvent(
                 }
             Column {
                 Text(
-                    event.reminder.title ?: "",
+                    text = event.reminder.title ?: "",
                     style = MaterialTheme.typography.bodyMedium.let {
                         if (done) {
                             it.copy(textDecoration = TextDecoration.LineThrough)
@@ -189,7 +190,8 @@ fun PeriodEvent(
                     }
                 )
                 Text(
-                    bulletedString(
+                    text = bulletedString(
+                        "⏰".takeIf { event.reminder.alarm == true },
                         if (showFullTime) event.date.formatEventFull(ScheduleView.Yearly) else event.date.formatEvent(
                             view
                         )?.notBlank,
@@ -215,16 +217,16 @@ fun PeriodEvent(
         }
         AnimatedVisibility(expanded) {
             ScheduleItemActions(
-                {
+                onDismissRequest = {
                     expanded = false
                 },
                 showOpen = showOpen,
                 onDone = {
                     scope.launch {
                         api.updateReminderOccurrence(
-                            event.reminder.id!!,
-                            event.updateDate,
-                            ReminderOccurrence(done = !done)
+                            id = event.reminder.id!!,
+                            occurrence = event.updateDate,
+                            update = ReminderOccurrence(done = !done)
                         ) {
                             onUpdated(event)
                         }

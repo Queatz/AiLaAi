@@ -62,6 +62,7 @@ fun CalendarEvent(
     val titleString = event.reminder.title ?: "New reminder"
     val info = bulletedString(
         titleString,
+        "⏰".takeIf { event.reminder.alarm == true },
         event.date.formatSecondary(view).let {
             (event.occurrence?.duration ?: event.reminder.duration)?.formatDuration()?.let { duration ->
                 "$it ($duration)"
