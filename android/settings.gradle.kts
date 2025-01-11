@@ -5,6 +5,7 @@ dependencyResolutionManagement {
         maven(url = "https://jitpack.io")
         google()
         mavenCentral()
+        jcenter()
     }
 }
 

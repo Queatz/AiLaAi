@@ -130,6 +130,7 @@ fun FriendsScreen() {
         MainTab.Friends -> {
             tabCache[tab] ?: cache.get<List<GroupExtended>>(CacheKey.Groups) ?: emptyList()
         }
+
         else -> {
             tabCache[tab] ?: emptyList()
         }
@@ -377,7 +378,14 @@ fun FriendsScreen() {
                 }
             },
             confirmFormatter = { stringResource(R.string.close) },
-            infoFormatter = { "${it.members?.size ?: 0} ${context.resources.getQuantityString(R.plurals.inline_members, it.members?.size ?: 0)}" },
+            infoFormatter = {
+                "${it.members?.size ?: 0} ${
+                    context.resources.getQuantityString(
+                        R.plurals.inline_members,
+                        it.members?.size ?: 0
+                    )
+                }"
+            },
             groups = {
                 showSharedGroupsDialog
             }
@@ -431,7 +439,7 @@ fun FriendsScreen() {
             },
             confirmButton = {
                 TextButton(
-                    {
+                    onClick = {
                         scope.launch {
                             coroutineScope {
                                 allHiddenGroups
@@ -480,12 +488,15 @@ fun FriendsScreen() {
             ) {
                 Icon(Icons.Outlined.MoreVert, null)
                 Dropdown(showMenu, { showMenu = false }) {
-                    DropdownMenuItem({
-                        Text(stringResource(R.string.hidden_groups))
-                    }, {
-                        showMenu = false
-                        showHiddenGroupsDialog = true
-                    })
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(R.string.hidden_groups))
+                        },
+                        onClick = {
+                            showMenu = false
+                            showHiddenGroupsDialog = true
+                        }
+                    )
                 }
             }
             ScanQrCodeButton()
@@ -572,7 +583,8 @@ fun FriendsScreen() {
                                             public = true,
                                             onError = {}
                                         ) {
-                                            localCategories = it.mapNotNull { it.group?.categories }.flatten().distinct()
+                                            localCategories =
+                                                it.mapNotNull { it.group?.categories }.flatten().distinct()
                                         }
                                     }
                                 }
@@ -606,38 +618,38 @@ fun FriendsScreen() {
                             }
                         }
                     } else {
-                            item {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                ) {
-                                    NotificationsDisabledBanner(show = tab == MainTab.Friends)
-                                    AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
-                                        Friends(
-                                            people = remember(allGroups) {
-                                                allGroups.people().sortedByDescending { it.id == me?.id }
-                                            },
-                                            statuses = statuses,
-                                            title = {
-                                                if (it.id == me?.id) {
-                                                    context.getString(R.string.set_status)
-                                                } else {
-                                                    null
-                                                }
-                                            },
-                                            onLongClick = {
-                                                nav.appNavigate(AppNav.Profile(it.id!!))
-                                            }
-                                        ) { person ->
-                                            if (person.id == me?.id) {
-                                                myStatusDialog = true
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                NotificationsDisabledBanner(show = tab == MainTab.Friends)
+                                AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
+                                    Friends(
+                                        people = remember(allGroups) {
+                                            allGroups.people().sortedByDescending { it.id == me?.id }
+                                        },
+                                        statuses = statuses,
+                                        title = {
+                                            if (it.id == me?.id) {
+                                                context.getString(R.string.set_status)
                                             } else {
-                                                onFriendClick(person)
+                                                null
                                             }
+                                        },
+                                        onLongClick = {
+                                            nav.appNavigate(AppNav.Profile(it.id!!))
+                                        }
+                                    ) { person ->
+                                        if (person.id == me?.id) {
+                                            myStatusDialog = true
+                                        } else {
+                                            onFriendClick(person)
                                         }
                                     }
                                 }
                             }
+                        }
 
                         items(
                             items = results,

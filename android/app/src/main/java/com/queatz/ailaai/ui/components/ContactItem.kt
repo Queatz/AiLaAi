@@ -72,10 +72,11 @@ fun ContactItem(
 
     if (showMenu) {
         Menu(
-            { showMenu = false }
+            onDismissRequest = { showMenu = false }
         ) {
             val groupExtended = (item as? SearchResult.Group)?.groupExtended
-            if (groupExtended != null) {
+            val myMember = groupExtended?.members?.first { it.person?.id == me?.id } != null
+            if (myMember) {
                 menuItem(stringResource(if (groupExtended.pin == true) R.string.unpin else R.string.pin)) {
                     showMenu = false
                     scope.launch {
