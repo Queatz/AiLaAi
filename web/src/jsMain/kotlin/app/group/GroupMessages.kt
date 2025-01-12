@@ -8,8 +8,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.AppNavigation
 import app.AppStyles
+import app.ailaai.api.groupTopReactions
 import app.ailaai.api.messages
 import app.ailaai.api.messagesBefore
+import app.ailaai.api.myTopReactions
 import app.ailaai.api.reactToMessage
 import app.appNav
 import app.components.LoadMore
@@ -41,6 +43,22 @@ fun GroupMessages(group: GroupExtended) {
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
     val myMember = group.members?.find { it.person?.id == me!!.id }
+
+    var myTopReactions by remember { mutableStateOf(emptyList<String>()) }
+    var topGroupReactions by remember { mutableStateOf(emptyList<String>()) }
+
+    LaunchedEffect(Unit) {
+        api.myTopReactions {
+            myTopReactions = it.take(5).map { it.reaction }
+        }
+    }
+
+    LaunchedEffect(group) {
+        topGroupReactions = emptyList()
+        api.groupTopReactions(group.group!!.id!!) {
+            topGroupReactions = it.take(5).map { it.reaction }
+        }
+    }
 
     var isLoading by remember(group.group?.id) {
         mutableStateOf(true)
@@ -171,7 +189,7 @@ fun GroupMessages(group: GroupExtended) {
                     },
                     onReact = {
                        scope.launch {
-                           val reaction = addReactionDialog()?.notBlank
+                           val reaction = addReactionDialog(topGroupReactions + myTopReactions)?.notBlank
 
                            if (reaction != null) {
                                api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction))) {

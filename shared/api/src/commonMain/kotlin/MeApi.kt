@@ -4,6 +4,11 @@ import com.queatz.db.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 
+suspend fun Api.myTopReactions(
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<ReactionCount>>,
+) = get("me/reactions/top", onError = onError, onSuccess = onSuccess)
+
 suspend fun Api.me(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<Person>,

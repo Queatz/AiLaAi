@@ -26,6 +26,7 @@ fun Db.occurrences(person: String?, start: Instant, end: Instant, reminders: Lis
         for reminder in ${Reminder::class.collection()}
             filter (@person == null or reminder.${f(Reminder::person)} == @person or @person in reminder.${f(Reminder::people)})
                 and (@reminders == null or reminder._key in @reminders)
+                // todo: next two lines can cause occurrences to be missing if they are moved before or after the range
                 and reminder.${f(Reminder::start)} <= @end
                 and (reminder.${f(Reminder::end)} == null or reminder.${f(Reminder::end)} >= @start)
             let utcOffset = reminder.${f(Reminder::utcOffset)} || 0.0
@@ -104,6 +105,8 @@ fun Db.occurrences(person: String?, start: Instant, end: Instant, reminders: Lis
                         )
                     return occurrence
             )
+            // todo: maybe base ending on end to include ongoing reminders
+            filter count(dates) > 0 or count(occurrences) > 0 or (reminder.${f(Reminder::start)} <= @end and reminder.${f(Reminder::start)} >= @start)
             return {
                 reminder,
                 dates,

@@ -1,5 +1,38 @@
 package com.queatz.db
 
+fun Db.topReactionsFrom(entityId: String) = query(
+    ReactionCount::class,
+    """
+        for entity, reaction in outbound @entity graph `${Reaction::class.graph()}`
+            collect text = reaction.${f(Reaction::reaction)} with count into count
+            sort count desc, text
+            limit 10
+            return { ${f(ReactionCount::reaction)}: text, ${f(ReactionCount::count)}: count }
+    """.trimIndent(),
+    mapOf(
+        "entity" to entityId
+    )
+)
+
+
+fun Db.topReactionsInGroup(groupKey: String) = query(
+    ReactionCount::class,
+    """
+        for message in `${Message::class.collection()}`
+            filter message.${f(Message::group)} == @group
+            sort message.${f(Message::createdAt)} desc
+            limit 500
+            for entity, reaction in inbound message graph `${Reaction::class.graph()}`
+                collect text = reaction.${f(Reaction::reaction)} with count into count
+                sort count desc, text
+                limit 10
+                return { ${f(ReactionCount::reaction)}: text, ${f(ReactionCount::count)}: count }
+    """.trimIndent(),
+    mapOf(
+        "group" to groupKey
+    )
+)
+
 /**
  * @param from The ID of the person
  * @param to The ID of the entity

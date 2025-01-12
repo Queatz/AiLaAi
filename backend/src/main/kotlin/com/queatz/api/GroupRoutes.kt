@@ -462,6 +462,14 @@ fun Route.groupRoutes() {
                 }
             }
         }
+
+        get("/groups/{id}/reactions/top") {
+            respond {
+                val group = db.group(meOrNull?.id, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                db.topReactionsInGroup(group.group!!.id!!)
+            }
+        }
     }
 }
 

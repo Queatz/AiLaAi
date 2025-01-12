@@ -8,6 +8,7 @@ import com.queatz.db.PersonStatus
 import com.queatz.db.Profile
 import com.queatz.db.Transfer
 import com.queatz.db.allCardsOfCard
+import com.queatz.db.asId
 import com.queatz.db.cardsOfPerson
 import com.queatz.db.collaborationsOfPerson
 import com.queatz.db.countStories
@@ -18,6 +19,7 @@ import com.queatz.db.profileByUrl
 import com.queatz.db.recentStatuses
 import com.queatz.db.savedCardsOfPerson
 import com.queatz.db.storiesOfPerson
+import com.queatz.db.topReactionsFrom
 import com.queatz.db.transferOfPerson
 import com.queatz.db.updateDevice
 import com.queatz.db.updateEquippedCards
@@ -365,6 +367,12 @@ fun Route.meRoutes() {
                 db.update(me)
 
                 HttpStatusCode.NoContent
+            }
+        }
+
+        get("/me/reactions/top") {
+            respond {
+                db.topReactionsFrom(me.id!!.asId(Person::class))
             }
         }
     }

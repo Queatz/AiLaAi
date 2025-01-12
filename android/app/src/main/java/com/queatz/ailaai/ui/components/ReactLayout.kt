@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,18 +25,45 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import app.ailaai.api.groupTopReactions
+import app.ailaai.api.myTopReactions
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.theme.pad
+
+private var myTopReactionsCache = emptyList<String>()
 
 @Composable
 fun ReactLayout(
     modifier: Modifier = Modifier,
+    group: String? = null,
     maxLength: Int = 64,
     placeholder: String = stringResource(R.string.react),
     onReaction: (String) -> Unit
 ) {
     var value by remember { mutableStateOf("") }
+
+    var myTopReactions by remember { mutableStateOf(myTopReactionsCache) }
+    var topGroupReactions by remember { mutableStateOf(emptyList<String>()) }
+
+    LaunchedEffect(Unit) {
+        if (myTopReactionsCache.isEmpty()) {
+            api.myTopReactions {
+                myTopReactions = it.take(5).map { it.reaction }
+                myTopReactionsCache = myTopReactions
+            }
+        }
+    }
+
+    LaunchedEffect(group) {
+        topGroupReactions = emptyList()
+        group?.let { group ->
+            api.groupTopReactions(group) {
+                topGroupReactions = it.take(5).map { it.reaction }
+            }
+        }
+    }
 
     fun send() {
         value.trim().notBlank?.let {
@@ -46,7 +74,10 @@ fun ReactLayout(
     Column(
         modifier = modifier
     ) {
-        ReactQuickLayout(onReaction = onReaction)
+        ReactQuickLayout(
+            quickReactions = topGroupReactions + myTopReactions,
+            onReaction = onReaction
+        )
 
         OutlinedTextField(
             value = value,

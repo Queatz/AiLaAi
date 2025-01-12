@@ -71,7 +71,7 @@ fun CalendarEvent(
         event.reminder.categories?.firstOrNull(),
         event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank
     )
-    val done = event.occurrence?.done ?: false
+    val done = event.occurrence?.done == true
     val duration = (event.occurrence?.duration ?: event.reminder.duration ?: 0)
     var element by remember { mutableStateOf<HTMLElement?>(null) }
 

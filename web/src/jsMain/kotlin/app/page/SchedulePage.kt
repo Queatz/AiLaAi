@@ -357,31 +357,30 @@ fun SchedulePage(
                 }
 
                 ScheduleViewType.Calendar -> {
-                    var today = offset
-                    val columnInfos = (0 until range[view]!!).map { index ->
-                        val start = when (view) {
-                            ScheduleView.Daily -> startOfDay(today)
-                            ScheduleView.Weekly -> startOfWeek(today)
-                            ScheduleView.Monthly -> startOfMonth(today)
-                            ScheduleView.Yearly -> startOfYear(today)
-                        }
+                    val columnInfos = remember(isLoading, offset, view, shownEvents) {
+                        var today = offset
+                        (0 until range[view]!!).map { index ->
+                            val start = when (view) {
+                                ScheduleView.Daily -> startOfDay(today)
+                                ScheduleView.Weekly -> startOfWeek(today)
+                                ScheduleView.Monthly -> startOfMonth(today)
+                                ScheduleView.Yearly -> startOfYear(today)
+                            }
 
-                        val end = when (view) {
-                            ScheduleView.Daily -> addDays(start, 1.0)
-                            ScheduleView.Weekly -> addWeeks(start, 1.0)
-                            ScheduleView.Monthly -> addMonths(start, 1.0)
-                            ScheduleView.Yearly -> addYears(start, 1.0)
-                        }
+                            val end = when (view) {
+                                ScheduleView.Daily -> addDays(start, 1.0)
+                                ScheduleView.Weekly -> addWeeks(start, 1.0)
+                                ScheduleView.Monthly -> addMonths(start, 1.0)
+                                ScheduleView.Yearly -> addYears(start, 1.0)
+                            }
 
-                        val result = if (isLoading) emptyList() else shownEvents.filter { event ->
-                            (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(
-                                event.date,
-                                end
-                            )
-                        }
-                        today = end
+                            val result = if (isLoading) emptyList() else shownEvents.filter { event ->
+                                (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(event.date, end)
+                            }
+                            today = end
 
-                        ColumnInfo(start, end, result)
+                            ColumnInfo(start, end, result)
+                        }
                     }
 
                     val millisecondsIn1Rem = remember(view) {
@@ -504,8 +503,8 @@ fun SchedulePage(
                                     }
                                 }) {
                                     val text = addMilliseconds(
-                                        columnInfos[index].start,
-                                        interval * lineIndex
+                                        date = columnInfos[index].start,
+                                        amount = interval * lineIndex
                                     ).formatSecondary(view)
                                     Span({
                                         title(text)

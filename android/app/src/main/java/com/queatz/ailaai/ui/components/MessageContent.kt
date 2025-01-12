@@ -248,6 +248,7 @@ fun ColumnScope.MessageContent(
         ) {
             if (canReact) {
                 ReactLayout(
+                    group = message.group!!,
                     modifier = Modifier.padding(1.pad)
                 ) { reaction ->
                     if (reaction.isNotBlank()) {

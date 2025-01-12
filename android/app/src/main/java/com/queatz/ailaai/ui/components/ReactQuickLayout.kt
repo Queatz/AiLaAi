@@ -24,13 +24,13 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun ReactQuickLayout(
     modifier: Modifier = Modifier,
+    quickReactions: List<String> = emptyList(),
     onReaction: (String) -> Unit
 ) {
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     val scrollState = rememberScrollState()
-    val common = remember {
-        // todo include from GroupExtended.topReactions and from my top reactions
-        listOf(
+    val common = remember(quickReactions) {
+        quickReactions + listOf(
             "\uD83D\uDE02",
             "\uD83D\uDE0E",
             "\uD83D\uDE32",
@@ -39,7 +39,7 @@ fun ReactQuickLayout(
             "\uD83E\uDD14",
             "\uD83D\uDE18",
             "\uD83D\uDE2C",
-        ).shuffled()
+        ).shuffled().distinct()
     }
 
     Row(
