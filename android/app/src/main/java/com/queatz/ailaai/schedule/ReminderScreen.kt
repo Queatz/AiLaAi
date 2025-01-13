@@ -115,6 +115,7 @@ fun ReminderScreen(reminderId: String) {
                 reminder = Reminder(alarm = alarm)
             ) {
                 reminder = it
+                reloadEvents()
             }
         }
     }

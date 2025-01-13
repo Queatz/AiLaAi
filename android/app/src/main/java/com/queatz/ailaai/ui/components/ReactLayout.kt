@@ -30,9 +30,11 @@ import app.ailaai.api.myTopReactions
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.ui.components.groupTopReactionsCache
 import com.queatz.ailaai.ui.theme.pad
 
 private var myTopReactionsCache = emptyList<String>()
+private val groupTopReactionsCache = mutableMapOf<String, List<String>>()
 
 @Composable
 fun ReactLayout(
@@ -45,7 +47,11 @@ fun ReactLayout(
     var value by remember { mutableStateOf("") }
 
     var myTopReactions by remember { mutableStateOf(myTopReactionsCache) }
-    var topGroupReactions by remember { mutableStateOf(emptyList<String>()) }
+    var topGroupReactions by remember(group) {
+        mutableStateOf(
+            group?.let { groupTopReactionsCache[it] } ?: emptyList<String>()
+        )
+    }
 
     LaunchedEffect(Unit) {
         if (myTopReactionsCache.isEmpty()) {
@@ -61,6 +67,7 @@ fun ReactLayout(
         group?.let { group ->
             api.groupTopReactions(group) {
                 topGroupReactions = it.take(5).map { it.reaction }
+                groupTopReactionsCache[group] = topGroupReactions
             }
         }
     }
