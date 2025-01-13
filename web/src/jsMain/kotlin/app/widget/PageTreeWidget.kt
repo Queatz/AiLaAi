@@ -15,7 +15,6 @@ import app.ailaai.api.card
 import app.ailaai.api.cardsCards
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
-import app.appNav
 import app.cards.NewCardInput
 import app.components.Empty
 import app.dialog.inputDialog
@@ -92,7 +91,6 @@ fun PageTreeWidget(widgetId: String) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
     val router = Router.current
-    val appNav = appNav
     var widget by remember(widgetId) {
         mutableStateOf<Widget?>(null)
     }
@@ -105,11 +103,11 @@ fun PageTreeWidget(widgetId: String) {
     var search by remember(widgetId) {
         mutableStateOf("")
     }
-    var tagFilter by remember(widgetId) {
-        mutableStateOf<TagFilter?>(null)
+    var tagFilters by remember(widgetId) {
+        mutableStateOf(emptySet<TagFilter>())
     }
-    var stageFilter by remember(widgetId) {
-        mutableStateOf<TagFilter?>(null)
+    var stageFilters by remember(widgetId) {
+        mutableStateOf(emptySet<TagFilter>())
     }
     var data by remember(widgetId) {
         mutableStateOf<PageTreeData?>(null)
@@ -140,7 +138,7 @@ fun PageTreeWidget(widgetId: String) {
             searchedCards.any { it.id == id }
         }?.values?.distinct()?.sorted()?.sortedDescending()
     }
-    val stagedCards = remember(searchedCards, stageFilter) {
+    val stagedCards = remember(searchedCards, stageFilters) {
         if (search.isNotBlank()) {
             cards.filter {
                 it.name?.contains(search, ignoreCase = true) == true
@@ -148,17 +146,16 @@ fun PageTreeWidget(widgetId: String) {
         } else {
             cards
         }.let {
-            val stage = (stageFilter as? TagFilter.Tag)?.tag
-            when {
-                stageFilter != null -> {
-                    it.filter {
-                        data?.stages?.get(it.id!!) == stage
-                    }
+            val stages = stageFilters.map {
+                when (it) {
+                    is TagFilter.Tag -> it.tag
+                    is TagFilter.Untagged -> null
                 }
-
-                stageFilter is TagFilter.Untagged -> {
+            }
+            when {
+                stages.isNotEmpty() -> {
                     it.filter {
-                        data?.stages?.get(it.id!!) == null
+                        data?.stages?.get(it.id!!) in stages
                     }
                 }
 
@@ -185,19 +182,20 @@ fun PageTreeWidget(widgetId: String) {
             stagedCards.any { it.id == id }
         }?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
     }
-    val shownCards = remember(stagedCards, tagFilter) {
+    val shownCards = remember(stagedCards, tagFilters) {
         stagedCards.let {
-            val tag = (tagFilter as? TagFilter.Tag)?.tag
-            when {
-                tag != null -> {
-                    it.filter {
-                        data?.tags?.get(it.id!!)?.contains(tag) == true
-                    }
+            val tags = tagFilters.map {
+                when (it) {
+                    is TagFilter.Tag -> it.tag
+                    is TagFilter.Untagged -> null
                 }
-
-                tagFilter is TagFilter.Untagged -> {
+            }
+            when {
+                tags.isNotEmpty() -> {
                     it.filter {
-                        data?.tags?.get(it.id!!).isNullOrEmpty()
+                        data?.tags?.get(it.id!!).orEmpty().let {
+                            it.any { it in tags } || (it.isEmpty() && null in tags)
+                        }
                     }
                 }
 
@@ -357,16 +355,29 @@ fun PageTreeWidget(widgetId: String) {
                     }
                 }) {
                     stages.forEach { stage ->
+                        val tags = stageFilters.filterIsInstance<TagFilter.Tag>().map { it.tag }
+
                         TagButton(
                             tag = stage,
                             // todo: translate
                             title = "Tap to filter",
-                            selected = stage == (stageFilter as? TagFilter.Tag)?.tag,
+                            selected = stage in tags,
                             outline = true,
                             count = stageCount?.get(stage)?.toString() ?: "",
-                            onClick = {
-                                stageFilter =
-                                    if ((stageFilter as? TagFilter.Tag)?.tag == stage) null else TagFilter.Tag(stage)
+                            onClick = { multiselect ->
+                                if (!multiselect) {
+                                    stageFilters = if (TagFilter.Tag(stage) in stageFilters) {
+                                        emptySet()
+                                    } else {
+                                        setOf(TagFilter.Tag(stage))
+                                    }
+                                } else {
+                                    if (stage in tags) {
+                                        stageFilters -= TagFilter.Tag(stage)
+                                    } else {
+                                        stageFilters += TagFilter.Tag(stage)
+                                    }
+                                }
                             }
                         )
                     }
@@ -377,10 +388,22 @@ fun PageTreeWidget(widgetId: String) {
                             count = noStageCount.toString(),
                             // todo: Translate
                             title = "Tap to filter",
-                            selected = stageFilter == TagFilter.Untagged,
+                            selected = TagFilter.Untagged in stageFilters,
                             outline = true,
-                            onClick = {
-                                stageFilter = if (stageFilter == TagFilter.Untagged) null else TagFilter.Untagged
+                            onClick = { multiselect ->
+                                if (!multiselect) {
+                                    stageFilters = if (TagFilter.Untagged in stageFilters) {
+                                        emptySet()
+                                    } else {
+                                        setOf(TagFilter.Untagged)
+                                    }
+                                } else {
+                                    stageFilters = if (TagFilter.Untagged in stageFilters) {
+                                        stageFilters - TagFilter.Untagged
+                                    } else {
+                                        stageFilters + TagFilter.Untagged
+                                    }
+                                }
                             }
                         )
                     }
@@ -390,7 +413,7 @@ fun PageTreeWidget(widgetId: String) {
             allTags?.notEmpty?.let { tags ->
                 Tags(
                     tags = tags,
-                    selected = tagFilter,
+                    selected = tagFilters,
                     marginTop = 0.r,
                     // todo: translate
                     title = "Tap to filter",
@@ -402,8 +425,20 @@ fun PageTreeWidget(widgetId: String) {
                         }
                     },
                     showNoTag = true,
-                    onClick = {
-                        tagFilter = if (tagFilter == it) null else it
+                    onClick = { tag, multiselect ->
+                        if (!multiselect) {
+                            tagFilters = if (tag in tagFilters) {
+                                emptySet()
+                            } else {
+                                setOf(tag)
+                            }
+                        } else {
+                            if (tag in tagFilters) {
+                                tagFilters -= tag
+                            } else {
+                                tagFilters += tag
+                            }
+                        }
                     }
                 )
             }
@@ -630,9 +665,9 @@ fun PageTreeWidget(widgetId: String) {
                             tags = tags,
                             // todo: translate
                             title = if (me != null) "Tap to remove" else "",
-                            onClick = {
+                            onClick = { tag, _ ->
                                 if (me != null) {
-                                    removeTag(card, (it as? TagFilter.Tag)?.tag ?: "")
+                                    removeTag(card, (tag as? TagFilter.Tag)?.tag ?: "")
                                 }
                             }
                         ) {
@@ -671,10 +706,10 @@ fun PageTreeWidget(widgetId: String) {
 @Composable
 fun Tags(
     tags: List<String>,
-    selected: TagFilter? = null,
+    selected: Set<TagFilter> = emptySet(),
     marginTop: CSSSizeValue<*> = 1.r,
     title: String,
-    onClick: (tag: TagFilter) -> Unit,
+    onClick: (tag: TagFilter, multiselect: Boolean) -> Unit,
     formatCount: ((tag: String?) -> String?)? = null,
     showNoTag: Boolean = false,
     content: @Composable () -> Unit = {},
@@ -691,10 +726,10 @@ fun Tags(
             TagButton(
                 tag = tag,
                 title = title,
-                selected = (selected as? TagFilter.Tag)?.tag == tag,
+                selected = tag in selected.filterIsInstance<TagFilter.Tag>().map { it.tag },
                 count = formatCount?.invoke(tag),
-                onClick = {
-                    onClick(TagFilter.Tag(tag))
+                onClick = { multiselect ->
+                    onClick(TagFilter.Tag(tag), multiselect)
                 }
             )
         }
@@ -705,10 +740,10 @@ fun Tags(
                 tag = "No tag",
                 count = formatCount?.invoke(null),
                 title = title,
-                selected = selected == TagFilter.Untagged,
+                selected = TagFilter.Untagged in selected,
                 outline = true,
                 onClick = {
-                    onClick(TagFilter.Untagged)
+                    onClick(TagFilter.Untagged, it)
                 }
             )
         }
@@ -724,7 +759,7 @@ fun TagButton(
     selected: Boolean,
     count: String? = null,
     outline: Boolean = false,
-    onClick: () -> Unit,
+    onClick: (multiselect: Boolean) -> Unit,
 ) {
     Button(
         {
@@ -748,7 +783,7 @@ fun TagButton(
 
             onClick {
                 it.stopPropagation()
-                onClick()
+                onClick(it.ctrlKey)
             }
         }
     ) {

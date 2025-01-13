@@ -30,7 +30,6 @@ import app.ailaai.api.myTopReactions
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.notBlank
-import com.queatz.ailaai.ui.components.groupTopReactionsCache
 import com.queatz.ailaai.ui.theme.pad
 
 private var myTopReactionsCache = emptyList<String>()
@@ -63,7 +62,6 @@ fun ReactLayout(
     }
 
     LaunchedEffect(group) {
-        topGroupReactions = emptyList()
         group?.let { group ->
             api.groupTopReactions(group) {
                 topGroupReactions = it.take(5).map { it.reaction }

@@ -69,5 +69,5 @@ dependencies {
     implementation("com.mohamedrejeb.ksoup:ksoup-html:0.3.1")
     implementation("org.apache.commons:commons-text:1.12.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}")
-    testImplementation("io.ktor:ktor-server-test-host:${versions.ktor}")
+    testImplementation("io.ktor:w:${versions.ktor}")
 }
