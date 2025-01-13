@@ -8,7 +8,7 @@ open class Versions {
     val compose = "1.7.6"
     val serialization = "1.7.3"
     val datetime = "0.5.0"
-    val logback = "1.4.12"
+    val logback = "1.5.16"
     val arango = "7.15.0"
     val jackson = "2.15.3"
 }
