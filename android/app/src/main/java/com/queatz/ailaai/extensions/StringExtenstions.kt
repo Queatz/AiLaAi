@@ -328,3 +328,5 @@ fun <R : Any> AnnotatedString.Builder.bold(block: AnnotatedString.Builder.() -> 
 val String.notBlank get() = takeIf { it.isNotBlank() }
 
 fun <T> String.notBlank(block: (String) -> T) = notBlank?.let(block)
+
+fun String.ellipsize(maxLength: Int = 128) = if (length <= maxLength) this else this.take(maxLength - 1) + "…"

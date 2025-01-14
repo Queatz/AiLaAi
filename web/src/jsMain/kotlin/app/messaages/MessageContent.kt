@@ -36,6 +36,8 @@ import stories.StoryStyles
 import stories.textContent
 import kotlin.js.Date
 
+private val cachedReplies = mutableListOf<Message>()
+
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun MessageContent(
@@ -53,20 +55,29 @@ fun MessageContent(
     }
 
     var reply by remember(message) {
-        mutableStateOf<Message?>(null)
+        mutableStateOf<Message?>(
+            (attachments.firstNotNullOfOrNull { it as? ReplyAttachment })
+                .takeIf { !isReply }
+                ?.let { attachment ->
+                cachedReplies.firstOrNull { it.id == attachment.message }
+            }
+        )
     }
 
-    LaunchedEffect(attachments) {
-        reply = null
+    if (!isReply) {
+        LaunchedEffect(attachments) {
+            reply = null
 
-        val replyAttachment = attachments.firstNotNullOfOrNull { it as? ReplyAttachment }
+            val replyAttachment = attachments.firstNotNullOfOrNull { it as? ReplyAttachment }
 
-        if (isReply || replyAttachment == null) {
-            return@LaunchedEffect
-        }
+            if (replyAttachment == null) {
+                return@LaunchedEffect
+            }
 
-        api.message(replyAttachment.message!!) {
-            reply = it
+            api.message(replyAttachment.message!!) {
+                reply = it
+                cachedReplies += it
+            }
         }
     }
 

@@ -13,6 +13,7 @@ import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
 import com.queatz.db.ReplyAttachment
+import ellipsize
 import json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ suspend fun replyInNewGroupDialog(
         )
 
         api.createGroup(it.map { it.id!! }) {
-            api.updateGroup(it.id!!, Group(name = "Re: $title ($groupName)")) { newGroup ->
+            api.updateGroup(it.id!!, Group(name = "Re: ${title.ellipsize(64)} ($groupName)")) { newGroup ->
                 api.sendMessage(
                     newGroup.id!!, message = Message(
                         attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),

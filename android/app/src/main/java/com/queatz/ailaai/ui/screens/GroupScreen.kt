@@ -148,6 +148,7 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.asOvalBitmap
 import com.queatz.ailaai.extensions.attachmentText
 import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.ellipsize
 import com.queatz.ailaai.extensions.fadingEdge
 import com.queatz.ailaai.extensions.formatFuture
 import com.queatz.ailaai.extensions.formatTime
@@ -258,6 +259,7 @@ import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
+private val cachedReplies = mutableListOf<Message>()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -512,7 +514,7 @@ fun GroupScreen(groupId: String) {
         ).orEmpty()
 
         api.createGroup(people.map { it.id!! }) {
-            api.updateGroup(it.id!!, Group(name = "Re: $title ($groupName)")) { newGroup ->
+            api.updateGroup(it.id!!, Group(name = "Re: ${title.ellipsize(64)} ($groupName)")) { newGroup ->
                 api.sendMessage(
                     newGroup.id!!, message = Message(
                         attachment = json.encodeToString(ReplyAttachment(message = message.id!!)),
@@ -1101,9 +1103,11 @@ fun GroupScreen(groupId: String) {
                                     groupExtended?.bots?.find { bot -> bot.id == it }
                                 },
                                 getMessage = { messageId ->
-                                    var message: Message? = messages.find { it.id == messageId }
+                                    var message: Message? = messages
+                                        .find { it.id == messageId } ?: cachedReplies.find { it.id == messageId }
                                     api.message(messageId) {
                                         message = it
+                                        cachedReplies += it
                                     }
                                     message
                                 },
