@@ -31,7 +31,7 @@ class ReplyReceiver : BroadcastReceiver() {
                     )
                 ) {
                     withContext(Dispatchers.Main) {
-                        push.clear(intent.getStringExtra(KEY_GROUP_ID)!!)
+                        push.clearGroup(intent.getStringExtra(KEY_GROUP_ID)!!)
                         context.toast(R.string.message_sent)
                     }
                 }

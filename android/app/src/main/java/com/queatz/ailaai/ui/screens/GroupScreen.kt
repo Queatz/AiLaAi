@@ -343,7 +343,7 @@ fun GroupScreen(groupId: String) {
     }
 
     LaunchedEffect(Unit) {
-        push.clear(groupId)
+        push.clearGroup(groupId)
     }
 
     LaunchedEffect(Unit) {

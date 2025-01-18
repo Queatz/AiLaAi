@@ -12,6 +12,7 @@ import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -40,8 +41,10 @@ class ActionReceiver : BroadcastReceiver() {
                         occurrence = action.occurrence,
                         update = ReminderOccurrence(done = true)
                     ) {
-                        context.toast(context.getString(R.string.occurrence_marked_as_done))
-                        push.clear(notificationKey)
+                        withContext(Dispatchers.Main) {
+                            context.toast(context.getString(R.string.occurrence_marked_as_done))
+                            push.clear(notificationKey)
+                        }
                     }
                 }
 

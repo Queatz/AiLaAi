@@ -251,8 +251,12 @@ class Push {
 
     internal fun makeGroupKey(groupId: String) = "group/$groupId"
 
-    fun clear(groupId: String) {
+    fun clearGroup(groupId: String) {
         notificationManager.cancel(makeGroupKey(groupId), 1)
+    }
+
+    fun clear(groupKey: String) {
+        notificationManager.cancel(groupKey, 1)
     }
 
     fun init(context: Context) {
