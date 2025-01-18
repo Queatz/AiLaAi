@@ -20,6 +20,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
+import com.queatz.ailaai.ActionReceiver
+import com.queatz.ailaai.PushNotificationAction
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ReplyReceiver
 import com.queatz.ailaai.ReplyReceiver.Companion.KEY_REPLY
@@ -48,6 +50,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 
 val push by lazy {
     Push()
@@ -138,7 +141,8 @@ class Push {
         style: NotificationCompat.Style? = null,
         sound: Uri? = null,
         alarm: Boolean = false,
-        replyInGroup: String? = null
+        replyInGroup: String? = null,
+        actions: List<PushNotificationAction>? = null
     ) {
         if (!notificationManager.areNotificationsEnabled()) {
             return
@@ -204,6 +208,41 @@ class Push {
                     )
                 } else {
                     it
+                }
+            }.let {
+                if (actions.isNullOrEmpty()) {
+                    it
+                } else {
+                    actions.fold(it) { it, action ->
+                        val actionIntent = Intent(context, ActionReceiver::class.java).apply {
+                            putExtras(
+                                bundleOf(
+                                    ActionReceiver.KEY_ACTION to json.encodeToString(action),
+                                    ActionReceiver.KEY_NOTIFICATION_KEY to groupKey,
+                                )
+                            )
+                        }
+
+                        val actionPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+                            context,
+                            0,
+                            actionIntent,
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+
+                        it.addAction(
+                            when (action) {
+                                is PushNotificationAction.MarkAsDone -> {
+                                    NotificationCompat.Action.Builder(
+                                        null,
+                                        context.getString(R.string.mark_as_done),
+                                        actionPendingIntent
+                                    )
+                                        .build()
+                                }
+                            }
+                        )
+                    }
                 }
             }
 

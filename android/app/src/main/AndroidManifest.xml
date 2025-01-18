@@ -162,6 +162,9 @@
         <receiver android:name=".ReplyReceiver"
                   android:exported="false" />
 
+        <receiver android:name=".ActionReceiver"
+                  android:exported="false" />
+
         <service
                 android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
                 android:enabled="false"

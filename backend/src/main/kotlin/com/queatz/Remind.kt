@@ -46,7 +46,11 @@ class Remind {
         Logger.getAnonymousLogger().info("REMIND events=${events.size}")
         events.forEach {
             Logger.getAnonymousLogger().info("REMIND reminder=${it.reminder.title} date=${it.date} event=${it.event}")
-            notify.reminder(it.reminder, it.occurrence)
+            notify.reminder(
+                date = it.date,
+                reminder = it.reminder,
+                occurrence = it.occurrence
+            )
         }
     }
 }

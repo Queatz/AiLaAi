@@ -1,6 +1,7 @@
 package com.queatz.push
 
 import com.queatz.db.*
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 enum class PushAction {
@@ -120,6 +121,7 @@ data class JoinRequestPushData(
 
 @Serializable
 data class ReminderPushData(
+    val date: Instant,
     val reminder: Reminder,
     val occurrence: ReminderOccurrence?,
     val show: Boolean? = null

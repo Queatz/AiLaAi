@@ -1,15 +1,12 @@
 package com.queatz.ailaai
 
-import android.app.NotificationManager
 import android.app.RemoteInput
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationCompat
 import app.ailaai.api.sendMessage
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.toast
-import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.push
 import com.queatz.db.Message
 import kotlinx.coroutines.CoroutineScope

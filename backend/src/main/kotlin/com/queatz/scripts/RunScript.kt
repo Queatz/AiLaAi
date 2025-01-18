@@ -38,6 +38,9 @@ class RunScript(private val script: Script, private val data: String?) {
                         id = it.id
                         name = it.name
                         photo = it.photo
+                        language = it.language
+                        utcOffset = it.utcOffset
+                        seen = it.seen
                     } },
                     "self" to script.id!!,
                     "render" to ScriptRender { content = it },

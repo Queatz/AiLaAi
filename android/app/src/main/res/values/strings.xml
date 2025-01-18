@@ -805,6 +805,8 @@
     <string name="alarm_off">Alarm off</string>
     <string name="alarm_on">Alarm on</string>
     <string name="alarms">Alarms</string>
+    <string name="mark_as_done">Mark as done</string>
+    <string name="occurrence_marked_as_done">Occurrence marked as done</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

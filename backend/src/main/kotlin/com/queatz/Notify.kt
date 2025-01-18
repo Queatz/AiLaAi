@@ -40,6 +40,7 @@ import com.queatz.push.StoryPushData
 import com.queatz.push.TradeEvent
 import com.queatz.push.TradePushData
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 class Notify {
     fun trade(trade: Trade, person: Person, people: List<Person>? = null, event: TradeEvent) {
@@ -65,11 +66,12 @@ class Notify {
         notifyPeople(trade.people!!, pushData)
     }
 
-    fun reminder(reminder: Reminder, occurrence: ReminderOccurrence?) {
+    fun reminder(date: Instant, reminder: Reminder, occurrence: ReminderOccurrence?) {
         val pushData = PushData(
             PushAction.Reminder,
             ReminderPushData(
-                Reminder().apply {
+                date = date,
+                reminder = Reminder().apply {
                     id = reminder.id
                     person = reminder.person
                     attachment = reminder.attachment
@@ -82,7 +84,7 @@ class Notify {
                     utcOffset = reminder.utcOffset
                     schedule = reminder.schedule
                 },
-                occurrence?.let { occurrence ->
+                occurrence = occurrence?.let { occurrence ->
                     ReminderOccurrence(
                         note = occurrence.note,
                         done = occurrence.done
@@ -94,7 +96,10 @@ class Notify {
             )
         )
 
-        notifyPeople(listOf(reminder.person!!) + (reminder.people ?: emptyList()), pushData)
+        notifyPeople(
+            people = listOf(reminder.person!!) + (reminder.people ?: emptyList()),
+            pushData = pushData
+        )
     }
 
     fun callStatus(group: Group, call: Call) {

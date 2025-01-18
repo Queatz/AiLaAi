@@ -655,7 +655,7 @@ fun ScriptsDialog(
                 me: Person? // The current user, if signed in, null if signed out
                 data: String? // Data passed to the script, if any
                 
-                Person has the following fields: id, name, photo
+                Person has the following fields: id, name, photo, language, utcOffset, seen
                 
                 The following are functions passed into scripts: render, http
                 
