@@ -12,10 +12,12 @@ class PermissionRequester(val permission: String) {
     internal lateinit var state: PermissionState
     private var onPermanentlyDenied: (() -> Unit)? = null
     private var onGranted: (() -> Unit)? = null
+    private var onDenied: (() -> Unit)? = null
 
-    fun use(onPermanentlyDenied: () -> Unit = {}, onGranted: () -> Unit) {
+    fun use(onPermanentlyDenied: () -> Unit = {}, onDenied: () -> Unit = {}, onGranted: () -> Unit) {
         this.onPermanentlyDenied = null
         this.onGranted = null
+        this.onDenied = null
 
         // Special cases for retired permissions
         when (permission) {
@@ -43,6 +45,8 @@ class PermissionRequester(val permission: String) {
             onGranted?.invoke()
         } else if (!state.status.shouldShowRationale) {
             onPermanentlyDenied?.invoke()
+        } else {
+            onDenied?.invoke()
         }
 
         onGranted = null

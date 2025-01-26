@@ -3,6 +3,7 @@ package com.queatz.ailaai.ui.components
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import com.huawei.hms.api.ConnectionResult
+import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.hmsscankit.ScanKitActivity
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
@@ -77,6 +80,13 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
     var showQrCodeExplanationDialog by rememberStateOf(false)
     var showCameraRationale by rememberStateOf(false)
     val cameraPermissionRequester = permissionRequester(Manifest.permission.CAMERA)
+    val readImagesPermissionRequester = permissionRequester(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+    )
     val nav = nav
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -126,20 +136,37 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
         }
     }
 
+    fun showQrCodeScanner() {
+        scanQrLauncher.launch(
+            // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
+            // Extracted from ScanUtil.java (startScan)
+            Intent(nav.context as Activity, ScanKitActivity::class.java).apply {
+                putExtra("ScanFormatValue", HmsScan.QRCODE_SCAN_TYPE)
+                putExtra("ScanViewValue", 1)
+            }
+        )
+    }
+
     fun scanQrCode() {
         cameraPermissionRequester.use(
             onPermanentlyDenied = {
                 showCameraRationale = true
             }
         ) {
-            scanQrLauncher.launch(
-                // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
-                // Extracted from ScanUtil.java (startScan)
-                Intent(nav.context as Activity, ScanKitActivity::class.java).apply {
-                    putExtra("ScanFormatValue", HmsScan.QRCODE_SCAN_TYPE)
-                    putExtra("ScanViewValue", 1)
+            if (HuaweiApiAvailability.getInstance().isHuaweiMobileServicesAvailable(context) != ConnectionResult.SUCCESS) {
+                readImagesPermissionRequester.use(
+                    onPermanentlyDenied = {
+                        showQrCodeScanner()
+                    },
+                    onDenied = {
+                        showQrCodeScanner()
+                    }
+                ) {
+                    showQrCodeScanner()
                 }
-            )
+            } else {
+                showQrCodeScanner()
+            }
         }
     }
 

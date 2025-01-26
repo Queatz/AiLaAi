@@ -131,7 +131,7 @@ dependencies {
     implementation("com.huawei.hms:base:6.13.0.300")
     implementation("com.huawei.hms:maps:6.11.2.301")
     implementation("com.huawei.hms:push:6.11.0.300")
-    implementation("com.huawei.hms:scan:2.12.0.301")
+    implementation("com.huawei.hms:scanplus:2.12.0.301")
     implementation("com.huawei.hms:hwid:6.12.0.300")
     implementation("com.huawei.hms:location:6.12.0.300")
 
