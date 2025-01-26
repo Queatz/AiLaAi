@@ -27,6 +27,7 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.R
 import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -73,7 +74,7 @@ fun String.sendEmail(context: Context, subject: String? = null) {
     if (subject != null) {
         intent.putExtra(Intent.EXTRA_SUBJECT, subject)
     }
-    context.startActivity(Intent.createChooser(intent, null))
+    context.startActivity(Intent.createChooser(intent, subject))
 }
 
 fun String.shareAsUrl(context: Context, name: String?) {
@@ -83,14 +84,14 @@ fun String.shareAsUrl(context: Context, name: String?) {
     if (name != null) {
         intent.putExtra(Intent.EXTRA_TITLE, name)
     }
-    context.startActivity(Intent.createChooser(intent, null))
+    context.startActivity(Intent.createChooser(intent, name ?: context.getString(R.string.empty_group_name)))
 }
 
 fun String.shareAsText(context: Context) {
     val intent = Intent(Intent.ACTION_SEND)
     intent.putExtra(Intent.EXTRA_TEXT, this)
     intent.type = ContentType.Text.Plain.toString()
-    context.startActivity(Intent.createChooser(intent, null))
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.invite_code)))
 }
 
 fun String.copyToClipboard(context: Context, label: String? = null) {
@@ -108,7 +109,7 @@ private fun shareFile(uri: Uri, context: Context, name: String?, contentType: Co
     }
     intent.setDataAndType(uri, context.contentResolver.getType(uri))
     intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-    context.startActivity(Intent.createChooser(intent, null))
+    context.startActivity(Intent.createChooser(intent, name))
 }
 
 // Returns true if everything went well
