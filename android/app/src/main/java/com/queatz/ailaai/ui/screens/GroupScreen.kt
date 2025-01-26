@@ -52,6 +52,7 @@ import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Mic
@@ -845,6 +846,14 @@ fun GroupScreen(groupId: String) {
                                         )
                                     )
                                 }
+                            }
+                            item(
+                                icon = Icons.Outlined.Link,
+                                name = stringResource(R.string.copy_link)
+                            ) {
+                                showMenu = false
+                                groupUrl(groupId).copyToClipboard(context)
+                                context.toast(R.string.copied)
                             }
                             item(
                                 icon = Icons.Outlined.QrCode2,

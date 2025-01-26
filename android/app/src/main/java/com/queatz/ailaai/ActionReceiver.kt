@@ -47,7 +47,6 @@ class ActionReceiver : BroadcastReceiver() {
                         }
                     }
                 }
-
             }
         }
     }
