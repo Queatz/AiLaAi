@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import api
 import app.AppStyles
-import app.ailaai.api.sendMedia
 import app.ailaai.api.uploadPhotos
 import application
 import com.queatz.db.AiPhotoRequest
@@ -20,12 +19,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
@@ -136,23 +135,44 @@ private suspend fun choosePhotoDialog(
 
         Div({
             style {
-                marginTop(1.r)
-                marginLeft(1.r)
-                marginBottom(.5.r)
-                opacity(.5f)
-                fontSize(14.px)
-            }
-        }) {
-            // todo translate
-            Text("Style")
-        }
-        Div({
-            style {
                 overflowY("auto")
                 height(8.r)
             }
         }) {
+            Div({
+                style {
+                    property("text-transform", "uppercase")
+                    fontSize(14.px)
+                    fontWeight("bolder")
+                    opacity(.5)
+                    paddingLeft(1.r)
+                    paddingTop(1.r)
+                }
+            }) {
+                // todo: translate
+                Text("General")
+            }
+            var previousItem: String? = null
+
             aiStyles.forEach { (name, style) ->
+                if (previousItem != null && previousItem.endsWith("HD)") && !name.endsWith("HD)")) {
+                    Div({
+                        style {
+                            property("text-transform", "uppercase")
+                            fontSize(14.px)
+                            fontWeight("bolder")
+                            opacity(.5)
+                            paddingLeft(1.r)
+                            paddingTop(1.r)
+                        }
+                    }) {
+                        // todo: translate
+                        Text("Stylized")
+                    }
+                }
+
+                previousItem = name
+
                 Div({
                     classes(
                         listOf(AppStyles.groupItem, AppStyles.groupItemOnSurface)

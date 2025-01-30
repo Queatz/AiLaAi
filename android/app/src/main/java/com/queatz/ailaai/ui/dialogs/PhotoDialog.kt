@@ -67,16 +67,16 @@ fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<
 
     if (showStoragePermissionDialog) {
         RationaleDialog(
-            {
+            onDismissRequest = {
                 showStoragePermissionDialog = false
             },
-            stringResource(R.string.permission_request)
+            message = stringResource(R.string.permission_request)
         )
     }
 
     if (showMenu) {
         Menu(
-            {
+            onDismissRequest = {
                 showMenu = false
             }
         ) {

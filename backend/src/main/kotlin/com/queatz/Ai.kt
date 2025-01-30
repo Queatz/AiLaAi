@@ -81,6 +81,10 @@ class Ai {
         }
     }
 
+    val String.isFlux get() = this == ":flux"
+    val String.isXlLightning get() = endsWith("_lightning_1024px")
+    val String.isXl get() = endsWith("_1024px") || isFlux
+
     suspend fun photo(
         prefix: String,
         prompts: List<TextPrompt>,
@@ -88,11 +92,13 @@ class Ai {
         aspect: Double = 1.5,
         transparentBackground: Boolean = false
     ): String {
-        val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.random()
+        val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.filter {
+            it.isXlLightning || it.isXl
+        }.random()
 
-        val isFlux = model == ":flux"
-        val isXlLightning = model.endsWith("_lightning_1024px")
-        val isXl = model.endsWith("_1024px") || isFlux
+        val isFlux = model.isFlux
+        val isXlLightning = model.isXlLightning
+        val isXl = model.isXl
 
         val height = if (isXl) heightXl else height
         val width = if (isXl) widthXl else width

@@ -7,12 +7,15 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Draw
 import androidx.compose.material.icons.outlined.Photo
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -20,9 +23,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import com.huawei.location.callback.ut
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
@@ -36,6 +42,7 @@ import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.uri
 import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.permission.permissionRequester
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.AiPhotoRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -147,8 +154,35 @@ fun ChoosePhotoDialog(
         Menu({
             aiStyleMenu = false
         }) {
+            Text(
+                text = stringResource(R.string.general).uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    fontWeight = FontWeight.Black
+                ),
+                modifier = Modifier
+                    .padding(horizontal = 1.5f.pad)
+                    .padding(top = 1.5f.pad)
+            )
+            var previousItem: String? = null
             allStyles.forEach {
-                menuItem(it.first, icon = if (selectedStyle == it.second) Icons.Outlined.Check else null) {
+                if (previousItem != null && previousItem.endsWith("HD)") && !it.first.endsWith("HD)")) {
+                    Text(
+                        text = stringResource(R.string.stylized).uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            fontWeight = FontWeight.Black
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 1.5f.pad)
+                            .padding(top = 1.5f.pad)
+                    )
+                }
+
+                menuItem(
+                    title = it.first,
+                    icon = if (selectedStyle == it.second) Icons.Outlined.Check else null
+                ) {
                     aiStyleMenu = false
                     selectedStyle = if (selectedStyle == it.second) {
                         null
@@ -157,6 +191,7 @@ fun ChoosePhotoDialog(
                     }
                     _selectedStyle = selectedStyle
                 }
+                previousItem = it.first
             }
         }
     }
