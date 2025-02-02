@@ -698,10 +698,14 @@ fun ExplorePage(
 //                }
 //            }
 
-        EditField(conversation.message, placeholder = appString { details }, styles = {
-            margin(.5.r, 1.r)
-            maxHeight(50.vh)
-        }) {
+        EditField(
+            value = conversation.message,
+            placeholder = appString { details },
+            styles = {
+                margin(.5.r, 1.r)
+                maxHeight(50.vh)
+            }
+        ) {
             saveConversation(it)
         }
 

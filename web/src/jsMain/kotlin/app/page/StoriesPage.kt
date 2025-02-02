@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.FullPageLayout
 import app.PageTopBar
+import app.components.EditField
 import app.components.TopBarSearch
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -20,6 +21,7 @@ import app.nav.StoryNav
 import appString
 import appText
 import application
+import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.api.updateStory
 import com.queatz.db.GroupExtended
@@ -35,12 +37,15 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
@@ -91,9 +96,7 @@ fun StoriesPage(
         }
     }
 
-    LaunchedEffect(selected, search) {
-        isLoading = true
-
+    suspend fun reload() {
         fun List<Story>.search() = if (search.isBlank()) this else filter {
             it.asTextContent().lowercase().contains(search.trim().lowercase())
         }
@@ -119,6 +122,12 @@ fun StoriesPage(
                 storyContent = selected.story.full()
             }
         }
+    }
+
+    LaunchedEffect(selected, search) {
+        isLoading = true
+
+        reload()
 
         isLoading = false
     }
@@ -136,17 +145,17 @@ fun StoriesPage(
                 item(appString { rename }) {
                     scope.launch {
                         val title = inputDialog(
-                            titleString,
-                            "",
-                            update,
+                            title = titleString,
+                            placeholder = "",
+                            confirmButton = update,
                             defaultValue = story!!.title ?: ""
                         )
 
                         if (title == null) return@launch
 
                         api.updateStory(
-                            story.id!!,
-                            Story(title = title)
+                            id = story.id!!,
+                            story = Story(title = title)
                         ) {
                             onStoryUpdated(it)
                         }
@@ -183,6 +192,44 @@ fun StoriesPage(
                     padding(1.r)
                 }
             }) {
+                var newPostText by remember { mutableStateOf("") }
+
+                if (selected is StoryNav.Friends && search.isEmpty()) {
+                    EditField(
+                        value = newPostText,
+                        placeholder = appString { shareAThought },
+                        autoFocus = true,
+                        resetOnSubmit = true,
+                        showDiscard = false,
+                        button = appString { post },
+                        buttonBarStyles = {
+                            justifyContent(JustifyContent.End)
+                            width(100.percent)
+                        },
+                        styles = {
+                            width(100.percent)
+                            minHeight(9.r)
+                        }
+                    ) { title ->
+                        var success = false
+                        api.createStory(
+                            Story(
+                                title = title
+                            )
+                        ) { story ->
+                            api.updateStory(
+                                id = story.id!!,
+                                story = Story(published = true)
+                            ) {
+                                reload()
+                                onStoryUpdated(it)
+                                success = true
+                            }
+                        }
+                        success
+                    }
+                }
+
                 if (storyContent.isEmpty()) {
                     Div({
                         style {
@@ -198,8 +245,8 @@ fun StoriesPage(
                     }
                 } else {
                     StoryContents(
-                        storyContent,
-                        onGroupClick,
+                        storyContent = storyContent,
+                        onGroupClick = onGroupClick,
                         openInNewWindow = true,
                         editable = (selected as? StoryNav.Selected)?.story?.let {
                             it.person == me?.id && it.published != true
@@ -239,6 +286,9 @@ fun StoriesPage(
             menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
         }
     } else {
-        TopBarSearch(search, { search = it })
+        TopBarSearch(
+            value = search,
+            onValue = { search = it }
+        )
     }
 }

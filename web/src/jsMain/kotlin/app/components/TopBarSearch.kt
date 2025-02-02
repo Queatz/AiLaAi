@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import appString
 import components.SearchField
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.focus
 import org.jetbrains.compose.web.dom.Div
 import r
 
@@ -13,6 +14,7 @@ fun TopBarSearch(
     onValue: (String) -> Unit,
     focus: Boolean = true,
     placeholder: String? = null,
+    content: (@Composable () -> Unit)? = null,
     styles: (StyleScope.() -> Unit)? = null
 ) {
     Div({
@@ -25,8 +27,8 @@ fun TopBarSearch(
         }
     }) {
         SearchField(
-            value,
-            placeholder ?: appString { this.search },
+            value = value,
+            placeholder = placeholder ?: appString { this.search },
             focus = focus,
             styles = {
                 if (styles != null) {
@@ -38,5 +40,6 @@ fun TopBarSearch(
         ) {
             onValue(it)
         }
+        content?.invoke()
     }
 }

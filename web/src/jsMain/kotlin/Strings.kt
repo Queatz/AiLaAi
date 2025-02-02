@@ -115,21 +115,17 @@ object Strings {
         "Introduction",
         "Giới thiệu"
     )
-    val introductionCardId = Translation(
-        "13575458",
-        "13575494"
-    )
     val stories = Translation(
-        "Stories",
+        "Posts",
         "Bài viết",
         "Истории"
     )
     val createStory = Translation(
-        "New story",
+        "New post",
         "Tạo bài viết"
     )
     val newStory = Translation(
-        "New story",
+        "New post",
         "Bài viết mới"
     )
     val newCard = Translation(
@@ -186,7 +182,7 @@ object Strings {
         "Профиль не найден."
     )
     val storyNotFound = Translation(
-        "Story not found.",
+        "Post not found.",
         "Không tìm được bài viết này.",
         "История не найдена."
     )
@@ -358,7 +354,7 @@ object Strings {
         "Không tìm được trang gần đây."
     )
     val noStories = Translation(
-        "No stories",
+        "No posts",
         "Không tìm được bài viết."
     )
     val noGroups = Translation(
@@ -892,6 +888,10 @@ object Strings {
     val scripts = Translation(
         "Scripts",
         "Tập lệnh"
+    )
+    val shareAThought = Translation(
+        "Share a thought",
+        "Chia sẻ những suy nghĩ của bạn"
     )
 }
 
