@@ -149,7 +149,7 @@ fun GroupItem(
                             if (group.latestMessage?.member == myMember?.member?.id) {
                                 Text("${appString { you }}: ")
                             } else if (group.members!!.size > 2 && group.latestMessage != null) {
-                                Text("${group.members?.find { it.member?.id == group.latestMessage?.member }?.person?.name ?: appString { someone }}: ")
+                                Text("${group.latestMessagePersonOrBotName}: ")
                             }
                             Text(
                                 group.latestMessage?.preview() ?: "${appString { created }} ${
@@ -280,3 +280,10 @@ fun GroupItem(
         }
     }
 }
+
+val GroupExtended.latestMessagePersonOrBotName
+    @Composable
+    get() =
+        (members?.find { it.member?.id == latestMessage!!.member }?.person?.name)
+            ?: (bots?.find { it.id == latestMessage!!.bot }?.name)
+            ?: appString { someone }
