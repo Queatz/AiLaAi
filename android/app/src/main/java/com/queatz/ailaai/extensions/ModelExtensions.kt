@@ -43,12 +43,12 @@ fun GroupExtended.isGroupLike(omitGroupsWith: Person? = null) =
 
 // todo make this @Composable and autofull strings
 fun GroupExtended.name(someone: String, emptyGroup: String, omit: List<String>) =
-    group?.name?.nullIfBlank
+    group?.name?.notBlank
         ?: members
             ?.filter { !omit.contains(it.person?.id) }
             ?.mapNotNull { it.person }
             ?.joinToString { it.name ?: someone }
-            ?.nullIfBlank
+            ?.notBlank
         ?: emptyGroup
 
 fun GroupExtended.photos(omit: List<Person> = emptyList(), ifEmpty: List<Person>? = null) = members
@@ -105,7 +105,7 @@ fun Message.attachmentText(context: Context): String? = when (val attachment = g
     else -> null
 }
 
-val InventoryItem.isExpired get() = expiresAt?.let { it < Clock.System.now() } ?: false
+val InventoryItem.isExpired get() = expiresAt?.let { it < Clock.System.now() } == true
 
 private val itemFormat = DecimalFormat("#.######").apply {
     roundingMode = BigDecimal.ROUND_CEILING

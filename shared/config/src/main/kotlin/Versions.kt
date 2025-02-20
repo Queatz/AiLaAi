@@ -6,7 +6,7 @@ open class Versions {
     val ktor = "3.0.3"
     val choiceSdk = "0.3.0"
     val compose = "1.7.6"
-    val serialization = "1.7.3"
+    val serialization = "1.8.0"
     val datetime = "0.5.0"
     val logback = "1.5.16"
     val arango = "7.15.0"

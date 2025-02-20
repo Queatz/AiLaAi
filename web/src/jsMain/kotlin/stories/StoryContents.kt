@@ -23,6 +23,7 @@ import app.widget.FormWidget
 import app.widget.ImpactEffortTable
 import app.widget.PageTreeWidget
 import app.widget.ScriptWidget
+import app.widget.SpaceWidget
 import app.widget.WebWidget
 import appString
 import application
@@ -360,6 +361,9 @@ fun StoryContents(
                     }
                     Widgets.Form -> {
                         FormWidget(part.id)
+                    }
+                    Widgets.Space -> {
+                        SpaceWidget(part.id)
                     }
                 }
             }

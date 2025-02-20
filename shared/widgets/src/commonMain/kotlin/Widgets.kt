@@ -5,5 +5,6 @@ enum class Widgets {
     PageTree,
     Script,
     Web,
-    Form
+    Form,
+    Space
 }

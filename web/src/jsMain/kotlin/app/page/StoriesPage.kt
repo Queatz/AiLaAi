@@ -195,38 +195,46 @@ fun StoriesPage(
                 var newPostText by remember { mutableStateOf("") }
 
                 if (selected is StoryNav.Friends && search.isEmpty()) {
-                    EditField(
-                        value = newPostText,
-                        placeholder = appString { shareAThought },
-                        autoFocus = true,
-                        resetOnSubmit = true,
-                        showDiscard = false,
-                        button = appString { post },
-                        buttonBarStyles = {
-                            justifyContent(JustifyContent.End)
-                            width(100.percent)
-                        },
-                        styles = {
-                            width(100.percent)
-                            minHeight(9.r)
-                        }
-                    ) { title ->
-                        var success = false
-                        api.createStory(
-                            Story(
-                                title = title
-                            )
-                        ) { story ->
-                            api.updateStory(
-                                id = story.id!!,
-                                story = Story(published = true)
-                            ) {
-                                reload()
-                                onStoryUpdated(it)
-                                success = true
+                    Div(
+                        {
+                            style {
+                                width(100.percent)
                             }
                         }
-                        success
+                    ) {
+                        EditField(
+                            value = newPostText,
+                            placeholder = appString { shareAThought },
+                            autoFocus = true,
+                            resetOnSubmit = true,
+                            showDiscard = false,
+                            button = appString { post },
+                            buttonBarStyles = {
+                                justifyContent(JustifyContent.End)
+                                width(100.percent)
+                            },
+                            styles = {
+                                width(100.percent)
+                                minHeight(9.r)
+                            }
+                        ) { title ->
+                            var success = false
+                            api.createStory(
+                                Story(
+                                    title = title
+                                )
+                            ) { story ->
+                                api.updateStory(
+                                    id = story.id!!,
+                                    story = Story(published = true)
+                                ) {
+                                    reload()
+                                    onStoryUpdated(it)
+                                    success = true
+                                }
+                            }
+                            success
+                        }
                     }
                 }
 

@@ -13,7 +13,6 @@ import com.queatz.db.Person
 import com.queatz.db.Search
 import com.queatz.db.SearchSource
 import com.queatz.db.allCardsOfCard
-import com.queatz.db.asId
 import com.queatz.db.asKey
 import com.queatz.db.cardByUrl
 import com.queatz.db.cardVisits
@@ -24,7 +23,6 @@ import com.queatz.db.member
 import com.queatz.db.people
 import com.queatz.db.peopleDevices
 import com.queatz.db.saveCard
-import com.queatz.db.storyByUrl
 import com.queatz.db.unsaveCard
 import com.queatz.launch
 import com.queatz.notBlank
