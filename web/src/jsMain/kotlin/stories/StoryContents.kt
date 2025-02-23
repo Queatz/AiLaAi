@@ -25,6 +25,7 @@ import app.widget.PageTreeWidget
 import app.widget.ScriptWidget
 import app.widget.SpaceWidget
 import app.widget.WebWidget
+import app.widget.WidgetStyles
 import appString
 import application
 import baseUrl
@@ -84,6 +85,7 @@ fun StoryContents(
 ) {
     Style(StoryStyles)
     Style(AppStyles)
+    Style(WidgetStyles)
 
     val scope = rememberCoroutineScope()
     val currentRecomposeScope = currentRecomposeScope

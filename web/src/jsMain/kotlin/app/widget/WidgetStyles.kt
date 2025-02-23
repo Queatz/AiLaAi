@@ -2,9 +2,33 @@ package app.widget
 
 import app.dark
 import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import r
 
 object WidgetStyles : StyleSheet() {
+    val spacePathWidget by style {
+        position(Absolute)
+        top(0.r)
+        left(0.r)
+        right(0.r)
+        textAlign("center")
+        padding(1.r)
+        property("z-index", 1)
+    }
+
+    val spacePathItem by style {
+        cursor("pointer")
+        color(Color.black)
+
+        hover(self) style {
+            textDecoration("underline")
+        }
+
+        dark(self) {
+            color(Color.white)
+        }
+    }
+
     val tableCenter by style {
     }
 
