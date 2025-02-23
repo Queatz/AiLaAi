@@ -28,7 +28,7 @@ fun SpaceWidgetPath(
                 Span(
                     attrs = {
                         style {
-                            padding(.125.r)
+                            padding(.25.r)
                             fontWeight("bold")
                         }
                     }

@@ -1,19 +1,24 @@
 package app.widget
 
-import Styles.card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
+import app.ailaai.api.newCard
 import app.compose.rememberDarkMode
+import app.dialog.inputDialog
 import app.widget.space.SpacePathItem
 import app.widget.space.SpaceWidgetPath
+import app.widget.space.SpaceWidgetTool
+import app.widget.space.SpaceWidgetToolbar
 import app.widget.space.drawCanvas
+import application
 import com.queatz.db.Card
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.SpaceContent
@@ -21,13 +26,16 @@ import com.queatz.widgets.widgets.SpaceData
 import com.queatz.widgets.widgets.SpaceItem
 import json
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import lib.ResizeObserver
+import notBlank
 import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.valid
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Canvas
 import org.jetbrains.compose.web.dom.Div
@@ -74,6 +82,7 @@ fun SpaceWidget(widgetId: String) {
     var data by remember(widgetId) { mutableStateOf<SpaceData?>(null) }
     var cardId by remember(widgetId) { mutableStateOf<String?>(null) }
     var path by remember { mutableStateOf(emptyList<SpacePathItem>()) }
+    var tool by remember { mutableStateOf<SpaceWidgetTool>(SpaceWidgetTool.Default) }
 
     LaunchedEffect(widgetId) {
         api.widget(widgetId) {
@@ -123,7 +132,10 @@ fun SpaceWidget(widgetId: String) {
     var selectedItem by remember { mutableStateOf<SpaceItem?>(null) }
     var draggedCircleIndex by remember { mutableStateOf<Int?>(null) }
     var offset by remember { mutableStateOf(0.0 to 0.0) }
+    var drawLineFrom by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    var drawLineTo by remember { mutableStateOf<Pair<Double, Double>?>(null) }
     var context by remember { mutableStateOf<CanvasRenderingContext2D?>(null) }
+    val scope = rememberCoroutineScope()
 
     val items = data?.items ?: listOf()
 
@@ -132,9 +144,20 @@ fun SpaceWidget(widgetId: String) {
     }
 
     // todo: kotlin/js bug, if we don't recreate the function, the function uses old values of these variables!
-    LaunchedEffect(context, offset, cardsById, items, selectedItem, darkMode) {
+    LaunchedEffect(context, offset, cardsById, items, selectedItem, darkMode, drawLineFrom, drawLineTo) {
         draw = {
-            context?.let { drawCanvas(it, offset, cardsById, items, selectedItem, darkMode) }
+            context?.let {
+                drawCanvas(
+                    it,
+                    offset,
+                    cardsById,
+                    items,
+                    selectedItem,
+                    darkMode,
+                    drawLineFrom,
+                    drawLineTo
+                )
+            }
         }
     }
 
@@ -182,22 +205,6 @@ fun SpaceWidget(widgetId: String) {
             }
         }
     ) {
-        card?.let { card ->
-            SpaceWidgetPath(
-                path = path,
-                currentPath = SpacePathItem(
-                    id = cardId!!,
-                    card = card,
-                )
-            ) { index ->
-                val item = path[index]
-                path = path.take(index)
-                cardId = item.id
-                offset = item.offset
-                selectedItem = item.selectedItem
-                draw()
-            }
-        }
         Canvas(
             attrs = {
                 style {
@@ -210,54 +217,141 @@ fun SpaceWidget(widgetId: String) {
                 tabIndex(1)
 
                 onMouseDown { event ->
-                    items.forEachIndexed { index, (item, position) ->
-                        when (item) {
-                            is SpaceContent.Page -> {
+                    when (tool) {
+                        SpaceWidgetTool.Default -> {
+                            var foundItem = false
+                            items.forEachIndexed { index, (item, position) ->
                                 val (x, y) = position
                                 val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
                                 val mouseX = event.clientX - rect.left - offset.first
                                 val mouseY = event.clientY - rect.top - offset.second
+
                                 if (sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) {
-                                    draggedCircleIndex = index
+                                    foundItem = true
+                                    when (item) {
+                                        is SpaceContent.Page -> {
+                                            draggedCircleIndex = index
+                                        }
+
+                                        else -> Unit
+                                    }
                                     selectedItem = items[index]
                                 }
+                            }
+
+                            if (!foundItem) {
+                                draggingCanvas = offset to (event.clientX.toDouble() to event.clientY.toDouble())
+                                selectedItem = null
+                            }
+
+                            draw()
+                        }
+
+                        SpaceWidgetTool.Line -> {
+                            val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
+                            val mouseX = event.clientX - rect.left - offset.first
+                            val mouseY = event.clientY - rect.top - offset.second
+                            drawLineFrom = mouseX to mouseY
+                        }
+                    }
+                }
+
+                onMouseMove { event ->
+                    when (tool) {
+                        SpaceWidgetTool.Default -> {
+                            draggedCircleIndex?.let { index ->
+                                val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
+                                val newX = event.clientX - rect.left - offset.first
+                                val newY = event.clientY - rect.top - offset.second
+                                data = data!!.copy(
+                                    items = data!!.items!!.toMutableList().apply {
+                                        val item = removeAt(index)
+                                        add(index, item.copy(position = newX to newY))
+                                    }
+                                )
+                                dirty = nextInt()
+                                draw()
+                            }
+                            draggingCanvas?.let { (initialOffset, initialMouse) ->
+                                offset =
+                                    (initialOffset.first + (event.clientX - initialMouse.first)) to (initialOffset.second + (event.clientY - initialMouse.second))
+                                draw()
+                            }
+                        }
+
+                        SpaceWidgetTool.Line -> {
+                            drawLineFrom?.let {
+                                val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
+                                val newX = event.clientX - rect.left - offset.first
+                                val newY = event.clientY - rect.top - offset.second
+                                drawLineTo = newX to newY
+                                draw()
                             }
                         }
                     }
 
-                    if (draggedCircleIndex == null) {
-                        draggingCanvas = offset to (event.clientX.toDouble() to event.clientY.toDouble())
-                        selectedItem = null
-                    }
-
-                    draw()
-                }
-
-                onMouseMove { event ->
-                    draggedCircleIndex?.let { index ->
-                        val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                        val newX = event.clientX - rect.left - offset.first
-                        val newY = event.clientY - rect.top - offset.second
-                        data = data!!.copy(
-                            items = data!!.items!!.toMutableList().apply {
-                                val item = removeAt(index)
-                                add(index, item.copy(position = newX to newY))
-                            }
-                        )
-                        dirty = nextInt()
-                        draw()
-                    }
-                    draggingCanvas?.let { (initialOffset, initialMouse) ->
-                        offset =
-                            (initialOffset.first + (event.clientX - initialMouse.first)) to (initialOffset.second + (event.clientY - initialMouse.second))
-                        draw()
-                    }
                 }
 
                 onMouseUp {
-                    draggedCircleIndex = null
-                    draggingCanvas = null
-                    draw()
+                    when (tool) {
+                        SpaceWidgetTool.Default -> {
+                            draggedCircleIndex = null
+                            draggingCanvas = null
+                            draw()
+                        }
+
+                        SpaceWidgetTool.Line -> {
+                            drawLineFrom?.let { from ->
+                                drawLineTo?.let { to ->
+                                    data = data!!.copy(
+                                        items = items + SpaceItem(
+                                            content = SpaceContent.Line(
+                                                to = to
+                                            ),
+                                            position = from
+                                        )
+                                    )
+                                    dirty = nextInt()
+
+                                    drawLineFrom = null
+                                    drawLineTo = null
+                                    draw()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                onClick { event ->
+                    if (!event.ctrlKey) return@onClick
+                    val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
+                    val mouseX = event.clientX - rect.left - offset.first
+                    val mouseY = event.clientY - rect.top - offset.second
+
+                    scope.launch {
+                        val newCardName = inputDialog(title = application.appString { newCard })?.notBlank
+
+                        if (newCardName != null) {
+                            api.newCard(
+                                card = Card(
+                                    name = newCardName,
+                                    parent = cardId,
+                                    active = card?.active == true,
+                                )
+                            ) { newCard ->
+                                data = data!!.copy(
+                                    items = data!!.items!!.toMutableList().apply {
+                                        add(SpaceItem(SpaceContent.Page(newCard.id!!), mouseX to mouseY))
+                                    }
+                                )
+                                dirty = nextInt()
+                                api.cardsCards(cardId ?: return@newCard) {
+                                    cards = it
+                                    cardsById = cards.associateBy { it.id!! }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 onDoubleClick { event ->
@@ -282,6 +376,8 @@ fun SpaceWidget(widgetId: String) {
                                     offset = 0.0 to 0.0
                                 }
                             }
+
+                            else -> Unit
                         }
                     }
                 }
@@ -296,13 +392,19 @@ fun SpaceWidget(widgetId: String) {
                             selectedItem = null
                         }
                     } else if (event.key == "Escape") {
-                        // Exit from page
-                        if (path.isNotEmpty()) {
-                            val item = path.last()
-                            cardId = item.id
-                            offset = item.offset
-                            selectedItem = item.selectedItem
-                            path = path.dropLast(1)
+                        if (drawLineFrom != null) {
+                            drawLineFrom = null
+                            drawLineTo = null
+                            draw()
+                        } else {
+                            // Exit from page
+                            if (path.isNotEmpty()) {
+                                val item = path.last()
+                                cardId = item.id
+                                offset = item.offset
+                                selectedItem = item.selectedItem
+                                path = path.dropLast(1)
+                            }
                         }
                     }
                 }
@@ -328,6 +430,30 @@ fun SpaceWidget(widgetId: String) {
                         context = null
                     }
                 }
+            }
+        )
+
+        card?.let { card ->
+            SpaceWidgetPath(
+                path = path,
+                currentPath = SpacePathItem(
+                    id = cardId!!,
+                    card = card,
+                )
+            ) { index ->
+                val item = path[index]
+                path = path.take(index)
+                cardId = item.id
+                offset = item.offset
+                selectedItem = item.selectedItem
+                draw()
+            }
+        }
+
+        SpaceWidgetToolbar(
+            tool = tool,
+            onTool = {
+                tool = it
             }
         )
     }

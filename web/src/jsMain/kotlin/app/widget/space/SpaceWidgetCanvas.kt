@@ -20,6 +20,8 @@ fun drawCanvas(
     items: List<SpaceItem>,
     selectedItem: SpaceItem?,
     darkMode: Boolean,
+    drawLineFrom: Pair<Double, Double>?,
+    drawLineTo: Pair<Double, Double>?,
 ) {
     with(context) {
         clearRect(
@@ -36,6 +38,17 @@ fun drawCanvas(
         // Draw the pages
         items.forEachIndexed { index, (item, position) ->
             when (item) {
+                is SpaceContent.Line -> {
+                    save()
+                    lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
+                    strokeStyle = Color.gray
+                    beginPath()
+                    moveTo(position.first, position.second)
+                    lineTo(item.to.first, item.to.second)
+                    stroke()
+                    restore()
+                }
+
                 is SpaceContent.Page -> {
                     val card = cardsById[item.id] ?: return@forEachIndexed
                     val (x, y) = position
@@ -91,6 +104,20 @@ fun drawCanvas(
 
                     fillText(card.name ?: "New page", x, y - 24 - 18)
                 }
+            }
+        }
+
+        // Draw line
+        drawLineFrom?.let { from ->
+            drawLineTo?.let { to ->
+                save()
+                lineWidth = 2.0
+                strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                beginPath()
+                moveTo(from.first, from.second)
+                lineTo(to.first, to.second)
+                stroke()
+                restore()
             }
         }
 

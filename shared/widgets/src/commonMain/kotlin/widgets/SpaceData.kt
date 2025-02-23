@@ -19,4 +19,7 @@ data class SpaceItem(
 sealed class SpaceContent {
     @Serializable
     class Page(val id: String) : SpaceContent()
+
+    @Serializable
+    class Line(val to: Pair<Double, Double>) : SpaceContent()
 }

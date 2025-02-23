@@ -6,6 +6,16 @@ import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import r
 
 object WidgetStyles : StyleSheet() {
+    val spacePathToolbar by style {
+        position(Absolute)
+        bottom(0.r)
+        left(0.r)
+        textAlign("center")
+        padding(1.r)
+        property("z-index", 1)
+        display(DisplayStyle.Flex)
+    }
+
     val spacePathWidget by style {
         position(Absolute)
         top(0.r)
