@@ -30,7 +30,7 @@ fun ReactQuickLayout(
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     val scrollState = rememberScrollState()
     val common = remember(quickReactions) {
-        quickReactions + listOf(
+        (quickReactions + listOf(
             "\uD83D\uDE02",
             "\uD83D\uDE0E",
             "\uD83D\uDE32",
@@ -39,7 +39,7 @@ fun ReactQuickLayout(
             "\uD83E\uDD14",
             "\uD83D\uDE18",
             "\uD83D\uDE2C",
-        ).shuffled().distinct()
+        ).shuffled()).distinct()
     }
 
     Row(

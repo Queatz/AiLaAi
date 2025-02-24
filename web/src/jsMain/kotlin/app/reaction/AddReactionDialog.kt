@@ -30,7 +30,7 @@ suspend fun addReactionDialog(
     topContent = { resolve, value, onValue ->
         val common = remember(quickReactions) {
             // todo include from GroupExtended.topReactions and from my top reactions
-            quickReactions + listOf(
+            (quickReactions + listOf(
                 "\uD83D\uDE02",
                 "\uD83D\uDE0E",
                 "\uD83D\uDE32",
@@ -39,7 +39,7 @@ suspend fun addReactionDialog(
                 "\uD83E\uDD14",
                 "\uD83D\uDE18",
                 "\uD83D\uDE2C",
-            ).shuffled().distinct()
+            ).shuffled()).distinct()
         }
 
         Div({

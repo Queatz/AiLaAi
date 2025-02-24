@@ -83,6 +83,10 @@ object Strings {
         "Delete",
         "Xóa bỏ"
     )
+    val info = Translation(
+        "Info",
+        "Thông tin"
+    )
     val edit = Translation(
         "Edit",
         "Chỉnh sửa"

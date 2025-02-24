@@ -21,8 +21,10 @@ import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
 import components.IconButton
 import components.ProfilePhoto
+import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toJSDate
 import notEmpty
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -41,6 +43,7 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
@@ -169,6 +172,21 @@ fun MessageItem(
                                         onUpdated()
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+
+                item(appString { info }) {
+                    scope.launch {
+                        dialog(
+                            title = null,
+                            confirmButton = application.appString { close },
+                            cancelButton = null,
+                        ) {
+                            Div {
+                                // todo: translate
+                                Text("Sent ${message.createdAt!!.toJSDate().format()}")
                             }
                         }
                     }
