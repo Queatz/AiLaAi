@@ -16,6 +16,7 @@ import kotlin.math.PI
 fun drawCanvas(
     context: CanvasRenderingContext2D,
     offset: Pair<Double, Double>,
+    cardId: String?,
     cardsById: Map<String, Card>,
     items: List<SpaceItem>,
     selectedItem: SpaceItem?,
@@ -39,14 +40,16 @@ fun drawCanvas(
         items.forEachIndexed { index, (item, position) ->
             when (item) {
                 is SpaceContent.Line -> {
-                    save()
-                    lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
-                    strokeStyle = Color.gray
-                    beginPath()
-                    moveTo(position.first, position.second)
-                    lineTo(item.to.first, item.to.second)
-                    stroke()
-                    restore()
+                    if (item.page == cardId) {
+                        save()
+                        lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
+                        strokeStyle = Color.gray
+                        beginPath()
+                        moveTo(position.first, position.second)
+                        lineTo(item.to.first, item.to.second)
+                        stroke()
+                        restore()
+                    }
                 }
 
                 is SpaceContent.Page -> {

@@ -35,7 +35,6 @@ import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
-import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.valid
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Canvas
 import org.jetbrains.compose.web.dom.Div
@@ -50,10 +49,14 @@ import kotlin.random.Random.Default.nextInt
 import kotlin.time.Duration.Companion.seconds
 
 /**
+ * Incoming:
+ *
+ * [ ] Space: Snap to grid
+ * [ ] Space: Show grid
+ *
  * Todos:
  * [ ] Click to add text
  * [ ] ctrl+click to add a page
- * [ ] draw line
  * [ ] draw scribble
  * [ ] draw box
  * [ ] draw circle
@@ -68,6 +71,7 @@ import kotlin.time.Duration.Companion.seconds
  * [ ] enter fullscreen/expanded view
  *
  * Done
+ * [X] draw line
  * [X] Double-click a page to enter into it inside the widget
  * [X] Save card position
  * [X] Render card photos
@@ -148,14 +152,15 @@ fun SpaceWidget(widgetId: String) {
         draw = {
             context?.let {
                 drawCanvas(
-                    it,
-                    offset,
-                    cardsById,
-                    items,
-                    selectedItem,
-                    darkMode,
-                    drawLineFrom,
-                    drawLineTo
+                    context = it,
+                    offset = offset,
+                    cardId = cardId,
+                    cardsById = cardsById,
+                    items = items,
+                    selectedItem = selectedItem,
+                    darkMode = darkMode,
+                    drawLineFrom = drawLineFrom,
+                    drawLineTo = drawLineTo
                 )
             }
         }
@@ -306,18 +311,19 @@ fun SpaceWidget(widgetId: String) {
                                     data = data!!.copy(
                                         items = items + SpaceItem(
                                             content = SpaceContent.Line(
+                                                page = cardId,
                                                 to = to
                                             ),
                                             position = from
                                         )
                                     )
                                     dirty = nextInt()
-
-                                    drawLineFrom = null
-                                    drawLineTo = null
-                                    draw()
                                 }
                             }
+
+                            drawLineFrom = null
+                            drawLineTo = null
+                            draw()
                         }
                     }
                 }

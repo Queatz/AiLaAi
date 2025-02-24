@@ -1,10 +1,12 @@
 package app.widget
 
 import app.dark
+import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import r
 
+@OptIn(ExperimentalComposeWebApi::class)
 object WidgetStyles : StyleSheet() {
     val spacePathToolbar by style {
         position(Absolute)
@@ -14,6 +16,15 @@ object WidgetStyles : StyleSheet() {
         padding(1.r)
         property("z-index", 1)
         display(DisplayStyle.Flex)
+
+        transitions {
+            "color" {
+                duration = 100.ms
+            }
+            "background-color" {
+                duration = 100.ms
+            }
+        }
     }
 
     val spacePathWidget by style {
