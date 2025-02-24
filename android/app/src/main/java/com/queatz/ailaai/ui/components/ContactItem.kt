@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Pin
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -172,7 +174,6 @@ fun ContactItem(
             val description = when (info) {
                 GroupInfo.LatestMessage -> {
                     bulletedString(
-                        "📌".takeIf { groupExtended.pin == true },
                         groupExtended.latestMessage?.preview(context)?.let { messagePreview ->
                             if (groupExtended.latestMessage!!.member == myMember?.member?.id) {
                                 stringResource(
@@ -220,6 +221,7 @@ fun ContactItem(
                 inCallCount = inCallCount,
                 joinRequestCount = joinRequestCount,
                 joined = myMember != null,
+                pinned = groupExtended.pin == true,
                 info = info,
                 coverPhoto = if (coverPhoto) groupExtended.group?.photo?.let(api::url) else null,
                 background = coverPhoto
@@ -241,6 +243,7 @@ fun ContactResult(
     inCallCount: Int = 0,
     joinRequestCount: Int = 0,
     joined: Boolean = false,
+    pinned: Boolean = false,
     info: GroupInfo = GroupInfo.LatestMessage,
     coverPhoto: String? = null,
     background: Boolean = false
@@ -346,11 +349,21 @@ fun ContactResult(
             )
             if (info == GroupInfo.Members && joined) {
                 Icon(
-                    Icons.Outlined.Check,
-                    null,
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(end = 1.pad)
+                )
+            }
+            if (pinned) {
+                Icon(
+                    imageVector = Icons.Outlined.PushPin,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .alpha(.5f)
+                        .size(16.dp)
                 )
             }
         }

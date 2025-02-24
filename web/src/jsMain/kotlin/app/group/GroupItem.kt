@@ -141,9 +141,6 @@ fun GroupItem(
                 Div({
                     classes(AppStyles.groupItemMessage)
                 }) {
-                    if (group.pin == true) {
-                        Text("\uD83D\uDCCC • ")
-                    }
                     when (info) {
                         GroupInfo.LatestMessage -> {
                             if (group.latestMessage?.member == myMember?.member?.id) {
@@ -275,6 +272,13 @@ fun GroupItem(
                             )
                         }
                     }
+                }
+            }
+            if (group.pin == true) {
+                Icon("keep") {
+                    marginLeft(.5.r)
+                    fontSize(16.px)
+                    opacity(.25f)
                 }
             }
         }
