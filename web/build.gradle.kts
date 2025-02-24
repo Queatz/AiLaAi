@@ -47,6 +47,8 @@ kotlin {
                 implementation(npm("@vvo/tzdb", "6.141.0"))
                 implementation(npm("@videosdk.live/js-sdk", "0.0.98"))
                 implementation(npm("mapbox-gl", "3.5.2"))
+                implementation(npm("mapbox-gl", "3.5.2"))
+                implementation(npm("marked", "15.0.7"))
             }
         }
     }

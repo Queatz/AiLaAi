@@ -100,6 +100,12 @@ object Styles : StyleSheet() {
         }
     }
 
+    val markdown by style {
+        child(self, selector("p")) style {
+            property("all", "unset")
+        }
+    }
+
     val reactionsLayout by style {
         display(DisplayStyle.Flex)
         flexWrap(FlexWrap.Wrap)

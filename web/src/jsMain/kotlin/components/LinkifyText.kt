@@ -29,7 +29,7 @@ fun LinkifyText(text: String) {
             }
         } else {
             Span {
-                Text(part)
+                Markdown(part)
             }
         }
     }
