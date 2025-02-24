@@ -516,6 +516,7 @@ data class Bot(
     var name: String? = null,
     var photo: String? = null,
     var creator: String? = null,
+    var open: Boolean? = null,
     var description: String? = null,
     var keywords: List<String>? = null,
     var config: List<BotConfigField>? = null

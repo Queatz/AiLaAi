@@ -7,14 +7,12 @@ import com.queatz.db.botData
 import com.queatz.db.bots
 import com.queatz.db.groupBotData
 import com.queatz.db.groupBotsOfBot
-import com.queatz.db.groupBotsOfGroup
 import com.queatz.parameter
 import com.queatz.plugins.bots
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.respond
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
@@ -63,13 +61,16 @@ fun Route.botRoutes() {
 
         get("bots/{id}") {
             respond {
-                db.document(Bot::class, parameter("id")) ?: HttpStatusCode.NotFound
+                db.document(Bot::class, parameter("id"))?.takeIf {
+                    it.isVisibleTo(me.id!!)
+                } ?: HttpStatusCode.NotFound
             }
         }
 
         post("bots/{id}") {
             respond {
-                val bot = db.document(Bot::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val bot = db.document(Bot::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
 
                 if (bot.creator != me.id!!) {
                     return@respond HttpStatusCode.BadRequest
@@ -85,13 +86,18 @@ fun Route.botRoutes() {
                     bot.url = update.url
                 }
 
+                if (update.open != null) {
+                    bot.open = update.open
+                }
+
                 db.update(bot)
             }
         }
 
         post("bots/{id}/reload") {
             respond {
-                val bot = db.document(Bot::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val bot = db.document(Bot::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
 
                 if (bot.creator != me.id!!) {
                     return@respond HttpStatusCode.BadRequest
@@ -110,7 +116,8 @@ fun Route.botRoutes() {
 
         post("bots/{id}/delete") {
             respond {
-                val bot = db.document(Bot::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val bot = db.document(Bot::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
 
                 if (bot.creator != me.id!!) {
                     return@respond HttpStatusCode.BadRequest
@@ -137,7 +144,8 @@ fun Route.botRoutes() {
 
         get("bots/{id}/data") {
             respond {
-                val bot = db.document(Bot::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+                val bot = db.document(Bot::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
 
                 if (bot.creator != me.id!!) {
                     return@respond HttpStatusCode.BadRequest
@@ -172,3 +180,5 @@ fun Route.botRoutes() {
         }
     }
 }
+
+private fun Bot.isVisibleTo(personId: String) = creator == personId || open == true

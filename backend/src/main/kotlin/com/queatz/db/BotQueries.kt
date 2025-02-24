@@ -5,6 +5,7 @@ fun Db.bots(person: String) = list(
     """
         for bot in @@collection
             filter bot.${f(Bot::creator)} == @person
+                or bot.${f(Bot::open)} == true
             return bot
     """.trimIndent(),
     mapOf(

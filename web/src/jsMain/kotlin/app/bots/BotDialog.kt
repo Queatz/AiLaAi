@@ -13,6 +13,7 @@ import app.ailaai.api.deleteBot
 import app.ailaai.api.reloadBot
 import app.ailaai.api.updateBot
 import app.ailaai.api.updateBotData
+import app.ailaai.api.updateGroupBot
 import app.components.Empty
 import app.dialog.dialog
 import app.dialog.photoDialog
@@ -22,9 +23,11 @@ import application
 import baseUrl
 import com.queatz.db.Bot
 import com.queatz.db.BotData
+import com.queatz.db.GroupBot
 import components.GroupPhoto
 import components.GroupPhotoItem
 import components.IconButton
+import components.Switch
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +71,7 @@ suspend fun botDialog(
             val me by application.me.collectAsState()
 
             var bot by remember { mutableStateOf(bot) }
+            var active by remember(bot) { mutableStateOf(bot.open == true) }
 
             LaunchedEffect(Unit) {
                 reload.collectLatest {
@@ -186,6 +190,27 @@ suspend fun botDialog(
             // todo: translate
             IconButton("more_vert", "More options", isLoading = isGenerating) {
                 menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
+            }
+
+            if (me?.id == bot.creator) {
+                Switch(
+                    value = active,
+                    onValue = {},
+                    // todo: translate
+                    title = if (active) "Public bot. Anyone can use this bot" else "Personal bot. Only I can use this bot",
+                    onChange = {
+                        scope.launch {
+                            api.updateBot(
+                                bot = bot.id!!,
+                                update = Bot(open = it)
+                            ) {
+                                active = it.open == true
+                                onBotUpdated()
+                            }
+                        }
+                    },
+                    border = true
+                )
             }
         }
     ) {
