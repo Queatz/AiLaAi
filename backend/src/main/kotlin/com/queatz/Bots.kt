@@ -192,16 +192,19 @@ class Bots {
                     )
                 )
 
-                db.document(Message::class, message.id!!)?.let {
-                    db.update(
-                        it.apply {
-                            bots = (bots ?: emptyList()) + BotMessageStatus(
-                                bot = bot.id!!,
-                                success = response.success ?: true,
-                                note = response.note
-                            )
-                        }
-                    )
+                // Save the bot response on the message if a success value is given
+                response.success?.let { success ->
+                    db.document(Message::class, message.id!!)?.let {
+                        db.update(
+                            it.apply {
+                                bots = (bots ?: emptyList()) + BotMessageStatus(
+                                    bot = bot.id!!,
+                                    success = success,
+                                    note = response.note
+                                )
+                            }
+                        )
+                    }
                 }
 
                 response.actions?.forEach { action ->

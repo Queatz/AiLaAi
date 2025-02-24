@@ -36,7 +36,7 @@ fun MessageBots(
             items = remember(bots, statuses) {
                 statuses.mapNotNull { status ->
                     bots.find { it.id == status.bot }?.let { bot ->
-                        GroupPhotoItem(bot.photo, "${bot.name}: ${if (status.success == true) "✅" else "❌"} ${status.note}")
+                        GroupPhotoItem(bot.photo, "${bot.name}: ${if (status.success == true) "✅" else "❌"} ${status.note.orEmpty()}")
                     }
                 }
             },
@@ -44,11 +44,11 @@ fun MessageBots(
             mergeTitles = true,
             fallback = "smart_toy",
             fallbackTitle = remember(bots, statuses) {
-                statuses.map { status ->
+                statuses.joinToString("\n") { status ->
                     bots.find { it.id == status.bot }.let { bot ->
-                        "${bot?.name ?: "\uD83E\uDD16"}: ${if (status.success == true) "✅" else "❌"} ${status.note}"
+                        "${bot?.name ?: "\uD83E\uDD16"}: ${if (status.success == true) "✅" else "❌"} ${status.note.orEmpty()}"
                     }
-                }.joinToString("\n")
+                }
             }
         )
         val success = statuses.all { it.success == true }

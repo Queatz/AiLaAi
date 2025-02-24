@@ -41,7 +41,7 @@ fun Route.botRoutes() {
 
                 db.insert(
                     Bot(
-                        url = body.url,
+                        url = url,
                         photo = body.photo,
                         creator = me.id!!,
                         name = botDetails.name,

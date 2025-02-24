@@ -197,7 +197,11 @@ suspend fun botDialog(
                     value = active,
                     onValue = {},
                     // todo: translate
-                    title = if (active) "Public bot. Anyone can use this bot" else "Personal bot. Only I can use this bot",
+                    title = if (active) {
+                        "Public bot. Anyone can use this bot"
+                    } else {
+                        "Personal bot. Only I can use this bot"
+                    },
                     onChange = {
                         scope.launch {
                             api.updateBot(
