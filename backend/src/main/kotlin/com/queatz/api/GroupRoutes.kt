@@ -276,7 +276,10 @@ fun Route.groupRoutes() {
                     )
 
                     urlAttachmentFetcher.handle(newMessage)
-                    bots.notify(newMessage, db.document(Person::class, member.from!!.asKey())!!)
+                    bots.notify(
+                        message = newMessage,
+                        person = db.document(Person::class, member.from!!.asKey())!!
+                    )
                     updateSeen(me, member, group)
                     notifyMessage(me, group, newMessage)
 

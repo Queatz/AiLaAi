@@ -9,8 +9,10 @@ import com.queatz.db.Group
 import com.queatz.db.GroupBot
 import com.queatz.db.Message
 import com.queatz.db.Person
+import com.queatz.db.asKey
 import com.queatz.db.groupBotData
 import com.queatz.db.groupBotsOfGroup
+import com.queatz.plugins.bots
 import com.queatz.plugins.db
 import com.queatz.plugins.json
 import io.ktor.client.HttpClient
@@ -76,7 +78,8 @@ data class BotAction(
 @Serializable
 data class MessageBotBody(
     val message: String? = null,
-    val person: Person? = null
+    val person: Person? = null,
+    val bot: Bot? = null
 )
 
 class Bots {
@@ -135,9 +138,14 @@ class Bots {
             setBody(body)
         }.body()
 
-    fun notify(message: Message, person: Person) {
+    fun notify(message: Message, person: Person? = null, messageBot: Bot? = null) {
         coroutineScope.launch {
             db.groupBotsOfGroup(message.group!!).forEach { groupBot ->
+                // Bots cannot send messages to themselves
+                if (messageBot?.id == groupBot.bot) {
+                    return@forEach
+                }
+
                 val bot = db.document(Bot::class, groupBot.bot!!) ?: let {
                     print("Bot not found: GroupBot(id = ${groupBot.id!!})")
                     return@forEach
@@ -169,9 +177,17 @@ class Bots {
                     authToken = authToken,
                     body = MessageBotBody(
                         message = message.text.orEmpty(),
-                        person = Person().apply {
-                            id = person.id
-                            name = person.name
+                        person = person?.let { person ->
+                            Person().apply {
+                                id = person.id
+                                name = person.name
+                            }
+                        },
+                        bot = messageBot?.let { bot ->
+                            Bot().apply {
+                                id = bot.id
+                                name = bot.name
+                            }
                         }
                     )
                 )
@@ -210,10 +226,16 @@ class Bots {
                     text = actionMessage
                 )
             )
+
             com.queatz.plugins.notify.message(
                 group = group,
                 bot = bot,
                 message = Message(text = botMessage.text?.ellipsize())
+            )
+
+            notify(
+                message = botMessage,
+                messageBot = bot
             )
 
             group.seen = Clock.System.now()
