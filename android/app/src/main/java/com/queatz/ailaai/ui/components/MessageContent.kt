@@ -928,7 +928,7 @@ fun ColumnScope.MessageContent(
 
     if (!message.text.isNullOrBlank()) {
         LinkifyText(
-            message.text ?: "",
+            text = message.text ?: "",
             color = if (isMeActual) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .align(if (isMe) Alignment.End else Alignment.Start)

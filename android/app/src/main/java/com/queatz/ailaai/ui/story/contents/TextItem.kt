@@ -11,7 +11,7 @@ import com.queatz.db.StoryContent
 fun LazyGridScope.textItem(content: StoryContent.Text) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         LinkifyText(
-            content.text,
+            text = content.text,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()

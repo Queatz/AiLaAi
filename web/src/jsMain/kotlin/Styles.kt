@@ -101,8 +101,14 @@ object Styles : StyleSheet() {
     }
 
     val markdown by style {
-        child(self, selector("p")) style {
+        desc(self, selector("p")) style {
             property("all", "unset")
+        }
+        desc(self, selector("ul")) style {
+            property("margin", "unset")
+        }
+        desc(self, selector("ol")) style {
+            property("margin", "unset")
         }
     }
 

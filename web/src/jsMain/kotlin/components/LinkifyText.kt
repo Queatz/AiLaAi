@@ -5,7 +5,6 @@ import com.queatz.db.splitByUrls
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.A
-import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 
 @Composable
@@ -28,9 +27,7 @@ fun LinkifyText(text: String) {
                 Text(part)
             }
         } else {
-            Span {
-                Markdown(part)
-            }
+            Markdown(part)
         }
     }
 }

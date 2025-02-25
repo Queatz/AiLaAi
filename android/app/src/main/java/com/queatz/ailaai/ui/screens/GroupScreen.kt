@@ -991,7 +991,7 @@ fun GroupScreen(groupId: String) {
                                     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
                                     val textScrollState = rememberScrollState()
                                     LinkifyText(
-                                        groupExtended?.group?.description ?: "",
+                                        text = groupExtended?.group?.description ?: "",
                                         modifier = Modifier
                                             .weight(1f)
                                             .heightIn(max = 128.dp)

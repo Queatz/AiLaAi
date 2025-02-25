@@ -1063,7 +1063,7 @@ fun ProfileScreen(personId: String) {
                             ) {
                                 if (isMe || profile?.about?.isBlank() == false) {
                                     LinkifyText(
-                                        profile?.about
+                                        text = profile?.about
                                             ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
                                         color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
                                         style = MaterialTheme.typography.bodyMedium,
