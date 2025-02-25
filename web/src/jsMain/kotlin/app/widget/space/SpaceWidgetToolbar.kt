@@ -11,6 +11,8 @@ import r
 sealed class SpaceWidgetTool {
     object Default : SpaceWidgetTool()
     object Line : SpaceWidgetTool()
+    object Box : SpaceWidgetTool()
+    object Text : SpaceWidgetTool()
 }
 
 @Composable
@@ -24,8 +26,8 @@ fun SpaceWidgetToolbar(
         }
     ) {
         IconButton(
-            // todo: translate
             name = "pan_tool_alt",
+            // todo: translate
             title = "Default",
             styles = {
                 borderRadius(1.r)
@@ -38,8 +40,8 @@ fun SpaceWidgetToolbar(
             }
         )
         IconButton(
-            // todo: translate
             name = "pen_size_2",
+            // todo: translate
             title = "Line",
             styles = {
                 borderRadius(1.r)
@@ -49,6 +51,34 @@ fun SpaceWidgetToolbar(
             },
             onClick = {
                 onTool(SpaceWidgetTool.Line)
+            }
+        )
+        IconButton(
+            name = "crop_square",
+            // todo: translate
+            title = "Box",
+            styles = {
+                borderRadius(1.r)
+                if (tool == SpaceWidgetTool.Box) {
+                    backgroundColor(Styles.colors.primary)
+                }
+            },
+            onClick = {
+                onTool(SpaceWidgetTool.Box)
+            }
+        )
+        IconButton(
+            name = "title",
+            // todo: translate
+            title = "Text",
+            styles = {
+                borderRadius(1.r)
+                if (tool == SpaceWidgetTool.Text) {
+                    backgroundColor(Styles.colors.primary)
+                }
+            },
+            onClick = {
+                onTool(SpaceWidgetTool.Text)
             }
         )
     }

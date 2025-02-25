@@ -23,7 +23,18 @@ sealed class SpaceContent {
     ) : SpaceContent()
 
     @Serializable
+    class Text(
+        val text: String? = null
+    ) : SpaceContent()
+
+    @Serializable
     class Line(
+        val page: String? = null,
+        val to: Pair<Double, Double>
+    ) : SpaceContent()
+
+    @Serializable
+    class Box(
         val page: String? = null,
         val to: Pair<Double, Double>
     ) : SpaceContent()

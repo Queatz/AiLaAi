@@ -35,11 +35,13 @@ object WidgetStyles : StyleSheet() {
         textAlign("center")
         padding(1.r)
         property("z-index", 1)
+        property("pointer-events", "none")
     }
 
     val spacePathItem by style {
         cursor("pointer")
         color(Color.black)
+        property("pointer-events", "auto")
 
         hover(self) style {
             textDecoration("underline")

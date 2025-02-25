@@ -1,5 +1,6 @@
 package app.widget.space
 
+import app.widget.DrawInfo
 import baseUrl
 import com.queatz.db.Card
 import com.queatz.widgets.widgets.SpaceContent
@@ -11,6 +12,7 @@ import org.w3c.dom.CanvasTextAlign
 import org.w3c.dom.CanvasTextBaseline
 import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.MIDDLE
+import org.w3c.dom.START
 import kotlin.math.PI
 
 fun drawCanvas(
@@ -21,8 +23,7 @@ fun drawCanvas(
     items: List<SpaceItem>,
     selectedItem: SpaceItem?,
     darkMode: Boolean,
-    drawLineFrom: Pair<Double, Double>?,
-    drawLineTo: Pair<Double, Double>?,
+    drawInfo: DrawInfo?,
 ) {
     with(context) {
         clearRect(
@@ -47,6 +48,34 @@ fun drawCanvas(
                         beginPath()
                         moveTo(position.first, position.second)
                         lineTo(item.to.first, item.to.second)
+                        stroke()
+                        restore()
+                    }
+                }
+
+                is SpaceContent.Text -> {
+                    font = if (selectedItem?.content == item) {
+                        "bold 24px ${font.split(" ").last()}"
+                    } else {
+                        "24px ${font.split(" ").last()}"
+                    }
+
+                    textAlign = CanvasTextAlign.START
+                    fillText(item.text.orEmpty(), position.first, position.second)
+                }
+
+                is SpaceContent.Box -> {
+                    if (item.page == cardId) {
+                        save()
+                        lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
+                        strokeStyle = Color.gray
+                        beginPath()
+                        rect(
+                            position.first,
+                            position.second,
+                            item.to.first - position.first,
+                            item.to.second - position.second
+                        )
                         stroke()
                         restore()
                     }
@@ -111,16 +140,41 @@ fun drawCanvas(
         }
 
         // Draw line
-        drawLineFrom?.let { from ->
-            drawLineTo?.let { to ->
-                save()
-                lineWidth = 2.0
-                strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
-                beginPath()
-                moveTo(from.first, from.second)
-                lineTo(to.first, to.second)
-                stroke()
-                restore()
+        drawInfo?.let { drawInfo ->
+            when (drawInfo.tool) {
+                is SpaceWidgetTool.Line -> {
+                    drawInfo.from?.let { from ->
+                        drawInfo.to?.let { to ->
+                            save()
+                            lineWidth = 2.0
+                            strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                            beginPath()
+                            moveTo(from.first, from.second)
+                            lineTo(to.first, to.second)
+                            stroke()
+                            restore()
+                        }
+                    }
+                }
+                is SpaceWidgetTool.Box -> {
+                    drawInfo.from?.let { from ->
+                        drawInfo.to?.let { to ->
+                            save()
+                            lineWidth = 2.0
+                            strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                            beginPath()
+                            rect(
+                                from.first,
+                                from.second,
+                                to.first - from.first,
+                                to.second - from.second
+                            )
+                            stroke()
+                            restore()
+                        }
+                    }
+                }
+                else -> Unit
             }
         }
 
