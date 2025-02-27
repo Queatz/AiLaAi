@@ -38,4 +38,10 @@ sealed class SpaceContent {
         val page: String? = null,
         val to: Pair<Double, Double>
     ) : SpaceContent()
+
+    @Serializable
+    class Circle(
+        val page: String? = null,
+        val to: Pair<Double, Double>
+    ) : SpaceContent()
 }

@@ -606,8 +606,10 @@ class MainActivity : AppCompatActivity() {
                                                 },
                                                 selected = selected,
                                                 onClick = {
-                                                    navController.popBackStack()
-                                                    navController.appNavigate(item.route)
+                                                    if (startDestinationLoaded) {
+                                                        navController.popBackStack()
+                                                        navController.appNavigate(item.route)
+                                                    }
                                                 }
                                             )
                                         }
@@ -655,8 +657,10 @@ class MainActivity : AppCompatActivity() {
                                                 },
                                                 selected = navController.currentDestination?.route == item.route.route,
                                                 onClick = {
-                                                    navController.popBackStack()
-                                                    navController.appNavigate(item.route)
+                                                    if (startDestinationLoaded) {
+                                                        navController.popBackStack()
+                                                        navController.appNavigate(item.route)
+                                                    }
                                                 },
                                                 modifier = Modifier.padding(horizontal = .5f.pad)
                                             )

@@ -51,29 +51,30 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Incoming:
  *
- * [ ] Space: Snap to grid
- * [ ] Space: Show grid
+ * [ ]
  *
  * Todos:
- * [ ] Click to add text
- * [ ] ctrl+click to add a page
  * [ ] draw scribble
- * [ ] draw box
  * [ ] draw circle
  * [ ] insert image [AI, upload]
- * [ ] tools bar
  * [ ] only card owner can edit
  * [ ] ctrl+z ctrl+shift+z
  *
- * Later
+ * Later:
  * [ ] select card on widget add
  * [ ] multi-select
+ * [ ] drag select
  * [ ] deal with deleted cards (can be removed from data...)
  * [ ] enter fullscreen/expanded view
+ * [ ] Space: Snap to grid
+ * [ ] Space: Show grid
  *
  * Done
- * [X] draw line
+ * [X] tools bar
+ * [X] Click to add text
+ * [X] ctrl+click to add a page
  * [X] draw box
+ * [X] draw line
  * [X] Double-click a page to enter into it inside the widget
  * [X] Save card position
  * [X] Render card photos
@@ -249,6 +250,12 @@ fun SpaceWidget(widgetId: String) {
                                             )
                                         ) <= 24.0
 
+                                        is SpaceContent.Circle -> sqrt(
+                                            (mouseX - item.to.first).pow(2) + (mouseY - item.to.second).pow(
+                                                2
+                                            )
+                                        ) <= 24.0
+
                                         else -> false
                                     }
                                 ) {
@@ -270,6 +277,7 @@ fun SpaceWidget(widgetId: String) {
 
                         SpaceWidgetTool.Line,
                         SpaceWidgetTool.Box,
+                        SpaceWidgetTool.Circle,
                             -> {
                             val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
                             val mouseX = event.clientX - rect.left - offset.first
@@ -306,6 +314,7 @@ fun SpaceWidget(widgetId: String) {
 
                         SpaceWidgetTool.Line,
                         SpaceWidgetTool.Box,
+                        SpaceWidgetTool.Circle,
                             -> {
                             drawInfo?.let {
                                 val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
@@ -331,6 +340,7 @@ fun SpaceWidget(widgetId: String) {
 
                         SpaceWidgetTool.Line,
                         SpaceWidgetTool.Box,
+                        SpaceWidgetTool.Circle,
                             -> {
                             drawInfo?.from?.let { from ->
                                 drawInfo?.to?.let { to ->
@@ -339,6 +349,13 @@ fun SpaceWidget(widgetId: String) {
                                             content = when (drawInfo?.tool) {
                                                 SpaceWidgetTool.Box -> {
                                                     SpaceContent.Box(
+                                                        page = cardId,
+                                                        to = to
+                                                    )
+                                                }
+
+                                                SpaceWidgetTool.Circle -> {
+                                                    SpaceContent.Circle(
                                                         page = cardId,
                                                         to = to
                                                     )
@@ -369,50 +386,50 @@ fun SpaceWidget(widgetId: String) {
                     val mouseX = event.clientX - rect.left - offset.first
                     val mouseY = event.clientY - rect.top - offset.second
 
-                    when (tool) {
-                        SpaceWidgetTool.Text -> {
-                            scope.launch {
-                                val text = inputDialog(
-                                    // todo: translate
-                                    title = "Text"
-                                )
+                    if (!event.ctrlKey) {
+                        when (tool) {
+                            SpaceWidgetTool.Text -> {
+                                scope.launch {
+                                    val text = inputDialog(
+                                        // todo: translate
+                                        title = "Text"
+                                    )
 
-                                if (!text.isNullOrBlank()) {
+                                    if (!text.isNullOrBlank()) {
+                                        data = data!!.copy(
+                                            items = data!!.items!!.toMutableList().apply {
+                                                add(SpaceItem(SpaceContent.Text(text), mouseX to mouseY))
+                                            }
+                                        )
+                                        dirty = nextInt()
+                                    }
+                                }
+                            }
+
+                            else -> Unit
+                        }
+                    } else {
+                        scope.launch {
+                            val newCardName = inputDialog(title = application.appString { newCard })?.notBlank
+
+                            if (newCardName != null) {
+                                api.newCard(
+                                    card = Card(
+                                        name = newCardName,
+                                        parent = cardId,
+                                        active = card?.active == true,
+                                    )
+                                ) { newCard ->
                                     data = data!!.copy(
                                         items = data!!.items!!.toMutableList().apply {
-                                            add(SpaceItem(SpaceContent.Text(text), mouseX to mouseY))
+                                            add(SpaceItem(SpaceContent.Page(newCard.id!!), mouseX to mouseY))
                                         }
                                     )
                                     dirty = nextInt()
-                                }
-                            }
-                        }
-
-                        else -> Unit
-                    }
-
-                    if (!event.ctrlKey) return@onClick
-
-                    scope.launch {
-                        val newCardName = inputDialog(title = application.appString { newCard })?.notBlank
-
-                        if (newCardName != null) {
-                            api.newCard(
-                                card = Card(
-                                    name = newCardName,
-                                    parent = cardId,
-                                    active = card?.active == true,
-                                )
-                            ) { newCard ->
-                                data = data!!.copy(
-                                    items = data!!.items!!.toMutableList().apply {
-                                        add(SpaceItem(SpaceContent.Page(newCard.id!!), mouseX to mouseY))
+                                    api.cardsCards(cardId ?: return@newCard) {
+                                        cards = it
+                                        cardsById = cards.associateBy { it.id!! }
                                     }
-                                )
-                                dirty = nextInt()
-                                api.cardsCards(cardId ?: return@newCard) {
-                                    cards = it
-                                    cardsById = cards.associateBy { it.id!! }
                                 }
                             }
                         }

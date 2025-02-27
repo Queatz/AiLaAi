@@ -171,9 +171,7 @@ fun StoriesScreen() {
                             is SwipeResult.Next -> {
                                 nav.appNavigate(AppNav.Explore)
                             }
-                            is SwipeResult.Select<*> -> {
-                                // Impossible
-                            }
+                            is SwipeResult.Select<*> -> Unit
                         }
                     }
             ) {

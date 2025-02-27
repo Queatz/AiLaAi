@@ -13,6 +13,7 @@ import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -33,6 +34,7 @@ suspend fun updateGroupBotDialog(
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Column)
                 gap(1.r)
+                maxWidth(32.r)
             }
         }) {
             bot.description?.notBlank?.let {

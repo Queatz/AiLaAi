@@ -53,6 +53,43 @@ fun drawCanvas(
                     }
                 }
 
+                is SpaceContent.Box -> {
+                    if (item.page == cardId) {
+                        save()
+                        lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
+                        strokeStyle = Color.gray
+                        beginPath()
+                        rect(
+                            x = position.first,
+                            y = position.second,
+                            w = item.to.first - position.first,
+                            h = item.to.second - position.second
+                        )
+                        stroke()
+                        restore()
+                    }
+                }
+
+                is SpaceContent.Circle -> {
+                    if (item.page == cardId) {
+                        save()
+                        lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
+                        strokeStyle = Color.gray
+                        beginPath()
+                        ellipse(
+                            x = position.first,
+                            y = position.second,
+                            radiusX = (item.to.first - position.first).coerceAtLeast(0.0),
+                            radiusY = (item.to.second - position.second).coerceAtLeast(0.0),
+                            rotation = 0.0,
+                            startAngle = 0.0,
+                            endAngle = 360.0
+                        )
+                        stroke()
+                        restore()
+                    }
+                }
+
                 is SpaceContent.Text -> {
                     font = if (selectedItem?.content == item) {
                         "bold 24px ${font.split(" ").last()}"
@@ -62,23 +99,6 @@ fun drawCanvas(
 
                     textAlign = CanvasTextAlign.START
                     fillText(item.text.orEmpty(), position.first, position.second)
-                }
-
-                is SpaceContent.Box -> {
-                    if (item.page == cardId) {
-                        save()
-                        lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
-                        strokeStyle = Color.gray
-                        beginPath()
-                        rect(
-                            position.first,
-                            position.second,
-                            item.to.first - position.first,
-                            item.to.second - position.second
-                        )
-                        stroke()
-                        restore()
-                    }
                 }
 
                 is SpaceContent.Page -> {
@@ -168,6 +188,27 @@ fun drawCanvas(
                                 from.second,
                                 to.first - from.first,
                                 to.second - from.second
+                            )
+                            stroke()
+                            restore()
+                        }
+                    }
+                }
+                is SpaceWidgetTool.Circle -> {
+                    drawInfo.from?.let { from ->
+                        drawInfo.to?.let { to ->
+                            save()
+                            lineWidth = 2.0
+                            strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
+                            beginPath()
+                            ellipse(
+                                x = from.first,
+                                y = from.second,
+                                radiusX = (to.first - from.first).coerceAtLeast(0.0),
+                                radiusY = (to.second - from.second).coerceAtLeast(0.0),
+                                rotation = 0.0,
+                                startAngle = 0.0,
+                                endAngle = 360.0
                             )
                             stroke()
                             restore()

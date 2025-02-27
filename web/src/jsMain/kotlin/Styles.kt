@@ -101,14 +101,19 @@ object Styles : StyleSheet() {
     }
 
     val markdown by style {
-        desc(self, selector("p")) style {
-            property("all", "unset")
+        whiteSpace("initial")
+
+        desc(self, selector(":first-child")) style {
+            property("margin-top", "0")
         }
-        desc(self, selector("ul")) style {
-            property("margin", "unset")
+        desc(self, selector(":last-child")) style {
+            property("margin-bottom", "0")
         }
-        desc(self, selector("ol")) style {
-            property("margin", "unset")
+        
+        desc(self, selector("blockquote")) style {
+            property("border-left", "${2.px} ${LineStyle.Solid} ${colors.primary}")
+            paddingLeft(.5.r)
+            marginLeft(0.px)
         }
     }
 

@@ -264,9 +264,7 @@ fun ScheduleScreen() {
                     is SwipeResult.Next -> {
                         nav.appNavigate(AppNav.Messages)
                     }
-                    is SwipeResult.Select<*> -> {
-                        // Impossible
-                    }
+                    is SwipeResult.Select<*> -> Unit
                 }
             }
     ) {

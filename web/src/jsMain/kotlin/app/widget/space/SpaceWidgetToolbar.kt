@@ -13,6 +13,7 @@ sealed class SpaceWidgetTool {
     object Line : SpaceWidgetTool()
     object Box : SpaceWidgetTool()
     object Text : SpaceWidgetTool()
+    object Circle : SpaceWidgetTool()
 }
 
 @Composable
@@ -65,6 +66,20 @@ fun SpaceWidgetToolbar(
             },
             onClick = {
                 onTool(SpaceWidgetTool.Box)
+            }
+        )
+        IconButton(
+            name = "circle",
+            // todo: translate
+            title = "Circle",
+            styles = {
+                borderRadius(1.r)
+                if (tool == SpaceWidgetTool.Circle) {
+                    backgroundColor(Styles.colors.primary)
+                }
+            },
+            onClick = {
+                onTool(SpaceWidgetTool.Circle)
             }
         )
         IconButton(

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -66,7 +65,6 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.px
-import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
@@ -83,14 +81,11 @@ import com.queatz.ailaai.services.messages
 import com.queatz.ailaai.services.push
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.ContactItem
-import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.MainTab
-import com.queatz.ailaai.ui.components.MainTabs
 import com.queatz.ailaai.ui.components.NotificationsDisabledBanner
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
@@ -122,20 +117,10 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
-private var tabCache = mutableMapOf<MainTab, List<GroupExtended>>()
+private var groupsCache = emptyList<GroupExtended>()
 
 @Composable
 fun FriendsScreen() {
-    fun tabCache(tab: MainTab) = when (tab) {
-        MainTab.Friends -> {
-            tabCache[tab] ?: cache.get<List<GroupExtended>>(CacheKey.Groups) ?: emptyList()
-        }
-
-        else -> {
-            tabCache[tab] ?: emptyList()
-        }
-    }
-
     val context = LocalContext.current
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -149,9 +134,8 @@ fun FriendsScreen() {
     var showSharedGroupsDialog by rememberStateOf<List<GroupExtended>>(emptyList())
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
-    var tab by rememberSavableStateOf(MainTab.Friends)
     var allGroups by remember {
-        mutableStateOf(tabCache(tab))
+        mutableStateOf(groupsCache.notEmpty ?: cache.get<List<GroupExtended>>(CacheKey.Groups) ?: emptyList())
     }
     var isLoading by rememberStateOf(allGroups.isEmpty())
     var geo: LatLng? by remember { mutableStateOf(null) }
@@ -180,7 +164,7 @@ fun FriendsScreen() {
     }
 
     LaunchedEffect(allGroups) {
-        tabCache[tab] = allGroups
+        groupsCache = allGroups
         cache.put(CacheKey.Groups, allGroups)
         categories = allGroups
             .flatMap { it.group?.categories ?: emptyList() }
@@ -226,39 +210,16 @@ fun FriendsScreen() {
     }
 
     suspend fun reload(passive: Boolean = false) {
-        isLoading = (!passive && tabCache[tab].isNullOrEmpty()) || results.isEmpty()
-        when (tab) {
-            MainTab.Friends -> {
-                api.groups(
-                    onError = {
-                        if (!passive && it !is CancellationException) {
-                            context.showDidntWork()
-                        }
-                    }
-                ) {
-                    allGroups = it.filter { it.group != null }
-                    messages.refresh(me, allGroups)
+        isLoading = (!passive && groupsCache.isEmpty()) || results.isEmpty()
+        api.groups(
+            onError = {
+                if (!passive && it !is CancellationException) {
+                    context.showDidntWork()
                 }
             }
-
-            MainTab.Local -> {
-                if (geo != null) {
-                    api.exploreGroups(
-                        geo = geo!!.toGeo(),
-                        search = searchText,
-                        public = true,
-                        onError = {
-                            if (!passive && it !is CancellationException) {
-                                context.showDidntWork()
-                            }
-                        }
-                    ) {
-                        allGroups = it.filter { it.group != null }
-                    }
-                }
-            }
-
-            else -> {}
+        ) {
+            allGroups = it.filter { it.group != null }
+            messages.refresh(me, allGroups)
         }
         isLoading = false
         scope.launch {
@@ -293,32 +254,6 @@ fun FriendsScreen() {
             }
         }
         reloadFlow.emit(true)
-    }
-
-    var skipFirst by rememberStateOf(geo != null)
-
-    LaunchedEffect(geo) {
-        if (geo == null || tab != MainTab.Local) {
-            return@LaunchedEffect
-        }
-        if (skipFirst) {
-            skipFirst = false
-            return@LaunchedEffect
-        }
-        // todo search server, set allGroups
-        reloadFlow.emit(true)
-    }
-
-    fun setTab(it: MainTab) {
-        tab = it
-        allGroups = tabCache(tab)
-        allPeople = emptyList()
-        isLoading = allGroups.isEmpty()
-        selectedCategory = null
-        scope.launch {
-            state.scrollToTop()
-            reloadFlow.emit(false)
-        }
     }
 
     fun onFriendClick(person: Person, sendMessage: Boolean = false) {
@@ -501,210 +436,182 @@ fun FriendsScreen() {
             }
             ScanQrCodeButton()
         }
-        MainTabs(
-            tab = tab,
-            onTab = {
-                setTab(it)
-            },
-            tabs = tabs
-        )
-        LocationScaffold(
-            geo = geo,
-            locationSelector = locationSelector,
-            enabled = tab == MainTab.Local,
-            rationale = {
-                // todo: translate
-                DisplayText("Join and host groups in your area.")
-            }
-        ) {
-            var h by rememberStateOf(80.dp.px)
 
-            Box(
-                contentAlignment = Alignment.TopCenter,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .swipeMainTabs {
-                        when (val it = tabs.swipe(tab, it)) {
-                            is SwipeResult.Previous -> {
-                                nav.appNavigate(AppNav.Schedule)
-                            }
+        var h by rememberStateOf(80.dp.px)
 
-                            is SwipeResult.Next -> {
-                                nav.appNavigate(AppNav.Stories)
-                            }
-
-                            is SwipeResult.Select<*> -> {
-                                setTab(it.item as MainTab)
-                            }
+        Box(
+            contentAlignment = Alignment.TopCenter,
+            modifier = Modifier
+                .fillMaxSize()
+                .swipeMainTabs {
+                    when (emptyList<Unit>().swipe(Unit, it)) {
+                        is SwipeResult.Previous -> {
+                            nav.appNavigate(AppNav.Schedule)
                         }
+
+                        is SwipeResult.Next -> {
+                            nav.appNavigate(AppNav.Stories)
+                        }
+
+                        is SwipeResult.Select<*> -> Unit
                     }
+                }
+        ) {
+            LazyColumn(
+                state = state,
+                contentPadding = PaddingValues(
+                    1.pad,
+                    1.pad,
+                    1.pad,
+                    3.pad + h.inDp()
+                ),
+                verticalArrangement = Arrangement.spacedBy(1.pad),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
             ) {
-                LazyColumn(
-                    state = state,
-                    contentPadding = PaddingValues(
-                        1.pad,
-                        1.pad,
-                        1.pad,
-                        3.pad + h.inDp()
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(1.pad),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.then(
-                        if (tab == MainTab.Local) {
-                            Modifier.widthIn(max = 640.dp)
-                        } else {
-                            Modifier
-                        }
-                    ).fillMaxSize()
-                ) {
-                    if (isLoading) {
-                        item {
-                            Loading()
-                        }
-                    } else if (results.isEmpty()) {
-                        item {
-                            Text(
-                                text = stringResource(
-                                    if (searchText.isBlank()) when (tab) {
-                                        MainTab.Friends -> R.string.you_have_no_groups
-                                        else -> R.string.no_groups_nearby
-                                    } else R.string.no_groups_to_show
-                                ),
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(2.pad)
-                            )
-
-                            if (tab == MainTab.Friends) {
-                                var localCategories by mutableStateOf(emptyList<String>())
-                                LaunchedEffect(geo) {
-                                    if (geo != null) {
-                                        api.exploreGroups(
-                                            geo = geo!!.toGeo(),
-                                            public = true,
-                                            onError = {}
-                                        ) {
-                                            localCategories =
-                                                it.mapNotNull { it.group?.categories }.flatten().distinct()
-                                        }
-                                    }
+                if (isLoading) {
+                    item {
+                        Loading()
+                    }
+                } else if (results.isEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(
+                                if (searchText.isBlank()) {
+                                    R.string.you_have_no_groups
+                                } else {
+                                    R.string.no_groups_to_show
                                 }
+                            ),
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(2.pad)
+                        )
 
-                                Button(
-                                    onClick = {
-                                        setTab(MainTab.Local)
-                                    }
+                        var localCategories by mutableStateOf(emptyList<String>())
+                        LaunchedEffect(geo) {
+                            if (geo != null) {
+                                api.exploreGroups(
+                                    geo = geo!!.toGeo(),
+                                    public = true,
+                                    onError = {}
                                 ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(1.pad),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(Icons.Outlined.Search, null)
-                                        Column {
-                                            Text(
-                                                text = stringResource(R.string.explore_local_groups),
-                                                style = MaterialTheme.typography.bodyLarge
-                                            )
-                                            localCategories.notEmpty?.let {
-                                                Text(
-                                                    text = it.joinToString(),
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                NotificationsDisabledBanner(show = tab == MainTab.Friends)
-                                AnimatedVisibility(tab == MainTab.Friends && searchText.isBlank() && selectedCategory == null) {
-                                    Friends(
-                                        people = remember(allGroups) {
-                                            allGroups.people().sortedByDescending { it.id == me?.id }
-                                        },
-                                        statuses = statuses,
-                                        title = {
-                                            if (it.id == me?.id) {
-                                                context.getString(R.string.set_status)
-                                            } else {
-                                                null
-                                            }
-                                        },
-                                        onLongClick = {
-                                            nav.appNavigate(AppNav.Profile(it.id!!))
-                                        }
-                                    ) { person ->
-                                        if (person.id == me?.id) {
-                                            myStatusDialog = true
-                                        } else {
-                                            onFriendClick(person)
-                                        }
-                                    }
+                                    localCategories =
+                                        it.mapNotNull { it.group?.categories }.flatten().distinct()
                                 }
                             }
                         }
 
-                        items(
-                            items = results,
-                            key = {
-                                when (it) {
-                                    is SearchResult.Connect -> "connect:${it.person.id}"
-                                    is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
-                                }
+                        Button(
+                            onClick = {
+                                nav.appNavigate(AppNav.Explore)
                             }
                         ) {
-                            ContactItem(
-                                item = it,
-                                onChange = {
-                                    scope.launch {
-                                        reloadFlow.emit(true)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(1.pad),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Outlined.Search, null)
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.explore),
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    localCategories.notEmpty?.let {
+                                        Text(
+                                            text = it.joinToString(),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
-                                },
-                                info = when (tab) {
-                                    MainTab.Friends -> GroupInfo.LatestMessage
-                                    else -> GroupInfo.Members
-                                },
-                                coverPhoto = tab == MainTab.Local
-                            )
+                                }
+                            }
                         }
                     }
-                }
+                } else {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            NotificationsDisabledBanner()
+                            AnimatedVisibility(searchText.isBlank() && selectedCategory == null) {
+                                Friends(
+                                    people = remember(allGroups) {
+                                        allGroups.people().sortedByDescending { it.id == me?.id }
+                                    },
+                                    statuses = statuses,
+                                    title = {
+                                        if (it.id == me?.id) {
+                                            context.getString(R.string.set_status)
+                                        } else {
+                                            null
+                                        }
+                                    },
+                                    onLongClick = {
+                                        nav.appNavigate(AppNav.Profile(it.id!!))
+                                    }
+                                ) { person ->
+                                    if (person.id == me?.id) {
+                                        myStatusDialog = true
+                                    } else {
+                                        onFriendClick(person)
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-                PageInput(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .onPlaced {
-                            h = it.size.height
+                    items(
+                        items = results,
+                        key = {
+                            when (it) {
+                                is SearchResult.Connect -> "connect:${it.person.id}"
+                                is SearchResult.Group -> "group:${it.groupExtended.group!!.id!!}"
+                            }
                         }
-                ) {
-                    SearchContent(
-                        locationSelector = locationSelector,
-                        isLoading = isLoading,
-                        categories = categories,
-                        category = selectedCategory
                     ) {
-                        selectedCategory = it
+                        ContactItem(
+                            item = it,
+                            onChange = {
+                                scope.launch {
+                                    reloadFlow.emit(true)
+                                }
+                            },
+                            info = GroupInfo.LatestMessage,
+                            coverPhoto = false
+                        )
                     }
-                    SearchFieldAndAction(
-                        value = searchText,
-                        valueChange = { searchText = it },
-                        placeholder = stringResource(R.string.search_people_and_groups),
-                        action = {
-                            Icon(Icons.Outlined.Add, stringResource(R.string.create_group))
-                        },
-                        onAction = {
-                            createGroupName = searchText
-                            showCreateGroupName = true
-                        },
-                    )
                 }
+            }
+
+            PageInput(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onPlaced {
+                        h = it.size.height
+                    }
+            ) {
+                SearchContent(
+                    locationSelector = locationSelector,
+                    isLoading = isLoading,
+                    categories = categories,
+                    category = selectedCategory
+                ) {
+                    selectedCategory = it
+                }
+                SearchFieldAndAction(
+                    value = searchText,
+                    valueChange = { searchText = it },
+                    placeholder = stringResource(R.string.search_people_and_groups),
+                    action = {
+                        Icon(Icons.Outlined.Add, stringResource(R.string.create_group))
+                    },
+                    onAction = {
+                        createGroupName = searchText
+                        showCreateGroupName = true
+                    },
+                )
             }
         }
     }

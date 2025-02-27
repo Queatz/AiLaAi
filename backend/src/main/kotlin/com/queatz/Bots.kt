@@ -93,7 +93,7 @@ class Bots {
         }
 
         engine {
-            requestTimeout = 2.minutes.inWholeMilliseconds
+            requestTimeout = 5.minutes.inWholeMilliseconds
         }
     }
 
