@@ -248,10 +248,12 @@ fun SpaceWidget(widgetId: String) {
                                             (mouseX - item.to.first).pow(2) + (mouseY - item.to.second).pow(
                                                 2
                                             )
-                                        ) <= 24.0
-
-                                        is SpaceContent.Circle -> sqrt(
-                                            (mouseX - item.to.first).pow(2) + (mouseY - item.to.second).pow(
+                                        ) <= 24.0 || sqrt(
+                                            (mouseX - item.to.first).pow(2) + (mouseY - y).pow(
+                                                2
+                                            )
+                                        ) <= 24.0 || sqrt(
+                                            (mouseX - x).pow(2) + (mouseY - item.to.second).pow(
                                                 2
                                             )
                                         ) <= 24.0

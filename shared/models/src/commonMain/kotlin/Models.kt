@@ -188,6 +188,13 @@ data class GroupConfig(
 )
 
 @Serializable
+class Prompt(
+    var person: String? = null,
+    var prompt: String? = null,
+    var lastUsed: Instant? = null
+) : Model()
+
+@Serializable
 data class ReactionSummary(
     val all: List<ReactionCount>,
     val mine: List<Reaction>? = null

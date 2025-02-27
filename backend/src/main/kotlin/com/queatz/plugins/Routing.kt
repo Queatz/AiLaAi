@@ -67,6 +67,7 @@ fun Application.configureRouting() {
         tradeRoutes()
         scriptRoutes()
         statusRoutes()
+        promptRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {
