@@ -302,7 +302,9 @@ fun Db.messages(
     group: String,
     before: Instant? = null,
     limit: Int = 20,
-    search: String? = null
+    search: String? = null,
+    reaction: String? = null,
+    rating: String? = null
 ) = list(
     Message::class,
     """
@@ -310,6 +312,8 @@ fun Db.messages(
             filter x.${f(Message::group)} == @group
             ${if (before != null) "and x.${f(Message::createdAt)} <= @before" else ""}
             ${if (search != null) "and contains(lower(x.${f(Message::text)}), @search)" else ""}
+            ${if (reaction != null) "and count(for reaction in ${allReactions("x._id")} filter reaction.${f(ReactionCount::reaction)} == @reaction return true) > 0" else ""}
+            ${if (rating != null) "and count(for rating in ${Rating::class.collection()} filter x._from == \"${personId}\" and x._to == x._id limit 1 return true) > 0" else ""}
             sort x.${f(Message::createdAt)} desc
             limit @limit
             return ${messageWithReactions(personId = personId)}
@@ -318,7 +322,9 @@ fun Db.messages(
         "group" to group,
         "before" to before,
         "limit" to limit,
-        "search" to search?.lowercase()
+        "search" to search?.lowercase(),
+        "reaction" to reaction,
+        "rating" to rating,
     ).filterValues { it != null }
 )
 

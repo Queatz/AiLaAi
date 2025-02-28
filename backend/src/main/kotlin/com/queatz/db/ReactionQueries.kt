@@ -115,7 +115,7 @@ private fun Db.myReactions(person: String, to: String) = """
     )
 """.trimIndent()
 
-private fun Db.allReactions(to: String) = """
+fun Db.allReactions(to: String) = """
     (
         for entity, reaction in inbound $to graph `${Reaction::class.graph()}`
             collect text = reaction.${f(Reaction::reaction)} with count into count

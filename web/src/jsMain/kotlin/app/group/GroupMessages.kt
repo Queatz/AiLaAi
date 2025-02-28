@@ -62,7 +62,8 @@ fun GroupMessages(
     var myTopReactions by remember { mutableStateOf(emptyList<String>()) }
     var topGroupReactions by remember { mutableStateOf(emptyList<String>()) }
     var search by remember(group.group?.id) { mutableStateOf("") }
-    var searchFilters by remember(group.group?.id) { mutableStateOf(emptyList<String>()) }
+    var searchByReaction by remember(group.group?.id) { mutableStateOf("") }
+    var searchByRating by remember(group.group?.id) { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         api.myTopReactions {
@@ -100,7 +101,9 @@ fun GroupMessages(
     suspend fun reloadMessages() {
         api.messages(
             group = group.group!!.id!!,
-            search = search.notBlank
+            search = search.notBlank,
+            reaction = searchByReaction.notBlank,
+            rating = searchByRating.notBlank
         ) {
             messages = it
         }
@@ -114,7 +117,9 @@ fun GroupMessages(
         api.messagesBefore(
             group = group.group!!.id!!,
             before = messages.lastOrNull()?.createdAt ?: return,
-            search = search.notBlank
+            search = search.notBlank,
+            reaction = searchByReaction.notBlank,
+            rating = searchByRating.notBlank
         ) {
             val messagesCount = messages.size
             messages = (messages + it).distinctBy { it.id }
@@ -125,8 +130,13 @@ fun GroupMessages(
         }
     }
 
-    LaunchedEffect(group.group?.id, search) {
-        isLoading = search.isBlank()
+    LaunchedEffect(
+        group.group?.id,
+        search,
+        searchByReaction,
+        searchByRating
+    ) {
+        isLoading = search.isBlank() && searchByReaction.isBlank() && searchByRating.isBlank()
         reloadMessages()
     }
 
@@ -158,11 +168,31 @@ fun GroupMessages(
                 Menu({ menuTarget = null }, menuTarget!!) {
                     // todo translate
                     item("Reaction") {
-                        //
+                        scope.launch {
+                            val reaction = addReactionDialog(
+                                quickReactions = topGroupReactions + myTopReactions,
+                                confirmButton = application.appString { this.search }
+                            )
+
+                            if (reaction != null) {
+                                searchByReaction = reaction
+                            }
+                        }
                     }
                     // todo translate
                     item("Rating") {
-                        //
+                        scope.launch {
+                            val rating = setRatingDialog(
+                                confirmButton = application.appString { this.search },
+                                onRemoveRating = {
+                                    searchByRating = ""
+                                }
+                            )
+
+                            if (rating != null) {
+                                searchByRating = rating
+                            }
+                        }
                     }
                 }
             }
@@ -173,7 +203,8 @@ fun GroupMessages(
                 IconButton(
                     name = "filter_list",
                     title = appString { filter },
-                    styles = { marginLeft(1.r) }
+                    styles = { marginLeft(1.r) },
+                    count = listOf(searchByReaction, searchByRating).count { it.isNotBlank() }
                 ) {
                     menuTarget = if (menuTarget == null) {
                         (it.target as HTMLElement).getBoundingClientRect()

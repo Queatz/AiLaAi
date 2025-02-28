@@ -32,13 +32,14 @@ import withPlus
 // todo: numbers only
 suspend fun setRatingDialog(
     initialRating: Int? = null,
+    // todo: translate
+    confirmButton: String = "Rate",
     onRemoveRating: () -> Unit
 ) = inputDialog(
     title = null,
     // todo: translate
     placeholder = "Custom",
-    // todo: translate
-    confirmButton = "Rate",
+    confirmButton = confirmButton,
     singleLine = true,
     inputStyles = {
         width(100.percent)

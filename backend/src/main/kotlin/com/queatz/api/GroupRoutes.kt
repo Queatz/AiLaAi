@@ -39,11 +39,13 @@ fun Route.groupRoutes() {
             respond {
                 db.group(meOrNull?.id, parameter("id"))?.let { group ->
                     db.messages(
-                        meOrNull?.id?.asId(Person::class),
-                        group.group!!.id!!,
-                        call.parameters["before"]?.toInstant(),
-                        call.parameters["limit"]?.toInt() ?: 20,
-                        call.parameters["search"]?.notBlank,
+                        personId = meOrNull?.id?.asId(Person::class),
+                        group = group.group!!.id!!,
+                        before = call.parameters["before"]?.toInstant(),
+                        limit = call.parameters["limit"]?.toInt() ?: 20,
+                        search = call.parameters["search"]?.notBlank,
+                        reaction = call.parameters["reaction"]?.notBlank,
+                        rating = call.parameters["rating"]?.notBlank,
                     ).also {
                         // Mark group as seen
                         meOrNull?.let { me ->

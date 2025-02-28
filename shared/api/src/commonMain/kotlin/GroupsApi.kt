@@ -15,11 +15,17 @@ suspend fun Api.groupTopReactions(
 suspend fun Api.messages(
     group: String,
     search: String? = null,
+    reaction: String? = null,
+    rating: String? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Message>>,
 ) = get(
     "groups/$group/messages",
-    mapOf("search" to search).filterValues { it != null },
+    mapOf(
+        "search" to search,
+        "reaction" to reaction,
+        "rating" to rating,
+    ).filterValues { it != null },
     onError = onError,
     onSuccess = onSuccess
 )
@@ -40,13 +46,17 @@ suspend fun Api.messagesBefore(
     group: String,
     before: Instant,
     search: String? = null,
+    reaction: String? = null,
+    rating: String? = null,
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<List<Message>>,
 ) = get(
     url = "groups/$group/messages",
     parameters = mapOf(
         "before" to before.toString(),
-        "search" to search
+        "search" to search,
+        "reaction" to reaction,
+        "rating" to rating,
     ).filterValues { it != null },
     onError = onError,
     onSuccess = onSuccess

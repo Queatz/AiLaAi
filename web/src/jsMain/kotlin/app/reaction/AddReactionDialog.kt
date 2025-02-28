@@ -21,13 +21,14 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 suspend fun addReactionDialog(
-    quickReactions: List<String> = emptyList()
+    quickReactions: List<String> = emptyList(),
+    // todo: translate
+    confirmButton: String = "React"
 ) = inputDialog(
     title = null,
     // todo: translate
     placeholder = "Custom",
-    // todo: translate
-    confirmButton = "React",
+    confirmButton = confirmButton,
     maxLength = 64,
     inputStyles = {
         width(100.percent)
