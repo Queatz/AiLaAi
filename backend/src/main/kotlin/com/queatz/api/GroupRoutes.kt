@@ -45,7 +45,7 @@ fun Route.groupRoutes() {
                         limit = call.parameters["limit"]?.toInt() ?: 20,
                         search = call.parameters["search"]?.notBlank,
                         reaction = call.parameters["reaction"]?.notBlank,
-                        rating = call.parameters["rating"]?.notBlank,
+                        rating = call.parameters["rating"]?.notBlank?.toIntOrNull(),
                     ).also {
                         // Mark group as seen
                         meOrNull?.let { me ->

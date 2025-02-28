@@ -190,7 +190,7 @@ fun GroupMessages(
                             )
 
                             if (rating != null) {
-                                searchByRating = rating
+                                searchByRating = rating.trimStart('+')
                             }
                         }
                     }
