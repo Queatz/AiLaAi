@@ -94,7 +94,8 @@ fun GroupTopBar(
     onGroupUpdated: () -> Unit,
     onGroupGone: () -> Unit,
     showCards: Boolean,
-    onShowCards: () -> Unit
+    onShowCards: () -> Unit,
+    onSearch: () -> Unit
 ) {
     val me by application.me.collectAsState()
     val myMember = group.members?.find { it.person?.id == me?.id }
@@ -502,9 +503,9 @@ fun GroupTopBar(
             item(appString { openInNewTab }, icon = "open_in_new") {
                 window.open("/group/${group.group!!.id}", target = "_blank")
             }
-//            item("Pin") {
-//
-//            }
+            item(appString { search }, icon = "search") {
+                onSearch()
+            }
             if (myMember != null) {
                 item(appString { invite }) {
                     scope.launch {
@@ -601,17 +602,17 @@ fun GroupTopBar(
                         }
                     }
                 }
+            }
 
-                item(appString { qrCode }) {
-                    scope.launch {
-                        dialog("", cancelButton = null) {
-                            val qrCode = remember {
-                                "$webBaseUrl/group/${group.group!!.id!!}".qr
-                            }
-                            Img(src = qrCode) {
-                                style {
-                                    borderRadius(1.r)
-                                }
+            item(appString { qrCode }) {
+                scope.launch {
+                    dialog("", cancelButton = null) {
+                        val qrCode = remember {
+                            "$webBaseUrl/group/${group.group!!.id!!}".qr
+                        }
+                        Img(src = qrCode) {
+                            style {
+                                borderRadius(1.r)
                             }
                         }
                     }

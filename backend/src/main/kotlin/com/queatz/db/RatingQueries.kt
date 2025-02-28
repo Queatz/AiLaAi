@@ -33,7 +33,6 @@ fun Db.rating(
                 and x._to == @entity
             limit 1
             return x
-        
     """,
     mapOf(
         "person" to personId,

@@ -158,7 +158,10 @@ fun GroupPage(
                 }
             }
         }
-        TopBarSearch(search, { search = it})
+        TopBarSearch(
+            value = search,
+            onValue = { search = it}
+        )
     } else if (nav is GroupNav.Selected) {
         if (isLoading) {
             Loading()

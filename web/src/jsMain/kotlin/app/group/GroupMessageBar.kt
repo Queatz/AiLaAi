@@ -260,7 +260,6 @@ fun GroupMessageBar(
             }
         }
         val messageString = if (isSending) appString { sending } else appString { message }
-        // todo can be EditField
         TextArea(messageText) {
             classes(Styles.textarea)
             style {

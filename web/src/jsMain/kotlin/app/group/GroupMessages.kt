@@ -20,8 +20,10 @@ import app.components.LoadMoreState
 import app.dialog.replyInNewGroupDialog
 import app.group.GroupMessageBar
 import app.group.JoinGroupLayout
+import app.menu.Menu
 import app.messaages.MessageItem
 import app.messaages.preview
+import app.nav.NavSearchInput
 import app.rating.setRatingDialog
 import app.reaction.addReactionDialog
 import com.queatz.db.GroupExtended
@@ -31,17 +33,27 @@ import com.queatz.db.Message
 import com.queatz.db.Rating
 import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
+import components.IconButton
 import components.Loading
 import components.ProfilePhoto
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 
 @Composable
-fun GroupMessages(group: GroupExtended) {
+fun GroupMessages(
+    group: GroupExtended,
+    showSearch: Boolean,
+    onShowSearch: (Boolean) -> Unit,
+) {
     val nav = appNav
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
@@ -49,6 +61,8 @@ fun GroupMessages(group: GroupExtended) {
 
     var myTopReactions by remember { mutableStateOf(emptyList<String>()) }
     var topGroupReactions by remember { mutableStateOf(emptyList<String>()) }
+    var search by remember(group.group?.id) { mutableStateOf("") }
+    var searchFilters by remember(group.group?.id) { mutableStateOf(emptyList<String>()) }
 
     LaunchedEffect(Unit) {
         api.myTopReactions {
@@ -84,7 +98,10 @@ fun GroupMessages(group: GroupExtended) {
     }
 
     suspend fun reloadMessages() {
-        api.messages(group.group!!.id!!) {
+        api.messages(
+            group = group.group!!.id!!,
+            search = search.notBlank
+        ) {
             messages = it
         }
         isLoading = false
@@ -95,8 +112,9 @@ fun GroupMessages(group: GroupExtended) {
             return
         }
         api.messagesBefore(
-            group.group!!.id!!,
-            before = messages.lastOrNull()?.createdAt ?: return
+            group = group.group!!.id!!,
+            before = messages.lastOrNull()?.createdAt ?: return,
+            search = search.notBlank
         ) {
             val messagesCount = messages.size
             messages = (messages + it).distinctBy { it.id }
@@ -107,8 +125,8 @@ fun GroupMessages(group: GroupExtended) {
         }
     }
 
-    LaunchedEffect(group.group?.id) {
-        isLoading = true
+    LaunchedEffect(group.group?.id, search) {
+        isLoading = search.isBlank()
         reloadMessages()
     }
 
@@ -131,7 +149,54 @@ fun GroupMessages(group: GroupExtended) {
     if (isLoading) {
         Loading()
     } else {
-        if (myMember != null) {
+        if (showSearch) {
+            var menuTarget by remember {
+                mutableStateOf<DOMRect?>(null)
+            }
+
+            if (menuTarget != null) {
+                Menu({ menuTarget = null }, menuTarget!!) {
+                    // todo translate
+                    item("Reaction") {
+                        //
+                    }
+                    // todo translate
+                    item("Rating") {
+                        //
+                    }
+                }
+            }
+
+            Div({
+                classes(AppStyles.messageBar)
+            }) {
+                IconButton(
+                    name = "filter_list",
+                    title = appString { filter },
+                    styles = { marginLeft(1.r) }
+                ) {
+                    menuTarget = if (menuTarget == null) {
+                        (it.target as HTMLElement).getBoundingClientRect()
+                    } else {
+                        null
+                    }
+                }
+                NavSearchInput(
+                    value = search,
+                    onChange = {
+                        search = it
+                    },
+                    onDismissRequest = {
+                        onShowSearch(false)
+                    },
+                    styles = {
+                        width(100.percent)
+                        height(3.5.r)
+                    },
+                    defaultMargins = false
+                )
+            }
+        } else if (myMember != null) {
             if (group.group?.config?.messages == null || myMember.member?.host == true) {
                 GroupMessageBar(group, replyMessage, { replyMessage = null }) {
                     reloadMessages()
@@ -165,7 +230,9 @@ fun GroupMessages(group: GroupExtended) {
                 val nextMessage = if (index > 0) messages[index - 1] else null
 
                 val seenUntilHere = members.filter {
-                    it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(nextMessage))
+                    it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(
+                        nextMessage
+                    ))
                 }
 
                 seenUntilHere.notEmpty?.let { members ->
@@ -191,15 +258,15 @@ fun GroupMessages(group: GroupExtended) {
                         replyMessage = message
                     },
                     onReact = {
-                       scope.launch {
-                           val reaction = addReactionDialog(topGroupReactions + myTopReactions)?.notBlank
+                        scope.launch {
+                            val reaction = addReactionDialog(topGroupReactions + myTopReactions)?.notBlank
 
-                           if (reaction != null) {
-                               api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction))) {
-                                   reloadMessages()
-                               }
-                           }
-                       }
+                            if (reaction != null) {
+                                api.reactToMessage(message.id!!, ReactBody(reaction = Reaction(reaction = reaction))) {
+                                    reloadMessages()
+                                }
+                            }
+                        }
                     },
                     onRate = { rating ->
                         scope.launch {

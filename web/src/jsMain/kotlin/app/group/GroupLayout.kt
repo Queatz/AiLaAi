@@ -17,6 +17,7 @@ fun GroupLayout(
      var showCards by remember(group.group?.id) {
         mutableStateOf(false)
     }
+    var showSearch by remember { mutableStateOf(false) }
 
     application.background(group.group?.background?.let { "$baseUrl$it" })
     application.effects(group.group?.config?.effects?.let { json.decodeFromString(it) })
@@ -29,9 +30,15 @@ fun GroupLayout(
     }
 
     if (showCards) {
-        GroupCards(group)
+        GroupCards(group = group)
     } else {
-        GroupMessages(group = group)
+        GroupMessages(
+            group = group,
+            showSearch = showSearch,
+            onShowSearch = {
+                showSearch = it
+            }
+        )
     }
 
     GroupTopBar(
@@ -41,6 +48,9 @@ fun GroupLayout(
         showCards = showCards,
         onShowCards = {
             showCards = !showCards
+        },
+        onSearch = {
+            showSearch = !showSearch
         }
     )
 }
