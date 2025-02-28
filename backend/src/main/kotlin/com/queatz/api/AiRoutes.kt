@@ -6,7 +6,11 @@ import com.queatz.TextPrompt
 import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiSpeakRequest
+import com.queatz.db.addPrompt
+import com.queatz.notBlank
 import com.queatz.plugins.ai
+import com.queatz.plugins.db
+import com.queatz.plugins.me
 import com.queatz.plugins.openAi
 import com.queatz.plugins.respond
 import io.ktor.client.call.body
@@ -31,17 +35,17 @@ fun Route.aiRoutes() {
             respond {
                 val request = call.receive<AiPhotoRequest>()
 
+                request.prompt.notBlank?.let {
+                    db.addPrompt(me.id!!, it)
+                }
+
                 AiPhotoResponse(
                     ai.photo(
-                        "group",
-                        buildList {
-                            add(
-                                TextPrompt(request.prompt)
-                            )
-                        },
-                        request.style,
+                        prefix = "group",
+                        prompts = listOf(TextPrompt(request.prompt)),
+                        style = request.style,
                         aspect = request.aspect ?: 1.5,
-                        transparentBackground = request.removeBackground ?: false
+                        transparentBackground = request.removeBackground == true
                     )
                 )
             }

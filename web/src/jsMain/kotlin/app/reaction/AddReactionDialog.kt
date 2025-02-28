@@ -11,8 +11,10 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.paddingBottom
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -27,6 +29,9 @@ suspend fun addReactionDialog(
     // todo: translate
     confirmButton = "React",
     maxLength = 64,
+    inputStyles = {
+        width(100.percent)
+    },
     topContent = { resolve, value, onValue ->
         val common = remember(quickReactions) {
             // todo include from GroupExtended.topReactions and from my top reactions

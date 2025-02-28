@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import api
 import app.AppStyles
+import app.ailaai.api.prompts
 import app.ailaai.api.uploadPhotos
 import application
 import com.queatz.db.AiPhotoRequest
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.Position.Companion.Absolute
+import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.height
@@ -25,7 +28,10 @@ import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingTop
+import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -33,11 +39,12 @@ import org.w3c.files.File
 import pickPhotos
 import r
 import toBytes
+import kotlin.js.Promise.Companion.resolve
 
 class ChoosePhotoDialogControl(
     private val scope: CoroutineScope,
     private var aiPrompt: String,
-    private val showUpload: Boolean
+    private val showUpload: Boolean,
 ) {
 
     private var _isGenerating = MutableStateFlow(false)
@@ -92,7 +99,7 @@ class ChoosePhotoDialogControl(
 @Composable
 fun rememberChoosePhotoDialog(
     aiPrompt: String = "",
-    showUpload: Boolean = false
+    showUpload: Boolean = false,
 ): ChoosePhotoDialogControl {
     val scope = rememberCoroutineScope()
 
@@ -107,7 +114,7 @@ private suspend fun choosePhotoDialog(
     aiStyle: StateFlow<String?>,
     showUpload: Boolean = false,
     onAiStyle: (String?) -> Unit,
-    onFile: (file: File) -> Unit
+    onFile: (file: File) -> Unit,
 ): String? {
     // todo: use inputWithListDialog
     val result = inputDialog(
@@ -118,6 +125,30 @@ private suspend fun choosePhotoDialog(
         singleLine = false,
         inputStyles = {
             width(32.r)
+        },
+        inputAction = { resolve, value, onValue ->
+            val scope = rememberCoroutineScope()
+            // todo: translate
+            IconButton("expand_more", "History", styles = {
+                if (value.isNotBlank()) {
+                    opacity(0)
+                    property("pointer-events", "none")
+                }
+
+                position(Absolute)
+                right(0.5.r)
+                top(1.r)
+                bottom(1.r)
+            }) {
+                scope.launch {
+                    api.prompts {
+                        // todo: translate
+                        inputSelectDialog("Choose", items = it.map { it.prompt!! }) {
+                            onValue(it)
+                        }
+                    }
+                }
+            }
         },
         extraButtons = { resolve ->
             if (showUpload) {

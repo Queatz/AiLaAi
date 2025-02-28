@@ -1,11 +1,14 @@
 package app.dialog
 
 import app.AppStyles
+import application
 import focusable
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -15,7 +18,14 @@ suspend fun inputSelectDialog(
     items: List<String>? = null,
     itemStyle: StyleScope.(String) -> Unit = {}
 
-) = inputDialog(null, confirmButton = confirmButton) { resolve, value, onValue ->
+) = inputDialog(
+    null,
+    confirmButton = confirmButton,
+    placeholder = application.appString { search },
+    inputStyles = {
+        width(100.percent)
+    }
+) { resolve, value, onValue ->
     Div({
         style {
             overflowY("auto")
