@@ -3,8 +3,10 @@ package app.nav
 import Styles
 import androidx.compose.runtime.Composable
 import appString
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.placeholder
+import org.jetbrains.compose.web.attributes.type
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.dom.TextInput
@@ -18,12 +20,18 @@ fun NavSearchInput(
     autoFocus: Boolean = true,
     selectAll: Boolean = false,
     defaultMargins: Boolean = true,
+    type: InputType<*>? = null,
     onDismissRequest: () -> Unit = {},
     styles: StyleScope.() -> Unit = {},
     onSubmit: (String) -> Unit = {}
 ) {
     TextInput(value) {
         classes(Styles.textarea)
+
+        type?.let {
+            type(it)
+        }
+
         style {
             if (defaultMargins) margin(.5.r, 1.r, 0.r, 1.r)
             styles()

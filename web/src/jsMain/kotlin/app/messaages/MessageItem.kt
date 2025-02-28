@@ -1,6 +1,7 @@
 package app.messaages
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -9,6 +10,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.ailaai.api.deleteMessage
+import app.ailaai.api.messageRating
 import app.ailaai.api.updateMessage
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -47,6 +49,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import withPlus
 
 @Composable
 fun MessageItem(
@@ -60,6 +63,7 @@ fun MessageItem(
     canReact: Boolean,
     onReply: () -> Unit,
     onReact: () -> Unit,
+    onRate: (Int?) -> Unit,
     onReplyInNewGroup: () -> Unit,
     onUpdated: () -> Unit
 ) {
@@ -110,6 +114,16 @@ fun MessageItem(
 
         if (messageMenuTarget != null) {
             Menu({ messageMenuTarget = null }, messageMenuTarget!!) {
+                var rating by remember { mutableStateOf<Int?>(null) }
+
+                LaunchedEffect(Unit) {
+                    api.messageRating(
+                        id = message.id!!
+                    ) {
+                        rating = it.rating
+                    }
+                }
+
                 if (canReact) {
                     item(
                         title = appString { react },
@@ -129,6 +143,15 @@ fun MessageItem(
                         onReact()
                     }
                 }
+
+                item(
+                    // todo: translate
+                    title = "Rate",
+                    textIcon = rating?.withPlus()
+                ) {
+                    onRate(rating)
+                }
+
                 if (canReply) {
                     item(appString { reply }) {
                         onReply()

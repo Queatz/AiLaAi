@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import app.components.TextBox
 import app.nav.NavSearchInput
 import application
+import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.margin
@@ -27,6 +28,7 @@ suspend fun inputDialog(
     defaultValue: String = "",
     singleLine: Boolean = true,
     maxLength: Int? = null,
+    type: InputType<*>? = null,
     inputStyles: StyleScope.() -> Unit = {},
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     inputAction: (@Composable (resolve: (Boolean?) -> Unit, value: String, onValue: (String) -> Unit) -> Unit)? = null,
@@ -67,6 +69,7 @@ suspend fun inputDialog(
                     },
                     placeholder = placeholder,
                     selectAll = true,
+                    type = type,
                     styles = {
                         margin(0.r)
                         maxWidth(100.percent)

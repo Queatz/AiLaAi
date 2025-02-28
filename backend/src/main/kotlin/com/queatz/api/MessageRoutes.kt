@@ -4,14 +4,17 @@ import com.queatz.db.Group
 import com.queatz.db.Member
 import com.queatz.db.Message
 import com.queatz.db.Person
+import com.queatz.db.Rating
 import com.queatz.db.ReactBody
 import com.queatz.db.Story
 import com.queatz.db.asId
 import com.queatz.db.group
 import com.queatz.db.member
 import com.queatz.db.message
+import com.queatz.db.rating
 import com.queatz.db.react
 import com.queatz.db.reactionsOf
+import com.queatz.db.setRating
 import com.queatz.db.unreact
 import com.queatz.parameter
 import com.queatz.plugins.db
@@ -25,6 +28,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import jdk.internal.joptsimple.internal.Messages
 
 fun Route.messageRoutes() {
     authenticate {
@@ -128,6 +132,25 @@ fun Route.messageRoutes() {
                         HttpStatusCode.Forbidden
                     }
                 }
+            }
+        }
+
+        get("/messages/{id}/rating") {
+            respond {
+                db.rating(
+                    personId = me.id!!.asId(Person::class),
+                    entityId = parameter("id").asId(Message::class)
+                ) ?: HttpStatusCode.NotFound
+            }
+        }
+
+        post("/messages/{id}/rating") {
+            respond {
+                db.setRating(
+                    personId = me.id!!.asId(Person::class),
+                    entityId = parameter("id").asId(Message::class),
+                    rating = call.receive<Rating>().rating
+                ) ?: HttpStatusCode.BadRequest
             }
         }
     }

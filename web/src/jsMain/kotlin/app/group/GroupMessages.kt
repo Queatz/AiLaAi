@@ -13,6 +13,7 @@ import app.ailaai.api.messages
 import app.ailaai.api.messagesBefore
 import app.ailaai.api.myTopReactions
 import app.ailaai.api.reactToMessage
+import app.ailaai.api.setMessageRating
 import app.appNav
 import app.components.LoadMore
 import app.components.LoadMoreState
@@ -21,11 +22,13 @@ import app.group.GroupMessageBar
 import app.group.JoinGroupLayout
 import app.messaages.MessageItem
 import app.messaages.preview
+import app.rating.setRatingDialog
 import app.reaction.addReactionDialog
 import com.queatz.db.GroupExtended
 import com.queatz.db.GroupMessagesConfig
 import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
+import com.queatz.db.Rating
 import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
 import components.Loading
@@ -197,6 +200,29 @@ fun GroupMessages(group: GroupExtended) {
                                }
                            }
                        }
+                    },
+                    onRate = { rating ->
+                        scope.launch {
+                            val result = setRatingDialog(rating) {
+                                scope.launch {
+                                    api.setMessageRating(
+                                        id = message.id!!,
+                                        rating = Rating(rating = null)
+                                    ) {
+                                        reloadMessages()
+                                    }
+                                }
+                            }?.trimStart('+')?.toIntOrNull()
+
+                            if (result != null) {
+                                api.setMessageRating(
+                                    id = message.id!!,
+                                    rating = Rating(rating = result)
+                                ) {
+                                    reloadMessages()
+                                }
+                            }
+                        }
                     },
                     onReplyInNewGroup = {
                         scope.launch {

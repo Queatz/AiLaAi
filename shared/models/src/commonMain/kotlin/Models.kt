@@ -195,6 +195,11 @@ class Prompt(
 ) : Model()
 
 @Serializable
+class Rating(
+    var rating: Int? = null
+) : Edge()
+
+@Serializable
 data class ReactionSummary(
     val all: List<ReactionCount>,
     val mine: List<Reaction>? = null

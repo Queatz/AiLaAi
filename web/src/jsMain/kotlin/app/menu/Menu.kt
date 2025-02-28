@@ -34,6 +34,7 @@ class MenuScope(val onDismissRequest: () -> Unit) {
         title: String,
         selected: Boolean = false,
         icon: String? = null,
+        textIcon: String? = null,
         iconTitle: String? = null,
         onIconClick: (() -> Unit)? = null,
         onClick: () -> Unit
@@ -57,6 +58,23 @@ class MenuScope(val onDismissRequest: () -> Unit) {
         }) {
             Span {
                 Text(title)
+            }
+            if (textIcon != null) {
+                Div(
+                    attrs = {
+                        style {
+                            opacity(0.5)
+                            fontWeight("bold")
+                            display(DisplayStyle.Flex)
+                            width(24.px)
+                            height(24.px)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.Center)
+                        }
+                    }
+                ) {
+                    Text(textIcon)
+                }
             }
             if (icon != null) {
                 Icon(
