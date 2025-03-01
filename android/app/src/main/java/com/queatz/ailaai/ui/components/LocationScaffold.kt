@@ -25,6 +25,7 @@ fun LocationScaffold(
     appHeader: @Composable ColumnScope.() -> Unit = {},
     rationale: @Composable ColumnScope.() -> Unit = {},
     enabled: Boolean = true,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val nav = nav
@@ -36,7 +37,8 @@ fun LocationScaffold(
 
         geo == null && !locationSelector.isGranted -> {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = modifier
             ) {
                 appHeader()
 
@@ -81,7 +83,10 @@ fun LocationScaffold(
         }
 
         geo == null -> {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = modifier
+            ) {
                 appHeader()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,

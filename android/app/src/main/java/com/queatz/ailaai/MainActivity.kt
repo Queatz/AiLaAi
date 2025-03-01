@@ -214,9 +214,7 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.Forum),
-            NavButton(AppNav.Stories, getString(R.string.posts), Icons.Outlined.Newspaper),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
-//            NavButton(AppNav.Inventory, getString(R.string.inventory), Icons.Outlined.Rocket, selectedIcon = Icons.Outlined.RocketLaunch),
             NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
         )
     }
@@ -579,23 +577,6 @@ class MainActivity : AppCompatActivity() {
                                                                     .padding(1.pad, .25f.pad)
                                                             )
                                                         }
-                                                        if (item.route == AppNav.Stories && (presence?.unreadStoriesCount
-                                                                ?: 0) > 0
-                                                        ) {
-                                                            // todo reusable icon IconAndCount
-                                                            Text(
-                                                                (presence?.unreadStoriesCount ?: 0).toString(),
-                                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                fontWeight = FontWeight.Bold,
-                                                                modifier = Modifier
-                                                                    .offset(2.pad, -.5f.pad)
-                                                                    .align(Alignment.TopEnd)
-                                                                    .clip(CircleShape)
-                                                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                                                    .padding(1.pad, .25f.pad)
-                                                            )
-                                                        }
                                                     }
                                                 },
                                                 alwaysShowLabel = appUi.showNavLabels,
@@ -642,14 +623,6 @@ class MainActivity : AppCompatActivity() {
                                                         if (item.route == AppNav.Messages && newMessages > 0) {
                                                             Text(
                                                                 newMessages.toString(),
-                                                                fontWeight = FontWeight.Bold
-                                                            )
-                                                        }
-                                                        if (item.route == AppNav.Stories && (presence?.unreadStoriesCount
-                                                                ?: 0) > 0
-                                                        ) {
-                                                            Text(
-                                                                (presence?.unreadStoriesCount ?: 0).toString(),
                                                                 fontWeight = FontWeight.Bold
                                                             )
                                                         }
@@ -781,9 +754,6 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             composable("reminder/{id}") {
                                                 ReminderScreen(it.arguments!!.getString("id")!!)
-                                            }
-                                            composable("stories") {
-                                                StoriesScreen()
                                             }
                                             composable(
                                                 "story/{id}",

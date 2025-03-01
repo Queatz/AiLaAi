@@ -1,6 +1,5 @@
 package com.queatz.ailaai.ui.story
 
-import android.app.Activity
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -13,12 +12,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,22 +35,17 @@ import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.appNavigate
-import com.queatz.ailaai.extensions.isAtTop
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.toGeo
-import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.DisplayText
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.PageInput
-import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.story.editor.StoryActions
@@ -69,16 +59,12 @@ import kotlinx.coroutines.launch
 private var cache = emptyList<Story>()
 
 @Composable
-fun StoriesScreen() {
+fun StoriesScreen(
+    geo: LatLng?
+) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
     val context = LocalContext.current
-    var geo by remember { mutableStateOf<LatLng?>(null) }
-    val locationSelector = locationSelector(
-        geo = geo,
-        onGeoChange = { geo = it },
-        activity = nav.context as Activity
-    )
     var stories by remember { mutableStateOf(cache) }
     val storyContents = remember(stories) {
         stories.flatMapIndexed { index, story ->
@@ -93,7 +79,6 @@ fun StoriesScreen() {
     var isLoading by rememberStateOf(stories.isEmpty())
     val nav = nav
     var showShareAThought by rememberStateOf(true)
-    val isAtTop by state.isAtTop()
 
     LaunchedEffect(stories) {
         cache = stories
@@ -113,7 +98,7 @@ fun StoriesScreen() {
     suspend fun reload() {
         if (geo != null) {
             api.stories(
-                geo!!.toGeo(),
+                geo.toGeo(),
                 onError = {
                     if (it is CancellationException) {
                         // Ignored, geo probably changes
@@ -133,33 +118,16 @@ fun StoriesScreen() {
         reload()
     }
 
-    LocationScaffold(
-        geo = geo,
-        locationSelector = locationSelector,
-        appHeader = {
-            AppHeader(
-                title = stringResource(R.string.posts),
-                onTitleClick = {}
-            ) {
-                ScanQrCodeButton()
-            }
-        },
-        rationale = {
-            // todo: translate
-            DisplayText("Share and discover what's new in town.")
-        }
-    ) {
         Column {
             AppHeader(
-                stringResource(R.string.posts),
-                {
+                title = stringResource(R.string.posts),
+                onTitleClick = {
                     scope.launch {
                         state.scrollToTop()
                     }
-                }
-            ) {
-                ScanQrCodeButton()
-            }
+                },
+                showProfile = false
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -227,22 +195,6 @@ fun StoriesScreen() {
                         .align(Alignment.BottomCenter)
                 ) {
                     PageInput {
-                        if (locationSelector.isManual) {
-                            ElevatedButton(
-                                elevation = ButtonDefaults.elevatedButtonElevation(2.pad),
-                                onClick = {
-                                    locationSelector.reset()
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                            ) {
-                                Text(
-                                    stringResource(R.string.reset_location),
-                                    modifier = Modifier.padding(end = 1.pad)
-                                )
-                                Icon(Icons.Outlined.Clear, stringResource(R.string.reset_location))
-                            }
-                        }
                         SearchFieldAndAction(
                             thought,
                             { thought = it },
@@ -271,6 +223,5 @@ fun StoriesScreen() {
                     }
                 }
             }
-        }
     }
 }

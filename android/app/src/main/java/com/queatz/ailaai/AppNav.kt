@@ -6,7 +6,6 @@ sealed class AppNav private constructor(val route: String) {
     object Explore : AppNav("explore")
     object Write : AppNav("write")
     object Messages : AppNav("messages")
-    object Stories : AppNav("stories")
     object Inventory : AppNav("inventory")
     object Items : AppNav("items")
     object StickerPacks : AppNav("sticker-packs")

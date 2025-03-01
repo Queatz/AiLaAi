@@ -54,6 +54,7 @@ private val offlineNoteKey = stringPreferencesKey("app.offlineNote")
 fun ColumnScope.AppHeader(
     title: String,
     onTitleClick: () -> Unit,
+    showProfile: Boolean = true,
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     val context = LocalContext.current
@@ -145,7 +146,7 @@ fun ColumnScope.AppHeader(
                         .padding(start = .5f.pad)
                 ) {
                     actions()
-                    me?.let { me ->
+                    me?.takeIf { showProfile }?.let { me ->
                         if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
                             GroupPhoto(
                                 listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),

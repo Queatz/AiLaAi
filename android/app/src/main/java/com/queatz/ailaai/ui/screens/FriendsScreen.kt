@@ -450,7 +450,7 @@ fun FriendsScreen() {
                         }
 
                         is SwipeResult.Next -> {
-                            nav.appNavigate(AppNav.Stories)
+                            nav.appNavigate(AppNav.Schedule)
                         }
 
                         is SwipeResult.Select<*> -> Unit

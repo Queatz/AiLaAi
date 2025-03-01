@@ -2,11 +2,16 @@ package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
@@ -14,8 +19,15 @@ import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import app.ailaai.api.cards
 import app.ailaai.api.myGeo
 import app.ailaai.api.savedCards
@@ -68,6 +81,8 @@ import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.state.latLngSaver
+import com.queatz.ailaai.ui.story.StoriesScreen
+import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.db.Card
 import com.queatz.db.Inventory
 import com.queatz.db.InventoryItemExtended
@@ -82,6 +97,7 @@ var exploreInitialCategory: String? = null
 
 private var cache = mutableMapOf<MainTab, List<Card>>()
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen() {
     val paidString = stringResource(R.string.paid)
@@ -350,106 +366,203 @@ fun ExploreScreen() {
         loadMore()
     }
 
-    LocationScaffold(
-        geo = geo,
-        locationSelector = locationSelector,
-        appHeader = {
-            AppHeader(
-                if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
-                {},
-            ) {
-                ScanQrCodeButton()
-            }
-        },
-        rationale = {
-            // todo: translate
-            DisplayText("Discover and post pages in your town.")
+
+    val bottomSheetState = rememberBottomSheetScaffoldState()
+    val sheetPeekHeight = 62.dp
+    val sheetCornerRadius by animateDpAsState(
+        targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
+        animationSpec = tween(durationMillis = 500)
+    )
+
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetState,
+        sheetPeekHeight = sheetPeekHeight,
+        sheetShadowElevation = 2.elevation,
+        sheetContainerColor = MaterialTheme.colorScheme.background,
+        sheetDragHandle = null,
+        sheetShape = RoundedCornerShape(
+            topStart = CornerSize(sheetCornerRadius),
+            topEnd = CornerSize(sheetCornerRadius),
+            bottomStart = CornerSize(0.dp),
+            bottomEnd = CornerSize(0.dp),
+        ),
+        sheetContent = {
+            StoriesScreen(geo)
         }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AppHeader(
-                if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
-                {
-                    scope.launch {
-                        state.scrollToTop()
-                    }
-                }
-            ) {
-                if (showAsMap) {
-                    IconButton(
-                        onClick = {
-                            showBar = !showBar
-                        }
-                    ) {
-                        Icon(if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null)
-                    }
-                }
-                IconButton({
-                    showAsMap = !showAsMap
-                }) {
-                    Icon(if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map, stringResource(R.string.map))
-                }
-                ScanQrCodeButton()
-            }
-
-            val cardsOfCategory = remember(cards, selectedCategory) {
-                if (selectedCategory == null) cards else cards.filter {
-                    it.categories?.contains(
-                        selectedCategory
-                    ) == true
-                }
-            }
-
-            var viewportHeight by remember { mutableIntStateOf(0) }
-
-            if (showAsMap) {
-                Box(
-                    contentAlignment = Alignment.BottomCenter,
-                    modifier = Modifier
-                        .fillMaxSize()
+    ) { paddingValues ->
+        LocationScaffold(
+            geo = geo,
+            locationSelector = locationSelector,
+            appHeader = {
+                AppHeader(
+                    if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    {},
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ScanQrCodeButton()
+                }
+            },
+            modifier = Modifier.padding(paddingValues),
+            rationale = {
+                // todo: translate
+                DisplayText("Discover and post pages in your town.")
+            }
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(paddingValues),
+            ) {
+                AppHeader(
+                    if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    {
+                        scope.launch {
+                            state.scrollToTop()
+                        }
+                    }
+                ) {
+                    if (showAsMap) {
+                        IconButton(
+                            onClick = {
+                                showBar = !showBar
+                            }
+                        ) {
+                            Icon(if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null)
+                        }
+                    }
+                    IconButton({
+                        showAsMap = !showAsMap
+                    }) {
+                        Icon(
+                            if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map,
+                            stringResource(R.string.map)
+                        )
+                    }
+                    ScanQrCodeButton()
+                }
+
+                val cardsOfCategory = remember(cards, selectedCategory) {
+                    if (selectedCategory == null) cards else cards.filter {
+                        it.categories?.contains(
+                            selectedCategory
+                        ) == true
+                    }
+                }
+
+                var viewportHeight by remember { mutableIntStateOf(0) }
+
+                if (showAsMap) {
+                    Box(
+                        contentAlignment = Alignment.BottomCenter,
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        if (cards.isNotEmpty()) {
-                            AnimatedVisibility(showBar) {
-                                CardsBar(
-                                    cards = cardsOfCategory,
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    onLongClick = {
-                                        scope.launch {
-                                            mapControl.recenter(it.geo?.toLatLng() ?: return@launch)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            if (cards.isNotEmpty()) {
+                                AnimatedVisibility(showBar) {
+                                    CardsBar(
+                                        cards = cardsOfCategory,
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        onLongClick = {
+                                            scope.launch {
+                                                mapControl.recenter(it.geo?.toLatLng() ?: return@launch)
+                                            }
                                         }
+                                    ) {
+                                        nav.appNavigate(AppNav.Page(it.id!!))
                                     }
-                                ) {
-                                    nav.appNavigate(AppNav.Page(it.id!!))
                                 }
                             }
-                        }
-                        MapScreen(
-                            control = mapControl,
-                            cards = cardsOfCategory,
-                            inventories = inventories,
-                            bottomPadding = viewportHeight,
-                            onCard = {
-                                nav.appNavigate(AppNav.Page(it))
-                            },
-                            onInventory = {
-                                showInventory = it
+                            MapScreen(
+                                control = mapControl,
+                                cards = cardsOfCategory,
+                                inventories = inventories,
+                                bottomPadding = viewportHeight,
+                                onCard = {
+                                    nav.appNavigate(AppNav.Page(it))
+                                },
+                                onInventory = {
+                                    showInventory = it
+                                }
+                            ) {
+                                mapGeo = it
                             }
+                        }
+                        PageInput(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .onPlaced { viewportHeight = it.boundsInParent().size.height.toInt() }
                         ) {
-                            mapGeo = it
+                            SearchContent(
+                                locationSelector = locationSelector,
+                                isLoading = isLoading,
+                                filters = filters,
+                                categories = categories,
+                                category = selectedCategory
+                            ) {
+                                selectedCategory = it
+                            }
+                            SearchFieldAndAction(
+                                value = value,
+                                valueChange = { value = it },
+                                placeholder = stringResource(R.string.search_map),
+                                action = {
+                                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                                },
+                                onAction = {
+                                    nav.appNavigate(AppNav.Me)
+                                },
+                            )
                         }
                     }
-                    PageInput(
+                } else {
+                    val me = me
+                    MainTabs(tab, { tab = it })
+                    CardList(
+                        state = state,
+                        cards = cardsOfCategory,
+                        isMine = { it.person == me?.id },
+                        geo = geo,
+                        onChanged = {
+                            scope.launch {
+                                clear()
+                                loadMore(reload = true)
+                            }
+                        },
+                        isLoading = isLoading,
+                        isError = isError,
+                        value = value,
+                        valueChange = { value = it },
+                        placeholder = stringResource(R.string.search),
+                        hasMore = hasMore,
+                        onLoadMore = {
+                            loadMore()
+                        },
+                        action = {
+                            Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                        },
+                        onAction = {
+                            nav.appNavigate(AppNav.Me)
+                        },
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .onPlaced { viewportHeight = it.boundsInParent().size.height.toInt() }
+                            .swipeMainTabs {
+                                when (val it = MainTab.entries.swipe(tab, it)) {
+                                    is SwipeResult.Previous -> {
+                                        nav.appNavigate(AppNav.Messages)
+                                    }
+
+                                    is SwipeResult.Next -> {
+                                        nav.appNavigate(AppNav.Schedule)
+                                    }
+
+                                    is SwipeResult.Select<*> -> {
+                                        tab = it.item as MainTab
+                                    }
+                                }
+                            }
                     ) {
                         SearchContent(
                             locationSelector = locationSelector,
@@ -460,73 +573,6 @@ fun ExploreScreen() {
                         ) {
                             selectedCategory = it
                         }
-                        SearchFieldAndAction(
-                            value = value,
-                            valueChange = { value = it },
-                            placeholder = stringResource(R.string.search_map),
-                            action = {
-                                Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
-                            },
-                            onAction = {
-                                nav.appNavigate(AppNav.Me)
-                            },
-                        )
-                    }
-                }
-            } else {
-                val me = me
-                MainTabs(tab, { tab = it })
-                CardList(
-                    state = state,
-                    cards = cardsOfCategory,
-                    isMine = { it.person == me?.id },
-                    geo = geo,
-                    onChanged = {
-                        scope.launch {
-                            clear()
-                            loadMore(reload = true)
-                        }
-                    },
-                    isLoading = isLoading,
-                    isError = isError,
-                    value = value,
-                    valueChange = { value = it },
-                    placeholder = stringResource(R.string.search),
-                    hasMore = hasMore,
-                    onLoadMore = {
-                        loadMore()
-                    },
-                    action = {
-                        Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
-                    },
-                    onAction = {
-                        nav.appNavigate(AppNav.Me)
-                    },
-                    modifier = Modifier
-                        .swipeMainTabs {
-                            when (val it = MainTab.entries.swipe(tab, it)) {
-                                is SwipeResult.Previous -> {
-                                    nav.appNavigate(AppNav.Stories)
-                                }
-
-                                is SwipeResult.Next -> {
-                                    nav.appNavigate(AppNav.Schedule)
-                                }
-
-                                is SwipeResult.Select<*> -> {
-                                    tab = it.item as MainTab
-                                }
-                            }
-                        }
-                ) {
-                    SearchContent(
-                        locationSelector = locationSelector,
-                        isLoading = isLoading,
-                        filters = filters,
-                        categories = categories,
-                        category = selectedCategory
-                    ) {
-                        selectedCategory = it
                     }
                 }
             }
