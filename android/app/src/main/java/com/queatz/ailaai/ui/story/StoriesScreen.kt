@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.story
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -60,7 +61,7 @@ private var cache = emptyList<Story>()
 
 @Composable
 fun StoriesScreen(
-    geo: LatLng?
+    geo: LatLng?,
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
@@ -118,110 +119,101 @@ fun StoriesScreen(
         reload()
     }
 
-        Column {
-            AppHeader(
-                title = stringResource(R.string.posts),
-                onTitleClick = {
-                    scope.launch {
-                        state.scrollToTop()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .swipeMainTabs {
+                when (emptyList<Unit>().swipe(Unit, it)) {
+                    is SwipeResult.Previous -> {
+                        nav.appNavigate(AppNav.Messages)
                     }
-                },
-                showProfile = false
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .swipeMainTabs {
-                        when (emptyList<Unit>().swipe(Unit, it)) {
-                            is SwipeResult.Previous -> {
-                                nav.appNavigate(AppNav.Messages)
-                            }
-                            is SwipeResult.Next -> {
-                                nav.appNavigate(AppNav.Explore)
-                            }
-                            is SwipeResult.Select<*> -> Unit
-                        }
+
+                    is SwipeResult.Next -> {
+                        nav.appNavigate(AppNav.Explore)
                     }
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    if (isLoading) {
-                        Loading(
-                            modifier = Modifier
-                                .padding(1.pad)
-                        )
-                    } else if (storyContents.isEmpty()) {
-                        EmptyText(stringResource(R.string.no_stories_to_read))
-                    } else {
-                        StoryContents(
-                            source = null,
-                            content = storyContents,
-                            state = state,
-                            onReloadRequest = {
-                                scope.launch {
-                                    reload()
-                                }
-                            },
-                            onCommentFocused = {
-                                showShareAThought = !it
-                            },
-                            modifier = Modifier
-                                .widthIn(max = 640.dp)
-                                .fillMaxWidth()
-                                .weight(1f),
-                            bottomContentPadding = 80.dp
-                        ) { storyId ->
-                            Row {
-                                StoryActions(
-                                    storyId,
-                                    stories.find { it.id == storyId },
-                                    showOpen = true
-                                )
-                            }
-                        }
-                    }
+
+                    is SwipeResult.Select<*> -> Unit
                 }
-
-                var thought by rememberStateOf("")
-
-                androidx.compose.animation.AnimatedVisibility(
-                    showShareAThought,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
+            }
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            if (isLoading) {
+                Loading(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                ) {
-                    PageInput {
-                        SearchFieldAndAction(
-                            thought,
-                            { thought = it },
-                            placeholder = stringResource(R.string.share_a_thought),
-                            showClear = false,
-                            singleLine = false,
-                            action = {
-                                if (thought.isBlank()) {
-                                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
-                                } else {
-                                    Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.write_a_story))
-                                }
-                            },
-                            onAction = {
-                                if (thought.isBlank()) {
-                                    nav.appNavigate(AppNav.Write)
-                                } else {
-                                    scope.launch {
-                                        api.createStory(Story(title = thought)) {
-                                            nav.appNavigate(AppNav.WriteStory(it.id!!))
-                                        }
-                                    }
-                                }
-                            }
+                        .padding(1.pad)
+                )
+            } else if (storyContents.isEmpty()) {
+                EmptyText(stringResource(R.string.no_stories_to_read))
+            } else {
+                StoryContents(
+                    source = null,
+                    content = storyContents,
+                    state = state,
+                    onReloadRequest = {
+                        scope.launch {
+                            reload()
+                        }
+                    },
+                    onCommentFocused = {
+                        showShareAThought = !it
+                    },
+                    modifier = Modifier
+                        .widthIn(max = 640.dp)
+                        .fillMaxWidth()
+                        .weight(1f),
+                    bottomContentPadding = 80.dp
+                ) { storyId ->
+                    Row {
+                        StoryActions(
+                            storyId,
+                            stories.find { it.id == storyId },
+                            showOpen = true
                         )
                     }
                 }
             }
+        }
+
+        var thought by rememberStateOf("")
+
+        AnimatedVisibility(
+            visible = showShareAThought,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+        ) {
+            PageInput {
+                SearchFieldAndAction(
+                    thought,
+                    { thought = it },
+                    placeholder = stringResource(R.string.share_a_thought),
+                    showClear = false,
+                    singleLine = false,
+                    action = {
+                        if (thought.isBlank()) {
+                            Icon(Icons.Outlined.Edit, stringResource(R.string.your_stories))
+                        } else {
+                            Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.write_a_story))
+                        }
+                    },
+                    onAction = {
+                        if (thought.isBlank()) {
+                            nav.appNavigate(AppNav.Write)
+                        } else {
+                            scope.launch {
+                                api.createStory(Story(title = thought)) {
+                                    nav.appNavigate(AppNav.WriteStory(it.id!!))
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        }
     }
 }

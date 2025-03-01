@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.story.editor
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Icon
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 fun StoryActions(
     storyId: String,
     story: Story?,
+    showMessageButton: Boolean = false,
     showOpen: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
@@ -99,16 +101,18 @@ fun StoryActions(
         )
     }
 
-    IconButton(
-        {
-            showMessageDialog = true
+    if (showMessageButton) {
+        IconButton(
+            {
+                showMessageDialog = true
+            }
+        ) {
+            Icon(
+                Icons.AutoMirrored.Outlined.Message,
+                stringResource(R.string.message),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
-    ) {
-        Icon(
-            Icons.Outlined.Message,
-            stringResource(R.string.message),
-            tint = MaterialTheme.colorScheme.primary
-        )
     }
     IconButton(
         {

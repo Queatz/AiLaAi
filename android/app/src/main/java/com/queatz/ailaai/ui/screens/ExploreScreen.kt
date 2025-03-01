@@ -1,13 +1,16 @@
 package com.queatz.ailaai.ui.screens
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CornerSize
@@ -16,9 +19,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -83,6 +89,7 @@ import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.story.StoriesScreen
 import com.queatz.ailaai.ui.theme.elevation
+import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Inventory
 import com.queatz.db.InventoryItemExtended
@@ -323,7 +330,6 @@ fun ExploreScreen() {
         )
     }
 
-
     showInventoryItemDialog?.let { item ->
         val quantity = item.inventoryItem?.quantity ?: 0.0
         TradeItemDialog(
@@ -361,25 +367,31 @@ fun ExploreScreen() {
         )
     }
 
-
     ResumeEffect {
         loadMore()
     }
 
-
     val bottomSheetState = rememberBottomSheetScaffoldState()
-    val sheetPeekHeight = 62.dp
+    val sheetPeekHeight = 64.dp
     val sheetCornerRadius by animateDpAsState(
         targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
         animationSpec = tween(durationMillis = 500)
     )
+
+    BackHandler(bottomSheetState.bottomSheetState.currentValue == SheetValue.Expanded) {
+        scope.launch {
+            bottomSheetState.bottomSheetState.partialExpand()
+        }
+    }
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetState,
         sheetPeekHeight = sheetPeekHeight,
         sheetShadowElevation = 2.elevation,
         sheetContainerColor = MaterialTheme.colorScheme.background,
-        sheetDragHandle = null,
+        sheetDragHandle = {
+            Spacer(Modifier.height(1.pad))
+        },
         sheetShape = RoundedCornerShape(
             topStart = CornerSize(sheetCornerRadius),
             topEnd = CornerSize(sheetCornerRadius),
@@ -395,8 +407,8 @@ fun ExploreScreen() {
             locationSelector = locationSelector,
             appHeader = {
                 AppHeader(
-                    if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
-                    {},
+                    title = if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    onTitleClick = {},
                 ) {
                     ScanQrCodeButton()
                 }
@@ -425,15 +437,26 @@ fun ExploreScreen() {
                                 showBar = !showBar
                             }
                         ) {
-                            Icon(if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null)
+                            Icon(
+                                imageVector = if (showBar) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                                contentDescription = null
+                            )
                         }
                     }
                     IconButton({
                         showAsMap = !showAsMap
                     }) {
                         Icon(
-                            if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map,
-                            stringResource(R.string.map)
+                            imageVector = if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map,
+                            contentDescription = stringResource(R.string.map)
+                        )
+                    }
+                    IconButton({
+
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Forum,
+                            contentDescription = stringResource(R.string.groups)
                         )
                     }
                     ScanQrCodeButton()

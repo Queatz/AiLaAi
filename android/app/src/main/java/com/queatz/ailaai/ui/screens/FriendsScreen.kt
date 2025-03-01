@@ -603,7 +603,7 @@ fun FriendsScreen() {
                 SearchFieldAndAction(
                     value = searchText,
                     valueChange = { searchText = it },
-                    placeholder = stringResource(R.string.search_people_and_groups),
+                    placeholder = stringResource(R.string.search),
                     action = {
                         Icon(Icons.Outlined.Add, stringResource(R.string.create_group))
                     },

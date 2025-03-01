@@ -31,7 +31,7 @@ fun LazyGridScope.titleItem(
             horizontalArrangement = Arrangement.spacedBy(1.pad),
         ) {
             Text(
-                content.title,
+                text = content.title,
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier
                     .weight(1f)

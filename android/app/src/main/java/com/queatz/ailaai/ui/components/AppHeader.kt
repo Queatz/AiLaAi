@@ -55,6 +55,7 @@ fun ColumnScope.AppHeader(
     title: String,
     onTitleClick: () -> Unit,
     showProfile: Boolean = true,
+    showOfflineNote: Boolean = true,
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     val context = LocalContext.current
@@ -68,57 +69,53 @@ fun ColumnScope.AppHeader(
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        var offlineNote by rememberStateOf("")
-        var showClearDialog by rememberStateOf(false)
-        var showProfileMenu by rememberStateOf(false)
+        if (showOfflineNote) {
 
-        LaunchedEffect(Unit) {
-            offlineNote = context.dataStore.data.first()[offlineNoteKey].orEmpty()
-        }
+            var offlineNote by rememberStateOf("")
+            var showClearDialog by rememberStateOf(false)
 
-        LaunchedEffect(offlineNote) {
-            delay(0.125.seconds)
-            context.dataStore.edit {
-                it[offlineNoteKey] = offlineNote
+            LaunchedEffect(Unit) {
+                offlineNote = context.dataStore.data.first()[offlineNoteKey].orEmpty()
             }
-        }
 
-        if (showProfileMenu) {
-            ProfileMenu {
-                showProfileMenu = false
-            }
-        }
-
-        if (showClearDialog) {
-            Alert(
-                onDismissRequest = {
-                    showClearDialog = false
-                },
-                title = stringResource(R.string.discard_offline_note),
-                text = null,
-                dismissButton = stringResource(R.string.cancel),
-                confirmButton = stringResource(R.string.delete),
-                confirmColor = MaterialTheme.colorScheme.error
-            ) {
-                offlineNote = ""
-                showClearDialog = false
-            }
-        }
-
-        AnimatedVisibility(offlineNote.isNotEmpty() || !apiIsReachable || !hasConnectivity || showOfflineNotes) {
-            SearchField(
-                value = offlineNote,
-                onValueChange = { offlineNote = it },
-                singleLine = false,
-                useMaxWidth = false,
-                useMaxHeight = true,
-                placeholder = stringResource(R.string.offline_notes),
-                icon = if (hasConnectivity) Icons.Outlined.Wifi else Icons.Outlined.WifiOff,
-                onClear = {
-                    showClearDialog = true
+            LaunchedEffect(offlineNote) {
+                delay(0.125.seconds)
+                context.dataStore.edit {
+                    it[offlineNoteKey] = offlineNote
                 }
-            )
+            }
+            if (showClearDialog) {
+                Alert(
+                    onDismissRequest = {
+                        showClearDialog = false
+                    },
+                    title = stringResource(R.string.discard_offline_note),
+                    text = null,
+                    dismissButton = stringResource(R.string.cancel),
+                    confirmButton = stringResource(R.string.delete),
+                    confirmColor = MaterialTheme.colorScheme.error
+                ) {
+                    offlineNote = ""
+                    showClearDialog = false
+                }
+            }
+
+            AnimatedVisibility(offlineNote.isNotEmpty() || !apiIsReachable || !hasConnectivity || showOfflineNotes) {
+                SearchField(
+                    value = offlineNote,
+                    onValueChange = { offlineNote = it },
+                    singleLine = false,
+                    useMaxWidth = false,
+                    useMaxHeight = true,
+                    placeholder = stringResource(R.string.offline_notes),
+                    icon = if (hasConnectivity) Icons.Outlined.Wifi else Icons.Outlined.WifiOff,
+                    onClear = {
+                        showClearDialog = true
+                    }
+                )
+            }
         }
+
         AppBar(
             title = {
                 Row(
@@ -147,6 +144,14 @@ fun ColumnScope.AppHeader(
                 ) {
                     actions()
                     me?.takeIf { showProfile }?.let { me ->
+                        var showProfileMenu by rememberStateOf(false)
+
+                        if (showProfileMenu) {
+                            ProfileMenu {
+                                showProfileMenu = false
+                            }
+                        }
+
                         if (me.name?.isNotBlank() == true || me.photo?.isNotBlank() == true) {
                             GroupPhoto(
                                 listOf(ContactPhoto(me.name ?: "", me.photo, me.seen)),

@@ -39,8 +39,7 @@
     <string name="location_disabled_description">The location permission is disabled in settings.</string>
     <string name="camera_disabled_description">The camera permission is disabled in settings.</string>
     <string name="search">Search</string>
-    <string name="search_map">Search for people, places, services, and more</string>
-    <string name="search_people_and_groups">Search people and groups</string>
+    <string name="search_map">Search for places, services, and more</string>
     <string name="explore">Explore</string>
     <string name="messages">Messages</string>
     <string name="me">Me</string>
