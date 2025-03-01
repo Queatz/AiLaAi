@@ -20,19 +20,15 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Forum
-import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -119,6 +115,7 @@ fun ExploreScreen() {
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var isError by rememberStateOf(false)
     var showAsMap by rememberSavableStateOf(true)
+    var showOpenGroups by rememberSavableStateOf(false)
     var offset by remember { mutableIntStateOf(0) }
     var hasMore by rememberStateOf(true)
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
@@ -313,7 +310,7 @@ fun ExploreScreen() {
 
         val moveUnder100 = shownGeo?.let { shownGeo ->
             (mapGeo?.takeIf { showAsMap } ?: geo)?.distance(shownGeo)?.let { it < 100 }
-        } ?: true
+        } != false
 
         // Don't reload if moving < 100m
         if (shownGeo != null && moveUnder100 && shownValue == value && shownTab == tab) {
@@ -407,7 +404,7 @@ fun ExploreScreen() {
             locationSelector = locationSelector,
             appHeader = {
                 AppHeader(
-                    title = if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    title = if (showOpenGroups) stringResource(R.string.groups) else if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
                     onTitleClick = {},
                 ) {
                     ScanQrCodeButton()
@@ -424,14 +421,14 @@ fun ExploreScreen() {
                 modifier = Modifier.padding(paddingValues),
             ) {
                 AppHeader(
-                    if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
-                    {
+                    title = if (showOpenGroups) stringResource(R.string.groups) else if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    onTitleClick = {
                         scope.launch {
                             state.scrollToTop()
                         }
                     }
                 ) {
-                    if (showAsMap) {
+                    if (showAsMap && !showOpenGroups) {
                         IconButton(
                             onClick = {
                                 showBar = !showBar
@@ -443,19 +440,21 @@ fun ExploreScreen() {
                             )
                         }
                     }
-                    IconButton({
-                        showAsMap = !showAsMap
-                    }) {
-                        Icon(
-                            imageVector = if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map,
-                            contentDescription = stringResource(R.string.map)
-                        )
+                    if (!showOpenGroups) {
+                        IconButton({
+                            showAsMap = !showAsMap
+                        }) {
+                            Icon(
+                                imageVector = if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map,
+                                contentDescription = stringResource(R.string.map)
+                            )
+                        }
                     }
                     IconButton({
-
+                        showOpenGroups = !showOpenGroups
                     }) {
                         Icon(
-                            imageVector = Icons.Outlined.Forum,
+                            imageVector = if (showOpenGroups) Icons.Outlined.Map else Icons.Outlined.Forum,
                             contentDescription = stringResource(R.string.groups)
                         )
                     }
@@ -472,7 +471,9 @@ fun ExploreScreen() {
 
                 var viewportHeight by remember { mutableIntStateOf(0) }
 
-                if (showAsMap) {
+                if (showOpenGroups) {
+                    GroupsScreen(geo)
+                } else if (showAsMap) {
                     Box(
                         contentAlignment = Alignment.BottomCenter,
                         modifier = Modifier

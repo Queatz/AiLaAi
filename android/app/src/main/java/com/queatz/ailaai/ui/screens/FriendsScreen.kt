@@ -296,7 +296,7 @@ fun FriendsScreen() {
 
     if (showSharedGroupsDialog.isNotEmpty()) {
         ChooseGroupDialog(
-            {
+            onDismissRequest = {
                 showSharedGroupsDialog = emptyList()
             },
             title = showSharedGroupsDialogPerson?.name ?: stringResource(R.string.someone),
