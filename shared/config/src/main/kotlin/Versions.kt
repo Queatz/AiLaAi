@@ -11,4 +11,5 @@ open class Versions {
     val logback = "1.5.16"
     val arango = "7.15.0"
     val jackson = "2.15.3"
+    val richtext = "1.0.0-alpha02"
 }

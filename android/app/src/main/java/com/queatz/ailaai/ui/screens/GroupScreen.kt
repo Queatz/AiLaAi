@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.outlined.Add
@@ -854,6 +855,20 @@ fun GroupScreen(groupId: String) {
                                 showMenu = false
                                 groupUrl(groupId).copyToClipboard(context)
                                 context.toast(R.string.copied)
+                            }
+                            item(
+                                icon = Icons.Outlined.Share,
+                                name = stringResource(R.string.share)
+                            ) {
+                                showMenu = false
+                                groupUrl(groupId).shareAsUrl(
+                                    context,
+                                    groupExtended?.name(
+                                        someone = context.getString(R.string.someone),
+                                        emptyGroup = context.getString(R.string.empty_group_name),
+                                        omit = me?.id?.inList().orEmpty()
+                                    )
+                                )
                             }
                             item(
                                 icon = Icons.Outlined.QrCode2,

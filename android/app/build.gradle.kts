@@ -123,6 +123,7 @@ dependencies {
     implementation("dev.shreyaspatil:capturable:3.0.1")
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
     implementation("io.github.ehsannarmani:compose-charts:0.1.0")
+    implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")
