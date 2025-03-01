@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -121,9 +122,9 @@ fun ExploreScreen() {
     var shownGeo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
     val locationSelector = locationSelector(
-        geo,
-        { geo = it },
-        nav.context as Activity
+        geo = geo,
+        onGeoChange = { geo = it },
+        activity = nav.context as Activity
     )
     var tab by rememberSavableStateOf(MainTab.Local)
     var shownTab by rememberSavableStateOf(tab)
@@ -200,7 +201,7 @@ fun ExploreScreen() {
 
     showInventoryDialog?.let { items ->
         InventoryDialog(
-            {
+            onDismissRequest = {
                 showInventory = null
                 showInventoryDialog = null
             },
@@ -385,7 +386,7 @@ fun ExploreScreen() {
         scaffoldState = bottomSheetState,
         sheetPeekHeight = sheetPeekHeight,
         sheetShadowElevation = 2.elevation,
-        sheetContainerColor = MaterialTheme.colorScheme.background,
+        sheetContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp),
         sheetDragHandle = {
             Spacer(Modifier.height(1.pad))
         },
@@ -399,12 +400,13 @@ fun ExploreScreen() {
             StoriesScreen(geo)
         }
     ) { paddingValues ->
+        val title = if (showOpenGroups) stringResource(R.string.groups) else if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards)
         LocationScaffold(
             geo = geo,
             locationSelector = locationSelector,
             appHeader = {
                 AppHeader(
-                    title = if (showOpenGroups) stringResource(R.string.groups) else if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    title = title,
                     onTitleClick = {},
                 ) {
                     ScanQrCodeButton()
@@ -421,7 +423,7 @@ fun ExploreScreen() {
                 modifier = Modifier.padding(paddingValues),
             ) {
                 AppHeader(
-                    title = if (showOpenGroups) stringResource(R.string.groups) else if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards),
+                    title = title,
                     onTitleClick = {
                         scope.launch {
                             state.scrollToTop()
@@ -469,56 +471,128 @@ fun ExploreScreen() {
                     }
                 }
 
-                var viewportHeight by remember { mutableIntStateOf(0) }
-
-                if (showOpenGroups) {
-                    GroupsScreen(geo)
-                } else if (showAsMap) {
-                    Box(
-                        contentAlignment = Alignment.BottomCenter,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                when {
+                    showOpenGroups -> {
+                        GroupsScreen(
+                            (shownGeo ?: mapGeo ?: geo)?.toGeo()
+                        )
+                    }
+                    showAsMap -> {
+                        var viewportHeight by remember { mutableIntStateOf(0) }
+                        Box(
+                            contentAlignment = Alignment.BottomCenter,
                             modifier = Modifier
                                 .fillMaxSize()
                         ) {
-                            if (cards.isNotEmpty()) {
-                                AnimatedVisibility(showBar) {
-                                    CardsBar(
-                                        cards = cardsOfCategory,
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        onLongClick = {
-                                            scope.launch {
-                                                mapControl.recenter(it.geo?.toLatLng() ?: return@launch)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            ) {
+                                if (cards.isNotEmpty()) {
+                                    AnimatedVisibility(showBar) {
+                                        CardsBar(
+                                            cards = cardsOfCategory,
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            onLongClick = {
+                                                scope.launch {
+                                                    mapControl.recenter(it.geo?.toLatLng() ?: return@launch)
+                                                }
                                             }
+                                        ) {
+                                            nav.appNavigate(AppNav.Page(it.id!!))
                                         }
-                                    ) {
-                                        nav.appNavigate(AppNav.Page(it.id!!))
                                     }
                                 }
-                            }
-                            MapScreen(
-                                control = mapControl,
-                                cards = cardsOfCategory,
-                                inventories = inventories,
-                                bottomPadding = viewportHeight,
-                                onCard = {
-                                    nav.appNavigate(AppNav.Page(it))
-                                },
-                                onInventory = {
-                                    showInventory = it
+                                MapScreen(
+                                    control = mapControl,
+                                    cards = cardsOfCategory,
+                                    inventories = inventories,
+                                    bottomPadding = viewportHeight,
+                                    onCard = {
+                                        nav.appNavigate(AppNav.Page(it))
+                                    },
+                                    onInventory = {
+                                        showInventory = it
+                                    }
+                                ) {
+                                    mapGeo = it
                                 }
+                            }
+                            PageInput(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .onPlaced { viewportHeight = it.boundsInParent().size.height.toInt() }
                             ) {
-                                mapGeo = it
+                                SearchContent(
+                                    locationSelector = locationSelector,
+                                    isLoading = isLoading,
+                                    filters = filters,
+                                    categories = categories,
+                                    category = selectedCategory
+                                ) {
+                                    selectedCategory = it
+                                }
+                                SearchFieldAndAction(
+                                    value = value,
+                                    valueChange = { value = it },
+                                    placeholder = stringResource(R.string.search_map),
+                                    action = {
+                                        Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                                    },
+                                    onAction = {
+                                        nav.appNavigate(AppNav.Me)
+                                    },
+                                )
                             }
                         }
-                        PageInput(
+                    }
+                    else -> {
+                        val me = me
+                        MainTabs(tab, { tab = it })
+                        CardList(
+                            state = state,
+                            cards = cardsOfCategory,
+                            isMine = { it.person == me?.id },
+                            geo = geo,
+                            onChanged = {
+                                scope.launch {
+                                    clear()
+                                    loadMore(reload = true)
+                                }
+                            },
+                            isLoading = isLoading,
+                            isError = isError,
+                            value = value,
+                            valueChange = { value = it },
+                            placeholder = stringResource(R.string.search),
+                            hasMore = hasMore,
+                            onLoadMore = {
+                                loadMore()
+                            },
+                            action = {
+                                Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                            },
+                            onAction = {
+                                nav.appNavigate(AppNav.Me)
+                            },
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .onPlaced { viewportHeight = it.boundsInParent().size.height.toInt() }
+                                .swipeMainTabs {
+                                    when (val it = MainTab.entries.swipe(tab, it)) {
+                                        is SwipeResult.Previous -> {
+                                            nav.appNavigate(AppNav.Messages)
+                                        }
+
+                                        is SwipeResult.Next -> {
+                                            nav.appNavigate(AppNav.Schedule)
+                                        }
+
+                                        is SwipeResult.Select<*> -> {
+                                            tab = it.item as MainTab
+                                        }
+                                    }
+                                }
                         ) {
                             SearchContent(
                                 locationSelector = locationSelector,
@@ -529,73 +603,6 @@ fun ExploreScreen() {
                             ) {
                                 selectedCategory = it
                             }
-                            SearchFieldAndAction(
-                                value = value,
-                                valueChange = { value = it },
-                                placeholder = stringResource(R.string.search_map),
-                                action = {
-                                    Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
-                                },
-                                onAction = {
-                                    nav.appNavigate(AppNav.Me)
-                                },
-                            )
-                        }
-                    }
-                } else {
-                    val me = me
-                    MainTabs(tab, { tab = it })
-                    CardList(
-                        state = state,
-                        cards = cardsOfCategory,
-                        isMine = { it.person == me?.id },
-                        geo = geo,
-                        onChanged = {
-                            scope.launch {
-                                clear()
-                                loadMore(reload = true)
-                            }
-                        },
-                        isLoading = isLoading,
-                        isError = isError,
-                        value = value,
-                        valueChange = { value = it },
-                        placeholder = stringResource(R.string.search),
-                        hasMore = hasMore,
-                        onLoadMore = {
-                            loadMore()
-                        },
-                        action = {
-                            Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
-                        },
-                        onAction = {
-                            nav.appNavigate(AppNav.Me)
-                        },
-                        modifier = Modifier
-                            .swipeMainTabs {
-                                when (val it = MainTab.entries.swipe(tab, it)) {
-                                    is SwipeResult.Previous -> {
-                                        nav.appNavigate(AppNav.Messages)
-                                    }
-
-                                    is SwipeResult.Next -> {
-                                        nav.appNavigate(AppNav.Schedule)
-                                    }
-
-                                    is SwipeResult.Select<*> -> {
-                                        tab = it.item as MainTab
-                                    }
-                                }
-                            }
-                    ) {
-                        SearchContent(
-                            locationSelector = locationSelector,
-                            isLoading = isLoading,
-                            filters = filters,
-                            categories = categories,
-                            category = selectedCategory
-                        ) {
-                            selectedCategory = it
                         }
                     }
                 }

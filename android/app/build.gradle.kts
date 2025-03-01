@@ -53,7 +53,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
 
             // This is here because of just how slow Jetpack Compose is in debug mode
-            isDebuggable = false
+//            isDebuggable = false
         }
         release {
             signingConfig = signingConfigs.getByName("release")
