@@ -85,6 +85,7 @@ import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.story.StoriesScreen
+import com.queatz.ailaai.ui.story.StoriesScreenState
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
@@ -375,10 +376,17 @@ fun ExploreScreen() {
         targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
         animationSpec = tween(durationMillis = 500)
     )
+    val storiesState = remember { StoriesScreenState() }
 
     BackHandler(bottomSheetState.bottomSheetState.currentValue == SheetValue.Expanded) {
         scope.launch {
             bottomSheetState.bottomSheetState.partialExpand()
+        }
+    }
+
+    LaunchedEffect(bottomSheetState.bottomSheetState.currentValue) {
+        if (bottomSheetState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
+            storiesState.scrollToTop()
         }
     }
 
@@ -403,7 +411,10 @@ fun ExploreScreen() {
             bottomEnd = CornerSize(0.dp),
         ),
         sheetContent = {
-            StoriesScreen(geo)
+            StoriesScreen(
+                geo = geo,
+                storiesState = storiesState
+            )
         }
     ) { paddingValues ->
         val title = if (showOpenGroups) stringResource(R.string.groups) else if (showAsMap) stringResource(R.string.map) else stringResource(R.string.cards)

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -59,9 +60,19 @@ import kotlinx.coroutines.launch
 
 private var cache = emptyList<Story>()
 
+class StoriesScreenState() {
+
+    internal var state: LazyGridState? = null
+
+    suspend fun scrollToTop() {
+        state?.scrollToTop()
+    }
+}
+
 @Composable
 fun StoriesScreen(
     geo: LatLng?,
+    storiesState: StoriesScreenState = remember { StoriesScreenState() }
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
@@ -80,6 +91,10 @@ fun StoriesScreen(
     var isLoading by rememberStateOf(stories.isEmpty())
     val nav = nav
     var showShareAThought by rememberStateOf(true)
+
+    LaunchedEffect(state) {
+        storiesState.state = state
+    }
 
     LaunchedEffect(stories) {
         cache = stories
