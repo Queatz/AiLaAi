@@ -54,7 +54,7 @@ fun StoryActions(
 
     if (showDeleteDialog) {
         Alert(
-            { showDeleteDialog = false },
+            onDismissRequest = { showDeleteDialog = false },
             title = stringResource(R.string.delete_story),
             text = stringResource(R.string.you_cannot_undo_this_story),
             dismissButton = stringResource(R.string.cancel),
@@ -103,35 +103,35 @@ fun StoryActions(
 
     if (showMessageButton) {
         IconButton(
-            {
+            onClick = {
                 showMessageDialog = true
             }
         ) {
             Icon(
-                Icons.AutoMirrored.Outlined.Message,
-                stringResource(R.string.message),
+                imageVector = Icons.AutoMirrored.Outlined.Message,
+                contentDescription = stringResource(R.string.message),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
     }
     IconButton(
-        {
+        onClick = {
             showMenu = true
         }
     ) {
         Icon(
-            Icons.Outlined.MoreVert,
-            null,
+            imageVector = Icons.Outlined.MoreVert,
+            contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         StoryMenu(
-            showMenu,
-            {
+            expanded = showMenu,
+            onDismissRequest = {
                 showMenu = false
             },
-            storyId,
-            story,
+            storyId = storyId,
+            story = story,
             isMine = story?.person == me?.id,
             showOpen = showOpen,
             editing = false

@@ -37,7 +37,13 @@ fun Period(
                     color(Styles.colors.secondary)
                 }
             }) {
-                Text(if (events == null) "${appString { loading }}…" else appString { noReminders })
+                Text(
+                    value = if (events == null) {
+                        "${appString { loading }}…"
+                    } else {
+                        appString { noReminders }
+                    }
+                )
             }
         } else {
             events.forEach { event ->

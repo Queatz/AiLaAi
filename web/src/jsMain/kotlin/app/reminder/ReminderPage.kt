@@ -77,8 +77,8 @@ fun ReminderPage(
                     if (title == null) return@launch
 
                     api.updateReminder(
-                        reminder.id!!,
-                        Reminder(title = title)
+                        id = reminder.id!!,
+                        reminder = Reminder(title = title)
                     ) {
                         onUpdate(it)
                     }
@@ -87,7 +87,10 @@ fun ReminderPage(
 
             item(appString { reschedule }) {
                 scope.launch {
-                    val result = dialog(application.appString { reschedule }, application.appString { update }) {
+                    val result = dialog(
+                        title = application.appString { reschedule },
+                        confirmButton = application.appString { update }
+                    ) {
                         EditReminderSchedule(schedule)
                     }
 
@@ -132,8 +135,8 @@ fun ReminderPage(
 
             suspend fun setTimezone(timezone: RawTimeZone) {
                 api.updateReminder(
-                    reminder.id!!,
-                    Reminder(
+                    id = reminder.id!!,
+                    reminder = Reminder(
                         timezone = timezone.name,
                         utcOffset = timezone.rawOffsetInMinutes.toDouble() / 60.0
                     )
@@ -228,8 +231,8 @@ fun ReminderPage(
             item(appString { timezone }) {
                 scope.launch {
                     searchDialog(
-                        configuration,
-                        application.appString { timezone },
+                        configuration = configuration,
+                        title = application.appString { timezone },
                         defaultValue = reminder.timezone?.replace("_", " ") ?: "",
                         load = {
                             rawTimeZones.toList()

@@ -16,7 +16,10 @@ import kotlinx.datetime.Instant
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-fun StoryAuthors(publishDate: Instant?, authors: List<Person>) {
+fun StoryAuthors(
+    publishDate: Instant?,
+    authors: List<Person>,
+) {
     val nav = nav
     val someone = stringResource(R.string.someone)
     val and = stringResource(R.string.inline_and)

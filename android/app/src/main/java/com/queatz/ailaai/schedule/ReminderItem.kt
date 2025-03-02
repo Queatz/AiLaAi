@@ -25,6 +25,7 @@ fun ReminderItem(reminder: Reminder) {
         onClick = {
             nav.appNavigate(AppNav.Reminder(reminder.id!!))
         },
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
             .fillMaxWidth()
     ) {
@@ -39,7 +40,11 @@ fun ReminderItem(reminder: Reminder) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = bulletedString(reminder.scheduleText, reminder.categories?.firstOrNull(), reminder.note?.notBlank),
+                text = bulletedString(
+                    reminder.categories?.firstOrNull(),
+                    reminder.scheduleText,
+                    reminder.note?.notBlank
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary,
             )

@@ -8,8 +8,8 @@ import com.queatz.db.StoryContent
 fun LazyGridScope.authorsItem(content: StoryContent.Authors) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         StoryAuthors(
-            content.publishDate,
-            content.authors
+            publishDate = content.publishDate,
+            authors = content.authors
         )
     }
 }

@@ -129,7 +129,7 @@ data class ReminderEvent(
     /**
      * The `ReminderOccurrence` associated with this event, if any.
      */
-    val occurrence: ReminderOccurrence?
+    val occurrence: ReminderOccurrence?,
 )
 
 val ReminderEvent.updateDate get() = occurrence?.occurrence ?: date.toKotlinInstant()
@@ -137,13 +137,13 @@ val ReminderEvent.updateDate get() = occurrence?.occurrence ?: date.toKotlinInst
 private data class ColumnInfo(
     val start: Date,
     val end: Date,
-    val events: List<ReminderEvent>
+    val events: List<ReminderEvent>,
 )
 
 @Serializable
 data class ReminderDragData(
     val reminder: String,
-    val occurrence: Instant
+    val occurrence: Instant,
 )
 
 @OptIn(ExperimentalComposeWebApi::class)
@@ -156,7 +156,7 @@ fun SchedulePage(
     goToToday: Flow<Unit>,
     onReminder: (Reminder?) -> Unit,
     onUpdate: (Reminder) -> Unit,
-    onDelete: (Reminder) -> Unit
+    onDelete: (Reminder) -> Unit,
 ) {
     Style(SchedulePageStyles)
 
@@ -184,8 +184,8 @@ fun SchedulePage(
         } else {
             events.filter {
                 it.reminder.title?.contains(search, ignoreCase = true) == true ||
-                it.occurrence?.note?.contains(search, ignoreCase = true) == true ||
-                it.reminder.note?.contains(search, ignoreCase = true) == true
+                        it.occurrence?.note?.contains(search, ignoreCase = true) == true ||
+                        it.reminder.note?.contains(search, ignoreCase = true) == true
             }
         }
     }
@@ -300,12 +300,14 @@ fun SchedulePage(
                     var today = offset
 
                     IconButton(
-                        "keyboard_arrow_up", when (view) {
+                        name = "keyboard_arrow_up",
+                        title = when (view) {
                             ScheduleView.Daily -> appString { previousDay }
                             ScheduleView.Weekly -> appString { previousWeek }
                             ScheduleView.Monthly -> appString { previousMonth }
                             ScheduleView.Yearly -> appString { previousYear }
-                        }) {
+                        }
+                    ) {
                         move(-1.0)
                     }
 
@@ -328,8 +330,15 @@ fun SchedulePage(
                             view = view,
                             start = start,
                             end = end,
-                            events = if (isLoading) null else shownEvents.filter { event ->
-                                (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(event.date, end)
+                            events = if (isLoading) {
+                                null
+                            } else {
+                                shownEvents.filter { event ->
+                                    (isAfter(event.date, start) || isEqual(event.date, start)) && isBefore(
+                                        event.date,
+                                        end
+                                    )
+                                }
                             },
                             onUpdate = {
                                 scope.launch {
@@ -526,7 +535,12 @@ fun SchedulePage(
                                     // Delay until start of next minute
                                     val now = Date()
                                     delay(
-                                        (startOfMinute(addMinutes(now, 1.0)).getTime() - now.getTime()).milliseconds + 1.seconds
+                                        (startOfMinute(
+                                            addMinutes(
+                                                date = now,
+                                                amount = 1.0
+                                            )
+                                        ).getTime() - now.getTime()).milliseconds + 1.seconds
                                     )
                                     tickTock = !tickTock
 

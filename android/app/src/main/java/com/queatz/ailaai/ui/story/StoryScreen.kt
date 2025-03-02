@@ -85,19 +85,19 @@ fun StoryScreen(storyId: String, commentId: String? = null) {
     val nav = nav
 
     StoryScaffold(
-        {
+        goBack = {
             nav.popBackStack()
         },
         actions = {
             if (story == null) return@StoryScaffold
-            StoryTitle(state, story?.title)
+            StoryTitle(state, story!!.title)
             StoryActions(storyId, story)
         }
     ) {
         StoryContents(
-            StorySource.Story(storyId),
-            contents,
-            state,
+            source = StorySource.Story(storyId),
+            content = contents,
+            state = state,
             onReloadRequest = {
                 scope.launch {
                     reload()
