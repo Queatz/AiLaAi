@@ -7,11 +7,10 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -370,7 +370,7 @@ fun ExploreScreen() {
     }
 
     val bottomSheetState = rememberBottomSheetScaffoldState()
-    val sheetPeekHeight = 64.dp
+    val sheetPeekHeight = 84.dp
     val sheetCornerRadius by animateDpAsState(
         targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
         animationSpec = tween(durationMillis = 500)
@@ -388,7 +388,13 @@ fun ExploreScreen() {
         sheetShadowElevation = 2.elevation,
         sheetContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp),
         sheetDragHandle = {
-            Spacer(Modifier.height(1.pad))
+            Surface(
+                modifier = Modifier.padding(vertical = 1.5f.pad),
+                color = MaterialTheme.colorScheme.outline,
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
+                Box(Modifier.size(width = 32.dp, height = 4.dp))
+            }
         },
         sheetShape = RoundedCornerShape(
             topStart = CornerSize(sheetCornerRadius),

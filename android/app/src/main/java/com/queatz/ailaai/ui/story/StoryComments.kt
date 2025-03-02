@@ -125,7 +125,7 @@ fun StoryComments(
             .fillMaxWidth()
     ) {
         if (maxShown) {
-            comments.take(max!!)
+            comments.take(max)
         } else {
             comments
         }.forEach { comment ->
@@ -141,7 +141,7 @@ fun StoryComments(
                 DisableSelection {
                     if (showDeleteCommentDialog) {
                         Alert(
-                            {
+                            onDismissRequest = {
                                 showDeleteCommentDialog = false
                             },
                             title = stringResource(R.string.delete_comment),
@@ -161,7 +161,7 @@ fun StoryComments(
 
                     if (showEditCommentDialog) {
                         TextFieldDialog(
-                            {
+                            onDismissRequest = {
                                 showEditCommentDialog = false
                             },
                             title = stringResource(R.string.edit_comment),
@@ -182,7 +182,7 @@ fun StoryComments(
                     horizontalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     GroupPhoto(
-                        comment.person!!.contactPhoto().inList(),
+                        photos = comment.person!!.contactPhoto().inList(),
                         padding = 0.pad,
                         size = 32.dp,
                         modifier = Modifier
@@ -204,15 +204,17 @@ fun StoryComments(
                                 .padding(1.pad)
                         ) {
                             Text(
-                                comment.person!!.name ?: stringResource(R.string.someone),
+                                text = comment.person!!.name ?: stringResource(R.string.someone),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.secondary
                             )
-                            LinkifyText(comment.comment!!.comment!!)
+                            LinkifyText(
+                                text = comment.comment!!.comment!!
+                            )
                         }
                         DisableSelection {
                             Text(
-                                bulletedString(
+                                text = bulletedString(
                                     comment.comment!!.createdAt!!.timeAgo(),
                                     stringResource(R.string.tap_to_reply)
                                 ),
@@ -265,8 +267,8 @@ fun StoryComments(
                                         isSendingReply = true
                                         scope.launch {
                                             api.replyToComment(
-                                                comment.comment!!.id!!,
-                                                Comment(comment = it)
+                                                id = comment.comment!!.id!!,
+                                                comment = Comment(comment = it)
                                             ) {
                                                 reply = ""
                                                 loadCommentReplies(comment.comment!!.id!!)
@@ -281,7 +283,7 @@ fun StoryComments(
                                         var showCommentMenu by rememberStateOf(false)
 
                                         IconButton(
-                                            {
+                                            onClick = {
                                                 showCommentMenu = true
                                             }
                                         ) {
@@ -355,10 +357,10 @@ fun StoryComments(
             }
         }
         if (maxShown) {
-            val remaining = comments.size - max!!
+            val remaining = comments.size - max
             DisableSelection {
                 OutlinedButton(
-                    {
+                    onClick = {
                         showAll = !showAll
                     }
                 ) {

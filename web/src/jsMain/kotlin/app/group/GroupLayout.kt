@@ -17,7 +17,7 @@ fun GroupLayout(
      var showCards by remember(group.group?.id) {
         mutableStateOf(false)
     }
-    var showSearch by remember { mutableStateOf(false) }
+    var showSearch by remember(group.group?.id) { mutableStateOf(false) }
 
     application.background(group.group?.background?.let { "$baseUrl$it" })
     application.effects(group.group?.config?.effects?.let { json.decodeFromString(it) })

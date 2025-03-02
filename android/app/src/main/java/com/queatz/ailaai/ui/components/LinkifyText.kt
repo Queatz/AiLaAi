@@ -1,7 +1,9 @@
 package com.queatz.ailaai.ui.components
 
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -19,16 +21,23 @@ import com.halilibo.richtext.ui.string.RichTextStringStyle
 fun LinkifyText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    textAlign: TextAlign? = null,
+    color: Color = LocalContentColor.current,
     style: TextStyle = LocalTextStyle.current,
 ) {
     RichTextThemeProvider(
+        contentColorProvider = {
+            color
+        },
         textStyleProvider = {
-            style.copy(
-                color = color,
-                textAlign = textAlign ?: LocalTextStyle.current.textAlign
-            )
+            style.copy(color = color)
+        },
+        contentColorBackProvider = { newContentColor, content ->
+            CompositionLocalProvider(LocalContentColor provides newContentColor) {
+                content()
+            }
+        },
+        textStyleBackProvider = { newTextStyle, content ->
+            ProvideTextStyle(newTextStyle, content)
         }
     ) {
         BasicRichText(
@@ -36,7 +45,7 @@ fun LinkifyText(
             style = RichTextStyle(
                 stringStyle = RichTextStringStyle(
                     linkStyle = TextLinkStyles(
-                        style = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.primary).toSpanStyle()
+                        style = style.copy(color = MaterialTheme.colorScheme.primary).toSpanStyle()
                     )
                 )
             )

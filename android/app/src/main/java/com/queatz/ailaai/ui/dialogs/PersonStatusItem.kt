@@ -102,8 +102,9 @@ fun PersonStatusItem(
             SelectionContainer {
                 LinkifyText(
                     text = note,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        textAlign = TextAlign.Center
+                    ),
                     modifier = Modifier
                         .padding(top = if (status.photo != null || status.statusInfo != null) 2.pad else 0.pad)
                 )
