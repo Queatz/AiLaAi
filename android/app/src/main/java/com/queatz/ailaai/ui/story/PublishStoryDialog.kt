@@ -62,9 +62,9 @@ fun PublishStoryDialog(
     var friendCount by rememberStateOf(0)
     var storyDraft by rememberStateOf<StoryDraft?>(null)
     val locationSelector = locationSelector(
-        geo,
-        { geo = it },
-        activity
+        geo = geo,
+        onGeoChange = { geo = it },
+        activity = activity
     )
     val me = me
 

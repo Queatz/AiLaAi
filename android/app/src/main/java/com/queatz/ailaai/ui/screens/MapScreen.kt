@@ -23,7 +23,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,22 +75,26 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import at.bluesource.choicesdk.maps.common.Map
 import at.bluesource.choicesdk.maps.common.MapFragment
 import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.helpers.geoKey
+import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
@@ -95,6 +103,7 @@ import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Inventory
+import com.queatz.db.Story
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -128,6 +137,7 @@ fun MapScreen(
     var position by rememberSaveable(stateSaver = latLngSaver()) {
         mutableStateOf(null)
     }
+    val nav = nav
     var mapType by rememberSavableStateOf(Map.MAP_TYPE_NORMAL)
     var zoom by rememberSavableStateOf<Float?>(null)
     val scope = rememberCoroutineScope()
@@ -524,8 +534,8 @@ fun MapScreen(
 
     if (newCard != null) {
         EditCardDialog(
-            newCard!!,
-            {
+            card = newCard!!,
+            onDismissRequest = {
                 newCard = null
             },
             create = true
@@ -536,18 +546,41 @@ fun MapScreen(
 
     showMapClickMenu?.let { clickGeo ->
         Menu(
-            {
+            onDismissRequest = {
                 showMapClickMenu = null
             }
         ) {
-            menuItem(stringResource(R.string.add_a_card)) {
-                showMapClickMenu = null
-                newCard = Card(geo = clickGeo.toList())
-            }
-            menuItem(stringResource(R.string.go_here)) {
-                showMapClickMenu = null
-                scope.launch {
-                    recenter.emit(clickGeo to map?.cameraPosition?.zoom?.plus(1f)?.coerceAtLeast(14f))
+            Toolbar {
+                item(
+                    icon = Icons.Outlined.Edit,
+                    name = stringResource(R.string.write_a_story)
+                ) {
+                    showMapClickMenu = null
+                    scope.launch {
+                        api.createStory(
+                            story = Story(
+                                geo = clickGeo.toList()
+                            )
+                        ) {
+                            nav.appNavigate(AppNav.WriteStory(it.id!!))
+                        }
+                    }
+                }
+                item(
+                    icon = Icons.Outlined.Add,
+                    name = stringResource(R.string.add_a_card)
+                ) {
+                    showMapClickMenu = null
+                    newCard = Card(geo = clickGeo.toList())
+                }
+                item(
+                    icon = Icons.Outlined.MyLocation,
+                    name = stringResource(R.string.go_here)
+                ) {
+                    showMapClickMenu = null
+                    scope.launch {
+                        recenter.emit(clickGeo to map?.cameraPosition?.zoom?.plus(1f)?.coerceAtLeast(14f))
+                    }
                 }
             }
         }

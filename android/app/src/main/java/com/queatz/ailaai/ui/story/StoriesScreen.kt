@@ -100,12 +100,6 @@ fun StoriesScreen(
         cache = stories
     }
 
-    LaunchedEffect(geo) {
-        geo?.let {
-            api.myGeo(it.toGeo())
-        }
-    }
-
     LaunchedEffect(Unit) {
         delay(7_000)
         mePresence.readStoriesUntilNow()
@@ -114,7 +108,8 @@ fun StoriesScreen(
     suspend fun reload() {
         if (geo != null) {
             api.stories(
-                geo.toGeo(),
+                geo = geo.toGeo(),
+                public = true,
                 onError = {
                     if (it is CancellationException) {
                         // Ignored, geo probably changes
@@ -204,8 +199,8 @@ fun StoriesScreen(
         ) {
             PageInput {
                 SearchFieldAndAction(
-                    thought,
-                    { thought = it },
+                    value = thought,
+                    valueChange = { thought = it },
                     placeholder = stringResource(R.string.share_a_thought),
                     showClear = false,
                     singleLine = false,

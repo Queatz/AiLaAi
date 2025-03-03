@@ -19,7 +19,7 @@ fun Route.storyRoutes() {
         get("/stories/{id}") {
             respond {
                 db.story(meOrNull?.id?.asId(Person::class), parameter("id"))
-                    //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
+                //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
                     ?: HttpStatusCode.NotFound
             }
         }
@@ -27,7 +27,7 @@ fun Route.storyRoutes() {
         get("/urls/stories/{url}") {
             respond {
                 db.storyByUrl(meOrNull?.id?.asId(Person::class), parameter("url"))
-                    //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
+                //?.takeIf { it.published == true || it.person == meOrNull?.id } // todo, authorize? how to share a draft
                     ?: HttpStatusCode.NotFound
             }
         }
@@ -62,22 +62,22 @@ fun Route.storyRoutes() {
                         )
                     } else {
                         call.parameters["public"]?.toBoolean().let {
-                            if (it == null) {
+                            if (it != true) {
                                 db.stories(
-                                    geo,
-                                    me.id!!,
-                                    defaultNearbyMaxDistanceInMeters,
-                                    call.parameters["offset"]?.toInt() ?: 0,
-                                    call.parameters["limit"]?.toInt() ?: 20
+                                    geo = geo,
+                                    person = me.id!!,
+                                    nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
+                                    offset = call.parameters["offset"]?.toInt() ?: 0,
+                                    limit = call.parameters["limit"]?.toInt() ?: 20
                                 )
                             } else {
                                 db.stories(
-                                    geo,
-                                    me.id!!,
-                                    defaultNearbyMaxDistanceInMeters,
-                                    call.parameters["offset"]?.toInt() ?: 0,
-                                    call.parameters["limit"]?.toInt() ?: 20,
-                                    it
+                                    geo = geo,
+                                    person = me.id!!,
+                                    nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
+                                    offset = call.parameters["offset"]?.toInt() ?: 0,
+                                    limit = call.parameters["limit"]?.toInt() ?: 20,
+                                    public = it
                                 )
                             }
                         }
@@ -91,7 +91,15 @@ fun Route.storyRoutes() {
         post("/stories") {
             respond {
                 val story = call.receive<Story>()
-                db.insert(Story(title = story.title, content = story.content, person = me.id!!))
+                db.insert(
+                    Story(
+                        title = story.title,
+                        content = story.content,
+                        geo = story.geo,
+                        categories = story.categories,
+                        person = me.id!!
+                    )
+                )
             }
         }
 

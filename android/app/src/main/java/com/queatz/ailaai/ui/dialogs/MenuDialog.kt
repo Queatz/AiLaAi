@@ -19,7 +19,10 @@ annotation class MenuDialogMarker
 
 @Composable
 @MenuDialogMarker
-fun Menu(onDismissRequest: () -> Unit, block: @Composable ColumnScope.() -> Unit) {
+fun Menu(
+    onDismissRequest: () -> Unit,
+    block: @Composable ColumnScope.() -> Unit,
+) {
     Dialog(onDismissRequest) {
         Surface(
             shape = MaterialTheme.shapes.large,
