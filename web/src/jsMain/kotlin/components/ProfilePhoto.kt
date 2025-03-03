@@ -30,8 +30,8 @@ fun ProfilePhoto(
     styles: (StyleScope.() -> Unit)? = null
 ) {
     ProfilePhoto(
-        photo = person.photo,
-        name = person.name,
+        photo = person.photo?.notBlank,
+        name = person.name?.notBlank,
         size = size,
         fontSize = fontSize,
         title = title,

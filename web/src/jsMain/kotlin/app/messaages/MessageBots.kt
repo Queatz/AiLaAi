@@ -9,6 +9,7 @@ import com.queatz.db.BotMessageStatus
 import components.GroupPhoto
 import components.GroupPhotoItem
 import components.Icon
+import notBlank
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.backgroundColor
@@ -36,7 +37,10 @@ fun MessageBots(
             items = remember(bots, statuses) {
                 statuses.mapNotNull { status ->
                     bots.find { it.id == status.bot }?.let { bot ->
-                        GroupPhotoItem(bot.photo, "${bot.name}: ${if (status.success == true) "✅" else "❌"} ${status.note.orEmpty()}")
+                        GroupPhotoItem(
+                            photo = bot.photo?.notBlank,
+                            name = "${bot.name}: ${if (status.success == true) "✅" else "❌"} ${status.note.orEmpty()}"
+                        )
                     }
                 }
             },

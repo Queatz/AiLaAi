@@ -7,6 +7,7 @@ import com.queatz.db.botData
 import com.queatz.db.bots
 import com.queatz.db.groupBotData
 import com.queatz.db.groupBotsOfBot
+import com.queatz.notBlank
 import com.queatz.parameter
 import com.queatz.plugins.bots
 import com.queatz.plugins.db
@@ -42,10 +43,10 @@ fun Route.botRoutes() {
                 db.insert(
                     Bot(
                         url = url,
-                        photo = body.photo,
+                        photo = body.photo?.notBlank,
                         creator = me.id!!,
-                        name = botDetails.name,
-                        description = botDetails.description,
+                        name = botDetails.name?.trim(),
+                        description = botDetails.description?.trim(),
                         keywords = botDetails.keywords,
                         config = botDetails.config
                     )

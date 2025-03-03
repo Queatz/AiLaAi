@@ -24,6 +24,7 @@ import components.ProfilePhoto
 import focusable
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import notBlank
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -111,7 +112,7 @@ suspend fun groupBotsDialog(
                             }
                         }) {
                             // todo: translate
-                            ProfilePhoto(bot.photo, bot.name ?: "New bot")
+                            ProfilePhoto(bot.photo?.notBlank, bot.name ?: "New bot")
                             Div({
                                 style {
                                     marginLeft(1.r)

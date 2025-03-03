@@ -27,6 +27,7 @@ import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJSDate
+import notBlank
 import notEmpty
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -93,14 +94,21 @@ fun MessageItem(
             } else {
                 when {
                     message.member != null && member?.person != null -> {
-                        ProfilePhoto(member.person!!, onClick = {
-                            window.open("/profile/${member.person!!.id!!}")
-                        }) {
+                        ProfilePhoto(
+                            person = member.person!!,
+                            onClick = {
+                                window.open("/profile/${member.person!!.id!!}")
+                            }
+                        ) {
                             marginRight(.5.r)
                         }
                     }
+
                     message.bot != null -> {
-                        ProfilePhoto(bot?.photo, bot?.name) {
+                        ProfilePhoto(
+                            photo = bot?.photo?.notBlank,
+                            name = bot?.name?.notBlank
+                        ) {
                             marginRight(.5.r)
                         }
                     }
@@ -251,7 +259,11 @@ fun MessageItem(
             }
         }
         message.bots?.notEmpty?.let {
-            MessageBots(bots, it, isMine = isMe)
+            MessageBots(
+                bots = bots,
+                statuses = it,
+                isMine = isMe
+            )
         }
     }
 }

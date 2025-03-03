@@ -49,7 +49,6 @@ import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import notBlank
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -97,7 +96,7 @@ fun ExplorePage(
     card: Card,
     onCard: (Card) -> Unit,
     onCardUpdated: (Card) -> Unit,
-    onCardDeleted: (card: Card) -> Unit
+    onCardDeleted: (card: Card) -> Unit,
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
@@ -709,9 +708,11 @@ fun ExplorePage(
             saveConversation(it)
         }
 
-        NewCardInput { name, active ->
-            newSubCard(card, name, active)
-        }
+        NewCardInput(
+            onSubmit = { name, active ->
+                newSubCard(card, name, active)
+            }
+        )
 
         if (isLoading) {
             Loading()

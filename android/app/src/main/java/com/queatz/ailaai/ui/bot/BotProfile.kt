@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Bot
 
@@ -23,7 +24,7 @@ fun BotProfile(bot: Bot) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(1.pad)
     ) {
-        bot.photo?.let { photo ->
+        bot.photo?.notBlank?.let { photo ->
             AsyncImage(
                 model = api.url(photo),
                 contentDescription = null,
