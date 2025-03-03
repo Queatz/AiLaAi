@@ -87,6 +87,9 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.appStringShort
+import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -104,6 +107,7 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Inventory
 import com.queatz.db.Story
+import com.queatz.db.formatPay
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -462,9 +466,12 @@ fun MapScreen(
                                         modifier = Modifier
                                             .widthIn(max = 120.dp)
                                     )
-                                    card.categories?.firstOrNull()?.let { category ->
+                                    listOf(
+                                        card.formatPay { appStringShort },
+                                        card.categories?.firstOrNull()
+                                    ).notEmpty?.let { it ->
                                         OutlinedText(
-                                            category,
+                                            text = bulletedString(*it.toTypedArray()),
                                             color = MaterialTheme.colorScheme.surfaceVariant,
                                             outlineColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                             outlineWidth = 4f,
@@ -604,7 +611,7 @@ fun OutlinedText(
         modifier = modifier
     ) {
         Text(
-            text,
+            text = text,
             color = outlineColor,
             style = style.copy(
                 drawStyle = Stroke(

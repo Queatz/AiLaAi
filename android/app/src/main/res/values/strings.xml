@@ -60,7 +60,7 @@
     <string name="calls_notification_channel_description">Answer incoming calls</string>
     <string name="ongoing_calls_notification_channel_description">Manage ongoing calls</string>
     <string name="subscription_notification_channel_description">Your subscriptions</string>
-    <string name="comments_notification_channel_description">Comments on your stories</string>
+    <string name="comments_notification_channel_description">Comments on your posts</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="connected">Connected</string>
@@ -431,10 +431,10 @@
     <string name="report_type_other_description">Tell us about anything else</string>
     <string name="this_is_urgent">This is urgent</string>
     <string name="export_data">Export data</string>
-    <string name="data_export_description">Data export includes your profile, pages, and stories.</string>
+    <string name="data_export_description">Data export includes your profile, pages, and posts.</string>
     <string name="skip">Skip</string>
     <string name="people">People</string>
-    <string name="your_stories">Your stories</string>
+    <string name="your_stories">Your posts</string>
     <string name="enable_replies">Enable replies</string>
     <string name="enable_anonymous_replies">Enable anonymous replies from the web</string>
     <string name="nothing_scheduled">Nothing scheduled</string>
@@ -688,7 +688,7 @@
     <string name="comment_added">Comment added</string>
     <string name="website">Website</string>
     <string name="url">Url</string>
-    <string name="recent_stories">Recent stories</string>
+    <string name="recent_stories">Recent posts</string>
     <string name="select_text">Select text</string>
     <string name="inline_or">or</string>
     <string name="hi">Hi</string>

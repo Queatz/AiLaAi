@@ -139,7 +139,7 @@ fun StoriesScreen(
                     }
 
                     is SwipeResult.Next -> {
-                        nav.appNavigate(AppNav.Explore)
+                        nav.appNavigate(AppNav.Schedule)
                     }
 
                     is SwipeResult.Select<*> -> Unit

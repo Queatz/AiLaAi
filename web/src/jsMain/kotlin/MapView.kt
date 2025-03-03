@@ -11,6 +11,7 @@ import app.cards.mapListDialog
 import app.components.Spacer
 import com.queatz.db.Card
 import com.queatz.db.Geo
+import com.queatz.db.formatPay
 import components.CardContent
 import components.Icon
 import components.SearchField
@@ -256,14 +257,17 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                                     Div {
                                         Text("${card.name}")
                                     }
-                                    if (card.categories.isNullOrEmpty().not()) {
+                                    listOf(
+                                        card.formatPay { appStringShort },
+                                        card.categories?.firstOrNull()
+                                    ).notEmpty?.let {
                                         Div({
                                             style {
                                                 fontSize(85.percent)
                                                 opacity(.85f)
                                             }
                                         }) {
-                                            Text(card.categories!!.first())
+                                            Text(bulletedString(*it.toTypedArray()))
                                         }
                                     }
                                 }
@@ -293,7 +297,10 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                         }
                     }
                 }.let { marker ->
-                    CardMarker(card, marker)
+                    CardMarker(
+                        card = card,
+                        marker = marker
+                    )
                 }
         }
 
