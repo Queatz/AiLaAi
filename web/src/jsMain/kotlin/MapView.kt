@@ -1,3 +1,4 @@
+import Styles.category
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,7 +9,9 @@ import androidx.compose.runtime.setValue
 import app.ailaai.api.cards
 import app.cards.MapList
 import app.cards.mapListDialog
+import app.components.HorizontalSpacer
 import app.components.Spacer
+import app.messaages.inList
 import com.queatz.db.Card
 import com.queatz.db.Geo
 import com.queatz.db.formatPay
@@ -41,12 +44,16 @@ import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
@@ -80,6 +87,10 @@ data class CardMarker(
     val marker: mapboxgl.Marker
 )
 
+sealed interface SearchFilter {
+    data object Paid : SearchFilter
+}
+
 @Composable
 fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) {
     var searchText by remember { mutableStateOf("") }
@@ -92,6 +103,7 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
     val scope = rememberCoroutineScope()
     val hasHash = remember { window.location.hash.isBlank() }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedFilters by remember { mutableStateOf(emptyList<SearchFilter>()) }
 
     val categories = remember(searchResults) {
         searchResults.mapNotNull { it.categories }.flatten().sortedDistinct()
@@ -108,7 +120,11 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
         isLoading = true
         delay(250)
 
-        api.cards(geo!!, search = searchText.notBlank, public = true) {
+        api.cards(
+            geo = geo!!,
+            search = searchText.notBlank,
+            public = true
+        ) {
             searchResults = it
         }
 
@@ -165,11 +181,25 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
         }
     }
 
-    val shownCards = remember(searchResults, selectedCategory) {
+    val shownCards = remember(searchResults, selectedCategory, selectedFilters) {
         if (selectedCategory == null) {
             searchResults
         } else {
             searchResults.filter { it.categories?.contains(selectedCategory) == true }
+        }.let {
+            if (selectedFilters.isEmpty()) {
+                it
+            } else {
+                it.filter { card ->
+                    selectedFilters.all { filter ->
+                        when (filter) {
+                            is SearchFilter.Paid -> {
+                                card.pay != null
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -396,11 +426,12 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                     boxSizing("border-box")
                 }
             }) {
-                // todo: translate
-                SearchField(searchText, "Search for people, places, services, and more",
-                    shadow = true,
-                    styles = {
-                    }) {
+                SearchField(
+                    value = searchText,
+                    // todo: translate
+                    placeholder = "Search for people, places, services, and more",
+                    shadow = true
+                ) {
                     searchText = it
                 }
                 Div({
@@ -413,6 +444,41 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                         position(Position.Relative)
                     }
                 }) {
+                    if (searchResults.any { it.pay != null }) {
+                        var paidFilterSelected = selectedFilters.any { it is SearchFilter.Paid }
+                        Div({
+                            classes(Styles.floatingButton)
+
+                            if (paidFilterSelected) {
+                                classes(Styles.floatingButtonSelected)
+                            }
+
+                            style {
+                                flexShrink(0)
+                            }
+
+                            onClick {
+                                selectedFilters = if (paidFilterSelected) {
+                                    emptyList<SearchFilter>()
+                                } else {
+                                    SearchFilter.Paid.inList()
+                                }
+                            }
+                        }) {
+                            Icon("payments")
+                            // todo: translate
+                            Text("Paid")
+                        }
+                        Div({
+                            style {
+                                margin(.5f.r)
+                                borderRadius(.5f.r)
+                                backgroundColor(Styles.colors.tertiary)
+                                flexShrink(0)
+                                width(.25.r)
+                            }
+                        })
+                    }
                     categories.forEach { category ->
                         Button({
                             classes(Styles.floatingButton)
