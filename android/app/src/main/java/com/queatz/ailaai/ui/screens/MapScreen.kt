@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MyLocation
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,7 +99,6 @@ import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.Menu
-import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
@@ -443,7 +441,7 @@ fun MapScreen(
                                             .widthIn(max = 240.dp)
                                     ) {
                                         Text(
-                                            buildAnnotatedString {
+                                            text = buildAnnotatedString {
                                                 withStyle(MaterialTheme.typography.titleMedium.toSpanStyle()) {
                                                     append(card.npc?.name.orEmpty())
                                                 }
@@ -454,12 +452,12 @@ fun MapScreen(
                                             }
                                         )
                                         card.npc?.text?.let {
-                                            Text(it)
+                                            Text(text = it)
                                         }
                                     }
                                 } else {
                                     OutlinedText(
-                                        card.name ?: "",
+                                        text = card.name ?: "",
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center,

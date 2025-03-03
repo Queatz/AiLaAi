@@ -131,26 +131,18 @@ fun ExploreScreen() {
     var shownTab by rememberSavableStateOf(tab)
     var cards by remember { mutableStateOf(cache[tab] ?: emptyList()) }
     var isLoading by rememberStateOf(cards.isEmpty())
-    val filters by remember(filterPaid, tab) {
+    val filters by remember(filterPaid, cards) {
         mutableStateOf(
-            when (tab) {
-                MainTab.Local, MainTab.Friends -> {
-                    if (cards.any { it.pay != null }) {
-                        listOf(
-                            SearchFilter(
-                                paidString,
-                                Icons.Outlined.Payments,
-                                filterPaid
-                            ) {
-                                filterPaid = !filterPaid
-                            }
-                        )
-                    } else {
-                        emptyList()
-                    }
-                }
-
-                else -> emptyList()
+            if (cards.any { it.pay != null }) {
+                SearchFilter(
+                    name = paidString,
+                    icon = Icons.Outlined.Payments,
+                    selected = filterPaid
+                ) {
+                    filterPaid = !filterPaid
+                }.inList()
+            } else {
+                emptyList()
             }
         )
     }
