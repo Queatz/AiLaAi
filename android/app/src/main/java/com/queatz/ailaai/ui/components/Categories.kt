@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.boundsInParent
@@ -87,14 +88,17 @@ fun Categories(
                         Text(it.name)
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = .25f.pad)
-                        .width(2.dp)
-                        .height(16.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
-                )
+                if (categories.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = .25f.pad)
+                            .width(2.dp)
+                            .height(16.dp)
+                            .shadow(1.elevation, MaterialTheme.shapes.medium)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+                    )
+                }
             }
 
             categories.forEachIndexed { index, it ->

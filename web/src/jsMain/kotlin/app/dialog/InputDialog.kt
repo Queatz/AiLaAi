@@ -73,6 +73,7 @@ suspend fun inputDialog(
                     styles = {
                         margin(0.r)
                         maxWidth(100.percent)
+                        width(100.percent)
                         inputStyles()
                     },
                     onDismissRequest = {

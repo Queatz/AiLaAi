@@ -274,7 +274,7 @@ fun GroupItem(
                     }
                 }
             }
-            if (group.pin == true) {
+            if (group.pin == true && info == GroupInfo.LatestMessage) {
                 Icon("keep") {
                     marginLeft(.5.r)
                     fontSize(16.px)

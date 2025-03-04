@@ -885,12 +885,16 @@ fun GroupScreen(groupId: String) {
                                         R.string.hide
                                     )
                                 ) {
-                                    val hide = !hidden
                                     scope.launch {
-                                        api.updateMember(myMember.member!!.id!!, Member(hide = hide)) {
-                                            if (hide) {
+                                        api.updateMember(
+                                            id = myMember.member!!.id!!,
+                                            member = Member(hide = !hidden)
+                                        ) {
+                                            if (!hidden) {
                                                 context.toast(R.string.group_hidden)
                                                 nav.popBackStack()
+                                            } else {
+                                                reload()
                                             }
                                         }
                                     }

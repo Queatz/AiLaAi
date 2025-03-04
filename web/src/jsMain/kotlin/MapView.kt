@@ -469,15 +469,18 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                             // todo: translate
                             Text("Paid")
                         }
-                        Div({
-                            style {
-                                margin(.5f.r)
-                                borderRadius(.5f.r)
-                                backgroundColor(Styles.colors.tertiary)
-                                flexShrink(0)
-                                width(.25.r)
-                            }
-                        })
+                        if (categories.isNotEmpty()) {
+                            Div({
+                                style {
+                                    margin(.5f.r)
+                                    borderRadius(.5f.r)
+                                    backgroundColor(Styles.colors.tertiary)
+                                    flexShrink(0)
+                                    width(.25.r)
+                                    property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.125)")
+                                }
+                            })
+                        }
                     }
                     categories.forEach { category ->
                         Button({

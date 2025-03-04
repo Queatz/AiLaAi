@@ -271,8 +271,6 @@ fun FriendsScreen() {
         }
     }
 
-    val tabs = listOf(MainTab.Friends, MainTab.Local)
-
     showFriendStatusDialog?.let { (person, status) ->
         PersonStatusDialog(
             onDismissRequest = { showFriendStatusDialog = null },
@@ -450,7 +448,7 @@ fun FriendsScreen() {
                         }
 
                         is SwipeResult.Next -> {
-                            nav.appNavigate(AppNav.Schedule)
+                            nav.appNavigate(AppNav.Explore)
                         }
 
                         is SwipeResult.Select<*> -> Unit

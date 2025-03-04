@@ -4,18 +4,27 @@ import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Pin
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,7 +46,18 @@ import coil3.request.crossfade
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.attachmentText
+import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.isUnread
+import com.queatz.ailaai.extensions.name
+import com.queatz.ailaai.extensions.nullIfBlank
+import com.queatz.ailaai.extensions.photos
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.calls
@@ -356,7 +376,7 @@ fun ContactResult(
                         .padding(end = 1.pad)
                 )
             }
-            if (pinned) {
+            if (pinned && info == GroupInfo.LatestMessage) {
                 Icon(
                     imageVector = Icons.Outlined.PushPin,
                     contentDescription = null,
