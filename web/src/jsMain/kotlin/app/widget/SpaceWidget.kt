@@ -2,6 +2,7 @@ package app.widget
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,6 +91,7 @@ data class DrawInfo(
 
 @Composable
 fun SpaceWidget(widgetId: String) {
+    val me by application.me.collectAsState()
     var dirty by remember(widgetId) { mutableStateOf<Int?>(null) }
     var data by remember(widgetId) { mutableStateOf<SpaceData?>(null) }
     var cardId by remember(widgetId) { mutableStateOf<String?>(null) }
@@ -121,6 +123,8 @@ fun SpaceWidget(widgetId: String) {
             }
         }
     }
+
+    val canEdit = card?.person == me?.id
 
     LaunchedEffect(dirty) {
         if (dirty != null) {
@@ -273,8 +277,10 @@ fun SpaceWidget(widgetId: String) {
                                     }
                                 ) {
                                     foundItem = true
-                                    draggedIndex = index
-                                    draggedOffset = (mouseX - x) to (mouseY - y)
+                                    if (canEdit) {
+                                        draggedIndex = index
+                                        draggedOffset = (mouseX - x) to (mouseY - y)
+                                    }
                                     selectedItem = items[index]
                                 }
                             }
@@ -304,19 +310,22 @@ fun SpaceWidget(widgetId: String) {
                 onMouseMove { event ->
                     when (tool) {
                         SpaceWidgetTool.Default -> {
-                            draggedIndex?.let { index ->
-                                val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                                val newX = event.clientX - rect.left - offset.first - draggedOffset.first
-                                val newY = event.clientY - rect.top - offset.second - draggedOffset.second
-                                data = data!!.copy(
-                                    items = data!!.items!!.toMutableList().apply {
-                                        val item = removeAt(index)
-                                        add(index, item.move(newX to newY))
-                                    }
-                                )
-                                dirty = nextInt()
-                                drawFunc()
+                            if (canEdit) {
+                                draggedIndex?.let { index ->
+                                    val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
+                                    val newX = event.clientX - rect.left - offset.first - draggedOffset.first
+                                    val newY = event.clientY - rect.top - offset.second - draggedOffset.second
+                                    data = data!!.copy(
+                                        items = data!!.items!!.toMutableList().apply {
+                                            val item = removeAt(index)
+                                            add(index, item.move(newX to newY))
+                                        }
+                                    )
+                                    dirty = nextInt()
+                                    drawFunc()
+                                }
                             }
+
                             draggingCanvas?.let { (initialOffset, initialMouse) ->
                                 offset =
                                     (initialOffset.first + (event.clientX - initialMouse.first)) to (initialOffset.second + (event.clientY - initialMouse.second))
@@ -396,6 +405,8 @@ fun SpaceWidget(widgetId: String) {
                 }
 
                 onClick { event ->
+                    if (!canEdit) return@onClick
+
                     val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
                     val mouseX = event.clientX - rect.left - offset.first
                     val mouseY = event.clientY - rect.top - offset.second
@@ -476,23 +487,31 @@ fun SpaceWidget(widgetId: String) {
                             }
 
                             is SpaceContent.Text -> {
-                                if (sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) {
-                                    scope.launch {
-                                        val text = inputDialog(
-                                            // todo: translate
-                                            title = "Text",
-                                            defaultValue = item.text.orEmpty(),
-                                            singleLine = false
-                                        )
-
-                                        if (!text.isNullOrBlank()) {
-                                            data = data!!.copy(
-                                                items = data!!.items!!.toMutableList().apply {
-                                                    removeAt(index)
-                                                    add(index, SpaceItem(SpaceContent.Text(page = item.page, text), position))
-                                                }
+                                if (canEdit) {
+                                    if (sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) {
+                                        scope.launch {
+                                            val text = inputDialog(
+                                                // todo: translate
+                                                title = "Text",
+                                                defaultValue = item.text.orEmpty(),
+                                                singleLine = false
                                             )
-                                            dirty = nextInt()
+
+                                            if (!text.isNullOrBlank()) {
+                                                data = data!!.copy(
+                                                    items = data!!.items!!.toMutableList().apply {
+                                                        removeAt(index)
+                                                        add(
+                                                            index,
+                                                            SpaceItem(
+                                                                SpaceContent.Text(page = item.page, text),
+                                                                position
+                                                            )
+                                                        )
+                                                    }
+                                                )
+                                                dirty = nextInt()
+                                            }
                                         }
                                     }
                                 }
@@ -505,12 +524,14 @@ fun SpaceWidget(widgetId: String) {
 
                 onKeyDown { event ->
                     if (event.key == "Delete") {
-                        if (selectedItem != null) {
-                            data = data!!.copy(
-                                items = data!!.items!!.filter { it.content != selectedItem?.content }
-                            )
-                            dirty = nextInt()
-                            selectedItem = null
+                        if (canEdit) {
+                            if (selectedItem != null) {
+                                data = data!!.copy(
+                                    items = data!!.items!!.filter { it.content != selectedItem?.content }
+                                )
+                                dirty = nextInt()
+                                selectedItem = null
+                            }
                         }
                     } else if (event.key == "Escape") {
                         if (drawInfo != null) {
@@ -570,12 +591,14 @@ fun SpaceWidget(widgetId: String) {
             }
         }
 
-        SpaceWidgetToolbar(
-            tool = tool,
-            onTool = {
-                tool = it
-            }
-        )
+        if (canEdit) {
+            SpaceWidgetToolbar(
+                tool = tool,
+                onTool = {
+                    tool = it
+                }
+            )
+        }
     }
 }
 
