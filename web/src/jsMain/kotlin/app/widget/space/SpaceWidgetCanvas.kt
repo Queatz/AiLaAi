@@ -5,6 +5,7 @@ import baseUrl
 import com.queatz.db.Card
 import com.queatz.widgets.widgets.SpaceContent
 import com.queatz.widgets.widgets.SpaceItem
+import notBlank
 import org.jetbrains.compose.web.css.Color
 import org.w3c.dom.CENTER
 import org.w3c.dom.CanvasRenderingContext2D
@@ -14,6 +15,9 @@ import org.w3c.dom.HTMLImageElement
 import org.w3c.dom.MIDDLE
 import org.w3c.dom.START
 import kotlin.math.PI
+import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.min
 
 fun drawCanvas(
     context: CanvasRenderingContext2D,
@@ -41,7 +45,7 @@ fun drawCanvas(
         items.forEachIndexed { index, (item, position) ->
             when (item) {
                 is SpaceContent.Line -> {
-                    if (item.page == cardId) {
+                    if (item.page == null || item.page == cardId) {
                         save()
                         lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
                         strokeStyle = Color.gray
@@ -54,24 +58,26 @@ fun drawCanvas(
                 }
 
                 is SpaceContent.Box -> {
-                    if (item.page == cardId) {
+                    if (item.page == null || item.page == cardId) {
                         save()
                         lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
                         strokeStyle = Color.gray
                         beginPath()
-                        rect(
-                            x = position.first,
-                            y = position.second,
-                            w = item.to.first - position.first,
-                            h = item.to.second - position.second
+
+                        roundedRect(
+                            x1 = position.first,
+                            y1 = position.second,
+                            x2 = item.to.first,
+                            y2 = item.to.second
                         )
+
                         stroke()
                         restore()
                     }
                 }
 
                 is SpaceContent.Circle -> {
-                    if (item.page == cardId) {
+                    if (item.page == null || item.page == cardId) {
                         save()
                         lineWidth = if (selectedItem?.content == item) 3.0 else 1.0
                         strokeStyle = Color.gray
@@ -91,14 +97,23 @@ fun drawCanvas(
                 }
 
                 is SpaceContent.Text -> {
-                    font = if (selectedItem?.content == item) {
-                        "bold 24px ${font.split(" ").last()}"
-                    } else {
-                        "24px ${font.split(" ").last()}"
-                    }
+                    if (item.page == null || item.page == cardId) {
+                        val fontSize = 24
+                        val lineHeight = fontSize * 1.5f
 
-                    textAlign = CanvasTextAlign.START
-                    fillText(item.text.orEmpty(), position.first, position.second)
+                        fillStyle = if (darkMode) Color.white else Color.black
+                        font = if (selectedItem?.content == item) {
+                            "bold ${fontSize}px ${font.split(" ").last()}"
+                        } else {
+                            "${fontSize}px ${font.split(" ").last()}"
+                        }
+
+                        textAlign = CanvasTextAlign.START
+
+                        item.text?.notBlank?.split("\n")?.forEachIndexed { index, text ->
+                            fillText(text, position.first, position.second + index * lineHeight)
+                        }
+                    }
                 }
 
                 is SpaceContent.Page -> {
@@ -183,11 +198,11 @@ fun drawCanvas(
                             lineWidth = 2.0
                             strokeStyle = if (darkMode) Color.gray else Styles.colors.primary
                             beginPath()
-                            rect(
-                                from.first,
-                                from.second,
-                                to.first - from.first,
-                                to.second - from.second
+                            roundedRect(
+                                x1 = from.first,
+                                y1 = from.second,
+                                x2 = to.first,
+                                y2 = to.second
                             )
                             stroke()
                             restore()

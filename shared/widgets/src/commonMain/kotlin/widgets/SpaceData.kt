@@ -24,6 +24,7 @@ sealed class SpaceContent {
 
     @Serializable
     class Text(
+        val page: String? = null,
         val text: String? = null
     ) : SpaceContent()
 

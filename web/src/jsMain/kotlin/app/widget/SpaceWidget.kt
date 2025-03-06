@@ -143,6 +143,7 @@ fun SpaceWidget(widgetId: String) {
     var draggingCanvas: Pair<Pair<Double, Double>, Pair<Double, Double>>? by remember { mutableStateOf(null) }
     var selectedItem by remember { mutableStateOf<SpaceItem?>(null) }
     var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var draggedOffset by remember { mutableStateOf(0.0 to 0.0) }
     var offset by remember { mutableStateOf(0.0 to 0.0) }
     var drawInfo by remember { mutableStateOf<DrawInfo?>(null) }
     var context by remember { mutableStateOf<CanvasRenderingContext2D?>(null) }
@@ -155,7 +156,15 @@ fun SpaceWidget(widgetId: String) {
     }
 
     // todo: kotlin/js bug, if we don't recreate the function, the function uses old values of these variables!
-    LaunchedEffect(context, offset, cardsById, items, selectedItem, darkMode, drawInfo) {
+    LaunchedEffect(
+        context,
+        offset,
+        cardsById,
+        items,
+        selectedItem,
+        darkMode,
+        drawInfo
+    ) {
         drawFunc = {
             context?.let {
                 drawCanvas(
@@ -218,6 +227,8 @@ fun SpaceWidget(widgetId: String) {
     ) {
         Canvas(
             attrs = {
+                classes(WidgetStyles.space)
+
                 style {
                     width(100.percent)
                     height(100.percent)
@@ -263,6 +274,7 @@ fun SpaceWidget(widgetId: String) {
                                 ) {
                                     foundItem = true
                                     draggedIndex = index
+                                    draggedOffset = (mouseX - x) to (mouseY - y)
                                     selectedItem = items[index]
                                 }
                             }
@@ -294,12 +306,12 @@ fun SpaceWidget(widgetId: String) {
                         SpaceWidgetTool.Default -> {
                             draggedIndex?.let { index ->
                                 val rect = (event.target as HTMLCanvasElement).getBoundingClientRect()
-                                val newX = event.clientX - rect.left - offset.first
-                                val newY = event.clientY - rect.top - offset.second
+                                val newX = event.clientX - rect.left - offset.first - draggedOffset.first
+                                val newY = event.clientY - rect.top - offset.second - draggedOffset.second
                                 data = data!!.copy(
                                     items = data!!.items!!.toMutableList().apply {
                                         val item = removeAt(index)
-                                        add(index, item.copy(position = newX to newY))
+                                        add(index, item.move(newX to newY))
                                     }
                                 )
                                 dirty = nextInt()
@@ -394,13 +406,14 @@ fun SpaceWidget(widgetId: String) {
                                 scope.launch {
                                     val text = inputDialog(
                                         // todo: translate
-                                        title = "Text"
+                                        title = "Text",
+                                        singleLine = false
                                     )
 
                                     if (!text.isNullOrBlank()) {
                                         data = data!!.copy(
                                             items = data!!.items!!.toMutableList().apply {
-                                                add(SpaceItem(SpaceContent.Text(text), mouseX to mouseY))
+                                                add(SpaceItem(SpaceContent.Text(page = cardId, text), mouseX to mouseY))
                                             }
                                         )
                                         dirty = nextInt()
@@ -468,14 +481,15 @@ fun SpaceWidget(widgetId: String) {
                                         val text = inputDialog(
                                             // todo: translate
                                             title = "Text",
-                                            defaultValue = item.text.orEmpty()
+                                            defaultValue = item.text.orEmpty(),
+                                            singleLine = false
                                         )
 
                                         if (!text.isNullOrBlank()) {
                                             data = data!!.copy(
                                                 items = data!!.items!!.toMutableList().apply {
                                                     removeAt(index)
-                                                    add(index, SpaceItem(SpaceContent.Text(text), mouseX to mouseY))
+                                                    add(index, SpaceItem(SpaceContent.Text(page = item.page, text), position))
                                                 }
                                             )
                                             dirty = nextInt()
@@ -563,4 +577,39 @@ fun SpaceWidget(widgetId: String) {
             }
         )
     }
+}
+
+private fun SpaceItem.move(position: Pair<Double, Double>): SpaceItem {
+    val offset = (position.first - this.position.first) to (position.second - this.position.second)
+
+    return when (val content = content) {
+        is SpaceContent.Box -> {
+            copy(
+                content = SpaceContent.Box(
+                    page = content.page,
+                    to = (content.to.first + offset.first) to (content.to.second + offset.second)
+                )
+            )
+        }
+
+        is SpaceContent.Line -> {
+            copy(
+                content = SpaceContent.Line(
+                    page = content.page,
+                    to = (content.to.first + offset.first) to (content.to.second + offset.second)
+                )
+            )
+        }
+
+        is SpaceContent.Circle -> {
+            copy(
+                content = SpaceContent.Circle(
+                    page = content.page,
+                    to = (content.to.first + offset.first) to (content.to.second + offset.second)
+                )
+            )
+        }
+
+        else -> this@move
+    }.copy(position = position)
 }

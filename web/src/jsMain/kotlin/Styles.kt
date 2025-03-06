@@ -97,6 +97,7 @@ object Styles : StyleSheet() {
 
         object dark {
             val background = Color("#18191a")
+            val surface = Color("#232526")
         }
     }
 

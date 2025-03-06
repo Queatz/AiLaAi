@@ -24,9 +24,14 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconToggleButton
+import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -451,21 +456,26 @@ fun ExploreScreen() {
                             )
                         }
                     }
-                    if (!showOpenGroups) {
-                        IconButton({
-                            showAsMap = !showAsMap
-                        }) {
-                            Icon(
-                                imageVector = if (showAsMap) Icons.Outlined.ViewAgenda else Icons.Outlined.Map,
-                                contentDescription = stringResource(R.string.map)
-                            )
+                    FilledTonalIconToggleButton(
+                        checked = !showAsMap && !showOpenGroups,
+                        onCheckedChange = {
+                            showAsMap = !it
+                            showOpenGroups = false
                         }
-                    }
-                    IconButton({
-                        showOpenGroups = !showOpenGroups
-                    }) {
+                    ) {
                         Icon(
-                            imageVector = if (showOpenGroups) Icons.Outlined.Map else Icons.Outlined.Forum,
+                            imageVector = Icons.Outlined.ViewAgenda,
+                            contentDescription = stringResource(R.string.map)
+                        )
+                    }
+                    FilledTonalIconToggleButton(
+                        checked = showOpenGroups,
+                        onCheckedChange = {
+                            showOpenGroups = it
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Forum,
                             contentDescription = stringResource(R.string.groups)
                         )
                     }
