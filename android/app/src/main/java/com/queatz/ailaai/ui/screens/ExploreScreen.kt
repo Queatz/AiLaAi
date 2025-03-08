@@ -106,10 +106,12 @@ import takeInventory
 var exploreInitialCategory: String? = null
 
 private var cache = mutableMapOf<MainTab, List<Card>>()
+private var showBarCache = true
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen() {
+    val me = me
     val paidString = stringResource(R.string.paid)
     val state = rememberLazyGridState()
     val scope = rememberCoroutineScope()
@@ -151,12 +153,29 @@ fun ExploreScreen() {
             }
         )
     }
+
+    // Inventories
     var inventories by rememberStateOf(emptyList<Inventory>())
     var showInventory by rememberStateOf<String?>(null)
     var showInventoryDialog by rememberStateOf<List<InventoryItemExtended>?>(null)
     var showInventoryItemDialog by rememberStateOf<InventoryItemExtended?>(null)
-    var showBar by rememberStateOf(true)
+
+    // Map
+    var showBar by rememberStateOf(showBarCache)
     val mapControl = remember { MapControl() }
+
+    // Posts
+    val bottomSheetState = rememberBottomSheetScaffoldState()
+    val sheetPeekHeight = 84.dp
+    val sheetCornerRadius by animateDpAsState(
+        targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
+        animationSpec = tween(durationMillis = 500)
+    )
+    val storiesState = remember { StoriesScreenState() }
+
+    LaunchedEffect(showBar) {
+        showBarCache = showBar
+    }
 
     suspend fun reloadInventories() {
         if (showAsMap && (mapGeo ?: geo) != null) {
@@ -367,14 +386,6 @@ fun ExploreScreen() {
         loadMore()
     }
 
-    val bottomSheetState = rememberBottomSheetScaffoldState()
-    val sheetPeekHeight = 84.dp
-    val sheetCornerRadius by animateDpAsState(
-        targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
-        animationSpec = tween(durationMillis = 500)
-    )
-    val storiesState = remember { StoriesScreenState() }
-
     BackHandler(bottomSheetState.bottomSheetState.currentValue == SheetValue.Expanded) {
         scope.launch {
             bottomSheetState.bottomSheetState.partialExpand()
@@ -409,7 +420,7 @@ fun ExploreScreen() {
         ),
         sheetContent = {
             StoriesScreen(
-                geo = geo,
+                geo = shownGeo ?: mapGeo ?: geo,
                 storiesState = storiesState
             )
         }
@@ -493,7 +504,7 @@ fun ExploreScreen() {
                 when {
                     showOpenGroups -> {
                         GroupsScreen(
-                            (shownGeo ?: mapGeo ?: geo)?.toGeo()
+                            geo = (shownGeo ?: mapGeo ?: geo)?.toGeo()
                         )
                     }
                     showAsMap -> {
@@ -568,7 +579,6 @@ fun ExploreScreen() {
                         }
                     }
                     else -> {
-                        val me = me
                         MainTabs(tab, { tab = it })
                         CardList(
                             state = state,

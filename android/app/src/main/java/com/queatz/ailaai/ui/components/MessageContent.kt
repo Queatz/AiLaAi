@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
+import app.ailaai.api.newReminder
 import app.ailaai.api.profile
 import app.ailaai.api.reactToMessage
 import app.ailaai.api.sticker
@@ -73,11 +74,13 @@ import com.queatz.ailaai.extensions.save
 import com.queatz.ailaai.extensions.share
 import com.queatz.ailaai.extensions.shareAudio
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.extensions.status
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.message.MessageReactions
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.schedule.ScheduleReminderDialog
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.trade.ActiveTradeItem
 import com.queatz.ailaai.trade.TradeDialog
@@ -105,6 +108,7 @@ import com.queatz.db.PhotosAttachment
 import com.queatz.db.ProfilesAttachment
 import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
+import com.queatz.db.Reminder
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
 import com.queatz.db.StickerAttachment
@@ -116,6 +120,9 @@ import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock.System.now
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import trade
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -168,6 +175,7 @@ fun ColumnScope.MessageContent(
     var attachedAudio by remember { mutableStateOf<String?>(null) }
     var attachedUrls by remember(message) { mutableStateOf<List<UrlAttachment>>(emptyList()) }
     var selectedBitmap by remember { mutableStateOf<String?>(null) }
+    var showReminderDialog by remember { mutableStateOf<String?>(null) }
     val nav = nav
     val writeExternalStoragePermissionRequester = permissionRequester(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     var showStoragePermissionDialog by rememberStateOf(false)
@@ -238,6 +246,36 @@ fun ColumnScope.MessageContent(
         }
     }
 
+    showReminderDialog?.let { reminderText ->
+        ScheduleReminderDialog(
+            onDismissRequest = {
+                showReminderDialog = null
+            },
+            initialReminder = Reminder(
+                title = reminderText,
+                start = now().startOfMinute()
+            ),
+            showTitle = true,
+            confirmText = stringResource(R.string.add_reminder)
+        ) { reminder ->
+            scope.launch {
+                api.newReminder(
+                    Reminder(
+                        title = reminder.title?.trim(),
+                        start = reminder.start ?: now().startOfMinute(),
+                        end = reminder.end,
+                        schedule = reminder.schedule,
+                        timezone = TimeZone.currentSystemDefault().id,
+                        utcOffset = TimeZone.currentSystemDefault().offsetAt(now()).totalSeconds / (60.0 * 60.0),
+                    )
+                ) {
+                    context.toast(R.string.reminder_created)
+                }
+                showReminderDialog = null
+            }
+        }
+    }
+
     if (showMessageDialog) {
         val messageString = stringResource(R.string.message)
         val savedString = stringResource(R.string.saved)
@@ -265,12 +303,13 @@ fun ColumnScope.MessageContent(
                 }
             }
 
-                if (canReply) {
+            if (canReply) {
                 menuItem(stringResource(R.string.reply)) {
                     onShowMessageDialog(false)
                     onReply(message)
                 }
             }
+
             menuItem(stringResource(R.string.reply_in_new_group)) {
                 onShowMessageDialog(false)
                 onReplyInNewGroup(message)
@@ -334,6 +373,10 @@ fun ColumnScope.MessageContent(
             }
 
             if (message.text?.isNotBlank() == true) {
+                menuItem(stringResource(R.string.create_reminder)) {
+                    showReminderDialog = message.text ?: ""
+                    onShowMessageDialog(false)
+                }
                 menuItem(stringResource(R.string.copy)) {
                     (message.text ?: "").copyToClipboard(context, messageString)
                     context.toast(R.string.copied)
@@ -978,12 +1021,12 @@ fun ColumnScope.MessageContent(
             alignment = if (isMe) Alignment.End else Alignment.Start,
             modifier = Modifier
                 .padding(horizontal = 1.pad).let {
-                if (isReply) {
-                    it.padding(bottom = 1.pad)
-                } else {
-                    it.padding(bottom = .5f.pad)
+                    if (isReply) {
+                        it.padding(bottom = 1.pad)
+                    } else {
+                        it.padding(bottom = .5f.pad)
+                    }
                 }
-            }
         ) {
             onUpdated()
         }

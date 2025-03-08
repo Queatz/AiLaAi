@@ -85,8 +85,8 @@ fun drawCanvas(
                         ellipse(
                             x = position.first,
                             y = position.second,
-                            radiusX = (item.to.first - position.first).coerceAtLeast(0.0),
-                            radiusY = (item.to.second - position.second).coerceAtLeast(0.0),
+                            radiusX = (item.to.first - position.first).absoluteValue,
+                            radiusY = (item.to.second - position.second).absoluteValue,
                             rotation = 0.0,
                             startAngle = 0.0,
                             endAngle = 360.0
@@ -219,8 +219,8 @@ fun drawCanvas(
                             ellipse(
                                 x = from.first,
                                 y = from.second,
-                                radiusX = (to.first - from.first).coerceAtLeast(0.0),
-                                radiusY = (to.second - from.second).coerceAtLeast(0.0),
+                                radiusX = (to.first - from.first).absoluteValue,
+                                radiusY = (to.second - from.second).absoluteValue,
                                 rotation = 0.0,
                                 startAngle = 0.0,
                                 endAngle = 360.0

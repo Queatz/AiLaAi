@@ -1918,7 +1918,7 @@ fun GroupScreen(groupId: String) {
 
             if (showScheduleNewReminderDialog != null) {
                 ScheduleReminderDialog(
-                    {
+                    onDismissRequest = {
                         showScheduleNewReminderDialog = null
                     },
                     initialReminder = Reminder(
