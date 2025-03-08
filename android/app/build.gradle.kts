@@ -158,6 +158,9 @@ dependencies {
         exclude("com.android.support")
     }
 
+    // ProtooJS
+   implementation("org.protoojs.droid:protoo-client:4.0.3")
+
     // Development
     debugImplementation("androidx.compose.ui:ui-tooling:${versions.compose}")
 }
