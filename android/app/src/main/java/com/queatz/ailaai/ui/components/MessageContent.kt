@@ -119,7 +119,9 @@ import com.queatz.db.TradeExtended
 import com.queatz.db.UrlAttachment
 import com.queatz.db.VideosAttachment
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
@@ -269,7 +271,9 @@ fun ColumnScope.MessageContent(
                         utcOffset = TimeZone.currentSystemDefault().offsetAt(now()).totalSeconds / (60.0 * 60.0),
                     )
                 ) {
-                    context.toast(R.string.reminder_created)
+                    withContext(Dispatchers.Main) {
+                        context.toast(R.string.reminder_created)
+                    }
                 }
                 showReminderDialog = null
             }

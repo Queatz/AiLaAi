@@ -55,10 +55,10 @@ fun Route.storyRoutes() {
                 meOrNull.let { me ->
                     if (me == null) {
                         db.stories(
-                            geo,
-                            defaultNearbyMaxDistanceInMeters,
-                            call.parameters["offset"]?.toInt() ?: 0,
-                            call.parameters["limit"]?.toInt() ?: 20
+                            geo = geo,
+                            nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
+                            offset = call.parameters["offset"]?.toInt() ?: 0,
+                            limit = call.parameters["limit"]?.toInt() ?: 20
                         )
                     } else {
                         call.parameters["public"]?.toBoolean().let {

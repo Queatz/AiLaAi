@@ -38,6 +38,7 @@ fun ScheduleReminderDialog(
     var reminder by remember(initialReminder) {
         mutableStateOf(
             Reminder(
+                title = initialReminder.title,
                 start = initialReminder.start,
                 end = initialReminder.end,
                 schedule = initialReminder.schedule

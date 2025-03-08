@@ -248,7 +248,7 @@ fun ExploreScreen() {
         hasMore = cards.size > oldSize
         isError = false
         isLoading = false
-        shownGeo = geo
+        shownGeo = mapGeo ?: geo
         shownValue = value
         shownTab = tab
 
@@ -271,7 +271,7 @@ fun ExploreScreen() {
     suspend fun loadMore(
         reload: Boolean = false,
     ) {
-        val geo = (mapGeo?.takeIf { showAsMap } ?: geo) ?: return
+        val geo = mapGeo ?: geo ?: return
         if (reload) {
             offset = 0
             hasMore = true
@@ -281,7 +281,7 @@ fun ExploreScreen() {
             MainTab.Local,
                 -> {
                 api.cards(
-                    geo.toGeo(),
+                    geo = geo.toGeo(),
                     offset = offset,
                     paid = filterPaid.takeIf { it },
                     search = value.notBlank,
@@ -420,7 +420,7 @@ fun ExploreScreen() {
         ),
         sheetContent = {
             StoriesScreen(
-                geo = shownGeo ?: mapGeo ?: geo,
+                geo = mapGeo ?: geo,
                 storiesState = storiesState
             )
         }
@@ -504,7 +504,7 @@ fun ExploreScreen() {
                 when {
                     showOpenGroups -> {
                         GroupsScreen(
-                            geo = (shownGeo ?: mapGeo ?: geo)?.toGeo()
+                            geo = (mapGeo ?: geo)?.toGeo()
                         )
                     }
                     showAsMap -> {
@@ -584,7 +584,7 @@ fun ExploreScreen() {
                             state = state,
                             cards = cardsOfCategory,
                             isMine = { it.person == me?.id },
-                            geo = geo,
+                            geo = mapGeo ?: geo,
                             onChanged = {
                                 scope.launch {
                                     clear()
