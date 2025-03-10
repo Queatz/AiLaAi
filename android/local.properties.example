@@ -5,6 +5,7 @@
 # For customization when using a Version Control System, please read the
 # header note.
 #Sat Mar 08 12:24:49 EST 2025
+AGP_VERSION=
 GOOGLE_MAPS_API_KEY=
 HMS_APP_ID=
 keyAlias=

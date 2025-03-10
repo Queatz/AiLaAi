@@ -5,7 +5,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.9.0")
+        val properties = java.util.Properties().apply {
+            load(file("local.properties").inputStream())
+        }
+        val agpVersion = properties.getProperty("AGP_VERSION").orEmpty().ifBlank {
+            "8.8.0-alpha05"
+        }
+        classpath("com.android.tools.build:gradle:$agpVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
         classpath("com.huawei.agconnect:agcp:1.9.1.300")
         classpath("com.google.gms:google-services:4.4.2")
