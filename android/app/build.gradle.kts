@@ -48,31 +48,39 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        resourceConfigurations.addAll(setOf("en", "vi"))
     }
     buildFeatures {
-        viewBinding = true
+        buildConfig = true
         compose = true
+        viewBinding = true
     }
     signingConfigs {
-        create("release") {
-            storeFile = file(properties.getProperty("storeFile"))
-            storePassword = properties.getProperty("storePassword")
-            keyAlias = properties.getProperty("keyAlias")
-            keyPassword = properties.getProperty("keyPassword")
+        properties.getProperty("storeFile").let {
+            if (it.isNotBlank()) {
+                create("release") {
+                    storeFile = file(it)
+                    storePassword = properties.getProperty("storePassword")
+                    keyAlias = properties.getProperty("keyAlias")
+                    keyPassword = properties.getProperty("keyPassword")
+                }
+            }
         }
     }
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfigs.findByName("debug")?.let {
+                signingConfig = it
+            }
 
             // This is here because of just how slow Jetpack Compose is in debug mode
             isDebuggable = false
         }
         release {
-            signingConfig = signingConfigs.getByName("release")
-//            isMinifyEnabled = true
-//            isShrinkResources = true
+            signingConfigs.findByName("debug")?.let {
+                signingConfig = it
+            }
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -90,6 +98,9 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    androidResources {
+        localeFilters.addAll(setOf("en", "vi"))
     }
 }
 
@@ -109,7 +120,7 @@ dependencies {
 
     // Compose
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.navigation:navigation-compose:2.8.8")
     implementation("androidx.compose.ui:ui:${versions.compose}")
     implementation("androidx.compose.material:material-icons-extended:${versions.compose}")
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")

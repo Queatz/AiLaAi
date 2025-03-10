@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="push-js-1.0-SNAPSHOT">
-    <output-path>$PROJECT_DIR$/shared/push/build/libs</output-path>
-    <root id="archive" name="push-js-1.0-SNAPSHOT.jar">
-      <element id="module-output" name="ailaai-shared.push.jsMain" />
-    </root>
-  </artifact>
-</component>

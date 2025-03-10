@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="reminder-jvm-1.0-SNAPSHOT">
-    <output-path>$PROJECT_DIR$/shared/reminder/build/libs</output-path>
-    <root id="archive" name="reminder-jvm-1.0-SNAPSHOT.jar">
-      <element id="module-output" name="ailaai-shared.reminder.jvmMain" />
-    </root>
-  </artifact>
-</component>
