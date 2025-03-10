@@ -30,6 +30,14 @@ fun Route.groupRoutes() {
                             member.seen = Clock.System.now()
                             db.update(member)
                         }
+                        // todo: Remove this when no longer needed
+                        // Make me host if there are no hosts
+                        if (group.members.orEmpty().none { it.member?.host == true }) {
+                            group.members?.find { it.person?.id == me.id }?.member?.let { myMember ->
+                                myMember.host = true
+                                db.update(myMember)
+                            }
+                        }
                     }
                 }?.forApi() ?: HttpStatusCode.NotFound
             }
