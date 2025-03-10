@@ -1,6 +1,5 @@
 package com.queatz.ailaai.extensions
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource

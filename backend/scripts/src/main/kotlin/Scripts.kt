@@ -40,7 +40,7 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
         )
 
         jvm {
-            jvmTarget("17")
+            jvmTarget("21")
             dependenciesFromCurrentContext(
                 "scripts", // :scripts (this library)
                 "models", // :models

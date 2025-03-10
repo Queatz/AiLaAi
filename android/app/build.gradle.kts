@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.konan.properties.Properties
 
 plugins {
@@ -16,6 +18,18 @@ plugins {
 
 val properties = Properties()
 properties.load(file("../local.properties").inputStream())
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
+    }
+}
 
 android {
     compileSdk = 35
@@ -74,11 +88,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = JavaVersion.VERSION_21.toString()
     }
     packaging {
         resources {
@@ -164,7 +178,7 @@ dependencies {
     implementation("com.google.auto.service:auto-service-annotations:1.1.1")
 
     // VideoSDK
-    implementation("live.videosdk:rtc-android-sdk:0.1.38") {
+    implementation("live.videosdk:rtc-android-sdk:0.2.0") {
         exclude("androidx.core")
         exclude("com.android.support")
     }
