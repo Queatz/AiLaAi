@@ -10,11 +10,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.BasicRichText
+import com.halilibo.richtext.ui.CodeBlockStyle
 import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.RichTextThemeProvider
+import com.halilibo.richtext.ui.string.RichTextString.Format.Code
 import com.halilibo.richtext.ui.string.RichTextStringStyle
 
 @Composable
@@ -41,10 +46,21 @@ fun LinkifyText(
         }
     ) {
         BasicRichText(
-            modifier = modifier,
-            style = RichTextStyle(
+            modifier = modifier, style = RichTextStyle(
+                // todo - this isn't applied to code blocks - investigate
+                codeBlockStyle = CodeBlockStyle(
+                    textStyle = style.copy(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp
+                    )
+                ),
                 stringStyle = RichTextStringStyle(
-                    linkStyle = TextLinkStyles(
+                    codeStyle = style.copy(
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                    ).toSpanStyle(), linkStyle = TextLinkStyles(
                         style = style.copy(color = MaterialTheme.colorScheme.primary).toSpanStyle()
                     )
                 )
