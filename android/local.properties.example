@@ -5,7 +5,10 @@
 # For customization when using a Version Control System, please read the
 # header note.
 #Sat Mar 08 12:24:49 EST 2025
-sdk.dir=/home/user/Android/Sdk
 GOOGLE_MAPS_API_KEY=
-HMS_APP_ID=123
-storeFile=false
+HMS_APP_ID=
+keyAlias=
+keyPassword=
+sdk.dir=
+storeFile=
+storePassword=
