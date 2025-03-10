@@ -29,7 +29,7 @@ fun SendMessageDialog(
     val sent = stringResource(R.string.sent)
 
     ChooseGroupDialog(
-        {
+        onDismissRequest = {
             onDismissRequest()
         },
         title = title,

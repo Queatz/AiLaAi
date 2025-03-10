@@ -21,7 +21,7 @@ fun SendTradeDialog(
     val me = me
 
     SendMessageDialog(
-        onDismissRequest,
+        onDismissRequest = onDismissRequest,
         title = stringResource(R.string.send_trade),
         confirmFormatter = defaultConfirmFormatter(
             R.string.send_trade,
@@ -29,6 +29,6 @@ fun SendTradeDialog(
             R.string.send_trade_to_groups,
             R.string.send_trade_to_x_groups
         ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
-        Message(attachment = json.encodeToString(TradeAttachment(tradeId)))
+        message = Message(attachment = json.encodeToString(TradeAttachment(tradeId)))
     )
 }

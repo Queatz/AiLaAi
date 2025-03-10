@@ -21,7 +21,7 @@ fun SendGroupDialog(
     val me = me
 
     SendMessageDialog(
-        onDismissRequest,
+        onDismissRequest = onDismissRequest,
         title = stringResource(R.string.send_group),
         confirmFormatter = defaultConfirmFormatter(
             R.string.send_group,
@@ -29,6 +29,6 @@ fun SendGroupDialog(
             R.string.send_group_to_groups,
             R.string.send_group_to_x_groups
         ) { it.name(someone, emptyGroup, me?.id?.let(::listOf) ?: emptyList()) },
-        Message(attachment = json.encodeToString(GroupAttachment(groupId)))
+        message = Message(attachment = json.encodeToString(GroupAttachment(groupId)))
     )
 }
