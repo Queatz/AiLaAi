@@ -156,6 +156,7 @@ dependencies {
     implementation("live.videosdk:rtc-android-sdk:0.1.38") {
         exclude("androidx.core")
         exclude("com.android.support")
+        exclude("org.protoojs.droid", "protoo-client")
     }
 
     // ProtooJS
