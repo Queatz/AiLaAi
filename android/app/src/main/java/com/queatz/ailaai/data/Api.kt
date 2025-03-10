@@ -33,7 +33,9 @@ val json = Json {
     explicitNulls = false
 }
 
-val api = Api()
+val api by lazy {
+    Api()
+}
 
 const val appDomain = "https://hitown.chat"
 val appDomains = listOf(
@@ -130,8 +132,6 @@ class Api : app.ailaai.api.Api() {
     }
 
     fun hasToken() = authToken != null
-
-//    suspend fun latestAppVersion() = httpData.get("$appDomain/latest").bodyAsText().trim().toIntOrNull()
 
     suspend fun latestAppVersionInfo() = httpDataClient.get("$appDomain/version-info").bodyAsText().trim().split(",").let {
         VersionInfo(

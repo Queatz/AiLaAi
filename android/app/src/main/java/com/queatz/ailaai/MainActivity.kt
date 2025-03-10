@@ -37,7 +37,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -161,7 +160,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
-import kotlinx.serialization.encodeToString
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.seconds
 

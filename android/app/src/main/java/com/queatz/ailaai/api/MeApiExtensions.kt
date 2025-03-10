@@ -16,12 +16,12 @@ suspend fun Api.updateProfilePhotoFromUri(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
     return updateProfilePhoto(
-        photo.asScaledJpeg(context) ?: run {
+        photo = photo.asScaledJpeg(context) ?: run {
             onError?.invoke(IllegalStateException("Uri returned null photo"))
             return
         },
-        onError,
-        onSuccess
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 

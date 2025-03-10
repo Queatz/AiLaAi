@@ -103,7 +103,7 @@ fun StoryContents(
                 },
                 actions = {
                     TextButton(
-                        {
+                        onClick = {
                             closeCallback.onCustomViewHidden()
                         },
                         modifier = Modifier
@@ -118,7 +118,7 @@ fun StoryContents(
 
     if (showOpenWidgetDialog) {
         AlertDialog(
-            {
+            onDismissRequest = {
                 showOpenWidgetDialog = false
             },
             text = {
@@ -127,7 +127,7 @@ fun StoryContents(
             },
             dismissButton = {
                 TextButton(
-                    {
+                    onClick = {
                         showOpenWidgetDialog = false
                     }
                 ) {
@@ -136,7 +136,7 @@ fun StoryContents(
             },
             confirmButton = {
                 TextButton(
-                    {
+                    onClick = {
                         showOpenWidgetDialog = false
                         Card().apply {
                             id = (source as StorySource.Card).id

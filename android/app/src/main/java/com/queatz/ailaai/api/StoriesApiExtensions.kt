@@ -20,10 +20,10 @@ suspend fun Api.uploadStoryPhotosFromUri(
         it.asScaledJpeg(context)
     }
     return uploadStoryPhotos(
-        story,
-        scaledPhotos,
-        onError,
-        onSuccess
+        story = story,
+        media = scaledPhotos,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -35,9 +35,9 @@ suspend fun Api.uploadStoryAudioFromUri(
     onSuccess: SuccessBlock<String>
 ) {
     return uploadStoryAudio(
-        story,
-        audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
-        onError,
-        onSuccess
+        story = story,
+        audio = audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
+        onError = onError,
+        onSuccess = onSuccess
     )
 }

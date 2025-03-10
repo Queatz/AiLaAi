@@ -20,9 +20,9 @@ suspend fun Api.uploadPhotosFromUris(
         it.asScaledJpeg(context)
     }
     return uploadPhotos(
-        scaledPhotos,
-        removeBackground,
-        onError,
-        onSuccess
+        photos = scaledPhotos,
+        removeBackground = removeBackground,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }

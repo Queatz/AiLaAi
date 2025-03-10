@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,13 +15,11 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,7 +77,6 @@ import com.queatz.db.isPart
 import com.queatz.db.toJsonStoryContent
 import com.queatz.widgets.Widgets
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonArray
 
 sealed class StorySource {
@@ -92,7 +88,7 @@ sealed class StorySource {
 
 @Composable
 fun StoryCreatorScreen(
-    source: StorySource
+    source: StorySource,
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
@@ -153,6 +149,7 @@ fun StoryCreatorScreen(
                     invalidate()
                 }
             }
+
             else -> {}
         }
         isLoading = false
@@ -382,12 +379,12 @@ fun StoryCreatorScreen(
                 when (source) {
                     is StorySource.Story -> {
                         StoryMenu(
-                            showMenu,
-                            {
+                            expanded = showMenu,
+                            onDismissRequest = {
                                 showMenu = false
                             },
-                            source.id,
-                            story,
+                            storyId = source.id,
+                            story = story,
                             isMine = story?.person == me?.id,
                             edited = edited,
                             editing = true,
@@ -401,17 +398,21 @@ fun StoryCreatorScreen(
                     }
 
                     is StorySource.Card,
-                    is StorySource.Profile -> {
+                    is StorySource.Profile,
+                        -> {
                         Dropdown(
-                            showMenu,
-                            {
+                            expanded = showMenu,
+                            onDismissRequest = {
                                 showMenu = false
                             }
                         ) {
-                            DropdownMenuItem({ Text(stringResource(R.string.reorder)) }, {
-                                showMenu = false
-                                showReorderContentDialog = true
-                            })
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.reorder)) },
+                                onClick = {
+                                    showMenu = false
+                                    showReorderContentDialog = true
+                                }
+                            )
                         }
                     }
 

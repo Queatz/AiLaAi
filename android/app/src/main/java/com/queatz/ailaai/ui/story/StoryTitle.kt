@@ -23,7 +23,7 @@ fun RowScope.StoryTitle(state: LazyGridState, title: String?) {
     val scope = rememberCoroutineScope()
 
     Crossfade(
-        isScrolled,
+        targetState = isScrolled,
         modifier = Modifier
             .weight(1f)
             .padding(horizontal = 1.pad),

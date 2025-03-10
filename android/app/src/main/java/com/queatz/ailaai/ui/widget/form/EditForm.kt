@@ -12,7 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,7 +33,6 @@ import com.queatz.db.Group
 import com.queatz.db.Script
 import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormOptions
-import kotlinx.coroutines.launch
 
 @Composable
 fun EditForm(
@@ -42,7 +40,6 @@ fun EditForm(
     formData: FormData,
     onFormData: (FormData) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     var showEditSubmitButtonTextDialog by rememberStateOf(false)
 
     val submitButtonText = formData.submitButtonText?.notBlank

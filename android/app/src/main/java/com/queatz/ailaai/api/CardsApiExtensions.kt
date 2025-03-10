@@ -18,13 +18,13 @@ suspend fun Api.uploadCardPhotoFromUri(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
     return uploadCardPhoto(
-        id,
-        photo.asScaledJpeg(context) ?: run {
+        id = id,
+        photo = photo.asScaledJpeg(context) ?: run {
             onError?.invoke(IllegalStateException("Uri returned null photo"))
             return
         },
-        onError,
-        onSuccess
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -47,13 +47,13 @@ suspend fun Api.uploadCardVideoFromUri(
         return
     }
     return uploadCardVideo(
-        id,
-        scaledVideo,
-        contentType,
-        filename,
-        uploadCallback,
-        onError,
-        onSuccess
+        id = id,
+        video = scaledVideo,
+        contentType = contentType,
+        filename = filename,
+        uploadCallback = uploadCallback,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -68,10 +68,10 @@ suspend fun Api.uploadCardContentPhotosFromUri(
         it.asScaledJpeg(context)
     }
     return uploadCardContentPhotos(
-        card,
-        scaledPhotos,
-        onError,
-        onSuccess
+        card = card,
+        media = scaledPhotos,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -83,10 +83,10 @@ suspend fun Api.uploadCardContentAudioFromUri(
     onSuccess: SuccessBlock<String>
 ) {
     return uploadCardContentAudio(
-        card,
-        audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
-        onError,
-        onSuccess
+        card = card,
+        audio = audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -101,10 +101,10 @@ suspend fun Api.uploadProfileContentPhotosFromUri(
         it.asScaledJpeg(context)
     }
     return uploadProfileContentPhotos(
-        card,
-        scaledPhotos,
-        onError,
-        onSuccess
+        profile = card,
+        media = scaledPhotos,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -116,9 +116,9 @@ suspend fun Api.uploadProfileContentAudioFromUri(
     onSuccess: SuccessBlock<String>
 ) {
     return uploadProfileContentAudio(
-        card,
-        audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
-        onError,
-        onSuccess
+        profile = card,
+        audio = audio.asInputProvider(context) ?: throw Exception("Couldn't load audio file"),
+        onError = onError,
+        onSuccess = onSuccess
     )
 }

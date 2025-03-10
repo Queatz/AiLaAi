@@ -1,6 +1,6 @@
 package com.queatz.ailaai
 
-sealed class AppNav private constructor(val route: String) {
+sealed class AppNav(val route: String) {
     object Schedule : AppNav("schedule")
     object Reminders : AppNav("reminders")
     object Explore : AppNav("explore")

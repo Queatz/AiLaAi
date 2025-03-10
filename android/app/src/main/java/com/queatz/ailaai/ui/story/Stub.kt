@@ -18,7 +18,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun Stub(text: String, onClick: (() -> Unit)? = null) {
     Text(
-        text,
+        text = text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.bodyMedium,

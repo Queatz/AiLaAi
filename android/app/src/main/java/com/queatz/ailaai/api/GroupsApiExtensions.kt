@@ -29,11 +29,11 @@ suspend fun Api.sendMediaFromUri(
         it.asScaledJpeg(context)
     }
     return sendMedia(
-        group,
-        scaledPhotos,
-        message,
-        onError,
-        onSuccess
+        group = group,
+        photos = scaledPhotos,
+        message = message,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -45,11 +45,11 @@ suspend fun Api.sendAudioFromUri(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) {
     return sendAudio(
-        group,
-        audio.asInputProvider(),
-        message,
-        onError,
-        onSuccess
+        group = group,
+        audio = audio.asInputProvider(),
+        message = message,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
@@ -80,12 +80,12 @@ suspend fun Api.sendVideosFromUri(
         return
     }
     return sendVideos(
-        group,
-        scaledVideos,
-        message,
-        uploadCallback,
-        onError,
-        onSuccess
+        group = group,
+        videos = scaledVideos,
+        message = message,
+        uploadCallback = uploadCallback,
+        onError = onError,
+        onSuccess = onSuccess
     )
 }
 
