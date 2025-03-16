@@ -46,7 +46,7 @@ suspend fun botHowToDialog() {
                       description: "Bot description",
                       keywords: ["keyword"] // null or empty to match all messages
                       config: [
-                        { key: string, label: string, placeholder: string, type: "string" | "number", required: boolean}
+                        { key: string, label: string, placeholder: string, type: "string" | "number", required: boolean }
                       ]
                     }
                 """.trimIndent())

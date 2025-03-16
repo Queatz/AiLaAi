@@ -7,6 +7,15 @@ apt update
 apt install certbot nginx default-jre python3-certbot-nginx
 ```
 
+See: https://arangodb.com/download-major/ubuntu/ for latest version of ArangoDB
+
+```shell
+echo 'deb https://download.arangodb.com/arangodb312/DEBIAN/ /' | sudo tee /etc/apt/sources.list.d/arangodb.list
+apt install apt-transport-https
+apt update
+apt install arangodb3
+```
+
 File: `/etc/nginx/sites-enabled/default`
 
 ```conf                      
@@ -38,9 +47,6 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/api.ailaai.app/privkey.pem; # man>
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-
-
 }
 
 server {

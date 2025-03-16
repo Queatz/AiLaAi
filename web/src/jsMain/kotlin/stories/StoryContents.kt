@@ -88,7 +88,6 @@ fun StoryContents(
     Style(WidgetStyles)
 
     val scope = rememberCoroutineScope()
-    val currentRecomposeScope = currentRecomposeScope
 
     storyContent.forEach { part ->
         when (part) {
@@ -168,8 +167,8 @@ fun StoryContents(
                         ) {
                             var success = false
                             api.commentOnStory(
-                                part.story,
-                                Comment(comment = it)
+                                id = part.story,
+                                comment = Comment(comment = it)
                             ) {
                                 success = true
                             }
@@ -191,9 +190,14 @@ fun StoryContents(
 
             is StoryContent.Section -> {
                 if (editable) {
+                    var value by remember(storyContent) { mutableStateOf(part.section) }
                     TextBox(
-                        part.section,
-                        onValue = { part.section = it; currentRecomposeScope.invalidate(); onEdited?.invoke() },
+                        value = value,
+                        onValue = {
+                            value = it
+                            part.section = it
+                            onEdited?.invoke()
+                        },
                         inline = true,
                         // todo translate
                         placeholder = "Section",
@@ -217,9 +221,14 @@ fun StoryContents(
 
             is StoryContent.Text -> {
                 if (editable) {
+                    var value by remember(storyContent) { mutableStateOf(part.text) }
                     TextBox(
-                        part.text,
-                        onValue = { part.text = it; currentRecomposeScope.invalidate(); onEdited?.invoke() },
+                        value = value,
+                        onValue = {
+                            part.text = it
+                            value = it
+                            onEdited?.invoke()
+                        },
                         inline = true,
                         // todo translate
                         placeholder = "Write",

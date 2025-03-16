@@ -148,7 +148,7 @@ fun StoriesPage(
                             title = titleString,
                             placeholder = "",
                             confirmButton = update,
-                            defaultValue = story!!.title ?: ""
+                            defaultValue = story.title ?: ""
                         )
 
                         if (title == null) return@launch
@@ -252,18 +252,22 @@ fun StoriesPage(
                         appText { noStories }
                     }
                 } else {
+                    val editable = (selected as? StoryNav.Selected)?.story?.let {
+                        it.person == me?.id && it.published != true
+                    } == true
                     StoryContents(
                         storyContent = storyContent,
                         onGroupClick = onGroupClick,
                         openInNewWindow = true,
-                        editable = (selected as? StoryNav.Selected)?.story?.let {
-                            it.person == me?.id && it.published != true
-                        } ?: false,
+                        editable = editable,
                         onEdited = { edited = true }
                     ) {
                         (selected as? StoryNav.Selected)?.story?.let { story ->
                             save(story)
                         }
+                    }
+                    if (editable) {
+                       // todo: add section
                     }
                 }
             }
@@ -271,7 +275,7 @@ fun StoriesPage(
     }
     if (selected is StoryNav.Selected) {
         PageTopBar(
-            "",
+            title = "",
 //                story.title?.notBlank ?: "New story"
             actions = {
                 if (edited) {
