@@ -12,6 +12,7 @@ import com.queatz.parameter
 import com.queatz.plugins.bots
 import com.queatz.plugins.db
 import com.queatz.plugins.me
+import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -21,6 +22,14 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 
 fun Route.botRoutes() {
+    get("bots/{id}") {
+        respond {
+            db.document(Bot::class, parameter("id"))?.takeIf {
+                it.isVisibleTo(meOrNull?.id)
+            } ?: HttpStatusCode.NotFound
+        }
+    }
+
     authenticate {
         get("bots") {
             respond {
@@ -57,14 +66,6 @@ fun Route.botRoutes() {
                         )
                     }
                 }
-            }
-        }
-
-        get("bots/{id}") {
-            respond {
-                db.document(Bot::class, parameter("id"))?.takeIf {
-                    it.isVisibleTo(me.id!!)
-                } ?: HttpStatusCode.NotFound
             }
         }
 
@@ -182,4 +183,4 @@ fun Route.botRoutes() {
     }
 }
 
-private fun Bot.isVisibleTo(personId: String) = creator == personId || open == true
+private fun Bot.isVisibleTo(personId: String?) = creator == personId || open == true

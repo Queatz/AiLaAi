@@ -157,6 +157,7 @@ fun collections() = listOf(
     Bot::class.db {
         ensurePersistentIndex(listOf(Bot::name.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Bot::creator.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Bot::open.name), PersistentIndexOptions())
     },
     BotData::class.db {
         ensurePersistentIndex(listOf(BotData::bot.name), PersistentIndexOptions())
