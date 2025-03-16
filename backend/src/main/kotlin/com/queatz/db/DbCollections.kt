@@ -162,6 +162,16 @@ fun collections() = listOf(
     BotData::class.db {
         ensurePersistentIndex(listOf(BotData::bot.name), PersistentIndexOptions())
     },
+    App::class.db {
+        ensurePersistentIndex(listOf(App::name.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(App::creator.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(App::open.name), PersistentIndexOptions())
+    },
+    AppPerson::class.db {
+        ensurePersistentIndex(listOf(AppPerson::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(AppPerson::app.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(AppPerson::permissions.name), PersistentIndexOptions())
+    },
     GroupBot::class.db {
         ensurePersistentIndex(listOf(GroupBot::bot.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(GroupBot::group.name), PersistentIndexOptions())

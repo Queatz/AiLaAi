@@ -541,6 +541,34 @@ data class BotData(
 ) : Model()
 
 @Serializable
+data class App(
+    var url: String? = null,
+    var name: String? = null,
+    var photo: String? = null,
+    var creator: String? = null,
+    var open: Boolean? = null,
+    var description: String? = null
+) : Model()
+
+enum class AppPermission {
+    Location,
+    Notifications,
+}
+
+@Serializable
+data class AppPerson(
+    var app: String? = null,
+    var person: String? = null,
+    var permissions: List<AppPermission>? = null
+) : Model()
+
+@Serializable
+data class AppData(
+    var app: String? = null,
+    var secret: String? = null
+) : Model()
+
+@Serializable
 data class BotConfigValue(
     var key: String? = null,
     var value: String? = null

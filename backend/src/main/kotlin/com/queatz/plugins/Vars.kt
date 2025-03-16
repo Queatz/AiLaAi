@@ -28,6 +28,7 @@ val notify = Notify()
 val ai = Ai()
 val platform = Platform()
 val bots = Bots()
+val apps = Apps()
 val openAi = OpenAi()
 
 const val defaultNearbyMaxDistanceInMeters = 100_000.0

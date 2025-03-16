@@ -297,6 +297,13 @@ data class BotDetailsBody(
 )
 
 @Serializable
+data class AppDetailsBody(
+    val url: String,
+    val photo: String? = null,
+    val data: AppData? = null
+)
+
+@Serializable
 class GroupBotExtended(
     var bot: Bot? = null,
     var groupBot: GroupBot? = null

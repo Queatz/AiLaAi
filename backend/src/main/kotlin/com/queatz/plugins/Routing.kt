@@ -27,9 +27,10 @@ fun Application.configureRouting() {
     remind.start(this)
     urlAttachmentFetcher.start(this)
     bots.start(this)
+    apps.start(this)
 
     routing {
-        get("/hi") { call.respondText("{\"hi\": true}", contentType = ContentType.Application.Json) }
+        get("/hi") { call.respondText("{ \"hi\": true }", contentType = ContentType.Application.Json) }
         platformRoutes()
         signRoutes()
         meRoutes()
@@ -69,6 +70,7 @@ fun Application.configureRouting() {
         statusRoutes()
         promptRoutes()
         ratingRoutes()
+        appRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {
