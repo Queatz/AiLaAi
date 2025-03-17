@@ -7,7 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Notes
+import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.FormatShapes
+import androidx.compose.material.icons.outlined.HistoryEdu
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.ListAlt
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Notes
@@ -15,6 +21,7 @@ import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -48,6 +55,7 @@ import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.LoadingIcon
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
@@ -223,26 +231,42 @@ fun StoryCreatorTools(
             showWidgetsMenu = false
         }) {
             // todo add search here
-            menuItem(Widgets.Script.stringResource) {
-                addWidget = Widgets.Script
-                showWidgetsMenu = false
-            }
-            menuItem(Widgets.Space.stringResource) {
-                scope.launch {
-                    api.createWidget(
-                        widget = Widgets.Space,
-                        data = json.encodeToString(SpaceData(card = (source as? StorySource.Card)?.id))
-                    ) {
-                        addPart(StoryContent.Widget(it.widget!!, it.id!!))
-                    }
+            Toolbar {
+                item(
+                    icon = Icons.Outlined.HistoryEdu,
+                    name = Widgets.Script.stringResource
+                ) {
+                    addWidget = Widgets.Script
+                    showWidgetsMenu = false
                 }
-                showWidgetsMenu = false
-            }
-            menuItem(Widgets.Web.stringResource) {
-                addWidget = Widgets.Web
-                showWidgetsMenu = false
-            }
-            menuItem(Widgets.ImpactEffortTable.stringResource) {
+
+                item(
+                    icon = Icons.Outlined.FormatShapes,
+                    name = Widgets.Space.stringResource
+                ) {
+                    scope.launch {
+                        api.createWidget(
+                            widget = Widgets.Space,
+                            data = json.encodeToString(SpaceData(card = (source as? StorySource.Card)?.id))
+                        ) {
+                            addPart(StoryContent.Widget(it.widget!!, it.id!!))
+                        }
+                    }
+                    showWidgetsMenu = false
+                }
+
+                item(
+                    icon = Icons.Outlined.Language,
+                    name = Widgets.Web.stringResource
+                ) {
+                    addWidget = Widgets.Web
+                    showWidgetsMenu = false
+                }
+
+                item(
+                    icon = Icons.Outlined.TableChart,
+                    name = Widgets.ImpactEffortTable.stringResource
+                ) {
                 scope.launch {
                     api.createWidget(
                         widget = Widgets.ImpactEffortTable,
@@ -252,14 +276,23 @@ fun StoryCreatorTools(
                     }
                 }
                 showWidgetsMenu = false
-            }
-            menuItem(Widgets.PageTree.stringResource) {
+                }
+
+                item(
+                    icon = Icons.Outlined.AccountTree,
+                    name = Widgets.PageTree.stringResource
+                ) {
                 addWidget = Widgets.PageTree
                 showWidgetsMenu = false
-            }
-            menuItem(Widgets.Form.stringResource) {
+                }
+
+                item(
+                    icon = Icons.Outlined.ListAlt,
+                    name = Widgets.Form.stringResource
+                ) {
                 addWidget = Widgets.Form
                 showWidgetsMenu = false
+                }
             }
         }
     }
@@ -361,85 +394,63 @@ fun StoryCreatorTools(
     }
 
     Card {
-        var viewport by remember { mutableStateOf(Size(0f, 0f)) }
-        val scrollState = rememberScrollState()
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(1.pad),
-            modifier = Modifier
-                .horizontalScroll(scrollState)
-                .onPlaced { viewport = it.boundsInParent().size }
-                .horizontalFadingEdge(viewport, scrollState)
-        ) {
-            IconButton(
-                onClick = {
-                    addPart(
-                        StoryContent.Section("")
-                    )
-                    addPart(
-                        StoryContent.Text("")
-                    )
-                }
+        Toolbar(singleLine = true) {
+            item(
+                icon = Icons.Outlined.Title,
+                name = stringResource(R.string.section),
             ) {
-                Icon(Icons.Outlined.Title, null)
+                addPart(
+                    StoryContent.Section("")
+                )
+                addPart(
+                    StoryContent.Text("")
+                )
             }
-            IconButton(
-                onClick = {
-                    addPart(
-                        StoryContent.Text("")
-                    )
-                }
+            item(
+                icon = Icons.AutoMirrored.Outlined.Notes,
+                name = stringResource(R.string.text),
             ) {
-                Icon(Icons.Outlined.Notes, null)
+                addPart(
+                    StoryContent.Text("")
+                )
             }
-            IconButton(
-                onClick = {
-                    showCardSelectorDialog = true
-                }
+            item(
+                icon = Icons.Outlined.Map,
+                name = stringResource(R.string.card),
             ) {
-                Icon(Icons.Outlined.Map, null)
+                showCardSelectorDialog = true
             }
-            IconButton(
-                onClick = {
-                    showAddProfilesDialog = true
-                }
+            item(
+                icon = Icons.Outlined.PersonAdd,
+                name = stringResource(R.string.profile),
             ) {
-                Icon(Icons.Outlined.PersonAdd, null)
+                showAddProfilesDialog = true
             }
-            IconButton(
-                onClick = {
-                    showCardGroupSelectorDialog = true
-                }
+            item(
+                icon = Icons.Outlined.People,
+                name = stringResource(R.string.group),
             ) {
-                Icon(Icons.Outlined.People, null)
+                showCardGroupSelectorDialog = true
             }
-            IconButton(
-                onClick = {
-                    showPhotoDialog = true
-                }
+            item(
+                icon = Icons.Outlined.Photo,
+                name = stringResource(R.string.photo),
+                isLoading = isGeneratingPhoto
             ) {
-                if (isGeneratingPhoto) {
-                    LoadingIcon()
-                } else {
-                    Icon(Icons.Outlined.Photo, null)
-                }
+                showPhotoDialog = true
             }
-            IconButton(
-                onClick = {
-                    audioLauncher.launch("audio/*")
-                }
+            item(
+                icon = Icons.Outlined.PlayCircle,
+                name = stringResource(R.string.audio),
+                isLoading = isUploadingAudio
             ) {
-                if (isUploadingAudio) {
-                    LoadingIcon()
-                } else {
-                    Icon(Icons.Outlined.PlayCircle, null)
-                }
+                audioLauncher.launch("audio/*")
             }
-            IconButton(
-                onClick = {
-                    showWidgetsMenu = true
-                }
+            item(
+                icon = Icons.Outlined.MoreHoriz,
+                name = stringResource(R.string.more),
             ) {
-                Icon(Icons.Outlined.MoreHoriz, null)
+                showWidgetsMenu = true
             }
         }
     }
