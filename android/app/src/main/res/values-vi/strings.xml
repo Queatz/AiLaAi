@@ -759,4 +759,5 @@
     <string name="zero">0</string>
     <string name="react">Phản ứng</string>
     <string name="inline_reacted_x_to_x">phản ứng với %1$s đến %2$s</string>
+    <string name="x_gets">%1$s sẽ nhận</string>
 </resources>

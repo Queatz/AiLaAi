@@ -86,6 +86,10 @@ fun Route.tradeRoutes() {
                 val trade = getTrade(me.id!!, parameter("id"))
                     ?: return@respond HttpStatusCode.NotFound
 
+                alreadyConfirmedResponse(trade)?.let {
+                    return@respond it
+                }
+
                 completedOrCancelledResponse(trade)?.let {
                     return@respond it
                 }

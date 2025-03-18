@@ -496,7 +496,9 @@ fun TradeDialog(
                                     FlowRow(
                                         horizontalArrangement = Arrangement.spacedBy(1.pad),
                                         verticalArrangement = Arrangement.spacedBy(1.pad),
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 1.pad)
                                     ) {
                                         photos.forEach { photo ->
                                             AsyncImage(
@@ -512,7 +514,9 @@ fun TradeDialog(
                                                             showPhotoDialog = photo.photo!!
                                                         },
                                                         onLongClick = {
-                                                            showDeletePhotoDialog = photo.photo!!
+                                                            if (mutable) {
+                                                                showDeletePhotoDialog = photo.photo!!
+                                                            }
                                                         }
                                                     )
                                             )
@@ -526,7 +530,7 @@ fun TradeDialog(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            member.person.name ?: stringResource(R.string.someone)
+                                            text = stringResource(R.string.x_gets, member.person.name ?: stringResource(R.string.someone))
                                         )
                                         if (anyConfirmed) {
                                             Text(" • ")
