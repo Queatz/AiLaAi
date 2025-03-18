@@ -35,7 +35,7 @@ fun Alert(
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
-        onDismissRequest,
+        onDismissRequest = onDismissRequest,
         properties = properties,
         title = if (title != null) {
             {
