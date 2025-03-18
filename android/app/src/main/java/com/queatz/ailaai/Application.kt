@@ -14,6 +14,7 @@ import at.bluesource.choicesdk.messaging.factory.MessagingRepositoryFactory
 import com.google.auto.service.AutoService
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
+import com.huawei.hms.maps.MapClientIdentify
 import com.huawei.hms.maps.MapsInitializer
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.db.db

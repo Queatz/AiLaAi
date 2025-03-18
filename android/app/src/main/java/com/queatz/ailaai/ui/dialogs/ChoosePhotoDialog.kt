@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.huawei.location.callback.ut
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
@@ -65,9 +64,9 @@ fun ChoosePhotoDialog(
     onDismissRequest: () -> Unit,
     onRemove: (() -> Unit)? = null,
     onIsGeneratingPhoto: (Boolean) -> Unit = {},
-    onPhotos: (List<Uri>) -> Unit,
-    onVideos: (List<Uri>) -> Unit = {},
-    onGeneratedPhoto: (String) -> Unit,
+    onPhotos: suspend (List<Uri>) -> Unit,
+    onVideos: suspend (List<Uri>) -> Unit = {},
+    onGeneratedPhoto: suspend (String) -> Unit,
 ) {
     var aiStyleMenu by rememberStateOf(false)
     val aiPrompt by state::prompt

@@ -142,7 +142,6 @@ import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
 import com.queatz.ailaai.ui.stickers.StickerPackScreen
 import com.queatz.ailaai.ui.stickers.StickerPacksScreen
 import com.queatz.ailaai.ui.story.MyStoriesScreen
-import com.queatz.ailaai.ui.story.StoriesScreen
 import com.queatz.ailaai.ui.story.StoryCreatorScreen
 import com.queatz.ailaai.ui.story.StoryScreen
 import com.queatz.ailaai.ui.story.StorySource
@@ -239,7 +238,6 @@ class MainActivity : AppCompatActivity() {
                 slideshow.navController = navController
 
                 var newMessages by rememberStateOf(0)
-                val presence by mePresence.rememberPresence()
 
                 LifecycleEffect {
                     if (push.navController == navController) {

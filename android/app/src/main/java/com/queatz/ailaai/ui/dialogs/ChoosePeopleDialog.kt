@@ -58,7 +58,7 @@ fun ChoosePeopleDialog(
                 .filter { it.source != PersonSource.Web }
                 .filter { !omit(it) }
             shownPeople = (if (searchText.isBlank()) allPeople else allPeople.filter {
-                it.name?.contains(searchText, true) ?: false
+                it.name?.contains(searchText, true) == true
             })
                 .distinctBy { it.id!! }
         }

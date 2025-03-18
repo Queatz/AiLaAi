@@ -227,8 +227,8 @@ fun MapScreen(
         map ?: return@LaunchedEffect
         cardPositions = renderedCards.map { card ->
             Pin(
-                card,
-                map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
+                card = card,
+                position = map!!.getProjection().toScreenLocation(card.geo!!.toLatLng()!!)
             )
         }
     }
@@ -269,7 +269,9 @@ fun MapScreen(
                     }
 
                     if (locationPermissionState.status == PermissionStatus.Granted || coarseLocationPermissionState.status == PermissionStatus.Granted) {
-                        isMyLocationEnabled = true
+                        runCatching {
+                            isMyLocationEnabled = true
+                        }
                     }
 
                     setOnMapClickListener {

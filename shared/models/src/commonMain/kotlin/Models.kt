@@ -258,6 +258,7 @@ data class Npc(
 data class Trade(
     var people: List<String>? = null,
     var members: List<TradeMember>? = null,
+    var photos: List<TradePhoto>? = null,
     var note: String? = null,
     var initiator: String? = null,
     var completedAt: Instant? = null,
@@ -269,6 +270,13 @@ data class TradeMember(
     var person: String? = null,
     var confirmed: Boolean? = null,
     var items: List<TradeItem>? = null
+)
+
+@Serializable
+data class TradePhoto(
+    var person: String? = null,
+    var photo: String? = null,
+    var addedAt: Instant? = null,
 )
 
 @Serializable

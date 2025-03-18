@@ -111,7 +111,6 @@ import com.queatz.ailaai.ui.components.LinkifyText
 import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.Video
-import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
@@ -150,7 +149,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
 
 enum class ProfileInfo {

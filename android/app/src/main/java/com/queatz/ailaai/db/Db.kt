@@ -13,9 +13,14 @@ class Db() {
         private set
 
     fun init(context: Context) {
-        store = MyObjectBox.builder()
-            .androidContext(context)
-            .build()
+        runCatching {
+            store = MyObjectBox.builder()
+                .androidContext(context)
+                .build()
+        }.onFailure {
+            BoxStore.deleteAllFiles(context, null)
+            init(context)
+        }
     }
 
     inline fun <reified T : Any> box() = store.boxFor<T>()

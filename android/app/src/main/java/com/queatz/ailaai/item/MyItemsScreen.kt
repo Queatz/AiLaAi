@@ -199,7 +199,7 @@ fun MyItemsScreen() {
                         )
                     ) {
                         items(shownItems, key = { it.item!!.id!! }) {
-                            ItemLayout(it) {
+                            MyItemLayout(it) {
                                 showMintItem = it.item
                             }
                         }
