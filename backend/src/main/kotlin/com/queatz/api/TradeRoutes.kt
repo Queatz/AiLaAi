@@ -1,18 +1,29 @@
 package com.queatz.api
 
-import com.queatz.db.*
+import com.queatz.db.InventoryItem
+import com.queatz.db.Trade
+import com.queatz.db.TradeExtended
+import com.queatz.db.TradeItem
+import com.queatz.db.TradeMember
+import com.queatz.db.activeTrades
+import com.queatz.db.completedTrades
+import com.queatz.db.inventoryItems
+import com.queatz.db.inventoryOfPerson
+import com.queatz.db.people
+import com.queatz.db.trade
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.notify
 import com.queatz.plugins.respond
 import com.queatz.push.TradeEvent
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
+import io.ktor.server.request.receive
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.RoutingContext
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import kotlinx.datetime.Clock
 
 fun Route.tradeRoutes() {
@@ -79,13 +90,15 @@ fun Route.tradeRoutes() {
                     return@respond it
                 }
 
-                if (updatedTrade.note != null) {
-                    updateTrade(trade) {
+                updateTrade(trade) {
+                    if (updatedTrade.note != null) {
                         note = updatedTrade.note
-                    } ?: HttpStatusCode.BadRequest.description("Update failed")
-                } else {
-                    HttpStatusCode.BadRequest.description("Nothing to update")
-                }
+                    }
+
+                    if (updatedTrade.photos != null) {
+                        photos = updatedTrade.photos
+                    }
+                } ?: HttpStatusCode.BadRequest.description("Update failed")
             }
         }
 

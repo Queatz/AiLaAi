@@ -809,6 +809,7 @@
     <string name="general">General</string>
     <string name="stylized">Stylized</string>
     <string name="space">Space</string>
+    <string name="remove_photo">Remove this photo?</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
