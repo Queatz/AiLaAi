@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.queatz.ailaai.ui.theme.pad
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DialogLayout(
     scrollable: Boolean = true,
@@ -24,9 +25,9 @@ fun DialogLayout(
             .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
     ) {
         content()
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
             modifier = Modifier.fillMaxWidth().wrapContentHeight()
         ) {
             actions()

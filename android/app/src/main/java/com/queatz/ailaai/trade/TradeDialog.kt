@@ -585,7 +585,7 @@ fun TradeDialog(
             },
             actions = {
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
                     }
                 ) {
@@ -594,7 +594,7 @@ fun TradeDialog(
                 if (trade?.inProgress == true) {
                     if (confirmedByMe) {
                         OutlinedButton(
-                            {
+                            onClick = {
                                 confirmUnconfirm()
                             },
                             enabled = true
@@ -626,7 +626,7 @@ fun TradeDialog(
 
     if (editNote) {
         TextFieldDialog(
-            {
+            onDismissRequest = {
                 editNote = false
             },
             title = stringResource(R.string.note),
@@ -667,10 +667,10 @@ fun TradeDialog(
 
     editItemDialog?.let { item ->
         TradeItemDialog(
-            {
+            onDismissRequest = {
                 editItemDialog = null
             },
-            item.inventoryItem,
+            inventoryItem = item.inventoryItem,
             initialQuantity = item.quantity,
             maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isMine = item.from.id == me.id,
@@ -700,10 +700,10 @@ fun TradeDialog(
 
     addItemDialog?.let { item ->
         TradeItemDialog(
-            {
+            onDismissRequest = {
                 addItemDialog = null
             },
-            item.inventoryItem,
+            inventoryItem = item.inventoryItem,
             initialQuantity = item.quantity,
             maxQuantity = maxQuantity(item.inventoryItem, item.to.id!!),
             isAdd = true,
@@ -729,8 +729,8 @@ fun TradeDialog(
 
     if (showMembers) {
         PeopleDialog(
-            stringResource(R.string.members),
-            {
+            title = stringResource(R.string.members),
+            onDismissRequest = {
                 showMembers = false
             },
             people = trade!!.people!!,

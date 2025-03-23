@@ -210,9 +210,9 @@ fun background(url: String?) {
 class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
-            NavButton(AppNav.Messages, getString(R.string.groups), Icons.Outlined.Forum),
+            NavButton(AppNav.Messages, getString(R.string.messages), Icons.Outlined.Forum),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
-            NavButton(AppNav.Schedule, getString(R.string.calendar), Icons.Outlined.CalendarMonth),
+            NavButton(AppNav.Schedule, getString(R.string.schedule), Icons.Outlined.CalendarMonth),
         )
     }
 

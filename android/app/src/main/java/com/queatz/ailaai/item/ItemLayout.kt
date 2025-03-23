@@ -50,7 +50,10 @@ fun ItemLayout(
                 .clip(MaterialTheme.shapes.large)
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         )
-        Column {
+        Column(
+            modifier = Modifier
+                .weight(1f, fill = true)
+        ) {
             Text(
                 text = item.name ?: "",
                 style = MaterialTheme.typography.titleMedium

@@ -63,6 +63,10 @@ object Strings {
         "Note",
         "Ghi chú"
     )
+    val messages = Translation(
+        "Messages",
+        "Tin nhắn"
+    )
     val orEnterTransferCode = Translation(
         "Or enter a transfer code here",
         "Hoặc nhập mã chuyển khoản tại đây"
@@ -656,6 +660,10 @@ object Strings {
     val reschedule = Translation(
         "Reschedule",
         "Lên lịch lại"
+    )
+    val schedule = Translation(
+        "Schedule",
+        "Lịch"
     )
     val timezone = Translation(
         "Timezone",

@@ -222,10 +222,10 @@ fun InventoryScreen() {
 
     showTradeDialog?.let {
         TradeDialog(
-            {
+            onDismissRequest = {
                 showTradeDialog = null
             },
-            it.id!!,
+            tradeId = it.id!!,
             onTradeCancelled = {
                 scope.launch {
                     trading.reload()
@@ -274,10 +274,10 @@ fun InventoryScreen() {
 
     if (showInventoryItem != null) {
         InventoryItemDialog(
-            {
+            onDismissRequest = {
                 showInventoryItem = null
             },
-            showInventoryItem!!,
+            inventoryItem = showInventoryItem!!,
             onDrop = {
                 showDropInventoryItem = showInventoryItem!! to it
             },
@@ -296,7 +296,7 @@ fun InventoryScreen() {
 
     if (showDropInventoryItem != null) {
         SetLocationDialog(
-            {
+            onDismissRequest = {
                 showDropInventoryItem = null
             },
             confirmButton = stringResource(R.string.drop),
@@ -340,7 +340,7 @@ fun InventoryScreen() {
 
     if (showDiscardDialog) {
         Alert(
-            {
+            onDismissRequest = {
                 showDiscardDialog = false
             },
             title = pluralStringResource(

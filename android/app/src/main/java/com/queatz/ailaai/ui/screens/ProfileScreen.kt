@@ -609,10 +609,10 @@ fun ProfileScreen(personId: String) {
     showInventoryItemDialog?.let { item ->
         val quantity = item.inventoryItem?.quantity ?: 0.0
         TradeItemDialog(
-            {
+            onDismissRequest = {
                 showInventoryItemDialog = null
             },
-            item,
+            inventoryItem = item,
             initialQuantity = quantity,
             maxQuantity = quantity,
             isMine = false,

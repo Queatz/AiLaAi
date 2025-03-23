@@ -2,10 +2,6 @@ package com.queatz.ailaai.ui.story
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Notes
 import androidx.compose.material.icons.outlined.AccountTree
@@ -16,11 +12,11 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.ListAlt
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MoreHoriz
-import androidx.compose.material.icons.outlined.Notes
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material3.Card
@@ -32,10 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.createGroup
@@ -49,12 +41,10 @@ import com.queatz.ailaai.api.uploadStoryAudioFromUri
 import com.queatz.ailaai.api.uploadStoryPhotosFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
-import com.queatz.ailaai.extensions.horizontalFadingEdge
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
-import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.ChooseCardDialog
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
@@ -64,13 +54,12 @@ import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
-import com.queatz.ailaai.ui.dialogs.menuItem
-import com.queatz.ailaai.ui.theme.pad
 import com.queatz.ailaai.ui.widget.AddWidgetDialog
 import com.queatz.db.Group
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ImpactEffortTableData
+import com.queatz.widgets.widgets.ShopData
 import com.queatz.widgets.widgets.SpaceData
 import createWidget
 import kotlinx.coroutines.launch
@@ -232,6 +221,21 @@ fun StoryCreatorTools(
         }) {
             // todo add search here
             Toolbar {
+                item(
+                    icon = Icons.Outlined.Storefront,
+                    name = Widgets.Shop.stringResource
+                ) {
+                    scope.launch {
+                        api.createWidget(
+                            widget = Widgets.Shop,
+                            data = json.encodeToString(ShopData())
+                        ) {
+                            addPart(StoryContent.Widget(it.widget!!, it.id!!))
+                        }
+                    }
+                    showWidgetsMenu = false
+                }
+
                 item(
                     icon = Icons.Outlined.HistoryEdu,
                     name = Widgets.Script.stringResource

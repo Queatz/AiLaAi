@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -98,9 +99,10 @@ fun InventoryItemDialog(
             },
             actions = {
                 TextButton(
-                    {
+                    onClick = {
                         onDismissRequest()
-                    }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Text(stringResource(R.string.close))
                 }
@@ -114,7 +116,7 @@ fun InventoryItemDialog(
                 }
                 if (inventoryItem.inventoryItem?.equipped == true) {
                     TextButton(
-                        {
+                        onClick = {
                             quantity.toItemQuantity()?.let(onUnequip)
                         },
                         enabled = enabled
@@ -123,7 +125,7 @@ fun InventoryItemDialog(
                     }
                 } else {
                     TextButton(
-                        {
+                        onClick = {
                             quantity.toItemQuantity()?.let(onEquip)
                         },
                         enabled = enabled
@@ -132,7 +134,7 @@ fun InventoryItemDialog(
                     }
                 }
                 Button(
-                    {
+                    onClick = {
                         quantity.toItemQuantity()?.let(onTrade)
                     },
                     enabled = !expired && enabled

@@ -516,6 +516,6 @@ val Widgets.stringResource
             Widgets.Web -> R.string.website
             Widgets.Form -> R.string.form
             Widgets.Space -> R.string.space
-            else -> R.string.widget
+            Widgets.Shop -> R.string.shop
         }
     )

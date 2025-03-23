@@ -18,7 +18,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
             flexShrink(0)
         }
     }) {
-        IconButton("forum", appString { groups }, styles = {
+        IconButton("forum", appString { messages }, styles = {
             if (nav == NavPage.Groups) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)
@@ -34,7 +34,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Stories)
         }
-        IconButton("map", appString { map }, styles = {
+        IconButton("map", appString { explore }, styles = {
             if (nav == NavPage.Cards) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)
@@ -42,7 +42,7 @@ fun AppBottomBar(nav: NavPage, onNavClick: (NavPage) -> Unit) {
         }) {
             onNavClick(NavPage.Cards)
         }
-        IconButton("calendar_month", appString { reminders }, styles = {
+        IconButton("calendar_month", appString { schedule }, styles = {
             if (nav == NavPage.Schedule) {
                 backgroundColor(Styles.colors.primary)
                 color(Color.white)

@@ -811,6 +811,9 @@
     <string name="space">Space</string>
     <string name="remove_photo">Remove this photo?</string>
     <string name="x_gets">%1$s gets</string>
+    <string name="shop">Shop</string>
+    <string name="buy">Buy</string>
+    <string name="schedule">Schedule</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
