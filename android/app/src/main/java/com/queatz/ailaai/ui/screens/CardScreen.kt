@@ -707,7 +707,7 @@ fun CardScreen(cardId: String) {
 
     if (showManageMenu) {
         Menu(
-            {
+            onDismissRequest = {
                 showManageMenu = false
             }
         ) {
@@ -1144,10 +1144,10 @@ fun CardScreen(cardId: String) {
                                 .fillMaxHeight()
                         ) {
                             cardHeaderItem(
-                                card,
-                                isMine,
-                                1.5f,
-                                scope,
+                                card = card,
+                                isMine = isMine,
+                                aspect = 1.5f,
+                                scope = scope,
                                 elevation = 2,
                                 playVideo = isAtTop
                             )
@@ -1164,10 +1164,10 @@ fun CardScreen(cardId: String) {
                     ) {
                         if (!isLandscape) {
                             cardHeaderItem(
-                                card,
-                                isMine,
-                                1.5f,
-                                scope,
+                                card = card,
+                                isMine = isMine,
+                                aspect = 1.5f,
+                                scope = scope,
                                 playVideo = isAtTop
                             )
                         }
@@ -1285,7 +1285,7 @@ fun CardScreen(cardId: String) {
 
     if (openAddCollaboratorDialog) {
         ChoosePeopleDialog(
-            {
+            onDismissRequest = {
                 openAddCollaboratorDialog = false
             },
             title = stringResource(R.string.add_collaborators),
@@ -1314,10 +1314,10 @@ fun CardScreen(cardId: String) {
             },
             title = stringResource(R.string.collaborators),
             confirmFormatter = defaultConfirmFormatter(
-                R.string.remove,
-                R.string.remove_person,
-                R.string.remove_people,
-                R.string.remove_x_people
+                none = R.string.remove,
+                one = R.string.remove_person,
+                two = R.string.remove_people,
+                many = R.string.remove_x_people
             ) { it.name ?: someone },
             extraButtons = {
                 TextButton(
@@ -1353,10 +1353,12 @@ fun CardScreen(cardId: String) {
 
     if (openCollaboratorsDialog && collaborators.isNotEmpty()) {
         PeopleDialog(
-            stringResource(R.string.collaborators),
-            {
+            title = stringResource(R.string.collaborators),
+            onDismissRequest = {
                 openCollaboratorsDialog = false
-            }, collaborators, infoFormatter = { person ->
+            },
+            people = collaborators,
+            infoFormatter = { person ->
                 if (person.id == me?.id) {
                     context.getString(R.string.leave)
                 } else {
@@ -1364,7 +1366,8 @@ fun CardScreen(cardId: String) {
                         "${context.getString(R.string.active)} ${timeAgo.lowercase()}"
                     }
                 }
-            }) { person ->
+            }
+        ) { person ->
             if (person.id == me?.id) {
                 openLeaveCollaboratorsDialog = true
                 openCollaboratorsDialog = false
@@ -1383,7 +1386,7 @@ fun CardScreen(cardId: String) {
     if (showSendDialog) {
         val sent = stringResource(R.string.sent)
         ChooseGroupDialog(
-            {
+            onDismissRequest = {
                 showSendDialog = false
             },
             title = stringResource(R.string.send_card),
@@ -1415,11 +1418,11 @@ fun CardScreen(cardId: String) {
 
     if (showQrCode) {
         QrCodeDialog(
-            {
+            onDismissRequest = {
                 showQrCode = false
             },
-            cardUrl(cardId),
-            card?.name
+            url = cardUrl(cardId),
+            name = card?.name
         )
     }
 
