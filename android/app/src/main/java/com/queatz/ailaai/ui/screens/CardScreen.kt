@@ -1093,7 +1093,7 @@ fun CardScreen(cardId: String) {
 
                                 item(
                                     icon = Icons.Outlined.Adjust,
-                                    name = if (level == 0) stringResource(R.string.size) else {
+                                    name = if (sizeInKm == 0.0) stringResource(R.string.size) else {
                                         pluralStringResource(
                                             id = R.plurals.x_km,
                                             count = sizeInKm.toInt(),
@@ -1473,9 +1473,8 @@ fun CardScreen(cardId: String) {
                 showPageSizeDialog = false
             },
             title = stringResource(R.string.page_size),
-            button = stringResource(R.string.mint),
-            placeholder = stringResource(R.string.quantity),
-            requireNotBlank = true,
+            button = stringResource(R.string.update),
+            showDismiss = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
@@ -1483,7 +1482,10 @@ fun CardScreen(cardId: String) {
                 if (it.isNumericTextInput()) it else null
             },
             extraContent = {
-                Text(stringResource(R.string.page_size_description))
+                Text(
+                    text = stringResource(R.string.page_size_description),
+                    modifier = Modifier.padding(bottom = 1.pad)
+                )
             }
         ) { size ->
             api.updateCard(
@@ -1493,6 +1495,7 @@ fun CardScreen(cardId: String) {
                 )
             ) {
                 reload()
+                showPageSizeDialog = false
             }
         }
     }

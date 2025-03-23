@@ -429,6 +429,7 @@ fun Route.cardRoutes() {
                         card.offline = update.offline
                     }
                     check(Card::location)
+                    check(Card::size)
                     check(Card::collaborators)
                     check(Card::categories)
                     check(Card::name)

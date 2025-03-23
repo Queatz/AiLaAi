@@ -574,4 +574,10 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
     }
 }
 
-private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0)
+private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0).let { compareLevel ->
+    if (compareLevel != 0) {
+        compareLevel
+    } else {
+        (size ?: 0.0).compareTo(other.size ?: 0.0)
+    }
+}
