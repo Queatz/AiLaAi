@@ -86,6 +86,7 @@ import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.w3c.dom.HTMLDivElement
 
+@OptIn(ExperimentalComposeWebApi::class)
 object Styles : StyleSheet() {
     object colors {
         val background = Color("#E0F3FF")
@@ -961,6 +962,12 @@ object Styles : StyleSheet() {
         property("pointer-events", "auto")
         property("will-change", "transform")
         property("transform-origin", "bottom center")
+
+        transitions {
+            "transform" {
+                duration = 200.ms
+            }
+        }
     }
 
     val personList by style {
