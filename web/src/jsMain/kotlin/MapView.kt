@@ -149,7 +149,7 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
             val groundDistance = cameraLngLat.distanceTo(marker.marker.getLngLat())
 
             val nearScale = when {
-                cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && markers[it.first].card.collides(markers[index].card) } -> {
+                altitude > 1_000.0 && cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && markers[it.first].card.collides(markers[index].card) } -> {
                     0f
                 }
                 cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && it.second.near(pos, nearDistance) } -> {

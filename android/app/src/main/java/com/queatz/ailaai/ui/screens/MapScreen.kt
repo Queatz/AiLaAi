@@ -372,9 +372,10 @@ fun MapScreen(
                     var placed by remember(card.name) { mutableStateOf(false) }
                     val shown = cards.any { c -> c.id == card.id }
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
+                    val zoom = cameraPosition?.zoom ?: 0f
 
                     val nearScale = when {
-                        cardPositions.any { it.card != card && card < it.card && it.card.collides(card) } -> {
+                        zoom < 16 && cardPositions.any { it.card != card && card < it.card && it.card.collides(card) } -> {
                             0f
                         }
                         cardPositions.any { it.card != card && card < it.card && it.position.near(pos, nearDistance) } -> {
