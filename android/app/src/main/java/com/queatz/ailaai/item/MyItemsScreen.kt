@@ -150,9 +150,12 @@ fun MyItemsScreen() {
                     )
                 }
             }
-        ) {
-            it.toItemQuantity()?.let {
-                mint(showMintItem!!, it)
+        ) { quantity ->
+            quantity.toItemQuantity()?.let { quantity ->
+                mint(
+                    item = showMintItem!!,
+                    quantity = quantity
+                )
                 showMintItem = null
             } ?: context.showDidntWork()
         }

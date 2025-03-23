@@ -814,6 +814,11 @@
     <string name="shop">Shop</string>
     <string name="buy">Buy</string>
     <string name="schedule">Schedule</string>
+    <string name="size">Size</string>
+    <string name="page_size">Page size (km)</string>
+    <string name="page_size_description">Larger pages are more visible from further away, while smaller pages are more
+        visible when close
+    </string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
@@ -937,5 +942,8 @@
     <plurals name="x_views">
         <item quantity="one">%1$s view</item>
         <item quantity="other">%1$s views</item>
+    </plurals>
+    <plurals name="x_km">
+        <item quantity="other">%1$s km</item>
     </plurals>
 </resources>

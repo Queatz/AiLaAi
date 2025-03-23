@@ -246,7 +246,7 @@ fun Db.explore(
             filter (
                 ${if (person == null || public) "d != null and d <= @nearbyMaxDistance" else isFriendCard()}
             )
-            sort x.${f(Card::level)} desc, d == null, d
+            sort x.${f(Card::level)} desc, x.${f(Card::size)} desc, d == null, d
             limit @offset, @limit
             return merge(
                 x,

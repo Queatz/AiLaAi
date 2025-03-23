@@ -24,9 +24,11 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddBox
+import androidx.compose.material.icons.outlined.Adjust
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Castle
@@ -70,6 +72,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -104,10 +107,12 @@ import com.queatz.ailaai.extensions.asOvalBitmap
 import com.queatz.ailaai.extensions.bitmapResource
 import com.queatz.ailaai.extensions.cardUrl
 import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.hint
 import com.queatz.ailaai.extensions.idOrUrl
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.isAtTop
+import com.queatz.ailaai.extensions.isNumericTextInput
 import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
@@ -134,9 +139,9 @@ import com.queatz.ailaai.ui.card.PageStatisticsDialog
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.CardLayout
-import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
@@ -173,7 +178,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
-import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.seconds
 
 private val showGeneratingMessage = booleanPreferencesKey("ui.showGeneratingMessage")
@@ -201,6 +205,7 @@ fun CardScreen(cardId: String) {
     var openLeaveCollaboratorsDialog by rememberSavableStateOf(false)
     var showUpgradeDialog by rememberSavableStateOf(false)
     var showDowngradeDialog by rememberSavableStateOf(false)
+    var showPageSizeDialog by rememberSavableStateOf(false)
     var card by rememberSaveable(stateSaver = jsonSaver<Card?>()) { mutableStateOf(null) }
     var cards by rememberSaveable(stateSaver = jsonSaver<List<Card>>(emptyList())) { mutableStateOf(emptyList()) }
     val scope = rememberCoroutineScope()
@@ -1075,13 +1080,29 @@ fun CardScreen(cardId: String) {
                                 item(
                                     icon = Icons.Outlined.Castle,
                                     name = if (level == 0) stringResource(R.string.upgrade) else pluralStringResource(
-                                        R.plurals.level_x,
-                                        level,
+                                        id = R.plurals.level_x,
+                                        count = level,
                                         level
                                     ),
                                     selected = level > 0
                                 ) {
                                     showUpgradeDialog = true
+                                }
+
+                                val sizeInKm = card.size ?: 0.0
+
+                                item(
+                                    icon = Icons.Outlined.Adjust,
+                                    name = if (level == 0) stringResource(R.string.size) else {
+                                        pluralStringResource(
+                                            id = R.plurals.x_km,
+                                            count = sizeInKm.toInt(),
+                                            sizeInKm.format()
+                                        )
+                                    },
+                                    selected = sizeInKm > 0.0
+                                ) {
+                                    showPageSizeDialog = true
                                 }
                             }
                         }
@@ -1443,6 +1464,36 @@ fun CardScreen(cardId: String) {
             currentLevel = card?.level ?: 0
         ) {
             reload()
+        }
+    }
+
+    if (showPageSizeDialog) {
+        TextFieldDialog(
+            onDismissRequest = {
+                showPageSizeDialog = false
+            },
+            title = stringResource(R.string.page_size),
+            button = stringResource(R.string.mint),
+            placeholder = stringResource(R.string.quantity),
+            requireNotBlank = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            ),
+            valueFormatter = {
+                if (it.isNumericTextInput()) it else null
+            },
+            extraContent = {
+                Text(stringResource(R.string.page_size_description))
+            }
+        ) { size ->
+            api.updateCard(
+                id = card?.id ?: return@TextFieldDialog,
+                card = Card(
+                    size = size.toDoubleOrNull() ?: 0.0
+                )
+            ) {
+                reload()
+            }
         }
     }
 }

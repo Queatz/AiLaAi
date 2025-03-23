@@ -150,6 +150,7 @@ class Card(
     var npc: Npc? = null,
     var active: Boolean? = null,
     var level: Int? = null,
+    var size: Double? = null,
 
     // Transient from db
     var cardCount: Int? = null
