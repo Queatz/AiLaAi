@@ -12,6 +12,10 @@ external object mapboxgl {
         var lat: Double
 
         fun distanceTo(other: LngLat): Double
+
+        companion object {
+            fun convert(array: Array<Double>): mapboxgl.LngLat
+        }
     }
 
     interface Point {

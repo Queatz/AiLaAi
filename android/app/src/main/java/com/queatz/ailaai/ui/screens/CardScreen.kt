@@ -1475,6 +1475,7 @@ fun CardScreen(cardId: String) {
             title = stringResource(R.string.page_size),
             button = stringResource(R.string.update),
             showDismiss = true,
+            initialValue = card?.size?.format().orEmpty(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),

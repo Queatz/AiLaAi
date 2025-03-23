@@ -376,6 +376,9 @@ fun StoryContents(
                     Widgets.Space -> {
                         SpaceWidget(part.id)
                     }
+                    Widgets.Shop -> {
+                        // todo
+                    }
                 }
             }
 

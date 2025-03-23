@@ -88,6 +88,7 @@ import com.queatz.ailaai.databinding.LayoutMapBinding
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.appStringShort
 import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.distance
 import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberSavableStateOf
@@ -373,6 +374,9 @@ fun MapScreen(
                     val scale = remember { Animatable(if (shown) 0f else 1f) }
 
                     val nearScale = when {
+                        cardPositions.any { it.card != card && card < it.card && it.card.collides(card) } -> {
+                            0f
+                        }
                         cardPositions.any { it.card != card && card < it.card && it.position.near(pos, nearDistance) } -> {
                             0f
                         }
@@ -593,6 +597,15 @@ fun MapScreen(
         }
     }
 }
+
+private fun Card.collides(other: Card): Boolean {
+    val geo = geo?.toLatLng() ?: return false
+    val otherGeo = other.geo?.toLatLng() ?: return false
+
+    return geo.distance(otherGeo) < ((size ?: 0.0) + (other.size ?: 0.0)).kmToMeters
+}
+
+private val Double.kmToMeters get() = this * 1_000.0
 
 private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0).let { compareLevel ->
     if (compareLevel != 0) {

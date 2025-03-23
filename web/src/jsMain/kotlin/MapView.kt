@@ -149,6 +149,9 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
             val groundDistance = cameraLngLat.distanceTo(marker.marker.getLngLat())
 
             val nearScale = when {
+                cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && markers[it.first].card.collides(markers[index].card) } -> {
+                    0f
+                }
                 cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && it.second.near(pos, nearDistance) } -> {
                     0f
                 }
@@ -218,12 +221,12 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
             options.element = element
             options.anchor = "bottom"
 
-            val latlng: mapboxgl.LngLat = js("{}")
-            latlng.lat = card.geo!![0]
-            latlng.lng = card.geo!![1]
+            val latLng: mapboxgl.LngLat = js("{}")
+            latLng.lat = card.geo!![0]
+            latLng.lng = card.geo!![1]
 
             mapboxgl.Marker(options)
-                .setLngLat(latlng)
+                .setLngLat(latLng)
                 .addTo(map!!).also {
                     renderComposable(root = element) {
                         val isNpc = !card.npc?.photo.isNullOrBlank()
@@ -317,9 +320,15 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                                         height(16.r)
                                         borderRadius(16.r)
                                         backgroundColor(Styles.colors.background)
+                                        property("border", "${2.px} solid ${Color.white}")
                                         backgroundImage("url($baseUrl${card.photo!!})")
                                         backgroundPosition("center")
                                         backgroundSize("cover")
+                                    } else {
+                                        width(16.r)
+                                        height(16.r)
+                                        borderRadius(16.r)
+                                        backgroundColor(Styles.colors.background)
                                         property("border", "${2.px} solid ${Color.white}")
                                     }
                                 }
@@ -567,12 +576,28 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                     }
                 }) {
                     Icon("list")
+                    // todo: translate
                     Text("View list")
                 }
             }
         }
     }
 }
+
+private fun List<Double>.toLatLng(): mapboxgl.LngLat? {
+    return takeIf { size == 2 }?.let { array ->
+        mapboxgl.LngLat.convert(array.asReversed().toTypedArray())
+    }
+}
+
+private fun Card.collides(other: Card): Boolean {
+    val geo = geo?.toLatLng() ?: return false
+    val otherGeo = other.geo?.toLatLng() ?: return false
+
+    return geo.distanceTo(otherGeo) < ((size ?: 0.0) + (other.size ?: 0.0)).kmToMeters
+}
+
+private val Double.kmToMeters get() = this * 1_000.0
 
 private operator fun Card.compareTo(other: Card) = (level ?: 0).compareTo(other.level ?: 0).let { compareLevel ->
     if (compareLevel != 0) {
