@@ -7,6 +7,13 @@ import org.w3c.dom.HTMLElement
 external object mapboxgl {
     var accessToken: String
 
+    interface MapMouseEvent {
+        var lngLat: LngLat
+    }
+
+    interface MapEvent {
+    }
+    
     interface LngLat {
         var lng: Double
         var lat: Double
@@ -50,7 +57,7 @@ external object mapboxgl {
         fun getPitch(): Double
         fun project(latLng: LngLat): Point
         fun getFreeCameraOptions(): dynamic
-        fun on(event: String, block: () -> Unit)
+        fun on(event: String, block: (event: mapboxgl.MapEvent) -> Unit)
     }
 
     class GeolocateControl(options: dynamic = definedExternally) {

@@ -50,7 +50,11 @@ import org.jetbrains.compose.web.dom.Div
 import r
 
 @Composable
-fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> Unit) {
+fun CardsPage(
+    nav: CardNav,
+    onCard: (CardNav) -> Unit,
+    onCardUpdated: (Card) -> Unit,
+) {
     Style(CardsPageStyles)
 
     val me by application.me.collectAsState()
@@ -128,7 +132,10 @@ fun CardsPage(nav: CardNav, onCard: (CardNav) -> Unit, onCardUpdated: (Card) -> 
                             flexDirection(FlexDirection.Column)
                         }
                     }) {
-                        MapView(showList = false)
+                        MapView(
+                            showList = false,
+                            onCardAdded = onCardUpdated
+                        )
                     }
                 } else {
                     if (cards.isEmpty()) {

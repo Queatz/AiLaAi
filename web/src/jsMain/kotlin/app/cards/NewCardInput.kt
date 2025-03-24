@@ -24,7 +24,10 @@ import org.jetbrains.compose.web.dom.Div
 import r
 
 @Composable
-fun NewCardInput(defaultMargins: Boolean = true, onSubmit: (name: String, active: Boolean) -> Unit) {
+fun NewCardInput(
+    defaultMargins: Boolean = true,
+    onSubmit: (name: String, active: Boolean) -> Unit,
+) {
     var newCardTitle by remember { mutableStateOf("") }
     var publishNow by remember { mutableStateOf(false) }
 

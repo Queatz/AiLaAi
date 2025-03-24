@@ -7,10 +7,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.ailaai.api.cards
+import app.ailaai.api.newCard
 import app.cards.MapList
 import app.cards.mapListDialog
 import app.components.HorizontalSpacer
 import app.components.Spacer
+import app.dialog.inputDialog
 import app.messaages.inList
 import com.queatz.db.Card
 import com.queatz.db.Geo
@@ -18,6 +20,7 @@ import com.queatz.db.formatPay
 import components.CardContent
 import components.Icon
 import components.SearchField
+import components.Switch
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
@@ -92,7 +95,11 @@ sealed interface SearchFilter {
 }
 
 @Composable
-fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) {
+fun MapView(
+    showList: Boolean = true,
+    onCardAdded: (Card) -> Unit = {},
+    header: (@Composable () -> Unit)? = null,
+) {
     var searchText by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf(listOf<Card>()) }
@@ -386,7 +393,63 @@ fun MapView(showList: Boolean = true, header: (@Composable () -> Unit)? = null) 
                 }
 
                 on("click") {
-                    selectedCard = null
+                    val event = it as mapboxgl.MapMouseEvent
+                    if (selectedCard != null) {
+                        selectedCard = null
+                    } else {
+                        val click = event.lngLat
+                        scope.launch {
+                            var active = false
+                            val cardName = inputDialog(
+                                // todo: translate
+                                title = "New page",
+                                // todo: translate
+                                placeholder = "Name",
+                                content = { _, _, _ ->
+                                    var value by remember { mutableStateOf(false) }
+
+                                    LaunchedEffect(value) {
+                                        active = value
+                                    }
+
+                                    Span({
+                                        style {
+                                            color(Color.gray)
+                                            paddingTop(1f.r)
+                                            paddingBottom(.5f.r)
+                                        }
+                                    }) {
+                                        Text("Publish")
+                                    }
+
+                                    Switch(
+                                        value = value,
+                                        onValue = {
+                                            value = it
+                                        },
+                                        onChange = {
+                                            value = it
+                                        },
+                                        border = true,
+                                        // todo: translate
+                                        title = if (value) "Publish now" else "Draft"
+                                    )
+                                }
+                            ) ?: return@launch
+
+                            api.newCard(
+                                Card(
+                                    name = cardName,
+                                    geo = listOf(click.lat, click.lng),
+                                    active = active
+                                )
+                            ) {
+                                // todo: just reload everything
+                                searchResults = searchResults + it
+                                onCardAdded(it)
+                            }
+                        }
+                    }
                 }
             }
 

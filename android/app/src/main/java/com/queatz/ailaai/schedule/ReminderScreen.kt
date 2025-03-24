@@ -42,6 +42,7 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
@@ -146,7 +147,7 @@ fun ReminderScreen(reminderId: String) {
     if (showAddPerson) {
         val someone = stringResource(R.string.someone)
         ChoosePeopleDialog(
-            {
+            onDismissRequest = {
                 showAddPerson = false
             },
             title = stringResource(R.string.invite_someone),
@@ -169,9 +170,10 @@ fun ReminderScreen(reminderId: String) {
     }
 
     if (showEditNote) {
-        TextFieldDialog({
-            showEditNote = false
-        },
+        TextFieldDialog(
+            onDismissRequest = {
+                showEditNote = false
+            },
             title = stringResource(R.string.edit_note),
             button = stringResource(R.string.update),
             showDismiss = true,
@@ -187,7 +189,7 @@ fun ReminderScreen(reminderId: String) {
 
     if (showReschedule && reminder != null) {
         ScheduleReminderDialog(
-            {
+            onDismissRequest = {
                 showReschedule = false
             },
             initialReminder = reminder!!
@@ -205,7 +207,7 @@ fun ReminderScreen(reminderId: String) {
 
     if (showEditTitle) {
         TextFieldDialog(
-            {
+            onDismissRequest = {
                 showEditTitle = false
             },
             title = stringResource(R.string.title),
@@ -223,7 +225,7 @@ fun ReminderScreen(reminderId: String) {
 
     if (showDelete) {
         Alert(
-            {
+            onDismissRequest = {
                 showDelete = false
             },
             title = stringResource(R.string.delete_this_reminder),
@@ -242,7 +244,7 @@ fun ReminderScreen(reminderId: String) {
 
     if (showLeave) {
         Alert(
-            {
+            onDismissRequest = {
                 showLeave = false
             },
             title = stringResource(R.string.leave_reminder),
@@ -372,10 +374,9 @@ fun ReminderScreen(reminderId: String) {
                     reminder?.let { reminder ->
                         (reminder.person!!.inList() + (reminder.people ?: emptyList()))
                             .distinct()
-                            .filter { it != me?.id }
                             .mapNotNull { authors.get(it) }
                             .sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
-                            .ifNotEmpty
+                            .notEmpty
                             ?.let { people ->
                                 Text(
                                     stringResource(R.string.people) + " (${people.size})",
