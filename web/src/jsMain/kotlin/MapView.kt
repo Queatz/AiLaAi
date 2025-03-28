@@ -147,6 +147,7 @@ fun MapView(
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
         val nearDistance = 32
+        val nearDistanceMax = 128
         val cardPositions = markers.mapIndexed { index, it ->
             index to map!!.project(it.marker.getLngLat())
         }
@@ -156,7 +157,9 @@ fun MapView(
             val groundDistance = cameraLngLat.distanceTo(marker.marker.getLngLat())
 
             val nearScale = when {
-                altitude > 1_000.0 && cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && markers[it.first].card.collides(markers[index].card) } -> {
+                cardPositions.any {
+                    it.first != index && markers[index].card < markers[it.first].card && markers[it.first].card.collides(markers[index].card) && it.second.near(pos, nearDistanceMax)
+                } -> {
                     0f
                 }
                 cardPositions.any { it.first != index && markers[index].card < markers[it.first].card && it.second.near(pos, nearDistance) } -> {
@@ -465,6 +468,14 @@ fun MapView(
         header()
     }
 
+    fun centerMapOnCard(card: Card?) {
+        card?.geo?.toLatLng()?.let { lngLat ->
+            val options: mapboxgl.FlyToOptions = js("{}")
+            options.center = lngLat
+            map?.flyTo(options)
+        }
+    }
+
     Div({
         classes(Styles.mapContainer)
     }) {
@@ -477,6 +488,7 @@ fun MapView(
                 }) {
                     MapList(shownCards) { card ->
                         selectedCard = if (selectedCard?.id == card.id) null else card
+                        centerMapOnCard(selectedCard)
                     }
                 }
             }

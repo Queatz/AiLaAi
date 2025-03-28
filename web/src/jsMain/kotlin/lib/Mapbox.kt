@@ -41,6 +41,10 @@ external object mapboxgl {
         var anchor: String
     }
 
+    interface FlyToOptions {
+        var center: LngLat
+    }
+
     class Marker(options: dynamic) {
         fun addTo(map: Map): Marker
         fun setLngLat(lngLat: LngLat): Marker
@@ -53,6 +57,8 @@ external object mapboxgl {
         fun addControl(control: dynamic, position: String)
         fun remove()
         fun getCenter(): LngLat
+        fun setCenter(lngLat: LngLat)
+        fun flyTo(options: FlyToOptions)
         fun getZoom(): Double
         fun getPitch(): Double
         fun project(latLng: LngLat): Point

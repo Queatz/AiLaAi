@@ -19,7 +19,7 @@ fun MapList(
         style {
             gap(.5.r)
             alignItems(AlignItems.Stretch)
-            padding(.5.r)
+            padding(1.r)
         }
     }) {
         items(cards) { card ->

@@ -443,7 +443,6 @@ object Styles : StyleSheet() {
         alignItems(AlignItems.Center)
         justifyContent(JustifyContent.Center)
         padding(1.r)
-        marginTop(1.r)
         backgroundColor(Color("#f7f7f7"))
         property("z-index", "1")
         whiteSpace("nowrap")

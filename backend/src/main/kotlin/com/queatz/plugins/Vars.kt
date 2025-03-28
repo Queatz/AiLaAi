@@ -31,5 +31,5 @@ val bots = Bots()
 val apps = Apps()
 val openAi = OpenAi()
 
-const val defaultNearbyMaxDistanceInMeters = 100_000.0
+const val defaultNearbyMaxDistanceInMeters = 1_000_000.0
 const val defaultInventoriesNearbyMaxDistanceInMeters = 10_000.0

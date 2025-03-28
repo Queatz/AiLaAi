@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
@@ -21,6 +22,7 @@ import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.RichTextThemeProvider
 import com.halilibo.richtext.ui.string.RichTextString.Format.Code
 import com.halilibo.richtext.ui.string.RichTextStringStyle
+import com.queatz.db.splitByUrls
 
 @Composable
 fun LinkifyText(
@@ -29,6 +31,21 @@ fun LinkifyText(
     color: Color = LocalContentColor.current,
     style: TextStyle = LocalTextStyle.current,
 ) {
+    val text = remember(text) {
+        text.splitByUrls().joinToString("") { (part, isUrl) ->
+            if (isUrl) {
+                part.let {
+                    when {
+                        it.contains("@") && !it.contains("/") -> "[$it](mailto:$it)"
+                        it.contains("://") -> it
+                        else -> "[$it](https://$it)"
+                    }
+                }
+            } else {
+                part
+            }
+        }
+    }
     RichTextThemeProvider(
         contentColorProvider = {
             color
@@ -46,7 +63,8 @@ fun LinkifyText(
         }
     ) {
         BasicRichText(
-            modifier = modifier, style = RichTextStyle(
+            modifier = modifier,
+            style = RichTextStyle(
                 // todo - this isn't applied to code blocks - investigate
                 codeBlockStyle = CodeBlockStyle(
                     textStyle = style.copy(

@@ -301,6 +301,7 @@ fun MapScreen(
         }
         map?.let { map ->
             val nearDistance = 32.dp.px
+            val nearDistanceMax = 128.dp.px
 
             fun Point.near(other: Point, distance: Int) =
                 abs(x - other.x) <= distance && abs(y - other.y) <= distance
@@ -375,7 +376,7 @@ fun MapScreen(
                     val zoom = cameraPosition?.zoom ?: 0f
 
                     val nearScale = when {
-                        zoom < 16 && cardPositions.any { it.card != card && card < it.card && it.card.collides(card) } -> {
+                        cardPositions.any { it.card != card && card < it.card && it.card.collides(card) && it.position.near(pos, nearDistanceMax) } -> {
                             0f
                         }
                         cardPositions.any { it.card != card && card < it.card && it.position.near(pos, nearDistance) } -> {
