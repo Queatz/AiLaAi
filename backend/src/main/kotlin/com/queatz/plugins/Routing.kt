@@ -71,6 +71,7 @@ fun Application.configureRouting() {
         promptRoutes()
         ratingRoutes()
         appRoutes()
+        inviteRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {

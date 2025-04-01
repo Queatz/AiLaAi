@@ -8,7 +8,10 @@ import com.queatz.plugins.db
 import kotlinx.datetime.Clock
 
 class App {
-    fun createGroup(people: List<String>, hosts: List<String> = emptyList()): Group =
+    fun createGroup(
+        people: List<String>,
+        hosts: List<String> = emptyList(),
+    ): Group =
         db.insert(Group(seen = Clock.System.now()))
             .also {
                 val group = it.id!!.asId(Group::class)
@@ -18,7 +21,11 @@ class App {
                 }
             }
 
-    fun createMember(person: String, group: String, host: Boolean? = null) = db.insert(
+    fun createMember(
+        person: String,
+        group: String,
+        host: Boolean? = null,
+    ) = db.insert(
         Member(
             host = host?.takeIf { it }
         ).also {

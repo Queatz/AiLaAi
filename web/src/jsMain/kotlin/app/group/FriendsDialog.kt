@@ -28,6 +28,7 @@ suspend fun friendsDialog(
     preselect: Set<String> = emptySet(),
     multiple: Boolean = false,
     confirmButton: String = application.appString { close },
+    actions: @Composable (resolve: (Boolean?) -> Unit) -> Unit = {},
     content: @Composable (resolve: (Boolean?) -> Unit) -> Unit = {},
     onPeople: (Set<Person>) -> Unit
 ) {
@@ -37,6 +38,7 @@ suspend fun friendsDialog(
         title = title,
         cancelButton = null,
         confirmButton = confirmButton,
+        actions = actions,
         maxWidth = 800.px
     ) { resolve ->
         var people by remember { mutableStateOf(items ?: emptyList()) }
@@ -50,7 +52,9 @@ suspend fun friendsDialog(
             if (search.isBlank()) {
                 people
             } else {
-                people.filter { it.name?.contains(search, ignoreCase = true) == true }
+                people.filter {
+                    it.name?.contains(search, ignoreCase = true) == true
+                }
             }.filter { it.id !in omit }
         }
 

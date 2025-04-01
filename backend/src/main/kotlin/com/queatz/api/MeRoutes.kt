@@ -31,7 +31,6 @@ import com.queatz.plugins.respond
 import com.queatz.receiveFile
 import com.queatz.scatterGeo
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
@@ -337,17 +336,6 @@ fun Route.meRoutes() {
             }
         }
 
-        get("/invite") {
-            respond {
-                db.insert(
-                    Invite(
-                        person = me.id!!,
-                        code = Random.code()
-                    )
-                )
-            }
-        }
-
         post("/me/delete") {
             respond {
                 val me = me
@@ -380,5 +368,3 @@ fun Route.meRoutes() {
 
 fun IntRange.token() =
     joinToString("") { Random.nextInt(35).toString(36).let { if (Random.nextBoolean()) it.uppercase() else it } }
-
-private fun Random.Default.code() = (1..6).joinToString("") { "${nextInt(9)}" }

@@ -9,7 +9,6 @@ class Person(
     var name: String? = null,
     var photo: String? = null,
     var geo: List<Double>? = null,
-    var inviter: String? = null,
     var seen: Instant? = null,
     var language: String? = null,
     var utcOffset: Double? = null,

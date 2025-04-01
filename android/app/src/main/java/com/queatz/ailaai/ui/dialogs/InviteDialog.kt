@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
-import app.ailaai.api.invite
+import app.ailaai.api.createQuickInvite
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.shareAsText
@@ -22,7 +22,7 @@ fun InviteDialog(meName: String, onDismissRequest: () -> Unit) {
 
     LaunchedEffect(Unit) {
         inviteCode = ""
-        api.invite(
+        api.createQuickInvite(
             onError = {
                 inviteCode = errorString
             }

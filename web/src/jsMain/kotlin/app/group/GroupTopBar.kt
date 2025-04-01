@@ -509,7 +509,18 @@ fun GroupTopBar(
             if (myMember != null) {
                 item(appString { invite }) {
                     scope.launch {
-                        friendsDialog(omit = group.members?.mapNotNull { it.person?.id } ?: emptyList()) {
+                        friendsDialog(
+                            omit = group.members?.mapNotNull { it.person?.id }.orEmpty(),
+                            actions = {
+                                IconButton(
+                                    name = "add_link",
+                                    // todo: translate
+                                    title = "Create an invite link"
+                                ) {
+                                    // todo
+                                }
+                            }
+                        ) {
                             it.forEach { addMember(it) }
                         }
                     }

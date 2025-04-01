@@ -149,7 +149,7 @@ object AppStyles : StyleSheet() {
     }
 
     val menuItem by style {
-        borderRadius(.5.r)
+        borderRadius(1.r)
         padding(1.r)
         cursor("pointer")
         whiteSpace("nowrap")
