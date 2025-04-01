@@ -679,6 +679,7 @@ object Styles : StyleSheet() {
         alignItems(AlignItems.Center)
         fontWeight("bold")
         overflow("hidden")
+        backgroundImage("linear-gradient(to bottom, #ffffff36, #ffffff00)")
 
         selector(".material-symbols-outlined") style {
             marginRight(.5.r)
