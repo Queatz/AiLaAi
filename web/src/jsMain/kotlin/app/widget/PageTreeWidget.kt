@@ -180,7 +180,18 @@ fun PageTreeWidget(widgetId: String) {
     val allTags = remember(data, stagedCards) {
         data?.tags?.filterKeys { id ->
             stagedCards.any { it.id == id }
-        }?.values?.flatten()?.distinct()?.sorted()?.sortedByDescending { tagCount?.get(it) ?: 0 }
+        }?.values
+            ?.flatten()
+            ?.distinct()
+            ?.sorted()
+            ?.sortedByDescending { tagCount?.get(it) ?: 0 }
+            ?.sortedByDescending { tag ->
+                stagedCards.sumOf { card ->
+                    data?.votes?.get(card.id!!)
+                        ?.takeIf { data?.tags?.get(card.id!!)?.contains(tag) == true }
+                        ?: 0
+                }
+            }
     }
     val shownCards = remember(stagedCards, tagFilters) {
         stagedCards.let {
@@ -421,7 +432,23 @@ fun PageTreeWidget(widgetId: String) {
                         if (tag == null) {
                             noTagCount.toString()
                         } else {
-                            tagCount?.get(tag)?.toString() ?: ""
+                            (tagCount?.get(tag) ?: 0).toString()
+                        }
+                    },
+                    formatDescription = { tag ->
+                        if (tag == null) {
+                            null
+                        } else {
+                            val totalVotes = cards.filter { card ->
+                                data?.tags?.get(card.id!!)?.contains(tag) == true
+                            }.sumOf { card -> data?.votes?.get(card.id!!) ?: 0 }
+
+                            // todo: translate
+                            if (totalVotes > 0) {
+                                "$totalVotes votes"
+                            } else {
+                                null
+                            }
                         }
                     },
                     showNoTag = true,
@@ -711,6 +738,7 @@ fun Tags(
     title: String,
     onClick: (tag: TagFilter, multiselect: Boolean) -> Unit,
     formatCount: ((tag: String?) -> String?)? = null,
+    formatDescription: ((tag: String?) -> String?)? = null,
     showNoTag: Boolean = false,
     content: @Composable () -> Unit = {},
 ) {
@@ -728,6 +756,7 @@ fun Tags(
                 title = title,
                 selected = tag in selected.filterIsInstance<TagFilter.Tag>().map { it.tag },
                 count = formatCount?.invoke(tag),
+                description = formatDescription?.invoke(tag),
                 onClick = { multiselect ->
                     onClick(TagFilter.Tag(tag), multiselect)
                 }
@@ -739,6 +768,7 @@ fun Tags(
                 // todo: Translate
                 tag = "No tag",
                 count = formatCount?.invoke(null),
+                description = formatDescription?.invoke(null),
                 title = title,
                 selected = TagFilter.Untagged in selected,
                 outline = true,
@@ -757,6 +787,7 @@ fun TagButton(
     tag: String,
     title: String,
     selected: Boolean,
+    description: String? = null,
     count: String? = null,
     outline: Boolean = false,
     onClick: (multiselect: Boolean) -> Unit,
@@ -772,6 +803,10 @@ fun TagButton(
             style {
                 height(2.5.r)
                 padding(0.r, 1.5.r)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                alignItems(AlignItems.Start)
+                justifyContent(JustifyContent.Center)
 
                 if (!outline) {
                     color(Color.white)
@@ -787,15 +822,27 @@ fun TagButton(
             }
         }
     ) {
-        Text(tag)
+        Div {
+            Text(tag)
 
-        count?.let {
-            Span({
+            count?.let {
+                Span({
+                    style {
+                        fontWeight("normal")
+                        paddingLeft(.25.r)
+                    }
+                }) { Text(it) }
+            }
+        }
+        if (description?.notBlank != null) {
+            Div({
                 style {
-                    fontWeight("normal")
-                    paddingLeft(.25.r)
+                    fontSize(12.px)
+                    opacity(.667f)
                 }
-            }) { Text(it) }
+            }) {
+                Text(description)
+            }
         }
     }
 }
