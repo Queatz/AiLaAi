@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -698,7 +699,19 @@ class MainActivity : AppCompatActivity() {
                                             modifier = Modifier
                                                 .padding(it)
                                                 .fillMaxSize()
-                                                .safePadding(!showNavigation)
+                                                .safePadding(!showNavigation),
+                                            enterTransition = {
+                                                fadeIn(animationSpec = tween(durationMillis = 50))
+                                            },
+                                            exitTransition = {
+                                                fadeOut(animationSpec = tween(durationMillis = 150))
+                                            },
+                                            popEnterTransition = {
+                                                fadeIn(animationSpec = tween(durationMillis = 50))
+                                            },
+                                            popExitTransition = {
+                                                fadeOut(animationSpec = tween(durationMillis = 150))
+                                            }
                                         ) {
                                             composable(
                                                 "profile/{id}",

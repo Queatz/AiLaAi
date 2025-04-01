@@ -319,7 +319,7 @@ fun PageTreeWidget(widgetId: String) {
             val tag = inputSelectDialog(
                 // todo: translate
                 confirmButton = "Add tag",
-                items = allTags,
+                items = data?.tags?.values?.flatten().orEmpty().distinct().sorted(),
                 itemStyle = { tag ->
                     backgroundColor(tagColor(tag))
                 }
@@ -327,10 +327,16 @@ fun PageTreeWidget(widgetId: String) {
 
             if (!tag.isNullOrBlank()) {
                 api.updateWidget(
-                    widgetId,
-                    Widget(data = json.encodeToString(data!!.copy(tags = data!!.tags.toMutableMap().apply {
-                        put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag.trim()).distinct())
-                    })))
+                    id = widgetId,
+                    widget = Widget(
+                        data = json.encodeToString(
+                            data!!.copy(
+                                tags = data!!.tags.toMutableMap().apply {
+                                    put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag.trim()).distinct())
+                                }
+                            )
+                        )
+                    )
                 ) {
                     widget = it
                     data = json.decodeFromString<PageTreeData>(it.data!!)

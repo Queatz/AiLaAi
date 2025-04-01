@@ -47,6 +47,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
 import webBaseUrl
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun ProfileNavPage(
@@ -92,7 +93,11 @@ fun ProfileNavPage(
     }
 
     NavTopBar(me, appString { this.profile }, onProfileClick = onProfileClick) {
-        IconButton("qr_code", appString { qrCode }) {
+        IconButton(
+            name = "qr_code",
+            title = appString { qrCode },
+            styles = { marginRight(.5f.r) }
+        ) {
             scope.launch {
                 dialog("", cancelButton = null) {
                     QrImg("$webBaseUrl/profile/${me!!.id!!}")
@@ -164,14 +169,14 @@ fun ProfileNavPage(
                             val clipboardText = link
                             window.navigator.clipboard.writeText(clipboardText)
                             copiedLink = true
-                            delay(3000)
+                            delay(2.seconds)
                             copiedLink = false
                         }
                     }
                 }
             ) {
                 // todo: translate
-                Text(if (copiedLink) "Copied!" else "Copy link")
+                Text(if (copiedLink) "Copied!" else "Copy profile link")
             }
             Button(
                 {
