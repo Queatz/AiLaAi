@@ -45,6 +45,16 @@ suspend fun Api.updateInvite(
     onSuccess = onSuccess
 )
 
+suspend fun Api.useInvite(
+    code: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<Invite> = {}
+) = post(
+    url = "invite/$code/use",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 suspend fun Api.deleteInvite(
     id: String,
     onError: ErrorBlock = null,

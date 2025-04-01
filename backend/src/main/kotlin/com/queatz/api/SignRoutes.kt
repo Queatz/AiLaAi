@@ -43,77 +43,14 @@ fun Route.signRoutes() {
                 if (invite == null) {
                     HttpStatusCode.NotFound.description("Invite not found")
                 } else {
-                    // Quick invites expire in 48 hours
-                    if (invite.expiry == null && invite.createdAt!! < Clock.System.now().minus(2.days)) {
-                        db.delete(invite)
-                        HttpStatusCode.NotFound.description("Invite expired")
-                    }
+                    val (person, error) = invite.use()
 
-                    // Ensure the invite is not expired
-                    if (invite.expiry != null) {
-                        if (invite.expiry!! < Clock.System.now()) {
-                            db.delete(invite)
-                            return@respond HttpStatusCode.Forbidden.description(
-                                "The invite has expired"
-                            )
-                        }
-                    }
-
-                    // Ensure the invite's creator is still the group's host
-                    if (invite.group != null) {
-                        if (
-                            db.member(
-                                person = invite.person!!,
-                                group = invite.group!!
-                            )?.host != true
-                        ) {
-                            db.delete(invite)
-                            return@respond HttpStatusCode.Forbidden.description(
-                                "The person who created this invite is no longer the group's host"
-                            )
-                        }
-                    }
-
-                    // Ensure there are remaining uses of this invite
-                    if (invite.total != null) {
-                        if ((invite.remaining ?: 0) > 0) {
-                            // Consume the use
-                            invite.remaining = invite.remaining!! - 1
-                            db.update(invite)
-                        } else {
-                            db.delete(invite)
-                            return@respond HttpStatusCode.Forbidden.description(
-                                "The invite has already been used the maximum number of times"
-                            )
-                        }
-                    } else {
-                        db.delete(invite)
-                    }
-
-                    // Create the new user
-                    val person = db.insert(
-                        Person(
-                            seen = Clock.System.now()
-                        )
-                    )
-
-                    // Add the user to the specified group, if any
-                    if (invite.group != null) {
-                        app.createMember(
-                            person = person.id!!,
-                            group = invite.group!!
-                        )
-                    }
-
-                    // If no group was specified, create an initial group with the invite's creator
-                    else {
-                        app.createGroup(
-                            people = listOf(person.id!!, invite.person!!)
-                        )
+                    error?.let {
+                        return@respond it
                     }
 
                     // Sign in the new user
-                    TokenResponse(jwt(person.id!!))
+                    TokenResponse(jwt(person!!.id!!))
                 }
             }
         }
