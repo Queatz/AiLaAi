@@ -181,17 +181,23 @@ fun PageTreeWidget(widgetId: String) {
         data?.tags?.filterKeys { id ->
             stagedCards.any { it.id == id }
         }?.values
+            ?.asSequence()
             ?.flatten()
             ?.distinct()
-            ?.sorted()
-            ?.sortedByDescending { tagCount?.get(it) ?: 0 }
-            ?.sortedByDescending { tag ->
-                stagedCards.sumOf { card ->
-                    data?.votes?.get(card.id!!)
-                        ?.takeIf { data?.tags?.get(card.id!!)?.contains(tag) == true }
-                        ?: 0
+            ?.sortedWith(
+                compareByDescending<String> { tag ->
+                    stagedCards.sumOf { card ->
+                        data?.votes?.get(card.id!!)
+                            ?.takeIf { data?.tags?.get(card.id!!)?.contains(tag) == true }
+                            ?: 0
+                    }
                 }
-            }
+                    .thenByDescending { tagCount?.get(it) ?: 0 }
+                    .thenBy {
+                        it
+                    }
+            )
+            ?.toList()
     }
     val shownCards = remember(stagedCards, tagFilters) {
         stagedCards.let {
@@ -439,13 +445,17 @@ fun PageTreeWidget(widgetId: String) {
                         if (tag == null) {
                             null
                         } else {
-                            val totalVotes = cards.filter { card ->
-                                data?.tags?.get(card.id!!)?.contains(tag) == true
-                            }.sumOf { card -> data?.votes?.get(card.id!!) ?: 0 }
+                            val totalVotes = stagedCards.sumOf { card ->
+                                if (data?.tags?.get(card.id!!)?.contains(tag) == true) {
+                                    data?.votes?.get(card.id!!) ?: 0
+                                } else {
+                                    0
+                                }
+                            }
 
                             // todo: translate
                             if (totalVotes > 0) {
-                                "$totalVotes votes"
+                                "$totalVotes ${if (totalVotes == 1) "vote" else "votes"}"
                             } else {
                                 null
                             }
