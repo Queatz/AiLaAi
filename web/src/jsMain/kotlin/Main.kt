@@ -13,6 +13,7 @@ import app.components.Background
 import app.group.GroupCoverPage
 import app.info.PrivacyPage
 import app.info.TosPage
+import app.invites.InvitePage
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import app.widget.WidgetStyles
@@ -134,7 +135,7 @@ fun main() {
 
                 route("signin") {
                     AppHeader(
-                        appString { signIn },
+                        title = appString { signIn },
                         showBack = true,
                         onBack = {
                             router.navigate("/")
@@ -164,8 +165,13 @@ fun main() {
                 }
 
                 route("invite") {
-                    string {
-                        Text("Invite page coming soon!")
+                    string { code ->
+                        AppHeader(
+                            title = appName,
+                            showDownloadApp = true
+                        )
+                        InvitePage(code = code)
+                        AppFooter()
                     }
                 }
 

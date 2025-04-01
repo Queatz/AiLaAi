@@ -198,6 +198,10 @@ object Strings {
         "Group not found.",
         "Không tìm được nhóm này."
     )
+    val inviteNotFound = Translation(
+        "Invite not found.",
+        "Không tìm được lời mời này."
+    )
     val cardNotFound = Translation(
         "Page not found.",
         "Không tìm được trang này.",

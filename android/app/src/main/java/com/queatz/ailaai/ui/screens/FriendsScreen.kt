@@ -485,7 +485,7 @@ fun FriendsScreen() {
                             modifier = Modifier.padding(2.pad)
                         )
 
-                        var localCategories by mutableStateOf(emptyList<String>())
+                        var localCategories by remember { mutableStateOf(emptyList<String>()) }
                         LaunchedEffect(geo) {
                             if (geo != null) {
                                 api.exploreGroups(

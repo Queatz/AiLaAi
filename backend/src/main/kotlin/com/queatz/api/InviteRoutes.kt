@@ -2,6 +2,7 @@ package com.queatz.api
 
 import com.queatz.db.Invite
 import com.queatz.db.Person
+import com.queatz.db.UseInviteResponse
 import com.queatz.db.invite
 import com.queatz.db.member
 import com.queatz.parameter
@@ -58,6 +59,14 @@ fun Route.inviteRoutes() {
                     return@respond HttpStatusCode.BadRequest.description("Parameter 'remaining' cannot be specified")
                 }
 
+                if (invite.total != null && invite.total!! < 1) {
+                    return@respond HttpStatusCode.BadRequest.description("Parameter 'total' must be greater than 0")
+                }
+
+                if (invite.expiry != null && invite.expiry!! < Clock.System.now()) {
+                    return@respond HttpStatusCode.BadRequest.description("Parameter 'expiry' must be in the future")
+                }
+
                 if (invite.group != null) {
                     if (
                         db.member(
@@ -90,13 +99,15 @@ fun Route.inviteRoutes() {
                 if (invite == null) {
                     HttpStatusCode.NotFound.description("Invite not found")
                 } else {
-                    val (_, error) = invite.use(me = me)
+                    val result = invite.use(me = me)
 
-                    error?.let {
+                    result.error?.let {
                         return@respond it
                     }
 
-                    HttpStatusCode.OK
+                    UseInviteResponse(
+                        group = result.group
+                    )
                 }
             }
         }
@@ -149,40 +160,43 @@ fun Route.inviteRoutes() {
     }
 }
 
-fun Invite.use(me: Person? = null): Pair<Person?, HttpStatusCode?> {
+fun Invite.use(me: Person? = null): UseInviteResult {
     val invite = this
 
     // You can't use your own invite
     if (invite.person == me?.id) {
-        return null to HttpStatusCode.Forbidden.description("You can't use your own invite")
+        return UseInviteResult(null, HttpStatusCode.Forbidden.description("You can't use your own invite"))
     }
 
     // Quick invites expire in 48 hours
     if (invite.expiry == null && invite.createdAt!! < Clock.System.now().minus(2.days)) {
         db.delete(invite)
-        return null to HttpStatusCode.NotFound.description("Invite expired")
+        return UseInviteResult(null, HttpStatusCode.NotFound.description("Invite expired"))
     }
 
     // Ensure the invite is not expired
     if (invite.expiry != null) {
         if (invite.expiry!! < Clock.System.now()) {
             db.delete(invite)
-            return null to HttpStatusCode.Forbidden.description(
-                "The invite has expired"
+            return UseInviteResult(
+                null, HttpStatusCode.Forbidden.description(
+                    "The invite has expired"
+                )
             )
         }
     }
 
     // Ensure the invite's creator is still the group's host
     if (invite.group != null) {
-        if (
-            db.member(
+        if (db.member(
                 person = invite.person!!,
                 group = invite.group!!
             )?.host != true
         ) {
-            return null to HttpStatusCode.Forbidden.description(
-                "The person who created this invite is no longer the group's host"
+            return UseInviteResult(
+                null, HttpStatusCode.Forbidden.description(
+                    "The person who created this invite is no longer the group's host"
+                )
             )
         }
     }
@@ -192,11 +206,18 @@ fun Invite.use(me: Person? = null): Pair<Person?, HttpStatusCode?> {
         if ((invite.remaining ?: 0) > 0) {
             // Consume the use
             invite.remaining = invite.remaining!! - 1
-            db.update(invite)
+
+            if (invite.remaining == 0) {
+                db.delete(invite)
+            } else {
+                db.update(invite)
+            }
         } else {
             db.delete(invite)
-            return null to HttpStatusCode.Forbidden.description(
-                "The invite has already been used the maximum number of times"
+            return UseInviteResult(
+                null, HttpStatusCode.Forbidden.description(
+                    "The invite has already been used the maximum number of times"
+                )
             )
         }
     } else {
@@ -211,22 +232,34 @@ fun Invite.use(me: Person? = null): Pair<Person?, HttpStatusCode?> {
     )
 
     // Add the user to the specified group, if any
-    if (invite.group != null) {
+    val group = if (invite.group != null) {
         app.createMember(
             person = person.id!!,
             group = invite.group!!
         )
+
+        invite.group!!
     }
 
     // If no group was specified, create an initial group with the invite's creator
     else {
         app.createGroup(
             people = listOf(person.id!!, invite.person!!)
-        )
+        ).id!!
     }
 
-    return person.takeIf { it != me } to null
+    return UseInviteResult(
+        person = person.takeIf { it != me },
+        error = null,
+        group = group
+    )
 }
+
+data class UseInviteResult(
+    val person: Person?,
+    val error: HttpStatusCode?,
+    val group: String? = null,
+)
 
 private fun Invite.canEdit(me: String): Boolean = if (group != null) {
     db.member(person = me, group = group!!)?.host == true

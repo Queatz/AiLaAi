@@ -29,6 +29,7 @@ import app.bots.groupBotsDialog
 import app.bots.updateGroupBotDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.invites.createInviteDialog
 import app.menu.InlineMenu
 import app.menu.Menu
 import app.messaages.inList
@@ -517,7 +518,23 @@ fun GroupTopBar(
                                     // todo: translate
                                     title = "Create an invite link"
                                 ) {
-                                    // todo
+                                    scope.launch {
+                                        createInviteDialog(
+                                            group = group.group!!.id!!,
+                                            onError = {
+                                                scope.launch {
+                                                    dialog(
+                                                        // todo: translate
+                                                        title = "The invite link could not be created",
+                                                        cancelButton = null
+                                                    )
+                                                }
+                                            }
+                                        ) {
+                                            // todo: show invite link + other details
+                                            onGroupUpdated()
+                                        }
+                                    }
                                 }
                             }
                         ) {

@@ -131,7 +131,8 @@ fun EditCardDialog(
                             keyboardController.hide()
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .focusRequester(titleFocusRequester)
                 )
                 OutlinedTextField(
@@ -182,7 +183,7 @@ fun EditCardDialog(
                     }
                 }
 
-                var messageState by mutableStateOf(cardConversation.message)
+                var messageState by remember { mutableStateOf(cardConversation.message) }
 
                 OutlinedTextField(
                     messageState,
@@ -216,7 +217,7 @@ fun EditCardDialog(
                 }
 
                 cardConversation.items.forEach {
-                    var titleState by mutableStateOf(it.title)
+                    var titleState by remember { mutableStateOf(it.title) }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically

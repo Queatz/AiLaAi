@@ -203,12 +203,12 @@ fun EditReminderSchedule(
 
     if (schedule.until) {
         ReminderDateTime(
-            schedule.untilDate,
-            schedule.untilTime,
-            { schedule.untilDate = it },
-            { schedule.untilTime = it },
-            disabled,
-            {
+            date = schedule.untilDate,
+            time = schedule.untilTime,
+            onDate = { schedule.untilDate = it },
+            onTime = { schedule.untilTime = it },
+            disabled = disabled,
+            styles = {
                 marginBottom(1.r)
                 padding(0.r, .5.r)
             }

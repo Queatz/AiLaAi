@@ -336,3 +336,8 @@ class CardDowngradeDetails(
 class PlatformAccountsPointsBody(
     var add: Int
 )
+
+@Serializable
+class UseInviteResponse(
+    val group: String? = null
+)

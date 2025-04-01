@@ -1,6 +1,7 @@
 package app.ailaai.api
 
 import com.queatz.db.Invite
+import com.queatz.db.UseInviteResponse
 import io.ktor.http.HttpStatusCode
 
 suspend fun Api.createQuickInvite(
@@ -48,7 +49,7 @@ suspend fun Api.updateInvite(
 suspend fun Api.useInvite(
     code: String,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<Invite> = {}
+    onSuccess: SuccessBlock<UseInviteResponse> = {}
 ) = post(
     url = "invite/$code/use",
     onError = onError,

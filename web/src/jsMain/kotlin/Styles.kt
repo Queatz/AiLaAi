@@ -1043,7 +1043,7 @@ fun StyleScope.ellipsize() {
     whiteSpace("nowrap")
 }
 
-fun AttrsScope<HTMLDivElement>.mainContent(layout: AppLayout) {
+fun AttrsScope<HTMLDivElement>.mainContent(layout: AppLayout = AppLayout.Default) {
     if (layout == AppLayout.Kiosk) {
         classes(Styles.mainContent, Styles.mainContentKiosk)
     } else {
