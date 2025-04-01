@@ -680,6 +680,7 @@ object Styles : StyleSheet() {
         fontWeight("bold")
         overflow("hidden")
         backgroundImage("linear-gradient(to bottom, #ffffff36, #ffffff00)")
+        property("box-shadow", "0 0 4px 2px #ffffff36 inset")
 
         selector(".material-symbols-outlined") style {
             marginRight(.5.r)
