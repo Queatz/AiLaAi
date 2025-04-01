@@ -90,7 +90,7 @@ fun MessageContent(
             } else {
                 alignItems(AlignItems.FlexStart)
             }
-//            width(100.percent)
+            maxWidth(100.percent)
         }
         title(
             "${message.createdAt?.let { formatDistanceToNow(Date(it.toEpochMilliseconds()), js("{ addSuffix: true }")) }}\n${message.createdAt?.let { Date(it.toEpochMilliseconds()) }.toString()}"

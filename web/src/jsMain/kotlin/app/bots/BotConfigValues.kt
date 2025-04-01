@@ -59,7 +59,6 @@ import r
                 placeholder = field.placeholder ?: "",
                 styles = {
                     margin(0.r)
-                    width(32.r)
                     maxWidth(100.percent)
                 }
             )

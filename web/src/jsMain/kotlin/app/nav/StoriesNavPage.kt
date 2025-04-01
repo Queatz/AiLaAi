@@ -152,7 +152,7 @@ fun StoriesNavPage(
         }
     }
 
-    NavTopBar(me, appString { posts }, onProfileClick) {
+    NavTopBar(me, appString { cards }, onProfileClick) {
         IconButton("search", appString { search }, styles = {
         }) {
             showSearch = !showSearch

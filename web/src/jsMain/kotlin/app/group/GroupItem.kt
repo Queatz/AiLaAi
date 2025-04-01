@@ -145,7 +145,7 @@ fun GroupItem(
                         GroupInfo.LatestMessage -> {
                             if (group.latestMessage?.member == myMember?.member?.id) {
                                 Text("${appString { you }}: ")
-                            } else if (group.members!!.size > 2 && group.latestMessage != null) {
+                            } else if (group.latestMessage != null) {
                                 Text("${group.latestMessagePersonOrBotName}: ")
                             }
                             Text(

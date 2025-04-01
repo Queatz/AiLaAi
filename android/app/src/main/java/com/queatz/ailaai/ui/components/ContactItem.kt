@@ -200,7 +200,7 @@ fun ContactItem(
                                     R.string.you_x,
                                     messagePreview
                                 )
-                            } else if (!groupExtended.group?.name.isNullOrBlank() || groupExtended.members!!.size > 2) {
+                            } else if (!groupExtended.group?.name.isNullOrBlank()) {
                                 stringResource(
                                     R.string.x_x,
                                     groupExtended.latestMessagePersonOrBotName,
