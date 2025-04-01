@@ -51,6 +51,9 @@ fun collections() = listOf(
     },
     Invite::class.db {
         ensurePersistentIndex(listOf(Invite::code.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Invite::expiry.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Invite::group.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Invite::person.name), PersistentIndexOptions())
     },
     Save::class.db {
         ensurePersistentIndex(listOf(Save::person.name), PersistentIndexOptions())

@@ -78,7 +78,59 @@ fun Route.inviteRoutes() {
                 )
             }
         }
+
+        post("/invite/{id}") {
+            respond {
+                val invite = db.document(Invite::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                val updated = call.receive<Invite>()
+
+                if (!invite.canEdit(me.id!!)) {
+                    return@respond HttpStatusCode.Forbidden
+                }
+
+                if (updated.about != null) {
+                    invite.about = updated.about
+                }
+
+                if (updated.expiry != null) {
+                    invite.expiry = updated.expiry
+                }
+
+                if (updated.remaining != null) {
+                    invite.remaining = updated.remaining
+                }
+
+                if (updated.total != null) {
+                    invite.total = updated.total
+                }
+
+                db.update(invite)
+            }
+        }
+
+        post("/invite/{id}/delete") {
+            respond {
+                val invite = db.document(Invite::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                if (!invite.canEdit(me.id!!)) {
+                    return@respond HttpStatusCode.Forbidden
+                }
+
+                db.delete(invite)
+
+                HttpStatusCode.OK
+            }
+        }
     }
+}
+
+private fun Invite.canEdit(me: String): Boolean = if (group != null) {
+    db.member(person = me, group = group!!)?.host == true
+} else {
+    person == me
 }
 
 private fun Random.code(length: Int = 6) =
