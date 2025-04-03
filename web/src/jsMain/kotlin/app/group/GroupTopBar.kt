@@ -58,11 +58,14 @@ import json
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import lib.formatDistanceToNow
 import notBlank
+import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
@@ -75,8 +78,10 @@ import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.vh
+import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -512,12 +517,16 @@ fun GroupTopBar(
                     scope.launch {
                         friendsDialog(
                             omit = group.members?.mapNotNull { it.person?.id }.orEmpty(),
-                            actions = {
+                            actions = { resolve ->
+                                if (myMember.member?.host != true) {
+                                    return@friendsDialog
+                                }
                                 IconButton(
                                     name = "add_link",
                                     // todo: translate
                                     title = "Create an invite link"
                                 ) {
+                                    resolve(null)
                                     scope.launch {
                                         createInviteDialog(
                                             group = group.group!!.id!!,
@@ -530,8 +539,41 @@ fun GroupTopBar(
                                                     )
                                                 }
                                             }
-                                        ) {
-                                            // todo: show invite link + other details
+                                        ) { invite ->
+                                            scope.launch {
+                                                val result = dialog(
+                                                    // todo: translate
+                                                    title = "Invite link is active",
+                                                    cancelButton = application.appString { close },
+                                                    // todo: translate
+                                                    confirmButton = "Copy link",
+                                                    content = {
+                                                        Div({
+                                                            style {
+                                                                padding(1.r)
+                                                                border(1.px, LineStyle.Solid, Styles.colors.primary)
+                                                                borderRadius(1.r)
+                                                                property("word-break", "break-word")
+                                                            }
+                                                        }) {
+                                                            A(
+                                                                href = "$webBaseUrl/invite/${invite.code!!}",
+                                                                attrs = {
+                                                                    target(ATarget.Blank)
+                                                                }
+                                                            ) {
+                                                                Text("$webBaseUrl/invite/${invite.code!!}")
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                                
+                                                if (result == true) {
+                                                    window.navigator.clipboard.writeText(
+                                                        "$webBaseUrl/invite/${invite.code!!}"
+                                                    )
+                                                }
+                                            }
                                             onGroupUpdated()
                                         }
                                     }

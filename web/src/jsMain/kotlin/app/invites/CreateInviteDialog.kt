@@ -10,6 +10,7 @@ import app.dialog.inputDialog
 import app.reminder.ReminderDateTime
 import com.queatz.db.Invite
 import kotlinx.datetime.toKotlinInstant
+import lib.addDays
 import lib.format
 import notBlank
 import org.jetbrains.compose.web.attributes.InputType
@@ -32,7 +33,7 @@ suspend fun createInviteDialog(
     onError: () -> Unit,
     onInvite: (Invite) -> Unit
 ) {
-    val initialDate = Date()
+    val initialDate = addDays(Date(), amount = 1.0)
     var hasTotal by mutableStateOf(false)
     var total by mutableStateOf(10)
     var expires by mutableStateOf(false)

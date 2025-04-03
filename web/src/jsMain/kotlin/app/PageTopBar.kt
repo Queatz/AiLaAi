@@ -16,6 +16,7 @@ import r
 fun PageTopBar(
     title: String,
     description: String? = null,
+    useMinHeight: Boolean = false,
     actions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     navActions: @Composable ElementScope<HTMLDivElement>.() -> Unit = {},
     onTitleClick: (() -> Unit)? = null,
@@ -30,6 +31,9 @@ fun PageTopBar(
             alignItems(AlignItems.Center)
             overflow("hidden")
             flexShrink(0)
+            if (useMinHeight) {
+                minHeight(3.r)
+            }
         }
     }) {
         navActions()

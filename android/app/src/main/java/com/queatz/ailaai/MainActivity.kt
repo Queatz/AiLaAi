@@ -701,13 +701,13 @@ class MainActivity : AppCompatActivity() {
                                                 .fillMaxSize()
                                                 .safePadding(!showNavigation),
                                             enterTransition = {
-                                                fadeIn(animationSpec = tween(durationMillis = 50))
+                                                fadeIn(animationSpec = tween(durationMillis = 150))
                                             },
                                             exitTransition = {
                                                 fadeOut(animationSpec = tween(durationMillis = 150))
                                             },
                                             popEnterTransition = {
-                                                fadeIn(animationSpec = tween(durationMillis = 50))
+                                                fadeIn(animationSpec = tween(durationMillis = 150))
                                             },
                                             popExitTransition = {
                                                 fadeOut(animationSpec = tween(durationMillis = 150))

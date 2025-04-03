@@ -145,7 +145,7 @@ data class SignInRequest(
 )
 
 @Serializable
-data class TokenResponse (
+data class TokenResponse(
     val token: String
 )
 

@@ -1,14 +1,30 @@
 package app.components
 
 import Styles
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import appString
 import appText
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.StyleScope
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.fontFamily
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -28,6 +44,8 @@ fun EditField(
     showDiscard: Boolean = true,
     autoFocus: Boolean = false,
     resetOnSubmit: Boolean = false,
+    autoSize: Boolean = true,
+    monospace: Boolean = false,
     button: String = appString { save },
     onSave: suspend (String) -> Boolean
 ) {
@@ -67,10 +85,16 @@ fun EditField(
         classes(Styles.textarea)
         style {
             height(3.5.r)
-            maxHeight(18.r)
+            if (autoSize) {
+                maxHeight(18.r)
+            }
             flexShrink(0)
             backgroundColor(Color.transparent)
             styles()
+
+            if (monospace) {
+                fontFamily("monospace")
+            }
         }
 
         placeholder(placeholder)
@@ -89,12 +113,16 @@ fun EditField(
 
         onInput {
             messageText = it.value
-            it.target.resize()
+            if (autoSize) {
+                it.target.resize()
+            }
             messageChanged = true
         }
 
         onChange {
-            it.target.resize()
+            if (autoSize) {
+                it.target.resize()
+            }
         }
 
         if (autoFocus) {
@@ -106,7 +134,9 @@ fun EditField(
                 element.focus()
             }
 
-            element.resize()
+            if (autoSize) {
+                element.resize()
+            }
 
             onValueChange = { element.dispatchEvent(Event("change")) }
 

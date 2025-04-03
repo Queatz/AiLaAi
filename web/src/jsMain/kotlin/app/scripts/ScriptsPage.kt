@@ -26,6 +26,7 @@ import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.whiteSpace
@@ -111,7 +112,10 @@ fun ScriptsPage(
                         }
                         IconButton(
                             "help_outline",
-                            "Help"
+                            "Help",
+                            styles = {
+                                marginLeft(.5.r)
+                            }
                         ) {
                             scope.launch {
                                 dialog(

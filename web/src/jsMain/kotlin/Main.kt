@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import lib.mapboxgl
 import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
@@ -168,7 +167,7 @@ fun main() {
                     string { code ->
                         AppHeader(
                             title = appName,
-                            showDownloadApp = true
+                            showMe = true
                         )
                         InvitePage(code = code)
                         AppFooter()

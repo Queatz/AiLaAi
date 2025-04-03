@@ -24,7 +24,10 @@ suspend fun Api.createWidget(
     onSuccess: SuccessBlock<Widget>
 ) = post(
     url = "widgets",
-    body = CreateWidgetBody(widget, data),
+    body = CreateWidgetBody(
+        widget = widget,
+        data = data
+    ),
     onError = onError,
     onSuccess = onSuccess
 )

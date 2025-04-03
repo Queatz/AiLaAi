@@ -1,5 +1,4 @@
 #! /bin/bash
-
-sftp 'root@hitown.chat:/root/ui' <<< $'put "build/kotlin-webpack/js/productionExecutable/ailaai.js"'
-
-
+for file in build/kotlin-webpack/js/productionExecutable/*.js; do
+  echo "put \"$file\""
+done | sftp root@hitown.chat:/root/ui
