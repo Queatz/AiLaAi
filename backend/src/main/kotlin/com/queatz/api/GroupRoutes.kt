@@ -483,6 +483,12 @@ fun Route.groupRoutes() {
                 db.topReactionsInGroup(group.group!!.id!!)
             }
         }
+
+        get("/groups/{id}/invites") {
+            respond {
+                db.activeInvitesOfGroup(parameter("id"))
+            }
+        }
     }
 }
 

@@ -133,7 +133,8 @@ suspend fun Api.sendMedia(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) {
-    return post("groups/$group/photos", MultiPartFormDataContent(
+    return post(
+        "groups/$group/photos", MultiPartFormDataContent(
         formData {
             if (message != null) {
                 append("message", httpJson.encodeToString(message))
@@ -159,7 +160,8 @@ suspend fun Api.sendAudio(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) {
-    return post("groups/$group/audio", MultiPartFormDataContent(
+    return post(
+        "groups/$group/audio", MultiPartFormDataContent(
         formData {
             if (message != null) {
                 append("message", httpJson.encodeToString(message))
@@ -197,7 +199,10 @@ suspend fun Api.sendVideos(
                         video.inputProvider,
                         Headers.build {
                             append(HttpHeaders.ContentType, video.type)
-                            append(HttpHeaders.ContentDisposition, "filename=${video.fileName?.split("/")?.lastOrNull() ?: ""}")
+                            append(
+                                HttpHeaders.ContentDisposition,
+                                "filename=${video.fileName?.split("/")?.lastOrNull() ?: ""}"
+                            )
                         }
                     )
                 }
@@ -217,8 +222,18 @@ suspend fun Api.sendMessage(
     onSuccess: SuccessBlock<HttpStatusCode> = {},
 ) = post("groups/$group/messages", message, onError = onError, onSuccess = onSuccess)
 
+suspend fun Api.activeGroupInvites(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<Invite>> = {},
+) = get(
+    "/groups/$id/invites",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
 data class ScaledVideo(
     val inputProvider: InputProvider,
     val type: String,
-    val fileName: String?
+    val fileName: String?,
 )
