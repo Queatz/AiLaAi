@@ -1,6 +1,7 @@
 package app.invites
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -10,33 +11,127 @@ import androidx.compose.runtime.rememberCoroutineScope
 import api
 import app.AppNavigation
 import app.ailaai.api.me
+import app.ailaai.api.profile
 import app.ailaai.api.signUp
 import app.ailaai.api.useInvite
 import app.appNav
+import app.dialog.dialog
 import app.softwork.routingcompose.Router
+import appString
 import application
 import com.queatz.db.Invite
-import com.queatz.db.StoryContent.Text
+import com.queatz.db.PersonProfile
 import components.Loading
 import kotlinx.coroutines.launch
+import notBlank
+import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.target
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.B
 import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
+import r
+import webBaseUrl
 
 @Composable
-fun InviteCard(invite: Invite) {
+fun InviteCard(
+    invite: Invite
+) {
     val scope = rememberCoroutineScope()
     val me by application.me.collectAsState()
     val router = Router.current
     val appNav = appNav
 
+    var inviter by remember { mutableStateOf<PersonProfile?>(null) }
+
     var isLoading by remember { mutableStateOf(false) }
 
-    Text(invite.about.orEmpty())
+    LaunchedEffect(Unit) {
+        isLoading = true
+        api.profile(
+            invite.person!!
+        ) {
+            inviter = it
+        }
+        isLoading = false
+    }
+
+    inviter?.let {
+        Div(
+            attrs = {
+                style {
+                    fontSize(24.px)
+                    textAlign("center")
+                    padding(1.r)
+                }
+            }
+        ) {
+            val url = it.profile.url?.notBlank
+            val link = url?.let { "$webBaseUrl/$it" } ?: "$webBaseUrl/profile/${me?.id!!}"
+            A(
+                href = link,
+                attrs = {
+                    target(ATarget.Blank)
+
+                    style {
+                        fontWeight("bold")
+                    }
+                }
+            ) {
+                Text(it.person.name ?: appString { someone })
+            }
+            // todo: translate
+            Text(" is inviting you to ")
+            B {
+                // todo: translate
+                Text("${appString { appName }}!")
+            }
+        }
+    }
+
+    invite.about?.notBlank?.let { about ->
+        Div(
+            attrs = {
+                style {
+                    marginTop(1.r)
+                    marginBottom(1.r)
+                    padding(1.r)
+                    border(1.px, LineStyle.Solid, Styles.colors.primary)
+                    borderRadius(1.r)
+                    property("word-break", "break-word")
+                }
+            }
+        ) {
+            Text(about)
+        }
+    }
 
     if (isLoading) {
         Loading()
     } else {
         Button(
             attrs = {
+                classes(Styles.button)
+
+                style {
+                    marginTop(1.r)
+                    justifyContent(JustifyContent.Center)
+                    textAlign("center")
+                }
+
                 onClick {
                     scope.launch {
                         if (me == null) {
@@ -53,7 +148,16 @@ fun InviteCard(invite: Invite) {
                             }
                         } else {
                             api.useInvite(
-                                code = invite.code!!
+                                code = invite.code!!,
+                                onError = {
+                                    scope.launch {
+                                        dialog(
+                                            // todo: translate
+                                            title = "The invite code cannot be used",
+                                            cancelButton = null
+                                        )
+                                    }
+                                }
                             ) { response ->
                                 response.group?.let { group ->
                                     appNav.navigate(

@@ -199,6 +199,20 @@ fun Invite.use(me: Person? = null): UseInviteResult {
                 )
             )
         }
+
+        if (
+            me?.id != null &&
+            db.member(
+                person = me.id!!,
+                group = invite.group!!
+            ) != null
+        ) {
+            return UseInviteResult(
+                null, HttpStatusCode.Forbidden.description(
+                    "You are already a member of this group"
+                )
+            )
+        }
     }
 
     // Ensure there are remaining uses of this invite

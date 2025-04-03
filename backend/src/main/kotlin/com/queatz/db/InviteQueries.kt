@@ -25,6 +25,7 @@ fun Db.activeInvitesOfGroup(group: String) = list(
             filter x.${f(Invite::group)} == @group
                 and (x.${f(Invite::expiry)} == null or DATE_ISO8601(x.${f(Invite::expiry)}) > DATE_ISO8601(DATE_NOW()))
                 and (x.${f(Invite::remaining)} == null or x.${f(Invite::remaining)} > 0)
+            sort x.${f(Invite::createdAt)} desc
             return x
     """.trimIndent(),
     mapOf(
