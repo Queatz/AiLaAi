@@ -126,7 +126,7 @@ fun GroupsNavPage(
         mutableStateOf(false)
     }
 
-    var searchText by remember {
+    var searchText by remember(showSearch) {
         mutableStateOf("")
     }
 

@@ -545,11 +545,20 @@ fun AppPage() {
 
                 NavPage.Platform -> PlatformPage(platform)
 
-                NavPage.Scripts -> ScriptsPage(script) {
-                    scope.launch {
-                        scriptUpdates.emit(it)
+                NavPage.Scripts -> ScriptsPage(
+                    nav = script,
+                    onUpdate = {
+                        scope.launch {
+                            scriptUpdates.emit(it)
+                        }
+                    },
+                    onDelete = {
+                        script = ScriptsNav.None
+                         scope.launch {
+                            scriptUpdates.emit(it)
+                        }
                     }
-                }
+                )
             }
         }
     }

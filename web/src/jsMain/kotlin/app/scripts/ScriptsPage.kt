@@ -9,10 +9,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.PageTopBar
+import app.ailaai.api.deleteScript
 import app.ailaai.api.runScript
 import app.ailaai.api.updateScript
+import app.appNav
 import app.dialog.dialog
+import app.dialog.inputDialog
+import app.menu.Menu
 import appString
+import application
 import bulletedString
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
@@ -39,6 +44,8 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import r
 import stories.StoryContents
 
@@ -46,8 +53,10 @@ import stories.StoryContents
 fun ScriptsPage(
     nav: ScriptsNav,
     onUpdate: (Script) -> Unit,
+    onDelete: (Script) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val appNav = appNav
 
     when (nav) {
         is ScriptsNav.None -> Unit
@@ -61,6 +70,59 @@ fun ScriptsPage(
             var isRunningScript by remember(script) { mutableStateOf(false) }
             var runScriptData by remember(script) { mutableStateOf<String?>(null) }
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
+            var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+
+            menuTarget?.let {
+                Menu(
+                    onDismissRequest = { menuTarget = null },
+                    target = it,
+                ) {
+                    item(
+                        // todo: translate
+                        title = "Rename",
+                        onClick = {
+                            menuTarget = null
+                            scope.launch {
+                                val name = inputDialog(
+                                    // todo: translate
+                                    title = "Script name",
+                                    confirmButton = application.appString { update },
+                                    defaultValue = script.name.orEmpty()
+                                )
+
+                                if (name != null) {
+                                    api.updateScript(
+                                        id = script.id!!,
+                                        script = Script(name = name)
+                                    ) {
+                                        onUpdate(it)
+                                    }
+                                }
+                            }
+                        }
+                    )
+                    item(
+                        // todo: translate
+                        title = "Delete",
+                        onClick = {
+                            menuTarget = null
+                            scope.launch {
+                                val proceed = dialog(
+                                    // todo: translate
+                                    title = "Delete this script?",
+                                    // todo: translate
+                                    confirmButton = "Yes, delete"
+                                )
+                                if (proceed == true) {
+                                    api.deleteScript(script.id!!) {
+                                        onDelete(script)
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
 
             val runScript = remember(script) {
                 { scriptId: String, data: String? ->
@@ -228,6 +290,7 @@ fun ScriptsPage(
                                                         script = "<Script ID to run>",
                                                         data = "<Data passed to the script>",
                                                     )
+                                                    photo("<Url>", <Aspect ratio>?) // Must start with /static/
                                                 }
                                                 
                                                 Networking:
@@ -266,6 +329,17 @@ fun ScriptsPage(
                                     }
                                 )
                             }
+                        }
+                        IconButton(
+                            name = "more_vert",
+                            // todo: translate
+                            title = "Menu",
+                            styles = {
+                                marginLeft(.5.r)
+                            }
+                        ) {
+                            menuTarget =
+                                if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
                         }
                     }
                 )

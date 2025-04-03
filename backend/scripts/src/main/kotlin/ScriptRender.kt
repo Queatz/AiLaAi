@@ -19,4 +19,8 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
     fun button(text: String, script: String, data: String? = null) {
         result += StoryContent.Button(text, script, data)
     }
+
+    fun photo(url: String, aspect: Float? = null) {
+        result += StoryContent.Photos(listOf(url), aspect = aspect)
+    }
 }

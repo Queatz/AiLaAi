@@ -35,6 +35,7 @@ fun MonacoEditor(
     LaunchedEffect(editor, initialValue) {
         editor?.apply {
             setValue(initialValue)
+            setScrollTop(0)
             onDidChangeModelContent {
                 onValueChange(getValue())
             }

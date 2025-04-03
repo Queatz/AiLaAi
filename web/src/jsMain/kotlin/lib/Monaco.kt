@@ -15,6 +15,7 @@ external object Monaco {
     interface IEditor {
         fun dispose()
         fun setValue(value: String)
+        fun setScrollTop(offset: Int)
         fun getValue(): String
         fun updateOptions(options: EditorOptions)
         fun onDidChangeModelContent(listener: () -> Unit)

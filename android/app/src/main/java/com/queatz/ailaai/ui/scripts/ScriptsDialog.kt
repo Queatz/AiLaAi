@@ -669,6 +669,7 @@ fun ScriptsDialog(
                         script = "<Script ID to run>",
                         data = "<Data passed to the script>",
                     )
+                    photo("<Url>", <Aspect ratio>?) // Must start with /static/
                 }
                 
                 Networking:

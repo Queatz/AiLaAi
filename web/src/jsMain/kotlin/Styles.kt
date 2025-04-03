@@ -104,6 +104,7 @@ object Styles : StyleSheet() {
 
     val markdown by style {
         whiteSpace("initial")
+        property("word-break", "break-word")
 
         desc(self, selector(":first-child")) style {
             property("margin-top", "0")

@@ -32,7 +32,7 @@ fun Markdown(content: String) {
         }
 
         marked.parse(
-            text = content,
+            text = content.replace("\n", "  \n"),
             options = js("{ renderer: renderer }")
         )
     }

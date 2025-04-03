@@ -62,7 +62,7 @@ fun StoriesNavPage(
         mutableStateOf(false)
     }
 
-    var searchText by remember {
+    var searchText by remember(showSearch) {
         mutableStateOf("")
     }
 

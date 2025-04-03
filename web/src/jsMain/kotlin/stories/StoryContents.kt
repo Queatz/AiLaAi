@@ -76,7 +76,7 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
 @Composable
 fun StoryContents(
     storyContent: List<StoryContent>,
-    onGroupClick: (GroupExtended) -> Unit,
+    onGroupClick: (GroupExtended) -> Unit = {},
     onButtonClick: ((script: String, data: String?) -> Unit)? = null,
     openInNewWindow: Boolean = false,
     editable: Boolean = false,

@@ -10,20 +10,24 @@ import kotlin.reflect.full.createType
 import kotlin.script.experimental.api.ResultValue
 import kotlin.script.experimental.api.ResultWithDiagnostics
 import kotlin.script.experimental.api.providedProperties
+import kotlin.script.experimental.api.valueOrThrow
 import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvm.util.isError
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
 import kotlin.script.experimental.jvmhost.createJvmEvaluationConfigurationFromTemplate
 
+// todo cache scripts
 
 class RunScript(private val script: Script, private val data: String?) {
-    fun run(person: Person?): ScriptResult {
+    suspend fun run(person: Person?): ScriptResult {
         var content: List<StoryContent>? = null
 
-        val result = BasicJvmScriptingHost().eval(
-            "@file:Suppress(\"PROVIDED_RUNTIME_TOO_LOW\")\n\n${script.source!!}".toScriptSource(),
-            createJvmCompilationConfigurationFromTemplate<ScriptWithMavenDeps> {
+        val host = BasicJvmScriptingHost()
+
+        val compiledScript = host.compiler.invoke(
+            script = "@file:Suppress(\"PROVIDED_RUNTIME_TOO_LOW\")\n\n${script.source!!}".toScriptSource(),
+            scriptCompilationConfiguration = createJvmCompilationConfigurationFromTemplate<ScriptWithMavenDeps> {
                 providedProperties(
                     "me" to Person::class.createType(nullable = true),
                     "self" to String::class.createType(),
@@ -31,8 +35,30 @@ class RunScript(private val script: Script, private val data: String?) {
                     "http" to ScriptHttp::class.createType(),
                     "data" to String::class.createType(nullable = true),
                 )
-            },
-            createJvmEvaluationConfigurationFromTemplate<ScriptWithMavenDeps> {
+
+                // todo script deps!
+//                importScripts(
+//                    "".toScriptSource(),
+//                    "".toScriptSource()
+//                )
+            }
+        )
+
+        if (compiledScript.isError()) {
+            return ScriptResult(
+                content = listOf(
+                    StoryContent.Text(
+                        "Script error: ${
+                            compiledScript.reports.joinToString("\n")
+                        }"
+                    )
+                )
+            )
+        }
+
+        val result = host.evaluator(
+            compiledScript = compiledScript.valueOrThrow(),
+            scriptEvaluationConfiguration = createJvmEvaluationConfigurationFromTemplate<ScriptWithMavenDeps> {
                 providedProperties(
                     "me" to person?.let { Person().apply {
                         id = it.id
@@ -49,8 +75,6 @@ class RunScript(private val script: Script, private val data: String?) {
                 )
             }
         )
-
-        println(result.toString())
 
         val resultError = (result as? ResultWithDiagnostics.Success)?.value?.returnValue as? ResultValue.Error
 

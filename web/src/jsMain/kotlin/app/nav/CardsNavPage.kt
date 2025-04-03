@@ -62,7 +62,7 @@ fun CardsNavPage(
         mutableStateOf(false)
     }
 
-    var searchText by remember(cardId) {
+    var searchText by remember(cardId, showSearch) {
         mutableStateOf("")
     }
 
