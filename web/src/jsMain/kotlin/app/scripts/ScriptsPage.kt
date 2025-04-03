@@ -10,11 +10,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.PageTopBar
+import app.ailaai.api.runScript
 import app.ailaai.api.updateScript
 import app.dialog.dialog
 import appString
 import bulletedString
+import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
+import com.queatz.db.ScriptResult
 import components.IconButton
 import components.Loading
 import kotlinx.coroutines.launch
@@ -25,15 +28,20 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
+import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.whiteSpace
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
+import stories.StoryContents
 
 @Composable
 fun ScriptsPage(
@@ -50,30 +58,84 @@ fun ScriptsPage(
             var editedScript by remember(script) { mutableStateOf<String?>(null) }
             var edited by remember(script) { mutableStateOf(false) }
             var isSaving by remember(script) { mutableStateOf(false) }
+            var showResultPanel by remember(script) { mutableStateOf(false) }
+            var isRunningScript by remember(script) { mutableStateOf(false) }
+            var runScriptData by remember(script) { mutableStateOf<String?>(null) }
+            var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
+
+            val runScript = remember(script) {
+                { scriptId: String, data: String? ->
+                    scope.launch {
+                        isRunningScript = true
+                        api.runScript(scriptId, RunScriptBody(data = data)) {
+                            scriptResult = it
+                            isRunningScript = false
+                        }
+                    }
+                }
+            }
 
             if (isLoading) {
                 Loading()
             } else {
                 Div({
                     style {
-                        flex(1)
                         display(DisplayStyle.Flex)
-                        flexDirection(FlexDirection.Column)
-                        overflowY("auto")
-                        overflowX("hidden")
+                        flex(1)
+                        height(0.r)
                     }
                 }) {
-                    MonacoEditor(
-                        initialValue = script.source.orEmpty(),
-                        onValueChange = {
-                            editedScript = it
-                            edited = editedScript != script.source
-                        },
-                        styles = {
-                            margin(0.r, 1.r, 1.r, 1.r)
-                            flexGrow(1)
+                    Div({
+                        style {
+                            flex(1)
+                            width(0.r)
+                            height(100.percent)
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            overflowX("hidden")
+                            overflowY("auto")
                         }
-                    )
+                    }) {
+                        MonacoEditor(
+                            initialValue = script.source.orEmpty(),
+                            onValueChange = {
+                                editedScript = it
+                                edited = editedScript != script.source
+                            },
+                            styles = {
+                                margin(0.r, 1.r, 1.r, 1.r)
+                                flexGrow(1)
+                            }
+                        )
+                    }
+                    if (showResultPanel) {
+                        Div({
+                            style {
+                                flexShrink(0)
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Column)
+                                overflowX("hidden")
+                                overflowY("auto")
+                                width(24.r)
+                                height(100.percent)
+                            }
+                        }) {
+                            if (isRunningScript) {
+                                Loading()
+                            } else {
+                                scriptResult?.content?.let {
+                                    Div({
+                                        classes(Styles.cardContent)
+                                    }) {
+                                        StoryContents(
+                                            storyContent = it,
+                                            onButtonClick = { script, data -> runScript(script, data) },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 PageTopBar(
                     // todo: translate
@@ -111,8 +173,21 @@ fun ScriptsPage(
                             }
                         }
                         IconButton(
-                            "help_outline",
-                            "Help",
+                            name = "play_arrow",
+                            // todo: translate
+                            title = "Run",
+                            styles = {
+                                marginLeft(.5.r)
+                            }
+                        ) {
+                            showResultPanel = true
+                            runScriptData = null
+                            runScript(script.id!!, null)
+                        }
+                        IconButton(
+                            name = "help_outline",
+                            // todo: translate
+                            title = "Help",
                             styles = {
                                 marginLeft(.5.r)
                             }
