@@ -24,3 +24,7 @@ external class DOMRectReadOnly {
     val width: Double
     val height: Double
 }
+
+inline fun <T> jsObject(init: T.() -> Unit): T = js("{}").unsafeCast<T>().apply {
+    init()
+}
