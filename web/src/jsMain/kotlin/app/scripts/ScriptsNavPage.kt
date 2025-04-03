@@ -14,6 +14,7 @@ import app.ailaai.api.myScripts
 import app.dialog.inputDialog
 import app.nav.NavMenu
 import app.nav.NavMenuItem
+import app.nav.NavSearchInput
 import app.nav.NavTopBar
 import appString
 import application
@@ -37,10 +38,12 @@ fun ScriptsNavPage(
     selected: ScriptsNav,
     onSelected: (ScriptsNav) -> Unit,
     onCreated: (Script) -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var scripts by remember { mutableStateOf<List<Script>>(emptyList()) }
+    var showSearch by remember { mutableStateOf(false) }
+    var searchQuery by remember(showSearch) { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         api.myScripts {
@@ -69,6 +72,15 @@ fun ScriptsNavPage(
 
     NavTopBar(me, appString { this.scripts }, onProfileClick = onProfileClick) {
         IconButton(
+            name = "search",
+            title = appString { this.search },
+            styles = {
+                marginRight(.5.r)
+            }
+        ) {
+            showSearch = !showSearch
+        }
+        IconButton(
             name = "add",
             title = appString { this.createCard },
             styles = {
@@ -93,8 +105,15 @@ fun ScriptsNavPage(
         }
     }
 
+    if (showSearch) {
+        NavSearchInput(searchQuery, { searchQuery = it }, onDismissRequest = {
+            searchQuery = ""
+            showSearch = false
+        })
+    }
+
     NavMenu {
-        scripts.forEach { script ->
+        scripts.filter { searchQuery.isBlank() || it.name.orEmpty().contains(searchQuery, ignoreCase = true) }.forEach { script ->
             NavMenuItem(
                 icon = null,
                 title = script.name.orEmpty(),

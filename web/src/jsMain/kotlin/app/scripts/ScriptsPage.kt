@@ -2,7 +2,6 @@ package app.scripts
 
 import Styles
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +65,6 @@ fun ScriptsPage(
             val runScript = remember(script) {
                 { scriptId: String, data: String? ->
                     scope.launch {
-                        isRunningScript = true
                         api.runScript(scriptId, RunScriptBody(data = data)) {
                             scriptResult = it
                             isRunningScript = false
@@ -171,18 +169,20 @@ fun ScriptsPage(
                             ) {
                                 Text(appString { save })
                             }
-                        }
-                        IconButton(
-                            name = "play_arrow",
-                            // todo: translate
-                            title = "Run",
-                            styles = {
-                                marginLeft(.5.r)
+                        } else {
+                            IconButton(
+                                name = "play_arrow",
+                                // todo: translate
+                                title = "Run",
+                                styles = {
+                                    marginLeft(.5.r)
+                                }
+                            ) {
+                                showResultPanel = true
+                                runScriptData = null
+                                isRunningScript = true
+                                runScript(script.id!!, null)
                             }
-                        ) {
-                            showResultPanel = true
-                            runScriptData = null
-                            runScript(script.id!!, null)
                         }
                         IconButton(
                             name = "help_outline",
