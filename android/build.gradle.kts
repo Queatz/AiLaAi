@@ -12,7 +12,7 @@ buildscript {
             "8.8.0-alpha05"
         }
         classpath("com.android.tools.build:gradle:$agpVersion")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
         classpath("com.huawei.agconnect:agcp:1.9.1.300")
         classpath("com.google.gms:google-services:4.4.2")
         classpath("io.objectbox:objectbox-gradle-plugin:4.0.3")
@@ -20,7 +20,7 @@ buildscript {
 }
 
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29" apply false
+    id("com.google.devtools.ksp") version "2.1.20-1.0.32" apply false
 }
 
 tasks.register("clean", Delete::class) {
