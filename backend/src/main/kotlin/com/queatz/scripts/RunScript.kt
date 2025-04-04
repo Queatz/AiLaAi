@@ -2,12 +2,18 @@ package com.queatz.scripts
 
 import ScriptRender
 import ScriptWithMavenDeps
+import com.queatz.db.InventoryItem
 import com.queatz.db.Person
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
 import com.queatz.db.StoryContent
+import com.queatz.db.equippedItemsOfInventory
+import com.queatz.db.inventoryOfPerson
+import com.queatz.plugins.db
 import kotlinx.serialization.json.JsonNull.content
+import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
+import kotlin.reflect.typeOf
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.ResultValue
 import kotlin.script.experimental.api.ResultWithDiagnostics
@@ -41,6 +47,7 @@ class RunScript(private val script: Script, private val data: String?) {
                     "render" to ScriptRender::class.createType(),
                     "http" to ScriptHttp::class.createType(),
                     "data" to String::class.createType(nullable = true),
+                    "equipment" to typeOf<() -> List<InventoryItem>>()
                 )
 
                 // todo script deps!
@@ -72,18 +79,27 @@ class RunScript(private val script: Script, private val data: String?) {
             compiledScript = compiledScript.valueOrThrow(),
             scriptEvaluationConfiguration = createJvmEvaluationConfigurationFromTemplate<ScriptWithMavenDeps> {
                 providedProperties(
-                    "me" to person?.let { Person().apply {
-                        id = it.id
-                        name = it.name
-                        photo = it.photo
-                        language = it.language
-                        utcOffset = it.utcOffset
-                        seen = it.seen
-                    } },
+                    "me" to person?.let { person ->
+                        Person().apply {
+                            id = person.id
+                            name = person.name
+                            photo = person.photo
+                            language = person.language
+                            utcOffset = person.utcOffset
+                            seen = person.seen
+                        }
+                    },
                     "self" to script.id!!,
                     "render" to ScriptRender { content = it },
                     "http" to ScriptHttp(),
-                    "data" to this@RunScript.data
+                    "data" to this@RunScript.data,
+                    "equipment" to {
+                        person?.let { person ->
+                            db.equippedItemsOfInventory(
+                                db.inventoryOfPerson(person.id!!).id!!
+                            )
+                        }
+                    }
                 )
             }
         )
