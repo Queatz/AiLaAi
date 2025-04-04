@@ -552,10 +552,10 @@ fun AppPage() {
                             scriptUpdates.emit(it)
                         }
                     },
-                    onDelete = {
-                        script = ScriptsNav.None
+                    onScriptDeleted = {
                          scope.launch {
-                            scriptUpdates.emit(it)
+                             script = ScriptsNav.None
+                             scriptUpdates.emit(it)
                         }
                     }
                 )

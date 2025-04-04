@@ -12,7 +12,6 @@ import app.PageTopBar
 import app.ailaai.api.deleteScript
 import app.ailaai.api.runScript
 import app.ailaai.api.updateScript
-import app.appNav
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.Menu
@@ -53,10 +52,9 @@ import stories.StoryContents
 fun ScriptsPage(
     nav: ScriptsNav,
     onUpdate: (Script) -> Unit,
-    onDelete: (Script) -> Unit,
+    onScriptDeleted: (Script) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val appNav = appNav
 
     when (nav) {
         is ScriptsNav.None -> Unit
@@ -115,7 +113,7 @@ fun ScriptsPage(
                                 )
                                 if (proceed == true) {
                                     api.deleteScript(script.id!!) {
-                                        onDelete(script)
+                                        onScriptDeleted(script)
                                     }
                                 }
                             }
@@ -235,7 +233,7 @@ fun ScriptsPage(
                             IconButton(
                                 name = "play_arrow",
                                 // todo: translate
-                                title = "Run",
+                                title = "Run script",
                                 styles = {
                                     marginLeft(.5.r)
                                 }

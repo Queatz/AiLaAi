@@ -3,14 +3,19 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.script.experimental.annotations.KotlinScript
 import kotlin.script.experimental.api.ResultWithDiagnostics
+import kotlin.script.experimental.api.ScriptAcceptedLocation
 import kotlin.script.experimental.api.ScriptCollectedData
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.api.ScriptConfigurationRefinementContext
+import kotlin.script.experimental.api.acceptedLocations
 import kotlin.script.experimental.api.asSuccess
+import kotlin.script.experimental.api.baseClass
 import kotlin.script.experimental.api.collectedAnnotations
 import kotlin.script.experimental.api.compilerOptions
 import kotlin.script.experimental.api.defaultImports
 import kotlin.script.experimental.api.dependencies
+import kotlin.script.experimental.api.ide
+import kotlin.script.experimental.api.implicitReceivers
 import kotlin.script.experimental.api.onSuccess
 import kotlin.script.experimental.api.refineConfiguration
 import kotlin.script.experimental.api.with
@@ -26,7 +31,8 @@ import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvm.jvmTarget
 
 @KotlinScript(
-    compilationConfiguration = ScriptWithMavenDepsConfiguration::class
+    compilationConfiguration = ScriptWithMavenDepsConfiguration::class,
+    fileExtension = "kts"
 )
 abstract class ScriptWithMavenDeps
 
@@ -48,8 +54,10 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
                 wholeClasspath = true,
                 unpackJarCollections = true
             )
-            compilerOptions.append("-Xadd-modules=ALL-MODULE-PATH")
-            compilerOptions.append("-Xplugin=kotlin-serialization-compiler-plugin-embeddable-1.9.22.jar") // todo Kotlin 2.1.20
+            compilerOptions(
+                "-Xadd-modules=ALL-MODULE-PATH",
+                "-Xplugin=kotlin-serialization-compiler-plugin-embeddable-2.1.20.jar"
+            )
         }
 
         refineConfiguration {
@@ -60,11 +68,13 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
             )
         }
     }
-)
+) {
+    private fun readResolve(): Any = ScriptWithMavenDepsConfiguration
+}
 
 private val resolver = CompoundDependenciesResolver(FileSystemDependenciesResolver(), MavenDependenciesResolver())
 
-fun configureMavenDepsOnAnnotations(context: ScriptConfigurationRefinementContext): ResultWithDiagnostics<ScriptCompilationConfiguration> {
+private fun configureMavenDepsOnAnnotations(context: ScriptConfigurationRefinementContext): ResultWithDiagnostics<ScriptCompilationConfiguration> {
     val annotations = context.collectedData
         ?.get(ScriptCollectedData.collectedAnnotations)
         ?.takeIf { it.isNotEmpty() }
