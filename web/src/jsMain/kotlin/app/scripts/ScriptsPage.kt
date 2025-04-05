@@ -26,7 +26,9 @@ import com.queatz.db.Script
 import com.queatz.db.ScriptResult
 import com.queatz.db.asGeo
 import components.IconButton
+import components.LinkifyText
 import components.Loading
+import components.Markdown
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -301,22 +303,25 @@ fun ScriptsPage(
                                                 }
                                             }
                                         ) {
-                                            Text(
+                                            LinkifyText(
                                                 """
                                                 Scripts are written in Kotlin. You may want to use your favorite code editor to write scripts, as you will need to add all import statements. 
                                                 
                                                 The following variables are passed to into scripts:
                                                 
+                                                ```kotlin
                                                 self: String // The id of this script
                                                 me: Person? // The current user, if signed in, null if signed out
                                                 data: String? // Data passed to the script, if any
+                                                ```
                                                 
-                                                Person has the following fields: id, name, photo, language, utcOffset, seen
+                                                Person has the following fields: `id`, `name`, `photo`, `language`, `utcOffset`, `seen`
                                                 
                                                 The following are functions passed into scripts: render, http
                                                 
                                                 Rendering content:
                                                 
+                                                ```kotlin
                                                 render {
                                                     section("<Title>")
                                                     text("<Text>")
@@ -330,16 +335,20 @@ fun ScriptsPage(
                                                     )
                                                     photo("<Url>", <Aspect ratio>?) // Must start with /static/
                                                 }
+                                                ```
                                                 
                                                 Networking:
                                                 
                                                 Ktor's HttpClient is used for simple networking. Learn more at ktor.io.
                                                 
+                                                ```kotlin
                                                 http<Any type here>("<url>")
                                                 http.post<Response type here, Request type here>("<url>", body = <Any object here>)
+                                                ```
                                                 
-                                                KotlinX Serialization is available. The recommendation is to use @Serializable data classes.
+                                                KotlinX Serialization is available. The recommendation is to use `@Serializable` data classes.
                                                 
+                                                ```kotlin
                                                 @Serializable
                                                 data class Request(val data: String)
                                                 
@@ -350,6 +359,7 @@ fun ScriptsPage(
                                                 val get = http<Response>("<url>")
                                                 val get: Response = http("<url>") // or this
                                                 val get: Response = http("<url>", headers = mapOf("Authorization" to "<token>")) // set headers
+                                                ```
                                                 
                                                 Other common response types are: String, HttpStatusCode, JsonObject
                                                 
@@ -357,18 +367,24 @@ fun ScriptsPage(
                                                 
                                                 You can depend on packages from Maven Repositories.
                                                 
+                                                ```kotlin
                                                 @file:Repository("<maven url>")
                                                 @file:DependsOn("<package>")
+                                                ```
                                                 
                                                 You can also depend on other scripts.
                                                 
+                                                ```kotlin
                                                 @file:DependsOnScript("<script ID>")
+                                                ```
                                                 
                                                 They will be available as script_<script ID> in your script.
                                                 
                                                 You can define the package of your script:
                                                 
+                                                ```kotlin
                                                 package <package name>
+                                                ```
                                                 
                                                 Which will make them available with your declared package name.
                                                 

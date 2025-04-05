@@ -18,6 +18,11 @@ fun Markdown(content: String) {
         val renderer = marked.Renderer()
         val originalLinkRenderer: dynamic = renderer.link
 
+        renderer.html = { data ->
+            console.log(data)
+            data.text.replace("<", "&lt;").replace(">", "&gt;")
+        }
+
         renderer.link = { data ->
             val localLink = data.href.startsWith("${window.location.protocol}//${window.location.hostname}")
             val html = originalLinkRenderer.call(renderer, data) as String
