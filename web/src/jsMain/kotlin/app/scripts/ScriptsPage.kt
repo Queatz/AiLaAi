@@ -201,7 +201,8 @@ fun ScriptsPage(
                     useMinHeight = true,
                     description = bulletedString(
                         script.categories?.firstOrNull(),
-                        script.description
+                        script.description,
+                        script.id
                     ),
                     actions = {
                         if (edited) {
@@ -322,6 +323,20 @@ fun ScriptsPage(
                                                 
                                                 @file:Repository("<maven url>")
                                                 @file:DependsOn("<package>")
+                                                
+                                                You can also depend on other scripts.
+                                                
+                                                @file:DependsOnScript("<script ID>")
+                                                
+                                                They will be available as script_<script ID> in your script.
+                                                
+                                                You can define the package of your script:
+                                                
+                                                package <package name>
+                                                
+                                                Which will make them available with your declared package name.
+                                                
+                                                Note that in imported scripts, no variables are passed in to the script.
                                                 
                                                 Learn more at kotlinlang.org
                                                 """.trimIndent()
