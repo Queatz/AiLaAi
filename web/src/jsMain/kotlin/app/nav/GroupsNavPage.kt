@@ -266,10 +266,10 @@ fun GroupsNavPage(
         ) {
             categories.forEach { category ->
                 item(category, icon = if (category == selectedCategory) "check" else null) {
-                    if (category == selectedCategory) {
-                        selectedCategory = null
+                    selectedCategory = if (category == selectedCategory) {
+                        null
                     } else {
-                        selectedCategory = category
+                        category
                     }
                 }
             }

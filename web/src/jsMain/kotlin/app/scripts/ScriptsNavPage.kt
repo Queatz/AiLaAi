@@ -1,5 +1,6 @@
 package app.scripts
 
+import Strings.groups
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,6 +13,7 @@ import api
 import app.ailaai.api.createScript
 import app.ailaai.api.myScripts
 import app.dialog.inputDialog
+import app.menu.Menu
 import app.nav.NavMenu
 import app.nav.NavMenuItem
 import app.nav.NavSearchInput
@@ -25,7 +27,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.marginRight
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import r
+import sortedDistinct
 
 sealed class ScriptsNav {
     data object None : ScriptsNav()
@@ -44,6 +49,15 @@ fun ScriptsNavPage(
     var scripts by remember { mutableStateOf<List<Script>>(emptyList()) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember(showSearch) { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    val categories by remember(scripts) {
+        mutableStateOf(scripts.mapNotNull { it.categories }.flatten().sortedDistinct())
+    }
+
+    var filterMenuTarget by remember {
+        mutableStateOf<DOMRect?>(null)
+    }
 
     LaunchedEffect(Unit) {
         api.myScripts {
@@ -70,6 +84,23 @@ fun ScriptsNavPage(
     val title = appString { title }
     val create = appString { create }
 
+    if (filterMenuTarget != null) {
+        Menu(
+            onDismissRequest = { filterMenuTarget = null },
+            target = filterMenuTarget!!
+        ) {
+            categories.forEach { category ->
+                item(category, icon = if (category == selectedCategory) "check" else null) {
+                    selectedCategory = if (category == selectedCategory) {
+                        null
+                    } else {
+                        category
+                    }
+                }
+            }
+        }
+    }
+
     NavTopBar(me, appString { this.scripts }, onProfileClick = onProfileClick) {
         IconButton(
             name = "search",
@@ -79,6 +110,20 @@ fun ScriptsNavPage(
             }
         ) {
             showSearch = !showSearch
+        }
+        IconButton(
+            name = "filter_list",
+            title = appString { this.filter },
+            count = selectedCategory?.let { 1 } ?: 0,
+            styles = {
+                marginRight(.5.r)
+            }
+        ) {
+            filterMenuTarget = if (filterMenuTarget == null) {
+                (it.target as HTMLElement).getBoundingClientRect()
+            } else {
+                null
+            }
         }
         IconButton(
             name = "add",
@@ -113,7 +158,10 @@ fun ScriptsNavPage(
     }
 
     NavMenu {
-        scripts.filter { searchQuery.isBlank() || it.name.orEmpty().contains(searchQuery, ignoreCase = true) }.forEach { script ->
+        scripts.filter {
+            (searchQuery.isBlank() || it.name.orEmpty().contains(searchQuery, ignoreCase = true)) &&
+                    (selectedCategory.isNullOrBlank() || it.categories.orEmpty().contains(selectedCategory))
+        }.forEach { script ->
             NavMenuItem(
                 icon = null,
                 title = script.name.orEmpty(),
