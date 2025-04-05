@@ -668,6 +668,10 @@ fun ScriptsDialog(
                         text = "<Button text>",
                         script = "<Script ID to run>",
                         data = "<Data passed to the script>",
+                        // Optional
+                        data = "<Data passed to the script>",
+                        // Optional
+                        style = ButtonStyle.Secondary // Default is Primary
                     )
                     photo("<Url>", <Aspect ratio>?) // Must start with /static/
                 }

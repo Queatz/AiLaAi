@@ -37,7 +37,7 @@ sealed class StoryContent {
     @Serializable
     class Widget(var widget: Widgets, var id: String) : StoryContent()
     @Serializable
-    class Button(var text: String, var script: String, var data: String?) : StoryContent()
+    class Button(var text: String, var script: String, var data: String?, var style: ButtonStyle? = null) : StoryContent()
     @Serializable
     class Profiles(var profiles: List<String>) : StoryContent()
 }

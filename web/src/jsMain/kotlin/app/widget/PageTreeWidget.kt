@@ -32,7 +32,6 @@ import isMine
 import json
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import lib.toLocaleString
 import notBlank
 import notEmpty

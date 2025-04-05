@@ -4,7 +4,6 @@ import com.queatz.ailaai.data.json
 import com.queatz.ailaai.db.CacheDbModel
 import com.queatz.ailaai.db.CacheDbModel_
 import com.queatz.ailaai.db.db
-import kotlinx.serialization.encodeToString
 
 val cache by lazy {
     Cache()

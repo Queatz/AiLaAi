@@ -11,7 +11,6 @@ import com.queatz.db.Widget
 import com.queatz.widgets.Widgets
 import com.queatz.widgets.widgets.ScriptData
 import createWidget
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun AddScriptWidgetDialog(

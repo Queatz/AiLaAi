@@ -45,7 +45,6 @@ import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalComposeUiApi::class)

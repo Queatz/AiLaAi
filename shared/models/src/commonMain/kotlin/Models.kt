@@ -563,6 +563,11 @@ enum class AppPermission {
     Notifications,
 }
 
+enum class ButtonStyle {
+    Primary,
+    Secondary
+}
+
 @Serializable
 data class AppPerson(
     var app: String? = null,

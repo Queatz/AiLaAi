@@ -1,3 +1,4 @@
+import com.queatz.db.ButtonStyle
 import com.queatz.db.StoryContent
 
 class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
@@ -16,11 +17,19 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
         result += StoryContent.Text(text)
     }
 
-    fun button(text: String, script: String, data: String? = null) {
-        result += StoryContent.Button(text, script, data)
+    fun button(
+        text: String,
+        script: String,
+        data: String? = null,
+        style: ButtonStyle? = null
+    ) {
+        result += StoryContent.Button(text, script, data, style)
     }
 
-    fun photo(url: String, aspect: Float? = null) {
+    fun photo(
+        url: String,
+        aspect: Float? = null,
+    ) {
         result += StoryContent.Photos(listOf(url), aspect = aspect)
     }
 }

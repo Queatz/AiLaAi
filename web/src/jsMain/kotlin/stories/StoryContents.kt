@@ -31,6 +31,7 @@ import application
 import baseUrl
 import com.queatz.ailaai.api.commentOnStory
 import com.queatz.ailaai.api.storyComments
+import com.queatz.db.ButtonStyle
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
 import com.queatz.db.GroupExtended
@@ -384,7 +385,13 @@ fun StoryContents(
 
             is StoryContent.Button -> {
                 Div({
-                    classes(Styles.button)
+                    classes(
+                        if (part.style == ButtonStyle.Secondary) {
+                            Styles.outlineButton
+                        } else {
+                            Styles.button
+                        }
+                    )
 
                     onClick {
                         onButtonClick?.invoke(part.script, part.data)

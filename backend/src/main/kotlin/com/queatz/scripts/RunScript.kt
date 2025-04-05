@@ -2,7 +2,7 @@ package com.queatz.scripts
 
 import ScriptRender
 import ScriptWithMavenDeps
-import com.queatz.db.InventoryItem
+import com.queatz.db.InventoryItemExtended
 import com.queatz.db.Person
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
@@ -10,10 +10,8 @@ import com.queatz.db.StoryContent
 import com.queatz.db.equippedItemsOfInventory
 import com.queatz.db.inventoryOfPerson
 import com.queatz.plugins.db
-import kotlinx.serialization.json.JsonNull.content
-import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KTypeProjection.Companion.invariant
 import kotlin.reflect.full.createType
-import kotlin.reflect.typeOf
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.ResultValue
 import kotlin.script.experimental.api.ResultWithDiagnostics
@@ -25,6 +23,7 @@ import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
 import kotlin.script.experimental.jvmhost.createJvmEvaluationConfigurationFromTemplate
 
+// Todo FIFO max 1000
 private val scriptCache = mutableMapOf<String, ResultWithDiagnostics<CompiledScript>>()
 
 class RunScript(private val script: Script, private val data: String?) {
@@ -47,7 +46,18 @@ class RunScript(private val script: Script, private val data: String?) {
                     "render" to ScriptRender::class.createType(),
                     "http" to ScriptHttp::class.createType(),
                     "data" to String::class.createType(nullable = true),
-                    "equipment" to typeOf<() -> List<InventoryItem>>()
+                    "equipment" to Function0::class.createType(
+                        arguments = listOf(
+                            invariant(
+                                List::class.createType(
+                                    arguments = listOf(
+                                        invariant(InventoryItemExtended::class.createType())
+                                    ),
+                                    nullable = true
+                                )
+                            )
+                        )
+                    )
                 )
 
                 // todo script deps!

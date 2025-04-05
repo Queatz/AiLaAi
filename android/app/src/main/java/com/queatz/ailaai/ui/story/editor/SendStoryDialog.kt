@@ -14,12 +14,10 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.db.Message
-import com.queatz.db.Person
 import com.queatz.db.StoryAttachment
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun SendStoryDialog(
