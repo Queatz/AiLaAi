@@ -47,10 +47,14 @@ fun Route.scriptRoutes() {
         post("/scripts/{id}/run") {
             respond {
                 val script = db.document(Script::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
-                val data = call.receive<RunScriptBody>().data
+                val data = call.receive<RunScriptBody>()
 
                 withContext(Dispatchers.IO) {
-                    RunScript(script, data).run(meOrNull)
+                    RunScript(
+                        script = script,
+                        data = data.data,
+                        useCache = data.useCache != false
+                    ).run(meOrNull)
                 }
             }
         }

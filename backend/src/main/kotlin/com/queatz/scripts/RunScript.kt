@@ -26,9 +26,14 @@ import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromT
 import kotlin.script.experimental.jvmhost.createJvmEvaluationConfigurationFromTemplate
 
 // Todo FIFO max 1000
+// Todo bust cache if ANY dependent scripts change
 private val scriptCache = mutableMapOf<String, ResultWithDiagnostics<CompiledScript>>()
 
-class RunScript(private val script: Script, private val data: String?) {
+class RunScript(
+    private val script: Script,
+    private val data: String?,
+    private val useCache: Boolean = true,
+) {
     init {
         scriptLoader = { scriptId ->
             db.document(Script::class, scriptId)
@@ -90,7 +95,7 @@ class RunScript(private val script: Script, private val data: String?) {
             )
         }
 
-        val compiledScript = scriptCache[scriptSource] ?: host.compiler.invoke(
+        val compiledScript = scriptCache[scriptSource].takeIf { useCache } ?: host.compiler.invoke(
             script = scriptSource.toScriptSource("script_${script.id!!}"),
             scriptCompilationConfiguration = scriptCompilationConfiguration
         )

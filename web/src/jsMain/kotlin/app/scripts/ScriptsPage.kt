@@ -123,9 +123,15 @@ fun ScriptsPage(
             }
 
             val runScript = remember(script) {
-                { scriptId: String, data: String? ->
+                { scriptId: String, data: String?, useCache: Boolean? ->
                     scope.launch {
-                        api.runScript(scriptId, RunScriptBody(data = data)) {
+                        api.runScript(
+                            id = scriptId,
+                            data = RunScriptBody(
+                                data = data,
+                                useCache = useCache
+                            )
+                        ) {
                             scriptResult = it
                             isRunningScript = false
                         }
@@ -187,7 +193,7 @@ fun ScriptsPage(
                                     }) {
                                         StoryContents(
                                             storyContent = it,
-                                            onButtonClick = { script, data -> runScript(script, data) },
+                                            onButtonClick = { script, data -> runScript(script, data, true) },
                                         )
                                     }
                                 }
@@ -234,7 +240,7 @@ fun ScriptsPage(
                             IconButton(
                                 name = "play_arrow",
                                 // todo: translate
-                                title = "Run script",
+                                title = "Run script (Hold SHIFT to skip cache)",
                                 styles = {
                                     marginLeft(.5.r)
                                 }
@@ -242,7 +248,7 @@ fun ScriptsPage(
                                 showResultPanel = true
                                 runScriptData = null
                                 isRunningScript = true
-                                runScript(script.id!!, null)
+                                runScript(script.id!!, null, !it.shiftKey)
                             }
                         }
                         IconButton(
