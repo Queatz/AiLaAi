@@ -9,18 +9,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.PageTopBar
+import app.ailaai.api.categories
 import app.ailaai.api.deleteScript
 import app.ailaai.api.runScript
 import app.ailaai.api.updateScript
+import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.menu.Menu
+import app.messaages.inList
 import appString
 import application
 import bulletedString
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
+import com.queatz.db.asGeo
 import components.IconButton
 import components.Loading
 import kotlinx.coroutines.launch
@@ -94,6 +98,32 @@ fun ScriptsPage(
                                         script = Script(name = name)
                                     ) {
                                         onUpdate(it)
+                                    }
+                                }
+                            }
+                        }
+                    )
+                    item(
+                        // todo: translate
+                        title = "Category",
+                        onClick = {
+                            menuTarget = null
+                            scope.launch {
+                                api.categories(
+                                    // todo: might need to not require geo
+                                    geo = application.me.value?.geo?.asGeo() ?: return@launch
+                                ) { categories ->
+                                    val category = categoryDialog(
+                                        categories = categories
+                                    )
+
+                                    if (category != null) {
+                                        api.updateScript(
+                                            id = script.id!!,
+                                            script = Script(categories = category.inList())
+                                        ) {
+                                            onUpdate(it)
+                                        }
                                     }
                                 }
                             }

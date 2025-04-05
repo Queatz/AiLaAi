@@ -17,9 +17,8 @@ suspend fun inputSelectDialog(
     confirmButton: String,
     items: List<String>? = null,
     itemStyle: StyleScope.(String) -> Unit = {}
-
 ) = inputDialog(
-    null,
+    title = null,
     confirmButton = confirmButton,
     placeholder = application.appString { search },
     inputStyles = {
