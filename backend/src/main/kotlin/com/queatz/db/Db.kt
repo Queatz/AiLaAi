@@ -63,10 +63,18 @@ class InstantModule : SimpleModule() {
 }
 
 class Db {
+
+    companion object {
+        const val USER = "ailaai"
+        const val PASSWORD = "ailaai"
+
+        private const val DATABASE_NAME = "ailaai"
+    }
+
     private val db = ArangoDB.Builder()
         .host("127.0.0.1", 8529)
-        .user("ailaai")
-        .password("ailaai")
+        .user(USER)
+        .password(PASSWORD)
         .serde(JacksonSerde.of(ContentType.JSON).apply {
             configure {
                 it.registerModule(InstantModule())
@@ -74,7 +82,7 @@ class Db {
             }
         })
         .build()
-        .db("ailaai")
+        .db(DATABASE_NAME)
         .setup()
 
     internal fun <T : Model> one(klass: KClass<T>, query: String, parameters: Map<String, Any?> = mapOf()) =

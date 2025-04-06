@@ -1,6 +1,7 @@
 package com.queatz.scripts
 
 import ScriptRender
+import ScriptStorage
 import ScriptWithMavenDeps
 import ScriptWithMavenDepsConfiguration.scriptLoader
 import com.queatz.db.InventoryItemExtended
@@ -11,6 +12,7 @@ import com.queatz.db.StoryContent
 import com.queatz.db.equippedItemsOfInventory
 import com.queatz.db.inventoryOfPerson
 import com.queatz.plugins.db
+import com.queatz.scripts.store.ArangoScriptStorage
 import parseScript
 import kotlin.reflect.KTypeProjection.Companion.invariant
 import kotlin.reflect.full.createType
@@ -52,6 +54,7 @@ class RunScript(
                 "me" to Person::class.createType(nullable = true),
                 "self" to String::class.createType(),
                 "render" to ScriptRender::class.createType(),
+                "storage" to ScriptStorage::class.createType(),
                 "http" to ScriptHttp::class.createType(),
                 "data" to String::class.createType(nullable = true),
                 "equipment" to Function0::class.createType(
@@ -83,6 +86,10 @@ class RunScript(
                 },
                 "self" to script.id!!,
                 "render" to ScriptRender { content = it },
+                "storage" to ArangoScriptStorage(
+                    scriptOwner = script.person!!,
+                    person = person?.id
+                ),
                 "http" to ScriptHttp(),
                 "data" to this@RunScript.data,
                 "equipment" to {
