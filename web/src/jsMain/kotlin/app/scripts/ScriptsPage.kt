@@ -368,7 +368,7 @@ fun ScriptsPage(
                                                 
                                                 ```kotlin
                                                 val name = (input as? Map<String, String?>)?.let { input ->
-                                                    input["key"]
+                                                    input["<key>"]
                                                 }
                                                 ```
                                                 
@@ -394,16 +394,23 @@ fun ScriptsPage(
                                                 And then:
                                                 
                                                 ```kotlin
-                                                store.set(MyModel::class, MyModel("<value>"))
-                                                store.get(MyModel::class, "<key>")
-                                                store.all(MyModel::class)
-                                                store.delete(MyModel::class, "<key>")
-                                                store.query(
+                                                storage.put(MyModel::class, MyModel("<value>")).let { model ->
+                                                    // model.key will now exist
+                                                }
+                                                
+                                                storage.get(MyModel::class, "<key>")?.let { model -> }
+                                                
+                                                storage.all(MyModel::class).forEach { model -> }
+                                                
+                                                storage.delete(MyModel::class, "<key>")
+                                                
+                                                storage.query(
+                                                    // AQL query return type
                                                     MyModel::class,
                                                     "<AQL query string>",
                                                     // Optional binding parameters
                                                     mapOf("<key>" to "<value>")
-                                                )
+                                                ).forEach { model -> }
                                                 ```
                                                 
                                                 # Advanced
@@ -421,7 +428,16 @@ fun ScriptsPage(
                                                 @file:DependsOnScript("<script ID>")
                                                 ```
                                                 
-                                                They will be available as script_<script ID> in your script.
+                                                They will be available according to their package name, or if no package name is specified, as script_<script ID> in your script.
+                                                
+                                                ```kotlin
+                                                import script_<script ID>.*
+                                                
+                                                // Use classes from script_<script ID> here
+                                                
+                                                // Or without imports:
+                                                script_<script ID>.<some class>.<some field>
+                                                ```
                                                 
                                                 You can define the package of your script:
                                                 

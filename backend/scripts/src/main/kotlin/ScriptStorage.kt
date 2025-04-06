@@ -14,15 +14,15 @@ interface ScriptStorage {
     operator fun get(key: String): String?
     operator fun set(key: String, value: String?)
 
-    fun <T : Any> set(
+    fun <T : Any> put(
         collection: KClass<T>,
         value: T,
-    )
+    ): T
 
     fun <T : Any> get(
         collection: KClass<T>,
         key: String,
-    )
+    ): T?
 
     fun <T : Any> all(
         collection: KClass<T>,

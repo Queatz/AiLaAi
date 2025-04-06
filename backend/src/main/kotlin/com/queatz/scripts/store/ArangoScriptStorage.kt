@@ -97,17 +97,19 @@ class ArangoScriptStorage(
         )
     }
 
-    override fun <T : Any> get(collection: KClass<T>, key: String) {
-        collection(collectionName(collection))
+    override fun <T : Any> get(collection: KClass<T>, key: String): T? {
+        return collection(collectionName(collection))
             .getDocument(key, collection.java)
     }
 
-    override fun <T : Any> set(collection: KClass<T>, value: T) {
-        collection(collectionName(collection))
+    override fun <T : Any> put(collection: KClass<T>, value: T): T {
+        return collection(collectionName(collection))
             .insertDocument(
                 value,
-                DocumentCreateOptions().overwriteMode(OverwriteMode.replace)
-            )
+                DocumentCreateOptions()
+                    .overwriteMode(OverwriteMode.replace)
+                    .returnNew(true)
+            ).new!!
     }
 
     override fun <T : Any> all(collection: KClass<T>): List<T> {
