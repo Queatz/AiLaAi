@@ -54,7 +54,6 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
@@ -65,7 +64,6 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.TextInput
 import profile.ProfileCard
 import r
 import kotlin.js.Date
@@ -83,7 +81,7 @@ fun StoryContents(
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
     onEdited: (() -> Unit)? = null,
-    onSave: ((List<StoryContent>) -> Unit)? = {}
+    onSave: ((List<StoryContent>) -> Unit)? = {},
 ) {
     Style(StoryStyles)
     Style(AppStyles)
@@ -373,21 +371,27 @@ fun StoryContents(
                     Widgets.ImpactEffortTable -> {
                         ImpactEffortTable(part.id)
                     }
+
                     Widgets.PageTree -> {
                         PageTreeWidget(part.id)
                     }
+
                     Widgets.Script -> {
                         ScriptWidget(part.id)
                     }
+
                     Widgets.Web -> {
                         WebWidget(part.id)
                     }
+
                     Widgets.Form -> {
                         FormWidget(part.id)
                     }
+
                     Widgets.Space -> {
                         SpaceWidget(part.id)
                     }
+
                     Widgets.Shop -> {
                         // todo
                     }
@@ -413,20 +417,19 @@ fun StoryContents(
             }
 
             is StoryContent.Input -> {
-                var value by remember(part.value.orEmpty()) { mutableStateOf(part.value.orEmpty()) }
-                TextInput(
-                    value = value
-                ) {
-                    classes(Styles.textarea)
-                    style {
+                var value by remember(part.value.orEmpty()) {
+                    mutableStateOf(part.value.orEmpty())
+                }
+                TextBox(
+                    value = value,
+                    onValue = {
+                        input = input + (part.key to it)
+                        value = it
+                    },
+                    styles = {
                         width(100.percent)
                     }
-
-                    onInput {
-                        input = input + (part.key to it.value)
-                        value = it.value
-                    }
-                }
+                )
             }
 
             is StoryContent.Profiles -> {
