@@ -1,6 +1,7 @@
 package app.scripts
 
 import Styles
+import aiScript
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,7 @@ import app.messaages.inList
 import appString
 import application
 import bulletedString
+import com.queatz.db.AiScriptRequest
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
@@ -29,6 +31,9 @@ import com.queatz.db.asGeo
 import components.IconButton
 import components.LinkifyText
 import components.Loading
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitAnimationFrame
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -38,12 +43,16 @@ import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
@@ -74,7 +83,10 @@ fun ScriptsPage(
             var isRunningScript by remember(script) { mutableStateOf(false) }
             var runScriptData by remember(script) { mutableStateOf<String?>(null) }
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
+            var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
+            var aiScript by remember(script) { mutableStateOf<String?>(null) }
             var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+            var aiJob by remember { mutableStateOf<Job?>(null) }
 
             menuTarget?.let {
                 Menu(
@@ -194,10 +206,10 @@ fun ScriptsPage(
                         }
                     }) {
                         MonacoEditor(
-                            initialValue = script.source.orEmpty(),
+                            initialValue = aiScript ?: script.source.orEmpty(),
                             onValueChange = {
                                 editedScript = it
-                                edited = editedScript != script.source
+                                edited = it != script.source
                             },
                             styles = {
                                 margin(0.r, 1.r, 1.r, 1.r)
@@ -226,7 +238,14 @@ fun ScriptsPage(
                                     }) {
                                         StoryContents(
                                             content = it,
-                                            onButtonClick = { script, data, input -> runScript(script, data, input, true) },
+                                            onButtonClick = { script, data, input ->
+                                                runScript(
+                                                    script,
+                                                    data,
+                                                    input,
+                                                    true
+                                                )
+                                            },
                                         )
                                     }
                                 }
@@ -244,10 +263,26 @@ fun ScriptsPage(
                         script.id
                     ),
                     actions = {
+                        if (aiScript != null && editedScript == aiScript) {
+                            IconButton(
+                                name = "undo",
+                                // todo: translate
+                                title = "Undo AI changes",
+                                styles = {
+                                    marginLeft(.5.r)
+                                }
+                            ) {
+                                aiScript = null
+                            }
+                        }
                         if (edited) {
                             Button(
                                 attrs = {
                                     classes(Styles.button)
+
+                                    style {
+                                        marginLeft(.5.r)
+                                    }
 
                                     onClick {
                                         scope.launch {
@@ -282,6 +317,75 @@ fun ScriptsPage(
                                 runScriptData = null
                                 isRunningScript = true
                                 runScript(script.id!!, null, emptyMap(), !it.shiftKey)
+                            }
+                            IconButton(
+                                name = "auto_awesome",
+                                // todo: translate
+                                title = "Code with AI",
+                                isLoading = isAiScriptGenerating,
+                                styles = {
+                                    marginLeft(.5.r)
+                                }
+                            ) {
+                                if (isAiScriptGenerating) {
+                                    scope.launch {
+                                        val result = dialog(
+                                            // todo: translate
+                                            title = "Stop script generation?",
+                                            // todo: translate
+                                            confirmButton = "Yes, stop"
+                                        )
+
+                                        if (result == true) {
+                                            aiJob?.cancel()
+                                            isAiScriptGenerating = false
+                                        }
+                                    }
+                                } else {
+                                    aiJob = scope.launch {
+                                        val prompt = inputDialog(
+                                            // todo: translate
+                                            title = "Prompt",
+                                            // todo: translate
+                                            confirmButton = "Send",
+                                            singleLine = false,
+                                            // todo: translate
+                                            placeholder = if ((editedScript
+                                                    ?: script.source!!).isBlank()
+                                            ) "Create a script that..." else "Modify this script to...",
+                                        )
+
+                                        if (prompt != null) {
+                                            isAiScriptGenerating = true
+                                            api.aiScript(
+                                                request = AiScriptRequest(
+                                                    prompt = prompt,
+                                                    script = (editedScript ?: script.source!!)
+                                                ),
+                                                onError = { error ->
+                                                    if (error !is CancellationException) {
+                                                        scope.launch {
+                                                            dialog(
+                                                                // todo: translate
+                                                                title = "Something went wrong",
+                                                                cancelButton = null,
+                                                                content = {
+                                                                    // todo: translate
+                                                                    Text("Please try again.")
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            ) {
+                                                aiScript = it.code
+                                            }
+                                            isAiScriptGenerating = false
+                                        }
+
+                                        aiJob = null
+                                    }
+                                }
                             }
                         }
                         IconButton(

@@ -128,6 +128,17 @@ class AiPhotoResponse(
 )
 
 @Serializable
+class AiScriptRequest(
+    val prompt: String,
+    val script: String? = null
+)
+
+@Serializable
+class AiScriptResponse(
+    val code: String
+)
+
+@Serializable
 data class VersionInfo(
     val versionCode: Int,
     val versionName: String

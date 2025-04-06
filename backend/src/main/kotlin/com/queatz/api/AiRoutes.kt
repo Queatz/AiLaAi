@@ -5,6 +5,7 @@ import com.queatz.OpenAiSpeakBody
 import com.queatz.TextPrompt
 import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
+import com.queatz.db.AiScriptRequest
 import com.queatz.db.AiSpeakRequest
 import com.queatz.db.addPrompt
 import com.queatz.notBlank
@@ -50,7 +51,7 @@ fun Route.aiRoutes() {
                 )
             }
         }
-        
+
         post("/ai/speak") {
             val request = call.receive<AiSpeakRequest>()
             val response = openAi.speak(request.text)
@@ -60,6 +61,18 @@ fun Route.aiRoutes() {
                 return@post
             } else {
                 call.respondBytes(response.body<ByteArray>(), ContentType.Audio.OGG)
+            }
+        }
+
+        post("/ai/script") {
+            respond {
+                val request = call.receive<AiScriptRequest>()
+                val response = openAi.script(
+                    prompt = request.prompt,
+                    script = request.script
+                )
+
+                response ?: HttpStatusCode.InternalServerError
             }
         }
     }
