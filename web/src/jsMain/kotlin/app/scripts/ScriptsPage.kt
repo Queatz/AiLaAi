@@ -28,7 +28,6 @@ import com.queatz.db.asGeo
 import components.IconButton
 import components.LinkifyText
 import components.Loading
-import components.Markdown
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -155,12 +154,13 @@ fun ScriptsPage(
             }
 
             val runScript = remember(script) {
-                { scriptId: String, data: String?, useCache: Boolean? ->
+                { scriptId: String, data: String?, input: Map<String, String?>, useCache: Boolean? ->
                     scope.launch {
                         api.runScript(
                             id = scriptId,
                             data = RunScriptBody(
                                 data = data,
+                                input = input,
                                 useCache = useCache
                             )
                         ) {
@@ -224,8 +224,8 @@ fun ScriptsPage(
                                         classes(Styles.cardContent)
                                     }) {
                                         StoryContents(
-                                            storyContent = it,
-                                            onButtonClick = { script, data -> runScript(script, data, true) },
+                                            content = it,
+                                            onButtonClick = { script, data, input -> runScript(script, data, input, true) },
                                         )
                                     }
                                 }
@@ -280,7 +280,7 @@ fun ScriptsPage(
                                 showResultPanel = true
                                 runScriptData = null
                                 isRunningScript = true
-                                runScript(script.id!!, null, !it.shiftKey)
+                                runScript(script.id!!, null, emptyMap(), !it.shiftKey)
                             }
                         }
                         IconButton(

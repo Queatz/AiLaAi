@@ -34,6 +34,7 @@ private val scriptCache = mutableMapOf<String, ResultWithDiagnostics<CompiledScr
 class RunScript(
     private val script: Script,
     private val data: String?,
+    private val input: Map<String, String?>?,
     private val useCache: Boolean = true,
 ) {
     init {
@@ -57,6 +58,13 @@ class RunScript(
                 "storage" to ScriptStorage::class.createType(),
                 "http" to ScriptHttp::class.createType(),
                 "data" to String::class.createType(nullable = true),
+                "input" to Map::class.createType(
+                    arguments = listOf(
+                        invariant(String::class.createType()),
+                        invariant(String::class.createType(nullable = true))
+                    ),
+                    nullable = true,
+                ),
                 "equipment" to Function0::class.createType(
                     arguments = listOf(
                         invariant(
@@ -92,6 +100,7 @@ class RunScript(
                 ),
                 "http" to ScriptHttp(),
                 "data" to this@RunScript.data,
+                "input" to this@RunScript.input,
                 "equipment" to {
                     person?.let { person ->
                         db.equippedItemsOfInventory(

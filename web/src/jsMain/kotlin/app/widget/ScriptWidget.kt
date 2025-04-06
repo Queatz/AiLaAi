@@ -65,15 +65,21 @@ fun ScriptWidget(widgetId: String) {
 
     scriptResult?.content?.notEmpty?.let { content ->
         StoryContents(
-            storyContent = content,
+            content = content,
             onGroupClick = {
                 scope.launch {
                     appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
                 }
             },
-            onButtonClick = { script, data ->
+            onButtonClick = { script, data, input ->
                 scope.launch {
-                    api.runScript(script, RunScriptBody(data)) {
+                    api.runScript(
+                        id = script,
+                        data = RunScriptBody(
+                            data = data,
+                            input = input
+                        )
+                    ) {
                         scriptResult = it
                     }
                 }

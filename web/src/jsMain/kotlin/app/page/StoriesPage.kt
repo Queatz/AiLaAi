@@ -256,7 +256,7 @@ fun StoriesPage(
                         it.person == me?.id && it.published != true
                     } == true
                     StoryContents(
-                        storyContent = storyContent,
+                        content = storyContent,
                         onGroupClick = onGroupClick,
                         openInNewWindow = true,
                         editable = editable,

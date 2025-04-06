@@ -53,6 +53,7 @@ fun Route.scriptRoutes() {
                     RunScript(
                         script = script,
                         data = data.data,
+                        input = data.input,
                         useCache = data.useCache != false
                     ).run(meOrNull)
                 }

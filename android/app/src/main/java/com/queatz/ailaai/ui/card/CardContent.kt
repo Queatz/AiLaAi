@@ -18,9 +18,9 @@ fun CardContent(
     val contents by remember(content) { mutableStateOf(content.asStoryContents()) }
 
     StoryContents(
-        source,
-        contents,
-        state,
+        source = source,
+        content = contents,
+        state = state,
         fade = true
     )
 }

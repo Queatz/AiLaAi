@@ -57,6 +57,7 @@ import com.queatz.ailaai.ui.story.creator.audioCreatorItem
 import com.queatz.ailaai.ui.story.creator.buttonCreatorItem
 import com.queatz.ailaai.ui.story.creator.cardsCreatorItem
 import com.queatz.ailaai.ui.story.creator.groupsCreatorItem
+import com.queatz.ailaai.ui.story.creator.inputCreatorItem
 import com.queatz.ailaai.ui.story.creator.photosCreatorItem
 import com.queatz.ailaai.ui.story.creator.profilesCreatorItem
 import com.queatz.ailaai.ui.story.creator.sectionCreatorItem
@@ -491,6 +492,8 @@ fun StoryCreatorScreen(
                     is StoryContent.Widget -> widgetCreatorItem(creatorScope(part, partIndex))
 
                     is StoryContent.Button -> buttonCreatorItem(creatorScope(part, partIndex))
+
+                    is StoryContent.Input -> inputCreatorItem(creatorScope(part, partIndex))
 
                     is StoryContent.Profiles -> profilesCreatorItem(creatorScope(part, partIndex))
 

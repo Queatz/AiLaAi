@@ -233,6 +233,7 @@ data class TradeExtended(
 @Serializable
 data class RunScriptBody(
     val data: String? = null,
+    val input: Map<String, String?>? = null,
     val useCache: Boolean? = true
 )
 

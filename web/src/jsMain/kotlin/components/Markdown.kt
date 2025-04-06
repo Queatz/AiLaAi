@@ -19,7 +19,6 @@ fun Markdown(content: String) {
         val originalLinkRenderer: dynamic = renderer.link
 
         renderer.html = { data ->
-            console.log(data)
             data.text.replace("<", "&lt;").replace(">", "&gt;")
         }
 

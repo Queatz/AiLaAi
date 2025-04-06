@@ -3,17 +3,13 @@ package com.queatz.api
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
 import com.queatz.db.CardOptions
-import com.queatz.db.ConversationItem
 import com.queatz.db.CreateWidgetBody
 import com.queatz.db.Message
-import com.queatz.db.RunScriptBody
 import com.queatz.db.RunWidgetBody
 import com.queatz.db.RunWidgetResponse
 import com.queatz.db.Script
-import com.queatz.db.ScriptResult
 import com.queatz.db.StoryContent
 import com.queatz.db.Widget
-import com.queatz.db.asKey
 import com.queatz.db.group
 import com.queatz.db.member
 import com.queatz.db.toJsonStoryContent
@@ -39,7 +35,6 @@ import io.ktor.server.routing.post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -171,7 +166,8 @@ fun Route.widgetRoutes() {
                                 withContext(Dispatchers.IO) {
                                     RunScript(
                                         script = script,
-                                        data = body.data!!
+                                        data = body.data!!,
+                                        input = null
                                     ).run(person = submitter)
                                 }
                             }

@@ -203,6 +203,10 @@ fun ReorderStoryContentsDialog(
                 Stub(it.text)
             }
 
+            is StoryContent.Input -> {
+                Stub(it.key)
+            }
+
             is StoryContent.Profiles -> {
                 LazyRow {
                     items(it.profiles, key = { it }) { profileId ->

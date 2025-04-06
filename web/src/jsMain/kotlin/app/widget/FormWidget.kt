@@ -32,11 +32,9 @@ import com.queatz.widgets.widgets.FormData
 import com.queatz.widgets.widgets.FormFieldData
 import com.queatz.widgets.widgets.FormFieldType
 import components.Icon
-import components.Loading
 import json
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -56,9 +54,6 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -107,15 +102,21 @@ fun FormWidget(widgetId: String) {
 
     scriptResult?.notEmpty?.let { content ->
         StoryContents(
-            storyContent = content,
+            content = content,
             onGroupClick = {
                 scope.launch {
                     appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
                 }
             },
-            onButtonClick = { script, data ->
+            onButtonClick = { script, data, input ->
                 scope.launch {
-                    api.runScript(script, RunScriptBody(data)) {
+                    api.runScript(
+                        id = script,
+                        data = RunScriptBody(
+                            data = data,
+                            input = input
+                        )
+                    ) {
                         scriptResult = it.content
                     }
                 }

@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.fadingEdge
-import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.idOrUrl
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
@@ -47,6 +47,7 @@ import com.queatz.ailaai.ui.story.contents.cardsItem
 import com.queatz.ailaai.ui.story.contents.commentsItem
 import com.queatz.ailaai.ui.story.contents.dividerItem
 import com.queatz.ailaai.ui.story.contents.groupsItem
+import com.queatz.ailaai.ui.story.contents.inputItem
 import com.queatz.ailaai.ui.story.contents.photosItem
 import com.queatz.ailaai.ui.story.contents.profilesItem
 import com.queatz.ailaai.ui.story.contents.reactionsItem
@@ -69,8 +70,8 @@ fun StoryContents(
     fade: Boolean = false,
     onReloadRequest: () -> Unit = {},
     onCommentFocused: (Boolean) -> Unit = {},
-    onButtonClick: ((script: String, data: String?) -> Unit)? = null,
-    actions: (@Composable (storyId: String) -> Unit)? = null
+    onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
+    actions: (@Composable (storyId: String) -> Unit)? = null,
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)
     var showOpenWidgetDialog by rememberStateOf(false)
@@ -80,6 +81,15 @@ fun StoryContents(
     val context = LocalContext.current
     var fullscreenWebView by remember {
         mutableStateOf<Pair<View, WebChromeClient.CustomViewCallback>?>(null)
+    }
+    var input by remember(content) {
+        mutableStateOf(
+            buildMap<String, String?> {
+                content.filterIsInstance<StoryContent.Input>().forEach {
+                    put(it.key, it.value)
+                }
+            }
+        )
     }
 
     fullscreenWebView?.let { (view, closeCallback) ->
@@ -212,7 +222,18 @@ fun StoryContents(
                         showOpenWidgetDialog = { showOpenWidgetDialog = it }
                     )
 
-                    is StoryContent.Button -> buttonItem(content, onButtonClick)
+                    is StoryContent.Button -> buttonItem(content, onButtonClick = { script: String, data: String? ->
+                        onButtonClick?.invoke(script, data, input)
+                    })
+
+                    is StoryContent.Input -> {
+                        inputItem(
+                            content = content,
+                            onValueChange = {
+                                input = input + (content.key to it)
+                            }
+                        )
+                    }
 
                     is StoryContent.Profiles -> profilesItem(content)
                 }

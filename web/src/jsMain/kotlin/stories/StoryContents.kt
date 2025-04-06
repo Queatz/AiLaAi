@@ -4,7 +4,6 @@ import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +54,7 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
@@ -65,6 +65,7 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.TextInput
 import profile.ProfileCard
 import r
 import kotlin.js.Date
@@ -76,9 +77,9 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
 
 @Composable
 fun StoryContents(
-    storyContent: List<StoryContent>,
+    content: List<StoryContent>,
     onGroupClick: (GroupExtended) -> Unit = {},
-    onButtonClick: ((script: String, data: String?) -> Unit)? = null,
+    onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
     onEdited: (() -> Unit)? = null,
@@ -90,7 +91,17 @@ fun StoryContents(
 
     val scope = rememberCoroutineScope()
 
-    storyContent.forEach { part ->
+    var input by remember(content) {
+        mutableStateOf(
+            buildMap<String, String?> {
+                content.filterIsInstance<StoryContent.Input>().forEach {
+                    put(it.key, it.value)
+                }
+            }
+        )
+    }
+
+    content.forEach { part ->
         when (part) {
             is StoryContent.Title -> {
                 Div({
@@ -191,7 +202,7 @@ fun StoryContents(
 
             is StoryContent.Section -> {
                 if (editable) {
-                    var value by remember(storyContent) { mutableStateOf(part.section) }
+                    var value by remember(content) { mutableStateOf(part.section) }
                     TextBox(
                         value = value,
                         onValue = {
@@ -209,7 +220,7 @@ fun StoryContents(
                             fontWeight("bold")
                         }
                     ) {
-                        onSave?.invoke(storyContent)
+                        onSave?.invoke(content)
                     }
                 } else {
                     Div({
@@ -222,7 +233,7 @@ fun StoryContents(
 
             is StoryContent.Text -> {
                 if (editable) {
-                    var value by remember(storyContent) { mutableStateOf(part.text) }
+                    var value by remember(content) { mutableStateOf(part.text) }
                     TextBox(
                         value = value,
                         onValue = {
@@ -239,7 +250,7 @@ fun StoryContents(
                             fontSize(16.px)
                         }
                     ) {
-                        onSave?.invoke(storyContent)
+                        onSave?.invoke(content)
                     }
                 } else {
                     Div({
@@ -394,10 +405,27 @@ fun StoryContents(
                     )
 
                     onClick {
-                        onButtonClick?.invoke(part.script, part.data)
+                        onButtonClick?.invoke(part.script, part.data, input)
                     }
                 }) {
                     Text(part.text)
+                }
+            }
+
+            is StoryContent.Input -> {
+                var value by remember(part.value.orEmpty()) { mutableStateOf(part.value.orEmpty()) }
+                TextInput(
+                    value = value
+                ) {
+                    classes(Styles.textarea)
+                    style {
+                        width(100.percent)
+                    }
+
+                    onInput {
+                        input = input + (part.key to it.value)
+                        value = it.value
+                    }
                 }
             }
 
