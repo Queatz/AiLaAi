@@ -111,6 +111,7 @@ dependencies {
     implementation("app.ailaai.shared:api")
     implementation("app.ailaai.shared:widgets")
     implementation("app.ailaai.shared:reminders")
+    implementation("app.ailaai.shared:content")
 
     // Ktor
     implementation("io.ktor:ktor-client-core-jvm:${versions.ktor}")

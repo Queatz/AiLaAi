@@ -37,6 +37,7 @@ kotlin {
                 implementation("app.ailaai.shared:api")
                 implementation("app.ailaai.shared:widgets")
                 implementation("app.ailaai.shared:reminders")
+                implementation("app.ailaai.shared:content")
                 implementation("io.ktor:ktor-client-js:${versions.ktor}")
                 implementation("io.ktor:ktor-client-content-negotiation:${versions.ktor}")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")

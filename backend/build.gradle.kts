@@ -34,6 +34,7 @@ dependencies {
     implementation("app.ailaai.shared:models")
     implementation("app.ailaai.shared:widgets")
     implementation("app.ailaai.shared:reminders")
+    implementation("app.ailaai.shared:content")
 
     if (tcnative_classifier != null) {
         implementation("io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-x86_64")

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import app.ailaai.api.createScript
 import app.ailaai.api.updateScript
+import app.ailaai.shared.resources.ScriptsResources
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.bulletedString
@@ -646,81 +647,7 @@ fun ScriptsDialog(
                 showHelp = false
             },
             title = "Kotlin Scripts",
-            text = """
-                Scripts are written in Kotlin. You may want to use your favorite code editor to write scripts, as you will need to add all import statements. 
-                
-                The following variables are passed to into scripts:
-                
-                self: String // The id of this script
-                me: Person? // The current user, if signed in, null if signed out
-                data: String? // Data passed to the script, if any
-                
-                Person has the following fields: id, name, photo, language, utcOffset, seen
-                
-                The following are functions passed into scripts: render, http
-                
-                Rendering content:
-                
-                render {
-                    section("<Title>")
-                    text("<Text>")
-                    button(
-                        text = "<Button text>",
-                        script = "<Script ID to run>",
-                        data = "<Data passed to the script>",
-                        // Optional
-                        data = "<Data passed to the script>",
-                        // Optional
-                        style = ButtonStyle.Secondary // Default is Primary
-                    )
-                    photo("<Url>", <Aspect ratio>?) // Must start with /static/
-                }
-                
-                Networking:
-                
-                Ktor's HttpClient is used for simple networking. Learn more at ktor.io.
-                
-                http<Any type here>("<url>")
-                http.post<Response type here, Request type here>("<url>", body = <Any object here>)
-                
-                KotlinX Serialization is available. The recommendation is to use @Serializable data classes.
-                
-                @Serializable
-                data class Request(val data: String)
-                
-                @Serializable
-                data class Response(val data: String)
-                
-                val post = http.post<Response, Request>("<url>", body = Request(""))
-                val get = http<Response>("<url>")
-                val get: Response = http("<url>") // or this
-                val get: Response = http("<url>", headers = mapOf("Authorization" to "<token>")) // set headers
-                
-                Other common response types are: String, HttpStatusCode, JsonObject
-                
-                Advanced:
-                
-                You can depend on packages from Maven Repositories.
-                
-                @file:Repository("<maven url>")
-                @file:DependsOn("<package>")
-                
-                You can also depend on other scripts.
-                                                
-                @file:DependsOnScript("<script ID>")
-                
-                They will be available as script_<script ID> in your script.
-                
-                You can define the package of your script:
-                
-                package <package name>
-                
-                Which will make them available with your declared package name.
-                
-                Note that in imported scripts, no variables are passed in to the script.                
-                
-                Learn more at kotlinlang.org
-            """.trimIndent(),
+            text = ScriptsResources.documentation,
             dismissButton = null,
             confirmButton = stringResource(R.string.close),
             properties = DialogProperties(usePlatformDefaultWidth = false)

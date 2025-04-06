@@ -1,0 +1,157 @@
+package app.ailaai.shared.resources
+
+object ScriptsResources {
+    const val documentation = """
+Scripts are written in Kotlin, and imports must be specified.
+
+The following variables are available in scripts:
+
+```kotlin
+self: String // The id of this script
+me: Person? // The current user, if signed in, null if signed out
+data: String? // Data passed to the script, if any
+```
+
+Person has the following fields: `id`, `name?`, `photo?`, `language?`, `utcOffset: Double?`, `seen: Instant?`
+
+The following are functions passed into scripts: `render`, `http`
+
+# Rendering content
+
+```kotlin
+render {
+    section("<Title>")
+    text("<Text>")
+    button(
+        text = "<Button text>",
+        script = "<Script ID to run>",
+        // Optional
+        data = "<Data passed to the script>",
+        // Optional
+        style = ButtonStyle.Secondary // Default is Primary
+    )
+    photo("<Url>", <Aspect ratio float>?) // Must start with /static/
+    input("<key>", "<value>")
+}
+```
+
+# Networking
+
+Ktor's HttpClient is used for simple networking. Learn more at ktor.io.
+
+```kotlin
+http<Any type here>("<url>")
+http.post<Response type here, Request type here>("<url>", body = <Any object here>)
+```
+
+KotlinX Serialization is available. The recommendation is to use `@Serializable` data classes.
+
+```kotlin
+@Serializable
+data class Request(val data: String)
+
+@Serializable
+data class Response(val data: String)
+
+val post = http.post<Response, Request>("<url>", body = Request(""))
+val get = http<Response>("<url>")
+val get: Response = http("<url>") // or this
+val get: Response = http("<url>", headers = mapOf("Authorization" to "<token>")) // set headers
+```
+
+Other common response types are: `String`, `HttpStatusCode`, `JsonObject`
+
+# Reading user input
+
+When using `input("<key>", "<value>")`, the value will be passed to the script in `input`.
+
+```kotlin
+val name = (input as? Map<String, String?>)?.let { input ->
+    input["<key>"]
+}
+```
+
+# Storing and retrieving data
+
+Scripts can store value in the scope of the script owner.
+
+Basic key/value storage is available as:
+
+```kotlin
+// Store
+storage["<key>"] = "<value>"
+
+// Retrieve
+storage["<key>"]
+```
+
+You can also use your own data classes. They must have a valid ArangoDB @Key field. It's recommended to import and extend `com.queatz.scripts.store.StorageModel`.
+
+```kotlin
+@Serializable
+data class MyModel : StorageModel() {
+    var value: String? = null
+}
+```
+
+And then:
+
+```kotlin
+storage.put(MyModel::class, MyModel("<value>")).let { model ->
+    // model.key will now be populated
+}
+
+storage.get(MyModel::class, "<key>")?.let { model -> }
+
+storage.all(MyModel::class).forEach { model -> }
+
+storage.delete(MyModel::class, "<key>")
+
+storage.query(
+    // AQL query return type (a list of these will be returned)
+    MyModel::class,
+    "<AQL query string>",
+    // Optional binding parameters to pass into the AQL query
+    mapOf("<key>" to "<value>")
+).forEach { model -> }
+```
+
+# Dependencies
+
+You can depend on packages from Maven Repositories.
+
+```kotlin
+@file:Repository("<maven url>")
+@file:DependsOn("<package>")
+```
+
+You can also depend on other scripts.
+
+```kotlin
+@file:DependsOnScript("<script ID>")
+```
+
+These scripts will be accessible according to their package name, or if no package name is specified, as script_<script ID> in your script.
+
+```kotlin
+import script_<script ID>.*
+
+// Use classes from script_<script ID> here
+
+// Or without imports:
+script_<script ID>.<some object>.<some field>
+```
+
+You can opt to define the package of your script:
+
+```kotlin
+package <package name>
+```
+
+Which will make them available according to your package name.
+
+Note that in imported scripts, no variables are passed in to the script, and as such, they can't render content.
+
+Learn more at kotlinlang.org
+"""
+}
