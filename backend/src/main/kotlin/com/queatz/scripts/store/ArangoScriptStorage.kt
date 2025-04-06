@@ -102,7 +102,7 @@ class ArangoScriptStorage(
             .getDocument(key, collection.java)
     }
 
-    override fun <T : Any> set(collection: KClass<T>, key: String, value: T) {
+    override fun <T : Any> set(collection: KClass<T>, value: T) {
         collection(collectionName(collection))
             .insertDocument(
                 value,
@@ -124,8 +124,8 @@ class ArangoScriptStorage(
     }
 
     override fun <T : Any> query(
-        aql: String,
         type: KClass<T>,
+        aql: String,
         params: Map<String, Any?>,
     ): List<T> {
         return synchronized(db) {

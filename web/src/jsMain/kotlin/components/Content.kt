@@ -19,7 +19,7 @@ fun Content(content: String?) {
 
     if (storyContent?.notEmpty != null) {
         StoryContents(
-            storyContent!!,
+            content = storyContent!!,
             onGroupClick = {
                 scope.launch {
                     appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))

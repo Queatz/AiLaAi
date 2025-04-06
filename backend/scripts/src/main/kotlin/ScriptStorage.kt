@@ -16,7 +16,6 @@ interface ScriptStorage {
 
     fun <T : Any> set(
         collection: KClass<T>,
-        key: String,
         value: T,
     )
 
@@ -36,8 +35,8 @@ interface ScriptStorage {
 
     // General querying
     fun <T : Any> query(
-        aql: String,
         type: KClass<T>,
+        aql: String,
         params: Map<String, Any?> = emptyMap()
     ): List<T>
 }

@@ -77,9 +77,9 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
                     .heightIn(max = 512.dp)
             ) {
                 StoryContents(
-                    null,
-                    scriptUi,
-                    rememberLazyGridState(),
+                    source = null,
+                    content = scriptUi,
+                    state = rememberLazyGridState(),
                     fade = true,
                     horizontalPadding = 0.dp,
                     onButtonClick = { script, data, input ->

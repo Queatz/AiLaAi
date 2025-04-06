@@ -319,7 +319,7 @@ fun ScriptsPage(
                                                 
                                                 The following are functions passed into scripts: render, http
                                                 
-                                                Rendering content:
+                                                # Rendering content
                                                 
                                                 ```kotlin
                                                 render {
@@ -334,10 +334,11 @@ fun ScriptsPage(
                                                         style = ButtonStyle.Secondary // Default is Primary
                                                     )
                                                     photo("<Url>", <Aspect ratio>?) // Must start with /static/
+                                                    input("<key>", "<value>")
                                                 }
                                                 ```
                                                 
-                                                Networking:
+                                                # Networking
                                                 
                                                 Ktor's HttpClient is used for simple networking. Learn more at ktor.io.
                                                 
@@ -363,7 +364,49 @@ fun ScriptsPage(
                                                 
                                                 Other common response types are: String, HttpStatusCode, JsonObject
                                                 
-                                                Advanced:
+                                                # Reading user input
+                                                
+                                                ```kotlin
+                                                val name = (input as? Map<String, String?>)?.let { input ->
+                                                    input["key"]
+                                                }
+                                                ```
+                                                
+                                                # Storing and retrieving data
+                                                
+                                                ```kotlin
+                                                // Store
+                                                storage["<key>"] = "<value>"
+                                                
+                                                // Retrieve
+                                                storage["<key>"]
+                                                ```
+                                                
+                                                You can also use your own data classes. They must have a valid @Key field. It's recommended to extend `com.queatz.scripts.store.StorageModel`.
+                                                
+                                                ```kotlin
+                                                @Serializable
+                                                data class MyModel : StorageModel() {
+                                                    var value: String? = null
+                                                }
+                                                ```
+                                                
+                                                And then:
+                                                
+                                                ```kotlin
+                                                store.set(MyModel::class, MyModel("<value>"))
+                                                store.get(MyModel::class, "<key>")
+                                                store.all(MyModel::class)
+                                                store.delete(MyModel::class, "<key>")
+                                                store.query(
+                                                    MyModel::class,
+                                                    "<AQL query string>",
+                                                    // Optional binding parameters
+                                                    mapOf("<key>" to "<value>")
+                                                )
+                                                ```
+                                                
+                                                # Advanced
                                                 
                                                 You can depend on packages from Maven Repositories.
                                                 

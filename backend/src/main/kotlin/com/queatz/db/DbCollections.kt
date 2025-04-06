@@ -20,6 +20,7 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Reminder::start.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::end.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::schedule.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Reminder::categories.name), PersistentIndexOptions())
     },
     ReminderOccurrence::class.db {
         ensurePersistentIndex(listOf(ReminderOccurrence::reminder.name), PersistentIndexOptions())
@@ -67,6 +68,7 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Story::title.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Story::url.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Story::published.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Story::categories.name), PersistentIndexOptions())
     },
     StoryDraft::class.db {
         ensurePersistentIndex(listOf(StoryDraft::story.name), PersistentIndexOptions())
@@ -84,6 +86,7 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Card::offline.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Card::group.name), PersistentIndexOptions())
         ensureFulltextIndex(listOf(Card::conversation.name), FulltextIndexOptions())
+        ensureFulltextIndex(listOf(Card::categories.name), FulltextIndexOptions())
         ensureGeoIndex(listOf(Card::geo.name), GeoIndexOptions())
     },
     Group::class.db {
@@ -120,6 +123,7 @@ fun collections() = listOf(
     Script::class.db {
         ensurePersistentIndex(listOf(Script::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Script::name.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Script::categories.name), PersistentIndexOptions())
     },
     Item::class.db {
         ensurePersistentIndex(listOf(Item::name.name), PersistentIndexOptions())
