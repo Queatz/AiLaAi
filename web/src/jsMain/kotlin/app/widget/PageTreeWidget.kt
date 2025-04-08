@@ -1,10 +1,6 @@
 package app.widget
 
-import Strings.cards
-import Strings.save
-import Strings.search
 import Styles
-import Styles.category
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,8 +67,6 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.left
-import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.scope
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
@@ -614,15 +608,50 @@ fun PageTreeWidget(widgetId: String) {
                 }
             }
 
+            val allCategories: List<String?> = remember(data) {
+                data?.categories?.values?.mapNotNull {
+                    it.firstOrNull()
+                }?.distinct().orEmpty() + null
+            }
+
+            val votesInCategory = remember(data, stagedCards, allCategories) {
+                buildMap<String?, Int> {
+                    allCategories.forEach { category ->
+                        put(
+                            key = category,
+                            value = stagedCards.filter { card ->
+                                val cardCategories = data?.tags?.get(card.id!!)
+                                    ?.map { tag ->
+                                        data?.categories?.get(tag)?.firstOrNull()
+                                    }
+
+                                if (cardCategories.isNullOrEmpty()) {
+                                    category == null
+                                } else {
+                                    cardCategories.any { it == category }
+                                }
+                            }.sumOf { card ->
+                                data?.votes
+                                    ?.get(card.id!!)
+                                    ?: 0
+                            }
+                        )
+                    }
+                }
+            }
+
             allTags?.notEmpty?.let { tags ->
                 val tagCategories = tags.groupBy { tag ->
                     data?.categories?.get(tag)?.firstOrNull()
-                }.filter {  (category, tags) ->
+                }.filter { (category, tags) ->
                     category == null || tags.isNotEmpty()
-                }.entries.sortedBy { (category, _) ->
-                    category ?: "Zzzzzzzzzzz" // No category last
-                }
-
+                }.entries.sortedWith(
+                    compareByDescending<Map.Entry<String?, List<String>>> { (category, _) ->
+                        votesInCategory[category] ?: 0
+                    }.thenBy {
+                        it.key ?: "Zzzzzzzzz" // Uncategorized last
+                    }
+                )
                 tagCategories.forEach { (category, tags) ->
                     Div {
                         if (tagCategories.size > 1) {
@@ -633,6 +662,15 @@ fun PageTreeWidget(widgetId: String) {
                             }) {
                                 // todo: translate
                                 Text(category ?: "Uncategorized")
+                                Text(" ")
+                                Span({
+                                    style {
+                                        opacity(.5)
+                                    }
+                                }) {
+                                    val votes = votesInCategory[category] ?: 0
+                                    Text("$votes vote${if (votes == 1) "" else "s"}")
+                                }
                             }
                         }
                         Tags(
@@ -649,23 +687,29 @@ fun PageTreeWidget(widgetId: String) {
                                 }
                             },
                             formatDescription = { tag ->
-                                if (tag == null) {
-                                    null
+                                val totalVotes = if (tag == null) {
+                                    stagedCards.sumOf { card ->
+                                        if (data?.tags?.get(card.id!!)?.notEmpty == null) {
+                                            data?.votes?.get(card.id!!) ?: 0
+                                        } else {
+                                            0
+                                        }
+                                    }
                                 } else {
-                                    val totalVotes = stagedCards.sumOf { card ->
+                                    stagedCards.sumOf { card ->
                                         if (data?.tags?.get(card.id!!)?.contains(tag) == true) {
                                             data?.votes?.get(card.id!!) ?: 0
                                         } else {
                                             0
                                         }
                                     }
+                                }
 
+                                if (totalVotes > 0) {
                                     // todo: translate
-                                    if (totalVotes > 0) {
-                                        "$totalVotes ${if (totalVotes == 1) "vote" else "votes"}"
-                                    } else {
-                                        null
-                                    }
+                                    "$totalVotes ${if (totalVotes == 1) "vote" else "votes"}"
+                                } else {
+                                    null
                                 }
                             },
                             showNoTag = category == null,
@@ -715,16 +759,18 @@ fun PageTreeWidget(widgetId: String) {
         }
 
         val shownCardsShown = remember(shownCards, showAll) {
-            if (showAll) {
-                shownCards
-            } else {
-                shownCards.take(5)
+            shownCards.sortedByDescending {
+                data?.votes?.get(it.id!!) ?: 0
+            }.let {
+                if (showAll) {
+                    it
+                } else {
+                    it.take(5)
+                }
             }
         }
 
-        shownCardsShown.sortedByDescending {
-            data?.votes?.get(it.id!!) ?: 0
-        }.forEach { card ->
+        shownCardsShown.forEach { card ->
             key(card.id!!) {
                 val votes = data?.votes?.get(card.id!!) ?: 0
                 Div({
