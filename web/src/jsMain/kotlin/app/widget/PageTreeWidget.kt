@@ -640,6 +640,28 @@ fun PageTreeWidget(widgetId: String) {
                 }
             }
 
+            val cardsInCategory = remember(data, stagedCards, allCategories) {
+                buildMap<String?, Int> {
+                    allCategories.forEach { category ->
+                        put(
+                            key = category,
+                            value = stagedCards.count { card ->
+                                val cardCategories = data?.tags?.get(card.id!!)
+                                    ?.map { tag ->
+                                        data?.categories?.get(tag)?.firstOrNull()
+                                    }
+
+                                if (cardCategories.isNullOrEmpty()) {
+                                    category == null
+                                } else {
+                                    cardCategories.any { it == category }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
             allTags?.notEmpty?.let { tags ->
                 val tagCategories = tags.groupBy { tag ->
                     data?.categories?.get(tag)?.firstOrNull()
@@ -662,7 +684,7 @@ fun PageTreeWidget(widgetId: String) {
                             }) {
                                 // todo: translate
                                 Text(category ?: "Uncategorized")
-                                Text(" ")
+                                Text(" (${cardsInCategory[category] ?: 0}) ")
                                 Span({
                                     style {
                                         opacity(.5)
