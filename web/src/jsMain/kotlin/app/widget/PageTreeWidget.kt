@@ -494,17 +494,17 @@ fun PageTreeWidget(widgetId: String) {
                 }
             )
 
-            Div({
-                style {
-                    fontWeight("bold")
-                    marginTop(1.r)
-                }
-            }) {
-                // todo: translate
-                Text("Stages")
-            }
-
             allStages?.notEmpty?.let { stages ->
+                Div({
+                    style {
+                        fontWeight("bold")
+                        marginTop(1.r)
+                    }
+                }) {
+                    // todo: translate
+                    Text("Stages")
+                }
+
                 Div({
                     style {
                         marginTop(1.r)
@@ -615,21 +615,25 @@ fun PageTreeWidget(widgetId: String) {
             }
 
             allTags?.notEmpty?.let { tags ->
-                tags.groupBy { tag ->
+                val tagCategories = tags.groupBy { tag ->
                     data?.categories?.get(tag)?.firstOrNull()
                 }.filter {  (category, tags) ->
                     category == null || tags.isNotEmpty()
                 }.entries.sortedBy { (category, _) ->
                     category ?: "Zzzzzzzzzzz" // No category last
-                }.forEach { (category, tags) ->
+                }
+
+                tagCategories.forEach { (category, tags) ->
                     Div {
-                        Div({
-                            style {
-                                marginBottom(.5.r)
+                        if (tagCategories.size > 1) {
+                            Div({
+                                style {
+                                    marginBottom(.5.r)
+                                }
+                            }) {
+                                // todo: translate
+                                Text(category ?: "Uncategorized")
                             }
-                        }) {
-                            // todo: translate
-                            Text(category ?: "Uncategorized")
                         }
                         Tags(
                             tags = tags,
