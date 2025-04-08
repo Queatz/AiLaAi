@@ -105,9 +105,6 @@ fun ScriptsNavPage(
         IconButton(
             name = "search",
             title = appString { this.search },
-            styles = {
-                marginRight(.5.r)
-            }
         ) {
             showSearch = !showSearch
         }
@@ -115,9 +112,6 @@ fun ScriptsNavPage(
             name = "filter_list",
             title = appString { this.filter },
             count = selectedCategory?.let { 1 } ?: 0,
-            styles = {
-                marginRight(.5.r)
-            }
         ) {
             filterMenuTarget = if (filterMenuTarget == null) {
                 (it.target as HTMLElement).getBoundingClientRect()
@@ -127,7 +121,8 @@ fun ScriptsNavPage(
         }
         IconButton(
             name = "add",
-            title = appString { this.createCard },
+            // todo: create a script
+            title = "Create a script",
             styles = {
                 marginRight(.5.r)
             }

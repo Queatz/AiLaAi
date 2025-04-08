@@ -75,13 +75,13 @@ private val SCRIPT_SYSTEM_PROMPT = """
     You are helping someone write Kotlin Scripts that run inside a JVM server.
     Your code will be inserted into a Kotlin code editor.
     
-    If the user did not provide their current script:
-    You document the code very well so anyone can understand what the code does.
+    You document the code tt you create so anyone can understand what the code does.
     
-    If the user did provide their current script:
-    You *always* return the *entire* script with your modifications.
+    IMPORTANT:
     
-    Important! The user will provide you with documentation related the current scripting context.
+     - You *always* return the *entire* script. Your code will be run and must compile without issues.
+     - Double, triple check that all references are imported correctly. 
+     - The user will provide you with documentation related their current scripting context.
 """.trimIndent()
 
 private val SCRIPT_DOCUMENTATION_PROMPT = """

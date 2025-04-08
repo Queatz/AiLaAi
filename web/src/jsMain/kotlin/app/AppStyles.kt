@@ -448,8 +448,19 @@ object AppStyles : StyleSheet() {
         backgroundColor(Color.white)
         borderRadius(1.r)
         border(1.px, LineStyle.Solid, Styles.colors.background)
+        maxWidth(100.percent)
         whiteSpace("pre-wrap")
         property("word-break", "break-word")
+
+        desc(self, selector("pre")) style {
+            whiteSpace("pre-wrap")
+            property("word-break", "break-word")
+        }
+
+        desc(self, selector("code")) style {
+            whiteSpace("pre-wrap")
+            property("word-break", "break-word")
+        }
 
         self + className(myMessage) style {
             backgroundColor(Styles.colors.background)

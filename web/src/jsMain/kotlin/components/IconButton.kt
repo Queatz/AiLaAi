@@ -17,9 +17,11 @@ import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.CSSColorValue
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.rad
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.dom.Div
@@ -38,6 +40,7 @@ fun IconButton(
     background: Boolean = false,
     backgroundColor: CSSColorValue? = null,
     isLoading: Boolean = false,
+    small: Boolean = false,
     styles: (StyleScope.() -> Unit)? = null,
     iconStyles: (StyleScope.() -> Unit)? = null,
     onClick: (SyntheticMouseEvent) -> Unit
@@ -83,6 +86,10 @@ fun IconButton(
             classes("material-symbols-outlined")
 
             style {
+                if (small) {
+                    fontSize(16.px)
+                }
+
                 iconStyles?.let {
                     it()
                 }

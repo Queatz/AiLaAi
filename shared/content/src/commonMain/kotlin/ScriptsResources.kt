@@ -85,7 +85,7 @@ storage["<key>"] = "<value>"
 storage["<key>"]
 ```
 
-You can also use your own data classes. They must have a valid ArangoDB @Key field. It's recommended to import and extend `com.queatz.scripts.store.StorageModel`.
+You can also use your own data classes. They must have a valid ArangoDB @Key field. It's recommended to import `com.queatz.scripts.store.StorageModel`.
 
 ```kotlin
 @Serializable

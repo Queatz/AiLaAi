@@ -209,7 +209,7 @@ fun ScriptsPage(
                             initialValue = aiScript ?: script.source.orEmpty(),
                             onValueChange = {
                                 editedScript = it
-                                edited = it != script.source
+                                edited = it != script.source && !(it.isBlank() && script.source!!.isBlank())
                             },
                             styles = {
                                 margin(0.r, 1.r, 1.r, 1.r)

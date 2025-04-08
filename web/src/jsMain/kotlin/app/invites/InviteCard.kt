@@ -25,6 +25,7 @@ import components.Loading
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
@@ -130,6 +131,10 @@ fun InviteCard(
                     marginTop(1.r)
                     justifyContent(JustifyContent.Center)
                     textAlign("center")
+                }
+
+                if (me?.id == invite.person) {
+                    disabled()
                 }
 
                 onClick {

@@ -1,6 +1,10 @@
 package app.widget
 
+import Strings.cards
+import Strings.save
+import Strings.search
 import Styles
+import Styles.category
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,6 +23,8 @@ import app.cards.NewCardInput
 import app.components.Empty
 import app.dialog.inputDialog
 import app.dialog.inputSelectDialog
+import app.menu.Menu
+import app.messaages.inList
 import app.nav.NavSearchInput
 import app.softwork.routingcompose.Router
 import appString
@@ -27,6 +33,7 @@ import com.queatz.db.Card
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.PageTreeData
 import components.Icon
+import components.IconButton
 import components.getConversation
 import isMine
 import json
@@ -64,12 +71,16 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.left
+import org.jetbrains.compose.web.css.selectors.CSSSelector.PseudoClass.scope
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.DOMRect
+import org.w3c.dom.HTMLElement
 import r
 import updateWidget
 import widget
@@ -222,6 +233,40 @@ fun PageTreeWidget(widgetId: String) {
         }
     }
 
+    var isEditingTagCategories by remember(widgetId) {
+        mutableStateOf(false)
+    }
+
+    var showAll by remember(widgetId) {
+        mutableStateOf(false)
+    }
+
+    var tagMenuTarget by remember(widgetId) {
+        mutableStateOf<DOMRect?>(null)
+    }
+
+    var newPageTags by remember {
+        mutableStateOf(emptyList<String>())
+    }
+
+    tagMenuTarget?.let {
+        // todo: this menu is still offset incorrectly because of the page header
+        Menu(
+            onDismissRequest = {
+                tagMenuTarget = null
+            },
+            target = it,
+            useOffsetParent = true
+        ) {
+            item(
+                // todo: translate
+                title = "Edit categories",
+            ) {
+                isEditingTagCategories = !isEditingTagCategories
+            }
+        }
+    }
+
     suspend fun reload() {
         api.cardsCards(data?.card ?: return) {
             cards = it
@@ -240,10 +285,32 @@ fun PageTreeWidget(widgetId: String) {
         saveCard(card.id!!, Card(conversation = json.encodeToString(conversation)))
     }
 
+    suspend fun addTagsToCard(card: Card, tags: List<String>) {
+        api.updateWidget(
+            id = widgetId,
+            widget = Widget(
+                data = json.encodeToString(
+                    data!!.copy(
+                        tags = data!!.tags.toMutableMap().apply {
+                            put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tags).distinct())
+                        }
+                    )
+                )
+            )
+        ) {
+            widget = it
+            data = json.decodeFromString<PageTreeData>(it.data!!)
+        }
+    }
+
     fun newSubCard(inCardId: String, name: String, active: Boolean) {
+        val newPageTags = newPageTags
         scope.launch {
             api.newCard(Card(name = name, parent = inCardId, active = active)) {
                 reload()
+                if (newPageTags.isNotEmpty()) {
+                    addTagsToCard(it, newPageTags)
+                }
             }
         }
     }
@@ -313,7 +380,7 @@ fun PageTreeWidget(widgetId: String) {
         }
     }
 
-    fun addTag(card: Card) {
+    fun selectTag(onTag: suspend (String) -> Unit) {
         scope.launch {
             val tag = inputSelectDialog(
                 // todo: translate
@@ -325,13 +392,37 @@ fun PageTreeWidget(widgetId: String) {
             )
 
             if (!tag.isNullOrBlank()) {
+                onTag(tag)
+            }
+        }
+    }
+
+    fun addTag(card: Card) {
+        selectTag { tag ->
+            addTagsToCard(card, tag.inList())
+        }
+    }
+
+    fun setTagCategory(tag: String) {
+        scope.launch {
+            val category = inputSelectDialog(
+                // todo: translate
+                confirmButton = "Set category",
+                items = data?.categories?.values.orEmpty()
+                    .mapNotNull { it.firstOrNull() }.distinct().sorted(),
+                itemStyle = { tag ->
+                    backgroundColor(tagColor(tag))
+                }
+            )
+
+            if (!category.isNullOrBlank()) {
                 api.updateWidget(
                     id = widgetId,
                     widget = Widget(
                         data = json.encodeToString(
                             data!!.copy(
-                                tags = data!!.tags.toMutableMap().apply {
-                                    put(card.id!!, (getOrElse(card.id!!) { emptyList() } + tag.trim()).distinct())
+                                categories = data!!.categories.toMutableMap().apply {
+                                    put(tag, category.inList())
                                 }
                             )
                         )
@@ -353,12 +444,48 @@ fun PageTreeWidget(widgetId: String) {
             NewCardInput(defaultMargins = false) { name, active ->
                 newSubCard(data?.card ?: return@NewCardInput, name, active)
             }
+
+            Tags(
+                tags = newPageTags,
+                // todo: translate
+                title = if (me != null) "Tap to remove" else "",
+                onClick = { tag, _ ->
+                    newPageTags = newPageTags.filter {
+                        it != (tag as? TagFilter.Tag)?.tag
+                    }
+                }
+            ) {
+                Button(
+                    {
+                        classes(Styles.outlineButton)
+
+                        style {
+                            padding(0.r, 1.5.r)
+                            height(2.5.r)
+                        }
+
+                        // todo: translate
+                        title("Add tag")
+
+                        onClick {
+                            it.stopPropagation()
+                            selectTag { tag ->
+                                newPageTags += tag
+                            }
+                        }
+                    }
+                ) {
+                    Icon("new_label") {
+                        marginRight(0.r)
+                    }
+                }
+            }
         }
 
         if (cards.size > 5) {
             NavSearchInput(
-                search,
-                { search = it },
+                value = search,
+                onChange = { search = it },
                 defaultMargins = false,
                 autoFocus = false,
                 styles = {
@@ -366,6 +493,16 @@ fun PageTreeWidget(widgetId: String) {
                     marginBottom(1.r)
                 }
             )
+
+            Div({
+                style {
+                    fontWeight("bold")
+                    marginTop(1.r)
+                }
+            }) {
+                // todo: translate
+                Text("Stages")
+            }
 
             allStages?.notEmpty?.let { stages ->
                 Div({
@@ -432,58 +569,139 @@ fun PageTreeWidget(widgetId: String) {
                 }
             }
 
-            allTags?.notEmpty?.let { tags ->
-                Tags(
-                    tags = tags,
-                    selected = tagFilters,
-                    marginTop = 0.r,
-                    // todo: translate
-                    title = "Tap to filter",
-                    formatCount = { tag ->
-                        if (tag == null) {
-                            noTagCount.toString()
-                        } else {
-                            (tagCount?.get(tag) ?: 0).toString()
-                        }
-                    },
-                    formatDescription = { tag ->
-                        if (tag == null) {
-                            null
-                        } else {
-                            val totalVotes = stagedCards.sumOf { card ->
-                                if (data?.tags?.get(card.id!!)?.contains(tag) == true) {
-                                    data?.votes?.get(card.id!!) ?: 0
-                                } else {
-                                    0
-                                }
-                            }
+            Div({
+                style {
+                    fontWeight("bold")
+                    marginTop(1.r)
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Row)
+                    alignItems(AlignItems.Center)
+                    justifyContent(JustifyContent.SpaceBetween)
+                    width(100.percent)
+                }
+            }) {
+                // todo: translate
+                Text("Tags")
 
-                            // todo: translate
-                            if (totalVotes > 0) {
-                                "$totalVotes ${if (totalVotes == 1) "vote" else "votes"}"
-                            } else {
-                                null
-                            }
+                if (isEditingTagCategories) {
+                    IconButton(
+                        name = "clear",
+                        // todo: translate
+                        title = "Leave",
+                        small = true,
+                        styles = {
+                            padding(0.r)
                         }
-                    },
-                    showNoTag = true,
-                    onClick = { tag, multiselect ->
-                        if (!multiselect) {
-                            tagFilters = if (tag in tagFilters) {
-                                emptySet()
-                            } else {
-                                setOf(tag)
-                            }
+                    ) {
+                        isEditingTagCategories = false
+                    }
+                } else {
+                    IconButton(
+                        name = "more_vert",
+                        // todo: translate
+                        title = "Menu",
+                        small = true,
+                        styles = {
+                            padding(0.r)
+                        }
+                    ) {
+                        tagMenuTarget = if (tagMenuTarget == null) {
+                            (it.target as HTMLElement).getBoundingClientRect()
                         } else {
-                            if (tag in tagFilters) {
-                                tagFilters -= tag
-                            } else {
-                                tagFilters += tag
-                            }
+                            null
                         }
                     }
-                )
+                }
             }
+
+            allTags?.notEmpty?.let { tags ->
+                tags.groupBy { tag ->
+                    data?.categories?.get(tag)?.firstOrNull()
+                }.filter {  (category, tags) ->
+                    category == null || tags.isNotEmpty()
+                }.entries.sortedBy { (category, _) ->
+                    category ?: "Zzzzzzzzzzz" // No category last
+                }.forEach { (category, tags) ->
+                    Div {
+                        Div({
+                            style {
+                                marginBottom(.5.r)
+                            }
+                        }) {
+                            // todo: translate
+                            Text(category ?: "Uncategorized")
+                        }
+                        Tags(
+                            tags = tags,
+                            selected = tagFilters,
+                            marginTop = 0.r,
+                            // todo: translate
+                            title = "Tap to filter",
+                            formatCount = { tag ->
+                                if (tag == null) {
+                                    noTagCount.toString()
+                                } else {
+                                    (tagCount?.get(tag) ?: 0).toString()
+                                }
+                            },
+                            formatDescription = { tag ->
+                                if (tag == null) {
+                                    null
+                                } else {
+                                    val totalVotes = stagedCards.sumOf { card ->
+                                        if (data?.tags?.get(card.id!!)?.contains(tag) == true) {
+                                            data?.votes?.get(card.id!!) ?: 0
+                                        } else {
+                                            0
+                                        }
+                                    }
+
+                                    // todo: translate
+                                    if (totalVotes > 0) {
+                                        "$totalVotes ${if (totalVotes == 1) "vote" else "votes"}"
+                                    } else {
+                                        null
+                                    }
+                                }
+                            },
+                            showNoTag = category == null,
+                            onClick = { tag, multiselect ->
+                                if (isEditingTagCategories) {
+                                    if (tag is TagFilter.Tag) {
+                                        setTagCategory(tag.tag)
+                                    } else {
+                                        // No tag
+                                    }
+                                } else {
+                                    if (!multiselect) {
+                                        tagFilters = if (tag in tagFilters) {
+                                            emptySet()
+                                        } else {
+                                            setOf(tag)
+                                        }
+                                    } else {
+                                        if (tag in tagFilters) {
+                                            tagFilters -= tag
+                                        } else {
+                                            tagFilters += tag
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        Div({
+            style {
+                fontWeight("bold")
+                marginTop(1.r)
+            }
+        }) {
+            // todo: translate
+            Text("Pages")
         }
 
         if (search.isNotBlank() && shownCards.isEmpty()) {
@@ -492,7 +710,15 @@ fun PageTreeWidget(widgetId: String) {
             }
         }
 
-        shownCards.sortedByDescending {
+        val shownCardsShown = remember(shownCards, showAll) {
+            if (showAll) {
+                shownCards
+            } else {
+                shownCards.take(5)
+            }
+        }
+
+        shownCardsShown.sortedByDescending {
             data?.votes?.get(it.id!!) ?: 0
         }.forEach { card ->
             key(card.id!!) {
@@ -739,6 +965,32 @@ fun PageTreeWidget(widgetId: String) {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        if (shownCards.size > 5 && !showAll) {
+            Div(
+                {
+                    style {
+                        width(100.percent)
+                        marginTop(1.r)
+                        display(DisplayStyle.Flex)
+                        justifyContent(JustifyContent.Center)
+                        alignItems(AlignItems.Center)
+                    }
+                }
+            ) {
+                Button(
+                    {
+                        classes(Styles.outlineButton)
+                        onClick {
+                            showAll = true
+                        }
+                    }
+                ) {
+                    // todo: translate
+                    Text("Show ${shownCards.size - 5} more")
                 }
             }
         }

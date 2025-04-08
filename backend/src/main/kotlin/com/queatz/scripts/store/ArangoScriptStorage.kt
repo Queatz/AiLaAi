@@ -98,6 +98,10 @@ class ArangoScriptStorage(
     }
 
     override fun <T : Any> get(collection: KClass<T>, key: String): T? {
+        if (!hasCollection(collectionName(collection))) {
+            return null
+        }
+
         return collection(collectionName(collection))
             .getDocument(key, collection.java)
     }
@@ -113,6 +117,9 @@ class ArangoScriptStorage(
     }
 
     override fun <T : Any> all(collection: KClass<T>): List<T> {
+        if (!hasCollection(collectionName(collection))) {
+            return emptyList()
+        }
         return query(
             aql = "FOR document IN @@collection RETURN document",
             type = collection,
@@ -141,8 +148,10 @@ class ArangoScriptStorage(
 
     private fun collectionName(collection: KClass<*>): String = collection.qualifiedName!!.replace(".", "_")
 
+    private fun hasCollection(name: String): Boolean = db.collections.any { it.name == name }
+
     private fun collection(name: String): ArangoCollection {
-        if (db.collections.none { it.name == name }) {
+        if (!hasCollection(name)) {
             db.createCollection(
                 name,
                 CollectionCreateOptions().type(CollectionType.DOCUMENT)

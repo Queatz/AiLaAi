@@ -376,7 +376,7 @@ fun ReminderScreen(reminderId: String) {
                             .distinct()
                             .mapNotNull { authors.get(it) }
                             .sortedByDescending { it.seen ?: fromEpochMilliseconds(0) }
-                            .notEmpty
+                            .takeIf { it.size > 1 }
                             ?.let { people ->
                                 Text(
                                     stringResource(R.string.people) + " (${people.size})",

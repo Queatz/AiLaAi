@@ -97,11 +97,18 @@ class MenuScope(val onDismissRequest: () -> Unit) {
     }
 }
 
+/**
+ * @param target The rect to position the menu around, in screen space.
+ *      You must calculate this based on where the rect
+ *      is considered to be in the DOM, and where you
+ *      place this Menu in the DOM.
+ */
 @Composable
 fun Menu(
     onDismissRequest: () -> Unit,
     target: DOMRect,
     above: Boolean = false,
+    useOffsetParent: Boolean = false,
     content: @Composable MenuScope.() -> Unit
 ) {
     var y by remember { mutableStateOf(0) }
@@ -142,7 +149,7 @@ fun Menu(
         }
 
         ref { menuElement ->
-            val clickListener = EventListener {
+            val windowClickListener = EventListener {
                 val parents = ((it as? MouseEvent)?.target as? HTMLElement)?.parents
                 if (parents?.none { it == menuElement } == true) {
                     onDismissRequest()
@@ -155,6 +162,15 @@ fun Menu(
                 y = keepInFrame(menuElement)
             }
 
+            if (useOffsetParent) {
+                menuElement.offsetParent?.let {
+                    val parentRect = it.getBoundingClientRect()
+                    if (parentRect.top != 0.0) {
+                        y += parentRect.top.toInt()
+                    }
+                }
+            }
+
             menuElement.onresize = {
                 if (above) {
                     y = menuElement.clientHeight
@@ -165,13 +181,13 @@ fun Menu(
 
             measured = true
 
-            val resizeListener = EventListener { onDismissRequest() }
-            document.addEventListener("click", clickListener)
-            window.addEventListener("resize", resizeListener)
+            val windowResizeListener = EventListener { onDismissRequest() }
+            document.addEventListener("click", windowClickListener)
+            window.addEventListener("resize", windowResizeListener)
 
             onDispose {
-                document.removeEventListener("click", clickListener)
-                window.removeEventListener("resize", resizeListener)
+                document.removeEventListener("click", windowClickListener)
+                window.removeEventListener("resize", windowResizeListener)
             }
         }
     }) {
