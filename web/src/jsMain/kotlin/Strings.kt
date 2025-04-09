@@ -661,6 +661,11 @@ object Strings {
         "Rename",
         "Đổi tên"
     )
+
+    val category = Translation(
+        "Category",
+        "Danh mục"
+    )
     val reschedule = Translation(
         "Reschedule",
         "Lên lịch lại"

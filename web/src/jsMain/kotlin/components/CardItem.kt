@@ -146,16 +146,16 @@ fun CardItem(
                 }
             }) {
                 NameAndLocation(card.name, card.hint)
-                card.categories?.firstOrNull()?.let { category ->
-                    Div({
-                        classes(Styles.category)
-                        style {
-                            marginBottom(1.r)
-                        }
-                    }) {
-                        Text(category)
-                    }
-                }
+//                card.categories?.firstOrNull()?.let { category ->
+//                    Div({
+//                        classes(Styles.category)
+//                        style {
+//                            marginBottom(1.r)
+//                        }
+//                    }) {
+//                        Text(category)
+//                    }
+//                }
             }
 
             message?.let { conversationMessage ->

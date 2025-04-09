@@ -7,6 +7,7 @@ import focusable
 import hint
 import notBlank
 import baseUrl
+import bulletedString
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.padding
@@ -86,11 +87,10 @@ fun CardListItem(
                     classes(AppStyles.groupItemMessage)
                 }) {
                     Text(
-                        listOfNotNull(
-                            card.categories?.first(),
+                        bulletedString(
                             card.hint.notBlank,
                             card.getConversation().message.notBlank
-                        ).joinToString(" • ")
+                        )
                     )
                 }
             }

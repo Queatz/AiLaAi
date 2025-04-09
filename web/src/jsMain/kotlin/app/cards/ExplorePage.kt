@@ -15,6 +15,7 @@ import app.AppStyles
 import app.PageTopBar
 import app.ailaai.api.card
 import app.ailaai.api.cardsCards
+import app.ailaai.api.categories
 import app.ailaai.api.deleteCard
 import app.ailaai.api.generateCardPhoto
 import app.ailaai.api.groups
@@ -23,6 +24,7 @@ import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.ailaai.api.uploadCardPhoto
 import app.components.EditField
+import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.searchDialog
@@ -30,12 +32,17 @@ import app.group.GroupInfo
 import app.group.GroupItem
 import app.menu.InlineMenu
 import app.menu.Menu
+import app.messaages.inList
 import appString
+import appStringShort
 import application
+import bulletedString
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
+import com.queatz.db.asGeo
+import com.queatz.db.formatPay
 import components.CardItem
 import components.CardPhotoOrVideo
 import components.IconButton
@@ -233,15 +240,16 @@ fun ExplorePage(
     val cancel = appString { cancel }
     val titleString = appString { title }
     val rename = appString { rename }
+    val category = appString { category }
     val hint = appString { hint }
     val update = appString { update }
 
     fun rename() {
         scope.launch {
             val name = inputDialog(
-                titleString,
-                "",
-                rename,
+                title = titleString,
+                placeholder = "",
+                confirmButton = rename,
                 defaultValue = card.name ?: ""
             )
 
@@ -340,6 +348,29 @@ fun ExplorePage(
         }
     }
 
+    fun setCategory() {
+        scope.launch {
+            api.categories(
+                // todo: might need to not require geo
+                geo = application.me.value?.geo?.asGeo() ?: return@launch
+            ) { categories ->
+                val category = categoryDialog(
+                    categories = categories,
+                    category = card.categories?.firstOrNull(),
+                )
+
+                if (category != null) {
+                    api.updateCard(
+                        id = card.id!!,
+                        card = Card(categories = category.inList())
+                    ) {
+                        onCardUpdated(it)
+                    }
+                }
+            }
+        }
+    }
+
     if (menuTarget != null) {
         Menu({ menuTarget = null }, menuTarget!!) {
             val isSaved = saves.cards.value.any { it.id == card.id }
@@ -358,6 +389,10 @@ fun ExplorePage(
 
             item(rename) {
                 rename()
+            }
+
+            item(category) {
+                setCategory()
             }
 
             item(hint) {
@@ -623,9 +658,9 @@ fun ExplorePage(
         },
         actions = {
             Switch(
-                published,
-                { published = it },
-                {
+                value = published,
+                onValue = { published = it },
+                onChange = {
                     scope.launch {
                         val previousValue = card.active == true
                         api.updateCard(card.id!!, Card(active = it), onError = {

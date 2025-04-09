@@ -1,5 +1,6 @@
 package app.dialog
 
+import Styles.category
 import app.AppStyles
 import application
 import focusable
@@ -15,10 +16,12 @@ import r
 
 suspend fun inputSelectDialog(
     confirmButton: String,
+    defaultValue: String = "",
     items: List<String>? = null,
     itemStyle: StyleScope.(String) -> Unit = {}
 ) = inputDialog(
     title = null,
+    defaultValue = defaultValue,
     confirmButton = confirmButton,
     placeholder = application.appString { search },
     inputStyles = {

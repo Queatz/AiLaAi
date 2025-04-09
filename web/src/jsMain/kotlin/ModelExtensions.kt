@@ -1,14 +1,15 @@
 import com.queatz.db.Card
 import com.queatz.db.PayFrequency
 
-val Card.hint get() = listOfNotNull(
+val Card.hint get() = bulletedString(
     pay?.pay?.let {
         pay?.frequency?.let { frequency ->
             "$it/${frequency.appStringShort}"
         } ?: it
     },
+    categories?.firstOrNull(),
     location?.notBlank
-).joinToString(" • ")
+)
 
 val PayFrequency.appStringShort get() = when (this) {
     PayFrequency.Hourly -> application.appString { inlineHour }
