@@ -17,6 +17,7 @@ import com.queatz.db.Geo
 import com.queatz.db.formatPay
 import components.CardContent
 import components.Icon
+import components.IconButton
 import components.SearchField
 import components.Switch
 import kotlinx.browser.document
@@ -53,7 +54,6 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
@@ -409,6 +409,7 @@ fun MapView(
                                 title = "New page",
                                 // todo: translate
                                 placeholder = "Name",
+                                confirmButton = application.appString { newCard },
                                 content = { _, _, _ ->
                                     var value by remember { mutableStateOf(false) }
 
@@ -423,6 +424,7 @@ fun MapView(
                                             paddingBottom(.5f.r)
                                         }
                                     }) {
+                                        // todo: translate
                                         Text("Publish")
                                     }
 
@@ -491,19 +493,33 @@ fun MapView(
                 Div({
                     classes(Styles.navContent)
                 }) {
+                    var expanded by remember { mutableStateOf(true) }
+
                     Div({
                         style {
                             fontWeight("bold")
                             padding(1.r)
                             fontSize(24.px)
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.SpaceBetween)
                         }
                     }) {
                         // todo: translate
                         Text("Pages (${shownCards.size})")
+                        IconButton(
+                            name = if (expanded) "expand_less" else "expand_more",
+                            // todo: translate
+                            title = if (expanded) "Collapse" else "Expand"
+                        ) {
+                            expanded = !expanded
+                        }
                     }
-                    MapList(shownCards) { card ->
-                        selectedCard = if (selectedCard?.id == card.id) null else card
-                        centerMapOnCard(selectedCard)
+                    if (expanded) {
+                        MapList(shownCards) { card ->
+                            selectedCard = if (selectedCard?.id == card.id) null else card
+                            centerMapOnCard(selectedCard)
+                        }
                     }
                 }
             }
@@ -528,7 +544,7 @@ fun MapView(
                 SearchField(
                     value = searchText,
                     // todo: translate
-                    placeholder = "Search for people, places, services, and more",
+                    placeholder = "Search for places, services, and more",
                     shadow = true
                 ) {
                     searchText = it
