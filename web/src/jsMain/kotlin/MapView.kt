@@ -122,14 +122,17 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(geo, searchText) {
+    LaunchedEffect(geo, searchText, selectedCategory) {
         geo ?: return@LaunchedEffect
         isLoading = true
         delay(250)
 
+        val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
+
         api.cards(
             geo = geo!!,
-            search = searchText.notBlank,
+            altitude = altitude / 1000,
+            search = searchText.notBlank ?: selectedCategory?.notBlank,
             public = true
         ) {
             searchResults = it

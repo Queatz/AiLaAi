@@ -218,6 +218,7 @@ fun Db.updateEquippedCards(person: String, geo: List<Double>) = query(
 fun Db.explore(
     person: String?,
     geo: List<Double>,
+    altitude: Double? = null,
     search: String? = null,
     paid: Boolean? = null,
     nearbyMaxDistance: Double = 0.0,
@@ -246,7 +247,7 @@ fun Db.explore(
             filter (
                 ${if (person == null || public) "d != null and d <= @nearbyMaxDistance" else isFriendCard()}
             )
-            sort x.${f(Card::level)} desc, x.${f(Card::size)} desc, d == null, d
+            sort x.${f(Card::level)}desc, ${if (altitude == null) "x.${f(Card::size)} desc" else "abs((x.${f(Card::size)} || 0) - @altitude)"}, d == null, d
             limit @offset, @limit
             return merge(
                 x,
@@ -263,6 +264,9 @@ fun Db.explore(
             }
         }
         put("geo", geo)
+        if (altitude != null) {
+            put("altitude", altitude)
+        }
         put("search", search?.trim()?.lowercase())
         if (person == null || public) {
             put("nearbyMaxDistance", nearbyMaxDistance)

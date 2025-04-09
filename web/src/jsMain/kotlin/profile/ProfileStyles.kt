@@ -131,11 +131,5 @@ object ProfileStyles : StyleSheet() {
         whiteSpace("pre-wrap")
         lineHeight("1.25")
         maxWidth(100.percent)
-
-        media(mediaMaxWidth(640.px)) {
-            self style {
-                textAlign("center")
-            }
-        }
     }
 }

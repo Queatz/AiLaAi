@@ -496,6 +496,7 @@ fun AppPage() {
                     onGroupGone = {
                         scope.launch {
                             groupUpdates.emit(Unit)
+                            group = GroupNav.None
                         }
                     }
                 )

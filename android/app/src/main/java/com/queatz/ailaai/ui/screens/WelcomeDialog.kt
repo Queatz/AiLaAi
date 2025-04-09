@@ -194,8 +194,8 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
                                     .fillMaxWidth()
                             )
                             OutlinedTextField(
-                                about,
-                                { about = it },
+                                value = about,
+                                onValueChange = { about = it },
                                 label = {
                                     Text(stringResource(R.string.say_hi))
                                 },

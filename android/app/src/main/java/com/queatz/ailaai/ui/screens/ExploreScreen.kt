@@ -122,6 +122,7 @@ fun ExploreScreen() {
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
     var mapGeo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    var mapAltitude: Double? by rememberSaveable { mutableStateOf<Double?>(null) }
     var isError by rememberStateOf(false)
     var showAsMap by rememberSavableStateOf(true)
     var showOpenGroups by rememberSavableStateOf(false)
@@ -282,9 +283,10 @@ fun ExploreScreen() {
                 -> {
                 api.cards(
                     geo = geo.toGeo(),
+                    altitude = (mapAltitude ?: 0.0) / 1000.0,
                     offset = offset,
                     paid = filterPaid.takeIf { it },
-                    search = value.notBlank,
+                    search = value.notBlank ?: selectedCategory?.notBlank,
                     public = tab == MainTab.Local,
                     onError = { ex ->
                         if (ex is CancellationException || ex is InterruptedException) {
@@ -321,7 +323,7 @@ fun ExploreScreen() {
         loadMore(reload = true)
     }
 
-    LaunchedEffect(geo, mapGeo, value, tab) {
+    LaunchedEffect(geo, mapGeo, value, tab, selectedCategory) {
         if (geo == null && mapGeo == null) {
             return@LaunchedEffect
         }
@@ -545,10 +547,14 @@ fun ExploreScreen() {
                                     },
                                     onInventory = {
                                         showInventory = it
+                                    },
+                                    onGeo = {
+                                        mapGeo = it
+                                    },
+                                    onAltitude = {
+                                        mapAltitude = it
                                     }
-                                ) {
-                                    mapGeo = it
-                                }
+                                )
                             }
                             PageInput(
                                 modifier = Modifier

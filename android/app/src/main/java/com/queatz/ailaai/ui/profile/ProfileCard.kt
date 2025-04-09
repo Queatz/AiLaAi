@@ -102,7 +102,6 @@ fun ProfileCard(person: PersonProfile, onClick: () -> Unit) {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(1.pad)

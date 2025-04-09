@@ -116,7 +116,6 @@ fun ProfileCard(personProfile: PersonProfile, onClick: () -> Unit) {
         personProfile.profile.about?.notBlank?.let { about ->
             Div({
                 style {
-                    textAlign("center")
                     paddingTop(1.r)
                     paddingLeft(1.r)
                     paddingRight(1.r)

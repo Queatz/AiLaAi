@@ -687,6 +687,7 @@ fun PageTreeWidget(widgetId: String) {
                                 Text(" (${cardsInCategory[category] ?: 0}) ")
                                 Span({
                                     style {
+                                        fontSize(14.px)
                                         opacity(.5)
                                     }
                                 }) {

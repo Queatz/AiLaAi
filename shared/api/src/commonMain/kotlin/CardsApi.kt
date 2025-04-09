@@ -7,6 +7,7 @@ import kotlinx.datetime.Instant
 
 suspend fun Api.cards(
     geo: Geo,
+    altitude: Double? = null,
     offset: Int = 0,
     limit: Int = 20,
     search: String? = null,
@@ -17,6 +18,7 @@ suspend fun Api.cards(
 ) =
     get("cards", mapOf(
         "geo" to geo.toString(),
+        "altitude" to altitude?.toString(),
         "offset" to offset.toString(),
         "limit" to limit.toString(),
         "public" to public.toString(),

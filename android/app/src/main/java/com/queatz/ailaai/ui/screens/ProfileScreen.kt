@@ -1064,9 +1064,7 @@ fun ProfileScreen(personId: String) {
                                         text = profile?.about
                                             ?: (if (isMe) stringResource(R.string.introduce_yourself) else ""),
                                         color = if (isMe && profile?.about?.isBlank() != false) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            textAlign = TextAlign.Center
-                                        ),
+                                        style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                     )

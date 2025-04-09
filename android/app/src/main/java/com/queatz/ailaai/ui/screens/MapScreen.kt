@@ -134,7 +134,8 @@ fun MapScreen(
     bottomPadding: Int,
     onCard: (String) -> Unit,
     onInventory: (String) -> Unit,
-    onGeo: (LatLng) -> Unit
+    onGeo: (LatLng) -> Unit,
+    onAltitude: (Double) -> Unit,
 ) {
     val context = LocalContext.current
     var position by rememberSaveable(stateSaver = latLngSaver()) {
@@ -178,6 +179,7 @@ fun MapScreen(
     LaunchedEffect(position) {
         if (position != null) {
             onGeo(position!!)
+            onAltitude(zoom?.zoomAsAltitude ?: 0.0)
         }
     }
 
@@ -599,6 +601,9 @@ fun MapScreen(
         }
     }
 }
+
+val Float.zoomAsAltitude: Double
+    get() = 591657550.5 / (2f.pow(this))
 
 private fun Card.collides(other: Card): Boolean {
     val geo = geo?.toLatLng() ?: return false

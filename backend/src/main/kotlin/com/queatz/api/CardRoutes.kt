@@ -126,6 +126,7 @@ fun Route.cardRoutes() {
                 db.explore(
                     person = person?.id,
                     geo = geo,
+                    altitude = call.parameters["altitude"]?.toDoubleOrNull(),
                     search = search,
                     paid = paid,
                     nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,

@@ -204,7 +204,6 @@ fun ProfileNavPage(
                 placeholder = appString { introduceYourself },
                 styles = {
                     margin(.5.r)
-                    textAlign("center")
                 }
             ) {
                 saveAbout(it)
