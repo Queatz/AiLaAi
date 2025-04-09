@@ -34,15 +34,12 @@ import app.menu.InlineMenu
 import app.menu.Menu
 import app.messaages.inList
 import appString
-import appStringShort
 import application
-import bulletedString
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
 import com.queatz.db.Pay
 import com.queatz.db.PayFrequency
 import com.queatz.db.asGeo
-import com.queatz.db.formatPay
 import components.CardItem
 import components.CardPhotoOrVideo
 import components.IconButton
@@ -217,7 +214,13 @@ fun ExplorePage(
         scope.launch {
             api.updateCard(
                 card.id!!,
-                Card(offline = false, parent = cardId, group = null, equipped = false, geo = null)
+                Card(
+                    offline = false,
+                    parent = cardId,
+                    group = null,
+                    equipped = false,
+                    geo = null
+                )
             ) {
                 onCardUpdated(it)
             }
@@ -228,7 +231,13 @@ fun ExplorePage(
         scope.launch {
             api.updateCard(
                 card.id!!,
-                Card(offline = false, parent = null, group = groupId, equipped = false, geo = null)
+                Card(
+                    offline = false,
+                    parent = null,
+                    group = groupId,
+                    equipped = false,
+                    geo = null
+                )
             ) {
                 onCardUpdated(it)
             }
@@ -607,10 +616,11 @@ fun ExplorePage(
 
             item(appString { delete }) {
                 scope.launch {
-                    // todo: translate
                     val result = dialog(
-                        "Delete this page?",
-                        "Yes, delete"
+                        // todo: translate
+                        title = "Delete this page?",
+                        // todo: translate
+                        confirmButton = "Yes, delete"
                     ) {
                         // todo: translate
                         Text("You cannot undo this.")

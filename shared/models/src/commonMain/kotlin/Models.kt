@@ -463,6 +463,13 @@ class Script(
 ) : Model()
 
 @Serializable
+data class ScriptData(
+    var script: String? = null,
+    var secret: String? = null
+) : Model()
+
+
+@Serializable
 data class ReminderSchedule(
     /**
      * 0 - 23 = hour of day

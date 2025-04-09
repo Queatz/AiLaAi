@@ -17,6 +17,7 @@ import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.cards.NewCardInput
 import app.components.Empty
+import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.inputSelectDialog
 import app.menu.Menu
@@ -68,6 +69,7 @@ import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
@@ -489,15 +491,10 @@ fun PageTreeWidget(widgetId: String) {
             )
 
             allStages?.notEmpty?.let { stages ->
-                Div({
-                    style {
-                        fontWeight("bold")
-                        marginTop(1.r)
-                    }
-                }) {
+                PageTreeHeader(
                     // todo: translate
-                    Text("Stages")
-                }
+                    title = "Stages"
+                )
 
                 Div({
                     style {
@@ -544,14 +541,14 @@ fun PageTreeWidget(widgetId: String) {
                             selected = TagFilter.Untagged in stageFilters,
                             outline = true,
                             onClick = { multiselect ->
-                                if (!multiselect) {
-                                    stageFilters = if (TagFilter.Untagged in stageFilters) {
+                                stageFilters = if (!multiselect) {
+                                    if (TagFilter.Untagged in stageFilters) {
                                         emptySet()
                                     } else {
                                         setOf(TagFilter.Untagged)
                                     }
                                 } else {
-                                    stageFilters = if (TagFilter.Untagged in stageFilters) {
+                                    if (TagFilter.Untagged in stageFilters) {
                                         stageFilters - TagFilter.Untagged
                                     } else {
                                         stageFilters + TagFilter.Untagged
@@ -563,20 +560,10 @@ fun PageTreeWidget(widgetId: String) {
                 }
             }
 
-            Div({
-                style {
-                    fontWeight("bold")
-                    marginTop(1.r)
-                    display(DisplayStyle.Flex)
-                    flexDirection(FlexDirection.Row)
-                    alignItems(AlignItems.Center)
-                    justifyContent(JustifyContent.SpaceBetween)
-                    width(100.percent)
-                }
-            }) {
+            PageTreeHeader(
                 // todo: translate
-                Text("Tags")
-
+                title = "Tags"
+            ) {
                 if (isEditingTagCategories) {
                     IconButton(
                         name = "clear",
@@ -700,8 +687,13 @@ fun PageTreeWidget(widgetId: String) {
                             tags = tags,
                             selected = tagFilters,
                             marginTop = 0.r,
-                            // todo: translate
-                            title = "Tap to filter",
+                            title = if (!isEditingTagCategories) {
+                                // todo: translate
+                                "Tap to filter"
+                            } else {
+                                // todo: translate
+                                "Tap to set category"
+                            },
                             formatCount = { tag ->
                                 if (tag == null) {
                                     noTagCount.toString()
@@ -765,31 +757,64 @@ fun PageTreeWidget(widgetId: String) {
             }
         }
 
-        Div({
-            style {
-                fontWeight("bold")
-                marginTop(1.r)
+        val shownCardsSorted = remember(shownCards, showAll) {
+            shownCards.sortedByDescending {
+                data?.votes?.get(it.id!!) ?: 0
             }
-        }) {
+        }
+
+        PageTreeHeader(
             // todo: translate
-            Text("Pages")
+            title = "Pages"
+        ) {
+            IconButton(
+                name = "download",
+                // todo: translate
+                title = "Export",
+                small = true,
+                styles = {
+                    padding(0.r)
+                }
+            ) {
+                scope.launch {
+                    dialog(
+                        // todo: json
+                        title = "Export",
+                        content = {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    flexDirection(FlexDirection.Column)
+                                    whiteSpace("pre-wrap")
+                                }
+                            }) {
+                                Text(
+                                    shownCardsSorted.joinToString("\n\n") {
+                                        // todo: translate
+                                        "[${data?.votes?.get(it.id!!) ?: 0}, ${data?.stages?.get(it.id!!) ?: "New"}] ${it.name}\n${
+                                            data?.tags?.get(
+                                                it.id!!
+                                            )?.joinToString { "($it)" } ?: ""}"
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        val shownCardsShown = shownCardsSorted.let {
+            if (showAll) {
+                it
+            } else {
+                it.take(5)
+            }
         }
 
         if (search.isNotBlank() && shownCards.isEmpty()) {
             Empty {
                 Text(appString { noCards })
-            }
-        }
-
-        val shownCardsShown = remember(shownCards, showAll) {
-            shownCards.sortedByDescending {
-                data?.votes?.get(it.id!!) ?: 0
-            }.let {
-                if (showAll) {
-                    it
-                } else {
-                    it.take(5)
-                }
             }
         }
 
@@ -1184,5 +1209,26 @@ fun TagButton(
                 Text(description)
             }
         }
+    }
+}
+
+@Composable
+fun PageTreeHeader(
+    title: String,
+    actions: @Composable () -> Unit = {},
+) {
+    Div({
+        style {
+            fontWeight("bold")
+            marginTop(1.r)
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Row)
+            alignItems(AlignItems.Center)
+            justifyContent(JustifyContent.SpaceBetween)
+            width(100.percent)
+        }
+    }) {
+        Text(title)
+        actions()
     }
 }

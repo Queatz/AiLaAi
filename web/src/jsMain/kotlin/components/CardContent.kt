@@ -72,16 +72,16 @@ fun CardContent(card: Card) {
                     Text("person")
                 }
             }
-            card.categories?.firstOrNull()?.let { category ->
-                Div({
-                    classes(Styles.category)
-                    style {
-                        property("clear", "both")
-                    }
-                }) {
-                    Text(category)
-                }
-            }
+//            card.categories?.firstOrNull()?.let { category ->
+//                Div({
+//                    classes(Styles.category)
+//                    style {
+//                        property("clear", "both")
+//                    }
+//                }) {
+//                    Text(category)
+//                }
+//            }
         }
         cardConversation?.message?.notBlank?.let { message ->
             Div({
