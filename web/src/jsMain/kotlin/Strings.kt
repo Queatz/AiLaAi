@@ -177,7 +177,7 @@ object Strings {
     )
     val map = Translation(
         "Map",
-        "Bài viết"
+        "Bản đồ"
     )
     val tapToOpen = Translation(
         "Tap to open",

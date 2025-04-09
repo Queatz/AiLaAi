@@ -11,4 +11,4 @@ inline fun Card.formatPay(format: PayFrequency.() -> String) = pay?.pay?.let {
     pay?.frequency?.let { frequency ->
         "$it/${frequency.format()}"
     } ?: it
-}
+}?.takeIf { it.isNotBlank() }

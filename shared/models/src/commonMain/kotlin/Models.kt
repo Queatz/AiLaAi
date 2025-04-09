@@ -423,6 +423,7 @@ class Reminder(
     var attachment: String? = null,
     var categories: List<String>? = null,
     var open: Boolean? = null,
+    var geo: List<Double>? = null,
     var title: String? = null,
     var note: String? = null,
     var start: Instant? = null,

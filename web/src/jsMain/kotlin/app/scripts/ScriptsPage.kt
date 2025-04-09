@@ -345,7 +345,7 @@ fun ScriptsPage(
                                     aiJob = scope.launch {
                                         val prompt = inputDialog(
                                             // todo: translate
-                                            title = "Prompt",
+                                            title = "AI Prompt",
                                             // todo: translate
                                             confirmButton = "Send",
                                             singleLine = false,

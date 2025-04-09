@@ -23,7 +23,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +76,7 @@ import com.queatz.db.StoryDraft
 import com.queatz.db.isPart
 import com.queatz.db.toJsonStoryContent
 import com.queatz.widgets.Widgets
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonArray
 
@@ -106,7 +106,6 @@ fun StoryCreatorScreen(
     var card by rememberStateOf<Card?>(null)
     var profile by rememberStateOf<PersonProfile?>(null)
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
-    val recompose = currentRecomposeScope
     val nav = nav
     val me = me
 
@@ -114,8 +113,10 @@ fun StoryCreatorScreen(
     fun invalidate() {
         val saved = storyContents
         storyContents = emptyList()
-        recompose.invalidate()
-        storyContents = saved
+        scope.launch {
+            awaitFrame()
+            storyContents = saved
+        }
     }
 
     BackHandler(enabled = edited && !showBackDialog) {

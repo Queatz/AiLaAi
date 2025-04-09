@@ -6,6 +6,7 @@ import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.AlignContent
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.AlignSelf
+import org.jetbrains.compose.web.css.AnimationTimingFunction
 import org.jetbrains.compose.web.css.CSSBuilder
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -914,11 +915,32 @@ object Styles : StyleSheet() {
         }
     }
 
+    val mapListAutoHide by style {  }
+
     val mapList by style {
         marginBottom(1.r)
 
         // Show above map controls
         property("z-index", "10")
+
+        self + className(mapListAutoHide) style {
+            transform {
+                translateX(-85.percent)
+            }
+
+            transitions {
+                "transform" {
+                    duration = 350.ms
+                    timingFunction = AnimationTimingFunction.EaseInOut
+                }
+            }
+
+            self + hover style {
+                transform {
+                    translateX(0.percent)
+                }
+            }
+        }
 
         desktop(self) {
             width(24.r)

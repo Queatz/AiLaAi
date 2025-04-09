@@ -474,7 +474,7 @@ fun MapScreen(
                                         modifier = Modifier
                                             .widthIn(max = 120.dp)
                                     )
-                                    listOf(
+                                    listOfNotNull(
                                         card.formatPay { appStringShort },
                                         card.categories?.firstOrNull()
                                     ).notEmpty?.let { it ->
@@ -491,8 +491,6 @@ fun MapScreen(
                                     }
                                 }
                             }
-
-                            val photo = card.photo?.let(api::url)
 
                             if (isNpc) {
                                 AsyncImage(
@@ -512,6 +510,7 @@ fun MapScreen(
                                         }
                                 )
                             } else {
+                                val photo = card.photo?.let(api::url)
                                 AsyncImage(
                                     model = remember(photo) {
                                         ImageRequest.Builder(context)

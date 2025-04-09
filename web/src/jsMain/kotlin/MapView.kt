@@ -1,4 +1,3 @@
-import Styles.category
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,7 +9,6 @@ import app.ailaai.api.cards
 import app.ailaai.api.newCard
 import app.cards.MapList
 import app.cards.mapListDialog
-import app.components.HorizontalSpacer
 import app.components.Spacer
 import app.dialog.inputDialog
 import app.messaages.inList
@@ -47,16 +45,15 @@ import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
-import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
@@ -97,6 +94,7 @@ sealed interface SearchFilter {
 @Composable
 fun MapView(
     showList: Boolean = true,
+    autoHideList: Boolean = false,
     onCardAdded: (Card) -> Unit = {},
     header: (@Composable () -> Unit)? = null,
 ) {
@@ -485,10 +483,24 @@ fun MapView(
         if (showList && shownCards.isNotEmpty()) {
             Div({
                 classes(Styles.navContainer, Styles.mapList)
+
+                if (autoHideList) {
+                    classes(Styles.mapListAutoHide)
+                }
             }) {
                 Div({
                     classes(Styles.navContent)
                 }) {
+                    Div({
+                        style {
+                            fontWeight("bold")
+                            padding(1.r)
+                            fontSize(24.px)
+                        }
+                    }) {
+                        // todo: translate
+                        Text("Pages (${shownCards.size})")
+                    }
                     MapList(shownCards) { card ->
                         selectedCard = if (selectedCard?.id == card.id) null else card
                         centerMapOnCard(selectedCard)

@@ -1,6 +1,7 @@
 package com.queatz.ailaai.schedule
 
 import ReminderEvent
+import android.R.id.toggle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +19,8 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.ToggleOff
+import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -114,6 +117,19 @@ fun ReminderScreen(reminderId: String) {
             api.updateReminder(
                 id = reminderId,
                 reminder = Reminder(alarm = alarm)
+            ) {
+                reminder = it
+                reloadEvents()
+            }
+        }
+    }
+
+    fun togglePosted() {
+        scope.launch {
+            val open = reminder?.open == true
+            api.updateReminder(
+                id = reminderId,
+                reminder = Reminder(open = open)
             ) {
                 reminder = it
                 reloadEvents()
@@ -295,6 +311,13 @@ fun ReminderScreen(reminderId: String) {
             ) {
                 item {
                     Toolbar {
+                        item(
+                            icon = if (reminder?.open == true) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                            name = stringResource(if (reminder?.open == true) R.string.posted else R.string.not_posted),
+                            selected = reminder?.open == true
+                        ) {
+                            togglePosted()
+                        }
                         item(
                             Icons.Outlined.PersonAdd,
                             stringResource(R.string.invite_someone)

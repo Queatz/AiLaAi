@@ -117,10 +117,6 @@ fun Route.reminderRoutes() {
                         reminder.people = update.people
                     }
 
-                    if (update.open != null) {
-                        reminder.open = update.open
-                    }
-
                     if (update.categories != null) {
                         reminder.categories = update.categories
                     }

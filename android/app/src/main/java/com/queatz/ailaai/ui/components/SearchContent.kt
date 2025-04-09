@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.screens
 
+import android.R.attr.category
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
@@ -44,7 +45,7 @@ fun SearchContent(
         categories = categories,
         category = category,
         filters = filters,
-        visible = (filters.isNotEmpty() || categories.size > 2) && !isLoading,
+        visible = category != null || (filters.isNotEmpty() || categories.size > 2) && !isLoading,
         onCategory = onCategory
     )
 }

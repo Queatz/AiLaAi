@@ -24,6 +24,7 @@ import components.CardItem
 import components.Loading
 import defaultGeo
 import kotlinx.coroutines.launch
+import lib.ResizeObserver
 import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -45,7 +46,6 @@ import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.position
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import r
 
@@ -121,6 +121,8 @@ fun CardsPage(
         FullPageLayout(maxWidth = null) {
             if (nav !is CardNav.Selected) {
                 if (nav is CardNav.Map) {
+                    var mapWidth by remember { mutableStateOf(0) }
+
                     Div({
                         style {
                             flexGrow(1)
@@ -131,9 +133,28 @@ fun CardsPage(
                             display(DisplayStyle.Flex)
                             flexDirection(FlexDirection.Column)
                         }
+
+                        ref {
+                            mapWidth = it.clientWidth
+
+                            val observer = ResizeObserver { _, _ ->
+                                mapWidth = it.clientWidth
+                            }.apply {
+                                observe(it)
+                            }
+
+                            onDispose {
+                                observer.disconnect()
+                            }
+                        }
                     }) {
+                        LaunchedEffect(mapWidth) {
+                            console.log(mapWidth)
+                        }
+
                         MapView(
-                            showList = false,
+                            showList = mapWidth >= 800,
+                            autoHideList = mapWidth < 1400,
                             onCardAdded = onCardUpdated
                         )
                     }
