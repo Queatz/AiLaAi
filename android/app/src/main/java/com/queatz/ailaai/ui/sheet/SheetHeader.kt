@@ -23,6 +23,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.SheetContent
@@ -37,9 +38,7 @@ fun SheetHeader(
     selected: SheetContent,
     onSelected: (SheetContent) -> Unit,
     onTitleClick: (() -> Unit)? = null,
-    onExpandRequest: () -> Unit,
-    isLoading: Boolean,
-    isEmpty: Boolean,
+    onExpandRequest: () -> Unit
 ) {
     DisableSelection {
         Column {
@@ -57,8 +56,8 @@ fun SheetHeader(
                             appendLine()
                             append(
                                 bulletedString(
-                                    distance,
-                                    hint
+                                    distance?.notBlank,
+                                    hint?.notBlank
                                 )
                             )
                         }
@@ -80,8 +79,7 @@ fun SheetHeader(
             )
             FlowRow(
                 verticalArrangement = Arrangement.spacedBy(.5f.pad),
-                horizontalArrangement = Arrangement.spacedBy(1.pad),
-                modifier = Modifier
+                horizontalArrangement = Arrangement.spacedBy(1.pad)
             ) {
                 // todo
                 listOf(
@@ -106,14 +104,6 @@ fun SheetHeader(
                         //Text(" ${Random(button.name.hashCode()).nextInt(20)}", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
                     }
                 }
-            }
-            if (isLoading) {
-                Loading(
-                    modifier = Modifier
-                        .padding(1.pad)
-                )
-            } else if (isEmpty) {
-                EmptyText(stringResource(R.string.no_stories_to_read))
             }
         }
     }

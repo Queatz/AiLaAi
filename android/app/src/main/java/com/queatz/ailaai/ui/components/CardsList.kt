@@ -50,71 +50,76 @@ fun CardList(
         contentAlignment = Alignment.TopCenter,
         modifier = modifier.fillMaxSize()
     ) {
-        if (isLoading) {
-            Loading()
-        } else if (isError || cards.isEmpty()) {
-            Text(
-                stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(2.pad)
+        val autoplayIndex by state.rememberAutoplayIndex()
+        LaunchedEffect(autoplayIndex) {
+            playingVideo = cards.getOrNull(autoplayIndex)
+        }
+
+        @Composable
+        fun basicCard(it: Card) {
+            CardLayout(
+                card = it,
+                showTitle = true,
+                showDistance = geo,
+                onClick = {
+                    nav.appNavigate(AppNav.Page(it.id!!))
+                },
+                scope = scope,
+                playVideo = playingVideo == it,
             )
-        } else {
-            val autoplayIndex by state.rememberAutoplayIndex()
-            LaunchedEffect(autoplayIndex) {
-                playingVideo = cards.getOrNull(autoplayIndex)
-            }
-            LazyVerticalGrid(
-                state = state,
-                contentPadding = PaddingValues(
-                    start = 1.pad,
-                    top = 0.pad,
-                    end = 1.pad,
-                    bottom = 3.5f.pad + viewport.height.inDp()
-                ),
-                horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
-                verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
-                modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(240.dp)
-            ) {
-                @Composable
-                fun basicCard(it: Card) {
-                    CardLayout(
-                        card = it,
-                        showTitle = true,
-                        showDistance = geo,
-                        onClick = {
-                            nav.appNavigate(AppNav.Page(it.id!!))
-                        },
-                        scope = scope,
-                        playVideo = playingVideo == it,
+        }
+
+        val nearbyCards = if (geo != null) cards.takeWhile {
+            it.geo != null
+        } else emptyList()
+
+        val remainingCards = cards.drop(nearbyCards.size)
+
+        LazyVerticalGrid(
+            state = state,
+            contentPadding = PaddingValues(
+                start = 1.pad,
+                top = 0.pad,
+                end = 1.pad,
+                bottom = 3.5f.pad + viewport.height.inDp()
+            ),
+            horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
+            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
+            modifier = Modifier.fillMaxSize(),
+            columns = GridCells.Adaptive(240.dp)
+        ) {
+            header()
+
+            if (isLoading) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Loading()
+                }
+            } else if (isError || cards.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .padding(2.pad)
                     )
                 }
+            }
 
-                val nearbyCards = if (geo != null) cards.takeWhile {
-                    it.geo != null
-                } else emptyList()
-
-                val remainingCards = cards.drop(nearbyCards.size)
-
-                header()
-
-                items(items = nearbyCards, key = { it.id!! }) {
+            items(items = nearbyCards, key = { it.id!! }) {
+                basicCard(it)
+            }
+            if (remainingCards.isNotEmpty()) {
+                items(items = remainingCards, key = { it.id!! }) {
                     basicCard(it)
                 }
-                if (remainingCards.isNotEmpty()) {
-                    items(items = remainingCards, key = { it.id!! }) {
-                        basicCard(it)
-                    }
-                }
-                if (onLoadMore != null && cards.isNotEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        LoadMore(
-                            hasMore && cards.isNotEmpty()
-                        ) {
-                            scope.launch {
-                                onLoadMore()
-                            }
+            }
+            if (onLoadMore != null && cards.isNotEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    LoadMore(
+                        hasMore && cards.isNotEmpty()
+                    ) {
+                        scope.launch {
+                            onLoadMore()
                         }
                     }
                 }
@@ -126,7 +131,8 @@ fun CardList(
                 .onPlaced { viewport = it.boundsInParent().size }
         ) {
             aboveSearchFieldContent()
-            SearchFieldAndAction(value,
+            SearchFieldAndAction(
+                value = value,
                 valueChange = valueChange,
                 placeholder = placeholder,
                 showClear = true,

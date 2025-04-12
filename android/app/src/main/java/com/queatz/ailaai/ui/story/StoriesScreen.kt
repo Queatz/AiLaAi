@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -45,6 +46,8 @@ import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
 import com.queatz.ailaai.ui.components.CardList
+import com.queatz.ailaai.ui.components.EmptyText
+import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchFilter
@@ -189,10 +192,23 @@ fun StoriesScreen(
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
-                                    onExpandRequest = onExpandRequest,
-                                    isLoading = isLoading,
-                                    isEmpty = storyContents.isEmpty()
+                                    onExpandRequest = onExpandRequest
                                 )
+                            }
+
+                            if (isLoading) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    Loading(
+                                        modifier = Modifier
+                                            .padding(1.pad)
+                                    )
+                                }
+                            } else if (storyContents.isEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    EmptyText(
+                                        stringResource(R.string.no_stories_to_read)
+                                    )
+                                }
                             }
                         }
                     ) { storyId ->
@@ -235,9 +251,7 @@ fun StoriesScreen(
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
-                                    onExpandRequest = onExpandRequest,
-                                    isLoading = isLoading,
-                                    isEmpty = storyContents.isEmpty()
+                                    onExpandRequest = onExpandRequest
                                 )
                             }
                         },
@@ -269,9 +283,7 @@ fun StoriesScreen(
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
-                                    onExpandRequest = onExpandRequest,
-                                    isLoading = isLoading,
-                                    isEmpty = storyContents.isEmpty()
+                                    onExpandRequest = onExpandRequest
                                 )
                             }
                         }
