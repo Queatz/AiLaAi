@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Edit
@@ -68,9 +70,13 @@ private var cache = emptyList<Story>()
 class StoriesScreenState() {
 
     internal var state: LazyGridState? = null
+    internal var cardsState: LazyGridState? = null
+    internal var groupsState: LazyListState? = null
 
     suspend fun scrollToTop() {
         state?.scrollToTop()
+        cardsState?.scrollToTop()
+        groupsState?.scrollToTop()
     }
 }
 
@@ -100,6 +106,8 @@ fun StoriesScreen(
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
+    val cardsState = rememberLazyGridState()
+    val groupsState = rememberLazyListState()
     val context = LocalContext.current
     var stories by remember { mutableStateOf(cache) }
     val storyContents = remember(stories) {
@@ -119,6 +127,14 @@ fun StoriesScreen(
 
     LaunchedEffect(state) {
         storiesState.state = state
+    }
+
+    LaunchedEffect(cardsState) {
+        storiesState.cardsState = cardsState
+    }
+
+    LaunchedEffect(groupsState) {
+        storiesState.groupsState = groupsState
     }
 
     LaunchedEffect(stories) {
@@ -224,7 +240,7 @@ fun StoriesScreen(
 
                 SheetContent.Pages -> {
                     CardList(
-                        state = state,
+                        state = cardsState,
                         cards = mapCardsControl.mapCategoriesControl.cardsOfCategory,
                         geo = myGeo,
                         isLoading = isLoading,
@@ -273,6 +289,7 @@ fun StoriesScreen(
                 SheetContent.Groups -> {
                     GroupsScreen(
                         geo = geo?.toGeo(),
+                        state = groupsState,
                         locationSelector = locationSelector,
                         header = {
                             item {
