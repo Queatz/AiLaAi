@@ -1,6 +1,7 @@
 package com.queatz.ailaai.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
@@ -8,6 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,19 +21,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.exploreGroups
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.sortedDistinct
+import com.queatz.ailaai.helpers.LocationSelector
+import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.PageInput
+import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Geo
@@ -42,6 +53,7 @@ private var groupsCache = emptyList<GroupExtended>()
 @Composable
 fun GroupsScreen(
     geo: Geo?,
+    locationSelector: LocationSelector,
     header: LazyListScope.() -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -49,6 +61,11 @@ fun GroupsScreen(
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by remember {
         mutableStateOf(groupsCache)
+    }
+    val categories = remember(allGroups) {
+        allGroups
+            .flatMap { it.group?.categories ?: emptyList() }
+            .sortedDistinct()
     }
     var isLoading by rememberStateOf(allGroups.isEmpty())
     val me = me
@@ -110,6 +127,11 @@ fun GroupsScreen(
             }
     }
 
+    Box(
+        contentAlignment = Alignment.TopCenter,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
     LazyColumn(
         state = state,
         contentPadding = PaddingValues(
@@ -154,6 +176,30 @@ fun GroupsScreen(
                     )
                 }
             }
+        }
+    }
+        var h by rememberStateOf(80.dp.px)
+
+        PageInput(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .onPlaced {
+                    h = it.size.height
+                }
+        ) {
+            SearchContent(
+                locationSelector = locationSelector,
+                isLoading = isLoading,
+                categories = categories,
+                category = selectedCategory
+            ) {
+                selectedCategory = it
+            }
+            SearchFieldAndAction(
+                value = searchText,
+                valueChange = { searchText = it },
+                placeholder = stringResource(R.string.search),
+            )
         }
     }
 }

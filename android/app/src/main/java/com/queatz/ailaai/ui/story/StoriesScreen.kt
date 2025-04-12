@@ -252,6 +252,7 @@ fun StoriesScreen(
                 SheetContent.Groups -> {
                     GroupsScreen(
                         geo = geo?.toGeo(),
+                        locationSelector = locationSelector,
                         header = {
                             item {
                                 SheetHeader(

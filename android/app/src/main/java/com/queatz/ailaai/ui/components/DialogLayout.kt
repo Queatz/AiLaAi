@@ -1,12 +1,18 @@
 package com.queatz.ailaai.ui.components
 
+import android.R.attr.minHeight
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.unit.Dp
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.theme.pad
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -25,10 +31,9 @@ fun DialogLayout(
             .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
     ) {
         content()
-        FlowRow(
+        Row(
             horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
-            verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.CenterVertically),
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+            modifier = Modifier.fillMaxWidth()
         ) {
             actions()
         }
