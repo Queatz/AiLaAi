@@ -256,21 +256,10 @@ fun ScheduleScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .swipeMainTabs {
-                when (emptyList<Unit>().swipe(Unit, it)) {
-                    is SwipeResult.Previous -> {
-                        nav.appNavigate(AppNav.Explore)
-                    }
-                    is SwipeResult.Next -> {
-                        nav.appNavigate(AppNav.Messages)
-                    }
-                    is SwipeResult.Select<*> -> Unit
-                }
-            }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader(
-                title = stringResource(R.string.reminders),
+                title = stringResource(R.string.schedule),
                 onTitleClick = {
                     scrollToTop()
                 },

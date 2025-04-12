@@ -60,7 +60,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.cache.CacheKey
 import com.queatz.ailaai.cache.cache
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.notEmpty
@@ -69,7 +68,6 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.sortedDistinct
-import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.ResumeEffect
@@ -85,13 +83,11 @@ import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.GroupInfo
 import com.queatz.ailaai.ui.components.Loading
-import com.queatz.ailaai.ui.components.MainTab
 import com.queatz.ailaai.ui.components.NotificationsDisabledBanner
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchResult
-import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.EditStatusDialog
@@ -441,19 +437,6 @@ fun FriendsScreen() {
             contentAlignment = Alignment.TopCenter,
             modifier = Modifier
                 .fillMaxSize()
-                .swipeMainTabs {
-                    when (emptyList<Unit>().swipe(Unit, it)) {
-                        is SwipeResult.Previous -> {
-                            nav.appNavigate(AppNav.Schedule)
-                        }
-
-                        is SwipeResult.Next -> {
-                            nav.appNavigate(AppNav.Explore)
-                        }
-
-                        is SwipeResult.Select<*> -> Unit
-                    }
-                }
         ) {
             LazyColumn(
                 state = state,

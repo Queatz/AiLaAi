@@ -35,13 +35,11 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
-import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
@@ -50,7 +48,6 @@ import com.queatz.ailaai.ui.components.CardList
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchFilter
-import com.queatz.ailaai.ui.components.swipeMainTabs
 import com.queatz.ailaai.ui.control.MapCardsControl
 import com.queatz.ailaai.ui.screens.GroupsScreen
 import com.queatz.ailaai.ui.screens.SearchContent
@@ -154,19 +151,6 @@ fun StoriesScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .swipeMainTabs {
-                when (emptyList<Unit>().swipe(Unit, it)) {
-                    is SwipeResult.Previous -> {
-                        nav.appNavigate(AppNav.Messages)
-                    }
-
-                    is SwipeResult.Next -> {
-                        nav.appNavigate(AppNav.Schedule)
-                    }
-
-                    is SwipeResult.Select<*> -> Unit
-                }
-            }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
