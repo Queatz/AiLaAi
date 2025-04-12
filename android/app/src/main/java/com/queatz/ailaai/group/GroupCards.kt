@@ -36,6 +36,7 @@ fun GroupCards(group: GroupExtended) {
     val isAtTop by state.isAtTop()
     var playingVideo by remember { mutableStateOf<Card?>(null) }
     val autoplayIndex by state.rememberAutoplayIndex()
+
     LaunchedEffect(autoplayIndex) {
         playingVideo = cards.getOrNull(
             (autoplayIndex - 1).coerceAtLeast(0)

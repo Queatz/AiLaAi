@@ -45,11 +45,14 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatDistance
 import com.queatz.ailaai.extensions.hint
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.toGeo
+import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
@@ -207,8 +210,14 @@ fun ExploreScreen() {
             StoriesScreen(
                 mapCardsControl = mapCardsControl,
                 geo = mapGeo ?: geo,
+                myGeo = geo,
                 title = mapCardsControl.areaCard?.name,
                 hint = mapCardsControl.areaCard?.hint,
+                distance = geo?.let { myGeo ->
+                    mapCardsControl.areaCard?.geo?.toLatLng()?.let {
+                        myGeo.distance(it).formatDistance()
+                    }
+                },
                 onTitleClick = {
                     mapCardsControl.areaCard?.takeIf { !it.name.isNullOrBlank() }?.let { card ->
                         nav.appNavigate(AppNav.Page(card.id!!))

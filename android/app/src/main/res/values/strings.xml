@@ -948,4 +948,7 @@
     <plurals name="x_km">
         <item quantity="other">%1$s km</item>
     </plurals>
+    <plurals name="x_m">
+        <item quantity="other">%1$s m</item>
+    </plurals>
 </resources>

@@ -20,7 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.SheetContent
@@ -30,6 +32,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun SheetHeader(
     title: String?,
+    distance: String?,
     hint: String?,
     selected: SheetContent,
     onSelected: (SheetContent) -> Unit,
@@ -43,20 +46,28 @@ fun SheetHeader(
             Text(
                 text = buildAnnotatedString {
                     append(title ?: stringResource(R.string.earth))
-                    if (!hint.isNullOrBlank()) {
+                    if (!hint.isNullOrBlank() || !distance.isNullOrBlank()) {
                         withStyle(
-                            MaterialTheme.typography.headlineSmall
+                            MaterialTheme.typography.bodyLarge
                                 .copy(
                                     fontWeight = FontWeight.Normal,
                                     color = MaterialTheme.colorScheme.secondary
                                 ).toSpanStyle()
                         ) {
-                            append(" ")
-                            append(hint)
+                            appendLine()
+                            append(
+                                bulletedString(
+                                    distance,
+                                    hint
+                                )
+                            )
                         }
                     }
                 },
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = MaterialTheme.typography.headlineMedium.fontSize
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 1.pad)

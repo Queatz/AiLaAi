@@ -74,8 +74,8 @@ class StoriesScreenState() {
 enum class SheetContent {
     Posts,
     Groups,
-    Events,
-    Pages
+    Pages,
+    Events
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -83,8 +83,10 @@ enum class SheetContent {
 fun StoriesScreen(
     mapCardsControl: MapCardsControl,
     geo: LatLng?,
+    myGeo: LatLng?,
     title: String? = null,
     hint: String? = null,
+    distance: String? = null,
     onTitleClick: (() -> Unit)? = null,
     onExpandRequest: () -> Unit = {},
     storiesState: StoriesScreenState = remember { StoriesScreenState() },
@@ -182,6 +184,7 @@ fun StoriesScreen(
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
                                     title = title,
+                                    distance = distance,
                                     hint = hint,
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
@@ -207,7 +210,7 @@ fun StoriesScreen(
                     CardList(
                         state = state,
                         cards = mapCardsControl.mapCategoriesControl.cardsOfCategory,
-                        geo = geo,
+                        geo = myGeo,
                         isLoading = isLoading,
                         isError = mapCardsControl.isError,
                         value = value,
@@ -227,6 +230,7 @@ fun StoriesScreen(
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
                                     title = title,
+                                    distance = distance,
                                     hint = hint,
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
@@ -260,6 +264,7 @@ fun StoriesScreen(
                             item {
                                 SheetHeader(
                                     title = title,
+                                    distance = distance,
                                     hint = hint,
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
