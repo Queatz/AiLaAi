@@ -28,6 +28,7 @@ fun SetLocationDialog(
     initialZoom: Float = 5f,
     title: String? = null,
     actions: @Composable () -> Unit = {},
+    onRemoveLocation: (() -> Unit)? = null,
     onLocation: (LatLng) -> Unit,
 ) {
     var position by remember { mutableStateOf(initialLocation) }
@@ -75,6 +76,19 @@ fun SetLocationDialog(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                onRemoveLocation?.let { onRemoveLocation ->
+                    TextButton(
+                        onClick = {
+                            onDismissRequest()
+                        }
+                    ) {
+                        Text(
+                            stringResource(R.string.remove),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                }
                 TextButton(
                     onClick = {
                         onDismissRequest()

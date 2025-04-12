@@ -109,6 +109,10 @@ fun Route.reminderRoutes() {
                         reminder.open = update.open
                     }
 
+                    if (update.geo != null) {
+                        reminder.geo = update.geo?.takeIf { it.size == 2 }
+                    }
+
                     if (update.groups != null) {
                         reminder.groups = update.groups
                     }

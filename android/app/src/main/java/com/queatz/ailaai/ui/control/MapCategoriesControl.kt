@@ -4,12 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.sortedDistinct
 import com.queatz.db.Card
+import kotlinx.coroutines.launch
 
 data class MapCategoriesControl(
     val updateCategories: () -> Unit,
@@ -25,15 +27,18 @@ var exploreInitialCategory: String? = null
 fun mapCategoriesControl(
     cards: List<Card>
 ): MapCategoriesControl {
+    val scope = rememberCoroutineScope()
     var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     fun updateCategories() {
-        selectedCategory = (selectedCategory ?: exploreInitialCategory)?.notBlank
-        categories = ((exploreInitialCategory.inList() + cards
-            .flatMap { it.categories ?: emptyList() }) + selectedCategory.inList())
-            .sortedDistinct()
-        exploreInitialCategory = null
+        scope.launch {
+            selectedCategory = (selectedCategory ?: exploreInitialCategory)?.notBlank
+            categories = ((exploreInitialCategory.inList() + cards
+                .flatMap { it.categories ?: emptyList() }) + selectedCategory.inList())
+                .sortedDistinct()
+            exploreInitialCategory = null
+        }
     }
 
     val cardsOfCategory = remember(cards, selectedCategory) {

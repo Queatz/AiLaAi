@@ -96,11 +96,8 @@ fun CardList(
                 }
             } else if (isError || cards.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(
-                        stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .padding(2.pad)
+                    EmptyText(
+                        text = stringResource(if (isError) R.string.didnt_work else R.string.no_cards_to_show),
                     )
                 }
             }

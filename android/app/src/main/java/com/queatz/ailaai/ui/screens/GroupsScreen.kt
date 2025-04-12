@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import app.ailaai.api.exploreGroups
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
@@ -73,6 +74,7 @@ fun GroupsScreen(
         mutableStateOf(nextInt())
     }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
+    var h by rememberStateOf(80.dp.px)
 
     LaunchedEffect(reloadKey) {
         if (geo != null) {
@@ -135,10 +137,10 @@ fun GroupsScreen(
     LazyColumn(
         state = state,
         contentPadding = PaddingValues(
-            top = 0.dp,
-            bottom = 1.pad,
             start = 1.pad,
-            end = 1.pad
+            top = 0.dp,
+            end = 1.pad,
+            bottom = 3.5f.pad + h.inDp()
         ),
         verticalArrangement = Arrangement.spacedBy(1.pad),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -178,8 +180,6 @@ fun GroupsScreen(
             }
         }
     }
-        var h by rememberStateOf(80.dp.px)
-
         PageInput(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

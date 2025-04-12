@@ -426,6 +426,9 @@ fun Route.cardRoutes() {
 
                     check(Card::active)
                     check(Card::geo) {
+                        if (card.geo?.size != 2) {
+                            card.geo = null
+                        }
                         card.parent = update.parent
                         card.offline = update.offline
                     }

@@ -1,7 +1,10 @@
 1.0.3
 ======
 
+ - Redesigned map tab
  - Create reminder from messages
+ - Make reminder open
+ - Set reminder location
  - Set page size (km)
 
 1.0.2

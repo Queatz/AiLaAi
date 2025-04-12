@@ -1,7 +1,6 @@
 package com.queatz.ailaai.schedule
 
 import ReminderEvent
-import android.R.id.toggle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,8 +16,11 @@ import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.EditLocation
+import androidx.compose.material.icons.outlined.EditLocationAlt
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material.icons.outlined.Update
@@ -38,27 +40,30 @@ import app.ailaai.api.deleteReminder
 import app.ailaai.api.reminder
 import app.ailaai.api.reminderOccurrences
 import app.ailaai.api.updateReminder
+import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
-import com.queatz.ailaai.extensions.ifNotEmpty
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
-import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.toLatLng
+import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
-import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
+import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
@@ -75,6 +80,7 @@ fun ReminderScreen(reminderId: String) {
     var isLoading by rememberStateOf(false)
     var showEditNote by rememberStateOf(false)
     var showAddPerson by rememberStateOf(false)
+    var showLocationDialog by rememberStateOf(false)
     var showReschedule by rememberStateOf(false)
     var showEditTitle by rememberStateOf(false)
     var showCategory by rememberStateOf(false)
@@ -157,6 +163,30 @@ fun ReminderScreen(reminderId: String) {
                     }
                 }
             }
+        }
+    }
+
+    if (showLocationDialog) {
+        SetLocationDialog(
+            initialLocation = reminder?.geo?.toLatLng() ?: LatLng(0.0, 0.0),
+            onDismissRequest = {
+                showLocationDialog = false
+            },
+            onRemoveLocation = {
+                scope.launch {
+                    api.updateReminder(reminderId, Reminder(geo = emptyList())) {
+                        reload()
+                    }
+                }
+                showLocationDialog = false
+            }
+        ) { geo ->
+            scope.launch {
+                api.updateReminder(reminderId, Reminder(geo = geo.toList())) {
+                    reload()
+                }
+            }
+            showLocationDialog = false
         }
     }
 
@@ -341,6 +371,12 @@ fun ReminderScreen(reminderId: String) {
                             stringResource(R.string.rename)
                         ) {
                             showEditTitle = true
+                        }
+                        item(
+                            Icons.Outlined.Place,
+                            stringResource(R.string.choose_location)
+                        ) {
+                            showLocationDialog = true
                         }
                         item(
                             icon = if (reminder?.alarm == true) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
