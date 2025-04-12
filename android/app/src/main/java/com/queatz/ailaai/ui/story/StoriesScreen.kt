@@ -84,6 +84,7 @@ fun StoriesScreen(
     mapCardsControl: MapCardsControl,
     geo: LatLng?,
     title: String? = null,
+    hint: String? = null,
     onTitleClick: (() -> Unit)? = null,
     onExpandRequest: () -> Unit = {},
     storiesState: StoriesScreenState = remember { StoriesScreenState() },
@@ -181,6 +182,7 @@ fun StoriesScreen(
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
                                     title = title,
+                                    hint = hint,
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
@@ -225,6 +227,7 @@ fun StoriesScreen(
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 SheetHeader(
                                     title = title,
+                                    hint = hint,
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },
@@ -257,6 +260,7 @@ fun StoriesScreen(
                             item {
                                 SheetHeader(
                                     title = title,
+                                    hint = hint,
                                     onTitleClick = onTitleClick,
                                     selected = sheetContent,
                                     onSelected = { sheetContent = it },

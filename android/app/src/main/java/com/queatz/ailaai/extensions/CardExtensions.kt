@@ -29,6 +29,7 @@ val Card.hint @Composable get() = bulletedString(
             "$it/${frequency.appStringShort}"
         } ?: it
     },
+    categories?.firstOrNull(),
     location?.notBlank
 )
 

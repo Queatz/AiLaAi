@@ -17,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
@@ -28,6 +30,7 @@ import com.queatz.ailaai.ui.theme.pad
 @Composable
 fun SheetHeader(
     title: String?,
+    hint: String?,
     selected: SheetContent,
     onSelected: (SheetContent) -> Unit,
     onTitleClick: (() -> Unit)? = null,
@@ -38,7 +41,21 @@ fun SheetHeader(
     DisableSelection {
         Column {
             Text(
-                text = title ?: stringResource(R.string.earth),
+                text = buildAnnotatedString {
+                    append(title ?: stringResource(R.string.earth))
+                    if (!hint.isNullOrBlank()) {
+                        withStyle(
+                            MaterialTheme.typography.headlineSmall
+                                .copy(
+                                    fontWeight = FontWeight.Normal,
+                                    color = MaterialTheme.colorScheme.secondary
+                                ).toSpanStyle()
+                        ) {
+                            append(" ")
+                            append(hint)
+                        }
+                    }
+                },
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .fillMaxWidth()

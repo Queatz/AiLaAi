@@ -55,10 +55,10 @@ fun mapCardsControl(
         // todo: translate
         mapCategoriesControl.cardsOfCategory
             .filter { page ->
-                page.geo?.toLatLng()?.let { geo ->
-                    geo.distance(geo) < (page.size ?: 0.0) * 1000
-                } == true && !page.name.isNullOrBlank()
-            }.maxByOrNull { it.size ?: 0.0 }
+                !page.name.isNullOrBlank()
+            }.minByOrNull {
+                (it.geo?.toLatLng()?.distance(geo)?.toDouble() ?: 0.0) - (it.size ?: 0.0) * 1000.0
+            }
     }
 
     fun onNewPage(page: List<Card>, clear: Boolean) {

@@ -48,13 +48,11 @@ fun ColumnScope.NotificationsDisabledBanner(modifier: Modifier = Modifier, show:
     }
 
     fun requestNotifications() {
-        if (!notificationManager.areNotificationsEnabled()) {
-            if (!notificationPermissionState.status.isGranted) {
-                if (notificationPermissionState.status.shouldShowRationale) {
-                    notificationPermissionState.launchPermissionRequest()
-                } else {
-                    showPushPermissionDialog = true
-                }
+        if (!notificationManager.areNotificationsEnabled() && !notificationPermissionState.status.isGranted) {
+            if (!notificationPermissionState.status.shouldShowRationale) {
+                notificationPermissionState.launchPermissionRequest()
+            } else {
+                showPushPermissionDialog = true
             }
         }
     }

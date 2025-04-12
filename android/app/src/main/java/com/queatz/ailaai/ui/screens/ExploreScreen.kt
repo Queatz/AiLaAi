@@ -45,6 +45,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.distance
+import com.queatz.ailaai.extensions.hint
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.scrollToTop
@@ -207,6 +208,7 @@ fun ExploreScreen() {
                 mapCardsControl = mapCardsControl,
                 geo = mapGeo ?: geo,
                 title = mapCardsControl.areaCard?.name,
+                hint = mapCardsControl.areaCard?.hint,
                 onTitleClick = {
                     mapCardsControl.areaCard?.takeIf { !it.name.isNullOrBlank() }?.let { card ->
                         nav.appNavigate(AppNav.Page(card.id!!))

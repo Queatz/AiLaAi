@@ -2,7 +2,6 @@ package com.queatz.ailaai.ui.screens
 
 import android.Manifest
 import android.graphics.Point
-import android.view.View
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -31,7 +30,6 @@ import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -108,14 +106,11 @@ import com.queatz.db.Card
 import com.queatz.db.Inventory
 import com.queatz.db.Story
 import com.queatz.db.formatPay
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.random.Random
