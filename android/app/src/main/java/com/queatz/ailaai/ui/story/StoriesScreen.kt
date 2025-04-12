@@ -5,11 +5,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.ailaai.api.myGeo
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -37,19 +37,24 @@ import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.SwipeResult
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.toGeo
+import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
-import com.queatz.ailaai.ui.components.AppHeader
-import com.queatz.ailaai.ui.components.EmptyText
-import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.components.CardList
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.components.swipeMainTabs
+import com.queatz.ailaai.ui.control.MapCardsControl
+import com.queatz.ailaai.ui.screens.GroupsScreen
+import com.queatz.ailaai.ui.screens.SearchContent
+import com.queatz.ailaai.ui.sheet.SheetHeader
 import com.queatz.ailaai.ui.story.editor.StoryActions
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Story
@@ -69,10 +74,26 @@ class StoriesScreenState() {
     }
 }
 
+enum class SheetContent {
+    Posts,
+    Groups,
+    Events,
+    Pages
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StoriesScreen(
+    mapCardsControl: MapCardsControl,
     geo: LatLng?,
-    storiesState: StoriesScreenState = remember { StoriesScreenState() }
+    title: String? = null,
+    onTitleClick: (() -> Unit)? = null,
+    onExpandRequest: () -> Unit = {},
+    storiesState: StoriesScreenState = remember { StoriesScreenState() },
+    value: String,
+    locationSelector: LocationSelector,
+    filters: List<SearchFilter>,
+    valueChange: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyGridState()
@@ -91,6 +112,7 @@ fun StoriesScreen(
     var isLoading by rememberStateOf(stories.isEmpty())
     val nav = nav
     var showShareAThought by rememberStateOf(true)
+    var sheetContent by rememberSavableStateOf(SheetContent.Posts)
 
     LaunchedEffect(state) {
         storiesState.state = state
@@ -151,47 +173,124 @@ fun StoriesScreen(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if (isLoading) {
-                Loading(
-                    modifier = Modifier
-                        .padding(1.pad)
-                )
-            } else if (storyContents.isEmpty()) {
-                EmptyText(stringResource(R.string.no_stories_to_read))
-            } else {
-                StoryContents(
-                    source = null,
-                    content = storyContents,
-                    state = state,
-                    onReloadRequest = {
-                        scope.launch {
-                            reload()
+            when (sheetContent) {
+                SheetContent.Posts -> {
+                    StoryContents(
+                        source = null,
+                        content = storyContents,
+                        horizontalPadding = 1.pad,
+                        state = state,
+                        onReloadRequest = {
+                            scope.launch {
+                                reload()
+                            }
+                        },
+                        onCommentFocused = {
+                            showShareAThought = !it
+                        },
+                        modifier = Modifier
+                            .widthIn(max = 640.dp)
+                            .fillMaxWidth()
+                            .weight(1f),
+                        bottomContentPadding = 80.dp,
+                        header = {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                SheetHeader(
+                                    title = title,
+                                    onTitleClick = onTitleClick,
+                                    selected = sheetContent,
+                                    onSelected = { sheetContent = it },
+                                    onExpandRequest = onExpandRequest,
+                                    isLoading = isLoading,
+                                    isEmpty = storyContents.isEmpty()
+                                )
+                            }
                         }
-                    },
-                    onCommentFocused = {
-                        showShareAThought = !it
-                    },
-                    modifier = Modifier
-                        .widthIn(max = 640.dp)
-                        .fillMaxWidth()
-                        .weight(1f),
-                    bottomContentPadding = 80.dp
-                ) { storyId ->
-                    Row {
-                        StoryActions(
-                            storyId,
-                            stories.find { it.id == storyId },
-                            showOpen = true
-                        )
+                    ) { storyId ->
+                        Row {
+                            StoryActions(
+                                storyId,
+                                stories.find { it.id == storyId },
+                                showOpen = true
+                            )
+                        }
                     }
                 }
+
+                SheetContent.Pages -> {
+                    CardList(
+                        state = state,
+                        cards = mapCardsControl.mapCategoriesControl.cardsOfCategory,
+                        geo = geo,
+                        isLoading = isLoading,
+                        isError = mapCardsControl.isError,
+                        value = value,
+                        valueChange = valueChange,
+                        placeholder = stringResource(R.string.search),
+                        hasMore = mapCardsControl.hasMore,
+                        onLoadMore = {
+                            mapCardsControl.loadMore(false)
+                        },
+                        action = {
+                            Icon(Icons.Outlined.Edit, stringResource(R.string.your_cards))
+                        },
+                        onAction = {
+                            nav.appNavigate(AppNav.Me)
+                        },
+                        header = {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                SheetHeader(
+                                    title = title,
+                                    onTitleClick = onTitleClick,
+                                    selected = sheetContent,
+                                    onSelected = { sheetContent = it },
+                                    onExpandRequest = onExpandRequest,
+                                    isLoading = isLoading,
+                                    isEmpty = storyContents.isEmpty()
+                                )
+                            }
+                        },
+                        aboveSearchFieldContent = {
+                            SearchContent(
+                                locationSelector = locationSelector,
+                                isLoading = isLoading,
+                                filters = filters,
+                                categories = mapCardsControl.mapCategoriesControl.categories,
+                                category = mapCardsControl.mapCategoriesControl.selectedCategory,
+                                onCategory = {
+                                    mapCardsControl.mapCategoriesControl.selectCategory(it)
+                                }
+                            )
+                        }
+                    )
+                }
+
+                SheetContent.Groups -> {
+                    GroupsScreen(
+                        geo = geo?.toGeo(),
+                        header = {
+                            item {
+                                SheetHeader(
+                                    title = title,
+                                    onTitleClick = onTitleClick,
+                                    selected = sheetContent,
+                                    onSelected = { sheetContent = it },
+                                    onExpandRequest = onExpandRequest,
+                                    isLoading = isLoading,
+                                    isEmpty = storyContents.isEmpty()
+                                )
+                            }
+                        }
+                    )
+                }
+                else -> Unit
             }
         }
 
         var thought by rememberStateOf("")
 
         AnimatedVisibility(
-            visible = showShareAThought,
+            visible = showShareAThought && sheetContent == SheetContent.Posts,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier

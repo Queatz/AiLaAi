@@ -38,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.outlined.Add
@@ -290,6 +291,7 @@ fun GroupScreen(groupId: String) {
     var showRemoveGroupMembers by rememberStateOf(false)
     var showPromoteGroupMembers by rememberStateOf(false)
     var showInviteMembers by rememberStateOf(false)
+    var showCreateInviteDialog by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
     var isGeneratingGroupBackground by rememberStateOf(false)
@@ -1977,14 +1979,19 @@ fun GroupScreen(groupId: String) {
                 }
             }
 
+            if (showCreateInviteDialog) {
+                // todo
+            }
+
             if (showInviteMembers) {
                 val someone = stringResource(R.string.someone)
                 val omit = groupExtended!!.members!!.mapNotNull { it.person?.id }
                 ChoosePeopleDialog(
-                    {
+                    onDismissRequest = {
                         showInviteMembers = false
                     },
                     title = stringResource(R.string.invite_someone),
+                    omit = { it.id!! in omit },
                     confirmFormatter = defaultConfirmFormatter(
                         R.string.invite_someone,
                         R.string.invite_person,
@@ -2015,7 +2022,18 @@ fun GroupScreen(groupId: String) {
                             context.showDidntWork()
                         }
                     },
-                    omit = { it.id!! in omit }
+                    actions = {
+                        if (myMember?.member?.host == true) {
+                            IconButton(
+                                onClick = {
+                                    showInviteMembers = false
+                                    showCreateInviteDialog = true
+                                }
+                            ) {
+                                Icon(Icons.Default.AddLink, stringResource(R.string.create_invite))
+                            }
+                        }
+                    }
                 )
             }
 

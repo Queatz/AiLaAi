@@ -26,13 +26,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun CardList(
     cards: List<Card>,
-    isMine: (Card) -> Boolean,
     geo: LatLng?,
     isLoading: Boolean,
     isError: Boolean,
     value: String,
     valueChange: (String) -> Unit,
-    onChanged: () -> Unit = {},
     state: LazyGridState = rememberLazyGridState(),
     placeholder: String = stringResource(R.string.search),
     modifier: Modifier = Modifier,
@@ -40,7 +38,8 @@ fun CardList(
     onLoadMore: (suspend () -> Unit)? = null,
     action: (@Composable () -> Unit)? = null,
     onAction: (() -> Unit)? = null,
-    aboveSearchFieldContent: @Composable () -> Unit = {}
+    header: LazyGridScope.() -> Unit = {},
+    aboveSearchFieldContent: @Composable () -> Unit = {},
 ) {
     var viewport by remember { mutableStateOf(Size(0f, 0f)) }
     var playingVideo by remember { mutableStateOf<Card?>(null) }
@@ -68,10 +67,10 @@ fun CardList(
             LazyVerticalGrid(
                 state = state,
                 contentPadding = PaddingValues(
-                    1.pad,
-                    1.pad,
-                    1.pad,
-                    3.5f.pad + viewport.height.inDp()
+                    start = 1.pad,
+                    top = 0.pad,
+                    end = 1.pad,
+                    bottom = 3.5f.pad + viewport.height.inDp()
                 ),
                 horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
                 verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),
@@ -97,6 +96,8 @@ fun CardList(
                 } else emptyList()
 
                 val remainingCards = cards.drop(nearbyCards.size)
+
+                header()
 
                 items(items = nearbyCards, key = { it.id!! }) {
                     basicCard(it)

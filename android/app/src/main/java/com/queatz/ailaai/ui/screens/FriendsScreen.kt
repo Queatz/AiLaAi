@@ -406,7 +406,7 @@ fun FriendsScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppHeader(
-            title = stringResource(R.string.groups),
+            title = stringResource(R.string.messages),
             onTitleClick = {
                 scope.launch {
                     state.scrollToTop()

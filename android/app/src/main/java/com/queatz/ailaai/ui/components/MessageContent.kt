@@ -84,6 +84,7 @@ import com.queatz.ailaai.schedule.ScheduleReminderDialog
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.trade.ActiveTradeItem
 import com.queatz.ailaai.trade.TradeDialog
+import com.queatz.ailaai.ui.control.exploreInitialCategory
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.dialogs.SelectTextDialog
@@ -91,7 +92,6 @@ import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.permission.permissionRequester
 import com.queatz.ailaai.ui.profile.ProfileCard
-import com.queatz.ailaai.ui.screens.exploreInitialCategory
 import com.queatz.ailaai.ui.stickers.StickerPhoto
 import com.queatz.ailaai.ui.story.StoryCard
 import com.queatz.ailaai.ui.theme.pad

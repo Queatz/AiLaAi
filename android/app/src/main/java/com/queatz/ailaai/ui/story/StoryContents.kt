@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -70,6 +71,7 @@ fun StoryContents(
     fade: Boolean = false,
     onReloadRequest: () -> Unit = {},
     onCommentFocused: (Boolean) -> Unit = {},
+    header: LazyGridScope.() -> Unit = {},
     onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null,
 ) {
@@ -184,6 +186,7 @@ fun StoryContents(
                     }
                 }
         ) {
+            header()
             content.forEach { content ->
                 when (content) {
                     is StoryContent.Divider -> dividerItem()

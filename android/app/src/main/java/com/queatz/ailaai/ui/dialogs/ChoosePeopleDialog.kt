@@ -27,6 +27,7 @@ fun ChoosePeopleDialog(
     initiallySelected: List<Person> = listOf(),
     onPeopleSelected: suspend (List<Person>) -> Unit,
     extraButtons: @Composable RowScope.() -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
     omit: (Person) -> Boolean = { false }
 ) {
     val scope = rememberCoroutineScope()
@@ -74,6 +75,7 @@ fun ChoosePeopleDialog(
         title = title,
         allowNone = allowNone,
         extraButtons = extraButtons,
+        actions = actions,
         photoFormatter = { listOf(ContactPhoto(it.name ?: "", it.photo, it.seen)) },
         nameFormatter = { it.name ?: stringResource(R.string.someone) },
         infoFormatter = {

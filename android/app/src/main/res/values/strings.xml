@@ -819,6 +819,8 @@
     <string name="page_size_description">Larger pages are more visible from further away, while smaller pages are more
         visible when close
     </string>
+    <string name="create_invite">Create invite</string>
+    <string name="earth">Earth</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

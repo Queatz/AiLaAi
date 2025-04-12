@@ -1,0 +1,56 @@
+package com.queatz.ailaai.ui.control
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.notBlank
+import com.queatz.ailaai.extensions.sortedDistinct
+import com.queatz.db.Card
+
+data class MapCategoriesControl(
+    val updateCategories: () -> Unit,
+    val selectedCategory: String?,
+    val categories: List<String>,
+    val selectCategory: (String?) -> Unit,
+    val cardsOfCategory: List<Card>
+)
+
+var exploreInitialCategory: String? = null
+
+@Composable
+fun mapCategoriesControl(
+    cards: List<Card>
+): MapCategoriesControl {
+    var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
+    var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
+
+    fun updateCategories() {
+        selectedCategory = (selectedCategory ?: exploreInitialCategory)?.notBlank
+        categories = ((exploreInitialCategory.inList() + cards
+            .flatMap { it.categories ?: emptyList() }) + selectedCategory.inList())
+            .sortedDistinct()
+        exploreInitialCategory = null
+    }
+
+    val cardsOfCategory = remember(cards, selectedCategory) {
+        if (selectedCategory == null) cards else cards.filter {
+            it.categories?.contains(
+                selectedCategory
+            ) == true
+        }
+    }
+
+    return MapCategoriesControl(
+        updateCategories = { updateCategories() },
+        categories = categories,
+        selectedCategory = selectedCategory,
+        selectCategory = {
+            selectedCategory = it
+        },
+        cardsOfCategory = cardsOfCategory
+    )
+}

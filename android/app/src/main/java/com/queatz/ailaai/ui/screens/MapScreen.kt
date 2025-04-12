@@ -2,6 +2,7 @@ package com.queatz.ailaai.ui.screens
 
 import android.Manifest
 import android.graphics.Point
+import android.view.View
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -108,14 +109,17 @@ import com.queatz.db.Inventory
 import com.queatz.db.Story
 import com.queatz.db.formatPay
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.random.Random
+import kotlin.random.Random.Default.nextInt
 
 class MapControl {
     internal val recenter = MutableSharedFlow<LatLng>()
@@ -145,16 +149,17 @@ fun MapScreen(
     var mapType by rememberSavableStateOf(Map.MAP_TYPE_NORMAL)
     var zoom by rememberSavableStateOf<Float?>(null)
     val scope = rememberCoroutineScope()
-    val disposable = remember { CompositeDisposable() }
     var cameraPosition by rememberStateOf<CameraPosition?>(null)
-    var composed by rememberStateOf(false)
-    var map: Map? by remember { mutableStateOf(null) }
-    var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
     val recenter = remember { MutableSharedFlow<Pair<LatLng, Float?>>() }
     var showMapClickMenu by remember { mutableStateOf<LatLng?>(null) }
     var viewport by rememberStateOf(IntSize(0, 0))
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val coarseLocationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    var mapKey by remember { mutableStateOf(0) }
+    var composed by remember { mutableStateOf(false) }
+    var map: Map? by remember { mutableStateOf(null) }
+    var mapView: LayoutMapBinding? by remember { mutableStateOf(null) }
 
     LaunchedEffect(control) {
         control.recenter.collectLatest {
@@ -170,10 +175,12 @@ fun MapScreen(
         }
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            disposable.dispose()
-        }
+    LaunchedEffect(Unit) {
+        map?.clear()
+        map = null
+        mapView = null
+        composed = false
+        mapKey = 0
     }
 
     LaunchedEffect(position) {
@@ -245,62 +252,76 @@ fun MapScreen(
             .fillMaxSize()
             .clipToBounds()
     ) {
-        AndroidViewBinding(
-            LayoutMapBinding::inflate,
-            modifier = Modifier
-                .fillMaxSize()
-                .clipToBounds()
-                .onPlaced {
-                    viewport = it.size
-                }
-        ) {
-            mapView = this
-            if (composed) return@AndroidViewBinding else composed = true
-            mapFragmentContainerView.doOnAttach { it.doOnDetach { mapFragmentContainerView.removeAllViews() } }
-
-            val mapFragment = mapFragmentContainerView.getFragment<MapFragment>()
-
-            mapFragment.getMapObservable().subscribe {
-                map = it
-                map?.apply {
-                    clear()
-
-                    getUiSettings().apply {
-                        isMapToolbarEnabled = true
-                        isCompassEnabled = true
-                        isMyLocationButtonEnabled = true
+        if (mapKey == 0) {
+            // mapKey and this LaunchedEffect deal with a map initialization issue
+            LaunchedEffect(Unit) {
+                delay(200)
+                mapKey = nextInt()
+            }
+        } else {
+            AndroidViewBinding(
+                factory = LayoutMapBinding::inflate,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clipToBounds()
+                    .onPlaced {
+                        viewport = it.size
                     }
+            ) {
+                mapView = this
+                if (composed) return@AndroidViewBinding else composed = true
 
-                    if (locationPermissionState.status == PermissionStatus.Granted || coarseLocationPermissionState.status == PermissionStatus.Granted) {
-                        runCatching {
-                            isMyLocationEnabled = true
+                val view = mapFragmentContainerView
+
+                view.doOnAttach {
+                    it.doOnDetach {
+                        view.removeAllViews()
+                    }
+                }
+
+                view.getFragment<MapFragment>().getMapAsync {
+                    map = it
+                    map?.apply {
+                        clear()
+
+                        getUiSettings().apply {
+                            isMapToolbarEnabled = true
+                            isCompassEnabled = true
+                            isMyLocationButtonEnabled = true
                         }
-                    }
 
-                    setOnMapClickListener {
-                        showMapClickMenu = it
-                    }
+                        if (locationPermissionState.status == PermissionStatus.Granted || coarseLocationPermissionState.status == PermissionStatus.Granted) {
+                            runCatching {
+                                isMyLocationEnabled = true
+                            }
+                        }
 
-                    setOnCameraMoveListener {
-                        cameraPosition = map?.cameraPosition
-                    }
+                        setOnMapClickListener {
+                            showMapClickMenu = it
+                        }
 
-                    setOnCameraIdleListener {
-                        position = map?.cameraPosition?.target
-                        zoom = map?.cameraPosition?.zoom
-                    }
+                        setOnCameraMoveListener {
+                            cameraPosition = map?.cameraPosition
+                        }
 
-                    moveCamera(
-                        CameraUpdateFactory.get().newCameraPosition(
-                            CameraPosition.Builder()
-                                .setTarget(position ?: return@apply)
-                                .setZoom(zoom ?: 14f)
-                                .build()
+                        setOnCameraIdleListener {
+                            position = map?.cameraPosition?.target
+                            zoom = map?.cameraPosition?.zoom
+                        }
+
+                        moveCamera(
+                            CameraUpdateFactory.get().newCameraPosition(
+                                CameraPosition.Builder()
+                                    .setTarget(position ?: return@apply)
+                                    .setZoom(zoom ?: 14f)
+                                    .build()
+                            )
                         )
-                    )
+                    }
                 }
-            }.let(disposable::add)
+            }
         }
+
         map?.let { map ->
             val nearDistance = 32.dp.px
             val nearDistanceMax = 128.dp.px
@@ -313,8 +334,9 @@ fun MapScreen(
             }
 
             fun tryNav(position: Point, block: () -> Unit) {
-                val nearby = cardPositions.filter { it.position != position && (it.position.near(position, nearDistance)) }
-                    .map { it.position } + position
+                val nearby =
+                    cardPositions.filter { it.position != position && (it.position.near(position, nearDistance)) }
+                        .map { it.position } + position
                 if (nearby.size == 1) {
                     block()
                 } else {
@@ -378,18 +400,42 @@ fun MapScreen(
                     val zoom = cameraPosition?.zoom ?: 0f
 
                     val nearScale = when {
-                        cardPositions.any { it.card != card && card < it.card && it.card.collides(card) && it.position.near(pos, nearDistanceMax) } -> {
+                        cardPositions.any {
+                            it.card != card && card < it.card && it.card.collides(card) && it.position.near(
+                                pos,
+                                nearDistanceMax
+                            )
+                        } -> {
                             0f
                         }
-                        cardPositions.any { it.card != card && card < it.card && it.position.near(pos, nearDistance) } -> {
+
+                        cardPositions.any {
+                            it.card != card && card < it.card && it.position.near(
+                                pos,
+                                nearDistance
+                            )
+                        } -> {
                             0f
                         }
-                        cardPositions.any { it.card != card && card <= it.card && it.position.near(pos, nearDistance / 4) } -> {
+
+                        cardPositions.any {
+                            it.card != card && card <= it.card && it.position.near(
+                                pos,
+                                nearDistance / 4
+                            )
+                        } -> {
                             .25f
                         }
-                        cardPositions.any { it.card != card && card <= it.card && it.position.near(pos, nearDistance) } -> {
+
+                        cardPositions.any {
+                            it.card != card && card <= it.card && it.position.near(
+                                pos,
+                                nearDistance
+                            )
+                        } -> {
                             .5f
                         }
+
                         else -> {
                             1f
                         }
@@ -456,7 +502,10 @@ fun MapScreen(
                                                     append(card.npc?.name.orEmpty())
                                                 }
                                                 append(" ")
-                                                withStyle(MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary).toSpanStyle()) {
+                                                withStyle(
+                                                    MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary)
+                                                        .toSpanStyle()
+                                                ) {
                                                     append(card.name.orEmpty())
                                                 }
                                             }
@@ -630,7 +679,7 @@ fun OutlinedText(
     outlineWidth: Float = 6f,
     style: TextStyle = MaterialTheme.typography.labelLarge,
     fontWeight: FontWeight = FontWeight.Normal,
-    textAlign: TextAlign = TextAlign.Start
+    textAlign: TextAlign = TextAlign.Start,
 ) {
     Box(
         modifier = modifier
@@ -661,5 +710,5 @@ fun OutlinedText(
 
 data class Pin(
     val card: Card,
-    val position: Point
+    val position: Point,
 )

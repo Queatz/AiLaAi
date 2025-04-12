@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -40,7 +41,8 @@ private var groupsCache = emptyList<GroupExtended>()
 
 @Composable
 fun GroupsScreen(
-    geo: Geo?
+    geo: Geo?,
+    header: LazyListScope.() -> Unit = {}
 ) {
     val context = LocalContext.current
     val state = rememberLazyListState()
@@ -111,7 +113,10 @@ fun GroupsScreen(
     LazyColumn(
         state = state,
         contentPadding = PaddingValues(
-            1.pad
+            top = 0.dp,
+            bottom = 1.pad,
+            start = 1.pad,
+            end = 1.pad
         ),
         verticalArrangement = Arrangement.spacedBy(1.pad),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -119,6 +124,8 @@ fun GroupsScreen(
             .widthIn(max = 640.dp)
             .fillMaxSize()
     ) {
+        header()
+
         when {
             isLoading -> {
                 item {

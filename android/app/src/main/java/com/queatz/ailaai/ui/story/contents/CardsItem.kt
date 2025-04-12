@@ -18,7 +18,7 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.CardItem
-import com.queatz.ailaai.ui.screens.exploreInitialCategory
+import com.queatz.ailaai.ui.control.exploreInitialCategory
 import com.queatz.db.Card
 import com.queatz.db.StoryContent
 

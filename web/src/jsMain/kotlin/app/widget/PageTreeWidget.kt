@@ -780,6 +780,8 @@ fun PageTreeWidget(widgetId: String) {
                     dialog(
                         // todo: json
                         title = "Export",
+                        cancelButton = null,
+                        confirmButton = application.appString { close },
                         content = {
                             Div({
                                 style {
@@ -794,7 +796,7 @@ fun PageTreeWidget(widgetId: String) {
                                         "[${data?.votes?.get(it.id!!) ?: 0}, ${data?.stages?.get(it.id!!) ?: "New"}] ${it.name}\n${
                                             data?.tags?.get(
                                                 it.id!!
-                                            )?.joinToString { "($it)" } ?: ""}"
+                                            )?.joinToString(" ") { "($it)" } ?: ""}"
                                     }
                                 )
                             }
