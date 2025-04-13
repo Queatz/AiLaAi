@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,6 +25,7 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
 
@@ -98,14 +98,7 @@ fun InventoryItemDialog(
                 )
             },
             actions = {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
                 TextButton(
                     {
                         quantity.toItemQuantity()?.let(onDrop)

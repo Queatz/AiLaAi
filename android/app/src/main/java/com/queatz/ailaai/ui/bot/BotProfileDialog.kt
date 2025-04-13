@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +22,7 @@ import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Bot
 
@@ -69,9 +69,7 @@ fun BotProfileDialog(onDismissRequest: () -> Unit, botId: String) {
                 }
             },
             actions = {
-                TextButton(onDismissRequest) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         )
     }

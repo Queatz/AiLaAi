@@ -20,6 +20,7 @@ import com.queatz.ailaai.item.ofInventoryItem
 import com.queatz.ailaai.item.upTo
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.InventoryItemExtended
 
@@ -100,14 +101,8 @@ fun TradeItemDialog(
                 }
             },
             actions = {
+                DialogCloseButton(onDismissRequest)
                 val quantity = quantity.toItemQuantity() ?: 0.0
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
                 if (active) {
                     if (isAdd) {
                         Button(

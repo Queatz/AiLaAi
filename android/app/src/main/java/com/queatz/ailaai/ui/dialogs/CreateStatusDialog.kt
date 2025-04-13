@@ -127,9 +127,7 @@ fun CreateStatusDialog(
                 )
             }
         ) {
-            TextButton(onDismissRequest) {
-                Text(stringResource(R.string.close))
-            }
+            DialogCloseButton(onDismissRequest)
             TextButton(
                 onClick = {
                     isSaving = true

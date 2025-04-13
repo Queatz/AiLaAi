@@ -59,13 +59,7 @@ fun PeopleDialog(
                 modifier = Modifier.fillMaxWidth().wrapContentHeight()
             ) {
                 extraButtons()
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         }
     }

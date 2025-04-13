@@ -65,13 +65,7 @@ fun <T> ItemsPeopleDialog(
                     .wrapContentHeight()
             ) {
                 extraButtons()
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         }
     }

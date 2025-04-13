@@ -1,6 +1,10 @@
 package com.queatz.ailaai.ui.dialogs
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -9,10 +13,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -50,13 +56,7 @@ fun ChooseCardDialog(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         }
     }
@@ -93,7 +93,7 @@ fun ChooseCardSelector(
     }
 
     OutlinedTextField(
-        searchCardsValue,
+        value = searchCardsValue,
         onValueChange = { searchCardsValue = it },
         label = { Text(stringResource(R.string.search_cards)) },
         shape = MaterialTheme.shapes.large,
@@ -118,7 +118,7 @@ fun ChooseCardSelector(
     ) {
         items(shownCards, { it.id!! }) {
             CardItem(
-                {
+                onClick = {
                     onCard(it.id!!)
                 },
                 card = it,

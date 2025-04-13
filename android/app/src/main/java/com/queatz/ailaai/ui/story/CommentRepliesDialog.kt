@@ -21,6 +21,7 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.CommentExtended
 import kotlinx.coroutines.launch
@@ -71,9 +72,7 @@ fun CommentRepliesDialog(
                 }
             },
              actions = {
-                TextButton(onDismissRequest) {
-                    Text(stringResource(R.string.close))
-                }
+                 DialogCloseButton(onDismissRequest)
             }
         )
     }

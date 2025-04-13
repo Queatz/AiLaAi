@@ -69,6 +69,7 @@ import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.LoadingIcon
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.Media
 import com.queatz.ailaai.ui.dialogs.PeopleDialog
 import com.queatz.ailaai.ui.dialogs.PhotoDialog
@@ -584,13 +585,7 @@ fun TradeDialog(
                 }
             },
             actions = {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
                 if (trade?.inProgress == true) {
                     if (confirmedByMe) {
                         OutlinedButton(
@@ -762,12 +757,8 @@ fun TradeDialog(
                 }
             },
             dismissButton = {
-                TextButton(
-                    {
-                        showCancelDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
+                DialogCloseButton {
+                    showCancelDialog = false
                 }
             }
         )

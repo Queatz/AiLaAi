@@ -41,6 +41,7 @@ import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.story.contents.audioItem
 import com.queatz.ailaai.ui.story.contents.authorsItem
 import com.queatz.ailaai.ui.story.contents.buttonItem
@@ -138,12 +139,8 @@ fun StoryContents(
                 Text("This widget is currently only interactable on web.")
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        showOpenWidgetDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
+                DialogCloseButton {
+                    showOpenWidgetDialog = false
                 }
             },
             confirmButton = {

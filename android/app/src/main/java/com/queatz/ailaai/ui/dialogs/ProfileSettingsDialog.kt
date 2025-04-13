@@ -82,13 +82,7 @@ fun ProfileSettingsDialog(
                 }
             },
             actions = {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
                 Button(
                     {
                         isLoading = true

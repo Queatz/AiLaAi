@@ -36,6 +36,7 @@ import com.queatz.ailaai.ui.components.Check
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Loading
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.CardVisit
@@ -61,8 +62,6 @@ fun PageStatisticsDialog(
     val since by rememberStateOf(Clock.System.now().startOfDay() - 6.days)
     var visits by rememberStateOf<List<CardVisit>>(emptyList())
     var isLoading by rememberStateOf(false)
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -130,8 +129,8 @@ fun PageStatisticsDialog(
                                 it.mapValues { (key, value) ->
                                     value.filter {
                                         (it.isOwner == true && myVisits) ||
-                                        (it.isOwner != true && it.isWild != true && othersVisits) ||
-                                        (it.isOwner != true && it.isWild == true && anonymousVisits)
+                                                (it.isOwner != true && it.isWild != true && othersVisits) ||
+                                                (it.isOwner != true && it.isWild == true && anonymousVisits)
                                     }
                                 }
                             }
@@ -149,19 +148,22 @@ fun PageStatisticsDialog(
 
                     if (bars.isNotEmpty()) {
                         ColumnChart(
-                            modifier = Modifier.fillMaxWidth().height(240.dp).padding(vertical = 1.pad),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(240.dp)
+                                .padding(vertical = 1.pad),
                             data =
-                            bars.map {
-                                Bars(
-                                    label = it.formatDateStamp(),
-                                    values = listOf(
-                                        Bars.Data(
-                                            value = (barData[it]?.size?.toDouble() ?: 0.0).coerceAtLeast(0.0001),
-                                            color = SolidColor(MaterialTheme.colorScheme.primary)
+                                bars.map {
+                                    Bars(
+                                        label = it.formatDateStamp(),
+                                        values = listOf(
+                                            Bars.Data(
+                                                value = (barData[it]?.size?.toDouble() ?: 0.0).coerceAtLeast(0.0001),
+                                                color = SolidColor(MaterialTheme.colorScheme.primary)
+                                            )
                                         )
                                     )
-                                )
-                            },
+                                },
                             barProperties = BarProperties(
                                 cornerRadius = Bars.Data.Radius.Rectangle(topRight = 6.dp, topLeft = 6.dp),
                                 spacing = 1.pad
@@ -204,13 +206,7 @@ fun PageStatisticsDialog(
                 }
             },
             actions = {
-                Button(
-                    onClick = {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         )
     }

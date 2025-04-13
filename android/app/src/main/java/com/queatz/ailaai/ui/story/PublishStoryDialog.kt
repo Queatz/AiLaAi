@@ -2,11 +2,29 @@ package com.queatz.ailaai.ui.story
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,20 +44,23 @@ import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.storyDraft
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.bold
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.showDidntWork
+import com.queatz.ailaai.extensions.status
+import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.ChooseGroups
-import com.queatz.ailaai.ui.dialogs.ChooseGroupDialog
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
-import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import com.queatz.db.Group
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import com.queatz.db.StoryDraft
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 
 @Composable
 fun PublishStoryDialog(
@@ -265,13 +286,7 @@ fun PublishStoryDialog(
             }
         },
         dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text(stringResource(R.string.close))
-            }
+            DialogCloseButton(onDismissRequest)
         },
         confirmButton = {
             Button(

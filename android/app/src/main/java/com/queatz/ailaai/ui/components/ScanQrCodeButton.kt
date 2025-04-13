@@ -28,6 +28,7 @@ import com.queatz.ailaai.extensions.cameraSupported
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.permission.permissionRequester
 import kotlinx.coroutines.flow.first
@@ -216,12 +217,8 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
                 }
             },
             dismissButton = {
-                TextButton(
-                    {
-                        showQrCodeExplanationDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
+                DialogCloseButton {
+                    showQrCodeExplanationDialog = false
                 }
             }
         )

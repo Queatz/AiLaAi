@@ -45,7 +45,6 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.distance
-import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.formatDistance
 import com.queatz.ailaai.extensions.hint
 import com.queatz.ailaai.extensions.inList

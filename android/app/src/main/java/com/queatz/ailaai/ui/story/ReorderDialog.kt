@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import org.burnoutcrew.reorderable.*
@@ -112,13 +113,7 @@ private fun ReorderDialogBase(
                     .fillMaxWidth()
                     .padding(2.pad)
             ) {
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         }
     }

@@ -97,9 +97,7 @@ fun PersonStatusDialog(
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                TextButton(onDismissRequest) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         )
     }

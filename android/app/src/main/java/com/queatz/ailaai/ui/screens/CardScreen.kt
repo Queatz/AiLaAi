@@ -148,6 +148,7 @@ import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.DeleteCardDialog
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
 import com.queatz.ailaai.ui.dialogs.Menu
@@ -552,10 +553,8 @@ fun CardScreen(cardId: String) {
                 Text(stringResource(R.string.generating_description))
             },
             dismissButton = {
-                TextButton({
+                DialogCloseButton {
                     showGeneratingPhotoDialog = false
-                }) {
-                    Text(stringResource(R.string.close))
                 }
             },
             confirmButton = {

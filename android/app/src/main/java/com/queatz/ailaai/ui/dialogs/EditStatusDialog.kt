@@ -222,14 +222,7 @@ fun EditStatusDialog(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
                 TextButton(
                     onClick = {
                         isSaving = true

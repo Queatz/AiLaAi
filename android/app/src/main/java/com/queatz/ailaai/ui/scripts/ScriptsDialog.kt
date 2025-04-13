@@ -61,6 +61,7 @@ import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Script
@@ -537,13 +538,7 @@ fun ScriptsDialog(
                     }
 
                     else -> {
-                        TextButton(
-                            {
-                                onDismissRequest()
-                            }
-                        ) {
-                            Text(stringResource(R.string.close))
-                        }
+                        DialogCloseButton(onDismissRequest)
                     }
                 }
                 when (state) {

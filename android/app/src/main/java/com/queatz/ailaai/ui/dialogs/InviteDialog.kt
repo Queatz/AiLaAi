@@ -44,13 +44,7 @@ fun InviteDialog(meName: String, onDismissRequest: () -> Unit) {
                     Text(stringResource(R.string.share))
                 }
             } else {
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         },
         properties = DialogProperties(usePlatformDefaultWidth = false),

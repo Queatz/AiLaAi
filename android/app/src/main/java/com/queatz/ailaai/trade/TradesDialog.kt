@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.TradeExtended
 
@@ -50,13 +51,7 @@ fun TradesDialog(
                 }
             },
             actions = {
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         )
     }

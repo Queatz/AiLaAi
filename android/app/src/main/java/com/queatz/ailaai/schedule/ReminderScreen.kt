@@ -172,13 +172,15 @@ fun ReminderScreen(reminderId: String) {
             onDismissRequest = {
                 showLocationDialog = false
             },
-            onRemoveLocation = {
-                scope.launch {
-                    api.updateReminder(reminderId, Reminder(geo = emptyList())) {
-                        reload()
+            onRemoveLocation = reminder?.geo?.let {
+                {
+                    scope.launch {
+                        api.updateReminder(reminderId, Reminder(geo = emptyList())) {
+                            reload()
+                        }
                     }
+                    showLocationDialog = false
                 }
-                showLocationDialog = false
             }
         ) { geo ->
             scope.launch {

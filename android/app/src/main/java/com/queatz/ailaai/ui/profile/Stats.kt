@@ -28,6 +28,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.extensions.dayMonthYear
 import com.queatz.ailaai.extensions.monthYear
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Person
 import com.queatz.db.ProfileStats
@@ -49,12 +50,8 @@ fun Stats(stats: ProfileStats, person: Person?) {
                 Text(person?.createdAt?.dayMonthYear() ?: "?")
             },
             confirmButton = {
-                TextButton(
-                    {
-                        showJoined = false
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
+                DialogCloseButton {
+                    showJoined = false
                 }
             }
         )

@@ -92,13 +92,7 @@ fun ReleaseNotesDialog(onDismissRequest: () -> Unit) {
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
                 AnimatedVisibility(updateAvailable) {
                     TextButton(
                         {

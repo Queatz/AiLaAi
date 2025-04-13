@@ -121,9 +121,7 @@ fun ViewSourceDialog(onDismissRequest: () -> Unit, content: String?) {
                 }
             },
             actions = {
-                TextButton(onDismissRequest) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
             }
         )
     }

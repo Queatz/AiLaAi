@@ -76,13 +76,7 @@ fun DrawDialog(onDismissRequest: () -> Unit, onSubmit: (ImageBitmap) -> Unit) {
                 }
             },
             actions = {
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.close))
-                }
+                DialogCloseButton(onDismissRequest)
                 TextButton(
                     {
                         done()
