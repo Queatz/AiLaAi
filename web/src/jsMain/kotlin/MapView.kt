@@ -262,7 +262,7 @@ fun MapView(
                             Div({
                                 style {
                                     textAlign("center")
-                                    fontSize(64.px)
+                                    fontSize(128.px)
                                     color(Color.black)
                                     padding(2.r)
                                     lineHeight(120.percent)
@@ -287,10 +287,10 @@ fun MapView(
                                             style {
                                                 opacity(.5)
                                                 paddingLeft(1.r)
-                                                fontSize(80.percent)
+                                                fontSize(85.percent)
                                             }
                                         }) {
-                                            Text("${card.name}")
+                                            Text(card.name ?: application.appString { newCard })
                                         }
                                         card.npc?.text?.notBlank?.let {
                                             Br()
@@ -299,7 +299,7 @@ fun MapView(
                                     }
                                 } else {
                                     Div {
-                                        Text("${card.name}")
+                                        Text(card.name ?: application.appString { newCard })
                                     }
                                     listOf(
                                         card.formatPay { appStringShort },
@@ -308,7 +308,7 @@ fun MapView(
                                         Div({
                                             style {
                                                 fontSize(85.percent)
-                                                opacity(.85f)
+                                                opacity(.5f)
                                             }
                                         }) {
                                             Text(bulletedString(*it.toTypedArray()))
@@ -343,7 +343,7 @@ fun MapView(
                                         property("border", "${2.px} solid ${Color.white}")
                                     }
                                 }
-                            }) {}
+                            })
                         }
                     }
                 }.let { marker ->

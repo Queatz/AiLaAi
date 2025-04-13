@@ -80,7 +80,7 @@ fun StoryContents(
     onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
-    onEdited: (() -> Unit)? = null,
+    onEdited: ((index: Int, part: StoryContent) -> Unit)? = null,
     onSave: ((List<StoryContent>) -> Unit)? = {},
 ) {
     Style(StoryStyles)
@@ -99,7 +99,7 @@ fun StoryContents(
         )
     }
 
-    content.forEach { part ->
+    content.forEachIndexed { index, part ->
         when (part) {
             is StoryContent.Title -> {
                 Div({
@@ -205,8 +205,7 @@ fun StoryContents(
                         value = value,
                         onValue = {
                             value = it
-                            part.section = it
-                            onEdited?.invoke()
+                            onEdited?.invoke(index, part.copy(section = it))
                         },
                         inline = true,
                         // todo translate
@@ -235,9 +234,8 @@ fun StoryContents(
                     TextBox(
                         value = value,
                         onValue = {
-                            part.text = it
                             value = it
-                            onEdited?.invoke()
+                            onEdited?.invoke(index, part.copy(text = it))
                         },
                         inline = true,
                         // todo translate

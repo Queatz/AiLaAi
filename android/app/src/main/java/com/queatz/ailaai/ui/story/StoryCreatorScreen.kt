@@ -76,10 +76,8 @@ import com.queatz.db.StoryDraft
 import com.queatz.db.isPart
 import com.queatz.db.toJsonStoryContent
 import com.queatz.widgets.Widgets
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonArray
-import java.util.stream.Collectors.toList
 
 sealed class StorySource {
     data class Card(val id: String) : StorySource()
@@ -331,12 +329,12 @@ fun StoryCreatorScreen(
             val title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title
             if (story != null) {
                 StoryTitle(
-                    state,
-                    title ?: story?.title
+                    state = state,
+                    title = title ?: story?.title
                 )
             } else if (card != null) {
                 Text(
-                    card?.name ?: stringResource(R.string.content),
+                    text = card?.name ?: stringResource(R.string.content),
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 1.pad),
@@ -350,7 +348,7 @@ fun StoryCreatorScreen(
                 )
             }
             IconButton(
-                {
+                onClick = {
                     showMenu = true
                 }
             ) {
@@ -358,8 +356,8 @@ fun StoryCreatorScreen(
                     LoadingIcon()
                 } else {
                     Icon(
-                        Icons.Outlined.MoreVert,
-                        null,
+                        imageVector = Icons.Outlined.MoreVert,
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -493,8 +491,8 @@ fun StoryCreatorScreen(
             }
         }
         StoryCreatorTools(
-            source,
-            ::addPart
+            source = source,
+            addPart = ::addPart
         )
     }
 }

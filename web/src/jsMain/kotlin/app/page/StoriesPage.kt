@@ -260,7 +260,12 @@ fun StoriesPage(
                         onGroupClick = onGroupClick,
                         openInNewWindow = true,
                         editable = editable,
-                        onEdited = { edited = true }
+                        onEdited = { index, part ->
+                            storyContent = storyContent.toMutableList().apply {
+                                set(index, part)
+                            }
+                            edited = true
+                        }
                     ) {
                         (selected as? StoryNav.Selected)?.story?.let { story ->
                             save(story)
