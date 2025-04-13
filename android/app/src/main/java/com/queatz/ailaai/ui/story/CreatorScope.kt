@@ -10,5 +10,5 @@ class CreatorScope<T : StoryContent>(
     val onCurrentFocus: (Int) -> Unit,
     val add: (part: StoryContent, position: Int?) -> Unit,
     val remove: (position: Int) -> Unit,
-    val edit: (block: T.() -> Unit) -> Unit
+    val edit: (block: T.() -> T) -> Unit
 )

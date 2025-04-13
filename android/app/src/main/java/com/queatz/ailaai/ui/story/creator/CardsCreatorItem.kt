@@ -36,12 +36,12 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
 
         if (showAddCardDialog) {
             ChooseCardDialog(
-                {
+                onDismissRequest = {
                     showAddCardDialog = false
                 },
             ) {
                 edit {
-                    cards = (cards + it).distinctBy { it }
+                    copy(cards = (cards + it).distinctBy { it })
                 }
                 showAddCardDialog = false
             }
@@ -52,9 +52,11 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
                 onDismissRequest = { showReorderDialog = false },
                 onMove = { from, to ->
                     edit {
-                        cards = cards.toMutableList().apply {
-                            add(to.index, removeAt(from.index))
-                        }
+                        copy(
+                            cards = cards.toMutableList().apply {
+                                add(to.index, removeAt(from.index))
+                            }
+                        )
                     }
                 },
                 items = part.cards,
@@ -106,9 +108,11 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
                         remove(partIndex)
                     } else {
                         edit {
-                            cards = cards.toMutableList().apply {
-                                removeAt(index)
-                            }
+                            copy(
+                                cards = cards.toMutableList().apply {
+                                    removeAt(index)
+                                }
+                            )
                         }
                     }
                 }

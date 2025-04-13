@@ -62,19 +62,23 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                             is StorySource.Story -> {
                                 api.uploadStoryPhotosFromUri(context, source.id, it) { photoUrls ->
                                     edit {
-                                        photos += photoUrls
+                                        copy(
+                                            photos = photos + photoUrls
+                                        )
                                     }
                                 }
                             }
 
                             is StorySource.Card -> {
                                 api.uploadCardContentPhotosFromUri(
-                                    context,
-                                    source.id,
-                                    it
+                                    context = context,
+                                    card = source.id,
+                                    media = it
                                 ) { photoUrls ->
                                     edit {
-                                        photos += photoUrls
+                                        copy(
+                                            photos = photos + photoUrls
+                                        )
                                     }
                                 }
                             }
@@ -86,7 +90,9 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                                     it
                                 ) { photoUrls ->
                                     edit {
-                                        photos += photoUrls
+                                        copy(
+                                            photos = photos + photoUrls
+                                        )
                                     }
                                 }
                             }
@@ -101,19 +107,25 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                         when (source) {
                             is StorySource.Story -> {
                                 edit {
-                                    photos += photoUrls
+                                    copy(
+                                        photos = photos + photoUrls
+                                    )
                                 }
                             }
 
                             is StorySource.Card -> {
                                 edit {
-                                    photos += photoUrls
+                                    copy(
+                                        photos = photos + photoUrls
+                                    )
                                 }
                             }
 
                             is StorySource.Profile -> {
                                 edit {
-                                    photos += photoUrls
+                                    copy(
+                                        photos = photos + photoUrls
+                                    )
                                 }
                             }
 
@@ -133,25 +145,33 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                 menuItem(stringResource(R.string.none)) {
                     showPhotoAspectMenu = false
                     edit {
-                        aspect = null
+                        copy(
+                            aspect = null
+                        )
                     }
                 }
                 menuItem(stringResource(R.string.portrait)) {
                     showPhotoAspectMenu = false
                     edit {
-                        aspect = .75f
+                        copy(
+                            aspect = .75f
+                        )
                     }
                 }
                 menuItem(stringResource(R.string.landscape)) {
                     showPhotoAspectMenu = false
                     edit {
-                        aspect = 1.5f
+                        copy(
+                            aspect = 1.5f
+                        )
                     }
                 }
                 menuItem(stringResource(R.string.square)) {
                     showPhotoAspectMenu = false
                     edit {
-                        aspect = 1f
+                        copy(
+                            aspect = 1f
+                        )
                     }
                 }
             }
@@ -162,9 +182,11 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                 { showReorderDialog = false },
                 onMove = { from, to ->
                     edit {
-                        photos = photos.toMutableList().apply {
-                            add(to.index, removeAt(from.index))
-                        }
+                        copy(
+                            photos = photos.toMutableList().apply {
+                                add(to.index, removeAt(from.index))
+                            }
+                        )
                     }
                 },
                 items = part.photos,
@@ -220,9 +242,11 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                         remove(partIndex)
                     } else {
                         edit {
-                            photos = photos.toMutableList().apply {
-                                removeAt(index)
-                            }
+                            copy(
+                                photos = photos.toMutableList().apply {
+                                    removeAt(index)
+                                }
+                            )
                         }
                     }
                 }

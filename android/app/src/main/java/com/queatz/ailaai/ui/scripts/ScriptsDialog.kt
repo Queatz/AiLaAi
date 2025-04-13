@@ -591,8 +591,8 @@ fun ScriptsDialog(
                     is ScriptsDialogState.Preview -> {
                         TextButton(
                             {
-                                scriptName = (state as ScriptsDialogState.Preview).script.name ?: ""
-                                scriptSource = (state as ScriptsDialogState.Preview).script.source ?: ""
+                                scriptName = (state as ScriptsDialogState.Preview).script.name.orEmpty()
+                                scriptSource = (state as ScriptsDialogState.Preview).script.source.orEmpty()
                                 state = ScriptsDialogState.EditScript()
                             },
                             enabled = !isLoading
@@ -615,8 +615,8 @@ fun ScriptsDialog(
                                 if (isMine)
                                     TextButton(
                                         onClick = {
-                                            scriptName = (state as ScriptsDialogState.Preview).script.name ?: ""
-                                            scriptSource = (state as ScriptsDialogState.Preview).script.source ?: ""
+                                            scriptName = (state as ScriptsDialogState.Preview).script.name.orEmpty()
+                                            scriptSource = (state as ScriptsDialogState.Preview).script.source.orEmpty()
                                             state =
                                                 ScriptsDialogState.EditScript((state as ScriptsDialogState.Preview).script.id!!)
                                         },
@@ -641,6 +641,7 @@ fun ScriptsDialog(
             {
                 showHelp = false
             },
+            // todo: translate
             title = "Kotlin Scripts",
             text = ScriptsResources.documentation,
             dismissButton = null,

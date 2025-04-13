@@ -13,35 +13,35 @@ import kotlinx.serialization.json.jsonObject
 @Serializable
 sealed class StoryContent {
     @Serializable
-    object Divider : StoryContent()
+    data object Divider : StoryContent()
     @Serializable
-    class Reactions(var story: String, val reactions: ReactionSummary?) : StoryContent()
+    data class Reactions(val story: String, val reactions: ReactionSummary?) : StoryContent()
     @Serializable
-    class Comments(var story: String) : StoryContent()
+    data class Comments(val story: String) : StoryContent()
     @Serializable
-    class Title(var title: String, val id: String) : StoryContent()
+    data class Title(val title: String, val id: String) : StoryContent()
     @Serializable
-    class Authors(var publishDate: Instant?, var authors: List<Person>) : StoryContent()
+    data class Authors(val publishDate: Instant?, val authors: List<Person>) : StoryContent()
     @Serializable
-    class Section(var section: String) : StoryContent()
+    data class Section(val section: String) : StoryContent()
     @Serializable
-    class Text(var text: String) : StoryContent()
+    data class Text(val text: String) : StoryContent()
     @Serializable
-    class Groups(var groups: List<String>, var coverPhotos: Boolean = false) : StoryContent()
+    data class Groups(val groups: List<String>, val coverPhotos: Boolean = false) : StoryContent()
     @Serializable
-    class Cards(var cards: List<String>) : StoryContent()
+    data class Cards(val cards: List<String>) : StoryContent()
     @Serializable
-    class Photos(var photos: List<String>, var aspect: Float? = null) : StoryContent()
+    data class Photos(val photos: List<String>, val aspect: Float? = null) : StoryContent()
     @Serializable
-    class Audio(var audio: String) : StoryContent()
+    data class Audio(val audio: String) : StoryContent()
     @Serializable
-    class Widget(var widget: Widgets, var id: String) : StoryContent()
+    data class Widget(val widget: Widgets, val id: String) : StoryContent()
     @Serializable
-    class Button(var text: String, var script: String, var data: String?, var style: ButtonStyle? = null) : StoryContent()
+    data class Button(val text: String, val script: String, val data: String?, val style: ButtonStyle? = null) : StoryContent()
     @Serializable
-    class Input(var key: String, var value: String?) : StoryContent()
+    data class Input(val key: String, val value: String?) : StoryContent()
     @Serializable
-    class Profiles(var profiles: List<String>) : StoryContent()
+    data class Profiles(val profiles: List<String>) : StoryContent()
 }
 
 @Serializable

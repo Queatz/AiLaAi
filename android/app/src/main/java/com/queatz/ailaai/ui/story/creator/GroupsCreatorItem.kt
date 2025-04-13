@@ -1,5 +1,7 @@
 package com.queatz.ailaai.ui.story.creator
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -7,11 +9,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.ailaai.api.createGroup
@@ -69,7 +74,9 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                         api.updateGroup(group.id!!, Group(name = value))
                     }
                     edit {
-                        groups += group.id!!
+                        copy(
+                            groups = groups + group.id!!
+                        )
                     }
                 }
                 showCreateGroupDialog = false
@@ -117,21 +124,25 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                 }
             ) {
                 edit {
-                    groups += it
-                        .mapNotNull { it.id }
-                        .distinctBy { it }
+                    copy(
+                        groups = groups + it
+                            .mapNotNull { it.id }
+                            .distinctBy { it }
+                    )
                 }
             }
         }
 
         if (showReorderDialog) {
             ReorderDialog(
-                { showReorderDialog = false },
+                onDismissRequest = { showReorderDialog = false },
                 onMove = { from, to ->
                     edit {
-                        groups = groups.toMutableList().apply {
-                            add(to.index, removeAt(from.index))
-                        }
+                        copy(
+                            groups = groups.toMutableList().apply {
+                                add(to.index, removeAt(from.index))
+                            }
+                        )
                     }
                 },
                 list = true,
@@ -144,13 +155,20 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                     api.group(groupId) { group = it }
                 }
 
-                LoadingText(group != null, stringResource(R.string.loading_group)) {
-                    ContactItem(
-                        onClick = null,
-                        onLongClick = null,
-                        item = SearchResult.Group(group!!),
-                        info = GroupInfo.LatestMessage
-                    )
+                LoadingText(
+                    done = group != null,
+                    text = stringResource(R.string.loading_group)
+                ) {
+                    Box(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.background, MaterialTheme.shapes.medium)
+                    ) {
+                        ContactItem(
+                            onClick = null,
+                            onLongClick = null,
+                            item = SearchResult.Group(group!!),
+                            info = GroupInfo.LatestMessage
+                        )
+                    }
                 }
             }
         }
@@ -164,7 +182,9 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                 menuItem(stringResource(if (part.coverPhotos) R.string.hide_photos else R.string.show_photos)) {
                     showGroupMenu = false
                     edit {
-                        coverPhotos = !coverPhotos
+                        copy(
+                            coverPhotos = !coverPhotos
+                        )
                     }
                 }
                 menuItem(stringResource(R.string.add_group)) {
@@ -192,9 +212,11 @@ fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Grou
                         remove(partIndex)
                     } else {
                         edit {
-                            groups = groups.toMutableList().apply {
-                                removeAt(index)
-                            }.toList()
+                            copy(
+                                groups = groups.toMutableList().apply {
+                                    removeAt(index)
+                                }.toList()
+                            )
                         }
                     }
                 }

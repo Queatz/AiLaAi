@@ -35,7 +35,6 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.sortedDistinct
 import com.queatz.ailaai.helpers.LocationSelector
-import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.EmptyText

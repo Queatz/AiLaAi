@@ -83,11 +83,18 @@ fun EditCardDialog(
         options.enableAnonymousReplies = enableReplies && enableWebReplies
     }
 
-    DialogBase(onDismissRequest, dismissable = false, modifier = Modifier.wrapContentHeight()) {
+    DialogBase(
+        onDismissRequest = onDismissRequest,
+        dismissable = false,
+        modifier = Modifier.wrapContentHeight()
+    ) {
         val scrollState = rememberScrollState()
-        val currentRecomposeScope = currentRecomposeScope
         fun invalidate() {
-            currentRecomposeScope.invalidate()
+            val old = cardConversation
+            scope.launch {
+                cardConversation = ConversationItem()
+                cardConversation = old
+            }
         }
 
         val titleFocusRequester = remember { FocusRequester() }
@@ -161,7 +168,7 @@ fun EditCardDialog(
             ) {
                 if (backstack.isNotEmpty()) {
                     TextButton(
-                        {
+                        onClick = {
                             backstack.removeLastOrNull()?.let {
                                 cardConversation = it
                             }

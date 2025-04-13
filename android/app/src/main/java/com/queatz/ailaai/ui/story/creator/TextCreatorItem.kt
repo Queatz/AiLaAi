@@ -20,10 +20,12 @@ fun LazyGridScope.textCreatorItem(creatorScope: CreatorScope<StoryContent.Text>)
             }
         }
         EditorTextField(
-            part.text,
-            {
+            value = part.text,
+            onValueChange = {
                 edit {
-                    text = it
+                    copy(
+                        text = it
+                    )
                 }
             },
             focusRequester = focusRequester,

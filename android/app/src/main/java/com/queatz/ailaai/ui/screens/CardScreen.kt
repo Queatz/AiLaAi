@@ -225,6 +225,7 @@ fun CardScreen(cardId: String) {
     var showRegeneratePhotoDialog by rememberStateOf(false)
     var showGeneratingPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
+    var isRegeneratingPhoto by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var oldPhoto by rememberStateOf<String?>(null)
     val me = me
@@ -428,6 +429,7 @@ fun CardScreen(cardId: String) {
     val isMineOrIAmACollaborator = (isMine || card?.collaborators?.contains(me?.id) == true) && !slideshowActive
 
     fun generatePhoto() {
+        isRegeneratingPhoto = true
         scope.launch {
             api.generateCardPhoto(cardId) {
                 if (
@@ -439,6 +441,7 @@ fun CardScreen(cardId: String) {
                 }
                 oldPhoto = card?.photo ?: ""
             }
+            isRegeneratingPhoto = false
         }
     }
 
@@ -1022,7 +1025,7 @@ fun CardScreen(cardId: String) {
                                     item(
                                         icon = Icons.Outlined.AutoAwesome,
                                         name = stringResource(R.string.generate_photo),
-                                        isLoading = oldPhoto != null
+                                        isLoading = isRegeneratingPhoto
                                     ) {
                                         regeneratePhoto()
                                         showMenu = false

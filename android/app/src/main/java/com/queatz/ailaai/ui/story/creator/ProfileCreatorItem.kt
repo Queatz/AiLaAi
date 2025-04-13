@@ -1,7 +1,6 @@
 package com.queatz.ailaai.ui.story.creator
 
 import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,9 +34,11 @@ fun LazyGridScope.profilesCreatorItem(creatorScope: CreatorScope<StoryContent.Pr
                 multiple = true,
                 onPeopleSelected = {
                     edit {
-                        profiles += it
-                            .mapNotNull { it.id }
-                            .distinctBy { it }
+                        copy(
+                            profiles = profiles + it
+                                .mapNotNull { it.id }
+                                .distinctBy { it }
+                        )
                     }
                     showAddDialog = false
                 },
@@ -57,9 +58,11 @@ fun LazyGridScope.profilesCreatorItem(creatorScope: CreatorScope<StoryContent.Pr
                     menuItem(stringResource(R.string.remove)) {
                         showMenu = false
                         edit {
-                            profiles = profiles.toMutableList().apply {
-                                removeAt(index)
-                            }.toList()
+                            copy(
+                                profiles = profiles.toMutableList().apply {
+                                    removeAt(index)
+                                }.toList()
+                            )
                         }
                     }
                     menuItem(stringResource(R.string.remove_all)) {

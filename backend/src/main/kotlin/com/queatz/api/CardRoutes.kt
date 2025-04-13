@@ -612,8 +612,8 @@ fun Route.cardRoutes() {
                 } else {
                     launch {
                         val url = ai.photo(
-                            "card-${card.id!!}",
-                            buildList {
+                            prefix = "card-${card.id!!}",
+                            prompts = buildList {
                                 add(
                                     TextPrompt(
                                         card.name!!

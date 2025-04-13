@@ -18,7 +18,12 @@ fun Db.reminders(person: String, offset: Int = 0, limit: Int = 20) = list(
     )
 )
 
-fun Db.occurrences(person: String?, start: Instant, end: Instant, reminders: List<String>? = null) = query(
+fun Db.occurrences(
+    person: String?,
+    start: Instant,
+    end: Instant,
+    reminders: List<String>? = null,
+) = query(
     ReminderOccurrences::class,
     """
         let dayRangeStart = date_trunc(@start, 'd')

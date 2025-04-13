@@ -79,6 +79,7 @@ import com.queatz.widgets.Widgets
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonArray
+import java.util.stream.Collectors.toList
 
 sealed class StorySource {
     data class Card(val id: String) : StorySource()
@@ -109,16 +110,6 @@ fun StoryCreatorScreen(
     val nav = nav
     val me = me
 
-    // Kotlin 2.0 upgrade stopped recompose.invalidate() from working
-    fun invalidate() {
-        val saved = storyContents
-        storyContents = emptyList()
-        scope.launch {
-            awaitFrame()
-            storyContents = saved
-        }
-    }
-
     BackHandler(enabled = edited && !showBackDialog) {
         showBackDialog = true
     }
@@ -132,7 +123,6 @@ fun StoryCreatorScreen(
                     storyContents = listOf(
                         StoryContent.Title(story?.title ?: "", source.id)
                     ) + story!!.contents()
-                    invalidate()
                 }
             }
 
@@ -140,7 +130,6 @@ fun StoryCreatorScreen(
                 api.card(source.id) {
                     card = it
                     storyContents = card?.content?.asStoryContents() ?: emptyList()
-                    invalidate()
                 }
             }
 
@@ -148,7 +137,6 @@ fun StoryCreatorScreen(
                 api.profile(source.id) {
                     profile = it
                     storyContents = profile?.profile?.content?.asStoryContents() ?: emptyList()
-                    invalidate()
                 }
             }
 
@@ -171,7 +159,6 @@ fun StoryCreatorScreen(
             add(index, part)
         }
         edited = true
-        invalidate()
         currentFocus = index
     }
 
@@ -180,7 +167,6 @@ fun StoryCreatorScreen(
             removeAt(position)
         }
         edited = true
-        invalidate()
         currentFocus = (position - 1).coerceAtLeast(0)
     }
 
@@ -259,14 +245,15 @@ fun StoryCreatorScreen(
                 }
             }
 
-            else -> {}
+            else -> Unit
         }
     }
 
-    fun <T : StoryContent> T.edit(block: T.() -> Unit) {
-        block()
+    fun <T : StoryContent> T.edit(partIndex: Int, block: T.() -> T) {
         edited = true
-        invalidate()
+        storyContents = storyContents.toMutableList().apply {
+            set(partIndex, block())
+        }
     }
 
     // todo make sealed class
@@ -277,12 +264,12 @@ fun StoryCreatorScreen(
     if (showPublishDialog) {
         val storyId = (source as StorySource.Story).id
         PublishStoryDialog(
-            {
+            onDismissRequest = {
                 showPublishDialog = false
             },
-            nav.context as Activity,
-            story!!,
-            storyContents,
+            activity = nav.context as Activity,
+            story = story!!,
+            storyContents = storyContents,
             onLocationChanged = {
                 scope.launch {
                     api.updateStory(storyId, Story(geo = it?.toList() ?: emptyList())) {
@@ -304,7 +291,7 @@ fun StoryCreatorScreen(
 
     if (showBackDialog) {
         SaveChangesDialog(
-            {
+            onDismissRequest = {
                 showBackDialog = false
             },
             onDiscard = {
@@ -322,14 +309,13 @@ fun StoryCreatorScreen(
 
     if (showReorderContentDialog) {
         ReorderStoryContentsDialog(
-            {
+            onDismissRequest = {
                 showReorderContentDialog = false
             },
-            storyContents
+            storyContents = storyContents
         ) {
             storyContents = it
             edited = true
-            invalidate()
         }
     }
 
@@ -471,7 +457,9 @@ fun StoryCreatorScreen(
                 onCurrentFocus = { currentFocus = it },
                 add = ::addPart,
                 remove = ::removePartAt,
-                edit = part::edit
+                edit = { block ->
+                    part.edit(partIndex, block)
+                }
             )
 
             storyContents.forEachIndexed { partIndex, part ->
