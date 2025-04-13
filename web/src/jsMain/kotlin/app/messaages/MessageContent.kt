@@ -238,7 +238,10 @@ fun MessageContent(
                 }
 
                 is CardAttachment -> {
-                    CardItem(attachment.card!!, openInNewWindow = true) {
+                    CardItem(
+                        cardId = attachment.card!!,
+                        openInNewWindow = true
+                    ) {
                         maxWidth(320.px)
 
                         if (message.text.isNullOrBlank().not()) {

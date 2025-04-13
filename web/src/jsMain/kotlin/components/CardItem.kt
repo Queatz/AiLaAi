@@ -21,7 +21,13 @@ import r
 import kotlin.math.roundToInt
 
 @Composable
-fun CardItem(cardId: String, openInNewWindow: Boolean = false, showTapToOpen: Boolean = true, styles: (StyleScope.() -> Unit)? = null) {
+fun CardItem(
+    cardId: String,
+    openInNewWindow: Boolean = false,
+    showTapToOpen: Boolean = true,
+    onClick: ((openInNewWindow: Boolean) -> Unit)? = null,
+    styles: (StyleScope.() -> Unit)? = null,
+) {
     var card by remember(cardId) { mutableStateOf<Card?>(null) }
 
     LaunchedEffect(cardId) {
@@ -31,7 +37,13 @@ fun CardItem(cardId: String, openInNewWindow: Boolean = false, showTapToOpen: Bo
     }
 
     card?.let { card ->
-        CardItem(card, openInNewWindow, styles = styles)
+        CardItem(
+            card = card,
+            openInNewWindow = openInNewWindow,
+            showTapToOpen = showTapToOpen,
+            styles = styles,
+            onClick = onClick
+        )
     }
 }
 

@@ -31,6 +31,7 @@ import baseUrl
 import com.queatz.ailaai.api.commentOnStory
 import com.queatz.ailaai.api.storyComments
 import com.queatz.db.ButtonStyle
+import com.queatz.db.Card
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
 import com.queatz.db.GroupExtended
@@ -77,6 +78,7 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
 fun StoryContents(
     content: List<StoryContent>,
     onGroupClick: (GroupExtended) -> Unit = {},
+    onCardClick: ((cardId: String, openInNewWindow: Boolean) -> Unit)? = null,
     onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
@@ -296,7 +298,14 @@ fun StoryContents(
                     classes(StoryStyles.contentCards)
                 }) {
                     part.cards.forEach { card ->
-                        CardItem(card)
+                        CardItem(
+                            cardId = card,
+                            onClick = onCardClick?.let { onCardClick ->
+                                { openInNewWindow ->
+                                    onCardClick(card, openInNewWindow)
+                                }
+                            },
+                        )
                     }
                 }
             }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import app.ailaai.api.card
 import app.ailaai.api.cards
 import app.ailaai.api.newCard
 import app.cards.MapList
@@ -52,6 +53,7 @@ import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.left
 import org.jetbrains.compose.web.css.lineHeight
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.maxWidth
@@ -109,9 +111,16 @@ fun MapView(
     val hasHash = remember { window.location.hash.isBlank() }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedFilters by remember { mutableStateOf(emptyList<SearchFilter>()) }
+    var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
 
     val categories = remember(searchResults) {
         searchResults.mapNotNull { it.categories }.flatten().sortedDistinct()
+    }
+
+    LaunchedEffect(selectedCard) {
+        if (selectedCard == null) {
+            cardNavHistory = emptyList()
+        }
     }
 
     LaunchedEffect(categories) {
@@ -147,8 +156,8 @@ fun MapView(
 
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
-        val nearDistance = 128
-        val nearDistanceMax = 256
+        val nearDistance = 64
+        val nearDistanceMax = 128
         val cardPositions = markers.mapIndexed { index, it ->
             index to map!!.project(it.marker.getLngLat())
         }
@@ -251,6 +260,7 @@ fun MapView(
                                 if (it.ctrlKey) {
                                     window.open("$webBaseUrl/page/${card.id!!}", target = "_blank")
                                 } else {
+                                    cardNavHistory = emptyList()
                                     selectedCard = if (selectedCard?.id == card.id) {
                                         null
                                     } else {
@@ -517,6 +527,7 @@ fun MapView(
                     }
                     if (expanded) {
                         MapList(shownCards) { card ->
+                            cardNavHistory = emptyList()
                             selectedCard = if (selectedCard?.id == card.id) null else card
                             centerMapOnCard(selectedCard)
                         }
@@ -628,9 +639,42 @@ fun MapView(
                 }) {
                     Div {
                         selectedCard?.let {
-                            CardContent(it)
+                            CardContent(
+                                card = it,
+                                onCardClick = { cardId, openInNewWindow ->
+                                    if (openInNewWindow) {
+                                        window.open("/page/$cardId", target = "_blank")
+                                    } else {
+                                        scope.launch {
+                                            api.card(cardId) {
+                                                selectedCard?.let {
+                                                    cardNavHistory += it
+                                                }
+                                                selectedCard = it
+                                                centerMapOnCard(it)
+                                            }
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
+                    cardNavHistory.lastOrNull()?.let { card ->
+                        IconButton(
+                            name = "arrow_back",
+                            title = appString { goBack },
+                            background = true,
+                            styles = {
+                                position(Position.Absolute)
+                                top(1.r)
+                                left(1.r)
+                            }
+                        ) {
+                            cardNavHistory -= card
+                            selectedCard = card
+                            centerMapOnCard(card)
+                        }
+                }
                     Button({
                         classes(Styles.button)
 

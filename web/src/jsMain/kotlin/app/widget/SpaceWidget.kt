@@ -221,12 +221,7 @@ fun SpaceWidget(widgetId: String) {
 
     Div(
         attrs = {
-            style {
-                position(Relative)
-                width(100.percent)
-                property("aspect-ratio", "2")
-                borderRadius(1.r)
-            }
+            classes(WidgetStyles.spaceContainer)
         }
     ) {
         Canvas(
@@ -236,7 +231,6 @@ fun SpaceWidget(widgetId: String) {
                 style {
                     width(100.percent)
                     height(100.percent)
-                    property("aspect-ratio", "2")
                     borderRadius(1.r)
                 }
 

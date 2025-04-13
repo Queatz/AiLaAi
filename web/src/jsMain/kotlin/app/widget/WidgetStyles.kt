@@ -1,14 +1,27 @@
 package app.widget
 
 import app.dark
+import app.mobile
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
+import org.jetbrains.compose.web.css.Position.Companion.Relative
 import r
 import shadow
 
 @OptIn(ExperimentalComposeWebApi::class)
 object WidgetStyles : StyleSheet() {
+    val spaceContainer by style {
+        position(Relative)
+        width(100.percent)
+        property("aspect-ratio", "2")
+        borderRadius(1.r)
+
+        mobile(self) {
+            property("aspect-ratio", ".5")
+        }
+    }
+
     val space by style {
         width(100.percent)
         height(100.percent)

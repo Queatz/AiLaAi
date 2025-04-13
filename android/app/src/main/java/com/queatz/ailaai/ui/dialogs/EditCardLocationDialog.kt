@@ -313,7 +313,7 @@ fun EditCardLocationDialog(
 
                             else -> {
                                 CardItem(
-                                    {
+                                    onClick = {
                                         parentCard = null
                                         card.parent = null
                                     },

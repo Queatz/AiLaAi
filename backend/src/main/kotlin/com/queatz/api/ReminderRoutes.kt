@@ -4,16 +4,31 @@ import com.queatz.db.*
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
+import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
 import com.queatz.startOfSecond
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.toInstant
 
 fun Route.reminderRoutes() {
+    authenticate(optional = true) {
+        get("/reminders/{id}") {
+            respond {
+                val reminder = db.document(Reminder::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                if (reminder.isVisibleToMe(meOrNull)) {
+                    reminder
+                } else {
+                    HttpStatusCode.NotFound
+                }
+            }
+        }
+    }
+
     authenticate {
         get("/reminders") {
             respond {
@@ -67,25 +82,17 @@ fun Route.reminderRoutes() {
             }
         }
 
-        get("/reminders/{id}") {
-            respond {
-                val reminder = db.document(Reminder::class, parameter("id"))
-                    ?: return@respond HttpStatusCode.NotFound
-
-                if (reminder.isMine(me)) {
-                    reminder
-                } else {
-                    HttpStatusCode.NotFound
-                }
-            }
-        }
-
         get("/reminders/{id}/occurrences") {
             respond {
                 val start = call.parameters["start"]?.toInstant() ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
                 val end = call.parameters["end"]?.toInstant() ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
 
-                db.occurrences(me.id!!, start, end, listOf(parameter("id")))
+                db.occurrences(
+                    person = me.id!!,
+                    start = start,
+                    end = end,
+                    reminders = listOf(parameter("id"))
+                )
             }
         }
 
@@ -240,3 +247,5 @@ fun Route.reminderRoutes() {
 }
 
 private fun Reminder.isMine(me: Person) = person == me.id || me.id in (people ?: emptyList())
+
+private fun Reminder.isVisibleToMe(me: Person?) = open == true || (me != null && isMine(me))
