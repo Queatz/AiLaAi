@@ -126,7 +126,6 @@ fun EditForm(
         onClick = {
             showCardDialog = true
         },
-        onCategoryClick = {},
         card = card,
         isChoosing = true,
         placeholder = stringResource(R.string.choose_page),

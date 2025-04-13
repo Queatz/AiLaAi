@@ -132,7 +132,6 @@ fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards
             onClick = {
                 showCardMenu = true
             },
-            onCategoryClick = {},
             card = card,
             isChoosing = true,
             modifier = Modifier.fillMaxWidth(.75f)

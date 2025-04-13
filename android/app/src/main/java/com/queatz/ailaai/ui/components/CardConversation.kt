@@ -10,13 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Message
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -65,10 +64,8 @@ fun CardConversation(
     showAuthors: Boolean = true,
     hideCreators: List<String>? = null,
     selectingText: ((Boolean) -> Unit)? = null,
-    conversationChange: ((List<ConversationItem>) -> Unit)? = null,
-    onCategoryClick: ((String) -> Unit)? = null
+    conversationChange: ((List<ConversationItem>) -> Unit)? = null
 ) {
-    val categories = card.categories ?: emptyList()
     val conversation = remember(card.conversation) {
         json.decodeFromString<ConversationItem>(card.conversation ?: "{}")
     }
@@ -181,22 +178,6 @@ fun CardConversation(
                     }
                 }
             }
-
-            if (categories.isNotEmpty()) {
-                AnimatedVisibility(stack.isEmpty()) {
-                    categories.forEach { category ->
-                        SuggestionChip(
-                            onClick = {
-                                onCategoryClick?.invoke(category)
-                            },
-                            shape = MaterialTheme.shapes.medium,
-                            label = {
-                                Text(category, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            }
-                        )
-                    }
-                }
-            }
         }
 
         if (stack.isEmpty() && showAuthors) {
@@ -244,7 +225,7 @@ fun CardConversation(
                             Button({
                                 onReply(stack.map { it.title } + current.title + it.title)
                             }) {
-                                Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = 1.pad))
+                                Icon(Icons.AutoMirrored.Outlined.Message, "", modifier = Modifier.padding(end = 1.pad))
                                 Text(it.title, overflow = TextOverflow.Ellipsis, maxLines = 1)
                             }
                         }
@@ -264,7 +245,7 @@ fun CardConversation(
                     Button({
                         onReply(stack.map { it.title } + current.title)
                     }) {
-                        Icon(Icons.Outlined.Message, "", modifier = Modifier.padding(end = 1.pad))
+                        Icon(Icons.AutoMirrored.Outlined.Message, "", modifier = Modifier.padding(end = 1.pad))
                         Text(
                             stringResource(R.string.message),
                             overflow = TextOverflow.Ellipsis,
@@ -283,7 +264,7 @@ fun CardConversation(
                             stack = stack.dropLast(1)
                         }
                     }) {
-                        Icon(Icons.Outlined.ArrowBack, stringResource(R.string.go_back))
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.go_back))
                         Text(stringResource(R.string.go_back), modifier = Modifier.padding(start = 1.pad))
                     }
                 }

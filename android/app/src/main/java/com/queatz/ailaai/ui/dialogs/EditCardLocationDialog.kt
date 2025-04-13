@@ -304,7 +304,6 @@ fun EditCardLocationDialog(
                                                 parentCard = it
                                                 card.parent = it.id
                                             },
-                                            onCategoryClick = {},
                                             card = it,
                                             isChoosing = true
                                         )
@@ -317,9 +316,6 @@ fun EditCardLocationDialog(
                                     {
                                         parentCard = null
                                         card.parent = null
-                                    },
-                                    onCategoryClick = {
-
                                     },
                                     card = parentCard!!,
                                     isChoosing = true,

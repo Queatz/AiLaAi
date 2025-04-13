@@ -84,7 +84,6 @@ import com.queatz.ailaai.schedule.ScheduleReminderDialog
 import com.queatz.ailaai.services.say
 import com.queatz.ailaai.trade.ActiveTradeItem
 import com.queatz.ailaai.trade.TradeDialog
-import com.queatz.ailaai.ui.control.exploreInitialCategory
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.dialogs.SelectTextDialog
@@ -656,10 +655,6 @@ fun ColumnScope.MessageContent(
             CardItem(
                 onClick = {
                     nav.appNavigate(AppNav.Page(it))
-                },
-                onCategoryClick = {
-                    exploreInitialCategory = it
-                    nav.appNavigate(AppNav.Explore)
                 },
                 card = attachedCard,
                 isChoosing = true

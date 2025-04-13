@@ -21,23 +21,21 @@ data class MapCategoriesControl(
     val cardsOfCategory: List<Card>
 )
 
-var exploreInitialCategory: String? = null
-
 @Composable
 fun mapCategoriesControl(
     cards: List<Card>
 ): MapCategoriesControl {
     val scope = rememberCoroutineScope()
-    var selectedCategory by rememberSaveable { mutableStateOf(exploreInitialCategory) }
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     fun updateCategories() {
         scope.launch {
-            selectedCategory = (selectedCategory ?: exploreInitialCategory)?.notBlank
-            categories = ((exploreInitialCategory.inList() + cards
-                .flatMap { it.categories ?: emptyList() }) + selectedCategory.inList())
-                .sortedDistinct()
-            exploreInitialCategory = null
+            selectedCategory = selectedCategory?.notBlank
+            categories = cards.flatMap { it.categories ?: emptyList() } + (
+                    selectedCategory?.inList()?.sortedDistinct()
+                        ?: emptyList()
+                    )
         }
     }
 

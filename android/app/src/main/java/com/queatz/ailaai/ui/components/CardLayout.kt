@@ -24,7 +24,6 @@ import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.card.CardContent
-import com.queatz.ailaai.ui.control.exploreInitialCategory
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
@@ -103,10 +102,6 @@ fun CardLayout(
                 showAuthors = showAuthors,
                 hideCreators = hideCreators,
                 showDistance = showDistance,
-                onCategoryClick = {
-                    exploreInitialCategory = it
-                    nav.appNavigate(AppNav.Explore)
-                },
                 onReply = { conversation ->
                     if (onReply == null) {
                         scope.launch {

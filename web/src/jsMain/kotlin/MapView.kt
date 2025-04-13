@@ -147,8 +147,8 @@ fun MapView(
 
         val cameraLngLat = map!!.getCameraLngLat()
         val altitude = map!!.getFreeCameraOptions().position.toAltitude() as Double
-        val nearDistance = 32
-        val nearDistanceMax = 128
+        val nearDistance = 128
+        val nearDistanceMax = 256
         val cardPositions = markers.mapIndexed { index, it ->
             index to map!!.project(it.marker.getLngLat())
         }
