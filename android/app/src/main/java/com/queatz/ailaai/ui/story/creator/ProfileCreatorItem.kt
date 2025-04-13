@@ -21,7 +21,10 @@ import com.queatz.db.PersonProfile
 import com.queatz.db.StoryContent
 
 fun LazyGridScope.profilesCreatorItem(creatorScope: CreatorScope<StoryContent.Profiles>) = with(creatorScope) {
-    itemsIndexed(creatorScope.part.profiles, key = { index, it -> "${part.hashCode()}.${it}" }) { index, personId ->
+    itemsIndexed(
+        items = creatorScope.part.profiles,
+        key = { index, it -> "${creatorScope.id}.${it}" }
+    ) { index, personId ->
         var profile by remember(personId) { mutableStateOf<PersonProfile?>(null)}
         var showMenu by rememberStateOf(false)
         var showAddDialog by rememberStateOf(false)

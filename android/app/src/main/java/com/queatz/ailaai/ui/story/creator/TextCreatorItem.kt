@@ -12,7 +12,10 @@ import com.queatz.ailaai.ui.story.EditorTextField
 import com.queatz.db.StoryContent
 
 fun LazyGridScope.textCreatorItem(creatorScope: CreatorScope<StoryContent.Text>) = with(creatorScope) {
-    item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
+    item(
+        span = { GridItemSpan(maxLineSpan) },
+        key = creatorScope.id
+    ) {
         val focusRequester = remember { FocusRequester() }
         LaunchedEffect(currentFocus) {
             if (currentFocus == partIndex) {

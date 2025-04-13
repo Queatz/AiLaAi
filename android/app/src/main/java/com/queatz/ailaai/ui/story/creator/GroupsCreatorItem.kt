@@ -47,9 +47,9 @@ import com.queatz.db.StoryContent
 
 fun LazyGridScope.groupsCreatorItem(creatorScope: CreatorScope<StoryContent.Groups>) = with(creatorScope) {
     itemsIndexed(
-        part.groups,
+        items = part.groups,
         span = { _, _ -> GridItemSpan(maxLineSpan) },
-        key = { index, it -> "${part.hashCode()}.$it" }
+        key = { index, it -> "${creatorScope.id}.$it" }
     ) { index, groupId ->
         val context = LocalContext.current
         val me = me

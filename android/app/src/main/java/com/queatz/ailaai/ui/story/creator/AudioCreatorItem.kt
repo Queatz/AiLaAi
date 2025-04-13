@@ -21,7 +21,10 @@ import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.StoryContent
 
 fun LazyGridScope.audioCreatorItem(creatorScope: CreatorScope<StoryContent.Audio>) = with(creatorScope) {
-    item(span = { GridItemSpan(maxLineSpan) }, key = part.hashCode()) {
+    item(
+        span = { GridItemSpan(maxLineSpan) },
+        key = creatorScope.id
+    ) {
         Card(
             shape = MaterialTheme.shapes.large,
             modifier = Modifier

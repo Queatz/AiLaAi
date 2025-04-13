@@ -38,11 +38,11 @@ import kotlinx.coroutines.launch
 
 fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Photos>) = with(creatorScope) {
     itemsIndexed(
-        part.photos,
+        items = part.photos,
         span = { index, item ->
             GridItemSpan(if (index == 0) maxLineSpan else if (index % 3 == 1) 1 else maxCurrentLineSpan)
         },
-        key = { index, it -> "${part.hashCode()}.$it" }
+        key = { index, it -> "${creatorScope.id}.$it" }
     ) { index, it ->
         val scope = rememberCoroutineScope()
         val context = LocalContext.current

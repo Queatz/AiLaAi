@@ -27,7 +27,10 @@ import com.queatz.db.Card
 import com.queatz.db.StoryContent
 
 fun LazyGridScope.cardsCreatorItem(creatorScope: CreatorScope<StoryContent.Cards>) = with(creatorScope) {
-    itemsIndexed(part.cards, key = { index, it -> "${part.hashCode()}.$it" }) { index, cardId ->
+    itemsIndexed(
+        items = part.cards,
+        key = { index, it -> "${creatorScope.id}.$it" }
+    ) { index, cardId ->
         var showCardMenu by rememberStateOf(false)
         var showAddCardDialog by rememberStateOf(false)
         var showReorderDialog by rememberStateOf(false)
