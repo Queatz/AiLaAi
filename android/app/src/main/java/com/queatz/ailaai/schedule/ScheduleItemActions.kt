@@ -12,7 +12,9 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.queatz.ailaai.R
 import com.queatz.ailaai.ui.theme.pad
 
 @Composable
@@ -38,8 +40,7 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Done,
-                // todo translate
-                "Mark as done",
+                stringResource(R.string.mark_as_done),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp)
             )
@@ -55,8 +56,7 @@ fun ScheduleItemActions(
             ) {
                 Icon(
                     Icons.Outlined.OpenInNew,
-                    // todo translate
-                    "Open",
+                    stringResource(R.string.open),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
@@ -72,8 +72,7 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Update,
-                // todo translate
-                "Reschedule",
+                stringResource(R.string.reschedule),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp)
             )
@@ -87,8 +86,7 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Edit,
-                // todo translate
-                "Edit",
+                stringResource(R.string.edit),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp)
             )
@@ -102,8 +100,7 @@ fun ScheduleItemActions(
         ) {
             Icon(
                 Icons.Outlined.Delete,
-                // todo translate
-                "Delete",
+                stringResource(R.string.delete),
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(18.dp)
             )

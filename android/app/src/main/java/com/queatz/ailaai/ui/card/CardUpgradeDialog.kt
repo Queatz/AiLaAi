@@ -77,20 +77,24 @@ fun CardUpgradeDialog(
                         val pointsString = pluralStringResource(R.plurals.x_points, details!!.points, details!!.points.format())
                         val levelString = pluralStringResource(R.plurals.level_x, details!!.level, details!!.level.format())
                         Text(
-                            // todo: translate
                             buildAnnotatedString {
-                                append("Upgrading this page to ")
-                                bold {
-                                    append(levelString)
+                                val formattedString = stringResource(R.string.upgrading_page_to_level_requires_points, levelString, pointsString)
+                                val levelIndex = formattedString.indexOf(levelString)
+                                val pointsIndex = formattedString.indexOf(pointsString)
+
+                                if (levelIndex >= 0 && pointsIndex >= 0) {
+                                    append(formattedString.substring(0, levelIndex))
+                                    bold {
+                                        append(levelString)
+                                    }
+                                    append(formattedString.substring(levelIndex + levelString.length, pointsIndex))
+                                    bold {
+                                        append(pointsString)
+                                    }
+                                    append(formattedString.substring(pointsIndex + pointsString.length))
+                                } else {
+                                    append(formattedString)
                                 }
-
-                                append(" requires ")
-
-                                bold {
-                                    append(pointsString)
-                                }
-
-                                append(".")
                             }
                         )
                     }
@@ -98,20 +102,24 @@ fun CardUpgradeDialog(
                         val pointsString = pluralStringResource(R.plurals.x_points, details!!.points, details!!.points.format())
                         val levelString = pluralStringResource(R.plurals.level_x, details!!.level, details!!.level.format())
                         Text(
-                            // todo: translate
                             buildAnnotatedString {
-                                append("Upgrade this page to ")
-                                bold {
-                                    append(levelString)
+                                val formattedString = stringResource(R.string.upgrade_page_to_level_for_points, levelString, pointsString)
+                                val levelIndex = formattedString.indexOf(levelString)
+                                val pointsIndex = formattedString.indexOf(pointsString)
+
+                                if (levelIndex >= 0 && pointsIndex >= 0) {
+                                    append(formattedString.substring(0, levelIndex))
+                                    bold {
+                                        append(levelString)
+                                    }
+                                    append(formattedString.substring(levelIndex + levelString.length, pointsIndex))
+                                    bold {
+                                        append(pointsString)
+                                    }
+                                    append(formattedString.substring(pointsIndex + pointsString.length))
+                                } else {
+                                    append(formattedString)
                                 }
-
-                                append(" for ")
-
-                                bold {
-                                    append(pointsString)
-                                }
-
-                                append("?")
                             }
                         )
                     }

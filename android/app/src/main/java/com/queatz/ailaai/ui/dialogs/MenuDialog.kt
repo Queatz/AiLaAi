@@ -9,8 +9,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.queatz.ailaai.ui.theme.pad
 
@@ -43,7 +46,12 @@ fun Menu(
 
 @MenuDialogMarker
 @Composable
-fun menuItem(title: String, icon: ImageVector? = null, action: () -> Unit) {
+fun menuItem(
+    title: String,
+    icon: ImageVector? = null,
+    textIcon: String? = null,
+    action: () -> Unit
+) {
     DropdownMenuItem(
         text = {
             Text(title)
@@ -52,8 +60,21 @@ fun menuItem(title: String, icon: ImageVector? = null, action: () -> Unit) {
             action()
         },
         trailingIcon = {
-            icon?.let { icon ->
-                Icon(icon, null)
+            when {
+                textIcon != null -> {
+                    Text(
+                        text = textIcon,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .padding(.5f.pad)
+                            .alpha(0.5f)
+                    )
+                }
+                icon != null -> {
+                    Icon(icon, null)
+                }
             }
         },
         modifier = Modifier

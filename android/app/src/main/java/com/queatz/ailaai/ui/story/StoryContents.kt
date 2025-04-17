@@ -135,8 +135,7 @@ fun StoryContents(
                 showOpenWidgetDialog = false
             },
             text = {
-                // todo translate
-                Text("This widget is currently only interactable on web.")
+                Text(stringResource(R.string.widget_web_only))
             },
             dismissButton = {
                 DialogCloseButton {

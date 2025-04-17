@@ -251,8 +251,7 @@ fun ExploreScreen() {
             },
             modifier = Modifier.padding(paddingValues),
             rationale = {
-                // todo: translate
-                DisplayText("Discover and post pages in your town.")
+                        DisplayText(stringResource(R.string.discover_and_post_pages))
             }
         ) {
             Column(

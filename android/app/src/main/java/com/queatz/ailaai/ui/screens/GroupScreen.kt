@@ -37,7 +37,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FileDownload
@@ -135,6 +134,7 @@ import app.ailaai.api.removeMember
 import app.ailaai.api.sendMessage
 import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
+import app.ailaai.api.setMessageRating
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.MainActivity
@@ -234,6 +234,7 @@ import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.PhotosAttachment
+import com.queatz.db.Rating
 import com.queatz.db.Reminder
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
@@ -264,7 +265,6 @@ import kotlin.time.Duration.Companion.hours
 
 private val cachedReplies = mutableListOf<Message>()
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(groupId: String) {
     val scope = rememberCoroutineScope()
@@ -1138,7 +1138,26 @@ fun GroupScreen(groupId: String) {
                                 onReplyInNewGroup = {
                                     showReplyInNewGroupDialog = it
                                 },
-                                onShowPhoto = { showPhoto = it }
+                                onShowPhoto = { showPhoto = it },
+                                onRate = { message, rating ->
+                                    scope.launch {
+                                        if (rating == null) {
+                                            api.setMessageRating(
+                                                id = message.id!!,
+                                                rating = Rating(rating = null)
+                                            ) {
+                                                reloadMessages()
+                                            }
+                                        } else {
+                                            api.setMessageRating(
+                                                id = message.id!!,
+                                                rating = Rating(rating = rating)
+                                            ) {
+                                                reloadMessages()
+                                            }
+                                        }
+                                    }
+                                }
                             )
                         }
                     }

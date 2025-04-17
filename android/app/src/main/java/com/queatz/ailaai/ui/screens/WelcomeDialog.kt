@@ -54,7 +54,6 @@ enum class WelcomeStep {
     Intro
 }
 
-// todo: translate
 @Composable
 fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
     val context = LocalContext.current
@@ -162,8 +161,7 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
 
                         WelcomeStep.SetPhoto -> {
                             Text(
-                                // todo: translate
-                                "Let people recognize you out in town.",
+                                stringResource(R.string.let_people_recognize_you),
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )
@@ -188,8 +186,7 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
 
                         WelcomeStep.SetIntroduction -> {
                             Text(
-                                // todo: translate
-                                "Share anything else you'd like to say.",
+                                stringResource(R.string.share_anything_else),
                                 modifier = Modifier
                                     .fillMaxWidth()
                             )
@@ -215,23 +212,22 @@ fun WelcomeDialog(onDismissRequest: () -> Unit, onProfileUpdate: () -> Unit) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ) {
-                                // todo: translate
-                                Text("Here's what you can do in town.")
+                                Text(stringResource(R.string.heres_what_you_can_do))
                                 Spacer(Modifier.height(1.pad))
-                                Text("Create groups", style = MaterialTheme.typography.titleMedium)
-                                Text("Gather friends and make things happen! Or open your group to new friends.")
+                                Text(stringResource(R.string.create_groups_title), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.create_groups_description))
                                 Spacer(Modifier.height(1.pad))
-                                Text("Write posts", style = MaterialTheme.typography.titleMedium)
-                                Text("Express your true self! Keep the town interesting and lively.")
+                                Text(stringResource(R.string.write_posts_title), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.write_posts_description))
                                 Spacer(Modifier.height(1.pad))
-                                Text("Create pages", style = MaterialTheme.typography.titleMedium)
-                                Text("Let people get to know you better with pages covering all of your ambitions.")
+                                Text(stringResource(R.string.create_pages_title), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.create_pages_description))
                                 Spacer(Modifier.height(1.pad))
                                 Text(
-                                    "Reminders, trading, scripts, oh my!",
+                                    stringResource(R.string.reminders_trading_scripts),
                                     style = MaterialTheme.typography.titleMedium
                                 )
-                                Text("There's so much more for the adventurous!")
+                                Text(stringResource(R.string.theres_so_much_more))
                             }
                         }
                     }

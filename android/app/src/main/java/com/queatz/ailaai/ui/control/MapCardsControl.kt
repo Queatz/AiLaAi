@@ -52,7 +52,6 @@ fun mapCardsControl(
 
     val areaCard = remember(mapCategoriesControl.cardsOfCategory, geo) {
         if (geo == null) return@remember null
-        // todo: translate
         mapCategoriesControl.cardsOfCategory
             .filter { page ->
                 !page.name.isNullOrBlank()

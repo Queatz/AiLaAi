@@ -77,20 +77,24 @@ fun CardDowngradeDialog(
                         val pointsString = pluralStringResource(R.plurals.x_points, details!!.points, details!!.points.format())
                         val levelString = pluralStringResource(R.plurals.level_x, details!!.level, details!!.level.format())
                         Text(
-                            // todo: translate
                             buildAnnotatedString {
-                                append("Downgrade this page to ")
-                                bold {
-                                    append(levelString)
+                                val formattedString = stringResource(R.string.downgrade_page_to_level_recover_points, levelString, pointsString)
+                                val levelIndex = formattedString.indexOf(levelString)
+                                val pointsIndex = formattedString.indexOf(pointsString)
+
+                                if (levelIndex >= 0 && pointsIndex >= 0) {
+                                    append(formattedString.substring(0, levelIndex))
+                                    bold {
+                                        append(levelString)
+                                    }
+                                    append(formattedString.substring(levelIndex + levelString.length, pointsIndex))
+                                    bold {
+                                        append(pointsString)
+                                    }
+                                    append(formattedString.substring(pointsIndex + pointsString.length))
+                                } else {
+                                    append(formattedString)
                                 }
-
-                                append(" and recover ")
-
-                                bold {
-                                    append(pointsString)
-                                }
-
-                                append("?")
                             }
                         )
                     }

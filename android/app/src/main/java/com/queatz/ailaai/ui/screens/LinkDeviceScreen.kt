@@ -35,9 +35,8 @@ fun LinkDeviceScreen(token: String) {
             .fillMaxSize()
             .padding(1.pad)
     ) {
-        // todo translate
         Text(
-            "Are your sure you want to link this device?",
+            stringResource(R.string.confirm_link_device),
             modifier = Modifier.padding(2.pad)
         )
         Button({

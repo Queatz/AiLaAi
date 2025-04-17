@@ -8,7 +8,6 @@ import com.queatz.ailaai.extensions.*
 import com.queatz.db.Reminder
 import kotlinx.datetime.Clock
 
-// todo translate
 val Reminder.scheduleText @Composable get(): String = buildString {
     val now = Clock.System.now()
 

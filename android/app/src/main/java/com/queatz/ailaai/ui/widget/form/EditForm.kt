@@ -50,8 +50,7 @@ fun EditForm(
             onDismissRequest = {
                 showEditSubmitButtonTextDialog = false
             },
-            // todo: translate
-            title = "Edit submit button",
+            title = stringResource(R.string.edit_submit_button),
             button = stringResource(R.string.update),
             singleLine = true,
             maxLength = 64,
@@ -70,8 +69,7 @@ fun EditForm(
     DialogDivider()
 
     Text(
-        // todo: translate
-        text = "Edit submit button:",
+        text = stringResource(R.string.edit_submit_button_colon),
         modifier = Modifier.padding(bottom = 1.pad),
         style = MaterialTheme.typography.labelMedium
     )
@@ -88,8 +86,7 @@ fun EditForm(
     DialogDivider()
 
     Text(
-        // todo: translate
-        text = "Form submissions will be created under this page:",
+        text = stringResource(R.string.form_submissions_page),
         modifier = Modifier.padding(bottom = 1.pad),
         style = MaterialTheme.typography.labelMedium
     )
@@ -135,8 +132,7 @@ fun EditForm(
     DialogDivider()
 
     Text(
-        // todo: translate
-        text = "Forward form submissions:",
+        text = stringResource(R.string.forward_form_submissions),
         modifier = Modifier.padding(bottom = 1.pad),
         style = MaterialTheme.typography.labelMedium
     )
@@ -154,8 +150,7 @@ fun EditForm(
     DialogDivider()
 
     Text(
-        // todo: translate
-        text = "Run a script:",
+        text = stringResource(R.string.run_a_script),
         modifier = Modifier.padding(bottom = 1.pad),
         style = MaterialTheme.typography.labelMedium
     )
@@ -185,7 +180,6 @@ fun EditForm(
     DialogDivider()
 
     Text(
-        // todo: translate
         text = stringResource(R.string.options_),
         modifier = Modifier.padding(bottom = 1.pad),
         style = MaterialTheme.typography.labelMedium

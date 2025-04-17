@@ -45,6 +45,7 @@ fun MessageItem(
     onReply: (Message) -> Unit,
     onReplyInNewGroup: (Message) -> Unit,
     onShowPhoto: (String) -> Unit,
+    onRate: (Message, Int?) -> Unit = { _, _ -> },
 ) {
     var showTime by remember(initiallyShowTime, message) {
         mutableStateOf(initiallyShowTime)
@@ -136,6 +137,9 @@ fun MessageItem(
                 selected = message in selectedMessages,
                 onSelectedChange = {
                     onSelectedChange(message, it)
+                },
+                onRate = { rating ->
+                    onRate(message, rating)
                 }
             )
         }

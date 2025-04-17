@@ -52,9 +52,11 @@ import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
+import app.ailaai.api.messageRating
 import app.ailaai.api.newReminder
 import app.ailaai.api.profile
 import app.ailaai.api.reactToMessage
+import app.ailaai.api.setMessageRating
 import app.ailaai.api.sticker
 import app.ailaai.api.updateMessage
 import coil3.imageLoader
@@ -85,6 +87,7 @@ import com.queatz.ailaai.services.say
 import com.queatz.ailaai.trade.ActiveTradeItem
 import com.queatz.ailaai.trade.TradeDialog
 import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.RateMessageDialog
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.dialogs.SelectTextDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
@@ -107,6 +110,7 @@ import com.queatz.db.PhotosAttachment
 import com.queatz.db.ProfilesAttachment
 import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
+import com.queatz.db.Rating
 import com.queatz.db.Reminder
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
@@ -149,6 +153,7 @@ fun ColumnScope.MessageContent(
     isReply: Boolean = false,
     selected: Boolean = false,
     onSelectedChange: ((Boolean) -> Unit)? = null,
+    onRate: (Int?) -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -157,6 +162,8 @@ fun ColumnScope.MessageContent(
     var showEditMessageDialog by rememberStateOf(false)
     var showSelectTextDialog by rememberStateOf<String?>(null)
     var autoSpeakText by rememberStateOf(false)
+    var showRateMessageDialog by rememberStateOf(false)
+    var currentRating by rememberStateOf<Int?>(null)
     var attachedCardId by remember { mutableStateOf<String?>(null) }
     var attachedTradeId by remember { mutableStateOf<String?>(null) }
     var attachedReplyId by remember { mutableStateOf<String?>(null) }
@@ -279,7 +286,54 @@ fun ColumnScope.MessageContent(
         }
     }
 
+    if (showRateMessageDialog) {
+        RateMessageDialog(
+            onDismissRequest = {
+                showRateMessageDialog = false
+            },
+            initialRating = currentRating,
+            onRemoveRating = {
+                scope.launch {
+                    api.setMessageRating(
+                        id = message.id!!,
+                        rating = Rating(rating = null)
+                    ) {
+                        onUpdated()
+                    }
+                }
+            },
+            onRate = { rating ->
+                scope.launch {
+                    api.setMessageRating(
+                        id = message.id!!,
+                        rating = Rating(rating = rating)
+                    ) {
+                        onUpdated()
+                    }
+                }
+            }
+        )
+    }
+
     if (showMessageDialog) {
+        // Fetch the current rating when the message dialog is shown
+        LaunchedEffect(Unit) {
+            try {
+                api.messageRating(
+                    id = message.id!!,
+                    onError = {
+                        // Silently handle error - message might not have a rating yet
+                        currentRating = null
+                    }
+                ) {
+                    currentRating = it.rating
+                }
+            } catch (e: Exception) {
+                // Fallback error handling
+                currentRating = null
+            }
+        }
+
         val messageString = stringResource(R.string.message)
         val savedString = stringResource(R.string.saved)
         Menu(
@@ -304,6 +358,18 @@ fun ColumnScope.MessageContent(
                         }
                     }
                 }
+            }
+
+            menuItem(
+                title = stringResource(R.string.rate),
+                textIcon = if (currentRating != null) {
+                    if (currentRating!! > 0) "+${currentRating}" else currentRating.toString()
+                } else {
+                    null
+                }
+            ) {
+                onShowMessageDialog(false)
+                showRateMessageDialog = true
             }
 
             if (canReply) {

@@ -216,7 +216,7 @@ fun EditReminderSchedule(
                 disabled()
             }
         }
-        appText { until }
+        appText { inlineUntil }
     }
 
     if (schedule.until) {

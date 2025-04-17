@@ -83,9 +83,9 @@ private val templates by lazy {
             source = """
             @Serializable
             data class Stats(val activePeople24Hours: Int)
-            
+
             val stats: Stats = http("https://api.ailaai.app/stats")
-            
+
             render {
                 text("There are currently ${"$"}{stats.activePeople24Hours} active people")
             }
@@ -96,12 +96,12 @@ private val templates by lazy {
             source = """
             @Serializable
             data class Request(val channel: String)
-            
+
             val ideas = http.post<List<String>, Request>("https://tagme.in/generate", Request("ideas"))
-            
+
             render {
                 section("Here are some ideas:")
-            
+
                 ideas.forEachIndexed { index, idea ->
                     text("${"$"}{index + 1}. ${"$"}idea")
                 }
@@ -113,18 +113,18 @@ private val templates by lazy {
             source = """
             @file:Repository("https://jitpack.io")
             @file:DependsOn("com.github.cosinekitty:astronomy:v2.1.19")
-            
+
             import io.github.cosinekitty.astronomy.*
             import java.lang.System.*
             import kotlin.math.*
-            
+
             val now = currentTimeMillis()
-            
+
             val percent = illumination(
                 Body.Moon,
                 Time.fromMillisecondsSince1970(now)
             ).phaseFraction.times(100f).roundToInt()
-            
+
             val emoji = when {
                 percent < 20 -> "🌑"
                 percent < 40 -> "🌒"
@@ -132,7 +132,7 @@ private val templates by lazy {
                 percent < 80 -> "🌔"
                 else -> "🌕️"
             }
-            
+
             render {
                 text("${"$"}emoji The moon is currently ${"$"}percent% illuminated")
             }
@@ -142,7 +142,7 @@ private val templates by lazy {
             name = "Counting button",
             source = """
             val count = data?.toIntOrNull() ?: 0
-            
+
             render {
                 text("Count: ${"$"}count")
                 button("+1", script = self, data = "${"$"}{count + 1}")
@@ -153,7 +153,7 @@ private val templates by lazy {
             name = "Roll a dice",
             source = """
             import kotlin.random.*
-            
+
             render {
                 text("${"$"}{Random.nextInt(6) + 1}")
                 button("Roll again", self)
@@ -168,7 +168,7 @@ private val templates by lazy {
                 val details: String,
                 val destinations: List<String>,
             )
-            
+
             val locations = listOf(
                 Location("Beach", "The beach is peaceful and quiet. You see a cave in the distance. Tall reeds cling around the towering stones.", listOf("Cave", "Reeds")),
                 Location("Cave", "A small wooden boat floats along the interior of the cave.", listOf("Boat", "Beach")),
@@ -176,9 +176,9 @@ private val templates by lazy {
                 Location("Island", "There is nothing of interest on the small sandy island.", listOf("Boat")),
                 Location("Reeds", "Hooray! You found the treasure!", listOf("Beach"))
             )
-            
+
             val location = locations.firstOrNull { it.name == data } ?: locations.first()
-            
+
             render {
                 section("You are at the ${"$"}{location.name}")
                 text(location.details)
@@ -220,7 +220,7 @@ fun ScriptsDialog(
     var scriptSource by rememberStateOf(
         """
             render {
-            
+
             }
         """.trimIndent()
     )
@@ -641,8 +641,7 @@ fun ScriptsDialog(
             {
                 showHelp = false
             },
-            // todo: translate
-            title = "Kotlin Scripts",
+            title = stringResource(R.string.kotlin_scripts),
             text = ScriptsResources.documentation,
             dismissButton = null,
             confirmButton = stringResource(R.string.close),

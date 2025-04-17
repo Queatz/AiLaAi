@@ -98,8 +98,14 @@ fun SheetHeader(
                             contentColor = if (selected == button) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     ) {
-                        // todo: translate
-                        Text(button.name)
+                        Text(
+                            when (button) {
+                                SheetContent.Posts -> stringResource(R.string.sheet_content_posts)
+                                SheetContent.Groups -> stringResource(R.string.sheet_content_groups)
+                                SheetContent.Pages -> stringResource(R.string.sheet_content_pages)
+                                SheetContent.Events -> stringResource(R.string.sheet_content_events)
+                            }
+                        )
                         // todo load counts from server
                         //Text(" ${Random(button.name.hashCode()).nextInt(20)}", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
                     }

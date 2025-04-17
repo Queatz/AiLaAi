@@ -24,7 +24,7 @@ fun Route.wildRoutes() {
                     ?: return@respond HttpStatusCode.NotFound.description("Card not found")
                 var wildDevice = db.device(DeviceType.Web, wildReply.device)
                 val wildPerson: Person = meOrNull ?: if (wildDevice.person == null) {
-                    // todo translate
+                    // todo: translate
                     db.insert(Person(source = PersonSource.Web, name = "Web message", seen = Clock.System.now())).also {
                         wildDevice.person = it.id
                         wildDevice = db.update(wildDevice)
@@ -37,7 +37,7 @@ fun Route.wildRoutes() {
                 val people = listOf(wildPerson.id!!, card.person!!).distinct()
                 val group = app.createGroup(people).let {
                     if (meOrNull == null) {
-                        // todo translate
+                        // todo: translate
                         it.description =
                             "This is a message from the web. The other person may not see your replies, but you can jot down notes here."
                     }

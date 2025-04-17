@@ -69,7 +69,7 @@ fun ReminderItem(reminder: Reminder, selected: Boolean, onSelected: () -> Unit) 
     }
 }
 
-// todo translate
+// todo: translate
 val Reminder.scheduleText @Composable get(): String = buildString {
     if (schedule == null) {
         if (end != null) {
@@ -92,63 +92,63 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     val dayStrings = (schedule?.weekdays?.map {
         application.locale.localize.day(it - 1)
     } ?: emptyList()) + (schedule?.days?.map {
-        if (it == -1) "last" else application.locale.localize.ordinalNumber(it)
+        if (it == -1) appString { inlineLast } else application.locale.localize.ordinalNumber(it)
     } ?: emptyList())
 
     if (dayStrings.isNotEmpty()) {
         append(dayStrings.asNaturalList { it })
 
         if (schedule?.days?.notEmpty != null) {
-            append(" day of the month")
+            append(" ${appString { inlineDayOfTheMonth }}")
         }
 
         append(" ")
     } else {
-        append("day ")
+        append("${appString { inlineDay }} ")
     }
 
     schedule?.hours?.notEmpty?.let { hours ->
         val mins = getMinutes(Date(start!!.toEpochMilliseconds()))
-        append("at ")
+        append("${appString { inlineAt }} ")
         append(hours.asNaturalList { format(parse("$it:$mins", "HH:mm", Date()), "h:mm a") })
         append(" ")
     }
 
-    var during = "during"
+    var during = appString { inlineDuring }
 
     schedule?.weeks?.notEmpty?.let { weeks ->
-        append("$during the ")
-        during = "of"
+        append("$during ${appString { inlineThe }} ")
+        during = appString { inlineOf }
         append(weeks.asNaturalList { application.locale.localize.ordinalNumber(it) })
-        append(" week")
+        append(" ${appString { inlineWeek }}")
         append(" ")
 
         if (schedule?.months?.notEmpty == null) {
-            append("of every month")
+            append(appString { inlineOfEveryMonth })
             append(" ")
         }
     }
 
     schedule?.months?.notEmpty?.let { months ->
         append("$during ")
-        during = "of"
+        during = appString { inlineOf }
         append(months.asNaturalList { application.locale.localize.month(it - 1) })
         append(" ")
     }
 
     schedule?.years?.notEmpty?.let { years ->
         append("$during ")
-        during = "of"
+        during = appString { inlineOf }
         append(years.asNaturalList { "$it" })
         append(" ")
     }
 
     val start = Date(start!!.toEpochMilliseconds())
     if (isAfter(start, Date())) {
-        append("from ${ start.format() } ")
+        append("${appString { inlineFrom }} ${ start.format() } ")
     }
 
     end?.let { Date(it.toEpochMilliseconds()) }?.let { end ->
-        append("until ${ end.format() } ")
+        append("${appString { inlineUntil }} ${ end.format() } ")
     }
 }.trimEnd()

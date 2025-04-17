@@ -113,7 +113,7 @@ object Strings {
         en = "Hi Town Use Cases",
         vn = "Trường hợp sử dụng Hi Town"
     )
-    
+
     val restart = Translation(
         en = "Restart",
         vn = "Khởi động lại"
@@ -320,7 +320,7 @@ object Strings {
         en = "Required",
         vn = "Bắt buộc"
     )
-    
+
     val pageIsPublished = Translation(
         en = "Page is published",
         vn = "Trang đã được xuất bản"
@@ -330,7 +330,7 @@ object Strings {
         en = "Page is saved",
         vn = "Trang đã được lưu"
     )
-    
+
     val accountDeletion = Translation(
         en = "Account Deletion",
         vn = "Xóa tài khoản"
@@ -420,7 +420,7 @@ object Strings {
         en = "Sent a profile",
         vn = "Đã gửi một trang cá nhân"
     )
-    
+
     val orGetItOn = Translation(
         en = "or get it on",
         vn = "hoặc tải xuống trên",
@@ -466,7 +466,7 @@ object Strings {
         vn = "Viết",
         ru = "Написать"
     )
-    
+
     val whoSendsMessagesToThisGroup = Translation(
         en = "Who sends messages to this group?",
         vn = "Ai gửi tin nhắn đến nhóm này?"
@@ -602,13 +602,58 @@ object Strings {
         en = "Every month",
         vn = "Mỗi tháng"
     )
-    val until = Translation(
-        en = "Until",
-        vn = "Cho đến khi"
+    val inlineUntil = Translation(
+        en = "until",
+        vn = "cho đến khi"
     )
 
     val nthWeek = Translation(
         en = "%1\$s week",
+    )
+
+    val inlineLast = Translation(
+        en = "last",
+        vn = "cuối cùng"
+    )
+
+    val inlineDayOfTheMonth = Translation(
+        en = "day of the month",
+        vn = "ngày của tháng"
+    )
+
+    val day = Translation(
+        en = "Day",
+        vn = "Ngày"
+    )
+
+    val inlineAt = Translation(
+        en = "at",
+        vn = "lúc"
+    )
+
+    val inlineDuring = Translation(
+        en = "during",
+        vn = "trong"
+    )
+
+    val inlineOf = Translation(
+        en = "of",
+        vn = "của"
+    )
+
+    val inlineOfEveryMonth = Translation(
+        en = "of every month",
+        vn = "của mỗi tháng"
+    )
+
+    val inlineFrom = Translation(
+        en = "from",
+        vn = "từ"
+    )
+
+    val inlineThe = Translation(
+        en = "the",
+        vn = "các"
     )
 
     val tapToSwitch = Translation(
