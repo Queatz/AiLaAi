@@ -15,33 +15,72 @@ sealed class StoryContent {
     @Serializable
     data object Divider : StoryContent()
     @Serializable
-    data class Reactions(val story: String, val reactions: ReactionSummary?) : StoryContent()
+    data class Reactions(
+        val story: String,
+        val reactions: ReactionSummary?,
+    ) : StoryContent()
     @Serializable
-    data class Comments(val story: String) : StoryContent()
+    data class Comments(
+        val story: String
+    ) : StoryContent()
     @Serializable
-    data class Title(val title: String, val id: String) : StoryContent()
+    data class Title(
+        val title: String,
+        val id: String,
+    ) : StoryContent()
     @Serializable
-    data class Authors(val publishDate: Instant?, val authors: List<Person>) : StoryContent()
+    data class Authors(
+        val publishDate: Instant?,
+        val authors: List<Person>,
+    ) : StoryContent()
     @Serializable
-    data class Section(val section: String) : StoryContent()
+    data class Section(
+        val section: String
+    ) : StoryContent()
     @Serializable
-    data class Text(val text: String) : StoryContent()
+    data class Text(
+        val text: String
+    ) : StoryContent()
     @Serializable
-    data class Groups(val groups: List<String>, val coverPhotos: Boolean = false) : StoryContent()
+    data class Groups(
+        val groups: List<String>,
+        val coverPhotos: Boolean = false,
+    ) : StoryContent()
     @Serializable
-    data class Cards(val cards: List<String>) : StoryContent()
+    data class Cards(
+        val cards: List<String>
+    ) : StoryContent()
     @Serializable
-    data class Photos(val photos: List<String>, val aspect: Float? = null) : StoryContent()
+    data class Photos(
+        val photos: List<String>,
+        val aspect: Float? = null,
+    ) : StoryContent()
     @Serializable
-    data class Audio(val audio: String) : StoryContent()
+    data class Audio(
+        val audio: String
+    ) : StoryContent()
     @Serializable
-    data class Widget(val widget: Widgets, val id: String) : StoryContent()
+    data class Widget(
+        val widget: Widgets,
+        val id: String,
+    ) : StoryContent()
     @Serializable
-    data class Button(val text: String, val script: String, val data: String?, val style: ButtonStyle? = null) : StoryContent()
+    data class Button(
+        val text: String,
+        val script: String,
+        val data: String?,
+        val style: ButtonStyle? = null,
+    ) : StoryContent()
     @Serializable
-    data class Input(val key: String, val value: String?) : StoryContent()
+    data class Input(
+        val key: String,
+        val value: String?,
+        val hint: String? = null,
+    ) : StoryContent()
     @Serializable
-    data class Profiles(val profiles: List<String>) : StoryContent()
+    data class Profiles(
+        val profiles: List<String>
+    ) : StoryContent()
 }
 
 @Serializable

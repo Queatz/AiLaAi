@@ -8,6 +8,7 @@ import app.components.Empty
 import app.dialog.dialog
 import app.messaages.inList
 import appString
+import appText
 import application
 import com.queatz.db.Person
 import components.Loading
@@ -101,8 +102,7 @@ suspend fun friendsDialog(
 
             if (shownPeople.isEmpty()) {
                 Empty {
-                    // todo: translate
-                    Text("No people.")
+                    appText { noPeople }
                 }
             } else {
                 shownPeople.forEachIndexed { index, person ->

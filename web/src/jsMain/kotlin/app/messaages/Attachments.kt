@@ -1,6 +1,7 @@
 package app.messaages
 
 import androidx.compose.runtime.Composable
+import appString
 import com.queatz.db.*
 import json
 import kotlinx.serialization.json.*
@@ -42,40 +43,39 @@ fun <T> T?.inList() = this?.let(::listOf) ?: emptyList<T>()
 fun Message.attachmentText(): String? = when (val attachment = getAttachment()) {
     is CardAttachment -> {
         if (attachment.card != null) {
-            // todo: translate
-            "Sent a page"
+            appString { sentAPage }
         } else {
             null
         }
     }
     is PhotosAttachment -> {
-        // todo: translate
-       "Sent a photo"
+        appString { sentAPhoto }
     }
+
     is AudioAttachment -> {
-        // todo: translate
-        "Sent an audio message"
+        appString { sentAnAudioMessage }
     }
+
     is VideosAttachment -> {
-        // todo: translate
-        "Sent a video"
+        appString { sentAVideo }
     }
+
     is StoryAttachment -> {
-        // todo: translate
-        "Sent a story"
+        appString { sentAStory }
     }
+
     is GroupAttachment -> {
-        // todo: translate
-        "Sent a group"
+        appString { sentAGroup }
     }
+
     is StickerAttachment -> {
-        // todo: translate
-        "Sent a sticker"
+        appString { sentASticker }
     }
+
     is ProfilesAttachment -> {
-        // todo: translate
-        "Sent a profile"
+        appString { sentAProfile }
     }
+
     else -> null
 }
 

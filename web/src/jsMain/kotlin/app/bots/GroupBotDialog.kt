@@ -12,6 +12,7 @@ import app.ailaai.api.groupBot
 import app.ailaai.api.updateGroupBot
 import app.dialog.dialog
 import app.menu.Menu
+import appString
 import application
 import com.queatz.db.Bot
 import com.queatz.db.GroupBot
@@ -73,12 +74,10 @@ suspend fun groupBotDialog(
             menuTarget?.let {
                 Menu({ menuTarget = null }, it) {
                     if (myMember?.member?.host == true) {
-                        // todo: translate
-                        item("Edit") {
+                        item(appString { edit }) {
                             onEditBot(bot, groupBot)
                         }
-                        // todo: translate
-                        item("Remove") {
+                        item(appString { remove }) {
                             scope.launch {
                                 val result = dialog(
                                     // todo: translate

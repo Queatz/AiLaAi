@@ -109,14 +109,14 @@ fun CardItem(
                 }
             }
             if (published) {
-                Icon("toggle_on", title = "Page is published") { // todo: translate
+                Icon("toggle_on", title = appString { pageIsPublished }) {
                     fontSize(22.px)
                     color(Styles.colors.primary)
                     marginLeft(.5.r)
                 }
             }
             if (saved) {
-                Icon("favorite", title = "Page is saved") { // todo: translate
+                Icon("favorite", title = appString { pageIsSaved }) {
                     fontSize(18.px)
                     color(Styles.colors.secondary)
                     marginLeft(.5.r)

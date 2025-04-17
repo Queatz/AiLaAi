@@ -55,23 +55,27 @@ fun NewCardInput(
             }
         }
 
-        // todo: translate
-        IconButton(if (publishNow) "toggle_on" else "toggle_off", "Publish now", onClick = {
-            publishNow = !publishNow
-        }, styles = {
-            if (publishNow) {
-                color(Styles.colors.primary)
-            } else {
-                color(Styles.colors.secondary)
-            }
+        IconButton(
+            name = if (publishNow) "toggle_on" else "toggle_off",
+            title = appString { publish },
+            onClick = {
+                publishNow = !publishNow
+            },
+            styles = {
+                if (publishNow) {
+                    color(Styles.colors.primary)
+                } else {
+                    color(Styles.colors.secondary)
+                }
 
-            marginTop(.5.r)
+                marginTop(.5.r)
 
-            if (!defaultMargins) {
-                marginLeft(1.r)
-            } else {
-                marginRight(2.r)
+                if (!defaultMargins) {
+                    marginLeft(1.r)
+                } else {
+                    marginRight(2.r)
+                }
             }
-        })
+        )
     }
 }

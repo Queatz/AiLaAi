@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import app.AppStyles
+import appString
 import notifications
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -55,8 +56,7 @@ fun NotificationsLayout() {
                     Div({
                         classes(AppStyles.notificationActions)
                     }) {
-                        // todo translate
-                        IconButton("close", "Dismiss") {
+                        IconButton("close", appString { dismiss }) {
                             notifications.remove(notification)
                             notification.onDismiss()
                         }
@@ -66,10 +66,8 @@ fun NotificationsLayout() {
 
             if (activeNotifications.size >= 2) {
                 IconButton(
-                    // todo: translate
                     name = "mop",
-                    // todo: translate
-                    title = "Clear all",
+                    title = appString { clearAll },
                     background = true,
                     styles = {
                         shadow(elevation = 2)

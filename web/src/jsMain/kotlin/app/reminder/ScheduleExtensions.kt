@@ -21,10 +21,8 @@ fun Long.formatDuration(): String? {
     val minutes = milliseconds.inWholeMinutes - hours.hours.inWholeMinutes
 
     return listOfNotNull(
-        // todo: translate
-        hours.takeIf { it > 0 }?.let { if (it == 1L) "$it hour" else "$it hours" },
-        // todo: translate
-        minutes.takeIf { it > 0 }?.let { if (it == 1L) "$it minute" else "$it minutes" },
+        hours.takeIf { it > 0 }?.let { if (it == 1L) "$it ${appString { hour }}" else "$it ${appString { this.hours }}" },
+        minutes.takeIf { it > 0 }?.let { if (it == 1L) "$it ${appString { minute }}" else "$it ${appString { this.minutes }}" },
     ).joinToString()
 }
 

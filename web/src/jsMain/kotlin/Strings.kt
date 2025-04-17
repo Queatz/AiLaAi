@@ -3,13 +3,606 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.neverEqualPolicy
 import org.jetbrains.compose.web.dom.Text
 
+/**
+ * Holds translations for a single term or phrase in multiple languages.
+ *
+ * @property en The English translation (default language).
+ * @property vn The Vietnamese translation.
+ * @property ru The Russian translation (default to English if not provided).
+ */
 data class Translation(
     val en: String,
-    val vn: String,
-    val ru: String = en
+    val vn: String = en,
+    val ru: String = en,
 )
 
+/**
+ * A central repository for all application strings, encapsulating translations
+ * for different languages (English, Vietnamese, and optionally Russian).
+ */
 object Strings {
+    val viewReactions = Translation(
+        en = "View reactions",
+        vn = "Xem phản ứng"
+    )
+    val rate = Translation(
+        en = "Rate",
+        vn = "Đánh giá"
+    )
+    val editMessage = Translation(
+        en = "Edit message",
+        vn = "Chỉnh sửa tin nhắn"
+    )
+    val deleteThisMessage = Translation(
+        en = "Delete this message?",
+        vn = "Xóa tin nhắn này?"
+    )
+    val sentAt = Translation(
+        en = "Sent at %1\$s",
+        vn = "Đã gửi lúc %1\$s"
+    )
+    val tapToReact = Translation(
+        en = "Tap to react",
+        vn = "Nhấn để phản ứng"
+    )
+    val clearAll = Translation(
+        en = "Clear all",
+        vn = "Xóa tất cả"
+    )
+    val yourProfileUrl = Translation(
+        en = "Your profile URL",
+        vn = "URL hồ sơ của bạn"
+    )
+    val copied = Translation(
+        en = "Copied!",
+        vn = "Đã sao chép!"
+    )
+    val copyProfileLink = Translation(
+        en = "Copy profile link",
+        vn = "Sao chép liên kết hồ sơ"
+    )
+    val openProfile = Translation(
+        en = "Open profile",
+        vn = "Mở hồ sơ"
+    )
+    val hour = Translation(
+        en = "Hour",
+        vn = "Giờ"
+    )
+    val minute = Translation(
+        en = "Minute",
+        vn = "Phút"
+    )
+    val hours = Translation(
+        en = "Hours",
+        vn = "Giờ"
+    )
+    val minutes = Translation(
+        en = "Minutes",
+        vn = "Phút"
+    )
+    val switchView = Translation(
+        en = "Switch view",
+        vn = "Chuyển chế độ xem"
+    )
+    val newScript = Translation(
+        en = "New script",
+        vn = "Tập lệnh mới"
+    )
+    val removeRating = Translation(
+        en = "Remove rating",
+        vn = "Xóa xếp hạng"
+    )
+    val help = Translation(
+        en = "Help",
+        vn = "Trợ giúp"
+    )
+    val yourRatingsAreVisible = Translation(
+        en = "Your ratings are only visible to you.",
+        vn = "Xếp hạng của bạn chỉ hiển thị với bạn."
+    )
+    val text = Translation(
+        en = "Text",
+        vn = "Văn bản"
+    )
+    val openLink = Translation(
+        en = "Open link",
+        vn = "Mở liên kết"
+    )
+    val appUseCases = Translation(
+        en = "Hi Town Use Cases",
+        vn = "Trường hợp sử dụng Hi Town"
+    )
+    
+    val restart = Translation(
+        en = "Restart",
+        vn = "Khởi động lại"
+    )
+    val errorSubmittingForm = Translation(
+        en = "There was an error submitting the form.",
+        vn = "Đã xảy ra lỗi khi gửi biểu mẫu."
+    )
+    val tryAgainOrContact = Translation(
+        en = "Please try again or contact the form owner.",
+        vn = "Vui lòng thử lại hoặc liên hệ với chủ sở hữu biểu mẫu."
+    )
+    val formSubmitted = Translation(
+        en = "Form submitted!",
+        vn = "Biểu mẫu đã được gửi!"
+    )
+    val tapToRemove = Translation(
+        en = "Tap to remove",
+        vn = "Nhấn để xóa"
+    )
+    val removeThisPhoto = Translation(
+        en = "Remove this photo?",
+        vn = "Xóa ảnh này?"
+    )
+    val addPhotos = Translation(
+        en = "Add photos",
+        vn = "Thêm ảnh"
+    )
+    val submitting = Translation(
+        en = "Submitting…",
+        vn = "Đang gửi…"
+    )
+    val signInToSubmitForm = Translation(
+        en = "Sign in to submit this form",
+        vn = "Đăng nhập để gửi biểu mẫu này"
+    )
+    val noPeople = Translation(
+        en = "No people.",
+        vn = "Không có người."
+    )
+    val androidApk = Translation(
+        en = "Android APK",
+        vn = "APK Android"
+    )
+    val appStore = Translation(
+        en = "App Store"
+    )
+    val noPagesInGroup = Translation(
+        en = "This group currently has no pages.",
+        vn = "Nhóm này hiện không có trang nào."
+    )
+    val createOpenGroupAbout = Translation(
+        en = "Create an open group about \"%1\$s\".",
+        vn = "Tạo một nhóm mở về \"%1\$s\"."
+    )
+    val setStatus = Translation(
+        en = "Set status",
+        vn = "Đặt trạng thái"
+    )
+    val isInvitingYouTo = Translation(
+        en = "is inviting you to",
+        vn = "đang mời bạn tham gia"
+    )
+    val inviteCodeCannotBeUsed = Translation(
+        en = "The invite code cannot be used",
+        vn = "Mã mời không thể sử dụng"
+    )
+    val acceptInvite = Translation(
+        en = "Accept invite",
+        vn = "Chấp nhận lời mời"
+    )
+    val name = Translation(
+        en = "Name",
+        vn = "Tên"
+    )
+    val publish = Translation(
+        en = "Publish",
+        vn = "Xuất bản"
+    )
+    val collapse = Translation(
+        en = "Collapse",
+        vn = "Thu gọn"
+    )
+    val expand = Translation(
+        en = "Expand",
+        vn = "Mở rộng"
+    )
+    val searchForPlaces = Translation(
+        en = "Search for places, services, and more",
+        vn = "Tìm kiếm địa điểm, dịch vụ và hơn thế nữa"
+    )
+    val paid = Translation(
+        en = "Paid",
+        vn = "Trả phí"
+    )
+    val viewList = Translation(
+        en = "View list",
+        vn = "Xem danh sách"
+    )
+    val pages = Translation(
+        en = "Pages",
+        vn = "Trang"
+    )
+    
+    val enterYourMessage = Translation(
+        en = "Enter your message"
+    )
+ 
+    val z = Translation(
+        en = "z"
+    )
+
+    val howWouldYouLikeToBeContacted = Translation(
+        en = "How would you like to be contacted?"
+    )
+
+    val yourPhoneNumberOrEmail = Translation(
+        en = "Your phone number or email"
+    )
+
+    val general = Translation(
+        en = "General"
+    )
+
+    val stylized = Translation(
+        en = "Stylized"
+    )
+
+    val descriptionOptional = Translation(
+        en = "Description (optional)"
+    )
+
+    val multipleUses = Translation(
+        en = "Multiple uses"
+    )
+
+    val expires = Translation(
+        en = "Expires"
+    )
+
+    val clearStatus = Translation(
+        en = "Clear status"
+    )
+
+    val generating = Translation(
+        en = "Generating"
+    )
+
+    val pageUpdatedWhenPhotoGenerated = Translation(
+        en = "The page will be updated when the photo is generated."
+    )
+
+    val pageTitleHintDetailsSharedWithThirdParty = Translation(
+        en = "Page title, hint, and details are shared with a 3rd party."
+    )
+
+    val dontShowThisAgain = Translation(
+        en = "Don't show this again"
+    )
+
+    val thisWillReplaceCurrentPhoto = Translation(
+        en = "This will replace the current photo."
+    )
+
+    val generateNewPhoto = Translation(
+        en = "Generate a new photo?"
+    )
+
+    val deleteThisPage = Translation(
+        en = "Delete this page?"
+    )
+
+    val youCannotUndoThis = Translation(
+        en = "You cannot undo this."
+    )
+
+    val pageIsNotPublished = Translation(
+        en = "Page is not published"
+    )
+
+    val required = Translation(
+        en = "Required"
+    )
+    
+    val pageIsPublished = Translation(
+        en = "Page is published",
+        vn = "Trang đã được xuất bản"
+    )
+
+    val pageIsSaved = Translation(
+        en = "Page is saved",
+        vn = "Trang đã được lưu"
+    )
+    
+    val accountDeletion = Translation(
+        en = "Account Deletion",
+        vn = "Xóa tài khoản"
+    )
+
+    val sendAnEmail = Translation(
+        en = "Send an email",
+        vn = "Gửi một email"
+    )
+
+    val sendAnEmailDeleteAccount = Translation(
+        en = "containing your profile URL and Transfer Code to permanently delete your account.",
+        vn = "chứa URL hồ sơ của bạn và mã chuyển để xóa vĩnh viễn tài khoản của bạn."
+    )
+
+    val sendAnEmailDeleteAccount2 = Translation(
+        en = "You can find this information on your profile page.",
+        vn = "Bạn có thể tìm thấy thông tin này trên trang hồ sơ của mình."
+    )
+
+    val noBots = Translation(
+        en = "No bots.",
+        vn = "Không có bot."
+    )
+
+    val newBot = Translation(
+        en = "New bot",
+        vn = "Bot mới"
+    )
+
+    val noDescription = Translation(
+        en = "No description",
+        vn = "Không có mô tả"
+    )
+
+    val custom = Translation(
+        en = "Custom",
+        vn = "Tuỳ chỉnh"
+    )
+
+    val messageReactions = Translation(
+        en = "Message reactions",
+        vn = "Phản ứng tin nhắn"
+    )
+
+    val getTheApp = Translation(
+        en = "Get the app",
+        vn = "Tải ứng dụng"
+    )
+
+    val sentAPage = Translation(
+        en = "Sent a page",
+        vn = "Đã gửi một trang"
+    )
+
+    val sentAPhoto = Translation(
+        en = "Sent a photo",
+        vn = "Đã gửi một bức ảnh"
+    )
+
+    val sentAnAudioMessage = Translation(
+        en = "Sent an audio message",
+        vn = "Đã gửi một tin nhắn âm thanh"
+    )
+
+    val sentAVideo = Translation(
+        en = "Sent a video",
+        vn = "Đã gửi một video"
+    )
+
+    val sentAStory = Translation(
+        en = "Sent a story",
+        vn = "Đã gửi một câu chuyện"
+    )
+
+    val sentAGroup = Translation(
+        en = "Sent a group",
+        vn = "Đã gửi một nhóm"
+    )
+
+    val sentASticker = Translation(
+        en = "Sent a sticker",
+        vn = "Đã gửi một nhãn dán"
+    )
+
+    val sentAProfile = Translation(
+        en = "Sent a profile",
+        vn = "Đã gửi một hồ sơ"
+    )
+    
+    val orGetItOn = Translation(
+        en = "or get it on",
+        vn = "hoặc tải xuống trên",
+        ru = "или скачайте это на"
+    )
+
+    val googlePlay = Translation(
+        en = "Google Play"
+    )
+
+    val iOSSupportComingSoon = Translation(
+        en = "iOS support is coming soon!",
+        vn = "Hỗ trợ iOS sẽ sớm ra mắt!",
+        ru = "Поддержка iOS скоро появится!"
+    )
+
+    val dismiss = Translation(
+        en = "Dismiss",
+        vn = "Bỏ qua",
+        ru = "Закрыть"
+    )
+
+    val history = Translation(
+        en = "History",
+        vn = "Lịch sử",
+        ru = "История"
+    )
+
+    val fromUntil = Translation(
+        en = "From %1\$s until %2\$s",
+        vn = "Từ %1\$s đến %2\$s",
+        ru = "С %1\$s до %2\$s"
+    )
+
+    val section = Translation(
+        en = "Section",
+        vn = "Phần",
+        ru = "Раздел"
+    )
+
+    val write = Translation(
+        en = "Write",
+        vn = "Viết",
+        ru = "Написать"
+    )
+    
+    val whoSendsMessagesToThisGroup = Translation(
+        en = "Who sends messages to this group?",
+        vn = "Ai gửi tin nhắn đến nhóm này?"
+    )
+
+    val hosts = Translation(
+        en = "Hosts",
+        vn = "Chủ nhóm"
+    )
+
+    val everyone = Translation(
+        en = "Everyone",
+        vn = "Mọi người"
+    )
+
+    val every = Translation(
+        en = "Every",
+        vn = "Mỗi"
+    )
+
+    val whoEditsThisGroup = Translation(
+        en = "Who edits this group?",
+        vn = "Ai chỉnh sửa nhóm này?"
+    )
+
+    val nameIntroductionPhoto = Translation(
+        en = "Name, introduction, photo",
+        vn = "Tên, giới thiệu, hình ảnh"
+    )
+
+    val createInviteLink = Translation(
+        en = "Create an invite link",
+        vn = "Tạo liên kết mời"
+    )
+
+    val inviteLinkCouldNotBeCreated = Translation(
+        en = "The invite link could not be created",
+        vn = "Không thể tạo liên kết mời"
+    )
+
+    val inviteLinkIsActive = Translation(
+        en = "Invite link is active",
+        vn = "Liên kết mời đang hoạt động"
+    )
+
+    val copyLink = Translation(
+        en = "Copy link",
+        vn = "Sao chép liên kết"
+    )
+
+    val tapToAnswer = Translation(
+        en = "Tap to answer",
+        vn = ""
+    )
+    val editNote = Translation(
+        en = "Edit note",
+        vn = "Chỉnh sửa ghi chú"
+    )
+    val deleteOccurrence = Translation(
+        en = "Delete this occurrence?",
+        vn = "Xóa mục này?"
+    )
+    val yesDelete = Translation(
+        en = "Yes, delete",
+        vn = "Vâng, xóa"
+    )
+    val rescheduleOccurrence = Translation(
+        en = "Reschedule occurrence",
+        vn = "Lên lịch lại mục này"
+    )
+    val unmarkAsDone = Translation(
+        en = "Unmark as done",
+        vn = "Bỏ đánh dấu hoàn thành"
+    )
+    val markAsDone = Translation(
+        en = "Mark as done",
+        vn = "Đánh dấu hoàn thành"
+    )
+    val open = Translation(
+        en = "Open",
+        vn = "Mở"
+    )
+    val peopleInCall = Translation(
+        en = "%1\$s in call",
+        vn = "%1\$s đang trong cuộc gọi"
+    )
+    val reaction = Translation(
+        en = "Reaction",
+        vn = "Phản ứng"
+    )
+    val rating = Translation(
+        en = "Rating",
+        vn = "Xếp hạng"
+    )
+    
+    val fullscreen = Translation(
+        en = "Fullscreen",
+        vn = ""
+    )
+    val microphone = Translation(
+        en = "Microphone",
+        vn = ""
+    )
+    val camera = Translation(
+        en = "Camera",
+        vn = ""
+    )
+    val shareScreen = Translation(
+        en = "Share screen",
+        vn = ""
+    )
+    val reoccurs = Translation(
+        en = "Reoccurs",
+        vn = ""
+    )
+    val everyDay = Translation(
+        en = "Every day",
+        vn = ""
+    )
+    val ofTheMonth = Translation(
+        en = "%1\$s of the month",
+        vn = ""
+    )
+    val lastDayOfTheMonth = Translation(
+        en = "Last day of the month",
+        vn = ""
+    )
+    val everyWeek = Translation(
+        en = "Every week",
+        vn = ""
+    )
+    val everyMonth = Translation(
+        en = "Every month",
+        vn = ""
+    )
+    val until = Translation(
+        en = "Until",
+        vn = ""
+    )
+    
+    val nthWeek = Translation(
+        en = "%1\$s week",
+    )
+
+    val tapToSwitch = Translation(
+        en = "Tap to switch",
+        vn = ""
+    )
+    
+    val personCommentedOnYourStory = Translation(
+        en = "%1\$s commented on your story",
+        vn = ""
+    )
+    
+    val personRepliedToYourComment = Translation(
+        en = "%1\$s replied to your comment",
+        vn = ""
+    )
+    
     val openPage = Translation(
         en = "Open page",
         vn = "Mở trang"
@@ -341,10 +934,6 @@ object Strings {
         " for all inquiries.",
         " cho tất cả các yêu cầu nha."
     )
-    val please = Translation(
-        "",
-        "Hãy "
-    )
     val searching = Translation(
         "Searching…",
         "Đang tìm kiếm…"
@@ -519,7 +1108,19 @@ object Strings {
     )
     val inlineHour = Translation(
         "hour",
-        "giờ"
+        "tiếng"
+    )
+    val inlineHours = Translation(
+        "hours",
+        "tiếng"
+    )
+    val inlineMinute = Translation(
+        "minute",
+        "phút"
+    )
+    val inlineMinutes = Translation(
+        "minutes",
+        "phút"
     )
     val inlineDay = Translation(
         "day",
@@ -588,6 +1189,10 @@ object Strings {
     val choosePhoto = Translation(
         "Choose photo",
         "Chọn ảnh"
+    )
+    val choose = Translation(
+        "Choose",
+        "Chọn"
     )
     val describePhoto = Translation(
         "Describe photo",
@@ -916,21 +1521,54 @@ object Strings {
     )
 }
 
+/**
+ * Retrieves the appropriate translation of a given string based on the specified language.
+ *
+ * @param string The `Translation` object containing translations in multiple languages.
+ * @param language The language code to select the translation ("vi" for Vietnamese, "ru" for Russian, default to English).
+ * @return The translated string in the requested language.
+ */
 fun getString(string: Translation, language: String) = when (language) {
     "vi" -> string.vn
     "ru" -> string.ru
     else -> string.en
 }
 
+/**
+ * A composable function to fetch the translated string specifically for use
+ * in the application's user interface based on the current language configuration.
+ *
+ * @param string The `Translation` object to translate.
+ * @return The localized string for the current language.
+ */
 @Composable
 private fun appString(string: Translation) = getString(string, LocalConfiguration.current.language)
 
+/**
+ * A composable function that takes a block to fetch a specific translation
+ * from the `Strings` object in the current language configuration.
+ *
+ * @param block A lambda to retrieve a `Translation` object from `Strings`.
+ * @return The localized string for the current language.
+ */
 @Composable
 fun appString(block: Strings.() -> Translation) = appString(block(Strings))
 
+/**
+ * A composable function that directly displays a localized string based on
+ * the current language configuration.
+ *
+ * @param block A lambda to retrieve a `Translation` object from `Strings`.
+ */
 @Composable
 fun appText(block: Strings.() -> Translation) = Text(appString(block))
 
+/**
+ * Holds the application's language configuration and allows switching between languages.
+ *
+ * @property language The currently selected language code (default is "en").
+ * @constructor Initializes with a default language and a callback to change the language.
+ */
 class Configuration(
     var language: String = "en",
     private val onLanguage: (String) -> Unit,
@@ -940,11 +1578,26 @@ class Configuration(
     }
 }
 
+/**
+ * A CompositionLocal that provides the current language configuration throughout the application.
+ * This helps dynamically update UI elements based on language changes.
+ */
 val LocalConfiguration = compositionLocalOf(
     neverEqualPolicy()
 ) {
-    Configuration(application.language) {}
+Configuration(application.language) {}
 }
 
+
+/**
+ * Formats a string with placeholder replacements. The placeholders must follow the pattern %1$s, %2$s, etc.
+ * Example: "Hello, %1$s!".format("world") => "Hello, world!"
+ *
+ * @receiver The string containing placeholders.
+ * @param values The values to replace the placeholders.
+ * @return The formatted string with placeholders replaced by the provided values.
+ */
 fun String.format(vararg values: String) =
-    values.foldIndexed(this) { index, acc, it -> acc.replace("%${index + 1}\$s", it) }
+    values.foldIndexed(this) { index, acc, it ->
+        acc.replace("%${index + 1}\$s", it)
+    }

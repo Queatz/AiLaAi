@@ -109,8 +109,7 @@ fun ProfileNavPage(
     NavMenu {
         val yourName = appString { yourName }
         val update = appString { update }
-        // todo: translate
-        val yourUrl = "Your profile URL"
+        val yourUrl = appString { yourProfileUrl }
 
         NavMenuItem("account_circle", me?.name?.notBlank ?: yourName) {
             scope.launch {
@@ -175,8 +174,13 @@ fun ProfileNavPage(
                     }
                 }
             ) {
-                // todo: translate
-                Text(if (copiedLink) "Copied!" else "Copy profile link")
+                Text(
+                    if (copiedLink) {
+                        appString { copied }
+                    } else {
+                        appString { copyProfileLink }
+                    }
+                )
             }
             Button(
                 {
@@ -193,8 +197,7 @@ fun ProfileNavPage(
                     }
                 }
             ) {
-                // todo: translate
-                Text("Open profile")
+                appText { openProfile }
             }
         }
 

@@ -91,8 +91,7 @@ fun HomePage() {
                         opacity(.5f)
                     }
                 }) {
-                    // todo translate
-                    Text("or get it on")
+                    appText { orGetItOn }
                 }
                 A("https://play.google.com/store/apps/details?id=com.ailaai.app", {
                     target(ATarget.Blank)
@@ -102,15 +101,14 @@ fun HomePage() {
                         textDecoration("underline")
                     }
                 }) {
-                    Text("Google Play")
+                    appText { googlePlay }
                 }
                 Span({
                     style {
                         opacity(.5f)
                     }
                 }) {
-                    // todo translate
-                    Text(". iOS support is coming soon!")
+                    appText { iOSSupportComingSoon }
                 }
             }
         }

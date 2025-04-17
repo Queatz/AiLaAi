@@ -136,8 +136,7 @@ fun MessageItem(
                     item(
                         title = appString { react },
                         icon = if (hasReactions) "visibility" else "add_reaction",
-                        // todo: translate
-                        iconTitle = if (hasReactions) "View reactions" else null,
+                        iconTitle = if (hasReactions) appString { viewReactions } else null,
                         onIconClick = if (hasReactions) {
                             {
                                 scope.launch {
@@ -153,8 +152,7 @@ fun MessageItem(
                 }
 
                 item(
-                    // todo: translate
-                    title = "Rate",
+                    title = appString { rate },
                     textIcon = rating?.withPlus()
                 ) {
                     onRate(rating)
@@ -174,8 +172,7 @@ fun MessageItem(
                     item(appString { edit }) {
                         scope.launch {
                             inputDialog(
-                                // todo: translate
-                                title = "Edit message",
+                                title = application.appString { editMessage },
                                 confirmButton = application.appString { update },
                                 singleLine = false,
                                 defaultValue = message.text.orEmpty()
@@ -194,8 +191,7 @@ fun MessageItem(
                     item(appString { delete }) {
                         scope.launch {
                             dialog(
-                                // todo: translate
-                                title = "Delete this message?",
+                                title = application.appString { deleteThisMessage },
                                 confirmButton = application.appString { delete }
                             ).let {
                                 if (it == true) {
@@ -216,8 +212,7 @@ fun MessageItem(
                             cancelButton = null,
                         ) {
                             Div {
-                                // todo: translate
-                                Text("Sent ${message.createdAt!!.toJSDate().format()}")
+                                Text(appString { sentAt }.format(message.createdAt!!.toJSDate().format()))
                             }
                         }
                     }
@@ -242,10 +237,14 @@ fun MessageItem(
         }) {
             var showingSticker by remember { mutableStateOf(false) }
             if (!showingSticker) {
-                // todo: translate
-                IconButton("more_vert", "Options", background = true, styles = {
-                    opacity(if (showOptionsMenuButton || messageMenuTarget != null) 1f else 0f)
-                }) {
+                IconButton(
+                    name = "more_vert",
+                    title = appString { options },
+                    background = true,
+                    styles = {
+                        opacity(if (showOptionsMenuButton || messageMenuTarget != null) 1f else 0f)
+                    }
+                ) {
                     messageMenuTarget =
                         if (messageMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
                 }

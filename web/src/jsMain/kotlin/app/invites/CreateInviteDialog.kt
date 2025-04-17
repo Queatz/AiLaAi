@@ -8,6 +8,8 @@ import api
 import app.ailaai.api.createInvite
 import app.dialog.inputDialog
 import app.reminder.ReminderDateTime
+import appText
+import application
 import com.queatz.db.Invite
 import kotlinx.datetime.toKotlinInstant
 import lib.addDays
@@ -27,6 +29,7 @@ import org.jetbrains.compose.web.dom.TextInput
 import parseDateTime
 import r
 import kotlin.js.Date
+import kotlin.math.exp
 
 suspend fun createInviteDialog(
     group: String,
@@ -41,12 +44,9 @@ suspend fun createInviteDialog(
     var expiresTime by mutableStateOf(format(initialDate, "HH:mm"))
 
     val about = inputDialog(
-        // todo: translate
-        title = "Create invite link",
-        // todo: translate
-        placeholder = "Description (optional)",
-        // todo: translate
-        confirmButton = "Create",
+        title = application.appString { createInviteLink },
+        placeholder = application.appString { descriptionOptional },
+        confirmButton = application.appString { create },
         singleLine = false,
         content = { resolve, _, _ ->
             Label(attrs = {
@@ -59,8 +59,7 @@ suspend fun createInviteDialog(
                         hasTotal = it.value
                     }
                 }
-                // todo: translate
-                Text("Multiple uses")
+                appText { multipleUses }
             }
 
             if (hasTotal) {
@@ -99,8 +98,7 @@ suspend fun createInviteDialog(
                         expires = it.value
                     }
                 }
-                // todo: translate
-                Text("Expires")
+                appText { this.expires }
             }
 
             if (expires) {

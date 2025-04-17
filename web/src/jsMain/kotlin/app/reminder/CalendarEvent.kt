@@ -11,10 +11,10 @@ import app.page.ReminderDragData
 import app.page.ReminderEvent
 import app.page.ScheduleView
 import app.page.updateDate
+import appString
 import bulletedString
 import io.ktor.http.ContentType
 import json
-import kotlinx.serialization.encodeToString
 import notBlank
 import org.jetbrains.compose.web.attributes.Draggable
 import org.jetbrains.compose.web.css.height
@@ -58,8 +58,7 @@ fun CalendarEvent(
         )
     }
 
-    // todo: translate
-    val titleString = event.reminder.title ?: "New reminder"
+    val titleString = event.reminder.title ?: appString { newReminder }
     val info = bulletedString(
         titleString,
         "⏰".takeIf { event.reminder.alarm == true },

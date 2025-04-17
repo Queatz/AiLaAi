@@ -2,6 +2,7 @@ package app.reminder
 
 import androidx.compose.runtime.Composable
 import app.AppStyles
+import appString
 import asNaturalList
 import bulletedString
 import com.queatz.db.*
@@ -41,8 +42,7 @@ fun ReminderItem(reminder: Reminder, selected: Boolean, onSelected: () -> Unit) 
             Div({
                 classes(AppStyles.groupItemName)
             }) {
-                // todo translate
-                Text(reminder.title ?: "New reminder")
+                Text(reminder.title ?: appString { newReminder })
             }
             Div({
                 classes(AppStyles.groupItemMessage)
@@ -69,7 +69,12 @@ fun ReminderItem(reminder: Reminder, selected: Boolean, onSelected: () -> Unit) 
 val Reminder.scheduleText @Composable get(): String = buildString {
     if (schedule == null) {
         if (end != null) {
-            append("From ${Date(start!!.toEpochMilliseconds()).format()} until ${Date(end!!.toEpochMilliseconds()).format()}")
+            append(
+                appString { fromUntil }.format(
+                    Date(start!!.toEpochMilliseconds()).format(),
+                    Date(end!!.toEpochMilliseconds()).format()
+                )
+            )
         } else {
             append(Date(start!!.toEpochMilliseconds()).format())
         }
@@ -77,7 +82,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
         return@buildString
     }
 
-    append("Every")
+    append(appString { every })
     append(" ")
 
     val dayStrings = (schedule?.weekdays?.map {

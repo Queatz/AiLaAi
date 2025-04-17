@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.cardsCards
+import appText
 import baseUrl
 import com.queatz.db.Card
 import components.getConversation
@@ -53,8 +54,7 @@ fun UseCasesPage() {
         }
     }) {
         H1 {
-            // todo: translate
-            Text("Hi Town Use Cases")
+            appText { appUseCases }
         }
         useCases.forEachIndexed { index, useCase ->
             Div({

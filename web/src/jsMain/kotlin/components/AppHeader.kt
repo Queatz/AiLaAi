@@ -115,8 +115,7 @@ fun AppHeader(
                     }
                 }
             }) {
-                // todo: translate
-                Text("Get the app")
+                appText { getTheApp }
             }
         }
         Span({

@@ -410,8 +410,7 @@ fun SpaceWidget(widgetId: String) {
                             SpaceWidgetTool.Text -> {
                                 scope.launch {
                                     val text = inputDialog(
-                                        // todo: translate
-                                        title = "Text",
+                                        title = application.appString { text },
                                         singleLine = false
                                     )
 
@@ -485,8 +484,7 @@ fun SpaceWidget(widgetId: String) {
                                     if (sqrt((mouseX - x).pow(2) + (mouseY - y).pow(2)) <= 24.0) {
                                         scope.launch {
                                             val text = inputDialog(
-                                                // todo: translate
-                                                title = "Text",
+                                                title = application.appString { text },
                                                 defaultValue = item.text.orEmpty(),
                                                 singleLine = false
                                             )

@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.menuItem
@@ -34,7 +35,12 @@ fun LazyGridScope.inputCreatorItem(creatorScope: CreatorScope<StoryContent.Input
                 showInputMenu = true
             }
         ) {
-            Text(part.key)
+            Text(
+                bulletedString(
+                    part.key,
+                    part.hint
+                )
+            )
         }
     }
 }

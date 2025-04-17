@@ -1,6 +1,7 @@
 package app.info
 
 import androidx.compose.runtime.Composable
+import appText
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -27,16 +28,15 @@ fun AccountDeletionPage() {
         }
     }) {
         H1 {
-            // todo: translate
-            Text("Account Deletion")
+            appText { accountDeletion }
         }
         Div {
             A(href = "mailto:jacobaferrero@gmail.com") {
-                Text("Send an email")
+                appText { sendAnEmail }
             }
             Span {
-                // todo: translate
-                Text(" containing your profile URL and Transfer Code to permanently delete your account.")
+                Text(" ")
+                appText { sendAnEmailDeleteAccount }
             }
         }
         Div({
@@ -44,8 +44,7 @@ fun AccountDeletionPage() {
                 marginTop(1.r)
             }
         }) {
-            // todo: translate
-            Text("You can find this information on your profile page.")
+            appText { sendAnEmailDeleteAccount2 }
         }
     }
 }

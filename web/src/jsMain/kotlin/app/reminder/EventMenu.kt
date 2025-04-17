@@ -3,7 +3,6 @@ package app.reminder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.deleteReminderOccurrence
@@ -13,6 +12,8 @@ import app.dialog.inputDialog
 import app.menu.Menu
 import app.page.ReminderEvent
 import app.page.updateDate
+import appString
+import application
 import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -48,11 +49,8 @@ fun EventMenu(
     fun edit() {
         scope.launch {
             val note = inputDialog(
-                // todo translate
-                title = "Edit note",
-                placeholder = "",
-                // todo translate
-                confirmButton = "Update",
+                title = application.appString { editNote },
+                confirmButton = application.appString { update },
                 defaultValue = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: ""
             )
 
@@ -72,8 +70,10 @@ fun EventMenu(
 
     fun delete() {
         scope.launch {
-            // todo translate
-            val result = dialog("Delete this occurrence?", confirmButton = "Yes, delete")
+            val result = dialog(
+                title = application.appString { deleteOccurrence },
+                confirmButton = application.appString { yesDelete }
+            )
 
             if (result != true) return@launch
 
@@ -90,8 +90,10 @@ fun EventMenu(
         scope.launch {
             var date by mutableStateOf(format(event.date, "yyyy-MM-dd"))
             var time by mutableStateOf(format(event.date, "HH:mm"))
-            // todo translate
-            val result = dialog("Reschedule occurrence", confirmButton = "Update") {
+            val result = dialog(
+                title = application.appString { rescheduleOccurrence },
+                confirmButton = application.appString { update }
+            ) {
                 ReminderDateTime(
                     date = date,
                     time = time,
@@ -118,29 +120,30 @@ fun EventMenu(
         Menu(onDismissRequest, target) {
             if (showMarkAsDone) {
                 val done = event.occurrence?.done == true
-                // todo: translate
-                item(if (done) "Unmark as done" else "Mark as done") {
+                item(
+                    title = if (done) {
+                        appString { unmarkAsDone }
+                    } else {
+                        appString { markAsDone }
+                    }
+                ) {
                     markAsDone(!done)
                 }
             }
             if (showEditNote) {
-                // todo: translate
-                item("Edit note") {
+                item(appString { editNote }) {
                     edit()
                 }
             }
             if (showOpen) {
-                // todo: translate
-                item("Open") {
+                item(appString { open }) {
                     onOpen()
                 }
             }
-            // todo: translate
-            item("Reschedule") {
+            item(appString { reschedule }) {
                 reschedule()
             }
-            // todo: translate
-            item("Delete") {
+            item(appString { delete }) {
                 delete()
             }
         }

@@ -155,10 +155,9 @@ fun CallLayout(activeCall: GroupCall) {
                             Div({
                                 classes(CallStyles.participantControls)
                             }) {
-                                // todo translate
                                 IconButton(
-                                    if (activeCall.pinnedStream != null) "fullscreen_exit" else "fullscreen",
-                                    "Fullscreen"
+                                    name = if (activeCall.pinnedStream != null) "fullscreen_exit" else "fullscreen",
+                                    title = appString { this.fullscreen }
                                 ) {
                                     call.togglePin(participant.stream)
                                 }
@@ -228,10 +227,9 @@ fun CallLayout(activeCall: GroupCall) {
                 property("z-index", "2")
             }
         }) {
-            // todo translate
             IconButton(
-                if (activeCall.localAudio != null) "mic" else "mic_off",
-                "Microphone",
+                name = if (activeCall.localAudio != null) "mic" else "mic_off",
+                title = appString { microphone },
                 background = true,
                 styles = {
                     marginRight(.5.r)
@@ -241,10 +239,9 @@ fun CallLayout(activeCall: GroupCall) {
                 }) {
                 call.toggleMic()
             }
-            // todo translate
             IconButton(
-                if (activeCall.localVideo != null) "videocam" else "videocam_off",
-                "Camera",
+                name = if (activeCall.localVideo != null) "videocam" else "videocam_off",
+                title = appString { camera },
                 background = true,
                 styles = {
                     marginRight(.5.r)
@@ -255,9 +252,8 @@ fun CallLayout(activeCall: GroupCall) {
                 call.toggleCamera()
             }
             IconButton(
-                if (activeCall.localShare != null) "cancel_presentation" else "present_to_all",
-                // todo translate
-                "Share screen",
+                name = if (activeCall.localShare != null) "cancel_presentation" else "present_to_all",
+                title = appString { shareScreen },
                 background = true,
                 styles = {
                     marginRight(.5.r)
@@ -268,9 +264,8 @@ fun CallLayout(activeCall: GroupCall) {
                 call.toggleScreenShare()
             }
             IconButton(
-                "call_end",
-                // todo translate
-                appString { leave },
+                name = "call_end",
+                title = appString { leave },
                 background = true,
                 styles = {
                     backgroundColor(Styles.colors.red)

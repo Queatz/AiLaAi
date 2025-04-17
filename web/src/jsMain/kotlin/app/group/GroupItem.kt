@@ -17,6 +17,7 @@ import com.queatz.db.*
 import components.GroupPhoto
 import components.Icon
 import focusable
+import format
 import joins
 import kotlinx.coroutines.flow.map
 import lib.formatDistanceToNow
@@ -193,8 +194,7 @@ fun GroupItem(
                                 fontSize(14.px)
                             }
                         }) {
-                            // todo translate
-                            Text("$inCall in call")
+                            Text(appString { peopleInCall }.format(inCall.toString()))
                         }
                     }
                 }

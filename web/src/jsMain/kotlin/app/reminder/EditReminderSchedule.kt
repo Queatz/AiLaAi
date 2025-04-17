@@ -2,7 +2,10 @@ package app.reminder
 
 import androidx.compose.runtime.*
 import app.components.MultiSelect
+import appString
+import appText
 import com.queatz.db.ReminderSchedule
+import format
 import kotlinx.datetime.toKotlinInstant
 import lib.*
 import org.jetbrains.compose.web.attributes.disabled
@@ -53,7 +56,6 @@ val EditSchedule.reminderSchedule get() = if (reoccurs) {
 val EditSchedule.start get() = parseDateTime(date, time).toKotlinInstant()
 val EditSchedule.end get() = if (until) parseDateTime(untilDate, untilTime).toKotlinInstant() else null
 
-// todo translate
 @Composable
 fun EditReminderSchedule(
     schedule: EditSchedule,
@@ -103,8 +105,7 @@ fun EditReminderSchedule(
                 disabled()
             }
         }
-        // todo: translate
-        Text("Reoccurs")
+        appText { reoccurs }
     }
     if (schedule.reoccurs) {
         Div({
@@ -139,15 +140,17 @@ fun EditReminderSchedule(
                     disabled()
                 }
             }) {
-                option("-", "Every day")
+                option("-", appString { everyDay })
                 (1..7).forEach {
+                    // todo: localize
                     val n = enUS.localize.day(it - 1).toString()
                     option("weekday:$it", n)
                 }
                 (1..31).forEach {
-                    option("day:$it", "${enUS.localize.ordinalNumber(it)} of the month")
+                    // todo: localize
+                    option("day:$it", appString { ofTheMonth }.format(enUS.localize.ordinalNumber(it)))
                 }
-                option("day:-1", "Last day of the month")
+                option("day:-1", appString { lastDayOfTheMonth })
             }
 
             MultiSelect(schedule.reoccurringWeeks, { schedule.reoccurringWeeks = it }, {
@@ -159,9 +162,9 @@ fun EditReminderSchedule(
                     disabled()
                 }
             }) {
-                option("-", "Every week")
+                option("-", appString { everyWeek })
                 (1..5).forEach {
-                    option("$it", "${enUS.localize.ordinalNumber(it)} week")
+                    option("$it", appString { nthWeek }.format(enUS.localize.ordinalNumber(it)))
                 }
             }
 
@@ -174,7 +177,7 @@ fun EditReminderSchedule(
                     disabled()
                 }
             }) {
-                option("-", "Every month")
+                option("-", appString { everyMonth })
                 (1..12).forEach {
                     option("$it", enUS.localize.month(it - 1).toString())
                 }
@@ -198,7 +201,7 @@ fun EditReminderSchedule(
                 disabled()
             }
         }
-        Text("Until")
+        appText { until }
     }
 
     if (schedule.until) {

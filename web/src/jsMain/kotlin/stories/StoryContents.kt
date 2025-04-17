@@ -210,8 +210,7 @@ fun StoryContents(
                             onEdited?.invoke(index, part.copy(section = it))
                         },
                         inline = true,
-                        // todo translate
-                        placeholder = "Section",
+                        placeholder = appString { section },
                         styles = {
                             margin(0.r)
                             width(100.percent)
@@ -240,8 +239,7 @@ fun StoryContents(
                             onEdited?.invoke(index, part.copy(text = it))
                         },
                         inline = true,
-                        // todo translate
-                        placeholder = "Write",
+                        placeholder = appString { write },
                         styles = {
                             margin(0.r)
                             width(100.percent)
@@ -435,7 +433,8 @@ fun StoryContents(
                     },
                     styles = {
                         width(100.percent)
-                    }
+                    },
+                    placeholder = part.hint.orEmpty()
                 )
             }
 

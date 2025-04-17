@@ -6,6 +6,7 @@ import app.ailaai.api.reminderOccurrences
 import app.page.ReminderEvent
 import app.page.SchedulePageStyles
 import app.page.ScheduleView
+import appText
 import com.queatz.db.Reminder
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -45,8 +46,7 @@ fun ReminderEvents(reminder: Reminder) {
             Div({
                 classes(SchedulePageStyles.title)
             }) {
-                // todo translate
-                Text("History")
+                appText { history }
             }
             Div({
                 classes(SchedulePageStyles.section)

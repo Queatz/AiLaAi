@@ -81,6 +81,7 @@ import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -415,11 +416,9 @@ fun MapView(
                         scope.launch {
                             var active = false
                             val cardName = inputDialog(
-                                // todo: translate
-                                title = "New page",
-                                // todo: translate
-                                placeholder = "Name",
-                                confirmButton = application.appString { newCard },
+                                title = application.appString { newCard },
+                                placeholder = application.appString { name },
+                                confirmButton = application.appString { createCard },
                                 content = { _, _, _ ->
                                     var value by remember { mutableStateOf(false) }
 
@@ -434,8 +433,7 @@ fun MapView(
                                             paddingBottom(.5f.r)
                                         }
                                     }) {
-                                        // todo: translate
-                                        Text("Publish")
+                                        appText { publish }
                                     }
 
                                     Switch(
@@ -447,8 +445,11 @@ fun MapView(
                                             value = it
                                         },
                                         border = true,
-                                        // todo: translate
-                                        title = if (value) "Publish now" else "Draft"
+                                        title = if (value) {
+                                            appString { publish }
+                                        } else {
+                                            appString { this.draft }
+                                        }
                                     )
                                 }
                             ) ?: return@launch
@@ -515,12 +516,10 @@ fun MapView(
                             justifyContent(JustifyContent.SpaceBetween)
                         }
                     }) {
-                        // todo: translate
-                        Text("Pages (${shownCards.size})")
+                        Text("${appString { pages }} (${shownCards.size})")
                         IconButton(
                             name = if (expanded) "expand_less" else "expand_more",
-                            // todo: translate
-                            title = if (expanded) "Collapse" else "Expand"
+                            title = if (expanded) appString { collapse } else appString { expand }
                         ) {
                             expanded = !expanded
                         }
@@ -554,8 +553,7 @@ fun MapView(
             }) {
                 SearchField(
                     value = searchText,
-                    // todo: translate
-                    placeholder = "Search for places, services, and more",
+                    placeholder = appString { searchForPlaces },
                     shadow = true
                 ) {
                     searchText = it
@@ -592,8 +590,7 @@ fun MapView(
                             }
                         }) {
                             Icon("payments")
-                            // todo: translate
-                            Text("Paid")
+                            appText { paid }
                         }
                         if (categories.isNotEmpty()) {
                             Div({
@@ -740,8 +737,7 @@ fun MapView(
                     }
                 }) {
                     Icon("list")
-                    // todo: translate
-                    Text("View list")
+                    appText { viewList }
                 }
             }
         }

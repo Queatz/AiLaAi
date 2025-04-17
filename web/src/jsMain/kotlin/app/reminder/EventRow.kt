@@ -15,6 +15,8 @@ import app.page.ReminderEventType
 import app.page.SchedulePageStyles
 import app.page.ScheduleView
 import app.page.updateDate
+import appString
+import application
 import bulletedString
 import com.queatz.db.ReminderOccurrence
 import components.IconButton
@@ -64,11 +66,9 @@ fun EventRow(
     fun edit() {
         scope.launch {
             val note = inputDialog(
-                // todo translate
-                title = "Edit note",
+                title = application.appString { editNote },
                 placeholder = "",
-                // todo translate
-                confirmButton = "Update",
+                confirmButton = application.appString { update },
                 defaultValue = event.occurrence?.note?.notBlank ?: event.reminder.note?.notBlank ?: ""
             )
 
@@ -103,14 +103,12 @@ fun EventRow(
     val eventType = event.event
     val date = event.date
     val done = event.occurrence?.done ?: false
-    // todo: translate
-    val text = event.reminder.title?.notBlank ?: "New reminder"
+    val text = event.reminder.title?.notBlank ?: appString { newReminder }
 
     Div({
         classes(SchedulePageStyles.row)
 
-        // todo: translate
-        title("Mark as done")
+        title(appString { markAsDone })
 
         onClick {
             markAsDone(!done)
@@ -178,14 +176,12 @@ fun EventRow(
         Div({
             classes(SchedulePageStyles.rowActions)
         }) {
-            // todo: translate
-            IconButton("edit", "Edit", styles = {
+            IconButton("edit", appString { edit }, styles = {
             }) {
                 it.stopPropagation()
                 edit()
             }
-            // todo: translate
-            IconButton("more_vert", "Options", styles = {
+            IconButton("more_vert", appString { options }, styles = {
             }) {
                 it.stopPropagation()
                 menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null

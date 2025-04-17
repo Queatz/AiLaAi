@@ -50,6 +50,7 @@ import com.queatz.push.MessagePushData
 import com.queatz.push.PushAction
 import com.queatz.push.ReminderPushData
 import com.queatz.push.StoryPushData
+import format
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -183,10 +184,13 @@ fun AppPage() {
                 playCallSound = true
                 notifications.add(
                     Notification(
-                        "call",
-                        data.group.name ?: data.person.name ?: someone,
-                        // todo translate
-                        if (call.active.value == null) "Tap to answer" else "Tap to switch",
+                        icon = "call",
+                        title = data.group.name ?: data.person.name ?: someone,
+                        message = if (call.active.value == null) {
+                            application.appString { tapToAnswer }
+                        } else {
+                            application.appString { tapToSwitch }
+                        },
                         onDismiss = {
                             playCallSound = false
                         }
@@ -270,10 +274,11 @@ fun AppPage() {
                         playNotificationSound = true
                         notifications.add(
                             Notification(
-                                null,
-                                // todo translate
-                                "${data.person!!.name ?: someone} commented on your story",
-                                data.comment?.comment ?: "",
+                                icon = null,
+                                title = application
+                                    .appString { personCommentedOnYourStory }
+                                    .format(data.person!!.name ?: someone),
+                                message = data.comment?.comment ?: "",
                                 onDismiss = {
                                     playNotificationSound = false
                                 }
@@ -289,10 +294,11 @@ fun AppPage() {
                         playNotificationSound = true
                         notifications.add(
                             Notification(
-                                null,
-                                // todo translate
-                                "${data.person!!.name ?: someone} replied to your comment",
-                                data.comment?.comment ?: "",
+                                icon = null,
+                                title = application
+                                    .appString { personRepliedToYourComment }
+                                    .format(data.person!!.name ?: someone),
+                                message = data.comment?.comment ?: "",
                                 onDismiss = {
                                     playNotificationSound = false
                                 }

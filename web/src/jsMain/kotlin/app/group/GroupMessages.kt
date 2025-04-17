@@ -166,8 +166,7 @@ fun GroupMessages(
 
             if (menuTarget != null) {
                 Menu({ menuTarget = null }, menuTarget!!) {
-                    // todo translate
-                    item("Reaction") {
+                    item(appString { reaction }) {
                         scope.launch {
                             val reaction = addReactionDialog(
                                 quickReactions = topGroupReactions + myTopReactions,
@@ -179,8 +178,7 @@ fun GroupMessages(
                             }
                         }
                     }
-                    // todo translate
-                    item("Rating") {
+                    item(appString { reaction }) {
                         scope.launch {
                             val rating = setRatingDialog(
                                 confirmButton = application.appString { this.search },

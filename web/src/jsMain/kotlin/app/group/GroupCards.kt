@@ -86,8 +86,7 @@ fun GroupCards(group: GroupExtended) {
         }) {
             if (cards.isEmpty()) {
                 Tip(
-                    // todo: translate
-                    text = "This group currently has no pages.",
+                    text = appString { noPagesInGroup },
                     action = appString { createCard },
                     styles = {
                         margin(1.r)
@@ -96,7 +95,7 @@ fun GroupCards(group: GroupExtended) {
                     newCard()
                 }
             } else {
-                if (cards.size > 0) {
+                if (cards.isNotEmpty()) {
                     TopBarSearch(search, { search = it }) {
                         marginTop(1.r)
                         marginBottom(1.r)

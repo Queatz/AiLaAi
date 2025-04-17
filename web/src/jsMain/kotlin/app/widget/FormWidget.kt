@@ -21,6 +21,7 @@ import app.widget.form.FormFieldDescription
 import app.widget.form.FormFieldInput
 import app.widget.form.FormFieldTitle
 import appString
+import appText
 import application
 import baseUrl
 import com.queatz.db.RunScriptBody
@@ -135,8 +136,7 @@ fun FormWidget(widgetId: String) {
             }
         }) {
             Icon("undo")
-            // todo: translate
-            Text("Restart")
+            appText { restart }
         }
     } ?: data?.let { data ->
         // Forms without a page cannot be submitted
@@ -209,20 +209,19 @@ fun FormWidget(widgetId: String) {
                     data = RunWidgetBody(json.encodeToString(formValues.values.toList())),
                     onError = {
                         dialog(
-                            // todo: translate
-                            title = "There was an error submitting the form.",
+                            title = application.appString { errorSubmittingForm },
                             cancelButton = null
                         ) {
-                            // todo: translate
-                            Text("Please try again or contact the form owner.")
+                            appText {
+                                tryAgainOrContact
+                            }
                         }
                     }
                 ) {
                     formValues = initialFormValues
                     if (it.content == null) {
                         dialog(
-                            // todo: translate
-                            title = "Form submitted!",
+                            title = application.appString { formSubmitted },
                             cancelButton = null
                         )
                     } else {
@@ -305,14 +304,12 @@ fun FormWidget(widgetId: String) {
                                                 cursor("pointer")
                                             }
 
-                                            // todo: translate
-                                            title("Tap to remove")
+                                            title(application.appString { tapToRemove })
 
                                             onClick {
                                                 scope.launch {
                                                     val result = dialog(
-                                                        // todo:translate
-                                                        title = "Remove this photo?"
+                                                        title = application.appString { removeThisPhoto }
                                                     )
 
                                                     if (result == true) {
@@ -370,8 +367,7 @@ fun FormWidget(widgetId: String) {
                                 }
                             }
                         }) {
-                            // todo: translate
-                            Text("Add photo(s)")
+                            appText { addPhotos }
                         }
                     }
                 }
@@ -395,8 +391,7 @@ fun FormWidget(widgetId: String) {
             }) {
                 Text(
                     if (isLoading) {
-                        // todo: translate
-                        "Submitting…"
+                        appString { submitting }
                     } else {
                         data.submitButtonText ?: appString { submit }
                     }
@@ -410,10 +405,7 @@ fun FormWidget(widgetId: String) {
                         fontStyle("italic")
                     }
                 }) {
-                    Text(
-                        // todo: translate
-                        "Sign in to submit this form"
-                    )
+                    appText { signInToSubmitForm }
                 }
             }
         }

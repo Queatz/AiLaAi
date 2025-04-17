@@ -12,6 +12,7 @@ import api
 import app.ailaai.api.wildReply
 import app.dialog.dialog
 import appString
+import appText
 import application
 import com.queatz.db.Card
 import com.queatz.db.CardOptions
@@ -105,8 +106,9 @@ fun CardReply(
                 disabled()
             }
 
-            // todo: translate
-            placeholder("Enter your message")
+            placeholder(
+                application.appString { enterYourMessage }
+            )
 
             onInput {
                 onReplyMessage(it.value)
@@ -125,8 +127,7 @@ fun CardReply(
                     fontWeight("bold")
                 }
             }) {
-                // todo: translate
-                Text("How would you like to be contacted?")
+                appText { howWouldYouLikeToBeContacted }
             }
             Input(InputType.Text) {
                 classes(Styles.textarea)
@@ -135,8 +136,9 @@ fun CardReply(
                     marginBottom(1.r)
                 }
 
-                // todo: translate
-                placeholder("Your phone number or email")
+                placeholder(
+                    application.appString { yourPhoneNumberOrEmail }
+                )
 
                 onInput {
                     onReplyMessageContact(it.value)

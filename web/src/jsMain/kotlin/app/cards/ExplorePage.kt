@@ -34,6 +34,7 @@ import app.menu.InlineMenu
 import app.menu.Menu
 import app.messaages.inList
 import appString
+import appText
 import application
 import com.queatz.db.Card
 import com.queatz.db.GroupExtended
@@ -159,13 +160,15 @@ fun ExplorePage(
             api.generateCardPhoto(card.id!!) {
                 oldPhoto = card.photo ?: ""
                 if (localStorage["app.config.ai.disclaimer.show"] != json.encodeToString(false)) {
-                    // todo: translate
-                    dialog("Generating", cancelButton = null) {
+                    dialog(
+                        title = application.appString { generating },
+                        cancelButton = null
+                    ) {
                         Div {
-                            Text("The page will be updated when the photo is generated.")
+                            appText { pageUpdatedWhenPhotoGenerated }
                             Br()
                             Br()
-                            Text("Page title, hint, and details are shared with a 3rd party.")
+                            appText { pageTitleHintDetailsSharedWithThirdParty }
                         }
                         Div({
                             style {
@@ -199,8 +202,7 @@ fun ExplorePage(
                                         fontSize(14.px)
                                     }
                                 }) {
-                                    // todo: translate
-                                    Text("Don't show this again")
+                                    appText { dontShowThisAgain }
                                 }
                             }
                         }
@@ -575,10 +577,10 @@ fun ExplorePage(
                         generatePhoto()
                     } else {
                         scope.launch {
-                            // todo: translate
-                            val result = dialog("Generate a new photo?") {
-                                // todo: translate
-                                Text("This will replace the current photo.")
+                            val result = dialog(
+                                title = application.appString { generateNewPhoto }
+                            ) {
+                                appText { thisWillReplaceCurrentPhoto }
                             }
 
                             if (result == true) {
@@ -617,13 +619,10 @@ fun ExplorePage(
             item(appString { delete }) {
                 scope.launch {
                     val result = dialog(
-                        // todo: translate
-                        title = "Delete this page?",
-                        // todo: translate
-                        confirmButton = "Yes, delete"
+                        title = application.appString { deleteThisPage },
+                        confirmButton = application.appString { yesDelete }
                     ) {
-                        // todo: translate
-                        Text("You cannot undo this.")
+                        appText { youCannotUndoThis }
                     }
 
                     if (result == true) {
@@ -680,8 +679,11 @@ fun ExplorePage(
                         }
                     }
                 },
-                // todo: translate
-                title = "Page is ${if (published) "published" else "not published"}"
+                title = if (published) {
+                    appString { pageIsPublished }
+                } else {
+                    appString { pageIsNotPublished }
+                }
             ) {
                 margin(1.r)
             }

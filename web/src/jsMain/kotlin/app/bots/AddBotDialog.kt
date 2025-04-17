@@ -12,6 +12,7 @@ import app.ailaai.api.groupBots
 import app.components.Empty
 import app.dialog.dialog
 import appString
+import appText
 import application
 import com.queatz.db.Bot
 import components.IconButton
@@ -73,8 +74,7 @@ suspend fun addBotDialog(
         ) {
             if (bots.isEmpty()) {
                 Empty {
-                    // todo: translate
-                    Text("No bots.")
+                    appText { noBots }
                 }
             }
 
@@ -89,8 +89,7 @@ suspend fun addBotDialog(
                         resolve(true)
                     }
                 }) {
-                    // todo: translate
-                    ProfilePhoto(bot.photo?.notBlank, bot.name ?: "New bot")
+                    ProfilePhoto(bot.photo?.notBlank, bot.name ?: appString { newBot })
                     Div({
                         style {
                             marginLeft(1.r)
@@ -100,14 +99,12 @@ suspend fun addBotDialog(
                         Div({
                             classes(AppStyles.groupItemName)
                         }) {
-                            // todo: translate
-                            Text(bot.name ?: "New bot")
+                            Text(bot.name ?: appString { newBot })
                         }
                         Div({
                             classes(AppStyles.groupItemMessage)
                         }) {
-                            // todo: translate
-                            Text(bot.description ?: "No description")
+                            Text(bot.description ?: appString { noDescription })
                         }
                     }
                 }

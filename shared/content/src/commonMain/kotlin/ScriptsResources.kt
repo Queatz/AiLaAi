@@ -33,10 +33,16 @@ render {
         // Optional
         data = "<Data passed to the script>",
         // Optional
-        style = ButtonStyle.Secondary // Default is Primary
+        style = ButtonStyle.Secondary // Default is ButtonStyle.Primary
     )
     photo("<Url>", <Aspect ratio float>?) // Must start with /static/
-    input("<key>", "<value>")
+    input(
+    key = "<key>",
+    // Optional
+    value = "<value>",
+    // Optional
+    hint = "<hint>"
+    )
 }
 ```
 

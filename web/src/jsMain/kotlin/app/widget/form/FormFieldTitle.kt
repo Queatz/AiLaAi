@@ -1,6 +1,8 @@
 package app.widget.form
 
 import androidx.compose.runtime.Composable
+import appString
+import application
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
@@ -33,8 +35,7 @@ fun FormFieldTitle(text: String, required: Boolean = false) {
                     color(Styles.colors.red)
                 }
 
-                // todo: translate
-                title("Required")
+                title(application.appString { this.required })
             }) {
                 Text("*")
             }

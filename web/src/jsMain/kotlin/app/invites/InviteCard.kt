@@ -18,6 +18,7 @@ import app.appNav
 import app.dialog.dialog
 import app.softwork.routingcompose.Router
 import appString
+import appText
 import application
 import com.queatz.db.Invite
 import com.queatz.db.PersonProfile
@@ -94,10 +95,8 @@ fun InviteCard(
             ) {
                 Text(it.person.name ?: appString { someone })
             }
-            // todo: translate
-            Text(" is inviting you to ")
+            Text(" ${appString { isInvitingYouTo }} ")
             B {
-                // todo: translate
                 Text("${appString { appName }}!")
             }
         }
@@ -157,8 +156,7 @@ fun InviteCard(
                                 onError = {
                                     scope.launch {
                                         dialog(
-                                            // todo: translate
-                                            title = "The invite code cannot be used",
+                                            title = application.appString { inviteCodeCannotBeUsed },
                                             cancelButton = null
                                         )
                                     }
@@ -177,8 +175,7 @@ fun InviteCard(
                 }
             }
         ) {
-            // todo: translate
-            Text("Accept invite")
+            appText { acceptInvite }
         }
     }
 }

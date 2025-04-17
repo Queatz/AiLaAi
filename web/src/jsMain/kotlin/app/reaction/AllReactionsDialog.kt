@@ -32,8 +32,7 @@ import kotlin.js.Date
 
 suspend fun allReactionsDialog(messageId: String) = dialog(
     // todo: show count in title
-    // todo: translate
-    title = "Message reactions",
+    title = application.appString { messageReactions },
     cancelButton = null,
     confirmButton = application.appString { close }
 ) {

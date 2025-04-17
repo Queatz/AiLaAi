@@ -129,8 +129,7 @@ fun ScriptsNavPage(
         ) {
             scope.launch {
                 val result = inputDialog(
-                    // todo: translate
-                    title = "New script",
+                    title = application.appString { newScript },
                     placeholder = title,
                     confirmButton = create
                 )

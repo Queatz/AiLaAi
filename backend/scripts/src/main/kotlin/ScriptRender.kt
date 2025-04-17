@@ -21,16 +21,26 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
         text: String,
         script: String,
         data: String? = null,
-        style: ButtonStyle? = null
+        style: ButtonStyle? = null,
     ) {
-        result += StoryContent.Button(text = text, script = script, data = data, style = style)
+        result += StoryContent.Button(
+            text = text,
+            script = script,
+            data = data,
+            style = style,
+        )
     }
 
     fun input(
         key: String,
         value: String? = null,
+        hint: String? = null,
     ) {
-        result += StoryContent.Input(key = key, value = value)
+        result += StoryContent.Input(
+            key = key,
+            value = value,
+            hint = hint,
+        )
     }
 
     fun photo(

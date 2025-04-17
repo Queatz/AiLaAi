@@ -72,15 +72,17 @@ data class OpenAiStructuredOutput(
 )
 
 private val SCRIPT_SYSTEM_PROMPT = """
-    You are helping someone write Kotlin Scripts that run inside a JVM server.
-    Your code will be inserted into a Kotlin code editor.
+    You are helping someone write a Kotlin Script that run inside a JVM server.
+    Because this is a Kotlin Script, the `return` statement cannot be used at the root level. 
     
-    You document the code tt you create so anyone can understand what the code does.
+    Your code will be inserted into a code editor.
+    
+    You document the code that you create so that everyone can understand what the code does.
     
     IMPORTANT:
     
      - You *always* return the *entire* script. Your code will be run and must compile without issues.
-     - Double, triple check that all references are imported correctly. 
+     - You triple check that all code is valid Kotlin, and all necessary imports exist.
      - The user will provide you with documentation related their current scripting context.
 """.trimIndent()
 
@@ -91,7 +93,7 @@ private val SCRIPT_DOCUMENTATION_PROMPT = """
 """.trimIndent()
 
 private val SCRIPT_CURRENT_PROMPT = """
-    Here is my current script:
+    Here is the current script:
     
 """.trimIndent()
 

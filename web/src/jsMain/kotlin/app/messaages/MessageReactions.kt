@@ -2,6 +2,7 @@ package app.messaages
 
 import Styles
 import androidx.compose.runtime.Composable
+import application
 import com.queatz.db.ReactionSummary
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.justifyContent
@@ -52,8 +53,7 @@ fun MessageReactions(
 
                 title(
                     if (isMyReaction) {
-                        // todo: translate
-                        "Tap to remove"
+                        application.appString { tapToRemove }
                     } else {
                         // todo: translate
                         "Tap to react"

@@ -3,6 +3,7 @@ package app.scripts
 import Styles
 import aiScript
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,7 +71,6 @@ fun ScriptsPage(
         is ScriptsNav.None -> Unit
         is ScriptsNav.Script -> {
             var script by remember(nav.script) { mutableStateOf(nav.script) }
-            var isLoading by remember { mutableStateOf(false) }
             var editedScript by remember(script) { mutableStateOf<String?>(null) }
             var edited by remember(script) { mutableStateOf(false) }
             var isSaving by remember(script) { mutableStateOf(false) }
@@ -80,9 +80,26 @@ fun ScriptsPage(
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
             var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
             var undoAiScript by remember(script) { mutableStateOf<String?>(null) }
-            var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
+
+            var isLoading by remember { mutableStateOf(false) }
+            var menuTarget by remember(script) { mutableStateOf<DOMRect?>(null) }
             var aiJob by remember { mutableStateOf<Job?>(null) }
             val state = remember { MonacoEditorState() }
+
+            val onValueChange: (String) -> Unit = remember(script) {
+                {
+                    editedScript = it
+                    edited = if (editedScript.isNullOrBlank() && script.source.isNullOrBlank()) {
+                        false
+                    } else {
+                        editedScript != script.source
+                    }
+                }
+            }
+
+            LaunchedEffect(script) {
+                aiJob?.cancel()
+            }
 
             menuTarget?.let {
                 Menu(
@@ -204,10 +221,7 @@ fun ScriptsPage(
                         MonacoEditor(
                             state = state,
                             initialValue = script.source.orEmpty(),
-                            onValueChange = {
-                                editedScript = it
-                                edited = it != script.source && !(it.isBlank() && script.source.isNullOrBlank())
-                            },
+                            onValueChange = onValueChange,
                             styles = {
                                 margin(0.r, 1.r, 1.r, 1.r)
                                 flexGrow(1)

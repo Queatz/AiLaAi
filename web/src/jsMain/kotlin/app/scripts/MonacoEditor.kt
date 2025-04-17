@@ -35,14 +35,14 @@ fun MonacoEditor(
     var editor: Monaco.IEditor? by remember { mutableStateOf(null) }
     val darkMode = rememberDarkMode()
 
-    LaunchedEffect(state) {
+    LaunchedEffect(editor, state) {
         state.onSetValue.collect { value ->
             editor?.setValue(value)
             onValueChange(value)
         }
     }
 
-    LaunchedEffect(darkMode) {
+    LaunchedEffect(editor, darkMode) {
         editor?.updateOptions(
             jsObject<Monaco.EditorOptions> {
                 theme = if (darkMode) "vs-dark" else "vs-light"

@@ -189,10 +189,13 @@ fun ScheduleNavPage(
         IconButton("search", appString { search }) {
             showSearch = !showSearch
         }
-        // todo: translate
-        IconButton(if (viewType == ScheduleViewType.Schedule) "view_agenda" else "view_week", "Switch view", styles = {
-            marginRight(.5.r)
-        }) {
+        IconButton(
+            name = if (viewType == ScheduleViewType.Schedule) "view_agenda" else "view_week",
+            title = appString { switchView },
+            styles = {
+                marginRight(.5.r)
+            }
+        ) {
             onViewTypeClick(
                 when (viewType) {
                     ScheduleViewType.Schedule -> ScheduleViewType.Calendar

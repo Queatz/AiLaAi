@@ -10,6 +10,8 @@ import api
 import app.AppStyles
 import app.ailaai.api.prompts
 import app.ailaai.api.uploadPhotos
+import appString
+import appText
 import application
 import com.queatz.db.AiPhotoRequest
 import components.IconButton
@@ -128,8 +130,7 @@ private suspend fun choosePhotoDialog(
         },
         inputAction = { resolve, value, onValue ->
             val scope = rememberCoroutineScope()
-            // todo: translate
-            IconButton("expand_more", "History", styles = {
+            IconButton("expand_more", appString { history }, styles = {
                 if (value.isNotBlank()) {
                     opacity(0)
                     property("pointer-events", "none")
@@ -142,8 +143,7 @@ private suspend fun choosePhotoDialog(
             }) {
                 scope.launch {
                     api.prompts {
-                        // todo: translate
-                        inputSelectDialog("Choose", items = it.map { it.prompt!! }) {
+                        inputSelectDialog(application.appString { choose }, items = it.map { it.prompt!! }) {
                             onValue(it)
                         }
                     }
@@ -180,8 +180,7 @@ private suspend fun choosePhotoDialog(
                     paddingTop(1.r)
                 }
             }) {
-                // todo: translate
-                Text("General")
+                appText { general }
             }
             var previousItem: String? = null
 
@@ -197,8 +196,7 @@ private suspend fun choosePhotoDialog(
                             paddingTop(1.r)
                         }
                     }) {
-                        // todo: translate
-                        Text("Stylized")
+                        appText { stylized }
                     }
                 }
 

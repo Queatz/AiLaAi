@@ -23,6 +23,7 @@ import coil3.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.ContactPhoto
+import com.queatz.ailaai.extensions.bulletedString
 import com.queatz.ailaai.ui.components.*
 import com.queatz.ailaai.ui.story.ReorderDialog
 import com.queatz.ailaai.ui.story.Stub
@@ -204,7 +205,12 @@ fun ReorderStoryContentsDialog(
             }
 
             is StoryContent.Input -> {
-                Stub(it.key)
+                Stub(
+                    bulletedString(
+                        it.key,
+                        it.hint
+                    )
+                )
             }
 
             is StoryContent.Profiles -> {

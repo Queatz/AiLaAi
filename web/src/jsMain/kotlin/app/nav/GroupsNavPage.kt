@@ -434,8 +434,7 @@ fun GroupsNavPage(
                                                             Span({
                                                                 classes(Styles.personItemStatusIndicatorText)
                                                             }) {
-                                                                // todo: translate
-                                                                Text("z")
+                                                                appText { z }
                                                             }
                                                         }
                                                     }
@@ -452,7 +451,7 @@ fun GroupsNavPage(
                                                 Text(
                                                     // todo: translate
                                                     if (person.id == me?.id) {
-                                                        "Set status"
+                                                        appString { setStatus }
                                                     } else if (differenceInMinutes(
                                                             Date(),
                                                             it.toJSDate(),

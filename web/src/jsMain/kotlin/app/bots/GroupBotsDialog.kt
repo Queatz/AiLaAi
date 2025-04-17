@@ -13,6 +13,7 @@ import app.components.Empty
 import app.dialog.dialog
 import app.menu.Menu
 import appString
+import appText
 import application
 import com.queatz.db.Bot
 import com.queatz.db.GroupBot
@@ -77,8 +78,7 @@ suspend fun groupBotsDialog(
         ) {
             if (groupBots.isEmpty()) {
                 Empty {
-                    // todo: translate
-                    Text("No bots.")
+                    appText { noBots }
                 }
             } else {
                 groupBots.forEach { groupBot ->
@@ -92,11 +92,11 @@ suspend fun groupBotsDialog(
                         if (menuTarget != null) {
                             Menu({ menuTarget = null }, menuTarget!!) {
                                 item(appString { delete }) {
-                                    //
+                                    // todo
                                 }
                                 if (application.me.value?.id == bot.creator) {
                                     item(appString { openBot }) {
-                                        //
+                                        // todo
                                     }
                                 }
                             }
@@ -111,8 +111,7 @@ suspend fun groupBotsDialog(
                                 onBot(bot, groupBot.groupBot!!)
                             }
                         }) {
-                            // todo: translate
-                            ProfilePhoto(bot.photo?.notBlank, bot.name ?: "New bot")
+                            ProfilePhoto(bot.photo?.notBlank, bot.name ?: appString { newBot })
                             Div({
                                 style {
                                     marginLeft(1.r)
@@ -122,8 +121,7 @@ suspend fun groupBotsDialog(
                                 Div({
                                     classes(AppStyles.groupItemName)
                                 }) {
-                                    // todo: translate
-                                    Text(bot.name ?: "New bot")
+                                    Text(bot.name ?: appString { newBot })
                                 }
                                 Div({
                                     classes(AppStyles.groupItemMessage)
@@ -131,8 +129,7 @@ suspend fun groupBotsDialog(
                                     // todo: translate
                                     Text(if (groupBot.groupBot!!.active == true) "Running" else "Paused")
                                     Text(" • ")
-                                    // todo: translate
-                                    Text(bot.description ?: "No description")
+                                    Text(bot.description ?: appString { noDescription })
                                 }
                             }
                         }

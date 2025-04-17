@@ -1,6 +1,7 @@
 package app.dialog
 
 import app.components.StatusName
+import appString
 import application
 import com.queatz.db.PersonStatus
 import com.queatz.db.Status
@@ -24,8 +25,10 @@ suspend fun editStatusDialog(
         placeholder = application.appString { note },
         confirmButton = application.appString { update },
         extraButtons = { resolve ->
-            // todo: translate
-            IconButton("delete", title = "Clear status") {
+            IconButton(
+                name = "delete",
+                title = appString { clearStatus }
+            ) {
                 onUpdate(PersonStatus())
                 resolve(false)
             }

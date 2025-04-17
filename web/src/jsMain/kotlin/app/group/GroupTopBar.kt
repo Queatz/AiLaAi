@@ -53,6 +53,7 @@ import com.queatz.db.Person
 import com.queatz.db.RainEffect
 import components.IconButton
 import components.LinkifyText
+import format
 import joins
 import json
 import kotlinx.browser.window
@@ -399,16 +400,13 @@ fun GroupTopBar(
                         }
                     }
                 ) {
-                    // todo translate
-                    Text("Who sends messages to this group?")
+                    appText { whoSendsMessagesToThisGroup }
                 }
                 InlineMenu({}) {
-                    // todo translate
-                    item("Hosts", selected = messagesConfig == GroupMessagesConfig.Hosts) {
+                    item(appString { hosts }, selected = messagesConfig == GroupMessagesConfig.Hosts) {
                         messagesConfig = GroupMessagesConfig.Hosts
                     }
-                    // todo translate
-                    item("Everyone", selected = messagesConfig == null) {
+                    item(appString { everyone }, selected = messagesConfig == null) {
                         messagesConfig = null
                     }
                 }
@@ -421,8 +419,7 @@ fun GroupTopBar(
                         }
                     }
                 ) {
-                    // todo translate
-                    Text("Who edits this group?")
+                    appText { whoEditsThisGroup }
                 }
                 Div(
                     {
@@ -433,17 +430,14 @@ fun GroupTopBar(
                         }
                     }
                 ) {
-                    // todo translate
-                    Text("Name, introduction, photo")
+                    appText { nameIntroductionPhoto }
                 }
                 InlineMenu({}) {
-                    // todo translate
-                    item("Hosts", selected = editsConfig == GroupEditsConfig.Hosts) {
+                    item(appString { hosts }, selected = editsConfig == GroupEditsConfig.Hosts) {
                         editsConfig = GroupEditsConfig.Hosts
 
                     }
-                    // todo translate
-                    item("Everyone", selected = editsConfig == null) {
+                    item(appString { everyone }, selected = editsConfig == null) {
                         editsConfig = null
                     }
                 }
@@ -523,8 +517,7 @@ fun GroupTopBar(
                                 }
                                 IconButton(
                                     name = "add_link",
-                                    // todo: translate
-                                    title = "Create an invite link"
+                                    title = appString { createInviteLink }
                                 ) {
                                     resolve(null)
                                     scope.launch {
@@ -533,8 +526,7 @@ fun GroupTopBar(
                                             onError = {
                                                 scope.launch {
                                                     dialog(
-                                                        // todo: translate
-                                                        title = "The invite link could not be created",
+                                                        title = application.appString { inviteLinkCouldNotBeCreated },
                                                         cancelButton = null
                                                     )
                                                 }
@@ -542,11 +534,9 @@ fun GroupTopBar(
                                         ) { invite ->
                                             scope.launch {
                                                 val result = dialog(
-                                                    // todo: translate
-                                                    title = "Invite link is active",
+                                                    title = application.appString { inviteLinkIsActive },
                                                     cancelButton = application.appString { close },
-                                                    // todo: translate
-                                                    confirmButton = "Copy link",
+                                                    confirmButton = application.appString { copyLink },
                                                     content = {
                                                         Div({
                                                             style {
@@ -763,8 +753,7 @@ fun GroupTopBar(
                 IconButton(
                     name = "call",
                     title = appString { call },
-                    // todo translate
-                    text = if (callParticipants > 0) "$callParticipants in call" else null,
+                    text = if (callParticipants > 0) appString { peopleInCall }.format(callParticipants.toString()) else null,
                     backgroundColor = if (callParticipants > 0) Styles.colors.tertiary else null,
                     styles = {
                         marginRight(.5.r)

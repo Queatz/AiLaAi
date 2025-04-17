@@ -3,6 +3,7 @@ package app.reaction
 import Styles
 import androidx.compose.runtime.remember
 import app.dialog.inputDialog
+import application
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexShrink
@@ -22,12 +23,10 @@ import r
 
 suspend fun addReactionDialog(
     quickReactions: List<String> = emptyList(),
-    // todo: translate
-    confirmButton: String = "React"
+    confirmButton: String = application.appString { react }
 ) = inputDialog(
     title = null,
-    // todo: translate
-    placeholder = "Custom",
+    placeholder = application.appString { custom },
     confirmButton = confirmButton,
     maxLength = 64,
     inputStyles = {

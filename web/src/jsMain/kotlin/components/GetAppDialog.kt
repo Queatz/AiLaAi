@@ -1,6 +1,7 @@
 package components
 
 import app.dialog.dialog
+import appText
 import application
 import kotlinx.browser.window
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -11,7 +12,6 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import r
 
 suspend fun getAppDialog() {
@@ -39,8 +39,7 @@ suspend fun getAppDialog() {
                 }
             }) {
                 Icon("android")
-                // todo: translate
-                Text("Google Play")
+                appText { googlePlay }
             }
             Button({
                 classes(Styles.outlineButton, Styles.outlineButtonAlt)
@@ -54,8 +53,7 @@ suspend fun getAppDialog() {
                 }
             }) {
                 Icon("download")
-                // todo: translate
-                Text("Android APK")
+                appText { androidApk }
             }
             Button({
                 classes(Styles.outlineButton, Styles.outlineButtonAlt)
@@ -69,8 +67,7 @@ suspend fun getAppDialog() {
                 }
             }) {
                 Icon("ios")
-                // todo: translate
-                Text("App Store")
+                appText { appStore }
             }
         }
     }

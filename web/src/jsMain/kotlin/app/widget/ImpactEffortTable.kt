@@ -15,7 +15,6 @@ import components.getConversation
 import isMine
 import json
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import updateWidget

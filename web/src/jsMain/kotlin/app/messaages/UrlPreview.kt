@@ -2,6 +2,7 @@ package app.messaages
 
 import androidx.compose.runtime.Composable
 import app.AppStyles
+import application
 import com.queatz.db.UrlAttachment
 import kotlinx.browser.window
 import notBlank
@@ -38,8 +39,7 @@ fun UrlPreview(url: UrlAttachment) {
         {
             classes(AppStyles.urlPreview)
 
-            // todo: translate
-            title("Open link\n${url.url!!}")
+            title("${application.appString { openLink }}\n${url.url!!}")
 
             onClick {
                 window.open(url.url!!, "_blank")

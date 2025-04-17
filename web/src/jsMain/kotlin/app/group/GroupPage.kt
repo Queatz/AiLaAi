@@ -27,6 +27,7 @@ import com.queatz.db.asGeo
 import components.Loading
 import components.Tip
 import defaultGeo
+import format
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.css.AlignItems
@@ -131,8 +132,8 @@ fun GroupPage(
                         }
                     } else if (search.isNotBlank()) {
                         Tip(
-                            // todo: translate
-                            text = "Create an open group about \"${search.trim()}\".",
+                            text = appString { createOpenGroupAbout }
+                                .format(search.trim()),
                             action = appString { createGroup }
                         ) {
                             scope.launch {

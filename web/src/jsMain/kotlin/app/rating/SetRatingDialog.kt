@@ -6,6 +6,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import app.dialog.dialog
 import app.dialog.inputDialog
+import appString
+import appText
+import application
 import com.queatz.db.PersonStatus
 import com.queatz.db.Rating
 import components.IconButton
@@ -32,13 +35,11 @@ import withPlus
 // todo: numbers only
 suspend fun setRatingDialog(
     initialRating: Int? = null,
-    // todo: translate
-    confirmButton: String = "Rate",
+    confirmButton: String = application.appString { rate },
     onRemoveRating: () -> Unit
 ) = inputDialog(
     title = null,
-    // todo: translate
-    placeholder = "Custom",
+    placeholder = application.appString { custom },
     confirmButton = confirmButton,
     singleLine = true,
     inputStyles = {
@@ -49,18 +50,15 @@ suspend fun setRatingDialog(
     extraButtons = { resolve ->
         val scope = rememberCoroutineScope()
         if (initialRating != null) {
-            // todo: translate
-            IconButton("delete", title = "Remove rating") {
+            IconButton("delete", title = appString { removeRating }) {
                 onRemoveRating()
                 resolve(false)
             }
         } else {
-            // todo: translate
-            IconButton("help", "Help") {
+            IconButton("help", appString { help }) {
                 scope.launch {
                     dialog(title = null, cancelButton = null) {
-                        // todo: translate
-                        Text("Your ratings are only visible to you.")
+                        appText { yourRatingsAreVisible }
                     }
                 }
             }

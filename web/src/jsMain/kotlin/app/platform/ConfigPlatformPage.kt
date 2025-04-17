@@ -95,7 +95,9 @@ fun ConfigPlatformPage() {
                 }
             ) {
                 // todo: translate
-                Span({ style { color(Color.gray) } }) { Text("Invite only") }
+                Span({ style { color(Color.gray) } }) {
+                    Text("Invite only")
+                }
                 Switch(
                     platformConfig?.inviteOnly ?: false,
                             onValue = {},

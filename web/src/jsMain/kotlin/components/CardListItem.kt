@@ -2,6 +2,7 @@ package components
 
 import androidx.compose.runtime.Composable
 import app.AppStyles
+import appString
 import com.queatz.db.Card
 import focusable
 import hint
@@ -65,8 +66,7 @@ fun CardListItem(
                 onClick()
             }
         }) {
-            // todo: translate
-            ProfilePhoto(card.photo, card.name ?: "New page", size = 54.px)
+            ProfilePhoto(card.photo, card.name ?: appString { newCard }, size = 54.px)
             Div({
                 style {
                     marginLeft(1.r)
@@ -80,8 +80,7 @@ fun CardListItem(
                         fontWeight("bold")
                     }
                 }) {
-                    // todo: translate
-                    Text(card.name ?: "New page")
+                    Text(card.name ?: appString { newCard })
                 }
                 Div({
                     classes(AppStyles.groupItemMessage)
