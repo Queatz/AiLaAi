@@ -308,24 +308,24 @@ fun ScheduleNavPage(
             Div({
             }) {
                 NavMenuItem(
-                    "routine",
-                    appString { daily },
+                    icon = "routine",
+                    title = appString { daily },
                     selected = reminder == null && view == ScheduleView.Daily
                 )
                 { onViewClick(ScheduleView.Daily) }
                 NavMenuItem(
-                    "calendar_view_week",
-                    appString { weekly },
+                    icon = "calendar_view_week",
+                    title = appString { weekly },
                     selected = reminder == null && view == ScheduleView.Weekly
                 ) { onViewClick(ScheduleView.Weekly) }
                 NavMenuItem(
-                    "calendar_month",
-                    appString { monthly },
+                    icon = "calendar_month",
+                    title = appString { monthly },
                     selected = reminder == null && view == ScheduleView.Monthly
                 ) { onViewClick(ScheduleView.Monthly) }
                 NavMenuItem(
-                    "auto_mode",
-                    appString { yearly },
+                    icon = "auto_mode",
+                    title = appString { yearly },
                     selected = reminder == null && view == ScheduleView.Yearly
                 ) { onViewClick(ScheduleView.Yearly) }
             }

@@ -1,12 +1,16 @@
 package app.group
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.ailaai.api.groups
 import app.components.Empty
 import app.dialog.dialog
-import app.messaages.inList
 import appString
 import appText
 import application
@@ -15,11 +19,19 @@ import components.Loading
 import components.ProfilePhoto
 import components.SearchField
 import focusable
-import lib.formatDistanceToNow
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
+import time.formatDistanceToNow
 import kotlin.js.Date
 
 suspend fun friendsDialog(
@@ -170,8 +182,7 @@ suspend fun friendsDialog(
                                 Text(
                                     "${application.appString { active }} ${
                                         formatDistanceToNow(
-                                            Date(person.seen?.toEpochMilliseconds() ?: person.createdAt!!.toEpochMilliseconds()),
-                                            js("{ addSuffix: true }")
+                                            Date(person.seen?.toEpochMilliseconds() ?: person.createdAt!!.toEpochMilliseconds())
                                         )
                                     }"
                                 )

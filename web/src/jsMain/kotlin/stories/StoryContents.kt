@@ -31,7 +31,6 @@ import baseUrl
 import com.queatz.ailaai.api.commentOnStory
 import com.queatz.ailaai.api.storyComments
 import com.queatz.db.ButtonStyle
-import com.queatz.db.Card
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
 import com.queatz.db.GroupExtended
@@ -44,7 +43,6 @@ import components.LoadingText
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import lib.format
 import lib.isThisYear
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
@@ -67,6 +65,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import profile.ProfileCard
 import r
+import time.format
 import kotlin.js.Date
 
 @Composable

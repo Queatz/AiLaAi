@@ -20,7 +20,7 @@ import focusable
 import format
 import joins
 import kotlinx.coroutines.flow.map
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import lib.toLocaleString
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
@@ -153,7 +153,6 @@ fun GroupItem(
                                 group.latestMessage?.preview() ?: "${appString { created }} ${
                                     formatDistanceToNow(
                                         Date(group.group!!.createdAt!!.toEpochMilliseconds()),
-                                        js("{ addSuffix: true }")
                                     )
                                 }"
                             )
@@ -265,7 +264,6 @@ fun GroupItem(
                                     group.group?.seen?.let {
                                         formatDistanceToNow(
                                             Date(it.toEpochMilliseconds()),
-                                            js("{ addSuffix: true }")
                                         )
                                     }
                                 }"

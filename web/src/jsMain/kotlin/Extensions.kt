@@ -63,12 +63,20 @@ val formatOptions = js("""
    }
 """)
 
-fun Date.format() = intlFormat(this, formatOptions, js("{ locale: \"en-US\" }"))
+fun Date.format(): String {
+    // Used below
+    val localeCode = application.locale.code
+    return intlFormat(
+        date = this,
+        formatOptions = formatOptions,
+        localeOptions = js("{ locale: localeCode }")
+    )
+}
 
 fun parseDateTime(dateStr: String, timeStr: String, date: Date = Date()) = parse(
-    timeStr,
-    "HH:mm",
-    parse(dateStr, "yyyy-MM-dd", date)
+    string = timeStr,
+    format = "HH:mm",
+    date = parse(dateStr, "yyyy-MM-dd", date)
 )
 
 fun SelectAttrsScope.onSelectedOptionsChange(block: (List<String>) -> Unit) {

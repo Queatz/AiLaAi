@@ -44,7 +44,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
                 implementation("app.softwork:routing-compose:0.3.0")
                 implementation(npm("@paulmillr/qr", "0.2.0"))
-                implementation(npm("date-fns", "3.5.0"))
+                implementation(npm("date-fns", "4.1.0"))
                 implementation(npm("@vvo/tzdb", "6.141.0"))
                 implementation(npm("@videosdk.live/js-sdk", "0.0.98"))
                 implementation(npm("mapbox-gl", "3.5.2"))

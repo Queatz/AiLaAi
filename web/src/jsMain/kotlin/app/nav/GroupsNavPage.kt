@@ -50,8 +50,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJSDate
-import lib.differenceInMinutes
-import lib.formatDistanceToNowStrict
+import time.differenceInMinutes
+import time.formatDistanceToNowStrict
 import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
@@ -452,17 +452,16 @@ fun GroupsNavPage(
                                                     // todo: translate
                                                     if (person.id == me?.id) {
                                                         appString { setStatus }
-                                                    } else if (differenceInMinutes(
-                                                            Date(),
-                                                            it.toJSDate(),
-                                                            js("{ roundingMethod: \"floor\" }")
+                                                    } else if (
+                                                        differenceInMinutes(
+                                                            date = Date(),
+                                                            otherDate = it.toJSDate(),
                                                         ) < 1
                                                     ) {
                                                         appString { now }
                                                     } else {
                                                         formatDistanceToNowStrict(
-                                                            Date(it.toEpochMilliseconds()),
-                                                            js("{ includeSeconds: false }")
+                                                            date = Date(it.toEpochMilliseconds()),
                                                         )
                                                     }
                                                 )

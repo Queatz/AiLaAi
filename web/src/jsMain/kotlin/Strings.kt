@@ -38,8 +38,8 @@ object Strings {
         vn = "Xóa tin nhắn này?"
     )
     val sentAt = Translation(
-        en = "Sent at %1\$s",
-        vn = "Đã gửi lúc %1\$s"
+        en = "Sent %1\$s",
+        vn = "Đã gửi %1\$s"
     )
     val tapToReact = Translation(
         en = "Tap to react",
@@ -59,11 +59,11 @@ object Strings {
     )
     val copyProfileLink = Translation(
         en = "Copy profile link",
-        vn = "Sao chép liên kết trang cá nhân"
+        vn = "Sao chép liên kết trang cá nhân của bạn"
     )
     val openProfile = Translation(
         en = "Open profile",
-        vn = "Mở trang cá nhân"
+        vn = "Mở trang cá nhân của bạn"
     )
     val hour = Translation(
         en = "Hour",
@@ -127,8 +127,8 @@ object Strings {
         vn = "Vui lòng thử lại hoặc liên hệ với chủ sở hữu biểu mẫu."
     )
     val please = Translation(
-        "",
-        "Hãy "
+        en = "",
+        vn = "Hãy "
     )
     val formSubmitted = Translation(
         en = "Form submitted!",
@@ -221,85 +221,104 @@ object Strings {
         en = "Pages",
         vn = "Trang"
     )
-    
+
     val enterYourMessage = Translation(
-        en = "Enter your message"
+        en = "Enter your message",
+        vn = "Nhập tin nhắn của bạn"
     )
- 
+
     val z = Translation(
         en = "z"
     )
 
     val howWouldYouLikeToBeContacted = Translation(
-        en = "How would you like to be contacted?"
+        en = "How would you like to be contacted?",
+        vn = "Bạn muốn được liên lạc như thế nào?"
     )
 
     val yourPhoneNumberOrEmail = Translation(
-        en = "Your phone number or email"
+        en = "Your phone number or email",
+        vn = "Số điện thoại hoặc email của bạn"
     )
 
     val general = Translation(
-        en = "General"
+        en = "General",
+        vn = "Chung"
     )
 
     val stylized = Translation(
-        en = "Stylized"
+        en = "Stylized",
+        vn = "Phong cách"
     )
 
     val descriptionOptional = Translation(
-        en = "Description (optional)"
+        en = "Description (optional)",
+        vn = "Mô tả (tùy chọn)"
     )
 
     val multipleUses = Translation(
-        en = "Multiple uses"
+        en = "Multiple uses",
+        vn = "Sử dụng nhiều lần"
     )
 
     val expires = Translation(
-        en = "Expires"
+        en = "Expires",
+        vn = "Hết hạn"
     )
 
     val clearStatus = Translation(
-        en = "Clear status"
+        en = "Clear status",
+        vn = "Xóa trạng thái"
     )
 
     val generating = Translation(
-        en = "Generating"
+        en = "Generating",
+        vn = "Đang tạo"
     )
 
     val pageUpdatedWhenPhotoGenerated = Translation(
-        en = "The page will be updated when the photo is generated."
+        en = "The page will be updated when the photo is generated.",
+        vn = "Trang sẽ được cập nhật khi ảnh được tạo."
     )
 
     val pageTitleHintDetailsSharedWithThirdParty = Translation(
-        en = "Page title, hint, and details are shared with a 3rd party."
+        en = "Page title, hint, and details are shared with a 3rd party.",
+        vn = "Tiêu đề trang, gợi ý và chi tiết được chia sẻ với bên thứ ba."
     )
 
     val dontShowThisAgain = Translation(
-        en = "Don't show this again"
+        en = "Don't show this again",
+        vn = "Đừng hiển thị điều này nữa"
     )
 
     val thisWillReplaceCurrentPhoto = Translation(
-        en = "This will replace the current photo."
+        en = "This will replace the current photo.",
+        vn = "Điều này sẽ thay thế ảnh hiện tại."
     )
 
     val generateNewPhoto = Translation(
-        en = "Generate a new photo?"
+        en = "Generate a new photo?",
+        vn = "Tạo ảnh mới?"
     )
 
     val deleteThisPage = Translation(
-        en = "Delete this page?"
+        en = "Delete this page?",
+        vn = "Xóa trang này?"
     )
 
     val youCannotUndoThis = Translation(
-        en = "You cannot undo this."
+        en = "You cannot undo this.",
+        vn = "Bạn không thể lấy lại điều này."
     )
 
     val pageIsNotPublished = Translation(
-        en = "Page is not published"
+        en = "Page is not published",
+        vn = "Trang chưa được xuất bản"
     )
 
     val required = Translation(
-        en = "Required"
+        en = "Required",
+        vn = "Bắt buộc"
     )
     
     val pageIsPublished = Translation(
@@ -500,7 +519,7 @@ object Strings {
 
     val tapToAnswer = Translation(
         en = "Tap to answer",
-        vn = ""
+        vn = "Nhấn để trả lời"
     )
     val editNote = Translation(
         en = "Edit note",
@@ -542,71 +561,71 @@ object Strings {
         en = "Rating",
         vn = "Xếp hạng"
     )
-    
+
     val fullscreen = Translation(
         en = "Fullscreen",
-        vn = ""
+        vn = "Toàn màn hình"
     )
     val microphone = Translation(
         en = "Microphone",
-        vn = ""
+        vn = "Micro"
     )
     val camera = Translation(
         en = "Camera",
-        vn = ""
+        vn = "Máy ảnh"
     )
     val shareScreen = Translation(
         en = "Share screen",
-        vn = ""
+        vn = "Chia sẻ màn hình"
     )
     val reoccurs = Translation(
         en = "Reoccurs",
-        vn = ""
+        vn = "Lặp lại"
     )
     val everyDay = Translation(
         en = "Every day",
-        vn = ""
+        vn = "Mỗi ngày"
     )
     val ofTheMonth = Translation(
         en = "%1\$s of the month",
-        vn = ""
+        vn = "%1\$s của tháng"
     )
     val lastDayOfTheMonth = Translation(
         en = "Last day of the month",
-        vn = ""
+        vn = "Ngày cuối cùng của tháng"
     )
     val everyWeek = Translation(
         en = "Every week",
-        vn = ""
+        vn = "Mỗi tuần"
     )
     val everyMonth = Translation(
         en = "Every month",
-        vn = ""
+        vn = "Mỗi tháng"
     )
     val until = Translation(
         en = "Until",
-        vn = ""
+        vn = "Cho đến khi"
     )
-    
+
     val nthWeek = Translation(
         en = "%1\$s week",
     )
 
     val tapToSwitch = Translation(
         en = "Tap to switch",
-        vn = ""
+        vn = "Nhấn để chuyển đổi"
     )
-    
+
     val personCommentedOnYourStory = Translation(
-        en = "%1\$s commented on your story",
-        vn = ""
+        en = "%1\$s commented on your post",
+        vn = "%1\$s đã bình luận về bài viết của bạn"
     )
-    
+
     val personRepliedToYourComment = Translation(
         en = "%1\$s replied to your comment",
-        vn = ""
+        vn = "%1\$s đã trả lời bình luận của bạn"
     )
-    
+
     val openPage = Translation(
         en = "Open page",
         vn = "Mở trang"

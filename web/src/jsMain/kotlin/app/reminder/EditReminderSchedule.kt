@@ -1,21 +1,36 @@
 package app.reminder
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import app.components.MultiSelect
 import appString
 import appText
+import application
 import com.queatz.db.ReminderSchedule
 import format
 import kotlinx.datetime.toKotlinInstant
-import lib.*
+import lib.addHours
+import lib.getMinutes
+import lib.parse
+import lib.setMinutes
+import lib.startOfDay
 import org.jetbrains.compose.web.attributes.disabled
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.CheckboxInput
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Label
-import org.jetbrains.compose.web.dom.Text
 import parseDateTime
 import r
+import time.format
 import kotlin.js.Date
 
 class EditSchedule(
@@ -143,12 +158,12 @@ fun EditReminderSchedule(
                 option("-", appString { everyDay })
                 (1..7).forEach {
                     // todo: localize
-                    val n = enUS.localize.day(it - 1).toString()
+                    val n = application.locale.localize.day(it - 1).toString()
                     option("weekday:$it", n)
                 }
                 (1..31).forEach {
                     // todo: localize
-                    option("day:$it", appString { ofTheMonth }.format(enUS.localize.ordinalNumber(it)))
+                    option("day:$it", appString { ofTheMonth }.format(application.locale.localize.ordinalNumber(it)))
                 }
                 option("day:-1", appString { lastDayOfTheMonth })
             }
@@ -164,7 +179,7 @@ fun EditReminderSchedule(
             }) {
                 option("-", appString { everyWeek })
                 (1..5).forEach {
-                    option("$it", appString { nthWeek }.format(enUS.localize.ordinalNumber(it)))
+                    option("$it", appString { nthWeek }.format(application.locale.localize.ordinalNumber(it)))
                 }
             }
 
@@ -179,7 +194,7 @@ fun EditReminderSchedule(
             }) {
                 option("-", appString { everyMonth })
                 (1..12).forEach {
-                    option("$it", enUS.localize.month(it - 1).toString())
+                    option("$it", application.locale.localize.month(it - 1).toString())
                 }
             }
         }

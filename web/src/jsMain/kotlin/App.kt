@@ -9,7 +9,9 @@ import kotlinx.browser.localStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.encodeToString
+import lib.enUS
+import lib.ru
+import lib.vi
 import org.w3c.dom.get
 import org.w3c.dom.set
 
@@ -36,6 +38,12 @@ class Application {
         private set
 
     var language: String = "en"
+
+    val locale get() = when (language) {
+        "vi" -> vi
+        "ru" -> ru
+        else -> enUS
+    }
 
     init {
         bearerToken.value = localStorage["bearer"]

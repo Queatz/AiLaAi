@@ -8,7 +8,7 @@ import com.queatz.db.GroupExtended
 import components.ProfilePhoto
 import focusable
 import kotlinx.browser.window
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -56,7 +56,6 @@ suspend fun groupMembersDialog(group: GroupExtended) = dialog(
                                 "${if (member.member?.host == true) "${appString { host }} • " else ""}${appString { active }} ${
                                     formatDistanceToNow(
                                         Date(member.person!!.seen?.toEpochMilliseconds() ?: member.person!!.createdAt!!.toEpochMilliseconds()),
-                                        js("{ addSuffix: true }")
                                     )
                                 }"
                             )

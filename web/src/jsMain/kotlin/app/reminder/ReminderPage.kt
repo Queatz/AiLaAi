@@ -14,6 +14,7 @@ import app.dialog.inputDialog
 import app.dialog.searchDialog
 import app.menu.Menu
 import appString
+import appText
 import application
 import bulletedString
 import com.queatz.db.Reminder
@@ -68,9 +69,10 @@ fun ReminderPage(
         Menu({ menuTarget = null }, target) {
             item(appString { rename }) {
                 scope.launch {
-                    val title = inputDialog(application.appString { this.reminder },
-                        application.appString { title },
-                        application.appString { update },
+                    val title = inputDialog(
+                        title = application.appString { this.reminder },
+                        placeholder = application.appString { title },
+                        confirmButton = application.appString { update },
                         defaultValue = reminder.title ?: ""
                     )
 
@@ -175,8 +177,7 @@ fun ReminderPage(
                         }
 
                         H3 {
-                            // todo: translate
-                            Text("Hours")
+                            appText { this.hours }
                         }
                         NumberInput(
                             value = hours,
@@ -197,8 +198,7 @@ fun ReminderPage(
                             }
                         )
                         H3 {
-                            // todo: translate
-                            Text("Minutes")
+                            appText { this.minutes }
                         }
                         NumberInput(
                             value = minutes,
@@ -284,8 +284,11 @@ fun ReminderPage(
             item(appString { delete }) {
                 scope.launch {
                     // Todo: translate
-                    val result = dialog("Delete this reminder?", confirmButton = "Yes, delete") {
-                        Text("You cannot undo this.")
+                    val result = dialog(
+                        title = "Delete this reminder?",
+                        confirmButton = application.appString { yesDelete }
+                    ) {
+                        appText { youCannotUndoThis }
                     }
 
                     if (result != true) return@launch

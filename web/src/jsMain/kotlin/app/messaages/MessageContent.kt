@@ -24,7 +24,7 @@ import components.LoadingText
 import ellipsize
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import notBlank
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
@@ -93,7 +93,9 @@ fun MessageContent(
             maxWidth(100.percent)
         }
         title(
-            "${message.createdAt?.let { formatDistanceToNow(Date(it.toEpochMilliseconds()), js("{ addSuffix: true }")) }}\n${message.createdAt?.let { Date(it.toEpochMilliseconds()) }.toString()}"
+            "${message.createdAt?.let {
+                formatDistanceToNow(Date(it.toEpochMilliseconds())) 
+            }}\n${message.createdAt?.let { Date(it.toEpochMilliseconds()) }.toString()}"
         )
     }) {
         reply?.let { reply ->

@@ -23,7 +23,7 @@ import components.ProfilePhoto
 import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import lib.toLocaleString
 import notEmpty
 import org.jetbrains.compose.web.css.AlignSelf
@@ -124,7 +124,6 @@ fun StoryComments(
                                 Text(
                                     formatDistanceToNow(
                                         Date(comment.comment!!.createdAt!!.toEpochMilliseconds()),
-                                        js("{ addSuffix: true }")
                                     )
                                 )
                             }

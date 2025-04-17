@@ -16,7 +16,7 @@ import com.queatz.db.ReactionAndPerson
 import components.Loading
 import components.ProfilePhoto
 import kotlinx.browser.window
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.display
@@ -91,8 +91,7 @@ suspend fun allReactionsDialog(messageId: String) = dialog(
                                 reaction.reaction?.reaction,
                                 reaction.reaction?.createdAt?.let {
                                     formatDistanceToNow(
-                                        Date(it.toEpochMilliseconds()),
-                                        js("{ addSuffix: true }")
+                                        Date(it.toEpochMilliseconds())
                                     )
                                 }
                             )

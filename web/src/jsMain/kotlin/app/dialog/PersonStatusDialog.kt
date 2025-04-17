@@ -8,7 +8,7 @@ import com.queatz.db.PersonStatus
 import components.ProfilePhoto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -95,8 +95,7 @@ suspend fun personStatusDialog(person: Person, status: PersonStatus, scope: Coro
         }) {
             Text(
                 formatDistanceToNow(
-                    Date(status.createdAt!!.toEpochMilliseconds()),
-                    js("{ addSuffix: true }")
+                    Date(status.createdAt!!.toEpochMilliseconds())
                 )
             )
         }

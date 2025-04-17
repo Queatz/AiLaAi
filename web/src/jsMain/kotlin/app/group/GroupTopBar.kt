@@ -59,7 +59,7 @@ import json
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import lib.formatDistanceToNow
+import time.formatDistanceToNow
 import notBlank
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
@@ -738,7 +738,7 @@ fun GroupTopBar(
     val active = group.members?.filter { it != myMember }?.maxByOrNull {
         it.person?.seen?.toEpochMilliseconds() ?: 0
     }?.person?.seen?.let { Date(it.toEpochMilliseconds()) }?.let {
-        "${appString { active }} ${formatDistanceToNow(it, js("{ addSuffix: true }"))}"
+        "${appString { active }} ${formatDistanceToNow(it)}"
     }
 
     PageTopBar(

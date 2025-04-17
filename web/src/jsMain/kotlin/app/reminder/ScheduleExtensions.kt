@@ -3,7 +3,7 @@ package app.reminder
 import androidx.compose.runtime.Composable
 import app.page.ScheduleView
 import appString
-import lib.format
+import time.format
 import lib.isToday
 import lib.isTomorrow
 import lib.isYesterday
@@ -21,8 +21,8 @@ fun Long.formatDuration(): String? {
     val minutes = milliseconds.inWholeMinutes - hours.hours.inWholeMinutes
 
     return listOfNotNull(
-        hours.takeIf { it > 0 }?.let { if (it == 1L) "$it ${appString { hour }}" else "$it ${appString { this.hours }}" },
-        minutes.takeIf { it > 0 }?.let { if (it == 1L) "$it ${appString { minute }}" else "$it ${appString { this.minutes }}" },
+        hours.takeIf { it > 0 }?.let { if (it == 1L) "$it ${appString { inlineHour }}" else "$it ${appString { this.inlineHours }}" },
+        minutes.takeIf { it > 0 }?.let { if (it == 1L) "$it ${appString { inlineMinute }}" else "$it ${appString { this.inlineMinutes }}" },
     ).joinToString()
 }
 

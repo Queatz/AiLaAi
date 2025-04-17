@@ -3,12 +3,15 @@ package app.reminder
 import androidx.compose.runtime.Composable
 import app.AppStyles
 import appString
+import application
 import asNaturalList
 import bulletedString
-import com.queatz.db.*
+import com.queatz.db.Reminder
 import focusable
 import format
-import lib.*
+import lib.getMinutes
+import lib.isAfter
+import lib.parse
 import notBlank
 import notEmpty
 import org.jetbrains.compose.web.css.flexGrow
@@ -16,6 +19,7 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import time.format
 import kotlin.js.Date
 
 @Composable
@@ -86,9 +90,9 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     append(" ")
 
     val dayStrings = (schedule?.weekdays?.map {
-        enUS.localize.day(it - 1)
+        application.locale.localize.day(it - 1)
     } ?: emptyList()) + (schedule?.days?.map {
-        if (it == -1) "last" else enUS.localize.ordinalNumber(it)
+        if (it == -1) "last" else application.locale.localize.ordinalNumber(it)
     } ?: emptyList())
 
     if (dayStrings.isNotEmpty()) {
@@ -115,7 +119,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     schedule?.weeks?.notEmpty?.let { weeks ->
         append("$during the ")
         during = "of"
-        append(weeks.asNaturalList { enUS.localize.ordinalNumber(it) })
+        append(weeks.asNaturalList { application.locale.localize.ordinalNumber(it) })
         append(" week")
         append(" ")
 
@@ -128,7 +132,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
     schedule?.months?.notEmpty?.let { months ->
         append("$during ")
         during = "of"
-        append(months.asNaturalList { enUS.localize.month(it - 1) })
+        append(months.asNaturalList { application.locale.localize.month(it - 1) })
         append(" ")
     }
 

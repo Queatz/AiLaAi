@@ -18,7 +18,7 @@ import com.queatz.db.ReminderOccurrence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toKotlinInstant
-import lib.format
+import time.format
 import notBlank
 import org.w3c.dom.DOMRect
 import parseDateTime

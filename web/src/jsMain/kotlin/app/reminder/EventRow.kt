@@ -55,9 +55,13 @@ fun EventRow(
 
     fun markAsDone(done: Boolean) {
         scope.launch {
-            api.updateReminderOccurrence(event.reminder.id!!, event.updateDate, ReminderOccurrence(
-                done = done
-            )) {
+            api.updateReminderOccurrence(
+                id = event.reminder.id!!,
+                occurrence = event.updateDate,
+                update = ReminderOccurrence(
+                    done = done
+                )
+            ) {
                 onUpdate()
             }
         }
@@ -158,9 +162,7 @@ fun EventRow(
                     bulletedString(
                         "⏰".takeIf { event.reminder.alarm == true },
                         date.formatSecondary(view).let {
-                            val duration = (event.occurrence?.duration ?: event.reminder.duration)?.let {
-                                it.formatDuration()
-                            }
+                            val duration = (event.occurrence?.duration ?: event.reminder.duration)?.formatDuration()
                             if (duration == null) {
                                 it
                             } else {
