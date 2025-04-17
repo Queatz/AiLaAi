@@ -59,11 +59,11 @@ object Strings {
     )
     val copyProfileLink = Translation(
         en = "Copy profile link",
-        vn = "Sao chép liên kết trang cá nhân của bạn"
+        vn = "Sao chép liên kết cá nhân"
     )
     val openProfile = Translation(
         en = "Open profile",
-        vn = "Mở trang cá nhân của bạn"
+        vn = "Mở trang cá nhân"
     )
     val hour = Translation(
         en = "Hour",

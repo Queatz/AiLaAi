@@ -132,7 +132,7 @@ fun ReminderScreen(reminderId: String) {
             val open = reminder?.open == true
             api.updateReminder(
                 id = reminderId,
-                reminder = Reminder(open = open)
+                reminder = Reminder(open = !open)
             ) {
                 reload()
             }
