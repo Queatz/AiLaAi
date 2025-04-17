@@ -859,20 +859,6 @@ fun GroupScreen(groupId: String) {
                                 context.toast(R.string.copied)
                             }
                             item(
-                                icon = Icons.Outlined.Share,
-                                name = stringResource(R.string.share)
-                            ) {
-                                showMenu = false
-                                groupUrl(groupId).shareAsUrl(
-                                    context,
-                                    groupExtended?.name(
-                                        someone = context.getString(R.string.someone),
-                                        emptyGroup = context.getString(R.string.empty_group_name),
-                                        omit = me?.id?.inList().orEmpty()
-                                    )
-                                )
-                            }
-                            item(
                                 icon = Icons.Outlined.QrCode2,
                                 name = stringResource(R.string.qr_code)
                             ) {

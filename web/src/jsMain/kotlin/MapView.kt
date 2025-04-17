@@ -631,8 +631,22 @@ fun MapView(
             }
         }
         if (selectedCard != null) {
+            var panelRef by remember { mutableStateOf<HTMLElement?>(null) }
+
+            LaunchedEffect(selectedCard) {
+                panelRef?.scrollTop = 0.0
+            }
+
             Div({
                 classes(Styles.navContainer, Styles.mapPanel)
+
+                ref { ref ->
+                    panelRef = ref
+
+                    onDispose {
+                        panelRef = null
+                    }
+                }
             }) {
                 Div({
                     classes(Styles.navContent)

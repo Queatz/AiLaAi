@@ -79,9 +79,10 @@ fun ScriptsPage(
             var runScriptData by remember(script) { mutableStateOf<String?>(null) }
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
             var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
-            var aiScript by remember(script) { mutableStateOf<String?>(null) }
+            var undoAiScript by remember(script) { mutableStateOf<String?>(null) }
             var menuTarget by remember { mutableStateOf<DOMRect?>(null) }
             var aiJob by remember { mutableStateOf<Job?>(null) }
+            val state = remember { MonacoEditorState() }
 
             menuTarget?.let {
                 Menu(
@@ -201,10 +202,11 @@ fun ScriptsPage(
                         }
                     }) {
                         MonacoEditor(
-                            initialValue = aiScript ?: script.source.orEmpty(),
+                            state = state,
+                            initialValue = script.source.orEmpty(),
                             onValueChange = {
                                 editedScript = it
-                                edited = it != script.source && !(it.isBlank() && script.source!!.isBlank())
+                                edited = it != script.source && !(it.isBlank() && script.source.isNullOrBlank())
                             },
                             styles = {
                                 margin(0.r, 1.r, 1.r, 1.r)
@@ -258,7 +260,7 @@ fun ScriptsPage(
                         script.id
                     ),
                     actions = {
-                        if (aiScript != null && editedScript == aiScript) {
+                        if (undoAiScript != null) {
                             IconButton(
                                 name = "undo",
                                 // todo: translate
@@ -267,7 +269,10 @@ fun ScriptsPage(
                                     marginLeft(.5.r)
                                 }
                             ) {
-                                aiScript = null
+                                scope.launch {
+                                    state.setValue(undoAiScript!!)
+                                    undoAiScript = null
+                                }
                             }
                         }
                         if (edited) {
@@ -345,8 +350,8 @@ fun ScriptsPage(
                                             confirmButton = "Send",
                                             singleLine = false,
                                             // todo: translate
-                                            placeholder = if ((editedScript
-                                                    ?: script.source!!).isBlank()
+                                            placeholder = if (
+                                                (editedScript ?: script.source.orEmpty()).isBlank()
                                             ) "Create a script that..." else "Modify this script to...",
                                         )
 
@@ -355,7 +360,7 @@ fun ScriptsPage(
                                             api.aiScript(
                                                 request = AiScriptRequest(
                                                     prompt = prompt,
-                                                    script = (editedScript ?: script.source!!)
+                                                    script = editedScript ?: script.source.orEmpty()
                                                 ),
                                                 onError = { error ->
                                                     if (error !is CancellationException) {
@@ -373,7 +378,8 @@ fun ScriptsPage(
                                                     }
                                                 }
                                             ) {
-                                                aiScript = it.code
+                                                undoAiScript = editedScript ?: script.source.orEmpty()
+                                                state.setValue(it.code)
                                             }
                                             isAiScriptGenerating = false
                                         }

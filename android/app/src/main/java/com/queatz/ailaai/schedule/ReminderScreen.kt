@@ -16,8 +16,6 @@ import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.EditLocation
-import androidx.compose.material.icons.outlined.EditLocationAlt
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Place
@@ -62,7 +60,6 @@ import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
-import com.queatz.ailaai.ui.dialogs.EditCardLocationDialog
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -137,8 +134,7 @@ fun ReminderScreen(reminderId: String) {
                 id = reminderId,
                 reminder = Reminder(open = open)
             ) {
-                reminder = it
-                reloadEvents()
+                reload()
             }
         }
     }
@@ -376,7 +372,8 @@ fun ReminderScreen(reminderId: String) {
                         }
                         item(
                             Icons.Outlined.Place,
-                            stringResource(R.string.choose_location)
+                            stringResource(R.string.choose_location),
+                            selected = reminder?.geo?.isNotEmpty() == true
                         ) {
                             showLocationDialog = true
                         }

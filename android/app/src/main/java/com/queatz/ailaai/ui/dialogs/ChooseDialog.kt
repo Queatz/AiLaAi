@@ -187,7 +187,7 @@ fun <T> ChooseDialog(
                     extraButtons()
                 }
                 TextButton(
-                    {
+                    onClick = {
                         if (multiple) {
                             disableSubmit = true
 
@@ -203,12 +203,20 @@ fun <T> ChooseDialog(
                             onDismissRequest()
                         }
                     },
-                    enabled = !disableSubmit && !isLoading,
+                    enabled = !disableSubmit && (allowNone || !isLoading),
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    Text(confirmFormatter(selected), textAlign = TextAlign.End, modifier = Modifier.weight(0.5f, false))
+                    Text(
+                        text = confirmFormatter(selected),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.weight(0.5f, false)
+                    )
                     if (multiple) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowForward, null, modifier = Modifier.padding(start = 1.pad))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 1.pad)
+                        )
                     }
                 }
             }

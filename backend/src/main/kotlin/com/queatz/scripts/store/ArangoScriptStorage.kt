@@ -34,7 +34,7 @@ open class StorageModel {
     @JsonAlias("key")
     @JsonNames("key", "_key")
     @JsonProperty("_key")
-    var key: String? = null
+    open var key: String? = null
 }
 
 @Serializable
@@ -80,13 +80,13 @@ class ArangoScriptStorage(
     }
 
     override fun get(key: String): String? {
-        return collection(DEFAULT_COLLECTION)
+        return arangoCollection(DEFAULT_COLLECTION)
             .getDocument(key, KeyValueModel::class.java)
             ?.value
     }
 
     override fun set(key: String, value: String?) {
-        collection(DEFAULT_COLLECTION).insertDocument(
+        arangoCollection(DEFAULT_COLLECTION).insertDocument(
             KeyValueModel().apply {
                 this.key = key
                 this.value = value
@@ -98,16 +98,16 @@ class ArangoScriptStorage(
     }
 
     override fun <T : Any> get(collection: KClass<T>, key: String): T? {
-        if (!hasCollection(collectionName(collection))) {
+        if (!hasCollection(collection)) {
             return null
         }
 
-        return collection(collectionName(collection))
+        return arangoCollection(collection(collection))
             .getDocument(key, collection.java)
     }
 
     override fun <T : Any> put(collection: KClass<T>, value: T): T {
-        return collection(collectionName(collection))
+        return arangoCollection(collection(collection))
             .insertDocument(
                 value,
                 DocumentCreateOptions()
@@ -117,18 +117,29 @@ class ArangoScriptStorage(
     }
 
     override fun <T : Any> all(collection: KClass<T>): List<T> {
-        if (!hasCollection(collectionName(collection))) {
+        if (!hasCollection(collection)) {
             return emptyList()
         }
         return query(
             aql = "FOR document IN @@collection RETURN document",
             type = collection,
-            params = mapOf("@collection" to collectionName(collection))
+            params = mapOf("@collection" to collection(collection))
+        )
+    }
+
+    override fun <T : Any> keys(collection: KClass<T>): List<String> {
+        if (!hasCollection(collection)) {
+            return emptyList()
+        }
+        return query(
+            aql = "FOR document IN @@collection RETURN document._key",
+            type = String::class,
+            params = mapOf("@collection" to collection(collection))
         )
     }
 
     override fun <T : Any> delete(collection: KClass<T>, key: String) {
-        collection(collectionName(collection))
+        arangoCollection(collection(collection))
             .deleteDocument(key)
     }
 
@@ -146,11 +157,16 @@ class ArangoScriptStorage(
         }
     }
 
-    private fun collectionName(collection: KClass<*>): String = collection.qualifiedName!!.replace(".", "_")
+    override fun <T : Any> collection(collection: KClass<T>): String =
+        collection.qualifiedName!!.replace(".", "_")
 
-    private fun hasCollection(name: String): Boolean = db.collections.any { it.name == name }
+    override fun <T : Any> hasCollection(collection: KClass<T>): Boolean =
+        hasCollection(collection(collection))
 
-    private fun collection(name: String): ArangoCollection {
+    private fun hasCollection(name: String): Boolean =
+        db.collections.any { it -> it.name == name }
+
+    private fun arangoCollection(name: String): ArangoCollection {
         if (!hasCollection(name)) {
             db.createCollection(
                 name,

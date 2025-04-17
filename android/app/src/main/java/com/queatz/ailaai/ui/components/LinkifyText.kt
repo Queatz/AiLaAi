@@ -1,5 +1,7 @@
 package com.queatz.ailaai.ui.components
 
+import android.R.attr.fontFamily
+import androidx.compose.foundation.background
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
@@ -67,10 +70,14 @@ fun LinkifyText(
             style = RichTextStyle(
                 // todo - this isn't applied to code blocks - investigate
                 codeBlockStyle = CodeBlockStyle(
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     textStyle = style.copy(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp
-                    )
+                        fontSize = 14.sp,
+                    ),
+                    wordWrap = true,
                 ),
                 stringStyle = RichTextStringStyle(
                     codeStyle = style.copy(
@@ -78,7 +85,8 @@ fun LinkifyText(
                         fontFamily = FontFamily.Monospace,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                    ).toSpanStyle(), linkStyle = TextLinkStyles(
+                    ).toSpanStyle(),
+                    linkStyle = TextLinkStyles(
                         style = style.copy(color = MaterialTheme.colorScheme.primary).toSpanStyle()
                     )
                 )

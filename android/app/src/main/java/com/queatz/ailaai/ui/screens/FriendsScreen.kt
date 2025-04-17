@@ -637,7 +637,7 @@ fun FriendsScreen() {
     if (showCreateGroupMembers) {
         val someone = stringResource(R.string.someone)
         ChoosePeopleDialog(
-            {
+            onDismissRequest = {
                 showCreateGroupMembers = false
             },
             title = stringResource(R.string.invite_people),

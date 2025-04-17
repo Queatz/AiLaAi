@@ -12,16 +12,21 @@ me: Person? // The current user, if signed in, null if signed out
 data: String? // Data passed to the script, if any
 ```
 
-Person has the following fields: `id`, `name?`, `photo?`, `language?`, `utcOffset: Double?`, `seen: Instant?`
+Person has the following fields:
+
+`id: String?`, `name: String?`, `photo: String?`, `language: String?`, `utcOffset: Double?`, `seen: Instant?`
 
 The following are functions passed into scripts: `render`, `http`
 
 # Rendering content
 
 ```kotlin
+// Optional
+import com.queatz.db.ButtonStyle
+
 render {
-    section("<Title>")
-    text("<Text>")
+    section("<Title>") // Markdown supported
+    text("<Text>") // Markdown supported
     button(
         text = "<Button text>",
         script = "<Script ID to run>",
@@ -85,7 +90,8 @@ storage["<key>"] = "<value>"
 storage["<key>"]
 ```
 
-You can also use your own data classes. They must have a valid ArangoDB @Key field. It's recommended to import `com.queatz.scripts.store.StorageModel`.
+You can also use your own data classes. They must have a valid ArangoDB @Key field.
+It's recommended to import and extend `com.queatz.scripts.store.StorageModel` which provides a correctly annotated `key` field.
 
 ```kotlin
 @Serializable
@@ -97,23 +103,37 @@ data class MyModel : StorageModel() {
 And then:
 
 ```kotlin
-storage.put(MyModel::class, MyModel("<value>")).let { model ->
-    // model.key will now be populated
+// Store a model
+storage.put(MyModel::class, MyModel()).let { model ->
+    // model.key will always be populated
 }
 
-storage.get(MyModel::class, "<key>")?.let { model -> }
+// Get by key
+storage.get(MyModel::class, "<key>")?.let { model: MyModel -> }
 
-storage.all(MyModel::class).forEach { model -> }
+// Get all
+storage.all(MyModel::class).forEach { model: MyModel -> }
 
+// Get all keys
+storage.keys(MyModel::class).forEach { key: String -> }
+
+// Delete by key
 storage.delete(MyModel::class, "<key>")
 
+// Query with AQL
 storage.query(
     // AQL query return type (a list of these will be returned)
     MyModel::class,
     "<AQL query string>",
     // Optional binding parameters to pass into the AQL query
     mapOf("<key>" to "<value>")
-).forEach { model -> }
+).forEach { model: MyModel -> }
+
+// Get collection name for use in AQL queries
+val collection: String = storage.collection(MyModel::class)
+
+// Check if a collection exists
+storage.hasCollection(MyModel::class)
 ```
 
 # Dependencies

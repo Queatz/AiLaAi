@@ -218,6 +218,8 @@ fun GroupMessages(
                         search = it
                     },
                     onDismissRequest = {
+                        searchByReaction = ""
+                        searchByRating = ""
                         onShowSearch(false)
                     },
                     styles = {

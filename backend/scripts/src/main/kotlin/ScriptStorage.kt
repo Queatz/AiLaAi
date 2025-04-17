@@ -28,6 +28,10 @@ interface ScriptStorage {
         collection: KClass<T>,
     ): List<T>
 
+    fun <T : Any> keys(
+        collection: KClass<T>,
+    ): List<String>
+
     fun <T : Any> delete(
         collection: KClass<T>,
         key: String,
@@ -39,4 +43,8 @@ interface ScriptStorage {
         aql: String,
         params: Map<String, Any?> = emptyMap()
     ): List<T>
+
+    fun <T : Any> collection(collection: KClass<T>): String
+
+    fun <T : Any> hasCollection(collection: KClass<T>): Boolean
 }

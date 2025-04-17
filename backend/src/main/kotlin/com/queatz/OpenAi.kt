@@ -41,7 +41,7 @@ data class OpenAiCompletionsMessage(
 
 @Serializable
 data class OpenAiResponsesBody(
-    val model: String = "gpt-4.5-preview-2025-02-27", // todo switch to "o3-mini-2025-1-31" when available
+    val model: String = "o4-mini",
     val input: List<OpenAiCompletionsMessage>,
     val text: JsonObject,
 )
@@ -134,11 +134,11 @@ class OpenAi {
         expectSuccess = true
 
         install(ContentNegotiation) {
-            json(com.queatz.plugins.json)
+            json(json)
         }
 
         engine {
-            requestTimeout = 4.minutes.inWholeMilliseconds
+            requestTimeout = 5.minutes.inWholeMilliseconds
         }
     }
 

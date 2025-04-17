@@ -117,6 +117,7 @@ class RunScript(
         )
 
         if (compiledScript.isError()) {
+            println("Compilation failed for script id ${script.id}: ${compiledScript.reports.joinToString("\n")}")
             return ScriptResult(
                 content = listOf(
                     StoryContent.Text(
@@ -133,14 +134,20 @@ class RunScript(
             scriptCache[scriptSource] = compiledScript
         }
 
-        val result = host.evaluator(
-            compiledScript = compiledScript.valueOrThrow(),
-            scriptEvaluationConfiguration = scriptEvaluationConfiguration
-        )
+        val result = runInSandbox {
+            host.evaluator(
+                compiledScript = compiledScript.valueOrThrow(),
+                scriptEvaluationConfiguration = scriptEvaluationConfiguration
+            )
+        }
 
         val resultError = (result as? ResultWithDiagnostics.Success)?.value?.returnValue as? ResultValue.Error
 
         return if (result.isError() || resultError != null) {
+            println(
+                "Execution failed for script id ${script.id}: ${
+                resultError?.let { "$it\n\n" } ?: "Unknown runtime error."
+            } ${result.reports.joinToString("\n")}")
             ScriptResult(
                 content = listOf(
                     StoryContent.Text(
@@ -157,5 +164,39 @@ class RunScript(
         } else {
             ScriptResult(content = content)
         }
+    }
+}
+
+suspend fun <T> runInSandbox(block: suspend () -> T): T {
+    // Configure thread context class loader with restricted access
+    val originalClassLoader = Thread.currentThread().contextClassLoader
+    try {
+        val restrictedClassLoader = RestrictedClassLoader(originalClassLoader)
+        Thread.currentThread().contextClassLoader = restrictedClassLoader
+        return block()
+    } finally {
+        Thread.currentThread().contextClassLoader = originalClassLoader
+    }
+}
+
+class RestrictedClassLoader(parent: ClassLoader) : ClassLoader(parent) {
+    private val blockedPackages = setOf(
+        "java.io",
+        "java.nio",
+        "kotlin.io",
+        "java.lang.System",
+        "java.util.logging",
+        "java.util.jar",
+        "java.util.zip",
+        "org.apache.commons.io",
+        "com.google.common.io"
+    )
+
+    override fun loadClass(name: String, resolve: Boolean): Class<*> {
+        // Block loading of file system access classes
+        if (blockedPackages.any { name.startsWith(it) }) {
+            throw ClassNotFoundException("Access to $name is restricted for security reasons")
+        }
+        return super.loadClass(name, resolve)
     }
 }
