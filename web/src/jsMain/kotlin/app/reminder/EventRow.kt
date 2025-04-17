@@ -108,7 +108,7 @@ fun EventRow(
     Div({
         classes(SchedulePageStyles.row)
 
-        title(appString { markAsDone })
+        title(application.appString { markAsDone })
 
         onClick {
             markAsDone(!done)

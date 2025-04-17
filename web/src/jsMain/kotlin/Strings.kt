@@ -51,7 +51,7 @@ object Strings {
     )
     val yourProfileUrl = Translation(
         en = "Your profile URL",
-        vn = "URL hồ sơ của bạn"
+        vn = "URL trang cá nhân của bạn"
     )
     val copied = Translation(
         en = "Copied!",
@@ -59,11 +59,11 @@ object Strings {
     )
     val copyProfileLink = Translation(
         en = "Copy profile link",
-        vn = "Sao chép liên kết hồ sơ"
+        vn = "Sao chép liên kết trang cá nhân"
     )
     val openProfile = Translation(
         en = "Open profile",
-        vn = "Mở hồ sơ"
+        vn = "Mở trang cá nhân"
     )
     val hour = Translation(
         en = "Hour",
@@ -125,6 +125,10 @@ object Strings {
     val tryAgainOrContact = Translation(
         en = "Please try again or contact the form owner.",
         vn = "Vui lòng thử lại hoặc liên hệ với chủ sở hữu biểu mẫu."
+    )
+    val please = Translation(
+        "",
+        "Hãy "
     )
     val formSubmitted = Translation(
         en = "Form submitted!",
@@ -320,12 +324,12 @@ object Strings {
 
     val sendAnEmailDeleteAccount = Translation(
         en = "containing your profile URL and Transfer Code to permanently delete your account.",
-        vn = "chứa URL hồ sơ của bạn và mã chuyển để xóa vĩnh viễn tài khoản của bạn."
+        vn = "chứa URL trang cá nhân của bạn và mã chuyển để xóa vĩnh viễn tài khoản của bạn."
     )
 
     val sendAnEmailDeleteAccount2 = Translation(
         en = "You can find this information on your profile page.",
-        vn = "Bạn có thể tìm thấy thông tin này trên trang hồ sơ của mình."
+        vn = "Bạn có thể tìm thấy thông tin này trên trang trang cá nhân của mình."
     )
 
     val noBots = Translation(
@@ -395,7 +399,7 @@ object Strings {
 
     val sentAProfile = Translation(
         en = "Sent a profile",
-        vn = "Đã gửi một hồ sơ"
+        vn = "Đã gửi một trang cá nhân"
     )
     
     val orGetItOn = Translation(
