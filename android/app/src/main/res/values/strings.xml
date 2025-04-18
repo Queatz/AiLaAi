@@ -560,6 +560,7 @@
     <string name="style">Style</string>
     <string name="photo">Photo</string>
     <string name="describe_photo">Describe the photo</string>
+    <string name="photo_count">Count</string>
     <string name="background">Background</string>
     <string name="open_link">Open link</string>
     <string name="open">Open</string>
@@ -833,6 +834,8 @@
     <string name="react">React</string>
     <string name="rate">Rate</string>
     <string name="remove_rating">Remove rating</string>
+    <string name="your_ratings_are_only_visible_to_you">Your ratings are only visible to you.</string>
+    <string name="help">Help</string>
     <string name="inline_reacted_x_to_x">reacted %1$s to %2$s</string>
     <string name="remove_your_reaction">Remove your reaction?</string>
     <string name="use_status">Use this status</string>
@@ -857,7 +860,15 @@
         visible when close
     </string>
     <string name="create_invite">Create invite</string>
+    <string name="create_invite_link">Create invite link</string>
+    <string name="multiple_uses">Multiple uses</string>
+    <string name="expires">Expires</string>
+    <string name="number_of_uses">Number of uses</string>
+    <string name="description_optional">Description (optional)</string>
+    <string name="invite_created">Invite created</string>
+    <string name="ok">OK</string>
     <string name="earth">Earth</string>
+    <string name="no_prompts">No prompts</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>

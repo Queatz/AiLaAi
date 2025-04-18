@@ -206,6 +206,7 @@ import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.GroupDescriptionDialog
+import com.queatz.ailaai.ui.dialogs.CreateInviteDialog
 import com.queatz.ailaai.ui.dialogs.GroupSettingsDialog
 import com.queatz.ailaai.ui.dialogs.Media
 import com.queatz.ailaai.ui.dialogs.Menu
@@ -234,7 +235,6 @@ import com.queatz.db.MemberAndPerson
 import com.queatz.db.Message
 import com.queatz.db.Person
 import com.queatz.db.PhotosAttachment
-import com.queatz.db.Rating
 import com.queatz.db.Reminder
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
@@ -1139,25 +1139,6 @@ fun GroupScreen(groupId: String) {
                                     showReplyInNewGroupDialog = it
                                 },
                                 onShowPhoto = { showPhoto = it },
-                                onRate = { message, rating ->
-                                    scope.launch {
-                                        if (rating == null) {
-                                            api.setMessageRating(
-                                                id = message.id!!,
-                                                rating = Rating(rating = null)
-                                            ) {
-                                                reloadMessages()
-                                            }
-                                        } else {
-                                            api.setMessageRating(
-                                                id = message.id!!,
-                                                rating = Rating(rating = rating)
-                                            ) {
-                                                reloadMessages()
-                                            }
-                                        }
-                                    }
-                                }
                             )
                         }
                     }
@@ -1747,6 +1728,7 @@ fun GroupScreen(groupId: String) {
                         if (myMember?.member?.host == true) {
                             IconButton(
                                 onClick = {
+                                    showGroupMembers = false
                                     showInviteMembers = true
                                 }
                             ) {
@@ -1755,7 +1737,7 @@ fun GroupScreen(groupId: String) {
                         }
                     },
                     extraButtons = {
-                        if (myMember?.member != null) {
+                        if (myMember?.member?.host == true) {
                             TextButton(
                                 onClick = {
                                     showManageGroupMembersMenu = true
@@ -1985,7 +1967,18 @@ fun GroupScreen(groupId: String) {
             }
 
             if (showCreateInviteDialog) {
-                // todo
+                CreateInviteDialog(
+                    onDismissRequest = {
+                        showCreateInviteDialog = false
+                    },
+                    groupId = groupId,
+                    onInviteCreated = { invite ->
+                        context.toast(context.getString(R.string.invite_created))
+                        scope.launch {
+                            reload()
+                        }
+                    }
+                )
             }
 
             if (showInviteMembers) {

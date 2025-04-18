@@ -36,12 +36,12 @@ import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.NumberInput
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.files.File
 import pickPhotos
 import r
 import toBytes
-import kotlin.js.Promise.Companion.resolve
 
 class ChoosePhotoDialogControl(
     private val scope: CoroutineScope,
@@ -54,6 +54,7 @@ class ChoosePhotoDialogControl(
 
     private var aiStyle = MutableStateFlow<String?>(null)
     private var aiStyles = MutableStateFlow(emptyList<Pair<String, String>>())
+    private var count = MutableStateFlow(1)
 
     fun launch(onPhoto: suspend (String) -> Unit) {
         scope.launch {
@@ -69,6 +70,7 @@ class ChoosePhotoDialogControl(
                 aiPrompt = aiPrompt,
                 aiStyles = aiStyles,
                 aiStyle = aiStyle,
+                count = count,
                 showUpload = showUpload,
                 onAiStyle = {
                     aiStyle.value = it
@@ -89,10 +91,20 @@ class ChoosePhotoDialogControl(
             if (!result.isNullOrBlank()) {
                 aiPrompt = result
                 _isGenerating.value = true
-                api.aiPhoto(AiPhotoRequest(result, aiStyle.value)) { photo ->
-                    onPhoto(photo.photo)
+
+                // Generate multiple photos based on count
+                val photoCount = count.value
+                var completedCount = 0
+
+                repeat(photoCount) {
+                    api.aiPhoto(AiPhotoRequest(result, aiStyle.value)) { photo ->
+                        onPhoto(photo.photo)
+                        completedCount++
+                        if (completedCount >= photoCount) {
+                            _isGenerating.value = false
+                        }
+                    }
                 }
-                _isGenerating.value = false
             }
         }
     }
@@ -114,6 +126,7 @@ private suspend fun choosePhotoDialog(
     aiPrompt: String = "",
     aiStyles: StateFlow<List<Pair<String, String>>>,
     aiStyle: StateFlow<String?>,
+    count: MutableStateFlow<Int> = MutableStateFlow(1),
     showUpload: Boolean = false,
     onAiStyle: (String?) -> Unit,
     onFile: (file: File) -> Unit,
@@ -130,6 +143,37 @@ private suspend fun choosePhotoDialog(
         },
         inputAction = { resolve, value, onValue ->
             val scope = rememberCoroutineScope()
+
+            // Number input for photo count
+            Div({
+                style {
+                    position(Absolute)
+                    right(3.r)
+                    top(1.r)
+                    bottom(1.r)
+                    property("display", "flex")
+                    property("align-items", "center")
+                }
+            }) {
+                NumberInput(
+                    value = count.collectAsState().value,
+                    min = 1,
+                    max = 10,
+                    attrs = {
+                        classes(Styles.dateTimeInput)
+                        style {
+                            width(3.r)
+                        }
+
+                        onInput {
+                            runCatching {
+                                count.value = (it.value?.toInt() ?: 1).coerceIn(1..10)
+                            }
+                        }
+                    }
+                )
+            }
+
             IconButton("expand_more", appString { history }, styles = {
                 if (value.isNotBlank()) {
                     opacity(0)
@@ -159,6 +203,9 @@ private suspend fun choosePhotoDialog(
                     resolve(false)
                 }
             }
+        },
+        topContent = { _, _, _ ->
+            // Removed NumberInput from here as it's now in inputAction
         }
     ) { _, _, _ ->
         val aiStyles = aiStyles.collectAsState().value
@@ -185,7 +232,7 @@ private suspend fun choosePhotoDialog(
             var previousItem: String? = null
 
             aiStyles.forEach { (name, style) ->
-                if (previousItem != null && previousItem.endsWith("HD)") && !name.endsWith("HD)")) {
+                if (previousItem != null && previousItem!!.endsWith("HD)") && !name.endsWith("HD)")) {
                     Div({
                         style {
                             property("text-transform", "uppercase")

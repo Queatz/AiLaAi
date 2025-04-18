@@ -70,7 +70,7 @@ fun ScriptsPage(
     when (nav) {
         is ScriptsNav.None -> Unit
         is ScriptsNav.Script -> {
-            var script by remember(nav.script) { mutableStateOf(nav.script) }
+            val script by remember(nav.script) { mutableStateOf(nav.script) }
             var editedScript by remember(script) { mutableStateOf<String?>(null) }
             var edited by remember(script) { mutableStateOf(false) }
             var isSaving by remember(script) { mutableStateOf(false) }
@@ -85,17 +85,6 @@ fun ScriptsPage(
             var menuTarget by remember(script) { mutableStateOf<DOMRect?>(null) }
             var aiJob by remember { mutableStateOf<Job?>(null) }
             val state = remember { MonacoEditorState() }
-
-            val onValueChange: (String) -> Unit = remember(script) {
-                {
-                    editedScript = it
-                    edited = if (editedScript.isNullOrBlank() && script.source.isNullOrBlank()) {
-                        false
-                    } else {
-                        editedScript != script.source
-                    }
-                }
-            }
 
             LaunchedEffect(script) {
                 aiJob?.cancel()
@@ -221,7 +210,12 @@ fun ScriptsPage(
                         MonacoEditor(
                             state = state,
                             initialValue = script.source.orEmpty(),
-                            onValueChange = onValueChange,
+                            onValueChange = {
+                                editedScript = it
+                            },
+                            onIsEdited = {
+                                edited = it
+                            },
                             styles = {
                                 margin(0.r, 1.r, 1.r, 1.r)
                                 flexGrow(1)
@@ -405,8 +399,7 @@ fun ScriptsPage(
                         }
                         IconButton(
                             name = "help_outline",
-                            // todo: translate
-                            title = "Help",
+                            title = appString { help },
                             styles = {
                                 marginLeft(.5.r)
                             }

@@ -26,6 +26,7 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.dom.Div
 import r
+import GroupMessages
 
 @Composable
 fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
@@ -41,6 +42,9 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
     }
     var group by remember {
         mutableStateOf<GroupExtended?>(null)
+    }
+    var showSearch by remember {
+        mutableStateOf(false)
     }
 
     application.background(group?.group?.background?.let { "$baseUrl$it" })
@@ -77,6 +81,14 @@ fun GroupCoverPage(groupId: String, onGroupLoaded: (GroupExtended) -> Unit) {
                     }
                 }) {
                     GroupCover(group!!)
+                    GroupMessages(
+                        group = group!!,
+                        showSearch = showSearch,
+                        onShowSearch = { newShowSearch ->
+                            showSearch = newShowSearch
+                        },
+                        inCoverPage = true
+                    )
                 }
             }
         }

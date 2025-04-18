@@ -161,7 +161,7 @@ class Push {
                 TaskStackBuilder.create(context).run {
                     addNextIntentWithParentStack(intent)
                     getPendingIntent(
-                        0,
+                        groupKey.hashCode(),
                         PendingIntent.FLAG_UPDATE_CURRENT or (if (replyInGroup == null) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_MUTABLE)
                     )
                 }
@@ -186,7 +186,7 @@ class Push {
                     }
                     val replyPendingIntent: PendingIntent = PendingIntent.getBroadcast(
                         context,
-                        0,
+                        replyInGroup.hashCode(),
                         replyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                     )
@@ -225,7 +225,7 @@ class Push {
 
                         val actionPendingIntent: PendingIntent = PendingIntent.getBroadcast(
                             context,
-                            0,
+                            groupKey.hashCode(),
                             actionIntent,
                             PendingIntent.FLAG_IMMUTABLE
                         )

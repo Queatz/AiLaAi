@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.platformMe
 import app.ailaai.api.profile
+import app.ailaai.api.transferCode
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
 import app.components.EditField
@@ -30,7 +31,6 @@ import components.Wbr
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.io.discardingSink
 import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.JustifyContent
@@ -231,14 +231,27 @@ fun ProfileNavPage(
             configuration.set(
                 when (configuration.language) {
                     "en" -> "vi"
-                    //"vi" -> "ru"
+                    "vi" -> "ru"
                     else -> "en"
                 }
             )
         }
 
         val signOut = appString { signOut }
+        val signOutOrTransfer = appString { signOutOrTransfer }
         val signOutQuestion = appString { signOutQuestion }
+        val showTransferCode = appString { showTransferCode }
+        var transferCode by remember { mutableStateOf("") }
+        var showingTransferCode by remember { mutableStateOf(false) }
+
+        fun loadTransferCode() {
+            scope.launch {
+                api.transferCode {
+                    transferCode = it.code ?: ""
+                    showingTransferCode = true
+                }
+            }
+        }
 
         NavMenuItem("history_edu", appString { scripts }) {
             onScriptsClick()
@@ -250,13 +263,60 @@ fun ProfileNavPage(
             }
         }
 
-        NavMenuItem("logout", signOut) {
+        NavMenuItem("logout", signOutOrTransfer) {
             scope.launch {
-                val result = dialog(signOutQuestion, signOut) {
-                    appText { signOutQuestionLine1 }
-                    Wbr()
-                    Text(" ")
-                    appText { signOutQuestionLine2 }
+                val result = dialog(
+                    title = signOutQuestion,
+                    confirmButton = signOut
+                ) {
+                    if (showingTransferCode) {
+                        appText { yourTransferCodeIs }
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                gap(0.5.r)
+                                padding(0.5.r)
+                                margin(0.5.r)
+                                justifyContent(JustifyContent.Center)
+                            }
+                        }) {
+                            Div({
+                                style {
+                                    padding(1.r)
+                                    textAlign("center")
+                                }
+                            }) {
+                                Text(transferCode)
+                            }
+                        }
+                        appText { signOutWarning }
+                    } else {
+                        appText { signOutDescription }
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                gap(0.5.r)
+                                padding(0.5.r)
+                                margin(0.5.r)
+                                justifyContent(JustifyContent.Center)
+                            }
+                        }) {
+                            Button({
+                                classes(Styles.button)
+                                onClick {
+                                    loadTransferCode()
+                                }
+                            }) {
+                                Text(showTransferCode)
+                            }
+                        }
+                        Wbr()
+                        Text(" ")
+                        appText { signOutQuestionLine1 }
+                        Wbr()
+                        Text(" ")
+                        appText { signOutQuestionLine2 }
+                    }
                 }
 
                 if (result == true) {
@@ -264,6 +324,9 @@ fun ProfileNavPage(
                     window.location.pathname = "/"
                     window.location.reload()
                 }
+
+                showingTransferCode = false
+                transferCode = ""
             }
         }
     }

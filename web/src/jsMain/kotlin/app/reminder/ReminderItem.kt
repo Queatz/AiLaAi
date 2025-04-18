@@ -120,7 +120,7 @@ val Reminder.scheduleText @Composable get(): String = buildString {
         append("$during ${appString { inlineThe }} ")
         during = appString { inlineOf }
         append(weeks.asNaturalList { application.locale.localize.ordinalNumber(it) })
-        append(" ${appString { inlineWeek }}")
+        append(" ${appString { inlineWeekly }}")
         append(" ")
 
         if (schedule?.months?.notEmpty == null) {

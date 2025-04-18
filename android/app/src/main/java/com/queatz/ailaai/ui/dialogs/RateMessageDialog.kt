@@ -1,10 +1,28 @@
 package com.queatz.ailaai.ui.dialogs
 
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -79,6 +97,20 @@ fun RateMessageDialog(
                 }
             },
             actions = {
+                // Help button to show ratings visibility info
+                var showHelpDialog by remember { mutableStateOf(false) }
+
+                if (showHelpDialog) {
+                    Alert(
+                        onDismissRequest = { showHelpDialog = false },
+                        title = null,
+                        text = stringResource(R.string.your_ratings_are_only_visible_to_you),
+                        dismissButton = null,
+                        confirmButton = stringResource(R.string.close),
+                        onConfirm = { showHelpDialog = false }
+                    )
+                }
+
                 if (initialRating != null) {
                     TextButton(
                         onClick = {
@@ -91,6 +123,19 @@ fun RateMessageDialog(
                     ) {
                         Text(stringResource(R.string.remove_rating))
                     }
+                } else {
+                    IconButton(
+                        onClick = {
+                            showHelpDialog = true
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.HelpOutline,
+                            contentDescription = stringResource(R.string.help),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
                 }
 
                 DialogCloseButton(onClick = onDismissRequest)

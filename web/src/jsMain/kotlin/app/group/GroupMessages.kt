@@ -53,6 +53,7 @@ fun GroupMessages(
     group: GroupExtended,
     showSearch: Boolean,
     onShowSearch: (Boolean) -> Unit,
+    inCoverPage: Boolean = false,
 ) {
     val nav = appNav
     val scope = rememberCoroutineScope()
@@ -227,7 +228,7 @@ fun GroupMessages(
                     defaultMargins = false
                 )
             }
-        } else if (myMember != null) {
+        } else if (myMember != null && !inCoverPage) {
             if (group.group?.config?.messages == null || myMember.member?.host == true) {
                 GroupMessageBar(group, replyMessage, { replyMessage = null }) {
                     reloadMessages()
@@ -239,7 +240,7 @@ fun GroupMessages(
                     }
                 }) { }
             }
-        } else {
+        } else if (!inCoverPage) {
             JoinGroupLayout(group)
         }
         LoadMore(
@@ -254,11 +255,14 @@ fun GroupMessages(
                 }
             }
         ) {
-            messages.forEachIndexed { index, message ->
+            // For cover page, display messages in reverse order (newest at the top)
+            val displayMessages = if (inCoverPage) messages.asReversed() else messages
+
+            displayMessages.forEachIndexed { index, message ->
                 val title = (message.text?.notBlank ?: message.preview())?.let { "\"$it\"" } ?: appString { reply }
 
                 val members = group.members ?: emptyList()
-                val nextMessage = if (index > 0) messages[index - 1] else null
+                val nextMessage = if (index > 0) displayMessages[index - 1] else null
 
                 val seenUntilHere = members.filter {
                     it.member?.id != myMember?.member?.id && it.hasSeen(message) && (nextMessage == null || !it.hasSeen(
@@ -278,7 +282,7 @@ fun GroupMessages(
 
                 MessageItem(
                     message = message,
-                    previousMessage = if (index < messages.lastIndex) messages[index + 1] else null,
+                    previousMessage = if (index < displayMessages.lastIndex) displayMessages[index + 1] else null,
                     member = group.members?.find { member -> member.member?.id == message.member },
                     bot = group.bots?.find { bot -> bot.id == message.bot },
                     myMember = myMember,

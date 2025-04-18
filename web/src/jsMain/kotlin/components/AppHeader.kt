@@ -129,7 +129,7 @@ fun AppHeader(
                 configuration.set(
                     when (configuration.language) {
                         "en" -> "vi"
-                        //"vi" -> "ru"
+                        "vi" -> "ru"
                         else -> "en"
                     }
                 )

@@ -152,8 +152,7 @@ fun ColumnScope.MessageContent(
     onShowPhoto: (String) -> Unit,
     isReply: Boolean = false,
     selected: Boolean = false,
-    onSelectedChange: ((Boolean) -> Unit)? = null,
-    onRate: (Int?) -> Unit = {},
+    onSelectedChange: ((Boolean) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()

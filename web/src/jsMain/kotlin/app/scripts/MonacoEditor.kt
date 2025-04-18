@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.compose.rememberDarkMode
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import lib.Monaco
 import lib.jsObject
 import org.jetbrains.compose.web.css.StyleScope
@@ -30,21 +29,27 @@ fun MonacoEditor(
     state: MonacoEditorState = remember { MonacoEditorState() },
     initialValue: String = "",
     onValueChange: (String) -> Unit = {},
+    onIsEdited: (Boolean) -> Unit = {},
     styles: StyleScope.() -> Unit = {},
 ) {
     var editor: Monaco.IEditor? by remember { mutableStateOf(null) }
     val darkMode = rememberDarkMode()
+    var currentValue by remember(initialValue) { mutableStateOf(initialValue) }
+
+    LaunchedEffect(currentValue) {
+        onValueChange(currentValue)
+        onIsEdited(currentValue.trimEnd() != initialValue.trimEnd())
+    }
 
     LaunchedEffect(editor, state) {
         state.onSetValue.collect { value ->
             editor?.setValue(value)
-            onValueChange(value)
         }
     }
 
     LaunchedEffect(editor, darkMode) {
         editor?.updateOptions(
-            jsObject<Monaco.EditorOptions> {
+            jsObject {
                 theme = if (darkMode) "vs-dark" else "vs-light"
             }
         )
@@ -55,7 +60,7 @@ fun MonacoEditor(
             setValue(initialValue)
             setScrollTop(0)
             onDidChangeModelContent {
-                onValueChange(getValue())
+                currentValue = getValue()
             }
         }
     }
@@ -70,7 +75,7 @@ fun MonacoEditor(
         ref { container ->
             editor = Monaco.editor.create(
                 container = container,
-                options = jsObject<Monaco.EditorOptions> {
+                options = jsObject {
                     value = initialValue
                     language = "kotlin"
                     theme = if (darkMode) "vs-dark" else "vs-light"

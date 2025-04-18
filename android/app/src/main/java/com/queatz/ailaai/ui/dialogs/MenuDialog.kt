@@ -50,6 +50,7 @@ fun menuItem(
     title: String,
     icon: ImageVector? = null,
     textIcon: String? = null,
+    modifier: Modifier = Modifier,
     action: () -> Unit
 ) {
     DropdownMenuItem(
@@ -77,7 +78,7 @@ fun menuItem(
                 }
             }
         },
-        modifier = Modifier
+        modifier = modifier
             .clip(MaterialTheme.shapes.large)
     )
 }
