@@ -1,5 +1,6 @@
 package com.queatz.ailaai.ui.dialogs
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,6 +41,7 @@ fun ActiveInvitesDialog(
     var isLoading by remember(groupId) { mutableStateOf(true) }
     var showCreateInviteDialog by remember { mutableStateOf(false) }
     var inviteToDelete by remember { mutableStateOf<Invite?>(null) }
+    var selectedInviteCode by remember { mutableStateOf<String?>(null) }
 
     suspend fun reload() {
         api.activeGroupInvites(groupId, onError = {
@@ -112,6 +114,15 @@ fun ActiveInvitesDialog(
         )
     }
 
+    selectedInviteCode?.let { code ->
+        CopyLinkDialog(
+            onDismissRequest = {
+                selectedInviteCode = null
+            },
+            code = code
+        )
+    }
+
     DialogBase(onDismissRequest) {
         DialogLayout(
             content = {
@@ -159,6 +170,11 @@ fun ActiveInvitesDialog(
                                     invite = invite,
                                     onDelete = {
                                         inviteToDelete = invite
+                                    },
+                                    onClick = {
+                                        invite.code?.let { code ->
+                                            selectedInviteCode = code
+                                        }
                                     }
                                 )
                             }
@@ -176,10 +192,13 @@ fun ActiveInvitesDialog(
 @Composable
 fun InviteItem(
     invite: Invite,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth(),
         shape = MaterialTheme.shapes.large
     ) {
         Column(

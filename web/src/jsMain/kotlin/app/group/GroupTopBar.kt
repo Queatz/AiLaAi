@@ -53,6 +53,7 @@ import com.queatz.db.Person
 import com.queatz.db.RainEffect
 import components.IconButton
 import components.LinkifyText
+import components.QrImg
 import format
 import joins
 import json
@@ -62,6 +63,7 @@ import kotlinx.coroutines.launch
 import time.formatDistanceToNow
 import notBlank
 import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.AutoComplete.Companion.url
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -77,6 +79,7 @@ import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
@@ -532,12 +535,16 @@ fun GroupTopBar(
                                                 }
                                             }
                                         ) { invite ->
+                                            val url = "$webBaseUrl/invite/${invite.code!!}"
                                             scope.launch {
                                                 val result = dialog(
                                                     title = application.appString { inviteLinkIsActive },
                                                     cancelButton = application.appString { close },
                                                     confirmButton = application.appString { copyLink },
                                                     content = {
+                                                        QrImg(url) {
+                                                            marginBottom(1.r)
+                                                        }
                                                         Div({
                                                             style {
                                                                 padding(1.r)
@@ -547,12 +554,12 @@ fun GroupTopBar(
                                                             }
                                                         }) {
                                                             A(
-                                                                href = "$webBaseUrl/invite/${invite.code!!}",
+                                                                href = url,
                                                                 attrs = {
                                                                     target(ATarget.Blank)
                                                                 }
                                                             ) {
-                                                                Text("$webBaseUrl/invite/${invite.code!!}")
+                                                                Text(url)
                                                             }
                                                         }
                                                     }
@@ -560,7 +567,7 @@ fun GroupTopBar(
                                                 
                                                 if (result == true) {
                                                     window.navigator.clipboard.writeText(
-                                                        "$webBaseUrl/invite/${invite.code!!}"
+                                                        url
                                                     )
                                                 }
                                             }

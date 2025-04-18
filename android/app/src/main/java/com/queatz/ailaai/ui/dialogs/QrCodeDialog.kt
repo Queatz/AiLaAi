@@ -36,7 +36,7 @@ fun String.buildQrBitmap(logo: Bitmap?, size: Int = 500) = ScanUtil.buildBitmap(
     size,
     size,
     HmsBuildBitmapOption.Creator().setQRLogoBitmap(logo?.tint(android.graphics.Color.BLACK)).create()
-)
+)!!
 
 @Composable
 fun QrCodeDialog(

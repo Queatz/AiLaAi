@@ -580,6 +580,7 @@ fun GroupScreen(groupId: String) {
             val myMember = groupExtended!!.members?.find { it.person?.id == me?.id }
             val otherMembers = groupExtended!!.members?.filter { it.person?.id != me?.id } ?: emptyList()
             val state = rememberLazyListState()
+            val canManage = myMember?.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts
 
             var latestMessage by remember { mutableStateOf<Instant?>(null) }
 
@@ -826,7 +827,7 @@ fun GroupScreen(groupId: String) {
                                 showSendDialog = true
                             }
                             if (myMember != null) {
-                                if (myMember.member?.host == true || groupExtended?.group?.config?.edits != GroupEditsConfig.Hosts) {
+                                if (canManage) {
                                     item(
                                         icon = Icons.Outlined.ManageAccounts,
                                         name = stringResource(R.string.manage)
@@ -1747,7 +1748,7 @@ fun GroupScreen(groupId: String) {
                         }
                     },
                     extraButtons = {
-                        if (myMember?.member?.host == true) {
+                        if (canManage) {
                             TextButton(
                                 onClick = {
                                     showManageGroupMembersMenu = true
