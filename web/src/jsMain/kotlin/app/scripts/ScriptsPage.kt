@@ -62,10 +62,60 @@ import org.w3c.dom.HTMLElement
 import r
 import stories.StoryContents
 
+@Composable
+fun ResultPanel(
+    isRunningScript: Boolean,
+    scriptResult: ScriptResult?,
+    runScript: (String, String?, Map<String, String?>, Boolean?) -> Unit,
+    isOnLeft: Boolean
+) {
+    Div({
+        style {
+            if (isOnLeft) {
+                flex(1)
+                width(0.r)
+            } else {
+                flexShrink(0)
+                width(24.r)
+            }
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            overflowX("hidden")
+            overflowY("auto")
+            height(100.percent)
+        }
+    }) {
+        if (isRunningScript) {
+            Loading()
+        } else {
+            scriptResult?.content?.let {
+                Div({
+                    classes(Styles.cardContent)
+                }) {
+                    StoryContents(
+                        content = it,
+                        onButtonClick = { script, data, input ->
+                            runScript(
+                                script,
+                                data,
+                                input,
+                                true
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
 suspend fun scriptSecretDialog(secret: String) = inputDialog(
+    // todo: translate
     title = "Script Secret",
+    // todo: translate
     placeholder = "Secret",
     defaultValue = secret,
+    // todo: translate
     confirmButton = "Save"
 )
 
@@ -90,6 +140,7 @@ fun ScriptsPage(
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
             var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
             var undoAiScript by remember(script) { mutableStateOf<String?>(null) }
+            var isEditorOnRight by remember(script) { mutableStateOf(false) }
 
             var isLoading by remember { mutableStateOf(false) }
             var menuTarget by remember(script) { mutableStateOf<DOMRect?>(null) }
@@ -178,6 +229,15 @@ fun ScriptsPage(
 
                     item(
                         // todo: translate
+                        title = "Swap editor position",
+                        onClick = {
+                            menuTarget = null
+                            isEditorOnRight = !isEditorOnRight
+                        }
+                    )
+
+                    item(
+                        // todo: translate
                         title = "Delete",
                         onClick = {
                             menuTarget = null
@@ -227,10 +287,29 @@ fun ScriptsPage(
                         height(0.r)
                     }
                 }) {
+                    // Conditionally arrange the editor and result panel based on isEditorOnRight
+                    if (isEditorOnRight && showResultPanel) {
+                        // Result Panel on the left
+                        ResultPanel(
+                            isRunningScript = isRunningScript,
+                            scriptResult = scriptResult,
+                            runScript = { scriptId, data, input, useCache ->
+                                runScript(scriptId, data, input, useCache)
+                            },
+                            isOnLeft = true
+                        )
+                    }
+
+                    // Editor (left by default, right when isEditorOnRight is true)
                     Div({
                         style {
-                            flex(1)
-                            width(0.r)
+                            if (isEditorOnRight && showResultPanel) {
+                                flexShrink(0)
+                                width(32.r)
+                            } else {
+                                flex(1)
+                                width(0.r)
+                            }
                             height(100.percent)
                             display(DisplayStyle.Flex)
                             flexDirection(FlexDirection.Column)
@@ -253,40 +332,17 @@ fun ScriptsPage(
                             }
                         )
                     }
-                    if (showResultPanel) {
-                        Div({
-                            style {
-                                flexShrink(0)
-                                display(DisplayStyle.Flex)
-                                flexDirection(FlexDirection.Column)
-                                overflowX("hidden")
-                                overflowY("auto")
-                                width(24.r)
-                                height(100.percent)
-                            }
-                        }) {
-                            if (isRunningScript) {
-                                Loading()
-                            } else {
-                                scriptResult?.content?.let {
-                                    Div({
-                                        classes(Styles.cardContent)
-                                    }) {
-                                        StoryContents(
-                                            content = it,
-                                            onButtonClick = { script, data, input ->
-                                                runScript(
-                                                    script,
-                                                    data,
-                                                    input,
-                                                    true
-                                                )
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                        }
+
+                    // Result Panel on the right (when not isEditorOnRight)
+                    if (!isEditorOnRight && showResultPanel) {
+                        ResultPanel(
+                            isRunningScript = isRunningScript,
+                            scriptResult = scriptResult,
+                            runScript = { scriptId, data, input, useCache ->
+                                runScript(scriptId, data, input, useCache)
+                            },
+                            isOnLeft = false
+                        )
                     }
                 }
                 PageTopBar(
