@@ -1,6 +1,7 @@
 import ScriptWithMavenDepsConfiguration.scriptLoader
 import com.queatz.db.Script
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.script.experimental.annotations.KotlinScript
@@ -46,6 +47,7 @@ object ScriptWithMavenDepsConfiguration : ScriptCompilationConfiguration(
             DependsOnScript::class,
             Repository::class,
             Serializable::class,
+            SerialName::class,
             Json::class
         )
 

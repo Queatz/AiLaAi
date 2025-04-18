@@ -1,5 +1,15 @@
 package com.queatz.db
 
+fun Db.scriptData(script: String) = one(
+    ScriptData::class,
+    """
+        for scriptData in @@collection
+            filter scriptData.${f(ScriptData::script)} == @script
+            return scriptData
+    """,
+    mapOf("script" to script)
+)
+
 fun Db.scriptsOfPerson(person: String) = list(
     Script::class,
     """

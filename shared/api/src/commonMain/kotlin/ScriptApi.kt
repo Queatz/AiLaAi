@@ -2,6 +2,7 @@ package app.ailaai.api
 
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
+import com.queatz.db.ScriptData
 import com.queatz.db.ScriptResult
 import io.ktor.http.HttpStatusCode
 
@@ -82,6 +83,28 @@ suspend fun Api.deleteScript(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) = post(
     "scripts/$id/delete",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.scriptData(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<ScriptData>,
+) = get(
+    "scripts/$id/data",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.updateScriptData(
+    id: String,
+    scriptData: ScriptData,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<ScriptData>,
+) = post(
+    "scripts/$id/data",
+    body = scriptData,
     onError = onError,
     onSuccess = onSuccess
 )

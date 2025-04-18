@@ -2,8 +2,9 @@ package com.queatz.api
 
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
-import com.queatz.db.ScriptResult
+import com.queatz.db.ScriptData
 import com.queatz.db.allScripts
+import com.queatz.db.scriptData
 import com.queatz.db.scriptsOfPerson
 import com.queatz.db.searchScripts
 import com.queatz.parameter
@@ -13,7 +14,6 @@ import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
 import com.queatz.scripts.RunScript
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
@@ -123,6 +123,42 @@ fun Route.scriptRoutes() {
                 db.delete(script)
 
                 HttpStatusCode.OK
+            }
+        }
+
+        get("/scripts/{id}/data") {
+            respond {
+                val script = db.document(Script::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                if (me.id!! != script.person) {
+                    return@respond HttpStatusCode.BadRequest.description("Script is not owned by this person")
+                }
+
+                db.scriptData(script.id!!) ?: ScriptData(script = script.id!!).let {
+                    db.insert(it)
+                }
+            }
+        }
+
+        post("/scripts/{id}/data") {
+            respond {
+                val script = db.document(Script::class, parameter("id")) ?: return@respond HttpStatusCode.NotFound
+
+                if (me.id!! != script.person) {
+                    return@respond HttpStatusCode.BadRequest.description("Script is not owned by this person")
+                }
+
+                val scriptData = db.scriptData(parameter("id")) ?: ScriptData(script = script.id!!).let {
+                    db.insert(it)
+                }
+
+                val update = call.receive<ScriptData>()
+
+                if (update.secret != null) {
+                    scriptData.secret = update.secret
+                }
+
+                db.update(scriptData)
             }
         }
     }

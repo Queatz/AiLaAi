@@ -9,7 +9,6 @@ import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
 import com.queatz.db.GroupAttachment
 import com.queatz.db.Message
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun SendGroupDialog(

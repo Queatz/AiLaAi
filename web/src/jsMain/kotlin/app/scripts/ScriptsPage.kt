@@ -19,6 +19,9 @@ import app.ailaai.shared.resources.ScriptsResources
 import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
+import com.queatz.db.ScriptData
+import app.ailaai.api.scriptData
+import app.ailaai.api.updateScriptData
 import app.menu.Menu
 import app.messaages.inList
 import appString
@@ -58,6 +61,13 @@ import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
 import stories.StoryContents
+
+suspend fun scriptSecretDialog(secret: String) = inputDialog(
+    title = "Script Secret",
+    placeholder = "Secret",
+    defaultValue = secret,
+    confirmButton = "Save"
+)
 
 @Composable
 fun ScriptsPage(
@@ -145,6 +155,27 @@ fun ScriptsPage(
                             }
                         }
                     )
+                    item(
+                        // todo: translate
+                        title = "Secret",
+                        onClick = {
+                            menuTarget = null
+                            scope.launch {
+                                api.scriptData(script.id!!) { scriptData ->
+                                    val result = scriptSecretDialog(scriptData.secret ?: "")
+
+                                    if (result != null) {
+                                        api.updateScriptData(
+                                            id = script.id!!,
+                                            scriptData = ScriptData(secret = result),
+                                            onSuccess = {}
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    )
+
                     item(
                         // todo: translate
                         title = "Delete",
@@ -267,6 +298,27 @@ fun ScriptsPage(
                         script.description,
                         script.id
                     ),
+                    onTitleClick = {
+                        scope.launch {
+                            val newName = inputDialog(
+                                // todo: translate
+                                title = "Rename script",
+                                // todo: translate
+                                defaultValue = script.name ?: "New script",
+                                // todo: translate
+                                placeholder = "Script name"
+                            )
+
+                            if (newName != null) {
+                                api.updateScript(
+                                    id = script.id!!,
+                                    script = Script(name = newName)
+                                ) {
+                                    onUpdate(it)
+                                }
+                            }
+                        }
+                    },
                     actions = {
                         if (undoAiScript != null) {
                             IconButton(

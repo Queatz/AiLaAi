@@ -11,6 +11,7 @@ import com.queatz.db.ScriptResult
 import com.queatz.db.StoryContent
 import com.queatz.db.equippedItemsOfInventory
 import com.queatz.db.inventoryOfPerson
+import com.queatz.db.scriptData
 import com.queatz.plugins.db
 import com.queatz.scripts.store.ArangoScriptStorage
 import parseScript
@@ -65,6 +66,7 @@ class RunScript(
                     ),
                     nullable = true,
                 ),
+                "secret" to String::class.createType(nullable = true),
                 "equipment" to Function0::class.createType(
                     arguments = listOf(
                         invariant(
@@ -101,6 +103,7 @@ class RunScript(
                 "http" to ScriptHttp(),
                 "data" to this@RunScript.data,
                 "input" to this@RunScript.input,
+                "secret" to db.scriptData(script.id!!)?.secret,
                 "equipment" to {
                     person?.let { person ->
                         db.equippedItemsOfInventory(

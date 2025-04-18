@@ -10,6 +10,7 @@ The following variables are available in scripts:
 self: String // The id of this script
 me: Person? // The current user, if signed in, null if signed out
 data: String? // Data passed to the script, if any
+secret: String? // Secret value set by the script owner, only visible to the script
 ```
 
 Person has the following fields:
@@ -49,6 +50,9 @@ render {
 # Networking
 
 Ktor's HttpClient is used for simple networking. Learn more at ktor.io.
+
+Important: This can only be used at the root level of a script.
+If you need to make HTTP calls from inside your own class, you'll need your own HTTP client.
 
 ```kotlin
 http<Any type here>("<url>")
