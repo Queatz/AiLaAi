@@ -866,6 +866,13 @@
     <string name="number_of_uses">Number of uses</string>
     <string name="description_optional">Description (optional)</string>
     <string name="invite_created">Invite created</string>
+    <string name="invites">Invites</string>
+    <string name="active_invites">Active invites</string>
+    <string name="no_active_invites">No active invites</string>
+    <string name="unlimited_uses">Unlimited uses</string>
+    <string name="x_uses_remaining">%1$s uses remaining</string>
+    <string name="x_of_y_uses_remaining">%1$s of %2$s uses remaining</string>
+    <string name="delete_invite">Delete invite</string>
     <string name="ok">OK</string>
     <string name="earth">Earth</string>
     <string name="no_prompts">No prompts</string>

@@ -3,7 +3,6 @@ package com.queatz.ailaai.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.queatz.ailaai.ui.theme.pad
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DialogLayout(
     scrollable: Boolean = true,

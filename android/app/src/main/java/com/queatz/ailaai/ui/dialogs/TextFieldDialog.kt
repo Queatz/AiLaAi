@@ -46,7 +46,7 @@ fun TextFieldDialog(
 ) {
     var disableSubmit by remember { mutableStateOf(requireModification) }
     val coroutineScope = rememberCoroutineScope()
-    var text by remember { mutableStateOf(initialValue) }
+    var text by remember(initialValue) { mutableStateOf(initialValue) }
 
     DialogBase(onDismissRequest, modifier = Modifier.wrapContentHeight()) {
         val scrollState = rememberScrollState()

@@ -206,6 +206,7 @@ import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.dialogs.GroupDescriptionDialog
+import com.queatz.ailaai.ui.dialogs.ActiveInvitesDialog
 import com.queatz.ailaai.ui.dialogs.CreateInviteDialog
 import com.queatz.ailaai.ui.dialogs.GroupSettingsDialog
 import com.queatz.ailaai.ui.dialogs.Media
@@ -292,6 +293,7 @@ fun GroupScreen(groupId: String) {
     var showPromoteGroupMembers by rememberStateOf(false)
     var showInviteMembers by rememberStateOf(false)
     var showCreateInviteDialog by rememberStateOf(false)
+    var showActiveInvitesDialog by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
     var isGeneratingGroupBackground by rememberStateOf(false)
@@ -831,6 +833,14 @@ fun GroupScreen(groupId: String) {
                                     ) {
                                         showMenu = false
                                         showManageDialog = true
+                                    }
+
+                                    item(
+                                        icon = Icons.Default.AddLink,
+                                        name = stringResource(R.string.invites)
+                                    ) {
+                                        showMenu = false
+                                        showActiveInvitesDialog = true
                                     }
                                 }
                             }
@@ -1978,6 +1988,15 @@ fun GroupScreen(groupId: String) {
                             reload()
                         }
                     }
+                )
+            }
+
+            if (showActiveInvitesDialog) {
+                ActiveInvitesDialog(
+                    onDismissRequest = {
+                        showActiveInvitesDialog = false
+                    },
+                    groupId = groupId
                 )
             }
 
