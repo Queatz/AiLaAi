@@ -163,6 +163,8 @@ You can also depend on other scripts.
 
 These scripts will be accessible according to their package name, or if no package name is specified, as script_<script ID> in your script.
 
+Note that scripts have access to all parameters and variables of the script that depends on them, including the script's `secret`.
+
 ```kotlin
 import script_<script ID>.*
 

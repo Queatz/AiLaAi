@@ -230,6 +230,7 @@ fun ScriptsPage(
                     item(
                         // todo: translate
                         title = "Swap editor position",
+                        icon = "swap_horiz",
                         onClick = {
                             menuTarget = null
                             isEditorOnRight = !isEditorOnRight
