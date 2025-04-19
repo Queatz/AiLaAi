@@ -22,6 +22,30 @@ suspend fun RoutingContext.launch(block: suspend CoroutineScope.() -> Unit) = co
 
 fun RoutingContext.parameter(name: String) = call.parameters[name]!!
 
+suspend fun ApplicationCall.receiveBytes(
+    param: String,
+    onBytes: suspend (bytes: ByteArray, params: Map<String, String>) -> Unit,
+) {
+    var bytes: ByteArray? = null
+    val params = mutableMapOf<String, String>()
+    receiveMultipart().forEachPart { part ->
+        if (part.name == param && part is PartData.FileItem) {
+            if (bytes == null) {
+                bytes = part.readBytes()
+            }
+        } else {
+            (part as? PartData.FormItem)?.let {
+                params.put(it.name ?: return@let, it.value)
+            }
+        }
+        part.dispose()
+    }
+
+    bytes?.let {
+        onBytes(it, params)
+    }
+}
+
 suspend fun ApplicationCall.receiveFiles(
     param: String,
     prefix: String,

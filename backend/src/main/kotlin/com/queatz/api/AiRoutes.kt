@@ -1,12 +1,12 @@
 package com.queatz.api
 
 import com.queatz.Ai
-import com.queatz.OpenAiSpeakBody
 import com.queatz.TextPrompt
 import com.queatz.db.AiPhotoRequest
 import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
 import com.queatz.db.AiSpeakRequest
+import com.queatz.db.AiTranscribeResponse
 import com.queatz.db.addPrompt
 import com.queatz.notBlank
 import com.queatz.plugins.ai
@@ -14,11 +14,10 @@ import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.openAi
 import com.queatz.plugins.respond
+import com.queatz.receiveBytes
 import io.ktor.client.call.body
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.respondBytes
@@ -73,6 +72,18 @@ fun Route.aiRoutes() {
                 )
 
                 response ?: HttpStatusCode.InternalServerError
+            }
+        }
+
+        post("/ai/transcribe") {
+            respond {
+                var transcribedText: String? = null
+
+                call.receiveBytes("audio") { bytes, _ ->
+                    transcribedText = openAi.transcribe(bytes)
+                }
+
+                transcribedText?.let { AiTranscribeResponse(it) } ?: HttpStatusCode.InternalServerError
             }
         }
     }

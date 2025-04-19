@@ -67,6 +67,9 @@ import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.Tune
+import com.queatz.ailaai.ui.dialogs.AddReactionDialog
+import com.queatz.ailaai.ui.dialogs.RateMessageDialog
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -75,7 +78,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -126,6 +128,7 @@ import androidx.core.net.toUri
 import app.ailaai.api.createGroup
 import app.ailaai.api.createMember
 import app.ailaai.api.group
+import app.ailaai.api.groupTopReactions
 import app.ailaai.api.message
 import app.ailaai.api.messages
 import app.ailaai.api.messagesBefore
@@ -322,6 +325,11 @@ fun GroupScreen(groupId: String) {
     var showTradeDialog by rememberStateOf<Trade?>(null)
     var showSendDialog by rememberStateOf(false)
     var searchMessages by rememberStateOf<String?>(null)
+    var searchByReaction by rememberStateOf<String?>(null)
+    var searchByRating by rememberStateOf<String?>(null)
+    var showFilterMenu by rememberStateOf(false)
+    var showReactionDialog by rememberStateOf(false)
+    var showRatingDialog by rememberStateOf(false)
     val inCallCount by calls.inCallCount(groupId).collectAsState(0)
     val nav = nav
     val me = me
@@ -359,7 +367,12 @@ fun GroupScreen(groupId: String) {
     }
 
     suspend fun reloadMessages() {
-        api.messages(group = groupId, search = searchMessages) {
+        api.messages(
+            group = groupId,
+            search = searchMessages,
+            reaction = searchByReaction,
+            rating = searchByRating
+        ) {
             hasOlderMessages = true
             messages = it
         }
@@ -432,7 +445,13 @@ fun GroupScreen(groupId: String) {
         }
 
         val oldest = messages.lastOrNull()?.createdAt ?: return
-        api.messagesBefore(group = groupId, before = oldest, search = searchMessages) { older ->
+        api.messagesBefore(
+            group = groupId,
+            before = oldest,
+            search = searchMessages,
+            reaction = searchByReaction,
+            rating = searchByRating
+        ) { older ->
             val newMessages = (messages + older).distinctBy { it.id }
 
             if (messages.size == newMessages.size) {
@@ -459,12 +478,14 @@ fun GroupScreen(groupId: String) {
         isLoading = false
     }
 
-    LaunchedEffect(searchMessages) {
+    LaunchedEffect(searchMessages, searchByReaction, searchByRating) {
         reloadMessages()
     }
 
     LaunchedEffect(stageReply) {
         searchMessages = null
+        searchByReaction = null
+        searchByRating = null
     }
 
     suspend fun reload() {
@@ -1336,16 +1357,33 @@ fun GroupScreen(groupId: String) {
                                                         searchMessages = it
                                                     },
                                                     leadingIcon = {
-                                                        Icon(
-                                                            Icons.Outlined.Search,
-                                                            contentDescription = null
-                                                        )
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            val activeFilters = listOf(searchByReaction, searchByRating).count { it != null }
+
+                                                            IconAndCount(
+                                                                icon = {
+                                                                    Icon(
+                                                                        imageVector = Icons.Outlined.Tune,
+                                                                        contentDescription = null
+                                                                    )
+                                                                },
+                                                                count = activeFilters
+                                                            ) {
+                                                                showFilterMenu = true
+                                                            }
+                                                        }
                                                     },
                                                     trailingIcon = {
-                                                        IconButton({ searchMessages = null }) {
+                                                        IconButton({
+                                                            searchMessages = null
+                                                            searchByRating = null
+                                                            searchByReaction = null
+                                                        }) {
                                                             Icon(
-                                                                Icons.Default.Clear,
-                                                                Icons.Default.Clear.name,
+                                                                imageVector = Icons.Default.Clear,
+                                                                contentDescription = Icons.Default.Clear.name,
                                                                 tint = MaterialTheme.colorScheme.primary
                                                             )
                                                         }
@@ -1762,6 +1800,64 @@ fun GroupScreen(groupId: String) {
                     showGroupMembers = false
                     nav.appNavigate(AppNav.Profile(it.id!!))
                 }
+            }
+
+            if (showFilterMenu) {
+                Menu({
+                    showFilterMenu = false
+                }) {
+                    menuItem(stringResource(R.string.reaction)) {
+                        showFilterMenu = false
+                        showReactionDialog = true
+                    }
+                    menuItem(stringResource(R.string.rating)) {
+                        showFilterMenu = false
+                        showRatingDialog = true
+                    }
+                    if (searchByReaction != null || searchByRating != null) {
+                        menuItem(stringResource(R.string.clear), icon = Icons.Default.Clear) {
+                            showFilterMenu = false
+                            searchByReaction = null
+                            searchByRating = null
+                        }
+                    }
+                }
+            }
+
+            if (showReactionDialog) {
+                var topGroupReactions by rememberStateOf(emptyList<String>())
+
+                LaunchedEffect(groupId) {
+                        api.groupTopReactions(groupId) {
+                            topGroupReactions = it.take(5).map { it.reaction }
+                        }
+                }
+                AddReactionDialog(
+                    onDismissRequest = {
+                        showReactionDialog = false
+                    },
+                    reactions = topGroupReactions,
+                    onReaction = { reaction ->
+                        searchByReaction = reaction
+                        showReactionDialog = false
+                    }
+                )
+            }
+
+            if (showRatingDialog) {
+                RateMessageDialog(
+                    onDismissRequest = {
+                        showRatingDialog = false
+                    },
+                    onRemoveRating = {
+                        searchByRating = null
+                        showRatingDialog = false
+                    },
+                    onRate = { rating ->
+                        searchByRating = rating.toString()
+                        showRatingDialog = false
+                    }
+                )
             }
 
             if (showManageGroupMembersMenu) {

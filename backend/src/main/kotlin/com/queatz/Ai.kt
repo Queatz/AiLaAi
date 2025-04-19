@@ -176,9 +176,9 @@ class Ai {
                     formData {
                         append("mode", "transparent")
                         append(
-                            "image",
-                            photo.readBytes(),
-                            Headers.build {
+                            key = "image",
+                            value = photo.readBytes(),
+                            headers = Headers.build {
                                 append(HttpHeaders.ContentType, "image/jpeg")
                                 append(HttpHeaders.ContentDisposition, "filename=photo.jpg")
                             }

@@ -70,6 +70,8 @@ fun Route.scriptRoutes() {
                     Script(
                         person = me.id!!,
                         name = script.name,
+                        description = script.description,
+                        categories = script.categories,
                         source = script.source
                     )
                 )

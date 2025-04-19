@@ -36,6 +36,7 @@ render {
         // Optional
         style = ButtonStyle.Secondary // Default is ButtonStyle.Primary
     )
+    audio("<Url>") // Must start with /static/
     photo("<Url>", <Aspect ratio float>?) // Must start with /static/
     input(
     key = "<key>",
@@ -43,6 +44,16 @@ render {
     value = "<value>",
     // Optional
     hint = "<hint>"
+    )
+    profiles(
+        profiles = listOf("<Profile IDs>") // List of profile IDs to display
+    )
+    groups(
+        groups = listOf("<Group IDs>") // List of group IDs to display
+        coverPhotos = false // Optional. Hide the cover photos
+    )
+    pages(
+        pages = listOf("<Page IDs>") // List of page IDs to display as cards
     )
 }
 ```

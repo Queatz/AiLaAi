@@ -6,6 +6,11 @@ import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
 import com.queatz.db.AiScriptResponse
 import com.queatz.db.AiSpeakRequest
+import com.queatz.db.AiTranscribeResponse
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 suspend fun Api.aiStyles(
     onError: ErrorBlock = null,
@@ -45,6 +50,28 @@ suspend fun Api.aiScript(
 ) = post(
     url = "ai/script",
     body = request,
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.aiTranscribe(
+    audio: ByteArray,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<AiTranscribeResponse>,
+) = post(
+    url = "ai/transcribe",
+    body = MultiPartFormDataContent(
+        formData {
+            append(
+                key = "audio",
+                value = audio,
+                headers = Headers.build {
+                    append(HttpHeaders.ContentType, "audio/webm")
+                    append(HttpHeaders.ContentDisposition, "filename=audio.webm")
+                }
+            )
+        }
+    ),
     onError = onError,
     onSuccess = onSuccess
 )

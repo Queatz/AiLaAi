@@ -161,21 +161,56 @@ suspend fun Api.sendAudio(
     onSuccess: SuccessBlock<HttpStatusCode>,
 ) {
     return post(
-        "groups/$group/audio", MultiPartFormDataContent(
-        formData {
-            if (message != null) {
-                append("message", httpJson.encodeToString(message))
-            }
-            append(
-                "audio",
-                audio,
-                Headers.build {
-                    append(HttpHeaders.ContentType, "audio/mp4")
-                    append(HttpHeaders.ContentDisposition, "filename=audio.m4a")
+        url = "groups/$group/audio",
+        body = MultiPartFormDataContent(
+            formData {
+                if (message != null) {
+                    append("message", httpJson.encodeToString(message))
                 }
-            )
-        }
-    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+                append(
+                    key = "audio",
+                    value = audio,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, "audio/mp4")
+                        append(HttpHeaders.ContentDisposition, "filename=audio.m4a")
+                    }
+                )
+            }
+        ),
+        client = httpDataClient,
+        onError = onError,
+        onSuccess = onSuccess
+    )
+}
+
+suspend fun Api.sendAudio(
+    group: String,
+    audio: ByteArray,
+    message: Message? = null,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode>,
+) {
+    return post(
+        url = "groups/$group/audio",
+        body = MultiPartFormDataContent(
+            formData {
+                if (message != null) {
+                    append("message", httpJson.encodeToString(message))
+                }
+                append(
+                    key = "audio",
+                    value = audio,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, "audio/mp4")
+                        append(HttpHeaders.ContentDisposition, "filename=audio.m4a")
+                    }
+                )
+            }
+        ),
+        client = httpDataClient,
+        onError = onError,
+        onSuccess = onSuccess
+    )
 }
 
 suspend fun Api.sendVideos(

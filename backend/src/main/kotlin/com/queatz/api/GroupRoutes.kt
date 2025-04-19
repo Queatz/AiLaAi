@@ -5,14 +5,12 @@ import com.queatz.db.*
 import com.queatz.db.Call
 import com.queatz.plugins.*
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlin.time.Duration.Companion.days
 
 @Serializable
@@ -315,10 +313,10 @@ fun Route.groupRoutes() {
                     call.receiveFiles("photo", "group-${group.id}") { photosUrls, params ->
                         val message = db.insert(
                             Message(
-                                member.to?.asKey(),
-                                member.id,
-                                null,
-                                json.encodeToString(
+                                group = member.to?.asKey(),
+                                member = member.id,
+                                text = null,
+                                attachment = json.encodeToString(
                                     PhotosAttachment(
                                         photos = photosUrls
                                     )
@@ -351,10 +349,10 @@ fun Route.groupRoutes() {
                     call.receiveFiles("photo", "group-${group.id}") { urls, params ->
                         val message = db.insert(
                             Message(
-                                member.to?.asKey(),
-                                member.id,
-                                null,
-                                json.encodeToString(
+                                group = member.to?.asKey(),
+                                member = member.id,
+                                text = null,
+                                attachment = json.encodeToString(
                                     VideosAttachment(
                                         videos = urls
                                     )
@@ -387,10 +385,10 @@ fun Route.groupRoutes() {
                     call.receiveFile("audio", "group-${group.id}") { url, params ->
                         val message = db.insert(
                             Message(
-                                member.to?.asKey(),
-                                member.id,
-                                null,
-                                json.encodeToString(
+                                group = member.to?.asKey(),
+                                member = member.id,
+                                text = null,
+                                attachment = json.encodeToString(
                                     AudioAttachment(
                                         audio = url
                                     )

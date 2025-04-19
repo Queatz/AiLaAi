@@ -23,6 +23,10 @@ import kotlinx.serialization.json.JsonObject
 import java.util.logging.Logger.getAnonymousLogger
 import kotlin.text.Charsets.UTF_8
 import kotlin.time.Duration.Companion.minutes
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 @Serializable
 data class OpenAiSpeakBody(
@@ -71,16 +75,21 @@ data class OpenAiStructuredOutput(
     val code: String,
 )
 
+@Serializable
+data class OpenAiTranscriptionResponse(
+    val text: String
+)
+
 private val SCRIPT_SYSTEM_PROMPT = """
     You are helping someone write a Kotlin Script that run inside a JVM server.
     Because this is a Kotlin Script, the `return` statement cannot be used at the root level. 
-    
+
     Your code will be inserted into a code editor.
-    
+
     You document the code that you create so that everyone can understand what the code does.
-    
+
     IMPORTANT:
-    
+
      - You *always* return the *entire* script. Your code will be run and must compile without issues.
      - You triple check that all code is valid Kotlin, and all necessary imports exist.
      - The user will provide you with documentation related their current scripting context.
@@ -88,13 +97,13 @@ private val SCRIPT_SYSTEM_PROMPT = """
 
 private val SCRIPT_DOCUMENTATION_PROMPT = """
     Here is the documentation related the my current scripting context:
-    
+
     ${ScriptsResources.documentation}
 """.trimIndent()
 
 private val SCRIPT_CURRENT_PROMPT = """
     Here is the current script:
-    
+
 """.trimIndent()
 
 private val SCRIPT_DEFAULT_PROMPT = """
@@ -213,6 +222,32 @@ class OpenAi {
                 OpenAiSpeakBody(input = text)
             )
         }
+    }.onFailure {
+        it.printStackTrace()
+    }.getOrNull()
+
+    suspend fun transcribe(audioBytes: ByteArray): String? = runCatching {
+        http.post("https://api.openai.com/v1/audio/transcriptions") {
+            bearerAuth(secrets.openAi.key)
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            key = "file",
+                            value = audioBytes,
+                            headers = Headers.build {
+                                append(HttpHeaders.ContentType, "audio/webm")
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"audio.webm\"")
+                            }
+                        )
+                        append(
+                            key = "model",
+                            value = "whisper-1"
+                        )
+                    }
+                )
+            )
+        }.body<OpenAiTranscriptionResponse>().text
     }.onFailure {
         it.printStackTrace()
     }.getOrNull()

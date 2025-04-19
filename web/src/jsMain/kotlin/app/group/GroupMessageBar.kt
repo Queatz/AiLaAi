@@ -1,6 +1,7 @@
 package app.group
 
 import Styles
+import aiTranscribe
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,6 +13,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.StickersTray
+import app.ailaai.api.sendAudio
 import app.ailaai.api.sendMedia
 import app.ailaai.api.sendMessage
 import app.dialog.rememberChoosePhotoDialog
@@ -26,13 +28,15 @@ import com.queatz.db.Sticker
 import com.queatz.db.StickerAttachment
 import components.Icon
 import components.IconButton
+import js.typedarrays.toByteArray
 import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
@@ -43,6 +47,9 @@ import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -53,10 +60,19 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLTextAreaElement
 import org.w3c.dom.get
 import org.w3c.files.File
+import pickAudio
 import pickPhotos
 import r
 import resize
 import toBytes
+import web.events.EventHandler
+import web.media.recorder.BlobEvent
+import web.media.recorder.MediaRecorder
+import web.media.recorder.MediaRecorderOptions
+import web.media.streams.MediaStream
+import web.media.streams.MediaStreamConstraints
+import web.media.streams.MediaTrackConstraints
+import web.navigator.navigator
 
 @Composable
 fun GroupMessageBar(
@@ -75,15 +91,107 @@ fun GroupMessageBar(
         mutableStateOf(false)
     }
 
+    var isTranscribingAudio by remember(group) {
+        mutableStateOf(false)
+    }
+
+    var isSendingAudio by remember(group) {
+        mutableStateOf(false)
+    }
+
     var showStickers by remember(group) {
         mutableStateOf(false)
     }
 
+    var isRecording by remember(group) {
+        mutableStateOf(false)
+    }
+
+    var mediaRecorder by remember(group) {
+        mutableStateOf<MediaRecorder?>(null)
+    }
+
+    var mediaStream by remember(group) {
+        mutableStateOf<MediaStream?>(null)
+    }
+
+    var audioBlob by remember(group) {
+        mutableStateOf<web.blob.Blob?>(null)
+    }
+
     val choosePhoto = rememberChoosePhotoDialog()
-
     val isGenerating = choosePhoto.isGenerating.collectAsState().value
-
     var focus by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    fun startRecording() {
+        scope.launch {
+            try {
+                val constraints = MediaStreamConstraints(audio = MediaTrackConstraints())
+
+                val stream = navigator.mediaDevices.getUserMedia(constraints)
+                mediaStream = stream
+
+                val options = MediaRecorderOptions(
+                    mimeType = "audio/webm"
+                )
+
+                mediaRecorder = MediaRecorder(mediaStream!!, options).apply {
+                    ondataavailable = EventHandler { event: BlobEvent ->
+                        audioBlob = event.data
+                    }
+
+                    onstop = EventHandler {
+                        mediaStream?.getTracks()?.forEach { it.stop() }
+                        mediaStream = null
+                    }
+
+                    start()
+                }
+
+                isRecording = true
+            } catch (e: Exception) {
+                console.error("Error starting recording: ${e.message}")
+            }
+        }
+    }
+
+    LaunchedEffect(audioBlob) {
+        audioBlob?.let { blob ->
+            isTranscribingAudio = true
+
+            scope.launch {
+                try {
+                    val bytes = blob.bytes().toByteArray()
+
+                    api.aiTranscribe(
+                        audio = bytes,
+                        onError = { error ->
+                            console.error("Error transcribing audio: ${error.message}")
+                        }
+                    ) { response ->
+                        response.text.let { text ->
+                            if (text.isNotBlank()) {
+                                messageText += if (messageText.isNotBlank()) " $text" else text
+                                focus?.invoke()
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    console.error("Error processing audio: ${e.message}")
+                }
+
+                isTranscribingAudio = false
+            }
+
+            audioBlob = null
+        }
+    }
+
+    fun stopRecording() {
+        mediaRecorder?.stop()
+        mediaRecorder = null
+        isRecording = false
+    }
 
     LaunchedEffect(replyMessage) {
         if (replyMessage != null) {
@@ -129,11 +237,42 @@ fun GroupMessageBar(
                     reloadMessages()
                 }
             } catch (e: Throwable) {
-                e.printStackTrace()
+                console.error(e)
                 return@launch
             }
 
             isSending = false
+        }
+    }
+
+    fun sendAudio(file: File) {
+        isSendingAudio = true
+        scope.launch {
+            try {
+                // Convert File to ByteArray
+                val audioBytes = file.toBytes()
+
+                api.sendAudio(
+                    group = group.group!!.id!!,
+                    audio = audioBytes,
+                    message = replyMessage?.let { replyMessage ->
+                        Message(
+                            attachments = replyMessage.id?.let {
+                                listOf(json.encodeToString(ReplyAttachment(it)))
+                            }
+                        )
+                    }
+                ) {
+                    clearReplyMessage()
+                    reloadMessages()
+                }
+            } catch (e: Throwable) {
+                isSendingAudio = false
+                console.error(e)
+                return@launch
+            }
+
+            isSendingAudio = false
         }
     }
 
@@ -237,9 +376,17 @@ fun GroupMessageBar(
             }
         }) {
             if (messageText.isBlank()) {
-//                    IconButton("mic", "Record audio", styles = { marginLeft(1.r) }) {
-//                        // todo
-//                    }
+                IconButton(
+                    name = "play_circle",
+                    // todo: translate
+                    title = "Send audio",
+                    isLoading = isSendingAudio,
+                    styles = { marginLeft(1.r) }
+                ) {
+                    pickAudio { file ->
+                        sendAudio(file)
+                    }
+                }
                 IconButton("image", appString { sendPhoto }, isLoading = isGenerating, styles = {
                     marginLeft(1.r)
                 }) {
@@ -260,61 +407,87 @@ fun GroupMessageBar(
             }
         }
         val messageString = if (isSending) appString { sending } else appString { message }
-        TextArea(messageText) {
-            classes(Styles.textarea)
+        Div({
             style {
+                position(Position.Relative)
                 width(100.percent)
-                height(3.5.r)
-                maxHeight(6.5.r)
             }
+        }) {
+            TextArea(messageText) {
+                classes(Styles.textarea)
+                style {
+                    width(100.percent)
+                    height(3.5.r)
+                    maxHeight(6.5.r)
+                }
 
-            placeholder(messageString)
+                placeholder(messageString)
 
-            onKeyDown {
-                if (it.key == "Enter" && !it.shiftKey) {
-                    sendMessage()
+                onKeyDown {
+                    if (it.key == "Enter" && !it.shiftKey) {
+                        sendMessage()
+                        it.preventDefault()
+                        scope.launch {
+                            delay(1)
+                            (it.target as HTMLTextAreaElement).resize()
+                        }
+                    }
+                }
+
+                onInput {
+                    messageText = it.value
+                    it.target.resize()
+                }
+
+                onChange {
+                    it.target.resize()
+                }
+
+                onPaste {
+                    val items = it.clipboardData?.items ?: return@onPaste
+
+                    val photos = (0 until items.length).mapNotNull {
+                        items[it]
+                    }.filter {
+                        it.type.startsWith("image/")
+                    }.mapNotNull {
+                        it.getAsFile()
+                    }
+
+                    if (photos.isEmpty()) return@onPaste
+
+                    sendPhotos(photos)
+
                     it.preventDefault()
-                    scope.launch {
-                        delay(1)
-                        (it.target as HTMLTextAreaElement).resize()
+                }
+
+                autoFocus()
+
+                ref { element ->
+                    element.focus()
+                    focus = { element.focus() }
+                    onDispose {
+                        focus = null
                     }
                 }
             }
-
-            onInput {
-                messageText = it.value
-                it.target.resize()
-            }
-
-            onChange {
-                it.target.resize()
-            }
-
-            onPaste {
-                val items = it.clipboardData?.items ?: return@onPaste
-
-                val photos = (0 until items.length).mapNotNull {
-                    items[it]
-                }.filter {
-                    it.type.startsWith("image/")
-                }.mapNotNull {
-                    it.getAsFile()
+            IconButton(
+                name = if (isRecording) "stop" else "mic",
+                // todo: translate
+                title = if (isRecording) "Finish voice input" else "Voice input",
+                isLoading = isTranscribingAudio,
+                styles = {
+                    position(Position.Absolute)
+                    right(.5.r)
+                    top(.5.r)
+                    bottom(.5.r)
+                    opacity(.5f)
                 }
-
-                if (photos.isEmpty()) return@onPaste
-
-                sendPhotos(photos)
-
-                it.preventDefault()
-            }
-
-            autoFocus()
-
-            ref { element ->
-                element.focus()
-                focus = { element.focus() }
-                onDispose {
-                    focus = null
+            ) {
+                if (isRecording) {
+                    stopRecording()
+                } else {
+                    startRecording()
                 }
             }
         }

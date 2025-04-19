@@ -707,6 +707,8 @@
     <string name="x_millions_mini">%1$sm</string>
     <string name="custom">Custom</string>
     <string name="reactions">Reactions</string>
+    <string name="reaction">Reaction</string>
+    <string name="rating">Rating</string>
     <string name="tap_to_remove">Tap to remove</string>
     <string name="reaction_removed">Reaction removed</string>
     <string name="comment">Comment</string>

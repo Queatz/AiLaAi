@@ -139,6 +139,19 @@ fun pickPhotos(multiple: Boolean = true, block: (List<File>) -> Unit) {
     element.click()
 }
 
+fun pickAudio(block: (File) -> Unit) {
+    val element = document.createElement("input") as HTMLInputElement
+    element.type = "file"
+    element.multiple = false
+    element.accept = "audio/*"
+    element.addEventListener("change", {
+        if (element.files != null && element.files!!.length > 0) {
+            block(element.files!!.item(0)!!)
+        }
+    })
+    element.click()
+}
+
 // Returns null if scaling is not needed
 suspend fun HTMLImageElement.scaleToBlob(maxSize: Int): Blob? {
     val canvas = document.createElement("canvas") as HTMLCanvasElement
@@ -199,6 +212,17 @@ suspend fun File.toScaledBlob(maxSize: Int): Blob {
     return result.await().scaleToBlob(maxSize) ?: this
 }
 
+fun web.blob.Blob.downloadAsAudio() {
+    val url = web.url.URL.createObjectURL(this)
+    val a = document.createElement("a") as HTMLAnchorElement
+    a.href = url
+    a.download = "audio.webm"
+    document.body!!.appendChild(a)
+    a.click()
+    document.body!!.removeChild(a)
+    web.url.URL.revokeObjectURL(url)
+
+}
 
 suspend fun File.toScaledBytes(maxSize: Int = 1600) =
     toScaledBlob(maxSize).toBytes()

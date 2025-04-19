@@ -9,6 +9,7 @@ import com.queatz.ailaai.ui.components.ReactQuickLayout
 @Composable
 fun AddReactionDialog(
     onDismissRequest: () -> Unit,
+    reactions: List<String> = emptyList(),
     onReaction: (String) -> Unit
 ) {
     TextFieldDialog(
@@ -19,7 +20,10 @@ fun AddReactionDialog(
         placeholder = stringResource(R.string.custom),
         maxLength = 64,
         extraContent = {
-            ReactQuickLayout(onReaction = onReaction)
+            ReactQuickLayout(
+                quickReactions = reactions,
+                onReaction = onReaction
+            )
         }
     ) { prompt ->
         prompt.trim().notBlank?.let {

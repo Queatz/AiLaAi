@@ -123,6 +123,11 @@ class AiSpeakRequest(
 )
 
 @Serializable
+class AiTranscribeResponse(
+    val text: String
+)
+
+@Serializable
 class AiPhotoResponse(
     val photo: String
 )

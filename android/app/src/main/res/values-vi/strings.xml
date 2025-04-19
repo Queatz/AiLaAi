@@ -890,6 +890,8 @@
     <string name="tomorrow_at_7am">Ngày mai lúc 7 giờ sáng</string>
     <string name="in_10_years">Trong 10 năm</string>
     <string name="rate">Đánh giá</string>
+    <string name="reaction">Phản ứng</string>
+    <string name="rating">Đánh giá</string>
     <string name="remove_rating">Xóa đánh giá</string>
     <string name="your_ratings_are_only_visible_to_you">Đánh giá của bạn chỉ hiển thị với bạn.</string>
     <string name="help">Trợ giúp</string>

@@ -43,6 +43,7 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${versions.ktor}")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:${versions.datetime}")
                 implementation("app.softwork:routing-compose:0.3.0")
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-browser:2025.4.12")
                 implementation(npm("@paulmillr/qr", "0.2.0"))
                 implementation(npm("date-fns", "4.1.0"))
                 implementation(npm("@vvo/tzdb", "6.141.0"))

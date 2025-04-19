@@ -49,4 +49,29 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
     ) {
         result += StoryContent.Photos(listOf(url), aspect = aspect)
     }
+
+    fun audio(
+        url: String,
+    ) {
+        result += StoryContent.Audio(url)
+    }
+
+    fun profiles(
+        profiles: List<String>,
+    ) {
+        result += StoryContent.Profiles(profiles)
+    }
+
+    fun groups(
+        groups: List<String>,
+        coverPhotos: Boolean = true
+    ) {
+        result += StoryContent.Groups(groups, coverPhotos = coverPhotos)
+    }
+
+    fun pages(
+        pages: List<String>,
+    ) {
+        result += StoryContent.Cards(pages)
+    }
 }
