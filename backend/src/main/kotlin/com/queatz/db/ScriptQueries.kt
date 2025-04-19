@@ -25,9 +25,15 @@ fun Db.allScripts(offset: Int = 0, limit: Int = 20) = list(
     Script::class,
     """
         for script in @@collection
+            let person = document(${Person::class.collection()}, script.${f(Script::person)})
             sort script.${f(Script::createdAt)} desc
             limit @offset, @limit
-            return script
+            return merge(script, {
+                ${f(Script::author)}: {
+                    id: person._key,
+                    ${f(Person::name)}: person.${f(Person::name)}
+                }
+            })
     """.trimIndent(),
     mapOf(
         "offset" to offset,
@@ -40,9 +46,15 @@ fun Db.searchScripts(search: String, offset: Int = 0, limit: Int = 20) = list(
     """
         for script in @@collection
             filter contains(lower(script.${f(Script::name)}), @search)
+            let person = document(${Person::class.collection()}, script.${f(Script::person)})
             sort script.${f(Script::createdAt)} desc
             limit @offset, @limit
-            return script
+            return merge(script, {
+                ${f(Script::author)}: {
+                    id: person._key,
+                    ${f(Person::name)}: person.${f(Person::name)}
+                }
+            })
     """.trimIndent(),
     mapOf(
         "search" to search.lowercase(),

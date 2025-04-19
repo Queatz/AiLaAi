@@ -459,7 +459,9 @@ class Script(
     var name: String? = null,
     var description: String? = null,
     var categories: List<String>? = null,
-    var source: String? = null
+    var source: String? = null,
+
+    var author: Person? = null,
 ) : Model()
 
 @Serializable

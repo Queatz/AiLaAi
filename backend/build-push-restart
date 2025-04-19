@@ -1,0 +1,5 @@
+#! /bin/bash
+
+./gradlew :backend:shadowJar
+sftp 'root@api.ailaai.app:/root' <<< $'put "build/libs/Ai La Ai Backend-all.jar"'
+ssh root@api.ailaai.app 'cd /root && ./r'

@@ -42,6 +42,7 @@ import components.IconButton
 import components.LazyColumn
 import components.LinkifyText
 import components.Loading
+import kotlinx.browser.window
 import notBlank
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -168,8 +169,8 @@ fun ScriptsPage(
                     limit = pageSize
                 ) {
                     scripts = it
-                    isLoading = false
                 }
+                isLoading = false
             }
 
             FullPageLayout {
@@ -204,6 +205,7 @@ fun ScriptsPage(
                                         style {
                                             fontSize(18.px)
                                             fontWeight("bold")
+                                            marginBottom(.5.r)
                                         }
                                     }) {
                                         // todo: translate
@@ -212,6 +214,8 @@ fun ScriptsPage(
                                     Div {
                                         Text(
                                             bulletedString(
+                                                // todo: translate
+                                                script.author?.name?.let { "By $it" },
                                                 script.categories?.firstOrNull(),
                                                 script.description,
                                                 script.id!!
@@ -386,15 +390,6 @@ fun ScriptsPage(
                         )
                         item(
                             // todo: translate
-                            title = "Swap editor position",
-                            icon = "swap_horiz",
-                            onClick = {
-                                menuTarget = null
-                                isEditorOnRight = !isEditorOnRight
-                            }
-                        )
-                        item(
-                            // todo: translate
                             title = "Delete",
                             onClick = {
                                 menuTarget = null
@@ -414,6 +409,29 @@ fun ScriptsPage(
                             }
                         )
                     }
+
+                    item(
+                        // todo: translate
+                        title = "Swap editor position",
+                        icon = "swap_horiz",
+                        onClick = {
+                            menuTarget = null
+                            isEditorOnRight = !isEditorOnRight
+                        }
+                    )
+
+                    script.person?.let { person ->
+                        item(
+                            // todo: translate
+                            title = "Go to author's profile",
+                            icon = "open_in_new",
+                            onClick = {
+                                menuTarget = null
+                                window.open("/profile/$person", "_blank")
+                            }
+                        )
+                    }
+
 
                     // Always show Fork option for all users
                     item(
