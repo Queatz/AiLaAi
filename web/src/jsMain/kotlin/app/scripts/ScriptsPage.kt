@@ -53,6 +53,7 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
@@ -68,13 +69,19 @@ import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
+import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.paddingBottom
+import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
+import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
@@ -84,6 +91,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import sortedDistinct
 import stories.StoryContents
 
 @Composable
@@ -158,13 +166,26 @@ fun ScriptsPage(
             var scripts by remember { mutableStateOf<List<Script>>(emptyList()) }
             var isLoading by remember { mutableStateOf(true) }
             var search by remember { mutableStateOf("") }
+            var selectedCategory by remember { mutableStateOf<String?>(null) }
+            var categoriesCache by remember { mutableStateOf(emptyList<String>()) }
             var offset by remember { mutableStateOf(0) }
             val pageSize = 20
+            val categories = remember(scripts) {
+                if (selectedCategory == null) {
+                    scripts
+                        .mapNotNull { it.categories?.firstOrNull() }
+                        .sortedDistinct().also {
+                            categoriesCache = it
+                        }
+                } else {
+                    categoriesCache
+                }
+            }
 
-            LaunchedEffect(search) {
-                isLoading = true
+            LaunchedEffect(search, selectedCategory) {
+                offset = 0
                 api.scripts(
-                    search = search.notBlank,
+                    search = selectedCategory?.notBlank ?: search.notBlank,
                     offset = offset,
                     limit = pageSize
                 ) {
@@ -178,14 +199,53 @@ fun ScriptsPage(
                     style {
                         display(DisplayStyle.Flex)
                         flexDirection(FlexDirection.Column)
-                        padding(1.r)
+                        paddingLeft(1.r)
+                        paddingRight(1.r)
+                        paddingBottom(1.r)
                     }
                 }) {
                     if (isLoading) {
                         Loading()
                     } else if (scripts.isNotEmpty()) {
-                        LazyColumn {
-                            items(scripts) { script ->
+                        if (categories.isNotEmpty()) {
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    gap(.5.r)
+                                    overflowY("auto")
+                                    paddingTop(.5.r)
+                                    paddingBottom(1.5.r)
+                                    position(Position.Relative)
+                                }
+                            }) {
+                                categories.forEach { category ->
+                                    Button({
+                                        classes(Styles.floatingButton)
+
+                                        if (selectedCategory == category) {
+                                            classes(Styles.floatingButtonSelected)
+                                        }
+
+                                        style {
+                                            flexShrink(0)
+                                        }
+
+                                        onClick {
+                                            selectedCategory = if (selectedCategory == category) null else category
+                                        }
+                                    }) {
+                                        Text(category)
+                                    }
+                                }
+                            }
+                        }
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Column)
+                            }
+                        }) {
+                            scripts.forEach { script ->
                                 Div({
                                     style {
                                         display(DisplayStyle.Flex)
@@ -260,6 +320,7 @@ fun ScriptsPage(
                 onValue = { search = it }
             )
         }
+
         is ScriptsNav.Script -> {
             val script by remember(nav.script) { mutableStateOf(nav.script) }
             var editedScript by remember(script) { mutableStateOf<String?>(null) }

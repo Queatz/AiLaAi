@@ -46,6 +46,7 @@ fun Db.searchScripts(search: String, offset: Int = 0, limit: Int = 20) = list(
     """
         for script in @@collection
             filter contains(lower(script.${f(Script::name)}), @search)
+                or (is_array(script.${f(Script::categories)}) and first(for c in (script.${f(Card::categories)} || []) filter contains(lower(c), @search) return true) == true)
             let person = document(${Person::class.collection()}, script.${f(Script::person)})
             sort script.${f(Script::createdAt)} desc
             limit @offset, @limit

@@ -16,16 +16,16 @@ import org.jetbrains.compose.web.dom.Div
 import org.w3c.dom.HTMLDivElement
 
 class LazyDsl internal constructor() {
-    val all = mutableListOf<@Composable () -> Unit>()
+    var all by mutableStateOf(listOf<@Composable () -> Unit>())
 
     fun item(block: @Composable () -> Unit) {
-        all += @Composable {
+        all = all + @Composable {
             block()
         }
     }
 
     fun <T : Any> items(items: List<T>, block: @Composable (item: T) -> Unit) {
-        all += items.map {
+        all = all + items.map {
             @Composable {
                 block(it)
             }
