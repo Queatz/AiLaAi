@@ -173,7 +173,8 @@ fun ScriptsPage(
             val categories = remember(scripts) {
                 if (selectedCategory == null) {
                     scripts
-                        .mapNotNull { it.categories?.firstOrNull() }
+                        .mapNotNull { it.categories }
+                        .flatten()
                         .sortedDistinct().also {
                             categoriesCache = it
                         }

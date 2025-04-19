@@ -1198,9 +1198,9 @@ object Strings {
         ru = "Нет сохраненных страниц"
     )
     val noCardsNearby = Translation(
-        "No pages nearby",
+        "No pages nearby.",
         "Không tìm được trang gần đây.",
-        ru = "Нет страниц поблизости"
+        ru = "Нет страниц поблизости."
     )
     val noStories = Translation(
         "No posts",

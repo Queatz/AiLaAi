@@ -10,6 +10,7 @@ import app.ailaai.api.cards
 import app.ailaai.api.newCard
 import app.cards.MapList
 import app.cards.mapListDialog
+import app.components.Empty
 import app.components.Spacer
 import app.dialog.inputDialog
 import app.messaages.inList
@@ -81,7 +82,6 @@ import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import kotlin.math.abs
-import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -111,11 +111,22 @@ fun MapView(
     val scope = rememberCoroutineScope()
     val hasHash = remember { window.location.hash.isBlank() }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var categoriesCache by remember { mutableStateOf(emptyList<String>()) }
     var selectedFilters by remember { mutableStateOf(emptyList<SearchFilter>()) }
     var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
 
     val categories = remember(searchResults) {
-        searchResults.mapNotNull { it.categories }.flatten().sortedDistinct()
+        if (selectedCategory == null) {
+            searchResults
+                .mapNotNull { it.categories }
+                .flatten()
+                .sortedDistinct().also {
+                    categoriesCache = it
+                }
+        } else {
+            categoriesCache
+        }
+
     }
 
     LaunchedEffect(selectedCard) {
@@ -493,7 +504,7 @@ fun MapView(
     Div({
         classes(Styles.mapContainer)
     }) {
-        if (showList && shownCards.isNotEmpty()) {
+        if (showList) {
             Div({
                 classes(Styles.navContainer, Styles.mapList)
 
@@ -525,10 +536,14 @@ fun MapView(
                         }
                     }
                     if (expanded) {
-                        MapList(shownCards) { card ->
-                            cardNavHistory = emptyList()
-                            selectedCard = if (selectedCard?.id == card.id) null else card
-                            centerMapOnCard(selectedCard)
+                        if (shownCards.isEmpty()) {
+                            Empty { appText { noCardsNearby } }
+                        } else {
+                            MapList(shownCards) { card ->
+                                cardNavHistory = emptyList()
+                                selectedCard = if (selectedCard?.id == card.id) null else card
+                                centerMapOnCard(selectedCard)
+                            }
                         }
                     }
                 }
