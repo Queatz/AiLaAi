@@ -1667,6 +1667,11 @@ object Strings {
         vn = "Lưu",
         ru = "Сохранить"
     )
+    val fork = Translation(
+        en = "Fork",
+        vn = "Tạo bản sao",
+        ru = "Форк"
+    )
     val hint = Translation(
         en = "Hint",
         vn = "Lời gợi ý",

@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.createScript
 import app.ailaai.api.myScripts
+import app.components.Spacer
 import app.dialog.inputDialog
 import app.menu.Menu
 import app.nav.NavMenu
@@ -34,6 +35,7 @@ import sortedDistinct
 sealed class ScriptsNav {
     data object None : ScriptsNav()
     data class Script(val script: com.queatz.db.Script) : ScriptsNav()
+    data object Explore: ScriptsNav()
 }
 
 @Composable
@@ -151,6 +153,16 @@ fun ScriptsNavPage(
     }
 
     NavMenu {
+        NavMenuItem(
+            icon = "explore",
+            title = appString { explore },
+            selected = selected is ScriptsNav.Explore
+        ) {
+            onSelected(ScriptsNav.Explore)
+        }
+
+        Spacer()
+
         scripts.filter {
             (searchQuery.isBlank() || it.name.orEmpty().contains(searchQuery, ignoreCase = true)) &&
                     (selectedCategory.isNullOrBlank() || it.categories.orEmpty().contains(selectedCategory))

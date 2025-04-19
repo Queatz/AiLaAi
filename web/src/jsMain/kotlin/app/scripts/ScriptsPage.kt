@@ -4,19 +4,23 @@ import Styles
 import aiScript
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.FullPageLayout
 import app.PageTopBar
 import app.ailaai.api.categories
 import app.ailaai.api.createScript
 import app.ailaai.api.deleteScript
 import app.ailaai.api.runScript
+import app.ailaai.api.scripts
 import app.ailaai.api.updateScript
 import app.ailaai.shared.resources.ScriptsResources
+import app.components.TopBarSearch
 import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -26,6 +30,7 @@ import app.ailaai.api.updateScriptData
 import app.menu.Menu
 import app.messaages.inList
 import appString
+import appText
 import application
 import bulletedString
 import com.queatz.db.AiScriptRequest
@@ -34,25 +39,42 @@ import com.queatz.db.Script
 import com.queatz.db.ScriptResult
 import com.queatz.db.asGeo
 import components.IconButton
+import components.LazyColumn
 import components.LinkifyText
 import components.Loading
+import notBlank
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.disabled
+import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.justifyContent
+import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.flexShrink
+import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
@@ -131,6 +153,109 @@ fun ScriptsPage(
 
     when (nav) {
         is ScriptsNav.None -> Unit
+        is ScriptsNav.Explore -> {
+            var scripts by remember { mutableStateOf<List<Script>>(emptyList()) }
+            var isLoading by remember { mutableStateOf(true) }
+            var search by remember { mutableStateOf("") }
+            var offset by remember { mutableStateOf(0) }
+            val pageSize = 20
+
+            LaunchedEffect(search) {
+                isLoading = true
+                api.scripts(
+                    search = search.notBlank,
+                    offset = offset,
+                    limit = pageSize
+                ) {
+                    scripts = it
+                    isLoading = false
+                }
+            }
+
+            FullPageLayout {
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        padding(1.r)
+                    }
+                }) {
+                    if (isLoading) {
+                        Loading()
+                    } else if (scripts.isNotEmpty()) {
+                        LazyColumn {
+                            items(scripts) { script ->
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Column)
+                                        border(1.px, LineStyle.Solid, Styles.colors.primary)
+                                        borderRadius(1.r)
+                                        marginBottom(1.r)
+                                        padding(1.r)
+                                        cursor("pointer")
+                                    }
+
+                                    onClick {
+                                        onScriptCreated(script)
+                                    }
+                                }) {
+                                    Div({
+                                        style {
+                                            fontSize(18.px)
+                                            fontWeight("bold")
+                                        }
+                                    }) {
+                                        // todo: translate
+                                        Text(script.name ?: "New Script")
+                                    }
+                                    Div {
+                                        Text(
+                                            bulletedString(
+                                                script.categories?.firstOrNull(),
+                                                script.description,
+                                                script.id!!
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else if (search.isNotBlank()) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                justifyContent(JustifyContent.Center)
+                                opacity(.5)
+                                padding(1.r)
+                            }
+                        }) {
+                            // todo: translate
+                            Text("No scripts.")
+                        }
+                    } else {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                justifyContent(JustifyContent.Center)
+                                opacity(.5)
+                                padding(1.r)
+                            }
+                        }) {
+                            // todo: translate
+                            Text("No scripts.")
+                        }
+                    }
+                }
+            }
+
+            TopBarSearch(
+                value = search,
+                onValue = { search = it }
+            )
+        }
         is ScriptsNav.Script -> {
             val script by remember(nav.script) { mutableStateOf(nav.script) }
             var editedScript by remember(script) { mutableStateOf<String?>(null) }
@@ -153,92 +278,144 @@ fun ScriptsPage(
                 aiJob?.cancel()
             }
 
+            // Check if the current user is the script owner
+            val me = application.me.value
+            val isCurrentUserOwner = script.person == me?.id
+
             menuTarget?.let {
                 Menu(
                     onDismissRequest = { menuTarget = null },
                     target = it,
                 ) {
-                    item(
-                        // todo: translate
-                        title = "Rename",
-                        onClick = {
-                            menuTarget = null
-                            scope.launch {
-                                val name = inputDialog(
-                                    // todo: translate
-                                    title = "Script name",
-                                    confirmButton = application.appString { update },
-                                    defaultValue = script.name.orEmpty()
-                                )
 
-                                if (name != null) {
-                                    api.updateScript(
-                                        id = script.id!!,
-                                        script = Script(name = name)
-                                    ) {
-                                        onUpdate(it)
-                                    }
-                                }
-                            }
-                        }
-                    )
-                    item(
-                        // todo: translate
-                        title = "Category",
-                        onClick = {
-                            menuTarget = null
-                            scope.launch {
-                                api.categories(
-                                    // todo: might need to not require geo
-                                    geo = application.me.value?.geo?.asGeo() ?: return@launch
-                                ) { categories ->
-                                    val category = categoryDialog(
-                                        categories = categories
+                    if (isCurrentUserOwner) {
+                        // Show all options for the script owner
+                        item(
+                            // todo: translate
+                            title = "Rename",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    val name = inputDialog(
+                                        // todo: translate
+                                        title = "Script name",
+                                        confirmButton = application.appString { update },
+                                        defaultValue = script.name.orEmpty()
                                     )
 
-                                    if (category != null) {
+                                    if (name != null) {
                                         api.updateScript(
                                             id = script.id!!,
-                                            script = Script(categories = category.inList())
+                                            script = Script(name = name)
                                         ) {
                                             onUpdate(it)
                                         }
                                     }
                                 }
                             }
-                        }
-                    )
-                    item(
-                        // todo: translate
-                        title = "Secret",
-                        onClick = {
-                            menuTarget = null
-                            scope.launch {
-                                api.scriptData(script.id!!) { scriptData ->
-                                    val result = scriptSecretDialog(scriptData.secret ?: "")
-
-                                    if (result != null) {
-                                        api.updateScriptData(
-                                            id = script.id!!,
-                                            scriptData = ScriptData(secret = result),
-                                            onSuccess = {}
+                        )
+                        item(
+                            // todo: translate
+                            title = "Category",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    api.categories(
+                                        // todo: might need to not require geo
+                                        geo = application.me.value?.geo?.asGeo() ?: return@launch
+                                    ) { categories ->
+                                        val category = categoryDialog(
+                                            categories = categories
                                         )
+
+                                        if (category != null) {
+                                            api.updateScript(
+                                                id = script.id!!,
+                                                script = Script(categories = category.inList())
+                                            ) {
+                                                onUpdate(it)
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
+                        )
+                        item(
+                            // todo: translate
+                            title = "Description",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    val description = inputDialog(
+                                        // todo: translate
+                                        title = "Script description",
+                                        confirmButton = application.appString { update },
+                                        defaultValue = script.description.orEmpty()
+                                    )
 
-                    item(
-                        // todo: translate
-                        title = "Swap editor position",
-                        icon = "swap_horiz",
-                        onClick = {
-                            menuTarget = null
-                            isEditorOnRight = !isEditorOnRight
-                        }
-                    )
+                                    if (description != null) {
+                                        api.updateScript(
+                                            id = script.id!!,
+                                            script = Script(description = description)
+                                        ) {
+                                            onUpdate(it)
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                        item(
+                            // todo: translate
+                            title = "Secret",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    api.scriptData(script.id!!) { scriptData ->
+                                        val result = scriptSecretDialog(scriptData.secret ?: "")
 
+                                        if (result != null) {
+                                            api.updateScriptData(
+                                                id = script.id!!,
+                                                scriptData = ScriptData(secret = result),
+                                                onSuccess = {}
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                        item(
+                            // todo: translate
+                            title = "Swap editor position",
+                            icon = "swap_horiz",
+                            onClick = {
+                                menuTarget = null
+                                isEditorOnRight = !isEditorOnRight
+                            }
+                        )
+                        item(
+                            // todo: translate
+                            title = "Delete",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    val proceed = dialog(
+                                        // todo: translate
+                                        title = "Delete this script?",
+                                        // todo: translate
+                                        confirmButton = "Yes, delete"
+                                    )
+                                    if (proceed == true) {
+                                        api.deleteScript(script.id!!) {
+                                            onScriptDeleted(script)
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    // Always show Fork option for all users
                     item(
                         // todo: translate
                         title = "Fork",
@@ -251,32 +428,10 @@ fun ScriptsPage(
                                         name = script.name,
                                         categories = script.categories,
                                         description = script.description,
-                                        source = script.source
+                                        source = editedScript?.notBlank ?: script.source
                                     )
                                 ) { newScript ->
-                                    // Use the new onScriptCreated callback to navigate to the new script
                                     onScriptCreated(newScript)
-                                }
-                            }
-                        }
-                    )
-
-                    item(
-                        // todo: translate
-                        title = "Delete",
-                        onClick = {
-                            menuTarget = null
-                            scope.launch {
-                                val proceed = dialog(
-                                    // todo: translate
-                                    title = "Delete this script?",
-                                    // todo: translate
-                                    confirmButton = "Yes, delete"
-                                )
-                                if (proceed == true) {
-                                    api.deleteScript(script.id!!) {
-                                        onScriptDeleted(script)
-                                    }
                                 }
                             }
                         }
@@ -380,22 +535,24 @@ fun ScriptsPage(
                         script.id
                     ),
                     onTitleClick = {
-                        scope.launch {
-                            val newName = inputDialog(
-                                // todo: translate
-                                title = "Rename script",
-                                // todo: translate
-                                defaultValue = script.name ?: "New script",
-                                // todo: translate
-                                placeholder = "Script name"
-                            )
+                        if (isCurrentUserOwner) {
+                            scope.launch {
+                                val newName = inputDialog(
+                                    // todo: translate
+                                    title = "Rename script",
+                                    // todo: translate
+                                    defaultValue = script.name ?: "New script",
+                                    // todo: translate
+                                    placeholder = "Script name"
+                                )
 
-                            if (newName != null) {
-                                api.updateScript(
-                                    id = script.id!!,
-                                    script = Script(name = newName)
-                                ) {
-                                    onUpdate(it)
+                                if (newName != null) {
+                                    api.updateScript(
+                                        id = script.id!!,
+                                        script = Script(name = newName)
+                                    ) {
+                                        onUpdate(it)
+                                    }
                                 }
                             }
                         }
@@ -426,15 +583,30 @@ fun ScriptsPage(
                                     }
 
                                     onClick {
-                                        scope.launch {
-                                            isSaving = true
-                                            api.updateScript(
-                                                id = script.id!!,
-                                                script = Script(source = editedScript)
-                                            ) {
-                                                onUpdate(it)
+                                        if (!isCurrentUserOwner) {
+                                            scope.launch {
+                                                api.createScript(
+                                                    Script(
+                                                        name = script.name,
+                                                        categories = script.categories,
+                                                        description = script.description,
+                                                        source = editedScript?.notBlank ?: script.source
+                                                    )
+                                                ) { newScript ->
+                                                    onScriptCreated(newScript)
+                                                }
                                             }
-                                            isSaving = false
+                                        } else {
+                                            scope.launch {
+                                                isSaving = true
+                                                api.updateScript(
+                                                    id = script.id!!,
+                                                    script = Script(source = editedScript)
+                                                ) {
+                                                    onUpdate(it)
+                                                }
+                                                isSaving = false
+                                            }
                                         }
                                     }
 
@@ -443,7 +615,11 @@ fun ScriptsPage(
                                     }
                                 }
                             ) {
-                                Text(appString { save })
+                                if (isCurrentUserOwner) {
+                                    appText { save }
+                                } else {
+                                    appText { fork }
+                                }
                             }
                         } else {
                             IconButton(
@@ -539,6 +715,7 @@ fun ScriptsPage(
                         ) {
                             scope.launch {
                                 dialog(
+                                    // todo: translate
                                     title = "Kotlin Scripts",
                                     cancelButton = null,
                                     content = {
