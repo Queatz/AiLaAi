@@ -564,6 +564,12 @@ fun AppPage() {
                              script = ScriptsNav.None
                              scriptUpdates.emit(it)
                         }
+                    },
+                    onScriptCreated = {
+                        scope.launch {
+                            script = ScriptsNav.Script(it)
+                            scriptUpdates.emit(it)
+                        }
                     }
                 )
             }

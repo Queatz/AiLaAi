@@ -468,7 +468,6 @@ data class ScriptData(
     var secret: String? = null
 ) : Model()
 
-
 @Serializable
 data class ReminderSchedule(
     /**

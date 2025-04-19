@@ -12,15 +12,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import app.ailaai.api.card
-import app.ailaai.api.updateCard
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.deleteStory
 import com.queatz.ailaai.api.updateStory
 import com.queatz.ailaai.api.uploadPhotosFromUris
 import com.queatz.ailaai.data.api
-import com.queatz.ailaai.extensions.*
+import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.copyToClipboard
+import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.shareAsUrl
+import com.queatz.ailaai.extensions.storyUrl
+import com.queatz.ailaai.extensions.toast
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
@@ -30,7 +33,6 @@ import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReportDialog
 import com.queatz.ailaai.ui.dialogs.ViewSourceDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
-import com.queatz.db.Card
 import com.queatz.db.Story
 import kotlinx.coroutines.launch
 
@@ -151,8 +153,8 @@ fun StoryMenu(
     }
 
     Dropdown(
-        expanded,
-        {
+        expanded = expanded,
+        onDismissRequest = {
             onDismissRequest()
         }
     ) {

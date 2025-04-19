@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.PageTopBar
 import app.ailaai.api.categories
+import app.ailaai.api.createScript
 import app.ailaai.api.deleteScript
 import app.ailaai.api.runScript
 import app.ailaai.api.updateScript
@@ -124,6 +125,7 @@ fun ScriptsPage(
     nav: ScriptsNav,
     onUpdate: (Script) -> Unit,
     onScriptDeleted: (Script) -> Unit,
+    onScriptCreated: (Script) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
 
@@ -234,6 +236,28 @@ fun ScriptsPage(
                         onClick = {
                             menuTarget = null
                             isEditorOnRight = !isEditorOnRight
+                        }
+                    )
+
+                    item(
+                        // todo: translate
+                        title = "Fork",
+                        icon = "call_split",
+                        onClick = {
+                            menuTarget = null
+                            scope.launch {
+                                api.createScript(
+                                    Script(
+                                        name = script.name,
+                                        categories = script.categories,
+                                        description = script.description,
+                                        source = script.source
+                                    )
+                                ) { newScript ->
+                                    // Use the new onScriptCreated callback to navigate to the new script
+                                    onScriptCreated(newScript)
+                                }
+                            }
                         }
                     )
 

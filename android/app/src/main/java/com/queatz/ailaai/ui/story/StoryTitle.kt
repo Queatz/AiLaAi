@@ -32,7 +32,7 @@ fun RowScope.StoryTitle(state: LazyGridState, title: String?) {
         when (it) {
             true -> {
                 Text(
-                    title
+                    text = title
                         ?: stringResource(R.string.empty_story_name),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

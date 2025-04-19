@@ -8,6 +8,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLDivElement
+import r
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -21,6 +22,7 @@ fun Loading(attrs: (AttrsScope<HTMLDivElement>.() -> Unit)? = null) {
             display(DisplayStyle.Flex)
             alignItems(AlignItems.Center)
             justifyContent(JustifyContent.Center)
+            padding(1.r)
             opacity(opacity)
             property("user-select", "none")
         }

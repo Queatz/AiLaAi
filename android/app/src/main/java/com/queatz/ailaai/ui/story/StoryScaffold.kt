@@ -32,13 +32,13 @@ fun StoryScaffold(
                 .padding(top = 1.pad)
         ) {
             IconButton(
-                {
+                onClick = {
                     goBack()
                 }
             ) {
                 Icon(
-                    Icons.AutoMirrored.Outlined.ArrowBack,
-                    stringResource(R.string.go_back),
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = stringResource(R.string.go_back),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

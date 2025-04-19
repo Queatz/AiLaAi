@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.profile
@@ -318,7 +319,7 @@ fun StoryCreatorScreen(
     }
 
     StoryScaffold(
-        {
+        goBack = {
             if (edited) {
                 showBackDialog = true
             } else {
@@ -335,13 +336,15 @@ fun StoryCreatorScreen(
             } else if (card != null) {
                 Text(
                     text = card?.name ?: stringResource(R.string.content),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 1.pad),
                 )
             } else if (profile != null) {
                 Text(
-                    stringResource(R.string.profile),
+                    text = stringResource(R.string.profile),
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 1.pad),
