@@ -22,28 +22,26 @@ fun LazyGridScope.buttonItem(
         val scope = rememberCoroutineScope()
         var isDisabled by remember(content) { mutableStateOf(false) }
 
+        val onClick: () -> Unit = remember(content) {
+            {
+                isDisabled = true
+                scope.launch {
+                    onButtonClick?.invoke(content.script, content.data)
+                    isDisabled = false
+                }
+            }
+        }
+
         if (content.style == ButtonStyle.Secondary) {
             OutlinedButton(
-                onClick = {
-                    isDisabled = true
-                    scope.launch {
-                        onButtonClick?.invoke(content.script, content.data)
-                        isDisabled = false
-                    }
-                },
+                onClick = onClick,
                 enabled = !isDisabled
             ) {
                 Text(content.text)
             }
         } else {
             Button(
-                onClick = {
-                    isDisabled = true
-                    scope.launch {
-                        onButtonClick?.invoke(content.script, content.data)
-                        isDisabled = false
-                    }
-                },
+                onClick = onClick,
                 enabled = !isDisabled
             ) {
                 Text(content.text)

@@ -113,7 +113,7 @@ import stories.StoryContents
 fun ResultPanel(
     isRunningScript: Boolean,
     scriptResult: ScriptResult?,
-    runScript: (String, String?, Map<String, String?>, Boolean?) -> Unit,
+    runScript: suspend (String, String?, Map<String, String?>, Boolean?) -> Unit,
     isOnLeft: Boolean
 ) {
     Div({
@@ -570,21 +570,17 @@ fun ScriptsPage(
                 }
             }
 
-            val runScript = remember(script) {
-                { scriptId: String, data: String?, input: Map<String, String?>, useCache: Boolean? ->
-                    scope.launch {
-                        api.runScript(
-                            id = scriptId,
-                            data = RunScriptBody(
-                                data = data,
-                                input = input,
-                                useCache = useCache
-                            )
-                        ) {
-                            scriptResult = it
-                            isRunningScript = false
-                        }
-                    }
+            val runScript: suspend (String, String?, Map<String, String?>, Boolean?) -> Unit = { scriptId, data, input, useCache ->
+                api.runScript(
+                    id = scriptId,
+                    data = RunScriptBody(
+                        data = data,
+                        input = input,
+                        useCache = useCache
+                    )
+                ) {
+                    scriptResult = it
+                    isRunningScript = false
                 }
             }
 
@@ -764,7 +760,9 @@ fun ScriptsPage(
                                 showResultPanel = true
                                 runScriptData = null
                                 isRunningScript = true
-                                runScript(script.id!!, null, emptyMap(), !it.shiftKey)
+                                scope.launch {
+                                    runScript(script.id!!, null, emptyMap(), !it.shiftKey)
+                                }
                             }
                             IconButton(
                                 name = "auto_awesome",

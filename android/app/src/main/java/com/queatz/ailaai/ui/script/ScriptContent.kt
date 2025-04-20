@@ -10,7 +10,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,7 +17,6 @@ import app.ailaai.api.runScript
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.rememberStateOf
-import com.queatz.ailaai.me
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.story.StoryContents
 import com.queatz.ailaai.ui.theme.pad
@@ -26,13 +24,10 @@ import com.queatz.db.RunScriptBody
 import com.queatz.db.StoryContent
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.ScriptData
-import kotlinx.coroutines.launch
 import widget
 
 fun LazyGridScope.ScriptContent(widgetId: String) {
     item(span = { GridItemSpan(maxLineSpan) }) {
-        val me = me
-        val scope = rememberCoroutineScope()
         var scriptUi by rememberStateOf(emptyList<StoryContent>())
 
         var widget by remember(widgetId) {

@@ -118,7 +118,7 @@ fun ProfileNavPage(
                 // todo: translate
                 AppFeedbackType.Issue -> "Report a bug"
                 // todo: translate
-                AppFeedbackType.Other -> "App feedback"
+                AppFeedbackType.Other -> "Other feedback"
                 else -> ""
             }
 
@@ -325,7 +325,7 @@ fun ProfileNavPage(
         }
 
         // todo: translate
-        NavMenuItem("feedback", "App feedback", iconColor = Styles.colors.primary) {
+        NavMenuItem("feedback", "Other feedback", iconColor = Styles.colors.primary) {
             sendAppFeedback = AppFeedbackType.Other
         }
 
