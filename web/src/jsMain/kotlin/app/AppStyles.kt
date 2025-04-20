@@ -11,6 +11,16 @@ import r
 
 object AppStyles : StyleSheet() {
 
+    val scriptItem by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        borderRadius(1.r)
+        marginBottom(1.r)
+        padding(1.r)
+        cursor("pointer")
+        elevated()
+    }
+
     val seenUntilLayout by style {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.RowReverse)
