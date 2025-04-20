@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.platformMe
 import app.ailaai.api.profile
+import app.ailaai.api.sendAppFeedback
 import app.ailaai.api.transferCode
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
@@ -22,6 +23,8 @@ import app.dialog.inputDialog
 import appString
 import appText
 import application
+import com.queatz.db.AppFeedback
+import com.queatz.db.AppFeedbackType
 import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 import com.queatz.db.Profile
@@ -63,6 +66,7 @@ fun ProfileNavPage(
     }
 
     var isPlatformHost by remember { mutableStateOf(false) }
+    var sendAppFeedback by remember { mutableStateOf<AppFeedbackType?>(null) }
 
     suspend fun reload() {
         api.profile(me!!.id!!) {
@@ -102,6 +106,53 @@ fun ProfileNavPage(
                 dialog("", cancelButton = null) {
                     QrImg("$webBaseUrl/profile/${me!!.id!!}")
                 }
+            }
+        }
+    }
+
+    if (sendAppFeedback != null) {
+        scope.launch {
+            val title = when (sendAppFeedback) {
+                // todo: translate
+                AppFeedbackType.Suggestion -> "Request a feature"
+                // todo: translate
+                AppFeedbackType.Issue -> "Report a bug"
+                // todo: translate
+                AppFeedbackType.Other -> "App feedback"
+                else -> ""
+            }
+
+            val feedback = inputDialog(
+                title = title,
+                // todo: translate
+                confirmButton = "Send"
+            )
+
+            if (feedback != null) {
+                var success = false
+                api.sendAppFeedback(AppFeedback(feedback = feedback, type = sendAppFeedback!!)) {
+                    success = true
+                    sendAppFeedback = null
+                }
+
+                if (success) {
+                    // todo: translate
+                    dialog("Thank you!", cancelButton = null)
+                } else {
+                    val failMessage = when (sendAppFeedback) {
+                        // todo: translate
+                        AppFeedbackType.Suggestion -> "Failed to send feature request"
+                        // todo: translate
+                        AppFeedbackType.Issue -> "Failed to send bug report"
+                        // todo: translate
+                        AppFeedbackType.Other -> "Failed to send feedback"
+                        else -> ""
+                    }
+                    dialog(failMessage, cancelButton = null)
+                    sendAppFeedback = null
+                }
+            } else {
+                sendAppFeedback = null
             }
         }
     }
@@ -261,6 +312,21 @@ fun ProfileNavPage(
             NavMenuItem("guardian", appString { platform }) {
                 onPlatformClick()
             }
+        }
+
+        // todo: translate
+        NavMenuItem("lightbulb", "Request a feature", iconColor = Styles.colors.green) {
+            sendAppFeedback = AppFeedbackType.Suggestion
+        }
+
+        // todo: translate
+        NavMenuItem("bug_report", "Report a bug", iconColor = Styles.colors.red) {
+            sendAppFeedback = AppFeedbackType.Issue
+        }
+
+        // todo: translate
+        NavMenuItem("feedback", "App feedback", iconColor = Styles.colors.primary) {
+            sendAppFeedback = AppFeedbackType.Other
         }
 
         NavMenuItem("logout", signOutOrTransfer) {

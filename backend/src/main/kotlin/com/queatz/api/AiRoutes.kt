@@ -7,6 +7,7 @@ import com.queatz.db.AiPhotoResponse
 import com.queatz.db.AiScriptRequest
 import com.queatz.db.AiSpeakRequest
 import com.queatz.db.AiTranscribeResponse
+import com.queatz.db.PromptContext
 import com.queatz.db.addPrompt
 import com.queatz.notBlank
 import com.queatz.plugins.ai
@@ -66,6 +67,15 @@ fun Route.aiRoutes() {
         post("/ai/script") {
             respond {
                 val request = call.receive<AiScriptRequest>()
+
+                request.prompt.notBlank?.let {
+                    db.addPrompt(
+                        person = me.id!!,
+                        prompt = it,
+                        context = PromptContext.Scripts,
+                    )
+                }
+
                 val response = openAi.script(
                     prompt = request.prompt,
                     script = request.script

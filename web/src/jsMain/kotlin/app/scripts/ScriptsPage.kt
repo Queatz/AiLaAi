@@ -13,10 +13,12 @@ import androidx.compose.runtime.setValue
 import api
 import app.FullPageLayout
 import app.PageTopBar
+import app.ailaai.api.addPrompt
 import app.ailaai.api.categories
 import app.ailaai.api.createScript
 import app.ailaai.api.deleteScript
 import app.ailaai.api.newCard
+import app.ailaai.api.prompts
 import app.ailaai.api.runScript
 import app.ailaai.api.scripts
 import app.ailaai.api.updateScript
@@ -25,6 +27,7 @@ import app.components.TopBarSearch
 import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.dialog.inputSelectDialog
 import com.queatz.db.ScriptData
 import app.ailaai.api.scriptData
 import app.ailaai.api.updateScriptData
@@ -37,12 +40,12 @@ import bulletedString
 import com.queatz.db.AiScriptRequest
 import com.queatz.db.Card
 import com.queatz.db.CardOptions
+import com.queatz.db.PromptContext
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
 import com.queatz.db.StoryContent
 import com.queatz.db.asGeo
-import com.queatz.db.isPart
 import com.queatz.db.toJsonStoryPart
 import com.queatz.widgets.Widgets
 import components.IconButton
@@ -63,14 +66,18 @@ import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
+import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.border
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
@@ -96,7 +103,6 @@ import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
@@ -153,11 +159,10 @@ fun ResultPanel(
 suspend fun scriptSecretDialog(secret: String) = inputDialog(
     // todo: translate
     title = "Script Secret",
-    // todo: translate
-    placeholder = "Secret",
     defaultValue = secret,
     // todo: translate
-    confirmButton = "Save"
+    confirmButton = "Save",
+    singleLine = false
 )
 
 @Composable
@@ -796,6 +801,39 @@ fun ScriptsPage(
                                             placeholder = if (
                                                 (editedScript ?: script.source.orEmpty()).isBlank()
                                             ) "Create a script that..." else "Modify this script to...",
+                                            inputAction = { resolve, value, onValue ->
+                                                IconButton("expand_more", appString { history }, styles = {
+                                                    if (value.isNotBlank()) {
+                                                        opacity(0)
+                                                        property("pointer-events", "none")
+                                                    }
+
+                                                    position(Absolute)
+                                                    right(0.5.r)
+                                                    top(1.r)
+                                                    bottom(1.r)
+                                                }) {
+                                                    scope.launch {
+                                                        // Get prompts with Scripts context
+                                                        api.prompts(context = PromptContext.Scripts) { previousPrompts ->
+                                                            if (previousPrompts.isNotEmpty()) {
+                                                                inputSelectDialog(
+                                                                    confirmButton = application.appString { choose },
+                                                                    items = previousPrompts.map { it.prompt!! }
+                                                                ) { selectedPrompt ->
+                                                                    onValue(selectedPrompt)
+                                                                }
+                                                            } else {
+                                                                dialog(
+                                                                    // todo: translate
+                                                                    title = "No prompt history",
+                                                                    cancelButton = null
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         )
 
                                         if (prompt != null) {

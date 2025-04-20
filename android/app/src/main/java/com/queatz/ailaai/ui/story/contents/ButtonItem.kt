@@ -8,22 +8,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.queatz.db.ButtonStyle
 import com.queatz.db.StoryContent
+import kotlinx.coroutines.launch
 
 fun LazyGridScope.buttonItem(
     content: StoryContent.Button,
-    onButtonClick: ((script: String, data: String?) -> Unit)?
+    onButtonClick: (suspend (script: String, data: String?) -> Unit)?
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
-        var isDisabled by remember(content, onButtonClick) { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+        var isDisabled by remember(content) { mutableStateOf(false) }
 
         if (content.style == ButtonStyle.Secondary) {
             OutlinedButton(
                 onClick = {
-                    onButtonClick?.invoke(content.script, content.data)
                     isDisabled = true
+                    scope.launch {
+                        onButtonClick?.invoke(content.script, content.data)
+                        isDisabled = false
+                    }
                 },
                 enabled = !isDisabled
             ) {
@@ -32,8 +38,11 @@ fun LazyGridScope.buttonItem(
         } else {
             Button(
                 onClick = {
-                    onButtonClick?.invoke(content.script, content.data)
                     isDisabled = true
+                    scope.launch {
+                        onButtonClick?.invoke(content.script, content.data)
+                        isDisabled = false
+                    }
                 },
                 enabled = !isDisabled
             ) {

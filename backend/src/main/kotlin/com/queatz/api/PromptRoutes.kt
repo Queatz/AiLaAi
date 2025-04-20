@@ -1,6 +1,7 @@
 package com.queatz.api
 
 import com.queatz.db.Prompt
+import com.queatz.db.PromptContext
 import com.queatz.db.addPrompt
 import com.queatz.db.prompts
 import com.queatz.plugins.db
@@ -18,15 +19,22 @@ fun Route.promptRoutes() {
         get("/prompts") {
             respond {
                 db.prompts(
-                    me.id!!,
-                    call.parameters["offset"]?.toInt() ?: 0,
-                    call.parameters["limit"]?.toInt() ?: 20
+                    person = me.id!!,
+                    context = call.parameters["context"]?.let { PromptContext.valueOf(it) },
+                    offset = call.parameters["offset"]?.toInt() ?: 0,
+                    limit = call.parameters["limit"]?.toInt() ?: 20
                 )
             }
         }
         post("/prompts") {
             respond {
-                db.addPrompt(me.id!!, call.receive<Prompt>().prompt!!) ?: HttpStatusCode.BadRequest
+                val prompt = call.receive<Prompt>()
+
+                db.addPrompt(
+                    person = me.id!!,
+                    prompt = prompt.prompt!!,
+                    context = prompt.context
+                ) ?: HttpStatusCode.BadRequest
             }
         }
     }

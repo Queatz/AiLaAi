@@ -110,16 +110,14 @@ fun FormWidget(widgetId: String) {
                 }
             },
             onButtonClick = { script, data, input ->
-                scope.launch {
-                    api.runScript(
-                        id = script,
-                        data = RunScriptBody(
-                            data = data,
-                            input = input
-                        )
-                    ) {
-                        scriptResult = it.content
-                    }
+                api.runScript(
+                    id = script,
+                    data = RunScriptBody(
+                        data = data,
+                        input = input
+                    )
+                ) {
+                    scriptResult = it.content
                 }
             }
         )

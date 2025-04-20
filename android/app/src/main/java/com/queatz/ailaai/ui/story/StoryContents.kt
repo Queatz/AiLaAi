@@ -73,7 +73,7 @@ fun StoryContents(
     onReloadRequest: () -> Unit = {},
     onCommentFocused: (Boolean) -> Unit = {},
     header: LazyGridScope.() -> Unit = {},
-    onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
+    onButtonClick: (suspend (script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
     actions: (@Composable (storyId: String) -> Unit)? = null,
 ) {
     var viewHeight by rememberStateOf(Float.MAX_VALUE)

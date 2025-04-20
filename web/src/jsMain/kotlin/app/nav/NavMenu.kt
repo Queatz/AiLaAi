@@ -9,8 +9,11 @@ import appString
 import components.Icon
 import focusable
 import notBlank
+import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.div
 import org.jetbrains.compose.web.css.flexDirection
@@ -49,6 +52,7 @@ fun NavMenuItem(
     description: String = "",
     selected: Boolean = false,
     textIcon: Boolean = false,
+    iconColor: CSSColorValue? = null,
     onClick: () -> Unit
 ) {
     Div({
@@ -71,11 +75,21 @@ fun NavMenuItem(
             if (textIcon) {
                 Span({
                     classes(Styles.textIcon)
+
+                    style {
+                        if (iconColor != null) {
+                            color(iconColor)
+                        }
+                    }
                 }) {
                     Text(icon)
                 }
             } else {
-                Icon(icon)
+                Icon(icon) {
+                    if (iconColor != null) {
+                        color(iconColor)
+                    }
+                }
             }
         }
 

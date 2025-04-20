@@ -72,16 +72,14 @@ fun ScriptWidget(widgetId: String) {
                 }
             },
             onButtonClick = { script, data, input ->
-                scope.launch {
-                    api.runScript(
-                        id = script,
-                        data = RunScriptBody(
-                            data = data,
-                            input = input
-                        )
-                    ) {
-                        scriptResult = it
-                    }
+                api.runScript(
+                    id = script,
+                    data = RunScriptBody(
+                        data = data,
+                        input = input
+                    )
+                ) {
+                    scriptResult = it
                 }
             }
         )

@@ -210,6 +210,7 @@ fun collections() = listOf(
     },
     Prompt::class.db {
         ensurePersistentIndex(listOf(Prompt::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Prompt::context.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Prompt::lastUsed.name), PersistentIndexOptions())
     },
     Rating::class.db(CollectionType.EDGES, listOf(Card::class, Story::class, Message::class)) {

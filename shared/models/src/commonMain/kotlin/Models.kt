@@ -187,10 +187,15 @@ data class GroupConfig(
     var effects: String? = null,
 )
 
+enum class PromptContext {
+    Scripts
+}
+
 @Serializable
 class Prompt(
     var person: String? = null,
     var prompt: String? = null,
+    var context: PromptContext? = null,
     var lastUsed: Instant? = null
 ) : Model()
 

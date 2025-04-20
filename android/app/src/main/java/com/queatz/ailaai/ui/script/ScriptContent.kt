@@ -83,16 +83,14 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
                     fade = true,
                     horizontalPadding = 0.dp,
                     onButtonClick = { script, data, input ->
-                        scope.launch {
-                            api.runScript(
-                                id = script,
-                                data = RunScriptBody(
-                                    data = data,
-                                    input = input
-                                )
-                            ) {
-                                scriptUi = it.content ?: emptyList()
-                            }
+                        api.runScript(
+                            id = script,
+                            data = RunScriptBody(
+                                data = data,
+                                input = input
+                            )
+                        ) {
+                            scriptUi = it.content ?: emptyList()
                         }
                     }
                 )

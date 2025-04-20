@@ -80,7 +80,7 @@ fun StoryContents(
     content: List<StoryContent>,
     onGroupClick: (GroupExtended) -> Unit = {},
     onCardClick: ((cardId: String, openInNewWindow: Boolean) -> Unit)? = null,
-    onButtonClick: ((script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
+    onButtonClick: (suspend (script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
     openInNewWindow: Boolean = false,
     editable: Boolean = false,
     onEdited: ((index: Int, part: StoryContent) -> Unit)? = null,
@@ -405,7 +405,7 @@ fun StoryContents(
             }
 
             is StoryContent.Button -> {
-                var isDisabled by remember(content, part) { mutableStateOf(false) }
+                var isDisabled by remember(part) { mutableStateOf(false) }
 
                 Button({
                     classes(
@@ -422,8 +422,11 @@ fun StoryContents(
 
                     onClick {
                         if (!isDisabled) {
-                            onButtonClick?.invoke(part.script, part.data, input)
                             isDisabled = true
+                            scope.launch {
+                                onButtonClick?.invoke(part.script, part.data, input)
+                                isDisabled = false
+                            }
                         }
                     }
                 }) {

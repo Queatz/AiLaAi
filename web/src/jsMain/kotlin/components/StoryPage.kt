@@ -145,7 +145,7 @@ fun StoryPage(storyUrl: String, onStoryLoaded: (Story) -> Unit) {
                         }) {
                             if (storyContent != null) {
                                 StoryContents(
-                                    storyContent!!,
+                                    content = storyContent!!,
                                     onGroupClick = {
                                         scope.launch {
                                             appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
