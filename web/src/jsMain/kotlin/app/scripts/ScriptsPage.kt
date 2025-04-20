@@ -1,10 +1,10 @@
 package app.scripts
 
 import Styles
+import Styles.card
 import aiScript
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +16,7 @@ import app.PageTopBar
 import app.ailaai.api.categories
 import app.ailaai.api.createScript
 import app.ailaai.api.deleteScript
+import app.ailaai.api.newCard
 import app.ailaai.api.runScript
 import app.ailaai.api.scripts
 import app.ailaai.api.updateScript
@@ -34,19 +35,27 @@ import appText
 import application
 import bulletedString
 import com.queatz.db.AiScriptRequest
+import com.queatz.db.Card
+import com.queatz.db.CardOptions
 import com.queatz.db.RunScriptBody
 import com.queatz.db.Script
 import com.queatz.db.ScriptResult
+import com.queatz.db.StoryContent
 import com.queatz.db.asGeo
+import com.queatz.db.isPart
+import com.queatz.db.toJsonStoryPart
+import com.queatz.widgets.Widgets
 import components.IconButton
-import components.LazyColumn
 import components.LinkifyText
 import components.Loading
+import createWidget
+import json
 import kotlinx.browser.window
 import notBlank
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonArray
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -479,6 +488,7 @@ fun ScriptsPage(
                         onClick = {
                             menuTarget = null
                             isEditorOnRight = !isEditorOnRight
+                            showResultPanel = true
                         }
                     )
 
@@ -494,6 +504,42 @@ fun ScriptsPage(
                         )
                     }
 
+                    item(
+                        // todo: translate
+                        title = "Open script in new page",
+                        icon = "note_add",
+                        onClick = {
+                            menuTarget = null
+                            scope.launch {
+                                api.createWidget(
+                                    widget = Widgets.Script,
+                                    data = json.encodeToString(
+                                        com.queatz.widgets.widgets.ScriptData(
+                                            script = script.id!!
+                                        )
+                                    )
+                                ) { widget ->
+                                    api.newCard(
+                                        card = Card(
+                                            name = script.name,
+                                            conversation = json.encodeToString(CardOptions(enableReplies = false, enableAnonymousReplies = false)),
+                                            content = json.encodeToString(
+                                                listOf(
+                                                    StoryContent.Widget(
+                                                        Widgets.Script,
+                                                        widget.id!!
+                                                    ).toJsonStoryPart(json)
+                                                )
+                                            )
+                                        ),
+                                        onSuccess = { card ->
+                                            window.open("/page/${card.id}", "_blank")
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    )
 
                     // Always show Fork option for all users
                     item(

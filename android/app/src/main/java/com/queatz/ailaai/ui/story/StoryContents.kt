@@ -221,9 +221,12 @@ fun StoryContents(
                         showOpenWidgetDialog = { showOpenWidgetDialog = it }
                     )
 
-                    is StoryContent.Button -> buttonItem(content, onButtonClick = { script: String, data: String? ->
-                        onButtonClick?.invoke(script, data, input)
-                    })
+                    is StoryContent.Button -> buttonItem(
+                        content = content,
+                        onButtonClick = { script: String, data: String? ->
+                            onButtonClick?.invoke(script, data, input)
+                        }
+                    )
 
                     is StoryContent.Input -> {
                         inputItem(

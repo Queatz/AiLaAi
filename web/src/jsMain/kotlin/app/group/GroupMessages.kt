@@ -245,7 +245,7 @@ fun GroupMessages(
         }
         LoadMore(
             state,
-            hasMore && messages.isNotEmpty(),
+            !inCoverPage && hasMore && messages.isNotEmpty(),
             attrs = {
                 classes(AppStyles.messages)
             },

@@ -3,6 +3,7 @@ package app.group
 import Styles
 import aiTranscribe
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -187,10 +188,29 @@ fun GroupMessageBar(
         }
     }
 
-    fun stopRecording() {
-        mediaRecorder?.stop()
+    fun stopRecording(isCancel: Boolean = false) {
+        mediaRecorder?.apply {
+            if (isCancel) {
+                ondataavailable = null
+                stream.getTracks().forEach {
+                    it.stop()
+                }
+            }
+            stop()
+        }
+
         mediaRecorder = null
         isRecording = false
+    }
+
+    fun cancelRecording() {
+        stopRecording(isCancel = true)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            cancelRecording()
+        }
     }
 
     LaunchedEffect(replyMessage) {
@@ -387,21 +407,34 @@ fun GroupMessageBar(
                         sendAudio(file)
                     }
                 }
-                IconButton("image", appString { sendPhoto }, isLoading = isGenerating, styles = {
-                    marginLeft(1.r)
-                }) {
+                IconButton(
+                    name = "image",
+                    title = appString { sendPhoto },
+                    isLoading = isGenerating,
+                    styles = {
+                        marginLeft(1.r)
+                    }
+                ) {
                     it.stopPropagation()
                     photoMenuTarget =
                         if (photoMenuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
                 }
-                IconButton(if (showStickers) "expand_less" else "expand_more", appString { stickers }, styles = {
-                    marginLeft(1.r)
-                    marginRight(1.r)
-                }) {
+                IconButton(
+                    name = if (showStickers) "expand_less" else "expand_more",
+                    title = appString { stickers },
+                    styles = {
+                        marginLeft(1.r)
+                        marginRight(1.r)
+                    }
+                ) {
                     showStickers = !showStickers
                 }
             } else {
-                IconButton("send", appString { sendMessage }, styles = { marginLeft(1.r) }) {
+                IconButton(
+                    name = "send",
+                    title = appString { sendMessage },
+                    styles = { marginLeft(1.r) }
+                ) {
                     sendMessage()
                 }
             }
@@ -431,6 +464,8 @@ fun GroupMessageBar(
                             delay(1)
                             (it.target as HTMLTextAreaElement).resize()
                         }
+                    } else if (it.key == "Escape") {
+                        cancelRecording()
                     }
                 }
 
@@ -475,7 +510,7 @@ fun GroupMessageBar(
                 name = if (isRecording) "stop" else "mic",
                 // todo: translate
                 title = if (isRecording) "Finish voice input" else "Voice input",
-                isLoading = isTranscribingAudio,
+                isLoading = !isRecording && isTranscribingAudio,
                 styles = {
                     position(Position.Absolute)
                     right(.5.r)
@@ -489,6 +524,7 @@ fun GroupMessageBar(
                 } else {
                     startRecording()
                 }
+                focus?.invoke()
             }
         }
     }

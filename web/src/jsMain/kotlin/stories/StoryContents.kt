@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import lib.isThisYear
 import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Style
@@ -58,6 +59,7 @@ import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Audio
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Source
@@ -403,7 +405,9 @@ fun StoryContents(
             }
 
             is StoryContent.Button -> {
-                Div({
+                var isDisabled by remember(content, part) { mutableStateOf(false) }
+
+                Button({
                     classes(
                         if (part.style == ButtonStyle.Secondary) {
                             Styles.outlineButton
@@ -412,8 +416,15 @@ fun StoryContents(
                         }
                     )
 
+                    if (isDisabled) {
+                        disabled()
+                    }
+
                     onClick {
-                        onButtonClick?.invoke(part.script, part.data, input)
+                        if (!isDisabled) {
+                            onButtonClick?.invoke(part.script, part.data, input)
+                            isDisabled = true
+                        }
                     }
                 }) {
                     Text(part.text)
