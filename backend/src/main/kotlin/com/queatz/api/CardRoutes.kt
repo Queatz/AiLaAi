@@ -10,8 +10,6 @@ import com.queatz.db.CardUpgradeDetails
 import com.queatz.db.CardVisit
 import com.queatz.db.ConversationItem
 import com.queatz.db.Person
-import com.queatz.db.Search
-import com.queatz.db.SearchSource
 import com.queatz.db.allCardsOfCard
 import com.queatz.db.asKey
 import com.queatz.db.cardByUrl
@@ -110,16 +108,7 @@ fun Route.cardRoutes() {
 
                 val person = meOrNull
 
-                val search = call.parameters["search"]
-                    ?.notBlank
-                    ?.also { search ->
-                        db.insert(
-                            Search(
-                                search = search,
-                                source = if (person == null) SearchSource.Web else null
-                            )
-                        )
-                    }
+                val search = call.parameters["search"]?.notBlank
 
                 val paid = call.parameters["paid"]?.toBoolean()
 

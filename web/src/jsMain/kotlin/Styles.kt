@@ -119,6 +119,10 @@ object Styles : StyleSheet() {
             paddingLeft(.5.r)
             marginLeft(0.px)
         }
+
+        desc(self, selector("li")) style {
+            marginBottom(1.r)
+        }
     }
 
     val reactionsLayout by style {

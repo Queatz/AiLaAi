@@ -564,7 +564,7 @@ fun GroupTopBar(
                                                         }
                                                     }
                                                 )
-                                                
+
                                                 if (result == true) {
                                                     window.navigator.clipboard.writeText(
                                                         url
@@ -754,6 +754,9 @@ fun GroupTopBar(
             listOfNotNull(appString { openGroup }, active).joinToString(" • ")
         } else {
             active
+        },
+        onTitleClick = {
+            renameGroup()
         },
         actions = {
             if (!showCards) {

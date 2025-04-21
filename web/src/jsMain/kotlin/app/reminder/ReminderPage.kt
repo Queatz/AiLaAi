@@ -73,6 +73,7 @@ fun ReminderPage(
                 initialReoccurringWeekdays = reminder.schedule?.weekdays,
                 initialReoccurringWeeks = reminder.schedule?.weeks,
                 initialReoccurringMonths = reminder.schedule?.months,
+                initialStickiness = reminder.stickiness
             )
         )
     }
@@ -114,7 +115,8 @@ fun ReminderPage(
                             reminder = Reminder(
                                 start = schedule.start,
                                 end = schedule.end,
-                                schedule = schedule.reminderSchedule
+                                schedule = schedule.reminderSchedule,
+                                stickiness = schedule.stickiness.takeIf { schedule.hasStickiness }
                             )
                         ) {
                             onUpdate(it)

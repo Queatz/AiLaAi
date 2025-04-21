@@ -34,6 +34,8 @@ render {
         // Optional
         data = "<Data passed to the script>",
         // Optional
+        color = "<Color hex code>",
+        // Optional
         style = ButtonStyle.Secondary // Default is ButtonStyle.Primary
     )
     audio("<Url>") // Must start with /static/

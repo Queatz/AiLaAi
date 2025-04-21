@@ -76,7 +76,8 @@ fun Route.reminderRoutes() {
                         end = new.end?.startOfSecond(),
                         timezone = new.timezone,
                         utcOffset = new.utcOffset ?: 0.0,
-                        schedule = new.schedule
+                        schedule = new.schedule,
+                        stickiness = new.stickiness
                     )
                 )
             }
@@ -134,6 +135,10 @@ fun Route.reminderRoutes() {
 
                     if (update.attachment != null) {
                         reminder.attachment = update.attachment
+                    }
+
+                    if (update.stickiness != null) {
+                        reminder.stickiness = update.stickiness
                     }
 
                     if (update.start != null) {

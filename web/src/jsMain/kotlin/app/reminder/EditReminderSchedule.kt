@@ -10,6 +10,7 @@ import appString
 import appText
 import application
 import com.queatz.db.ReminderSchedule
+import com.queatz.db.ReminderStickiness
 import format
 import kotlinx.datetime.toKotlinInstant
 import lib.addHours
@@ -25,6 +26,8 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.CheckboxInput
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Label
@@ -42,7 +45,8 @@ class EditSchedule(
     initialReoccurringDays: List<Int>? = null,
     initialReoccurringWeekdays: List<Int>? = null,
     initialReoccurringWeeks: List<Int>? = null,
-    initialReoccurringMonths: List<Int>? = null
+    initialReoccurringMonths: List<Int>? = null,
+    initialStickiness: ReminderStickiness? = null
 ) {
     var reoccurs by mutableStateOf(initialReoccurs)
     var date by mutableStateOf(format(initialDate, "yyyy-MM-dd"))
@@ -54,6 +58,8 @@ class EditSchedule(
     var reoccurringDays by mutableStateOf((initialReoccurringDays?.map { "day:$it" } ?: emptyList()) + (initialReoccurringWeekdays?.map { "weekday:$it" } ?: emptyList()))
     var reoccurringWeeks by mutableStateOf(initialReoccurringWeeks?.map { it.toString() } ?: emptyList<String>())
     var reoccurringMonths by mutableStateOf(initialReoccurringMonths?.map { it.toString() } ?: emptyList<String>())
+    var stickiness by mutableStateOf(initialStickiness ?: ReminderStickiness.None)
+    var hasStickiness by mutableStateOf(initialStickiness != null && initialStickiness != ReminderStickiness.None)
 }
 
 val EditSchedule.reminderSchedule get() = if (reoccurs) {
@@ -231,5 +237,65 @@ fun EditReminderSchedule(
                 padding(0.r, .5.r)
             }
         )
+    }
+
+    Label(attrs = {
+        style {
+            padding(0.r, .5.r, 1.r, .5.r)
+        }
+    }) {
+        CheckboxInput(schedule.hasStickiness) {
+            onChange {
+                schedule.hasStickiness = it.value
+            }
+
+            if (disabled) {
+                disabled()
+            }
+        }
+        appText { stickiness }
+    }
+
+    if (schedule.hasStickiness) {
+        Div({
+            style {
+                padding(0.r, .5.r, 1.r, .5.r)
+                marginBottom(1.r)
+            }
+        }) {
+            MultiSelect(
+                selected = listOf(schedule.stickiness.toString()),
+                onSelected = { newValue ->
+                    if (newValue.isNotEmpty()) {
+                        schedule.stickiness = ReminderStickiness.valueOf(newValue.first())
+                    } else {
+                        schedule.stickiness = ReminderStickiness.None
+                    }
+                }, attrs = {
+                    style {
+                        marginTop(.5.r)
+                        width(100.percent)
+                    }
+
+                    if (disabled) {
+                        disabled()
+                    }
+                }
+            ) {
+                ReminderStickiness.entries.forEach { stickinessOption ->
+                    option(
+                        value = stickinessOption.toString(),
+                        title = when(stickinessOption) {
+                            ReminderStickiness.None -> application.appString { none }
+                            ReminderStickiness.Hourly -> application.appString { hourly }
+                            ReminderStickiness.Daily -> application.appString { daily }
+                            ReminderStickiness.Weekly -> application.appString { weekly }
+                            ReminderStickiness.Monthly -> application.appString { monthly }
+                            ReminderStickiness.Yearly -> application.appString { yearly }
+                        }
+                    )
+                }
+            }
+        }
     }
 }

@@ -391,12 +391,6 @@ class Device(
 ) : Model()
 
 @Serializable
-class Search(
-    var search: String? = null,
-    var source: SearchSource? = null
-) : Model()
-
-@Serializable
 class Story(
     var person: String? = null,
     var title: String? = null,
@@ -420,6 +414,15 @@ class StoryDraft(
     var groupDetails: List<Group>? = null
 ) : Model()
 
+enum class ReminderStickiness {
+    None,
+    Hourly,
+    Daily,
+    Weekly,
+    Monthly,
+    Yearly
+}
+
 @Serializable
 class Reminder(
     var person: String? = null,
@@ -437,7 +440,8 @@ class Reminder(
     var alarm: Boolean? = null,
     var timezone: String? = null,
     var utcOffset: Double? = null,
-    var schedule: ReminderSchedule? = null
+    var schedule: ReminderSchedule? = null,
+    var stickiness: ReminderStickiness? = null
 ) : Model()
 
 @Serializable
@@ -524,10 +528,6 @@ enum class DeviceType {
 }
 
 enum class PersonSource {
-    Web
-}
-
-enum class SearchSource {
     Web
 }
 

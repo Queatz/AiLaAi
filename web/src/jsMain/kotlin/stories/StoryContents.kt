@@ -47,8 +47,10 @@ import lib.isThisYear
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.target
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
@@ -418,6 +420,12 @@ fun StoryContents(
 
                     if (isDisabled) {
                         disabled()
+                    }
+
+                    part.color?.let {
+                        style {
+                            backgroundColor(Color(it))
+                        }
                     }
 
                     onClick {

@@ -1,5 +1,6 @@
 package app.platform
 
+import FeedbackPlatformPage
 import androidx.compose.runtime.Composable
 import app.FullPageLayout
 import app.components.Empty
@@ -15,6 +16,7 @@ fun PlatformPage(selected: PlatformNav) {
             is PlatformNav.Config -> ConfigPlatformPage()
             is PlatformNav.Reports -> ReportsPlatformPage()
             is PlatformNav.Stats -> StatsPlatformPage()
+            is PlatformNav.Feedback -> FeedbackPlatformPage()
             is PlatformNav.Crashes -> CrashesPlatformPage()
             else -> Empty { Text("Not yet implemented.") }
         }

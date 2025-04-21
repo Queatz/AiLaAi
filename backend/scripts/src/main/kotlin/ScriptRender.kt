@@ -22,12 +22,14 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
         script: String,
         data: String? = null,
         style: ButtonStyle? = null,
+        color: String? = null,
     ) {
         result += StoryContent.Button(
             text = text,
             script = script,
             data = data,
             style = style,
+            color = color,
         )
     }
 

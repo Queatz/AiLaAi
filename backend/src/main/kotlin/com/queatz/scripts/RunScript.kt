@@ -127,7 +127,7 @@ class RunScript(
                         """Script compile error:  
                             ```${
                             compiledScript.reports.joinToString("\n")
-                        }
+                            }
                             ```
                         """.trimIndent()
                     )
@@ -158,7 +158,7 @@ class RunScript(
                             ```
                             ${resultError?.let { "$it\n\n" }}${
                             result.reports.joinToString("\n")
-                        }
+                            }
                             ```
                         """.trimIndent()
                     )
@@ -187,7 +187,13 @@ class RestrictedClassLoader(parent: ClassLoader) : ClassLoader(parent) {
         "java.io",
         "java.nio",
         "kotlin.io",
-        "java.lang.System",
+        "java.lang.System.getProperty",
+        "java.lang.System.getenv",
+        "java.lang.System.exit",
+        "java.lang.System.gc",
+        "java.lang.System.setIn",
+        "java.lang.System.setOut",
+        "java.lang.System.setErr",
         "java.util.logging",
         "java.util.jar",
         "java.util.zip",

@@ -16,6 +16,7 @@ sealed class PlatformNav {
     data object Reviews : PlatformNav()
     data object Reports : PlatformNav()
     data object Stats : PlatformNav()
+    data object Feedback : PlatformNav()
     data object Crashes : PlatformNav()
     data object Config : PlatformNav()
     data object Health : PlatformNav()
@@ -51,6 +52,10 @@ fun PlatformNavPage(
         // todo: translate
         NavMenuItem(null, "Stats", selected = selected == PlatformNav.Stats) {
             onSelected(PlatformNav.Stats)
+        }
+        // todo: translate
+        NavMenuItem(null, "Feedback", selected = selected == PlatformNav.Feedback) {
+            onSelected(PlatformNav.Feedback)
         }
         // todo: translate
         NavMenuItem(null, "Crashes", selected = selected == PlatformNav.Crashes) {

@@ -464,6 +464,7 @@
     <string name="weekly">Theo tuần</string>
     <string name="monthly">Theo tháng</string>
     <string name="yearly">Theo năm</string>
+    <string name="stickiness">Độ bám dính</string>
     <string name="edit_note">Chỉnh sửa ghi chú</string>
     <string name="edit_reminders">chỉnh sửa lời nhắc</string>
     <string name="yes_delete">Vâng, xóa</string>

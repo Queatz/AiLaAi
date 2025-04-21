@@ -21,6 +21,11 @@ data class Translation(
  * for different languages (English, Vietnamese, and optionally Russian).
  */
 object Strings {
+    val myQr = Translation(
+        en = "My QR",
+        vn = "Mã QR của tôi",
+        ru = "Мой QR"
+    )
     val viewReactions = Translation(
         en = "View reactions",
         vn = "Xem phản ứng",
@@ -1406,6 +1411,11 @@ object Strings {
         "Weekly",
         "Theo tuần",
         ru = "Еженедельный"
+    )
+    val stickiness = Translation(
+        en = "Stickiness",
+        vn = "Độ bám",
+        ru = "Прилипание"
     )
     val monthly = Translation(
         "Monthly",

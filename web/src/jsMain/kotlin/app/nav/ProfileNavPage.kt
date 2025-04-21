@@ -2,6 +2,7 @@ package app.nav
 
 import LocalConfiguration
 import Styles
+import account
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,6 +68,8 @@ fun ProfileNavPage(
 
     var isPlatformHost by remember { mutableStateOf(false) }
     var sendAppFeedback by remember { mutableStateOf<AppFeedbackType?>(null) }
+    var points by remember { mutableStateOf<Int?>(null) }
+    var showPointsDialog by remember { mutableStateOf(false) }
 
     suspend fun reload() {
         api.profile(me!!.id!!) {
@@ -83,6 +86,12 @@ fun ProfileNavPage(
     LaunchedEffect(Unit) {
         api.platformMe {
             isPlatformHost = it.host
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        api.account {
+            points = it.points ?: 0
         }
     }
 
@@ -103,10 +112,24 @@ fun ProfileNavPage(
             styles = { marginRight(.5f.r) }
         ) {
             scope.launch {
-                dialog("", cancelButton = null) {
+                dialog(
+                    title = application.appString { myQr },
+                    cancelButton = null
+                ) {
                     QrImg("$webBaseUrl/profile/${me!!.id!!}")
                 }
             }
+        }
+    }
+
+    if (showPointsDialog) {
+        scope.launch {
+            // todo: translate
+            dialog("Points", cancelButton = null, confirmButton = "Close") {
+                // todo: translate
+                Text("Points are earned by contributing to the community. You can use points to access premium features.")
+            }
+            showPointsDialog = false
         }
     }
 
@@ -125,10 +148,11 @@ fun ProfileNavPage(
             val feedback = inputDialog(
                 title = title,
                 // todo: translate
-                confirmButton = "Send"
+                confirmButton = "Send",
+                singleLine = false
             )
 
-            if (feedback != null) {
+            if (!feedback.isNullOrBlank()) {
                 var success = false
                 api.sendAppFeedback(AppFeedback(feedback = feedback, type = sendAppFeedback!!)) {
                     success = true
@@ -174,6 +198,11 @@ fun ProfileNavPage(
                     application.setMe(it)
                 }
             }
+        }
+
+        // todo: translate
+        NavMenuItem("stars", if (points == null) "Loading points..." else "$points points") {
+            showPointsDialog = true
         }
 
         val url = profile?.profile?.url?.notBlank
@@ -343,7 +372,6 @@ fun ProfileNavPage(
                                 gap(0.5.r)
                                 padding(0.5.r)
                                 margin(0.5.r)
-                                justifyContent(JustifyContent.Center)
                             }
                         }) {
                             Div({
@@ -364,11 +392,10 @@ fun ProfileNavPage(
                                 gap(0.5.r)
                                 padding(0.5.r)
                                 margin(0.5.r)
-                                justifyContent(JustifyContent.Center)
                             }
                         }) {
                             Button({
-                                classes(Styles.button)
+                                classes(Styles.outlineButton)
                                 onClick {
                                     loadTransferCode()
                                 }

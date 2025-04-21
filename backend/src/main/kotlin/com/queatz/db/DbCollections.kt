@@ -60,9 +60,6 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Save::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Save::card.name), PersistentIndexOptions())
     },
-    Search::class.db {
-        ensurePersistentIndex(listOf(Search::search.name), PersistentIndexOptions())
-    },
     Story::class.db {
         ensurePersistentIndex(listOf(Story::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Story::title.name), PersistentIndexOptions())

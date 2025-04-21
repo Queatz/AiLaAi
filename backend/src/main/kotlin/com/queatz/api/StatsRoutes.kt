@@ -5,7 +5,6 @@ import com.queatz.db.StatsHealth
 import com.queatz.db.activePeople
 import com.queatz.db.newPeople
 import com.queatz.db.recentFeedback
-import com.queatz.db.recentSearches
 import com.queatz.db.totalClosedGroups
 import com.queatz.db.totalDraftCards
 import com.queatz.db.totalDraftStories
@@ -17,7 +16,6 @@ import com.queatz.db.totalPublishedStories
 import com.queatz.db.totalReminders
 import com.queatz.plugins.db
 import com.queatz.plugins.respond
-import io.ktor.server.application.call
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import java.io.File
@@ -42,12 +40,6 @@ fun Route.statsRoutes() {
                 totalReminders = db.totalReminders,
                 totalItems = db.totalItems,
             )
-        }
-    }
-
-    get("/stats/searches") {
-        respond {
-            db.recentSearches(call.parameters["limit"]?.toInt() ?: 20)
         }
     }
 

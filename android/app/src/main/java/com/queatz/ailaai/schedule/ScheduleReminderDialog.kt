@@ -24,6 +24,7 @@ import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import com.queatz.db.ReminderSchedule
+import com.queatz.db.ReminderStickiness
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
@@ -55,6 +56,13 @@ fun ScheduleReminderDialog(
     var showDays by rememberStateOf(false)
     var showWeeks by rememberStateOf(false)
     var showMonths by rememberStateOf(false)
+    var showStickiness by rememberStateOf(false)
+
+    // Get stickiness from the reminder or default to None
+    var stickiness by remember {
+        val initialStickiness = initialReminder.stickiness ?: ReminderStickiness.None
+        mutableStateOf(initialStickiness)
+    }
     val today = Clock.System.now().startOfDay()
 
     fun invalidate() {
@@ -211,6 +219,22 @@ fun ScheduleReminderDialog(
                         invalidate()
                     }
                 }
+
+                OutlinedButton(
+                    onClick = {
+                        showStickiness = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.stickiness) + ": " + when(stickiness) {
+                        ReminderStickiness.None -> stringResource(R.string.none)
+                        ReminderStickiness.Hourly -> stringResource(R.string.hourly)
+                        ReminderStickiness.Daily -> stringResource(R.string.daily)
+                        ReminderStickiness.Weekly -> stringResource(R.string.weekly)
+                        ReminderStickiness.Monthly -> stringResource(R.string.monthly)
+                        ReminderStickiness.Yearly -> stringResource(R.string.yearly)
+                    })
+                }
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.End),
@@ -233,7 +257,9 @@ fun ScheduleReminderDialog(
                                     start = reminder.start,
                                     end = reminder.end?.takeIf { until },
                                     schedule = reminder.schedule?.takeIf { reoccurs },
-                                    title = reminder.title?.takeIf { showTitle }
+                                    title = reminder.title?.takeIf { showTitle },
+                                    note = reminder.note,
+                                    stickiness = stickiness
                                 )
                             )
                             isLoading = false
@@ -426,6 +452,30 @@ fun ScheduleReminderDialog(
         ) {
             reminder.end = it
             invalidate()
+        }
+    }
+
+    if (showStickiness) {
+        Menu({
+            showStickiness = false
+        }) {
+            ReminderStickiness.values().forEach { stickinessOption ->
+                val checked = stickiness == stickinessOption
+                menuItem(
+                    title = when(stickinessOption) {
+                        ReminderStickiness.None -> stringResource(R.string.none)
+                        ReminderStickiness.Hourly -> stringResource(R.string.hourly)
+                        ReminderStickiness.Daily -> stringResource(R.string.daily)
+                        ReminderStickiness.Weekly -> stringResource(R.string.weekly)
+                        ReminderStickiness.Monthly -> stringResource(R.string.monthly)
+                        ReminderStickiness.Yearly -> stringResource(R.string.yearly)
+                    },
+                    icon = if (checked) Icons.Outlined.Check else null
+                ) {
+                    stickiness = stickinessOption
+                    showStickiness = false
+                }
+            }
         }
     }
 }

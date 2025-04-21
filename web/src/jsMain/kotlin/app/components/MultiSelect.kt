@@ -48,10 +48,11 @@ fun MultiSelect(
     selected: List<String>,
     onSelected: (List<String>) -> Unit,
     attrs: SelectAttrsScope.() -> Unit = {},
+    multiple: Boolean = true,
     options: @Composable MultiSelectScope.() -> Unit
 ) {
     Select(
-        {
+        attrs = {
             classes(Styles.dateTimeInput)
 
             onSelectedOptionsChange {
@@ -60,7 +61,7 @@ fun MultiSelect(
 
             attrs()
         },
-        multiple = true
+        multiple = multiple
     ) {
         val changes = remember {
             MutableStateFlow(selected)

@@ -26,19 +26,6 @@ fun Db.recentReports(limit: Int = 50) = list(
     )
 )
 
-fun Db.recentSearches(limit: Int = 50) = list(
-    Search::class,
-    """
-        for x in @@collection
-            sort x.${f(Search::createdAt)} desc
-            limit @limit
-            return x
-    """.trimIndent(),
-    mapOf(
-        "limit" to limit
-    )
-)
-
 fun Db.recentFeedback(limit: Int = 50) = list(
     AppFeedback::class,
     """

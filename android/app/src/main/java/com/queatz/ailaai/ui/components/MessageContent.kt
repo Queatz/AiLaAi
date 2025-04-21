@@ -53,6 +53,7 @@ import app.ailaai.api.card
 import app.ailaai.api.deleteMessage
 import app.ailaai.api.group
 import app.ailaai.api.messageRating
+import app.ailaai.api.newCard
 import app.ailaai.api.newReminder
 import app.ailaai.api.profile
 import app.ailaai.api.reactToMessage
@@ -67,6 +68,7 @@ import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.getAllAttachments
+import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.copyToClipboard
 import com.queatz.ailaai.extensions.inDp
@@ -101,6 +103,7 @@ import com.queatz.db.AudioAttachment
 import com.queatz.db.Bot
 import com.queatz.db.Card
 import com.queatz.db.CardAttachment
+import com.queatz.db.CardOptions
 import com.queatz.db.GroupAttachment
 import com.queatz.db.GroupExtended
 import com.queatz.db.Message
@@ -108,9 +111,9 @@ import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 import com.queatz.db.PhotosAttachment
 import com.queatz.db.ProfilesAttachment
+import com.queatz.db.Rating
 import com.queatz.db.ReactBody
 import com.queatz.db.Reaction
-import com.queatz.db.Rating
 import com.queatz.db.Reminder
 import com.queatz.db.ReplyAttachment
 import com.queatz.db.Sticker
@@ -445,6 +448,21 @@ fun ColumnScope.MessageContent(
                     showReminderDialog = message.text ?: ""
                     onShowMessageDialog(false)
                 }
+
+                menuItem(stringResource(R.string.create_as_new_page)) {
+                    scope.launch {
+                        api.newCard(
+                            Card(
+                                name = message.text!!.trim(),
+                                options = json.encodeToString(CardOptions(enableReplies = false, enableAnonymousReplies = false)),
+                            )
+                        ) {
+                            context.toast(R.string.page_created)
+                        }
+                    }
+                    onShowMessageDialog(false)
+                }
+
                 menuItem(stringResource(R.string.copy)) {
                     (message.text ?: "").copyToClipboard(context, messageString)
                     context.toast(R.string.copied)

@@ -361,7 +361,7 @@ fun ProfileScreen(personId: String) {
         cards = emptyList()
         reloadCards()
     }
-    
+
     LaunchedEffect(Unit) {
         reloadItems()
     }

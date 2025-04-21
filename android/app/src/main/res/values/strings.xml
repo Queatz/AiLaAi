@@ -457,6 +457,7 @@
     <string name="weekly">Weekly</string>
     <string name="monthly">Monthly</string>
     <string name="yearly">Yearly</string>
+    <string name="stickiness">Stickiness</string>
     <string name="edit_note">Edit note</string>
     <string name="edit_reminders">Edit reminders</string>
     <string name="yes_delete">Yes, delete</string>
@@ -878,6 +879,8 @@
     <string name="ok">OK</string>
     <string name="earth">Earth</string>
     <string name="no_prompts">No prompts</string>
+    <string name="create_as_new_page">Create as new page</string>
+    <string name="page_created">Page created</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
