@@ -23,6 +23,7 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
         data: String? = null,
         style: ButtonStyle? = null,
         color: String? = null,
+        enabled: Boolean? = null,
     ) {
         result += StoryContent.Button(
             text = text,
@@ -30,6 +31,7 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
             data = data,
             style = style,
             color = color,
+            enabled = enabled,
         )
     }
 

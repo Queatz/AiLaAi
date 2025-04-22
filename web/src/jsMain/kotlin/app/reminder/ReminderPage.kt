@@ -13,16 +13,24 @@ import api
 import app.AppStyles
 import app.PageTopBar
 import app.ailaai.api.deleteReminder
+import app.ailaai.api.groups
+import app.ailaai.api.people
+import app.ailaai.api.profile
 import app.ailaai.api.updateReminder
 import app.components.EditField
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.searchDialog
+import app.group.friendsDialog
 import app.menu.Menu
 import appString
 import appText
 import application
+import components.ProfilePhoto
+import components.Switch
 import bulletedString
+import com.queatz.db.Card
+import com.queatz.db.Person
 import com.queatz.db.Reminder
 import focusable
 import kotlinx.coroutines.launch
@@ -33,14 +41,17 @@ import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.NumberInput
 import org.jetbrains.compose.web.dom.Text
+import kotlinx.browser.window
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
@@ -291,9 +302,29 @@ fun ReminderPage(
                 }
             }
 
-//            item("Groups") {
-//
-//            }
+            item(appString { invite }) {
+                scope.launch {
+                    friendsDialog(
+                        omit = (reminder.people ?: emptyList()),
+                        actions = { _ ->
+                            // No additional actions needed
+                        }
+                    ) { selectedPeople ->
+                        if (selectedPeople.isNotEmpty()) {
+                            scope.launch {
+                                api.updateReminder(
+                                    id = reminder.id!!,
+                                    reminder = Reminder(
+                                        people = ((reminder.people ?: emptyList()) + selectedPeople.map { it.id!! }).distinct()
+                                    )
+                                ) {
+                                    onUpdate(it)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             item(appString { delete }) {
                 scope.launch {
@@ -339,14 +370,96 @@ fun ReminderPage(
 
             success
         }
+
+        // Render people on the reminder if there are any
+        val people = reminder.people
+        if (people != null && people.isNotEmpty()) {
+            // Add a title for the people section
+            Div({
+                style {
+                    margin(1.r, 1.r, 0.r, 1.r)
+                    fontWeight("bold")
+                }
+            }) {
+                Text("People")
+            }
+
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Row)
+                    margin(1.r)
+                    overflowX("auto")
+                }
+            }) {
+                people.forEach { personId ->
+                    // Load person data and render ProfilePhoto
+                    var person by remember(personId) {
+                        mutableStateOf<Person?>(null)
+                    }
+
+                    LaunchedEffect(personId) {
+                        api.profile(personId) {
+                            person = it.person
+                        }
+                    }
+
+                    person?.let { p ->
+                        ProfilePhoto(
+                            person = p,
+                            size = 48.px,
+                            border = true,
+                            onClick = {
+                                window.open("/profile/${p.id}", "_blank")
+                            },
+                            styles = {
+                                margin(0.r, .5.r, 0.r, 0.r)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
         ReminderEvents(reminder)
     }
+    var isOpen by remember(reminder) {
+        mutableStateOf(reminder.open == true)
+    }
+
     PageTopBar(
         title = reminder.title ?: appString { newGroup },
         description = bulletedString(
             reminder.categories?.firstOrNull(),
             reminder.scheduleText
-        )
+        ),
+        actions = {
+            Switch(
+                value = isOpen,
+                onValue = { isOpen = it },
+                onChange = {
+                    scope.launch {
+                        val previousValue = reminder.open == true
+                        api.updateReminder(
+                            id = reminder.id!!,
+                            reminder = Reminder(open = it),
+                            onError = {
+                                isOpen = previousValue
+                            }
+                        ) {
+                            onUpdate(it)
+                        }
+                    }
+                },
+                title = if (isOpen) {
+                    application.appString { reminderIsOpen }
+                } else {
+                    application.appString { reminderIsClosed }
+                }
+            ) {
+                margin(1.r)
+            }
+        }
     ) {
         menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
     }

@@ -86,7 +86,8 @@ private val SCRIPT_SYSTEM_PROMPT = """
 
     Your code will be inserted into a code editor.
 
-    You document the code that you create so that everyone can understand what the code does.
+    - You document the code that you create so that everyone can understand what the code does.
+    - You prefer Kotlin imports over Java ones (ex. kotlinx.datetime)
 
     IMPORTANT:
 

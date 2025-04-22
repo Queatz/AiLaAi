@@ -71,6 +71,7 @@ sealed class StoryContent {
         val data: String?,
         val style: ButtonStyle? = null,
         val color: String? = null,
+        val enabled: Boolean? = null,
     ) : StoryContent()
     @Serializable
     data class Input(

@@ -37,6 +37,8 @@ render {
         color = "<Color hex code>",
         // Optional
         style = ButtonStyle.Secondary // Default is ButtonStyle.Primary
+        // Optional
+        enabled = false
     )
     audio("<Url>") // Must start with /static/
     photo("<Url>", <Aspect ratio float>?) // Must start with /static/

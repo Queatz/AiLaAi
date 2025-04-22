@@ -204,7 +204,9 @@ fun ReminderScreen(reminderId: String) {
             onPeopleSelected = { people ->
                 api.updateReminder(
                     id = reminderId,
-                    reminder = Reminder(people = ((reminder!!.people ?: emptyList()) + people.map { it.id!! }).distinct())
+                    reminder = Reminder(
+                        people = ((reminder!!.people ?: emptyList()) + people.map { it.id!! }).distinct()
+                    )
                 ) {
                     reload()
                 }

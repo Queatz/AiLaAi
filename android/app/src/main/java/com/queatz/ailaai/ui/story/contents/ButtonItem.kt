@@ -23,6 +23,7 @@ fun LazyGridScope.buttonItem(
     item(span = { GridItemSpan(maxLineSpan) }) {
         val scope = rememberCoroutineScope()
         var isDisabled by remember(content) { mutableStateOf(false) }
+        val buttonEnabled = content.enabled != false // null or true means enabled
 
         val onClick: () -> Unit = remember(content) {
             {
@@ -45,7 +46,7 @@ fun LazyGridScope.buttonItem(
         if (content.style == ButtonStyle.Secondary) {
             OutlinedButton(
                 onClick = onClick,
-                enabled = !isDisabled,
+                enabled = !isDisabled && buttonEnabled,
                 colors = if (customColor == null) {
                     ButtonDefaults.outlinedButtonColors()
                 } else {
@@ -59,7 +60,7 @@ fun LazyGridScope.buttonItem(
         } else {
             Button(
                 onClick = onClick,
-                enabled = !isDisabled,
+                enabled = !isDisabled && buttonEnabled,
                 colors = if (customColor == null) {
                     ButtonDefaults.buttonColors()
                 } else {

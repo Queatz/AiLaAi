@@ -118,7 +118,7 @@ object Strings {
     )
     val removeRating = Translation(
         en = "Remove rating",
-        vn = "Xóa xếp hạng",
+        vn = "Xóa đánh giá",
         ru = "Удалить оценку"
     )
     val help = Translation(
@@ -128,7 +128,7 @@ object Strings {
     )
     val yourRatingsAreVisible = Translation(
         en = "Your ratings are only visible to you.",
-        vn = "Xếp hạng của bạn chỉ hiển thị với bạn.",
+        vn = "Đánh giá của bạn chỉ hiển thị với bạn.",
         ru = "Ваши оценки видны только вам."
     )
     val text = Translation(
@@ -538,6 +538,18 @@ object Strings {
         ru = "Страница опубликована"
     )
 
+    val reminderIsOpen = Translation(
+        en = "Reminder is open",
+        vn = "Lời nhắc đang mở",
+        ru = "Напоминание открыто"
+    )
+
+    val reminderIsClosed = Translation(
+        en = "Reminder is closed",
+        vn = "Lời nhắc đã đóng",
+        ru = "Напоминание закрыто"
+    )
+
     val pageIsSaved = Translation(
         en = "Page is saved",
         vn = "Trang đã được lưu",
@@ -810,7 +822,7 @@ object Strings {
     )
     val rating = Translation(
         en = "Rating",
-        vn = "Xếp hạng",
+        vn = "Đánh giá",
         ru = "Рейтинг"
     )
 

@@ -96,10 +96,12 @@ object Styles : StyleSheet() {
         val tertiary = Color("#2e8900")
         val red = Color("#761c1c")
         val green = Color("#1c7626")
+        val outline = Color("#fff6")
 
         object dark {
             val background = Color("#18191a")
             val surface = Color("#232526")
+            val outline = Color("#0006")
         }
     }
 

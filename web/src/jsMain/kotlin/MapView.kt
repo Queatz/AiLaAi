@@ -12,6 +12,7 @@ import app.cards.MapList
 import app.cards.mapListDialog
 import app.components.Empty
 import app.components.Spacer
+import app.compose.rememberDarkMode
 import app.dialog.inputDialog
 import app.messaages.inList
 import com.queatz.db.Card
@@ -114,6 +115,7 @@ fun MapView(
     var categoriesCache by remember { mutableStateOf(emptyList<String>()) }
     var selectedFilters by remember { mutableStateOf(emptyList<SearchFilter>()) }
     var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
+    val isDarkMode = rememberDarkMode()
 
     val categories = remember(searchResults) {
         if (selectedCategory == null) {
@@ -538,7 +540,12 @@ fun MapView(
                         Text("${appString { pages }} (${shownCards.size})")
                         IconButton(
                             name = if (expanded) "expand_less" else "expand_more",
-                            title = if (expanded) appString { collapse } else appString { expand }
+                            title = if (expanded) appString { collapse } else appString { expand },
+                            styles = {
+                                property("border", "1px solid ${if (isDarkMode) Styles.colors.dark.outline else Styles.colors.outline}")
+                                borderRadius(2.r)
+
+                            }
                         ) {
                             expanded = !expanded
                         }

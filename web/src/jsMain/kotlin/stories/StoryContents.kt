@@ -411,6 +411,7 @@ fun StoryContents(
 
             is StoryContent.Button -> {
                 var isDisabled by remember(part) { mutableStateOf(false) }
+                val buttonEnabled = part.enabled != false // null or true means enabled
 
                 Button({
                     classes(
@@ -421,7 +422,7 @@ fun StoryContents(
                         }
                     )
 
-                    if (isDisabled) {
+                    if (isDisabled || !buttonEnabled) {
                         disabled()
                     }
 
@@ -437,7 +438,7 @@ fun StoryContents(
                     }
 
                     onClick {
-                        if (!isDisabled) {
+                        if (!isDisabled && buttonEnabled) {
                             isDisabled = true
                             scope.launch {
                                 onButtonClick?.invoke(part.script, part.data, input)
