@@ -34,6 +34,39 @@ external object mapboxgl {
         var container: HTMLElement
         var boxZoom: Boolean
         var hash: Boolean
+        var style: String
+        var center: LngLat
+        var zoom: Double
+        var bearing: Double
+        var pitch: Double
+        var minZoom: Double
+        var maxZoom: Double
+        var minPitch: Double
+        var maxPitch: Double
+        var interactive: Boolean
+        var bearingSnap: Double
+        var pitchWithRotate: Boolean
+        var clickTolerance: Double
+        var attributionControl: Boolean
+        var customAttribution: String
+        var logoPosition: String
+        var failIfMajorPerformanceCaveat: Boolean
+        var preserveDrawingBuffer: Boolean
+        var antialias: Boolean
+        var refreshExpiredTiles: Boolean
+        var maxBounds: dynamic
+        var scrollZoom: dynamic
+        var dragRotate: Boolean
+        var dragPan: Boolean
+        var keyboard: Boolean
+        var doubleClickZoom: Boolean
+        var touchZoomRotate: Boolean
+        var trackResize: Boolean
+        var renderWorldCopies: Boolean
+        var projection: String
+        var locale: dynamic
+        var fadeDuration: Double
+        var crossSourceCollisions: Boolean
     }
 
     interface MarkerOptions {

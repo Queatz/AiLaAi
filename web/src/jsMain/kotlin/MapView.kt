@@ -391,10 +391,18 @@ fun MapView(
         ref { ref ->
             val locateMeControl = mapboxgl.GeolocateControl()
 
+            val (initialZoom, initialLat, initialLng, initialBearing, initialPitch) = "13.27/10.77564/106.72394/-39.9/50".split("/")
             val options: mapboxgl.MapOptions = js("{}")
+            val initialLngLat: mapboxgl.LngLat = js("{}")
+            initialLngLat.lng = initialLng.toDouble()
+            initialLngLat.lat = initialLat.toDouble()
             options.container = ref
             options.boxZoom = false
             options.hash = true
+            options.zoom = initialZoom.toDouble()
+            options.center = initialLngLat
+            options.bearing = initialBearing.toDouble()
+            options.pitch = initialPitch.toDouble()
             map = mapboxgl.Map(options).apply {
                 addControl(locateMeControl, "bottom-right")
 
