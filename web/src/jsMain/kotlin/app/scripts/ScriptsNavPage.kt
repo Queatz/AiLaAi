@@ -169,7 +169,9 @@ fun ScriptsNavPage(
         }.forEach { script ->
             NavMenuItem(
                 icon = null,
-                title = script.name.orEmpty(),
+                title = script.name.orEmpty().ifBlank {
+                    appString { newScript }
+                },
                 description = bulletedString(
                     script.categories?.firstOrNull(),
                     script.description

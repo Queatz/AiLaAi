@@ -21,6 +21,11 @@ data class Translation(
  * for different languages (English, Vietnamese, and optionally Russian).
  */
 object Strings {
+    val noScripts = Translation(
+        en = "No scripts.",
+        vn = "Không có tập lệnh.",
+        ru = "Нет скриптов."
+    )
     val myQr = Translation(
         en = "My QR",
         vn = "Mã QR của tôi",
@@ -310,6 +315,137 @@ object Strings {
         en = "Stylized",
         vn = "Phong cách",
         ru = "Стилизованный"
+    )
+
+    val description = Translation(
+        en = "Description",
+        vn = "Mô tả",
+        ru = "Описание"
+    )
+    val secret = Translation(
+        en = "Secret",
+        vn = "Bí mật",
+        ru = "Секрет"
+    )
+    val deleteThisScript = Translation(
+        en = "Delete this script?",
+        vn = "Xóa Tập lệnh này?",
+        ru = "Удалить этот скрипт?"
+    )
+    val swapEditorPosition = Translation(
+        en = "Swap editor position",
+        vn = "Đổi vị trí trình soạn thảo",
+        ru = "Поменять позицию редактора"
+    )
+    val goToAuthorProfile = Translation(
+        en = "Go to author's profile",
+        vn = "Đi đến hồ sơ của tác giả",
+        ru = "Перейти к профилю автора"
+    )
+    val openScriptInNewPage = Translation(
+        en = "Open script in new page",
+        vn = "Mở Tập lệnh trong trang mới",
+        ru = "Открыть скрипт в новой странице"
+    )
+    val renameScript = Translation(
+        en = "Rename script",
+        vn = "Đổi tên của tập lệnh",
+        ru = "Переименовать скрипт"
+    )
+    val scriptName = Translation(
+        en = "Script name",
+        vn = "Tên của tập lệnh",
+        ru = "Имя скрипта"
+    )
+
+    val undoAiChanges = Translation(
+        en = "Undo AI changes",
+        vn = "Hoàn tác thay đổi AI",
+        ru = "Отменить изменения ИИ"
+    )
+
+    val runScriptHoldShift = Translation(
+        en = "Run script (Hold SHIFT to skip cache)",
+        vn = "Chạy tập lệnh (Giữ SHIFT để bỏ qua bộ nhớ đệm)",
+        ru = "Запустить скрипт (удерживайте SHIFT, чтобы пропустить кеш)"
+    )
+
+    val codeWithAi = Translation(
+        en = "Code with AI",
+        vn = "Lập trình với AI",
+        ru = "Программирование с ИИ"
+    )
+
+    val stopScriptGeneration = Translation(
+        en = "Stop script generation?",
+        vn = "Dừng tạo tập lệnh?",
+        ru = "Остановить генерацию скрипта?"
+    )
+
+    val yesStop = Translation(
+        en = "Yes, stop",
+        vn = "Vâng, dừng lại",
+        ru = "Да, остановить"
+    )
+
+    val aiPrompt = Translation(
+        en = "AI Prompt",
+        vn = "Lời nhắc AI",
+        ru = "Подсказка ИИ"
+    )
+
+    val send = Translation(
+        en = "Send",
+        vn = "Gửi",
+        ru = "Отправить"
+    )
+
+    val createScriptThat = Translation(
+        en = "Create a script that...",
+        vn = "Tạo một tập lệnh mà...",
+        ru = "Создать скрипт, который..."
+    )
+
+    val modifyThisScriptTo = Translation(
+        en = "Modify this script to...",
+        vn = "Sửa đổi tập lệnh này để...",
+        ru = "Изменить этот скрипт, чтобы..."
+    )
+
+    val noPromptHistory = Translation(
+        en = "No prompt history",
+        vn = "Không có lịch sử lời nhắc",
+        ru = "Нет истории подсказок"
+    )
+
+    val somethingWentWrong = Translation(
+        en = "Something went wrong",
+        vn = "Đã xảy ra lỗi",
+        ru = "Что-то пошло не так"
+    )
+
+    val pleaseTryAgain = Translation(
+        en = "Please try again.",
+        vn = "Vui lòng thử lại.",
+        ru = "Пожалуйста, попробуйте еще раз."
+    )
+
+    val dependOnScript = Translation(
+        en = "Depend on script",
+        vn = "Phụ thuộc vào tập lệnh khác",
+        ru = "Зависит от скрипта"
+    )
+
+    val kotlinScripts = Translation(
+        en = "Kotlin Scripts",
+        vn = "Tập lệnh Kotlin",
+        ru = "Скрипты Kotlin"
+    )
+
+    val menu = Translation(
+        en = "Menu",
+        vn = "Menu",
+        ru = "Меню"
     )
 
     val descriptionOptional = Translation(

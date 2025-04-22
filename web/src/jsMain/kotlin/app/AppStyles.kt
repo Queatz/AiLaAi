@@ -15,7 +15,6 @@ object AppStyles : StyleSheet() {
         display(DisplayStyle.Flex)
         flexDirection(FlexDirection.Column)
         borderRadius(1.r)
-        marginBottom(1.r)
         padding(1.r)
         cursor("pointer")
         elevated()

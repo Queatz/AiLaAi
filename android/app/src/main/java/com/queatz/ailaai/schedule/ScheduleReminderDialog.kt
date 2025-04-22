@@ -42,7 +42,8 @@ fun ScheduleReminderDialog(
                 title = initialReminder.title,
                 start = initialReminder.start,
                 end = initialReminder.end,
-                schedule = initialReminder.schedule
+                schedule = initialReminder.schedule,
+                stickiness = initialReminder.stickiness
             )
         )
     }
@@ -57,12 +58,6 @@ fun ScheduleReminderDialog(
     var showWeeks by rememberStateOf(false)
     var showMonths by rememberStateOf(false)
     var showStickiness by rememberStateOf(false)
-
-    // Get stickiness from the reminder or default to None
-    var stickiness by remember {
-        val initialStickiness = initialReminder.stickiness ?: ReminderStickiness.None
-        mutableStateOf(initialStickiness)
-    }
     val today = Clock.System.now().startOfDay()
 
     fun invalidate() {
@@ -79,6 +74,7 @@ fun ScheduleReminderDialog(
             timezone = reminder.timezone,
             utcOffset = reminder.utcOffset,
             schedule = reminder.schedule,
+            stickiness = reminder.stickiness,
         )
     }
 
@@ -226,14 +222,17 @@ fun ScheduleReminderDialog(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.stickiness) + ": " + when(stickiness) {
-                        ReminderStickiness.None -> stringResource(R.string.none)
-                        ReminderStickiness.Hourly -> stringResource(R.string.hourly)
-                        ReminderStickiness.Daily -> stringResource(R.string.daily)
-                        ReminderStickiness.Weekly -> stringResource(R.string.weekly)
-                        ReminderStickiness.Monthly -> stringResource(R.string.monthly)
-                        ReminderStickiness.Yearly -> stringResource(R.string.yearly)
-                    })
+                    Text(
+                        "${stringResource(R.string.stickiness)}: " + when (reminder.stickiness) {
+                            ReminderStickiness.None -> stringResource(R.string.none)
+                            ReminderStickiness.Hourly -> stringResource(R.string.hourly)
+                            ReminderStickiness.Daily -> stringResource(R.string.daily)
+                            ReminderStickiness.Weekly -> stringResource(R.string.weekly)
+                            ReminderStickiness.Monthly -> stringResource(R.string.monthly)
+                            ReminderStickiness.Yearly -> stringResource(R.string.yearly)
+                            else -> stringResource(R.string.none)
+                        }
+                    )
                 }
             }
             Row(
@@ -259,7 +258,7 @@ fun ScheduleReminderDialog(
                                     schedule = reminder.schedule?.takeIf { reoccurs },
                                     title = reminder.title?.takeIf { showTitle },
                                     note = reminder.note,
-                                    stickiness = stickiness
+                                    stickiness = reminder.stickiness
                                 )
                             )
                             isLoading = false
@@ -459,8 +458,8 @@ fun ScheduleReminderDialog(
         Menu({
             showStickiness = false
         }) {
-            ReminderStickiness.values().forEach { stickinessOption ->
-                val checked = stickiness == stickinessOption
+            ReminderStickiness.entries.forEach { stickinessOption ->
+                val checked = reminder.stickiness == stickinessOption
                 menuItem(
                     title = when(stickinessOption) {
                         ReminderStickiness.None -> stringResource(R.string.none)
@@ -472,8 +471,9 @@ fun ScheduleReminderDialog(
                     },
                     icon = if (checked) Icons.Outlined.Check else null
                 ) {
-                    stickiness = stickinessOption
+                    reminder.stickiness = stickinessOption
                     showStickiness = false
+                    invalidate()
                 }
             }
         }

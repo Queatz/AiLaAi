@@ -49,9 +49,12 @@ import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.justifyContent
@@ -424,7 +427,12 @@ fun StoryContents(
 
                     part.color?.let {
                         style {
-                            backgroundColor(Color(it))
+                            if (part.style == ButtonStyle.Secondary) {
+                                border(1.px, LineStyle.Solid, Color(it))
+                                color(Color(it))
+                            } else {
+                                backgroundColor(Color(it))
+                            }
                         }
                     }
 

@@ -238,11 +238,15 @@ fun ReminderScreen(reminderId: String) {
             },
             initialReminder = reminder!!
         ) {
-            api.updateReminder(reminderId, Reminder(
-                start = it.start,
-                end = it.end,
-                schedule = it.schedule
-            )) {
+            api.updateReminder(
+                id = reminderId,
+                reminder = Reminder(
+                    start = it.start,
+                    end = it.end,
+                    schedule = it.schedule,
+                    stickiness = it.stickiness
+                )
+            ) {
                 reload()
                 showReschedule = false
             }
@@ -260,7 +264,10 @@ fun ReminderScreen(reminderId: String) {
             dismissButtonText = stringResource(R.string.cancel),
             initialValue = reminder?.title ?: ""
         ) {
-            api.updateReminder(reminderId, Reminder(title = it)) {
+            api.updateReminder(
+                id = reminderId,
+                reminder = Reminder(title = it)
+            ) {
                 reload()
                 showEditTitle = false
             }

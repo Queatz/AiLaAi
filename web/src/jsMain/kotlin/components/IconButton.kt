@@ -126,7 +126,7 @@ fun IconButton(
 fun Icon(
     name: String,
     title: String? = null,
-    onClick: (() -> Unit)? = null,
+    onClick: ((ctrlKey: Boolean) -> Unit)? = null,
     styles: (StyleScope.() -> Unit)? = null
 ) {
     Span({
@@ -142,7 +142,7 @@ fun Icon(
         if (onClick != null) {
             onClick {
                 it.stopPropagation()
-                onClick()
+                onClick(it.ctrlKey)
             }
         }
     }) {

@@ -50,7 +50,7 @@ fun LazyGridScope.buttonItem(
                     ButtonDefaults.outlinedButtonColors()
                 } else {
                     ButtonDefaults.outlinedButtonColors(
-                        containerColor = customColor
+                        contentColor = customColor
                     )
                 }
             ) {

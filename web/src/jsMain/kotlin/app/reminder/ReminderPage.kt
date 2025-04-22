@@ -325,8 +325,8 @@ fun ReminderPage(
         }
     }) {
         EditField(
-            reminder.note ?: "",
-            appString { note },
+            value = reminder.note ?: "",
+            placeholder = appString { note },
             styles = {
                 margin(1.r, 1.r, 0.r, 1.r)
             }

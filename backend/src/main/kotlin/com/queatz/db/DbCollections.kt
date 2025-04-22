@@ -121,6 +121,7 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Script::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Script::name.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Script::categories.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Script::description.name), PersistentIndexOptions())
     },
     ScriptData::class.db {
         ensurePersistentIndex(listOf(ScriptData::script.name), PersistentIndexOptions())

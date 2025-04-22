@@ -60,6 +60,10 @@ fun FeedbackPlatformPage() {
                     Div({
                         classes(AppStyles.scriptItem)
 
+                        style {
+                            marginBottom(1.r)
+                        }
+
                         onClick {
                             item.person?.let { person ->
                                 window.open("/profile/$person", target = "_blank")

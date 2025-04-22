@@ -29,6 +29,7 @@ import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.inputSelectDialog
+import components.SearchField
 import app.menu.Menu
 import app.messaages.inList
 import appString
@@ -79,7 +80,9 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
@@ -102,6 +105,8 @@ import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
 import stories.StoryContents
+import web.cssom.PropertyName.Companion.marginBottom
+import web.cssom.PropertyName.Companion.marginTop
 
 @Composable
 fun ResultPanel(
@@ -151,13 +156,172 @@ fun ResultPanel(
 }
 
 suspend fun scriptSecretDialog(secret: String) = inputDialog(
-    // todo: translate
-    title = "Script Secret",
+    title = application.appString { this.secret },
     defaultValue = secret,
-    // todo: translate
-    confirmButton = "Save",
+    confirmButton = application.appString { save },
     singleLine = false
 )
+
+suspend fun selectScriptDialog(
+    scope: kotlinx.coroutines.CoroutineScope,
+    state: MonacoEditorState,
+    editedScript: String?,
+    script: Script
+) {
+    dialog(
+        title = application.appString { dependOnScript },
+        confirmButton = null,
+        cancelButton = application.appString { cancel },
+        content = { resolve ->
+            var scripts by remember { mutableStateOf<List<Script>>(emptyList()) }
+            var isLoading by remember { mutableStateOf(true) }
+            var search by remember { mutableStateOf("") }
+
+            LaunchedEffect(search) {
+                api.scripts(
+                    search = search.notBlank,
+                    offset = 0,
+                    limit = 20
+                ) {
+                    scripts = it
+                }
+                isLoading = false
+            }
+
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(1.r)
+                    width(32.r)
+                    height(24.r)
+                }
+            }) {
+                SearchField(
+                    search,
+                    placeholder = appString { this.search },
+                    shadow = false,
+                    styles = {
+                        margin(.5.r)
+                    },
+                    onValue = {
+                        search = it
+                    }
+                )
+
+                if (isLoading) {
+                    Loading()
+                } else if (scripts.isNotEmpty()) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            gap(.5.r)
+                            padding(0.r, .5.r)
+                            property("overflow-y", "auto")
+                            flex(1)
+                        }
+                    }) {
+                        scripts.forEach { selectedScript ->
+                            Div({
+                                classes(AppStyles.scriptItem)
+
+                                onClick {
+                                    scope.launch {
+                                        val currentSource = editedScript ?: script.source.orEmpty()
+                                        val description = if (selectedScript.description.isNullOrBlank()) {
+                                            ""
+                                        } else {
+                                            "\n/* ${selectedScript.description.orEmpty()}\n */\n"
+                                        }
+                                        val dependsOnLine = "$description@file:DependsOnScript(\"${selectedScript.id}\") // ${selectedScript.name}"
+
+                                        // Check if the script already has a @file:DependsOnScript annotation
+                                        val newSource = if (currentSource.contains("@file:DependsOnScript")) {
+                                            // Insert the new annotation after the last @file:DependsOnScript annotation
+                                            val lines = currentSource.lines()
+                                            val lastAnnotationIndex = lines.indexOfLast { it.contains("@file:DependsOnScript") }
+
+                                            if (lastAnnotationIndex >= 0) {
+                                                val updatedLines = lines.toMutableList()
+                                                updatedLines.add(lastAnnotationIndex + 1, dependsOnLine)
+                                                updatedLines.joinToString("\n")
+                                            } else {
+                                                "$dependsOnLine\n$currentSource"
+                                            }
+                                        } else {
+                                            "$dependsOnLine\n$currentSource"
+                                        }
+
+                                        state.setValue(newSource)
+                                        resolve(false)
+                                    }
+                                }
+                            }) {
+                                Div({
+                                    style {
+                                        fontSize(18.px)
+                                        fontWeight("bold")
+                                        marginBottom(.5.r)
+                                    }
+                                }) {
+                                    Text(selectedScript.name?.notBlank ?: appString { newScript })
+                                }
+                                Div({
+                                    style {
+                                        opacity(.5)
+                                    }
+                                }) {
+                                    Text(
+                                        bulletedString(
+                                            selectedScript.author?.name?.let { "By $it" },
+                                            selectedScript.categories?.firstOrNull(),
+                                            selectedScript.id!!
+                                        )
+                                    )
+                                }
+                                selectedScript.description?.notBlank?.let { description ->
+                                    Div({
+                                        style {
+                                            marginTop(.5.r)
+                                            overflow("auto")
+                                        }
+                                    }) {
+                                        LinkifyText(description)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (search.isNotBlank()) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.Center)
+                            opacity(.5)
+                            padding(1.r)
+                        }
+                    }) {
+                        appText { noScripts }
+                    }
+                } else {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.Center)
+                            opacity(.5)
+                            padding(1.r)
+                        }
+                    }) {
+                        appText { noScripts }
+                    }
+                }
+            }
+        }
+    )
+}
 
 @Composable
 fun ScriptsPage(
@@ -258,6 +422,10 @@ fun ScriptsPage(
                                 Div({
                                     classes(AppStyles.scriptItem)
 
+                                    style {
+                                        marginBottom(1.r)
+                                    }
+
                                     onClick {
                                         onScriptCreated(script)
                                     }
@@ -269,19 +437,30 @@ fun ScriptsPage(
                                             marginBottom(.5.r)
                                         }
                                     }) {
-                                        // todo: translate
-                                        Text(script.name ?: "New Script")
+                                        Text(script.name?.notBlank ?: appString { newScript })
                                     }
-                                    Div {
+                                    Div({
+                                        style {
+                                            opacity(.5)
+                                        }
+                                    }) {
                                         Text(
                                             bulletedString(
-                                                // todo: translate
                                                 script.author?.name?.let { "By $it" },
                                                 script.categories?.firstOrNull(),
-                                                script.description,
                                                 script.id!!
                                             )
                                         )
+                                    }
+                                    script.description?.notBlank?.let { description ->
+                                        Div({
+                                            style {
+                                                marginTop(.5.r)
+                                                overflow("auto")
+                                            }
+                                        }) {
+                                            LinkifyText(description)
+                                        }
                                     }
                                 }
                             }
@@ -296,8 +475,7 @@ fun ScriptsPage(
                                 padding(1.r)
                             }
                         }) {
-                            // todo: translate
-                            Text("No scripts.")
+                            appText { noScripts }
                         }
                     } else {
                         Div({
@@ -309,8 +487,7 @@ fun ScriptsPage(
                                 padding(1.r)
                             }
                         }) {
-                            // todo: translate
-                            Text("No scripts.")
+                            appText { noScripts }
                         }
                     }
                 }
@@ -357,13 +534,11 @@ fun ScriptsPage(
                     if (isCurrentUserOwner) {
                         // Show all options for the script owner
                         item(
-                            // todo: translate
-                            title = "Rename",
+                            title = appString { rename },
                             onClick = {
                                 menuTarget = null
                                 scope.launch {
                                     val name = inputDialog(
-                                        // todo: translate
                                         title = "Script name",
                                         confirmButton = application.appString { update },
                                         defaultValue = script.name.orEmpty()
@@ -381,8 +556,7 @@ fun ScriptsPage(
                             }
                         )
                         item(
-                            // todo: translate
-                            title = "Category",
+                            title = appString { category },
                             onClick = {
                                 menuTarget = null
                                 scope.launch {
@@ -406,17 +580,17 @@ fun ScriptsPage(
                                 }
                             }
                         )
+                        val title = appString { description }
                         item(
-                            // todo: translate
-                            title = "Description",
+                            title = title,
                             onClick = {
                                 menuTarget = null
                                 scope.launch {
                                     val description = inputDialog(
-                                        // todo: translate
-                                        title = "Script description",
+                                        title = title,
                                         confirmButton = application.appString { update },
-                                        defaultValue = script.description.orEmpty()
+                                        defaultValue = script.description.orEmpty(),
+                                        singleLine = false
                                     )
 
                                     if (description != null) {
@@ -431,8 +605,7 @@ fun ScriptsPage(
                             }
                         )
                         item(
-                            // todo: translate
-                            title = "Secret",
+                            title = appString { secret },
                             onClick = {
                                 menuTarget = null
                                 scope.launch {
@@ -451,16 +624,13 @@ fun ScriptsPage(
                             }
                         )
                         item(
-                            // todo: translate
-                            title = "Delete",
+                            title = appString { delete },
                             onClick = {
                                 menuTarget = null
                                 scope.launch {
                                     val proceed = dialog(
-                                        // todo: translate
-                                        title = "Delete this script?",
-                                        // todo: translate
-                                        confirmButton = "Yes, delete"
+                                        title = application.appString { deleteThisScript },
+                                        confirmButton = application.appString { yesDelete }
                                     )
                                     if (proceed == true) {
                                         api.deleteScript(script.id!!) {
@@ -473,8 +643,7 @@ fun ScriptsPage(
                     }
 
                     item(
-                        // todo: translate
-                        title = "Swap editor position",
+                        title = appString { swapEditorPosition },
                         icon = "swap_horiz",
                         onClick = {
                             menuTarget = null
@@ -485,8 +654,7 @@ fun ScriptsPage(
 
                     script.person?.let { person ->
                         item(
-                            // todo: translate
-                            title = "Go to author's profile",
+                            title = appString { goToAuthorProfile },
                             icon = "open_in_new",
                             onClick = {
                                 menuTarget = null
@@ -496,8 +664,7 @@ fun ScriptsPage(
                     }
 
                     item(
-                        // todo: translate
-                        title = "Open script in new page",
+                        title = appString { openScriptInNewPage },
                         icon = "note_add",
                         onClick = {
                             menuTarget = null
@@ -534,8 +701,7 @@ fun ScriptsPage(
 
                     // Always show Fork option for all users
                     item(
-                        // todo: translate
-                        title = "Fork",
+                        title = appString { fork },
                         icon = "call_split",
                         onClick = {
                             menuTarget = null
@@ -639,8 +805,7 @@ fun ScriptsPage(
                     }
                 }
                 PageTopBar(
-                    // todo: translate
-                    title = script.name ?: "New script",
+                    title = script.name?.notBlank ?: appString { newScript },
                     useMinHeight = true,
                     description = bulletedString(
                         script.categories?.firstOrNull(),
@@ -651,12 +816,9 @@ fun ScriptsPage(
                         if (isCurrentUserOwner) {
                             scope.launch {
                                 val newName = inputDialog(
-                                    // todo: translate
-                                    title = "Rename script",
-                                    // todo: translate
-                                    defaultValue = script.name ?: "New script",
-                                    // todo: translate
-                                    placeholder = "Script name"
+                                    title = application.appString { renameScript },
+                                    defaultValue = script.name?.notBlank ?: application.appString { newScript },
+                                    placeholder = application.appString { scriptName }
                                 )
 
                                 if (newName != null) {
@@ -674,8 +836,7 @@ fun ScriptsPage(
                         if (undoAiScript != null) {
                             IconButton(
                                 name = "undo",
-                                // todo: translate
-                                title = "Undo AI changes",
+                                title = appString { undoAiChanges },
                                 styles = {
                                     marginLeft(.5.r)
                                 }
@@ -737,8 +898,7 @@ fun ScriptsPage(
                         } else {
                             IconButton(
                                 name = "play_arrow",
-                                // todo: translate
-                                title = "Run script (Hold SHIFT to skip cache)",
+                                title = appString { runScriptHoldShift },
                                 styles = {
                                     marginLeft(.5.r)
                                 }
@@ -752,8 +912,7 @@ fun ScriptsPage(
                             }
                             IconButton(
                                 name = "auto_awesome",
-                                // todo: translate
-                                title = "Code with AI",
+                                title = appString { codeWithAi },
                                 isLoading = isAiScriptGenerating,
                                 styles = {
                                     marginLeft(.5.r)
@@ -762,10 +921,8 @@ fun ScriptsPage(
                                 if (isAiScriptGenerating) {
                                     scope.launch {
                                         val result = dialog(
-                                            // todo: translate
-                                            title = "Stop script generation?",
-                                            // todo: translate
-                                            confirmButton = "Yes, stop"
+                                            title = application.appString { stopScriptGeneration },
+                                            confirmButton = application.appString { yesStop }
                                         )
 
                                         if (result == true) {
@@ -776,27 +933,28 @@ fun ScriptsPage(
                                 } else {
                                     aiJob = scope.launch {
                                         val prompt = inputDialog(
-                                            // todo: translate
-                                            title = "AI Prompt",
-                                            // todo: translate
-                                            confirmButton = "Send",
+                                            title = application.appString { aiPrompt },
+                                            confirmButton = application.appString { send },
                                             singleLine = false,
-                                            // todo: translate
                                             placeholder = if (
                                                 (editedScript ?: script.source.orEmpty()).isBlank()
-                                            ) "Create a script that..." else "Modify this script to...",
+                                            ) application.appString { createScriptThat } else application.appString { modifyThisScriptTo },
                                             inputAction = { resolve, value, onValue ->
-                                                IconButton("expand_more", appString { history }, styles = {
-                                                    if (value.isNotBlank()) {
-                                                        opacity(0)
-                                                        property("pointer-events", "none")
-                                                    }
+                                                IconButton(
+                                                    name = "expand_more",
+                                                    title = appString { history },
+                                                    styles = {
+                                                        if (value.isNotBlank()) {
+                                                            opacity(0)
+                                                            property("pointer-events", "none")
+                                                        }
 
-                                                    position(Absolute)
-                                                    right(0.5.r)
-                                                    top(1.r)
-                                                    bottom(1.r)
-                                                }) {
+                                                        position(Absolute)
+                                                        right(0.5.r)
+                                                        top(1.r)
+                                                        bottom(1.r)
+                                                    }
+                                                ) {
                                                     scope.launch {
                                                         // Get prompts with Scripts context
                                                         api.prompts(context = PromptContext.Scripts) { previousPrompts ->
@@ -809,8 +967,7 @@ fun ScriptsPage(
                                                                 }
                                                             } else {
                                                                 dialog(
-                                                                    // todo: translate
-                                                                    title = "No prompt history",
+                                                                    title = application.appString { noPromptHistory },
                                                                     cancelButton = null
                                                                 )
                                                             }
@@ -831,12 +988,10 @@ fun ScriptsPage(
                                                     if (error !is CancellationException) {
                                                         scope.launch {
                                                             dialog(
-                                                                // todo: translate
-                                                                title = "Something went wrong",
+                                                                title = application.appString { somethingWentWrong },
                                                                 cancelButton = null,
                                                                 content = {
-                                                                    // todo: translate
-                                                                    Text("Please try again.")
+                                                                    appText { pleaseTryAgain }
                                                                 }
                                                             )
                                                         }
@@ -854,6 +1009,19 @@ fun ScriptsPage(
                                 }
                             }
                         }
+
+                        IconButton(
+                            name = "post_add",
+                            title = appString { dependOnScript },
+                            styles = {
+                                marginLeft(.5.r)
+                            }
+                        ) {
+                            scope.launch {
+                                selectScriptDialog(scope, state, editedScript, script)
+                            }
+                        }
+
                         IconButton(
                             name = "help_outline",
                             title = appString { help },
@@ -863,8 +1031,7 @@ fun ScriptsPage(
                         ) {
                             scope.launch {
                                 dialog(
-                                    // todo: translate
-                                    title = "Kotlin Scripts",
+                                    title = application.appString { kotlinScripts },
                                     cancelButton = null,
                                     content = {
                                         Div(
@@ -882,8 +1049,7 @@ fun ScriptsPage(
                         }
                         IconButton(
                             name = "more_vert",
-                            // todo: translate
-                            title = "Menu",
+                            title = appString { menu },
                             styles = {
                                 marginLeft(.5.r)
                             }

@@ -82,6 +82,7 @@ class Remind {
             )
 
             updateStickyReminder(it)?.let { newDate ->
+                Logger.getAnonymousLogger().info("REMIND [Sticky] ${it.reminder.title} stickiness=${it.reminder.stickiness} to=$newDate")
                 if (it.occurrence == null) {
                     db.insert(
                         ReminderOccurrence(
