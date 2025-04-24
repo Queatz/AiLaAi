@@ -2,6 +2,7 @@ package com.queatz.plugins
 
 import com.queatz.api.*
 import com.queatz.groupCall
+import com.queatz.impromptuService
 import com.queatz.remind
 import com.queatz.urlAttachmentFetcher
 import io.ktor.http.*
@@ -28,6 +29,7 @@ fun Application.configureRouting() {
     urlAttachmentFetcher.start(this)
     bots.start(this)
     apps.start(this)
+    impromptuService.start(this)
 
     routing {
         get("/hi") { call.respondText("{ \"hi\": true }", contentType = ContentType.Application.Json) }
@@ -72,6 +74,7 @@ fun Application.configureRouting() {
         ratingRoutes()
         appRoutes()
         inviteRoutes()
+        impromptuRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {

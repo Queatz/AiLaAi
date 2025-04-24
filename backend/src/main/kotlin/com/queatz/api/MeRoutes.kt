@@ -64,6 +64,7 @@ fun Route.meRoutes() {
 
                 me.let {
                     it.geo = geo
+                    it.geoUpdatedAt = Clock.System.now()
                     db.update(it)
                     db.updateEquippedCards(it.id!!, geo.scatterGeo())
                 }

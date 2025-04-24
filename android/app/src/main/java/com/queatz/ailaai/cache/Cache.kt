@@ -16,12 +16,14 @@ enum class CacheKey {
 
 class Cache {
     inline fun <reified T : Any> put(key: CacheKey, value: T) {
-        db.box<CacheDbModel>().put(
-            CacheDbModel(
-                key = key.name,
-                value = json.encodeToString(value)
+        runCatching {
+            db.box<CacheDbModel>().put(
+                CacheDbModel(
+                    key = key.name,
+                    value = json.encodeToString(value)
+                )
             )
-        )
+        }
     }
 
     inline fun <reified T : Any> get(key: CacheKey): T? = runCatching {
@@ -31,6 +33,8 @@ class Cache {
     }.getOrNull()
 
     fun remove(key: CacheKey) {
-        db.box<CacheDbModel>().query(CacheDbModel_.key.equal(key.name)).build().remove()
+        runCatching {
+            db.box<CacheDbModel>().query(CacheDbModel_.key.equal(key.name)).build().remove()
+        }
     }
 }

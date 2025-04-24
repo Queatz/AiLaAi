@@ -36,6 +36,7 @@ import com.queatz.push.CollaborationPushData
 import com.queatz.push.CommentPushData
 import com.queatz.push.CommentReplyPushData
 import com.queatz.push.GroupPushData
+import com.queatz.push.ImpromptuPushData
 import com.queatz.push.JoinRequestPushData
 import com.queatz.push.MessagePushData
 import com.queatz.push.MessageReactionPushData
@@ -44,13 +45,13 @@ import com.queatz.push.PushDataData
 import com.queatz.push.ReminderPushData
 import com.queatz.push.StoryPushData
 import com.queatz.push.TradePushData
+import com.queatz.push.UpdateLocationPushData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 
 val push by lazy {
     Push()
@@ -106,6 +107,8 @@ class Push {
                 PushAction.Story -> receive(parse<StoryPushData>(push))
                 PushAction.Comment -> receive(parse<CommentPushData>(push))
                 PushAction.CommentReply -> receive(parse<CommentReplyPushData>(push))
+                PushAction.UpdateLocation -> receive(parse<UpdateLocationPushData>(push))
+                PushAction.Impromptu -> receive(parse<ImpromptuPushData>(push))
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()
@@ -353,6 +356,12 @@ enum class Notifications(
     Comments(
         R.string.comments,
         R.string.comments_notification_channel_description,
+        NotificationManager.IMPORTANCE_DEFAULT,
+        NotificationCompat.CATEGORY_SOCIAL
+    ),
+    Impromptu(
+        R.string.impromptu,
+        R.string.impromptu_notification_channel_description,
         NotificationManager.IMPORTANCE_DEFAULT,
         NotificationCompat.CATEGORY_SOCIAL
     ),

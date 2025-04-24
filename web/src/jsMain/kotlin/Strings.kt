@@ -21,6 +21,11 @@ data class Translation(
  * for different languages (English, Vietnamese, and optionally Russian).
  */
 object Strings {
+    val people = Translation(
+        en = "People",
+        vn = "Con người",
+        ru = "Люди"
+    )
     val noScripts = Translation(
         en = "No scripts.",
         vn = "Không có tập lệnh.",

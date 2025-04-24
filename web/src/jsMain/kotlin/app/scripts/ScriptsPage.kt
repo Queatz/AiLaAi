@@ -183,7 +183,7 @@ suspend fun selectScriptDialog(
                     offset = 0,
                     limit = 20
                 ) {
-                    scripts = it
+                    scripts = it.filter { it.id != script.id }
                 }
                 isLoading = false
             }
@@ -198,7 +198,7 @@ suspend fun selectScriptDialog(
                 }
             }) {
                 SearchField(
-                    search,
+                    value = search,
                     placeholder = appString { this.search },
                     shadow = false,
                     styles = {

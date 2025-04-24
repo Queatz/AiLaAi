@@ -381,7 +381,7 @@ fun ReminderPage(
                     fontWeight("bold")
                 }
             }) {
-                Text("People")
+                appText { this.people }
             }
 
             Div({

@@ -127,8 +127,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:${versions.compose}")
     runtimeOnly("androidx.compose.runtime:runtime-rxjava3:${versions.compose}")
     implementation("androidx.compose.ui:ui-viewbinding:${versions.compose}")
-    implementation("androidx.compose.material3:material3:1.3.1")
-    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
+    implementation("androidx.compose.material3:material3:1.3.2")
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
     implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     // Android
@@ -150,6 +150,7 @@ dependencies {
     implementation("com.github.skydoves:colorpicker-compose:1.1.2")
     implementation("io.github.ehsannarmani:compose-charts:0.1.0")
     implementation("com.halilibo.compose-richtext:richtext-commonmark:${versions.richtext}")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     // HMS Support
     implementation("at.bluesource.choicesdk:choicesdk-location:${versions.choiceSdk}")

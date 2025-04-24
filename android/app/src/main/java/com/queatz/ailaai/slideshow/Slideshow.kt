@@ -35,6 +35,9 @@ class Slideshow {
     private val _active = MutableStateFlow(false)
     val active = _active.asStateFlow()
 
+    private val _fullscreen = MutableStateFlow(false)
+    val fullscreen = _fullscreen.asStateFlow()
+
     private val _card = MutableStateFlow<Card?>(null)
     val card = _card.asStateFlow()
 
@@ -50,6 +53,10 @@ class Slideshow {
 
     fun init(context: Context) {
         this.context = context
+    }
+
+    fun setFullscreen(fullscreen: Boolean) {
+        this._fullscreen.value = fullscreen
     }
 
     fun start(

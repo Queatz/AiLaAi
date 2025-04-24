@@ -2,9 +2,7 @@ package com.queatz.ailaai.push
 
 import android.content.Intent
 import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
 import com.queatz.ailaai.MainActivity
-import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.extensions.attachmentText
 import com.queatz.ailaai.extensions.notBlank

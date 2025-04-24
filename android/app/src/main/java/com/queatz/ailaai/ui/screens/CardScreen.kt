@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
@@ -52,6 +53,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -185,7 +187,10 @@ private val showGeneratingMessage = booleanPreferencesKey("ui.showGeneratingMess
 private val showMyCardTools = booleanPreferencesKey("ui.showMyCardTools")
 
 @Composable
-fun CardScreen(cardId: String) {
+fun CardScreen(
+    cardId: String,
+    startInFullscreen: Boolean = false
+) {
     var isLoading by rememberStateOf(false)
     var showTools by rememberStateOf(true)
     var notFound by rememberStateOf(false)
@@ -239,7 +244,28 @@ fun CardScreen(cardId: String) {
     var showSourceDialog by rememberStateOf(false)
     val slideshowActive by slideshow.active.collectAsState()
     val userIsInactive by slideshow.userIsInactive.collectAsState()
+    val fullscreen by slideshow.fullscreen.collectAsState()
     var showScanMe by rememberStateOf(false)
+
+    val showInFullscreen = fullscreen || slideshowActive
+
+    LaunchedEffect(startInFullscreen) {
+        if (startInFullscreen) {
+            slideshow.setFullscreen(true)
+        }
+    }
+
+    BackHandler(fullscreen) {
+        slideshow.setFullscreen(false)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            if (fullscreen) {
+                slideshow.setFullscreen(false)
+            }
+        }
+    }
 
     fun reload() {
         scope.launch {
@@ -262,7 +288,7 @@ fun CardScreen(cardId: String) {
         }
     }
 
-    background(card?.background?.takeIf { slideshowActive }?.let(api::url))
+    background(card?.background?.takeIf { showInFullscreen }?.let(api::url))
 
     if (openChangeUrl && card != null) {
         TextFieldDialog(
@@ -425,8 +451,8 @@ fun CardScreen(cardId: String) {
         isLoading = false
     }
 
-    val isMine = me?.id == card?.person && !slideshowActive
-    val isMineOrIAmACollaborator = (isMine || card?.collaborators?.contains(me?.id) == true) && !slideshowActive
+    val isMine = me?.id == card?.person && !showInFullscreen
+    val isMineOrIAmACollaborator = (isMine || card?.collaborators?.contains(me?.id) == true) && !showInFullscreen
 
     fun generatePhoto() {
         isRegeneratingPhoto = true
@@ -482,7 +508,7 @@ fun CardScreen(cardId: String) {
                 .setShortLabel(card?.name ?: context.getString(R.string.app_name))
                 .setIntent(Intent(context, MainActivity::class.java).apply {
                     action = Intent.ACTION_VIEW
-                    data = cardUrl(card!!.id!!).toUri()
+                    data = cardUrl(card!!.id!!).let { "$it?fullscreen=true" }.toUri()
                 })
                 .build()
             val pinnedShortcutCallbackIntent =
@@ -739,16 +765,18 @@ fun CardScreen(cardId: String) {
         }
     }
 
+    val userIsActive = !fullscreen && !userIsInactive
+
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
     ) {
-        val showAppBar = (!slideshowActive || !userIsInactive) && !showScanMe
+        val showAppBar = (!showInFullscreen || userIsActive) && !showScanMe
 
         AnimatedVisibility(showAppBar) {
             AppBar(
                 title = {
-                    if (!slideshowActive) {
+                    if (!showInFullscreen) {
                         Column {
                             Text(
                                 card?.name ?: "",
@@ -769,13 +797,13 @@ fun CardScreen(cardId: String) {
                     }
                 },
                 navigationIcon = {
-                    if (!slideshowActive) {
+                    if (!showInFullscreen) {
                         BackButton()
                     }
                 },
                 actions = {
                     card?.let { card ->
-                        if (!slideshowActive) {
+                        if (!showInFullscreen) {
                             if (isMine) {
                                 IconButton({
                                     toggleShowTools()
@@ -824,7 +852,13 @@ fun CardScreen(cardId: String) {
                                 nav.appNavigate(AppNav.Profile(card.person!!))
                                 showMenu = false
                             })
-                            if (slideshowActive) {
+                            DropdownMenuItem({
+                                Text(stringResource(R.string.toggle_fullscreen))
+                            }, {
+                                slideshow.setFullscreen(!fullscreen)
+                                showMenu = false
+                            })
+                            if (showInFullscreen) {
                                 DropdownMenuItem({
                                     Text(stringResource(R.string.stop_slideshow))
                                 }, {
@@ -1111,14 +1145,14 @@ fun CardScreen(cardId: String) {
                     }
                     CardLayout(
                         card = card,
-                        showTitle = slideshowActive,
-                        largeTitle = slideshowActive,
-                        showAuthors = !slideshowActive,
+                        showTitle = showInFullscreen,
+                        largeTitle = showInFullscreen,
+                        showAuthors = !showInFullscreen,
                         aspect = aspect,
                         scope = scope,
                         elevation = elevation,
                         playVideo = playVideo,
-                        onReply = if (slideshowActive) {
+                        onReply = if (showInFullscreen) {
                             { conversation ->
                                 showScanMe = true
                             }
@@ -1131,7 +1165,9 @@ fun CardScreen(cardId: String) {
         }
 
         if (isLoading) {
-            Loading()
+            Loading(
+                modifier = Modifier.padding(vertical = 1.pad)
+            )
         } else if (notFound) {
             Text(
                 stringResource(R.string.card_not_found),
@@ -1224,7 +1260,7 @@ fun CardScreen(cardId: String) {
                     }
                 }
 
-                if (slideshowActive) {
+                if (showInFullscreen) {
                     val logo = bitmapResource(R.drawable.ic_notification)
                     val size = 220.dp.px
                     val qrCode = remember(cardId) {
@@ -1232,7 +1268,7 @@ fun CardScreen(cardId: String) {
                     }
 
                     Crossfade(
-                        targetState = userIsInactive || showScanMe,
+                        targetState = userIsActive || showScanMe,
                         modifier = Modifier
                             .align(if (isLandscape) Alignment.BottomEnd else Alignment.BottomStart)
                             .padding(1.pad)

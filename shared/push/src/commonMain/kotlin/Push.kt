@@ -17,6 +17,8 @@ enum class PushAction {
     Comment,
     CommentReply,
     MessageReaction,
+    UpdateLocation,
+    Impromptu
 }
 
 enum class StoryEvent {
@@ -167,4 +169,14 @@ data class CommentReplyPushData(
     val onComment: Comment? = null,
     val story: Story? = null,
     val person: Person? = null
+) : PushDataData()
+
+@Serializable
+data class UpdateLocationPushData(
+    val person: String? = null
+) : PushDataData()
+
+@Serializable
+data class ImpromptuPushData(
+    val data: ImpromptuHistory? = null
 ) : PushDataData()

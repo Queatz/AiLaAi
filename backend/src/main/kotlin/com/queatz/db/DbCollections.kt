@@ -6,6 +6,18 @@ import com.arangodb.model.GeoIndexOptions
 import com.arangodb.model.PersistentIndexOptions
 
 fun collections() = listOf(
+    Impromptu::class.db {
+        ensurePersistentIndex(listOf(Impromptu::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Impromptu::mode.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(Impromptu::updateLocation.name), PersistentIndexOptions())
+    },
+    ImpromptuSeek::class.db {
+        ensurePersistentIndex(listOf(ImpromptuSeek::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ImpromptuSeek::name.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ImpromptuSeek::offer.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ImpromptuSeek::radius.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ImpromptuSeek::expiresAt.name), PersistentIndexOptions())
+    },
     Person::class.db {
         ensurePersistentIndex(listOf(Person::name.name), PersistentIndexOptions())
     },

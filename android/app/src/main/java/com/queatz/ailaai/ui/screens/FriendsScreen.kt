@@ -15,9 +15,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ConnectWithoutContact
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.SpatialTracking
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -72,6 +74,7 @@ import com.queatz.ailaai.extensions.timeAgo
 import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
+import com.queatz.ailaai.impromptu.ImpromptuDialog
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.joins
@@ -131,7 +134,11 @@ fun FriendsScreen() {
     val scope = rememberCoroutineScope()
     var selectedHiddenGroups by rememberStateOf(listOf<Group>())
     var allGroups by remember {
-        mutableStateOf(groupsCache.notEmpty ?: cache.get<List<GroupExtended>>(CacheKey.Groups) ?: emptyList())
+        mutableStateOf(
+            groupsCache.notEmpty
+                ?: cache.get<List<GroupExtended>>(CacheKey.Groups)
+                ?: emptyList()
+        )
     }
     var isLoading by rememberStateOf(allGroups.isEmpty())
     var geo: LatLng? by remember { mutableStateOf(null) }
@@ -427,6 +434,26 @@ fun FriendsScreen() {
                         }
                     )
                 }
+            }
+
+            var showImpromptuDialog by rememberStateOf(false)
+            IconButton(
+                onClick = {
+                    showImpromptuDialog = true
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ConnectWithoutContact,
+                    contentDescription = stringResource(R.string.impromptu_mode)
+                )
+            }
+
+            if (showImpromptuDialog) {
+                ImpromptuDialog(
+                    onDismissRequest = {
+                        showImpromptuDialog = false
+                    }
+                )
             }
             ScanQrCodeButton()
         }

@@ -25,8 +25,8 @@ import com.queatz.ailaai.extensions.rememberStateOf
 fun Alert(
     onDismissRequest: () -> Unit,
     title: String?,
-    text: String?,
-    dismissButton: String?,
+    text: String? = null,
+    dismissButton: String? = null,
     confirmButton: String,
     confirmColor: Color? = null,
     textStyle: TextStyle = LocalTextStyle.current,

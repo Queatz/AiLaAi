@@ -8,7 +8,7 @@ import app.nav.NavMenuItem
 import app.nav.NavTopBar
 import appString
 import application
-
+import org.jetbrains.compose.web.css.Color
 
 sealed class PlatformNav {
     data object None : PlatformNav()
@@ -34,32 +34,32 @@ fun PlatformNavPage(
 
     NavMenu {
         // todo: translate
-        NavMenuItem(null, "Accounts", selected = selected == PlatformNav.Accounts) {
-            onSelected(PlatformNav.Accounts)
+        NavMenuItem("people", "Accounts", selected = selected == PlatformNav.Accounts, iconColor = Color("#60BFBF")) {
+        onSelected(PlatformNav.Accounts)
         }
         // todo: translate
-        NavMenuItem(null, "Health", selected = selected == PlatformNav.Health) {
-            onSelected(PlatformNav.Health)
+        NavMenuItem("favorite", "Health", selected = selected == PlatformNav.Health, iconColor = Color("#FF69B4")) {
+        onSelected(PlatformNav.Health)
         }
         // todo: translate
-        NavMenuItem(null, "Config", selected = selected == PlatformNav.Config) {
-            onSelected(PlatformNav.Config)
+        NavMenuItem("settings", "Config", selected = selected == PlatformNav.Config, iconColor = Color("#808080")) {
+        onSelected(PlatformNav.Config)
         }
         // todo: translate
-        NavMenuItem(null, "Reports", selected = selected == PlatformNav.Reports) {
-            onSelected(PlatformNav.Reports)
+        NavMenuItem("report", "Reports", selected = selected == PlatformNav.Reports, iconColor = Color("#6060BF")) {
+        onSelected(PlatformNav.Reports)
         }
         // todo: translate
-        NavMenuItem(null, "Stats", selected = selected == PlatformNav.Stats) {
-            onSelected(PlatformNav.Stats)
+        NavMenuItem("bar_chart", "Stats", selected = selected == PlatformNav.Stats, iconColor = Color("#60BF60")) {
+        onSelected(PlatformNav.Stats)
         }
         // todo: translate
-        NavMenuItem(null, "Feedback", selected = selected == PlatformNav.Feedback) {
-            onSelected(PlatformNav.Feedback)
+        NavMenuItem("feedback", "Feedback", selected = selected == PlatformNav.Feedback, iconColor = Color("#BF9060")) {
+        onSelected(PlatformNav.Feedback)
         }
         // todo: translate
-        NavMenuItem(null, "Crashes", selected = selected == PlatformNav.Crashes) {
-            onSelected(PlatformNav.Crashes)
+        NavMenuItem("bug_report", "Crashes", selected = selected == PlatformNav.Crashes, iconColor = Color("#BF6060")) {
+        onSelected(PlatformNav.Crashes)
         }
     }
 }

@@ -8,11 +8,15 @@ val db by lazy {
     Db()
 }
 
-class Db() {
+class Db {
     lateinit var store: BoxStore
         private set
 
+    private lateinit var context: Context
+
     fun init(context: Context) {
+        this.context = context
+
         runCatching {
             store = MyObjectBox.builder()
                 .androidContext(context)
@@ -26,10 +30,16 @@ class Db() {
     inline fun <reified T : Any> box() = store.boxFor<T>()
 
     fun clear() {
-        if (!store.isClosed) {
-            store.close()
-        }
-
+        close()
         store.deleteAllFiles()
+        init(context)
+    }
+
+    fun close() {
+        if (!store.isClosed) {
+            runCatching {
+                store.close()
+            }
+        }
     }
 }

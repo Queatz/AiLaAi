@@ -497,6 +497,7 @@ fun List<GroupExtended>.forApi() = onEach {
 fun GroupExtended.forApi() = also {
     it.members?.onEach {
         it.person?.geo = null
+        it.person?.geoUpdatedAt = null
     }
 }
 

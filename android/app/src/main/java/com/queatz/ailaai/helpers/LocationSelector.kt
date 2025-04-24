@@ -38,7 +38,7 @@ fun locationSelector(
 ): LocationSelector {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val locationClient = FusedLocationProviderFactory.getFusedLocationProviderClient(activity)
+    val locationClient = remember { FusedLocationProviderFactory.getFusedLocationProviderClient(activity) }
     var geoManual by rememberStateOf(false)
     var showSetMyLocation by rememberStateOf(false)
     var wasRequested by rememberStateOf(false)

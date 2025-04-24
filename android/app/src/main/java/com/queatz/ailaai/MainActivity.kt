@@ -1,5 +1,7 @@
 package com.queatz.ailaai
 
+import android.app.ComponentCaller
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -153,6 +155,7 @@ import com.queatz.db.Person
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -249,8 +252,12 @@ class MainActivity : AppCompatActivity() {
                 val windowInsetsController = WindowCompat.getInsetsController(window, LocalView.current)
 
                 LaunchedEffect(Unit) {
-                    slideshow.active.collectLatest {
-                        if (it) {
+                    combine(
+                        slideshow.active,
+                        slideshow.fullscreen,
+                        { active, fullscreen -> active || fullscreen }
+                    ).collectLatest { activeOrFullscreen ->
+                        if (activeOrFullscreen) {
                             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                             windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
@@ -280,16 +287,20 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     LaunchedEffect(Unit) {
-                        startDestination = context.dataStore.data.first()[appTabKey]
+                        startDestination = context.dataStore.data.first()[appTabKey]?.takeIf {
+                            // Handle cases where the saved start destination is invalid, i.e. the app was updated.
+                            it in menuItems.map { it.route.route }
+                        }
                         startDestinationLoaded = true
                     }
                 }
 
                 val slideshowActive by slideshow.active.collectAsState()
                 val userIsInactive by slideshow.userIsInactive.collectAsState()
+                val fullscreen by slideshow.fullscreen.collectAsState()
 
                 val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
-                val showNavigation = navController.currentBackStackEntryAsState()
+                val showNavigation = !fullscreen && (navController.currentBackStackEntryAsState()
                     .value
                     ?.destination
                     ?.route
@@ -301,7 +312,7 @@ class MainActivity : AppCompatActivity() {
                                 || (it.startsWith("card/") && it.endsWith("/edit"))
                                 || (it.startsWith("profile/") && it.endsWith("/edit"))
                                 || it == "sticker-packs"
-                    } != true && !(slideshowActive && userIsInactive)
+                    } != true && !(slideshowActive && userIsInactive))
 
                 var known by remember { mutableStateOf(api.hasToken()) }
                 var showReleaseNotes by rememberStateOf(false)
@@ -782,10 +793,16 @@ class MainActivity : AppCompatActivity() {
                                                 )
                                             }
                                             composable(
-                                                "card/{id}",
-                                                deepLinks = deeplink("/page/{id}", "/card/{id}")
+                                                "card/{id}?fullscreen={fullscreen}",
+                                                deepLinks = deeplink(
+                                                    "/page/{id}?fullscreen={fullscreen}",
+                                                    "/card/{id}?fullscreen={fullscreen}"
+                                                )
                                             ) {
-                                                CardScreen(it.arguments!!.getString("id")!!)
+                                                CardScreen(
+                                                    cardId = it.arguments!!.getString("id")!!,
+                                                    startInFullscreen = it.arguments!!.getString("fullscreen")?.toBoolean() ?: false
+                                                )
                                             }
                                             composable(
                                                 "card/{id}/edit"
@@ -881,6 +898,20 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent, caller: ComponentCaller) {
+        super.onNewIntent(intent, caller)
+
+        if (intent.action == Intent.ACTION_VIEW) {
+            intent.data?.let { uri ->
+                try {
+                    push.navController?.navigate(uri.toString())
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
                 }
             }
         }

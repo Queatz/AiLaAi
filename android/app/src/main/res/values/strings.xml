@@ -881,6 +881,8 @@
     <string name="no_prompts">No prompts</string>
     <string name="create_as_new_page">Create as new page</string>
     <string name="page_created">Page created</string>
+    <string name="impromptu_mode">Impromptu Mode</string>
+    <string name="enable_background_location">Enable background location</string>
     <plurals name="show_x_more_comments">
         <item quantity="one">Show %1$s more comment</item>
         <item quantity="other">Show %1$s more comments</item>
@@ -1011,4 +1013,37 @@
     <plurals name="x_m">
         <item quantity="other">%1$s m</item>
     </plurals>
+    <string name="updating_location">Updating location</string>
+    <string name="location_update_channel">Location Updates</string>
+    <string name="location_update_channel_description">Notifications for location updates</string>
+    <string name="impromptu">Impromptu</string>
+    <string name="impromptu_notification_channel_description">Impromptu notifications</string>
+    <string name="stop_seeking_this">Stop seeking this?</string>
+    <string name="stop_providing_this">Stop providing this?</string>
+    <string name="impromptu_connect_description">Let Hi Town connect you with people providing what you seek and vice versa.</string>
+    <string name="impromptu_seeking_visibility">What you are providing and seeking is only visible to you.</string>
+    <string name="im_seeking">I\'m seeking</string>
+    <string name="im_providing">I\'m providing</string>
+    <string name="impromptu_nearby_notification">When people seeking what you provide are nearby, Hi Town will let you know.</string>
+    <string name="more_settings">More settings</string>
+    <string name="impromptu_settings">Impromptu Settings</string>
+    <string name="update_my_location">Update my location</string>
+    <string name="location_when_open">When I open Hi Town</string>
+    <string name="location_hourly">Hourly</string>
+    <string name="location_daily">Daily</string>
+    <string name="location_weekly">Weekly</string>
+    <string name="notification_normal">Normal</string>
+    <string name="notification_passive">Passive</string>
+    <string name="notification_normal_description">Sound and vibration</string>
+    <string name="notification_passive_description">Visible in notification center</string>
+    <string name="distance_and_expiry">%1$skm, %2$s</string>
+    <string name="extend_by_1_hour">Extend by 1 hour</string>
+    <string name="extend_by_1_day">Extend by 1 day</string>
+    <string name="extend_by_1_week">Extend by 1 week</string>
+    <string name="extend_by_1_year">Extend by 1 year</string>
+    <string name="flute_teacher_example">e.g. Flute teacher</string>
+    <string name="search_distance">Search distance (km)</string>
+    <string name="expires_with_time">Expires: %1$s</string>
+    <string name="off">Off</string>
+    <string name="toggle_fullscreen">Toggle fullscreen</string>
 </resources>

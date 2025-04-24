@@ -326,7 +326,7 @@ class Notify {
         }
     }
 
-    private fun notifyPeople(people: List<String>, pushData: PushData) {
+    fun notifyPeople(people: List<String>, pushData: PushData) {
         db.peopleDevices(people).forEach { device ->
             push.sendPush(device, pushData)
         }

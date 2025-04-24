@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.time.temporal.ChronoUnit
 import javax.imageio.ImageIO
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 val String.notBlank get() = takeIf { it.isNotBlank() }
@@ -20,8 +21,14 @@ fun Instant.startOfSecond() = toJavaInstant().truncatedTo(ChronoUnit.SECONDS).to
 
 fun Instant.startOfMinute() = toJavaInstant().truncatedTo(ChronoUnit.MINUTES).toKotlinInstant()
 
+fun Instant.startOfHour() = toJavaInstant().truncatedTo(ChronoUnit.HOURS).toKotlinInstant()
+
 suspend fun delayUntilNextMinute() = delay(
     Clock.System.now().let { now -> (now + 1.minutes).startOfMinute() - now }
+)
+
+suspend fun delayUntilNextHour() = delay(
+    Clock.System.now().let { now -> (now + 1.hours).startOfHour() - now }
 )
 
 data class OpenGraphData(
