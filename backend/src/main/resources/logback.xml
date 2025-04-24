@@ -9,5 +9,5 @@
     </root>
     <logger name="org.eclipse.jetty" level="DEBUG"/>
     <logger name="io.netty" level="DEBUG"/>
-    <logger name="com.arangodb" level="INFO"/>
+    <logger name="com.arangodb" level="VERBOSE"/>
 </configuration>

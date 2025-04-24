@@ -1,5 +1,6 @@
 package com.queatz.ailaai.extensions
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
@@ -42,5 +43,12 @@ fun Number.formatDistance() = toInt().let {
     when {
         it < 1_000 -> pluralStringResource(R.plurals.x_m, it, it.format())
         else -> pluralStringResource(R.plurals.x_km, it / 1_000, (it / 1_000).format())
+    }
+}
+
+fun Number.formatDistance(context: Context) = toInt().let {
+    when {
+        it < 1_000 -> context.resources.getQuantityString(R.plurals.x_m, it, it.format())
+        else -> context.resources.getQuantityString(R.plurals.x_km, it / 1_000, (it / 1_000).format())
     }
 }

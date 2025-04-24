@@ -985,4 +985,5 @@
     <string name="impromptu_mode">Chế độ tức thời</string>
     <string name="enable_background_location">Bật vị trí nền</string>
     <string name="toggle_fullscreen">Chuyển đổi toàn màn hình</string>
+    <string name="is_nearby_seeking">đang xa bạn %1$s và đang tìm kiếm %2$s</string>
 </resources>

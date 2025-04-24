@@ -1046,4 +1046,5 @@
     <string name="expires_with_time">Expires: %1$s</string>
     <string name="off">Off</string>
     <string name="toggle_fullscreen">Toggle fullscreen</string>
+    <string name="is_nearby_seeking">is %1$s away and is seeking %2$s</string>
 </resources>

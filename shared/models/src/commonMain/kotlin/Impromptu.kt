@@ -42,7 +42,7 @@ data class ImpromptuHistory(
     var otherPersonDetails: Person? = null,
 
     // Transient from db
-    val seeksDetails: List<String>? = null,
+    var seeksDetails: List<ImpromptuSeek>? = null,
 ) : Model()
 
 enum class ImpromptuMode {

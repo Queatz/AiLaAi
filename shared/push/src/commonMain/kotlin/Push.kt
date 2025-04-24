@@ -178,5 +178,6 @@ data class UpdateLocationPushData(
 
 @Serializable
 data class ImpromptuPushData(
+    val notificationType: ImpromptuNotificationStyle,
     val data: ImpromptuHistory? = null
 ) : PushDataData()

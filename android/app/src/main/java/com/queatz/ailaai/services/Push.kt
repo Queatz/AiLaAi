@@ -144,6 +144,7 @@ class Push {
         style: NotificationCompat.Style? = null,
         sound: Uri? = null,
         alarm: Boolean = false,
+        passive: Boolean = false,
         replyInGroup: String? = null,
         actions: List<PushNotificationAction>? = null
     ) {
@@ -169,7 +170,10 @@ class Push {
                     )
                 }
             ).let {
-                if (sound != null) {
+                if (passive) {
+                    it.setSound(null)
+                        .setSilent(true)
+                } else if (sound != null) {
                     it.setSound(sound)
                 } else if (alarm) {
                     val alarmSoundUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)

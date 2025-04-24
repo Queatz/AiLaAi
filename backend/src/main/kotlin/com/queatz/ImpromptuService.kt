@@ -2,8 +2,9 @@ package com.queatz
 
 import com.queatz.db.ImpromptuHistory
 import com.queatz.db.ImpromptuLocationUpdates
-import com.queatz.db.Person
+import com.queatz.db.ImpromptuNotificationStyle
 import com.queatz.db.allActiveImpromptu
+import com.queatz.db.friends
 import com.queatz.db.processAllImpromptu
 import com.queatz.plugins.db
 import com.queatz.plugins.notify
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import java.util.logging.Logger
 import kotlin.time.Duration.Companion.hours
 
 val impromptuService = ImpromptuService()
@@ -30,7 +32,7 @@ class ImpromptuService {
 
         scope.launch {
             while (true) {
-                delayUntilNextHour()
+                delayUntilNextMinute()
                 hour.update { Clock.System.now().startOfHour() }
             }
         }
@@ -49,7 +51,9 @@ class ImpromptuService {
                 val now = Clock.System.now()
 
                 // Find all Impromptu settings with mode Friends or Everyone
-                db.allActiveImpromptu().forEach { impromptu ->
+                db.allActiveImpromptu().also {
+                    Logger.getAnonymousLogger().info("IMPROMPTU updateLocations found ${it.size} active impromptus for location updates")
+                }.forEach { impromptu ->
                     // Get the person
                     val person = impromptu.personDetails ?: return@forEach
 
@@ -89,6 +93,8 @@ class ImpromptuService {
                     }
 
                     if (shouldUpdate) {
+                        Logger.getAnonymousLogger().info("IMPROMPTU updateLocations will update location for ${person.id!!}")
+
                         notify.notifyPeople(
                             people = listOf(person.id!!),
                             pushData = PushData(
@@ -102,16 +108,19 @@ class ImpromptuService {
                 }
             }.onFailure {
                 it.printStackTrace()
-            }.getOrNull()
+            }
         }
     }
 
     private fun sendNotifications() {
+        Logger.getAnonymousLogger().info("IMPROMPTU sendNotifications started")
         // Check for people near each other, match their impromptu seek settings, and send notifications
         scope.launch {
             runCatching {
                 // Notifications are sent to the other person
-                db.processAllImpromptu().forEach { impromptuProposal ->
+                db.processAllImpromptu().also {
+                    Logger.getAnonymousLogger().info("IMPROMPTU processAllImpromptu found ${it.size} impromptus to process")
+                }.forEach { impromptuProposal ->
                     val impromptuHistory = ImpromptuHistory(
                         person = impromptuProposal.person.id!!,
                         otherPerson = impromptuProposal.otherPerson.id!!,
@@ -119,6 +128,24 @@ class ImpromptuService {
                         seeks = impromptuProposal.seeks.map { it.id!! },
                     ).let {
                         db.insert(it)
+                    }.also {
+                        // Needed for the push notification
+                        it.otherPersonDetails = impromptuProposal.otherPerson
+                        // Needed for the push notification
+                        it.seeksDetails = impromptuProposal.seeks
+                    }
+
+                    if (!impromptuProposal.everyone) {
+                        if (
+                            !db.friends(
+                                listOf(
+                                    impromptuProposal.person.id!!,
+                                    impromptuProposal.otherPerson.id!!
+                                )
+                            )
+                        ) {
+                            return@forEach
+                        }
                     }
 
                     // Send notification to the other person
@@ -127,11 +154,15 @@ class ImpromptuService {
                         pushData = PushData(
                             action = PushAction.Impromptu,
                             data = ImpromptuPushData(
+                                notificationType = impromptuProposal.notificationType
+                                    ?: ImpromptuNotificationStyle.Normal,
                                 data = impromptuHistory
                             )
                         )
                     )
                 }
+            }.onFailure {
+                it.printStackTrace()
             }
         }
     }

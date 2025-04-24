@@ -18,6 +18,10 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(ImpromptuSeek::radius.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(ImpromptuSeek::expiresAt.name), PersistentIndexOptions())
     },
+    ImpromptuHistory::class.db {
+        ensurePersistentIndex(listOf(ImpromptuHistory::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ImpromptuHistory::distance.name), PersistentIndexOptions())
+    },
     Person::class.db {
         ensurePersistentIndex(listOf(Person::name.name), PersistentIndexOptions())
     },

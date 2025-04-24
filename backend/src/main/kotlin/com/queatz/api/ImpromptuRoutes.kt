@@ -42,7 +42,7 @@ fun Route.impromptuRoutes() {
                 db.insert(
                     ImpromptuSeek().apply {
                         person = me.id
-                        name = impromptuSeek.name
+                        name = impromptuSeek.name?.trim()
                         offer = impromptuSeek.offer
                         radius = impromptuSeek.radius
                         expiresAt = impromptuSeek.expiresAt

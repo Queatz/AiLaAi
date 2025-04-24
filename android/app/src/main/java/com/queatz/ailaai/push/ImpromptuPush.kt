@@ -5,8 +5,10 @@ import androidx.core.net.toUri
 import com.queatz.ailaai.MainActivity
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.appDomain
+import com.queatz.ailaai.extensions.formatDistance
 import com.queatz.ailaai.services.Notifications
 import com.queatz.ailaai.services.Push
+import com.queatz.db.ImpromptuNotificationStyle
 import com.queatz.push.ImpromptuPushData
 
 fun Push.receive(
@@ -30,9 +32,14 @@ fun Push.receive(
     send(
         intent = deeplinkIntent,
         channel = Notifications.Impromptu,
+        passive = data.notificationType == ImpromptuNotificationStyle.Passive,
         groupKey = makeGroupKey(otherPersonId),
         title = otherPersonName,
         // todo: translate
-        text = "is nearby"
+        text = context.getString(
+            R.string.is_nearby_seeking,
+            data.data?.distance?.formatDistance(context).orEmpty(),
+            data.data?.seeksDetails?.firstOrNull()?.name
+        )
     )
 }

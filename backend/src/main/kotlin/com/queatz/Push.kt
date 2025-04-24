@@ -266,6 +266,8 @@ class Push {
                                                 is CommentPushData -> it
                                                 is CommentReplyPushData -> it
                                                 is MessageReactionPushData -> it
+                                                is UpdateLocationPushData -> it
+                                                is ImpromptuPushData -> it
                                                 else -> error("Unknown push data type")
                                             }
                                         )

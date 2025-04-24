@@ -237,7 +237,7 @@ fun Db.member(person: String, group: String) = one(
 /**
  * @people The list of all people in the group
  *
- * @return The most recently active group with all these people, or null
+ * @return The most recently active group with exactly all these people, or null
  */
 fun Db.group(people: List<String>) = one(
     Group::class,
@@ -258,6 +258,29 @@ fun Db.group(people: List<String>) = one(
         "people" to people.map { it.asId(Person::class) }
     )
 )
+
+/**
+ * @people The list of all people in the same group
+ *
+ * @return True if all these people are in a group together
+ */
+fun Db.friends(people: List<String>) = query(
+    Boolean::class,
+    """
+        for x in @@collection
+            let members = (
+                for person, edge in inbound x graph `${Member::class.graph()}`
+                    filter edge.${f(Member::gone)} != true
+                    return edge._from
+            )
+            filter @people all in members
+            limit 1
+            return true
+    """.trimIndent(),
+    mapOf(
+        "people" to people.map { it.asId(Person::class) }
+    )
+).firstOrNull() == true
 
 /**
  * @people The current user
