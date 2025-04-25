@@ -131,7 +131,7 @@
     <string name="story_not_found">Post not found</string>
     <string name="leave">Leave</string>
     <string name="leave_group">Leave group?</string>
-    <string name="leave_reminder">Leave reminder?</string>
+    <string name="leave_reminder">Leave?</string>
     <string name="members">Members</string>
     <string name="rename">Rename</string>
     <string name="rename_group">Rename group</string>
@@ -858,6 +858,8 @@
     <string name="shop">Shop</string>
     <string name="buy">Buy</string>
     <string name="schedule">Schedule</string>
+    <string name="shopping">Shopping</string>
+    <string name="no_cards_with_prices">No cards with prices</string>
     <string name="size">Size</string>
     <string name="page_size">Page size (km)</string>
     <string name="page_size_description">Larger pages are more visible from further away, while smaller pages are more
@@ -1041,11 +1043,26 @@
     <string name="extend_by_1_hour">Extend by 1 hour</string>
     <string name="extend_by_1_day">Extend by 1 day</string>
     <string name="extend_by_1_week">Extend by 1 week</string>
+    <string name="extend_by_1_month">Extend by 1 month</string>
     <string name="extend_by_1_year">Extend by 1 year</string>
+    <string name="_1_hour">1 hour</string>
+    <string name="_1_day">1 day</string>
+    <string name="_1_week">1 week</string>
+    <string name="_1_month">1 month</string>
+    <string name="_1_year">1 year</string>
     <string name="flute_teacher_example">e.g. Flute teacher</string>
     <string name="search_distance">Search distance (km)</string>
     <string name="expires_with_time">Expires: %1$s</string>
     <string name="off">Off</string>
     <string name="toggle_fullscreen">Toggle fullscreen</string>
     <string name="is_nearby_seeking">is %1$s away and is seeking %2$s</string>
+    <string name="edit_search_distance">Edit search distance</string>
+    <string name="edit_search_distance_km">Edit search distance (km)</string>
+    <string name="impromptu_history">Impromptu history</string>
+    <string name="delete_this_history">Delete this history?</string>
+    <string name="no_history_yet">No history yet</string>
+    <string name="sell">Sell</string>
+    <string name="no_events">No events</string>
+    <string name="join">Join</string>
+    <string name="untitled_event">Untitled event</string>
 </resources>

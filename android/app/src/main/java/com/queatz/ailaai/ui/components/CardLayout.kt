@@ -21,6 +21,7 @@ import coil3.request.crossfade
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.reply
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.card.CardContent
@@ -121,7 +122,7 @@ fun CardLayout(
                     .padding(1.5f.pad)
             )
 
-            card.content?.let { content ->
+            card.content?.notBlank?.let { content ->
                 Box(
                     modifier = Modifier
                         .heightIn(max = 2096.dp)

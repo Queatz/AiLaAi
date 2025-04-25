@@ -21,6 +21,7 @@ fun collections() = listOf(
     ImpromptuHistory::class.db {
         ensurePersistentIndex(listOf(ImpromptuHistory::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(ImpromptuHistory::distance.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(ImpromptuHistory::gone.name), PersistentIndexOptions())
     },
     Person::class.db {
         ensurePersistentIndex(listOf(Person::name.name), PersistentIndexOptions())
@@ -37,6 +38,7 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Reminder::end.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::schedule.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Reminder::categories.name), PersistentIndexOptions())
+        ensureGeoIndex(listOf(Reminder::geo.name), GeoIndexOptions())
     },
     ReminderOccurrence::class.db {
         ensurePersistentIndex(listOf(ReminderOccurrence::reminder.name), PersistentIndexOptions())

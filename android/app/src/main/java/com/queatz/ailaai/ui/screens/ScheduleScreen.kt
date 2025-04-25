@@ -373,7 +373,11 @@ fun ScheduleScreen() {
 
                     if (shownEvents.isNotEmpty()) {
                         item(contentType = -1) {
-                            LoadMore(true, permanent = true, contentPadding = 1.pad) {
+                            LoadMore(
+                                hasMore = true,
+                                permanent = true,
+                                contentPadding = 1.pad
+                            ) {
                                 range = range.first to (range.second + view.duration)
                             }
                         }

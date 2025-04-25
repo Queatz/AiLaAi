@@ -1,5 +1,6 @@
 package com.queatz.db
 
+import com.queatz.plugins.defaultRemindersNearbyMaxDistanceInMeters
 import kotlinx.datetime.Instant
 
 fun Db.reminders(person: String, offset: Int = 0, limit: Int = 20) = list(
@@ -22,6 +23,9 @@ fun Db.occurrences(
     person: String?,
     start: Instant,
     end: Instant,
+    geo: List<Double>? = null,
+    open: Boolean? = false,
+    maxDistance: Double = defaultRemindersNearbyMaxDistanceInMeters,
     reminders: List<String>? = null,
 ) = query(
     ReminderOccurrences::class,
@@ -29,8 +33,19 @@ fun Db.occurrences(
         let dayRangeStart = date_trunc(@start, 'd')
         let dayRange = range(0, date_diff(@start, @end, 'd'))
         for reminder in ${Reminder::class.collection()}
-            filter (@person == null or reminder.${f(Reminder::person)} == @person or @person in reminder.${f(Reminder::people)})
+            filter (
+                @person == null
+                    or reminder.${f(Reminder::person)} == @person
+                    or @person in reminder.${f(Reminder::people)}
+                    or (@open and reminder.${f(Reminder::open)} == true)
+            )
                 and (@reminders == null or reminder._key in @reminders)
+                and (
+                    @geo == null or (
+                        reminder.${f(Reminder::geo)} != null
+                            and distance(@geo[0], @geo[1], reminder.${f(Reminder::geo)}[0], reminder.${f(Reminder::geo)}[1]) <= @maxDistance
+                    )
+                )
                 // todo: next two lines can cause occurrences to be missing if they are moved before or after the range
                 and reminder.${f(Reminder::start)} <= @end
                 and (reminder.${f(Reminder::end)} == null or reminder.${f(Reminder::end)} >= @start)
@@ -123,6 +138,9 @@ fun Db.occurrences(
         "reminders" to reminders,
         "start" to start,
         "end" to end,
+        "geo" to geo,
+        "open" to open,
+        "maxDistance" to maxDistance,
     )
 )
 

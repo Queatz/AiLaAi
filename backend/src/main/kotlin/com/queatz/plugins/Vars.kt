@@ -33,3 +33,4 @@ val openAi = OpenAi()
 
 const val defaultNearbyMaxDistanceInMeters = 1_000_000.0
 const val defaultInventoriesNearbyMaxDistanceInMeters = 10_000.0
+const val defaultRemindersNearbyMaxDistanceInMeters = 10_000.0

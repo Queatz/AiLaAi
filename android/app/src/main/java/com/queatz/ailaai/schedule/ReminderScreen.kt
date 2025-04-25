@@ -12,33 +12,51 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.AlarmOff
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material.icons.outlined.Update
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.Button
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import app.ailaai.api.deleteReminder
+import app.ailaai.api.joinReminder
+import app.ailaai.api.leaveReminder
 import app.ailaai.api.reminder
 import app.ailaai.api.reminderOccurrences
 import app.ailaai.api.updateReminder
 import at.bluesource.choicesdk.maps.common.LatLng
+import coil3.compose.AsyncImage
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
@@ -52,17 +70,22 @@ import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.authors
+import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.Toolbar
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
+import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -74,7 +97,7 @@ import toEvents
 @Composable
 fun ReminderScreen(reminderId: String) {
     val scope = rememberCoroutineScope()
-    var isLoading by rememberStateOf(false)
+    var isLoading by rememberStateOf(true)
     var showEditNote by rememberStateOf(false)
     var showAddPerson by rememberStateOf(false)
     var showLocationDialog by rememberStateOf(false)
@@ -83,6 +106,8 @@ fun ReminderScreen(reminderId: String) {
     var showCategory by rememberStateOf(false)
     var showDelete by rememberStateOf(false)
     var showLeave by rememberStateOf(false)
+    var showPhotoDialog by rememberStateOf(false)
+    var isPhotoLoading by rememberStateOf(false)
     var reminder by rememberStateOf<Reminder?>(null)
     var events by rememberStateOf(emptyList<ReminderEvent>())
     val onExpand = remember {
@@ -106,7 +131,6 @@ fun ReminderScreen(reminderId: String) {
     }
 
     suspend fun reload() {
-        isLoading = true
         api.reminder(reminderId) {
             reminder = it
             reloadEvents()
@@ -114,6 +138,15 @@ fun ReminderScreen(reminderId: String) {
         isLoading = false
     }
 
+    fun join() {
+        scope.launch {
+            api.joinReminder(
+                id = reminderId,
+            ) {
+                reload()
+            }
+        }
+    }
     fun toggleAlarm() {
         scope.launch {
             val alarm = reminder?.alarm != true
@@ -134,7 +167,8 @@ fun ReminderScreen(reminderId: String) {
                 id = reminderId,
                 reminder = Reminder(open = !open)
             ) {
-                reload()
+                reminder = it
+                reloadEvents()
             }
         }
     }
@@ -151,9 +185,11 @@ fun ReminderScreen(reminderId: String) {
             preselect = reminder?.categories?.firstOrNull(),
         ) {
             scope.launch {
-                api.updateReminder(reminderId, Reminder(
-                    categories = it.inList()
-                )) {
+                api.updateReminder(
+                    reminderId, Reminder(
+                        categories = it.inList()
+                    )
+                ) {
                     api.reminder(reminderId) {
                         reminder = it
                     }
@@ -307,12 +343,52 @@ fun ReminderScreen(reminderId: String) {
             confirmColor = MaterialTheme.colorScheme.error
         ) {
             scope.launch {
-                api.updateReminder(reminderId, Reminder(people = reminder?.people?.filter { it != me?.id })) {
+                api.leaveReminder(reminderId) {
                     nav.popBackStackOrFinish()
                 }
             }
         }
     }
+
+    if (showPhotoDialog) {
+        ChoosePhotoDialog(
+            state = remember { ChoosePhotoDialogState(mutableStateOf("")) },
+            onDismissRequest = {
+                showPhotoDialog = false
+            },
+            scope = scope,
+            imagesOnly = true,
+            onPhotos = { photos ->
+                isPhotoLoading = true
+                scope.launch {
+                    api.updateReminder(
+                        id = reminderId,
+                        reminder = Reminder(photo = photos.firstOrNull()?.toString())
+                    ) {
+                        reload()
+                        showPhotoDialog = false
+                    }
+                    isPhotoLoading = false
+                }
+            },
+            onIsGeneratingPhoto = {
+                isPhotoLoading = it
+            },
+            onGeneratedPhoto = { photo ->
+                scope.launch {
+                    api.updateReminder(
+                        id = reminderId,
+                        reminder = Reminder(photo = photo)
+                    ) {
+                        reload()
+                        showPhotoDialog = false
+                    }
+                }
+            }
+        )
+    }
+
+    val isMine = reminder?.person == me?.id
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -335,6 +411,31 @@ fun ReminderScreen(reminderId: String) {
             },
             navigationIcon = {
                 BackButton()
+            },
+            actions = {
+                if (!isMine && me?.id in (reminder?.people ?: emptyList())) {
+                    var showMenu by remember { mutableStateOf(false) }
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = null
+                        )
+                    }
+                    Dropdown(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(stringResource(R.string.leave))
+                            },
+                            onClick = {
+                                showMenu = false
+                                showLeave = true
+                            }
+                        )
+                    }
+                }
             }
         )
 
@@ -347,82 +448,123 @@ fun ReminderScreen(reminderId: String) {
                     .fillMaxSize()
             ) {
                 item {
-                    Toolbar {
-                        item(
-                            icon = if (reminder?.open == true) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
-                            name = stringResource(if (reminder?.open == true) R.string.posted else R.string.not_posted),
-                            selected = reminder?.open == true
-                        ) {
-                            togglePosted()
-                        }
-                        item(
-                            Icons.Outlined.PersonAdd,
-                            stringResource(R.string.invite_someone)
-                        ) {
-                            showAddPerson = true
-                        }
-                        item(
-                            Icons.Outlined.EditNote,
-                            stringResource(R.string.edit_note)
-                        ) {
-                            showEditNote = true
-                        }
-                        item(
-                            Icons.Outlined.Update,
-                            stringResource(R.string.reschedule)
-                        ) {
-                            showReschedule = true
-                        }
-                        item(
-                            Icons.Outlined.Edit,
-                            stringResource(R.string.rename)
-                        ) {
-                            showEditTitle = true
-                        }
-                        item(
-                            Icons.Outlined.Place,
-                            stringResource(R.string.choose_location),
-                            selected = reminder?.geo?.isNotEmpty() == true
-                        ) {
-                            showLocationDialog = true
-                        }
-                        item(
-                            icon = if (reminder?.alarm == true) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
-                            name = if (reminder?.alarm == true) stringResource(R.string.alarm_on) else stringResource(R.string.alarm_off),
-                            selected = reminder?.alarm == true
-                        ) {
-                            toggleAlarm()
-                        }
-                        val category = reminder?.categories?.firstOrNull()
-                        item(
-                            Icons.Outlined.Category,
-                            category ?: stringResource(R.string.set_category),
-                                    selected = category != null
-                        ) {
-                            showCategory = true
-                        }
-                        if (reminder?.person == me?.id) {
+                    reminder?.photo?.notBlank?.let { photo ->
+                        AsyncImage(
+                            model = photo.let(api::url),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 1.pad)
+                                .aspectRatio(1.5f)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp))
+                        )
+                    }
+                    if (isMine) {
+                        Toolbar {
                             item(
-                                Icons.Outlined.Delete,
-                                stringResource(R.string.delete),
-                                color = MaterialTheme.colorScheme.error
+                                icon = if (reminder?.open == true) Icons.Outlined.ToggleOn else Icons.Outlined.ToggleOff,
+                                name = stringResource(if (reminder?.open == true) R.string.posted else R.string.not_posted),
+                                selected = reminder?.open == true
                             ) {
-                                showDelete = true
+                                togglePosted()
                             }
-                        } else if (me?.id in (reminder?.people ?: emptyList())) {
                             item(
-                                Icons.Outlined.Clear,
-                                stringResource(R.string.leave),
-                                color = MaterialTheme.colorScheme.error
+                                icon = Icons.Outlined.PersonAdd,
+                                name = stringResource(R.string.invite_someone)
                             ) {
-                                showLeave = true
+                                showAddPerson = true
+                            }
+                            item(
+                                icon = Icons.Outlined.EditNote,
+                                name = stringResource(R.string.edit_note),
+                                selected = !reminder?.note.isNullOrBlank()
+                            ) {
+                                showEditNote = true
+                            }
+                            item(
+                                icon = Icons.Outlined.Update,
+                                name = stringResource(R.string.reschedule)
+                            ) {
+                                showReschedule = true
+                            }
+                            item(
+                                icon = Icons.Outlined.Edit,
+                                name = stringResource(R.string.rename)
+                            ) {
+                                showEditTitle = true
+                            }
+                            item(
+                                icon = Icons.Outlined.CameraAlt,
+                                isLoading = isPhotoLoading,
+                                name = stringResource(
+                                    if (reminder?.photo.isNullOrBlank()) {
+                                        R.string.add_photo
+                                    } else {
+                                        R.string.set_photo
+                                    }
+                                ),
+                                selected = reminder?.photo != null
+                            ) {
+                                showPhotoDialog = true
+                            }
+                            item(
+                                icon = Icons.Outlined.EditNote,
+                                name = stringResource(R.string.edit_content),
+                                selected = !reminder?.content.isNullOrBlank()
+                            ) {
+                                nav.appNavigate(AppNav.EditReminder(reminderId))
+                            }
+                            item(
+                                icon = Icons.Outlined.Place,
+                                name = stringResource(R.string.choose_location),
+                                selected = reminder?.geo?.isNotEmpty() == true
+                            ) {
+                                showLocationDialog = true
+                            }
+                            item(
+                                icon = if (reminder?.alarm == true) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
+                                name = if (reminder?.alarm == true) stringResource(R.string.alarm_on) else stringResource(
+                                    R.string.alarm_off
+                                ),
+                                selected = reminder?.alarm == true
+                            ) {
+                                toggleAlarm()
+                            }
+                            val category = reminder?.categories?.firstOrNull()
+                            item(
+                                icon = Icons.Outlined.Category,
+                                name = category ?: stringResource(R.string.set_category),
+                                selected = category != null
+                            ) {
+                                showCategory = true
+                            }
+                            if (reminder?.person == me?.id) {
+                                item(
+                                    icon = Icons.Outlined.Delete,
+                                    name = stringResource(R.string.delete),
+                                    color = MaterialTheme.colorScheme.error
+                                ) {
+                                    showDelete = true
+                                }
+                            } else if (me?.id in (reminder?.people ?: emptyList())) {
+                                item(
+                                    icon = Icons.Outlined.Clear,
+                                    name = stringResource(R.string.leave),
+                                    color = MaterialTheme.colorScheme.error
+                                ) {
+                                    showLeave = true
+                                }
                             }
                         }
                     }
                     reminder?.note?.notBlank?.let {
                         OutlinedCard(
                             onClick = {
-                                showEditNote = true
+                                if (isMine) {
+                                    showEditNote = true
+                                }
                             },
                             shape = MaterialTheme.shapes.large,
                             modifier = Modifier
@@ -434,7 +576,18 @@ fun ReminderScreen(reminderId: String) {
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier
-                                    .padding(1.pad)
+                                    .padding(1.5f.pad)
+                            )
+                        }
+                    }
+                    reminder?.content?.notBlank?.let { content ->
+                        Box(
+                            modifier = Modifier
+                                .heightIn(max = 2096.dp)
+                        ) {
+                            CardContent(
+                                source = StorySource.Reminder(reminderId),
+                                content = content
                             )
                         }
                     }
@@ -460,33 +613,51 @@ fun ReminderScreen(reminderId: String) {
                                 }
                             }
                     }
-                    Text(
-                        stringResource(R.string.history),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .padding(horizontal = 1.pad)
-                    )
-                    if (events.isEmpty()) {
+                    if (isMine) {
                         Text(
-                            stringResource(R.string.none),
+                            stringResource(R.string.history),
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
                                 .padding(horizontal = 1.pad)
                         )
+                        if (events.isEmpty()) {
+                            Text(
+                                stringResource(R.string.none),
+                                modifier = Modifier
+                                    .padding(horizontal = 1.pad)
+                            )
+                        }
                     }
                 }
-                items(events) {
-                    PeriodEvent(
-                        ScheduleView.Yearly,
-                        it,
-                        showOpen = false,
-                        showFullTime = true,
-                        onExpand = onExpand,
-                        onUpdated = {
-                            scope.launch {
-                                reloadEvents()
+                if (isMine) {
+                    items(events) {
+                        PeriodEvent(
+                            view = ScheduleView.Yearly,
+                            event = it,
+                            showOpen = false,
+                            showFullTime = true,
+                            onExpand = onExpand,
+                            onUpdated = {
+                                scope.launch {
+                                    reloadEvents()
+                                }
+                            }
+                        )
+                    }
+                } else {
+                    if (me?.id !in (reminder?.people ?: emptyList())) {
+                        item {
+                            Button(
+                                onClick = {
+                                    join()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(stringResource(R.string.join))
                             }
                         }
-                    )
+                    }
                 }
             }
         }

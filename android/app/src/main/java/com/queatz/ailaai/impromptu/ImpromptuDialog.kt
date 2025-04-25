@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -50,34 +52,48 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.createImpromptuSeek
+import app.ailaai.api.deleteImpromptuHistory
 import app.ailaai.api.deleteImpromptuSeek
+import app.ailaai.api.getImpromptuHistory
 import app.ailaai.api.myImpromptu
 import app.ailaai.api.updateImpromptuSeek
 import app.ailaai.api.updateMyImpromptu
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.bulletedString
+import com.queatz.ailaai.extensions.contactPhoto
 import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatDistance
 import com.queatz.ailaai.extensions.formatFuture
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.timeAgo
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.DialogBase
 import com.queatz.ailaai.ui.components.DialogLayout
+import com.queatz.ailaai.ui.components.EmptyText
+import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.Menu
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Impromptu
+import com.queatz.db.ImpromptuHistory
 import com.queatz.db.ImpromptuLocationUpdates
 import com.queatz.db.ImpromptuMode
 import com.queatz.db.ImpromptuNotificationStyle
 import com.queatz.db.ImpromptuSeek
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
@@ -106,12 +122,31 @@ fun ImpromptuDialog(
                 // Dialog header
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = stringResource(R.string.impromptu_mode),
                         style = MaterialTheme.typography.titleLarge
                     )
+                    var showHistoryDialog by rememberStateOf(false)
+
+                    IconButton(
+                        onClick = {
+                            showHistoryDialog = true
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.History,
+                            contentDescription = stringResource(R.string.history)
+                        )
+                    }
+
+                    if (showHistoryDialog) {
+                        ImpromptuHistoryDialog(
+                            onDismissRequest = { showHistoryDialog = false }
+                        )
+                    }
                 }
 
                 if (isLoading) {
@@ -356,6 +391,146 @@ fun ImpromptuDialog(
     }
 }
 
+@Composable
+private fun ImpromptuHistoryDialog(
+    onDismissRequest: () -> Unit
+) {
+    val nav = nav
+    val scope = rememberCoroutineScope()
+    var historyItems by rememberStateOf<List<ImpromptuHistory>>(emptyList())
+    var isLoading by rememberStateOf(true)
+
+    // Load history items
+    LaunchedEffect(Unit) {
+        api.getImpromptuHistory {
+            historyItems = it
+            isLoading = false
+        }
+    }
+
+    DialogBase(
+        onDismissRequest = onDismissRequest
+    ) {
+        DialogLayout(
+            content = {
+                // Dialog header
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.impromptu_history),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(2.pad))
+
+                if (isLoading) {
+                    Loading(
+                        modifier = Modifier.padding(vertical = 2.pad)
+                    )
+                    return@DialogLayout
+                }
+
+                if (historyItems.isEmpty()) {
+                    EmptyText(
+                        text = stringResource(R.string.no_history_yet),
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        historyItems.forEach { historyItem ->
+                            ImpromptuHistoryItem(
+                                item = historyItem,
+                                onClick = {
+                                    nav.appNavigate(
+                                        AppNav.Profile(historyItem.otherPerson!!)
+                                    )
+                                },
+                                onDelete = {
+                                    scope.launch {
+                                        api.deleteImpromptuHistory(historyItem.id!!) {
+                                            historyItems = historyItems - historyItem
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            actions = {
+                DialogCloseButton(onDismissRequest)
+            }
+        )
+    }
+}
+
+@Composable
+private fun ImpromptuHistoryItem(
+    item: ImpromptuHistory,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var confirmDeleteAlert by remember(item) {
+        mutableStateOf(false)
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .clickable {
+                onClick()
+            }
+    ) {
+        item.otherPersonDetails?.let { person ->
+            GroupPhoto(
+                photos = listOf(item.otherPersonDetails!!.contactPhoto()),
+                size = 32.dp
+            )
+        }
+        TextAndDescription(
+            text = item.otherPersonDetails?.name ?: stringResource(R.string.someone),
+            description = bulletedString(
+                item.createdAt!!.timeAgo(),
+                (item.distance ?: 0.0).formatDistance(),
+                item.seeksDetails?.firstOrNull { it.offer == true }?.name
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = .5f.pad)
+        )
+
+        if (confirmDeleteAlert) {
+            Alert(
+                onDismissRequest = { confirmDeleteAlert = false },
+                title = stringResource(R.string.delete_this_history),
+                dismissButton = stringResource(R.string.cancel),
+                confirmButton = stringResource(R.string.delete),
+                confirmColor = MaterialTheme.colorScheme.error,
+                onConfirm = onDelete
+            )
+        }
+
+        IconButton(
+            onClick = {
+                confirmDeleteAlert = true
+            },
+            modifier = Modifier.padding(start = 1.pad)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = stringResource(R.string.delete),
+                tint = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun ImpromptuSettingsDialog(
@@ -537,6 +712,7 @@ private fun ImpromptuSeekItem(
     onDelete: (String) -> Unit
 ) {
     var showExtendMenu by rememberStateOf(false)
+    var showEditRadiusDialog by rememberStateOf(false)
     val scope = rememberCoroutineScope()
 
     Row(
@@ -555,7 +731,11 @@ private fun ImpromptuSeekItem(
                     stringResource(R.string.never_expires)
                 } else {
                     stringResource(
-                        if (item.expiresAt?.let { it <= Clock.System.now() } == true) R.string.expired_x else R.string.expires_x,
+                        if (item.expiresAt?.let { it <= Clock.System.now() } == true) {
+                            R.string.expired_x
+                        } else {
+                            R.string.expires_x
+                        },
                         item.expiresAt?.formatFuture().orEmpty()
                     )
                 }
@@ -569,7 +749,9 @@ private fun ImpromptuSeekItem(
                 .padding(horizontal = 1.pad, vertical = .5f.pad)
         )
 
-        var confirmDeleteAlert by rememberStateOf(false)
+        var confirmDeleteAlert by remember(item) {
+            mutableStateOf(false)
+        }
 
         if (confirmDeleteAlert) {
             Alert(
@@ -605,6 +787,39 @@ private fun ImpromptuSeekItem(
                 tint = MaterialTheme.colorScheme.error
             )
         }
+    }
+
+    if (showEditRadiusDialog) {
+        TextFieldDialog(
+            onDismissRequest = { showEditRadiusDialog = false },
+            title = stringResource(R.string.edit_search_distance),
+            button = stringResource(R.string.save),
+            initialValue = (item.radius ?: 5.0).toString(),
+            placeholder = "5.0",
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            valueFormatter = { value: String ->
+                // Only allow numbers and decimal point
+                if (value.isEmpty() || value.all { char: Char -> char.isDigit() || char == '.' }) {
+                    value
+                } else {
+                    null
+                }
+            },
+            onSubmit = { value: String ->
+                val newRadius = value.toDoubleOrNull() ?: 5.0
+                item.id?.let { seekId ->
+                    scope.launch {
+                        val updatedSeek = item.copy(
+                            radius = newRadius
+                        )
+                        api.updateImpromptuSeek(seekId, updatedSeek) {
+                            onUpdate()
+                        }
+                    }
+                }
+                showEditRadiusDialog = false
+            }
+        )
     }
 
     if (showExtendMenu) {
@@ -675,8 +890,26 @@ private fun ImpromptuSeekItem(
                     showExtendMenu = false
                 }
             )
+            menuItem(
+                title = stringResource(R.string.edit_search_distance),
+                action = {
+                    showEditRadiusDialog = true
+                    showExtendMenu = false
+                }
+            )
         }
     }
+}
+
+enum class ExpirationOption(
+    @StringRes val label: Int,
+    val duration: Duration
+) {
+    Hour(R.string._1_hour, 1.hours),
+    Day(R.string._1_day, 1.days),
+    Week(R.string._1_week, 7.days),
+    Month(R.string._1_month, 30.days),
+    Year(R.string._1_year, 365.days);
 }
 
 @Composable
@@ -687,9 +920,9 @@ private fun ImpromptuItemDialog(
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var distance by rememberSaveable { mutableStateOf("5") }
-    var expiration by rememberSaveable { mutableStateOf("1 month") }
+    var expiration by rememberSaveable { mutableStateOf(ExpirationOption.Month) }
 
-    val expirationOptions = listOf("1 hour", "1 day", "1 week", "1 month", "1 year")
+
     var showExpirationOptions by rememberStateOf(false)
 
     DialogBase(
@@ -756,7 +989,10 @@ private fun ImpromptuItemDialog(
                     shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.expires_with_time, expiration), modifier = Modifier.padding(vertical = 1.pad))
+                    Text(
+                        stringResource(R.string.expires_with_time, stringResource(expiration.label)),
+                        modifier = Modifier.padding(vertical = 1.pad)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(2.pad))
@@ -765,9 +1001,9 @@ private fun ImpromptuItemDialog(
                     Menu(
                         onDismissRequest = { showExpirationOptions = false }
                     ) {
-                        expirationOptions.forEach { option ->
+                        ExpirationOption.entries.forEach { option ->
                             menuItem(
-                                title = option,
+                                title = stringResource(option.label),
                                 action = {
                                     expiration = option
                                     showExpirationOptions = false
@@ -783,13 +1019,7 @@ private fun ImpromptuItemDialog(
                     onClick = {
                         if (name.isNotBlank()) {
                             val distanceValue = distance.toDoubleOrNull() ?: 10.0
-                            val expirationInstant = when (expiration) {
-                                "1 hour" -> Clock.System.now() + 1.hours
-                                "1 day" -> Clock.System.now() + 1.days
-                                "1 week" -> Clock.System.now() + 7.days
-                                "1 year" -> Clock.System.now() + 365.days
-                                else -> Clock.System.now() + 30.days // 1 month default
-                            }
+                            val expirationInstant = Clock.System.now() + expiration.duration
                             onSave(name, distanceValue, expirationInstant)
                             onDismissRequest()
                         }

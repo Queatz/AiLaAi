@@ -85,9 +85,23 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
 
                             is StorySource.Profile -> {
                                 api.uploadProfileContentPhotosFromUri(
-                                    context,
-                                    source.id,
-                                    it
+                                    context = context,
+                                    card = source.id,
+                                    media = it
+                                ) { photoUrls ->
+                                    edit {
+                                        copy(
+                                            photos = photos + photoUrls
+                                        )
+                                    }
+                                }
+                            }
+
+                            is StorySource.Reminder -> {
+                                api.uploadProfileContentPhotosFromUri(
+                                    context = context,
+                                    card = source.id,
+                                    media = it
                                 ) { photoUrls ->
                                     edit {
                                         copy(
@@ -122,6 +136,14 @@ fun LazyGridScope.photosCreatorItem(creatorScope: CreatorScope<StoryContent.Phot
                             }
 
                             is StorySource.Profile -> {
+                                edit {
+                                    copy(
+                                        photos = photos + photoUrls
+                                    )
+                                }
+                            }
+
+                            is StorySource.Reminder -> {
                                 edit {
                                     copy(
                                         photos = photos + photoUrls

@@ -20,6 +20,8 @@ suspend fun Api.reminders(
 suspend fun Api.occurrences(
     start: Instant,
     end: Instant,
+    open: Boolean? = null,
+    geo: List<Double>? = null,
     onError: ErrorBlock = {},
     onSuccess: SuccessBlock<List<ReminderOccurrences>> = {}
 ) = get(
@@ -28,8 +30,10 @@ suspend fun Api.occurrences(
     onSuccess = onSuccess,
     parameters = mapOf(
         "start" to start.toString(),
-        "end" to end.toString()
-    )
+        "end" to end.toString(),
+        "open" to open?.toString(),
+        "geo" to geo?.joinToString(",")
+    ).filterValues { it != null }
 )
 
 suspend fun Api.newReminder(
@@ -51,6 +55,26 @@ suspend fun Api.updateReminder(
 ) = post(
     url = "reminders/$id",
     body = reminder,
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.joinReminder(
+    id: String,
+    onError: ErrorBlock = {},
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
+) = post(
+    url = "reminders/$id/join",
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.leaveReminder(
+    id: String,
+    onError: ErrorBlock = {},
+    onSuccess: SuccessBlock<HttpStatusCode> = {}
+) = post(
+    url = "reminders/$id/leave",
     onError = onError,
     onSuccess = onSuccess
 )

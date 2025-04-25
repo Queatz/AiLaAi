@@ -162,10 +162,10 @@ fun StoryContents(
             state = state,
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(
-                horizontalPadding,
-                0.dp,
-                horizontalPadding,
-                2.pad + bottomContentPadding
+                start = horizontalPadding,
+                top = 0.dp,
+                end = horizontalPadding,
+                bottom = 2.pad + bottomContentPadding
             ),
             horizontalArrangement = Arrangement.spacedBy(1.pad, Alignment.Start),
             verticalArrangement = Arrangement.spacedBy(1.pad, Alignment.Top),

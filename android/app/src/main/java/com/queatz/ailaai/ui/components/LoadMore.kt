@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.seconds
 fun LoadMore(
     hasMore: Boolean,
     permanent: Boolean = false,
+    visible: Boolean = true,
     contentPadding: Dp = 0.dp,
     onLoadMore: () -> Unit
 ) {
@@ -58,10 +59,12 @@ fun LoadMore(
                     .fillMaxWidth()
                     .padding(2.pad)
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                )
+                if (visible) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    )
+                }
             }
         }
     }

@@ -70,6 +70,7 @@ fun StoryCreatorTools(
     addPart: (part: StoryContent) -> Unit
 ) {
     val context = LocalContext.current
+    val me = me
     val scope = rememberCoroutineScope()
     var showCardSelectorDialog by rememberStateOf(false)
     var showCardGroupSelectorDialog by rememberStateOf(false)
@@ -126,6 +127,15 @@ fun StoryCreatorTools(
 
                         is StorySource.Profile -> {
                             api.uploadProfileContentPhotosFromUri(context, source.id, photoUrls) { photoUrls ->
+                                addPart(StoryContent.Photos(photoUrls))
+                                addPart(
+                                    StoryContent.Text("")
+                                )
+                            }
+                        }
+
+                        is StorySource.Reminder -> {
+                            api.uploadProfileContentPhotosFromUri(context, me!!.id!!, photoUrls) { photoUrls ->
                                 addPart(StoryContent.Photos(photoUrls))
                                 addPart(
                                     StoryContent.Text("")
@@ -200,6 +210,17 @@ fun StoryCreatorTools(
 
                 is StorySource.Profile -> {
                     api.uploadProfileContentAudioFromUri(context, source.id, it) { audioUrl ->
+                        addPart(StoryContent.Audio(audioUrl))
+                        addPart(
+                            StoryContent.Text("")
+                        )
+                        isUploadingAudio = false
+                    }
+                }
+
+                is StorySource.Reminder -> {
+                    // todo: upload reminder audio
+                    api.uploadProfileContentAudioFromUri(context, me!!.id!!, it) { audioUrl ->
                         addPart(StoryContent.Audio(audioUrl))
                         addPart(
                             StoryContent.Text("")

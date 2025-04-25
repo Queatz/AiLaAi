@@ -134,52 +134,54 @@ fun GroupsScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-    LazyColumn(
-        state = state,
-        contentPadding = PaddingValues(
-            start = 1.pad,
-            top = 0.dp,
-            end = 1.pad,
-            bottom = 3.5f.pad + h.inDp()
-        ),
-        verticalArrangement = Arrangement.spacedBy(1.pad),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .widthIn(max = 640.dp)
-            .fillMaxSize()
-    ) {
-        header()
+        LazyColumn(
+            state = state,
+            contentPadding = PaddingValues(
+                start = 1.pad,
+                top = 0.dp,
+                end = 1.pad,
+                bottom = 3.5f.pad + h.inDp()
+            ),
+            verticalArrangement = Arrangement.spacedBy(1.pad),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .widthIn(max = 640.dp)
+                .fillMaxSize()
+        ) {
+            header()
 
-        when {
-            isLoading -> {
-                item {
-                    Loading()
-                }
-            }
-            results.isEmpty() -> {
-                item {
-                    EmptyText(stringResource(R.string.no_groups_nearby))
-                }
-            }
-            else -> {
-                items(
-                    items = results,
-                    key = {
-                        "group:${it.groupExtended.group!!.id!!}"
+            when {
+                isLoading -> {
+                    item {
+                        Loading()
                     }
-                ) {
-                    ContactItem(
-                        item = it,
-                        onChange = {
-                            reloadKey = nextInt()
-                        },
-                        info = GroupInfo.Members,
-                        coverPhoto = true
-                    )
+                }
+
+                results.isEmpty() -> {
+                    item {
+                        EmptyText(stringResource(R.string.no_groups_nearby))
+                    }
+                }
+
+                else -> {
+                    items(
+                        items = results,
+                        key = {
+                            "group:${it.groupExtended.group!!.id!!}"
+                        }
+                    ) {
+                        ContactItem(
+                            item = it,
+                            onChange = {
+                                reloadKey = nextInt()
+                            },
+                            info = GroupInfo.Members,
+                            coverPhoto = true
+                        )
+                    }
                 }
             }
         }
-    }
         PageInput(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

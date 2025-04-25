@@ -46,8 +46,16 @@ fun Route.reminderRoutes() {
                     ?: return@respond HttpStatusCode.BadRequest.description("Missing 'start' parameter")
                 val end = call.parameters["end"]?.toInstant()
                     ?: return@respond HttpStatusCode.BadRequest.description("Missing 'end' parameter")
+                val geo = call.parameters["geo"]?.split(",")?.map { it.toDouble() }?.takeIf { it.size == 2 }
+                val open = call.parameters["open"]?.toBoolean()?.takeIf { it }
 
-                db.occurrences(me.id!!, start, end)
+                db.occurrences(
+                    person = me.id!!,
+                    start = start,
+                    end = end,
+                    geo = geo,
+                    open = open
+                )
             }
         }
 
@@ -161,6 +169,14 @@ fun Route.reminderRoutes() {
                         reminder.duration = update.duration
                     }
 
+                    if (update.photo != null) {
+                        reminder.photo = update.photo
+                    }
+
+                    if (update.content != null) {
+                        reminder.content = update.content
+                    }
+
                     // TODO need a way for the user to delete
                     if (update.end != null) {
                         reminder.end = update.end?.startOfSecond()
@@ -177,6 +193,46 @@ fun Route.reminderRoutes() {
                 } else {
                     HttpStatusCode.NotFound
                 }
+            }
+        }
+        
+        post("reminders/{id}/join") {
+            respond {
+                val reminder = db.document(Reminder::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                if (!reminder.isVisibleToMe(meOrNull)) {
+                    return@respond HttpStatusCode.NotFound
+                }
+
+                val currentPeople = reminder.people ?: emptyList()
+                if (currentPeople.contains(me.id)) {
+                    return@respond HttpStatusCode.BadRequest.description("You are already in this reminder")
+                }
+
+                reminder.people = currentPeople + me.id!!
+                db.update(reminder)
+                HttpStatusCode.OK
+            }
+        }
+        
+        post("reminders/{id}/leave") {
+            respond {
+                val reminder = db.document(Reminder::class, parameter("id"))
+                    ?: return@respond HttpStatusCode.NotFound
+
+                if (!reminder.isVisibleToMe(meOrNull)) {
+                    return@respond HttpStatusCode.NotFound
+                }
+
+                val currentPeople = reminder.people ?: emptyList()
+                if (!currentPeople.contains(me.id)) {
+                    return@respond HttpStatusCode.BadRequest.description("You are not in this reminder")
+                }
+
+                reminder.people = currentPeople - me.id!!
+                db.update(reminder)
+                HttpStatusCode.OK
             }
         }
 
@@ -251,6 +307,7 @@ fun Route.reminderRoutes() {
     }
 }
 
-private fun Reminder.isMine(me: Person) = person == me.id || me.id in (people ?: emptyList())
+private fun Reminder.isMine(me: Person) = person == me.id
+private fun Reminder.isMineOrJoined(me: Person) = person == me.id || me.id in (people ?: emptyList())
 
-private fun Reminder.isVisibleToMe(me: Person?) = open == true || (me != null && isMine(me))
+private fun Reminder.isVisibleToMe(me: Person?) = open == true || (me != null && isMineOrJoined(me))

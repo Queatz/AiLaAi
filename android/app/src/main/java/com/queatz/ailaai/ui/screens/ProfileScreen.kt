@@ -1081,8 +1081,8 @@ fun ProfileScreen(personId: String) {
                                     .heightIn(max = 2096.dp)
                             ) {
                                 CardContent(
-                                    StorySource.Profile(person!!.id!!),
-                                    content
+                                    source = StorySource.Profile(person!!.id!!),
+                                    content = content
                                 )
                             }
                         }

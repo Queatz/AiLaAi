@@ -435,6 +435,8 @@ class Reminder(
     var geo: List<Double>? = null,
     var title: String? = null,
     var note: String? = null,
+    var photo: String? = null,
+    var content: String? = null,
     var start: Instant? = null,
     var end: Instant? = null,
     var duration: Long? = null,

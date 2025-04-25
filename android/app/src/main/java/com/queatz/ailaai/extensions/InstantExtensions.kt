@@ -112,6 +112,11 @@ fun Instant.isYesterday(zone: TimeZone = TimeZone.currentSystemDefault()) = toLo
     it.date == ((now() - 1.days).toLocalDateTime(zone).date)
 }
 
+fun Instant.isThisYear(zone: TimeZone = TimeZone.currentSystemDefault()) = toLocalDateTime(zone).let {
+    it.year == now().toLocalDateTime(zone).year
+}
+
+// todo: internationalize
 @Composable
 fun Instant.formatFuture() = when {
     isToday() -> {
@@ -122,12 +127,49 @@ fun Instant.formatFuture() = when {
         "${format("h:mm a")} ${stringResource(R.string.inline_tomorrow)}"
     }
 
-    else -> {
+    isThisYear() -> {
         format("EEEE, MMMM d")
+    }
+
+    else -> {
+        format("EEEE, MMMM d, yyyy")
     }
 }
 
+// todo: internationalize
 fun Instant.formatDate() = format("EEEE, MMMM d")
+
+// todo: internationalize
+@Composable
+fun Instant.formatDateForToday() = when {
+    isYesterday() -> {
+        bulletedString(
+            stringResource(R.string.yesterday),
+            format("EEEE, MMMM d")
+        )
+    }
+    isToday() -> {
+        bulletedString(
+            stringResource(R.string.today),
+            format("EEEE, MMMM d")
+        )
+    }
+
+    isTomorrow() -> {
+        bulletedString(
+            stringResource(R.string.tomorrow),
+            format("EEEE, MMMM d")
+        )
+    }
+
+    isThisYear() -> {
+        format("EEEE, MMMM d")
+    }
+
+    else -> {
+        format("EEEE, MMMM d, yyyy")
+    }
+}
 
 fun Instant.formatDateStamp() = format("MM/dd")
 

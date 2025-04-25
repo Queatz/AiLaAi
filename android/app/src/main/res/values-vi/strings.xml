@@ -128,7 +128,7 @@
     <string name="story_not_found">Không tìm được bài viết này</string>
     <string name="leave">Rời khỏi</string>
     <string name="leave_group">Rời khỏi nhóm này không?</string>
-    <string name="leave_reminder">Rời khỏi lời nhắc này không?</string>
+    <string name="leave_reminder">Rời khỏi không?</string>
     <string name="members">Thành viên</string>
     <string name="rename">Đổi tên</string>
     <string name="rename_group">Đổi tên của nhóm này</string>
@@ -765,6 +765,8 @@
     <string name="x_gets">%1$s sẽ nhận</string>
     <string name="shop">Cửa hàng</string>
     <string name="schedule">Lịch</string>
+    <string name="shopping">Mua sắm</string>
+    <string name="no_cards_with_prices">Không có sắm</string>
     <string name="size">Kích cỡ</string>
     <string name="page_size">Kích cỡ của trang (km)</string>
     <string name="page_size_description">Trang lớn hơn sẽ dễ nhìn thấy hơn từ xa, trong khi trang nhỏ hơn sẽ dễ nhìn thấy hơn khi ở gần</string>
@@ -977,7 +979,13 @@
     <string name="extend_by_1_hour">Gia hạn thêm 1 giờ</string>
     <string name="extend_by_1_day">Gia hạn thêm 1 ngày</string>
     <string name="extend_by_1_week">Gia hạn thêm 1 tuần</string>
+    <string name="extend_by_1_month">Gia hạn thêm 1 tháng</string>
     <string name="extend_by_1_year">Gia hạn thêm 1 năm</string>
+    <string name="_1_hour">1 giờ</string>
+    <string name="_1_day">1 ngày</string>
+    <string name="_1_week">1 tuần</string>
+    <string name="_1_month">1 tháng</string>
+    <string name="_1_year">1 năm</string>
     <string name="flute_teacher_example">ví dụ: Giáo viên sáo</string>
     <string name="search_distance">Khoảng cách tìm kiếm (km)</string>
     <string name="expires_with_time">Hết hạn: %1$s</string>
@@ -987,4 +995,12 @@
     <string name="enable_background_location">Bật vị trí nền</string>
     <string name="toggle_fullscreen">Chuyển đổi toàn màn hình</string>
     <string name="is_nearby_seeking">đang xa bạn %1$s và đang tìm kiếm %2$s</string>
+    <string name="edit_search_distance">Edit search distance</string>
+    <string name="edit_search_distance_km">Chỉnh sửa khoảng cách tìm kiếm (km)</string>
+    <string name="impromptu_history">Lịch sử tức thời</string>
+    <string name="delete_this_history">Xóa lịch sử này?</string>
+    <string name="no_history_yet">Chưa có lịch sử</string>
+    <string name="sell">Bán</string>
+    <string name="no_events">Chưa có sự kiện</string>
+    <string name="join">Tham gia</string>
 </resources>

@@ -7,6 +7,42 @@ import kotlinx.serialization.Serializable
  */
 
 /**
+ * Get a person's impromptu history
+ */
+fun Db.getImpromptuHistory(
+    person: String,
+    offset: Int = 0,
+    limit: Int = 20
+) = list(
+    ImpromptuHistory::class,
+    """
+    for history in @@collection
+        filter history.${f(ImpromptuHistory::person)} == @person
+            and history.${f(ImpromptuHistory::gone)} != true
+        sort history.${f(ImpromptuHistory::createdAt)} desc
+        limit @offset, @limit
+        let otherPerson = document(${Person::class.collection()}, history.${f(ImpromptuHistory::otherPerson)})
+        let seeksDetails = (
+            for seek in ${ImpromptuSeek::class.collection()}
+                filter seek._key in history.${f(ImpromptuHistory::seeks)}
+                return seek
+        )
+        return merge(
+            history,
+            { 
+                ${f(ImpromptuHistory::otherPersonDetails)}: otherPerson,
+                ${f(ImpromptuHistory::seeksDetails)}: seeksDetails
+            }
+        )
+    """,
+    mapOf(
+        "person" to person,
+        "offset" to offset,
+        "limit" to limit
+    )
+)
+
+/**
  * Get a person's impromptu settings
  */
 fun Db.getImpromptu(person: String) = one(

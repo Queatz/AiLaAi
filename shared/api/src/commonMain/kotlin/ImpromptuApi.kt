@@ -55,3 +55,28 @@ suspend fun Api.deleteImpromptuSeek(
     onError = onError,
     onSuccess = onSuccess
 )
+
+suspend fun Api.getImpromptuHistory(
+    offset: Int = 0,
+    limit: Int = 20,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<List<ImpromptuHistory>>,
+) = get(
+    url = "me/impromptu/history",
+    parameters = mapOf(
+        "offset" to offset.toString(),
+        "limit" to limit.toString()
+    ),
+    onError = onError,
+    onSuccess = onSuccess
+)
+
+suspend fun Api.deleteImpromptuHistory(
+    id: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<HttpStatusCode> = {},
+) = post(
+    url = "me/impromptu/history/$id/delete",
+    onError = onError,
+    onSuccess = onSuccess
+)

@@ -31,6 +31,8 @@ data class ImpromptuSeek(
 data class ImpromptuHistory(
     // The person who got this notification
     var person: String? = null,
+    // If the history was deleted
+    var gone: Boolean? = null,
     // The person this notification is about
     var otherPerson: String? = null,
     // The distance in meters between the two people

@@ -1658,6 +1658,7 @@ fun GroupScreen(groupId: String) {
                 ChoosePhotoDialog(
                     scope = scope,
                     state = generatePhotoState,
+                    allowGenerateMultiple = true,
                     onDismissRequest = { showPhotoDialog = false },
                     onIsGeneratingPhoto = { isGeneratingPhoto = it },
                     onPhotos = { photos ->

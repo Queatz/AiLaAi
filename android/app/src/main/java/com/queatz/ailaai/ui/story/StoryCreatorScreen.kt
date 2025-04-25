@@ -35,14 +35,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.card
 import app.ailaai.api.profile
+import app.ailaai.api.reminder
 import app.ailaai.api.updateCard
 import app.ailaai.api.updateProfile
+import app.ailaai.api.updateReminder
 import com.queatz.ailaai.R
 import com.queatz.ailaai.api.story
 import com.queatz.ailaai.api.updateStory
 import com.queatz.ailaai.api.updateStoryDraft
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
@@ -69,8 +72,8 @@ import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
 import com.queatz.ailaai.ui.story.editor.StoryMenu
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
-import com.queatz.db.PersonProfile
 import com.queatz.db.Profile
+import com.queatz.db.Reminder
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import com.queatz.db.StoryDraft
@@ -85,6 +88,14 @@ sealed class StorySource {
     data class Story(val id: String) : StorySource()
     data class Profile(val id: String) : StorySource()
     data class Script(val id: String) : StorySource()
+    data class Reminder(val id: String) : StorySource()
+}
+
+sealed interface ContentContext {
+    data class StoryContentContext(val story: Story) : ContentContext
+    data class CardContentContext(val card: Card) : ContentContext
+    data class ProfileContentContext(val profile: Profile) : ContentContext
+    data class ReminderContentContext(val reminder: Reminder) : ContentContext
 }
 
 @Composable
@@ -102,9 +113,7 @@ fun StoryCreatorScreen(
     var showReorderContentDialog by rememberStateOf(false)
     var edited by rememberStateOf(false)
     var currentFocus by rememberStateOf(0)
-    var story by rememberStateOf<Story?>(null)
-    var card by rememberStateOf<Card?>(null)
-    var profile by rememberStateOf<PersonProfile?>(null)
+    var contentContext by rememberStateOf<ContentContext?>(null)
     var storyContents by remember { mutableStateOf(emptyList<StoryContent>()) }
     val nav = nav
     val me = me
@@ -118,24 +127,35 @@ fun StoryCreatorScreen(
         when (source) {
             is StorySource.Story -> {
                 api.story(source.id) {
-                    story = it
+                    val ctx = ContentContext.StoryContentContext(it)
+                    contentContext = ctx
                     storyContents = listOf(
-                        StoryContent.Title(story?.title ?: "", source.id)
-                    ) + story!!.contents()
+                        StoryContent.Title(ctx.story.title ?: "", source.id)
+                    ) + ctx.story.contents()
                 }
             }
 
             is StorySource.Card -> {
                 api.card(source.id) {
-                    card = it
-                    storyContents = card?.content?.asStoryContents() ?: emptyList()
+                    val ctx = ContentContext.CardContentContext(it)
+                    contentContext = ctx
+                    storyContents = ctx.card.content?.asStoryContents() ?: emptyList()
                 }
             }
 
             is StorySource.Profile -> {
                 api.profile(source.id) {
-                    profile = it
-                    storyContents = profile?.profile?.content?.asStoryContents() ?: emptyList()
+                    val ctx = ContentContext.ProfileContentContext(it.profile)
+                    contentContext = ctx
+                    storyContents = ctx.profile.content?.asStoryContents() ?: emptyList()
+                }
+            }
+
+            is StorySource.Reminder -> {
+                api.reminder(source.id) {
+                    val ctx = ContentContext.ReminderContentContext(it)
+                    contentContext = ctx
+                    storyContents = ctx.reminder.content?.asStoryContents() ?: emptyList()
                 }
             }
 
@@ -185,7 +205,7 @@ fun StoryCreatorScreen(
                         hasError = true
                     }
                 ) {
-                    story = it
+                    contentContext = ContentContext.StoryContentContext(it)
                     edited = false
                 }
             }
@@ -201,7 +221,7 @@ fun StoryCreatorScreen(
                         })
                     )
                 ) {
-                    card = it
+                    contentContext = ContentContext.CardContentContext(it)
                     edited = false
                 }
             }
@@ -212,7 +232,18 @@ fun StoryCreatorScreen(
                         add(part.toJsonStoryPart())
                     }
                 }))) {
-                    profile = profile?.copy(profile = it)
+                    contentContext = ContentContext.ProfileContentContext(it)
+                    edited = false
+                }
+            }
+
+            is StorySource.Reminder -> {
+                api.updateReminder(source.id, reminder = Reminder(content = json.encodeToString(buildJsonArray {
+                    storyContents.filter { it.isPart() }.forEach { part ->
+                        add(part.toJsonStoryPart())
+                    }
+                }))) {
+                    contentContext = ContentContext.ReminderContentContext(it)
                     edited = false
                 }
             }
@@ -255,8 +286,7 @@ fun StoryCreatorScreen(
         }
     }
 
-    // todo make sealed class
-    if (story == null && card == null && profile == null) {
+    if (contentContext == null) {
         return
     }
 
@@ -267,12 +297,12 @@ fun StoryCreatorScreen(
                 showPublishDialog = false
             },
             activity = nav.context as Activity,
-            story = story!!,
+            story = (contentContext as ContentContext.StoryContentContext).story,
             storyContents = storyContents,
             onLocationChanged = {
                 scope.launch {
                     api.updateStory(storyId, Story(geo = it?.toList() ?: emptyList())) {
-                        story?.geo = it.geo
+                        (contentContext as ContentContext.StoryContentContext).story.geo = it.geo
                     }
                 }
             },
@@ -328,27 +358,44 @@ fun StoryCreatorScreen(
         },
         actions = {
             val title = storyContents.firstNotNullOfOrNull { it as? StoryContent.Title }?.title
-            if (story != null) {
-                StoryTitle(
-                    state = state,
-                    title = title ?: story?.title
-                )
-            } else if (card != null) {
-                Text(
-                    text = card?.name ?: stringResource(R.string.content),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 1.pad),
-                )
-            } else if (profile != null) {
-                Text(
-                    text = stringResource(R.string.profile),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 1.pad),
-                )
+            when (val contentContext = contentContext) {
+                is ContentContext.StoryContentContext -> {
+                    StoryTitle(
+                        state = state,
+                        title = title ?: contentContext.story.title
+                    )
+                }
+
+                is ContentContext.CardContentContext -> {
+                    Text(
+                        text = contentContext.card.name ?: stringResource(R.string.content),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 1.pad),
+                    )
+                }
+
+                is ContentContext.ProfileContentContext -> {
+                    Text(
+                        text = stringResource(R.string.profile),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 1.pad),
+                    )
+                }
+
+                is ContentContext.ReminderContentContext -> {
+                    Text(
+                        text = contentContext.reminder.title?.notBlank ?: stringResource(R.string.new_reminder),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 1.pad),
+                    )
+                }
+
+                else -> Unit
             }
             IconButton(
                 onClick = {
@@ -373,8 +420,8 @@ fun StoryCreatorScreen(
                                 showMenu = false
                             },
                             storyId = source.id,
-                            story = story,
-                            isMine = story?.person == me?.id,
+                            story = (contentContext as? ContentContext.StoryContentContext)?.story,
+                            isMine = (contentContext as? ContentContext.StoryContentContext)?.story?.person == me?.id,
                             edited = edited,
                             editing = true,
                             onIsLoading = {
@@ -388,7 +435,7 @@ fun StoryCreatorScreen(
 
                     is StorySource.Card,
                     is StorySource.Profile,
-                        -> {
+                    is StorySource.Reminder -> {
                         Dropdown(
                             expanded = showMenu,
                             onDismissRequest = {

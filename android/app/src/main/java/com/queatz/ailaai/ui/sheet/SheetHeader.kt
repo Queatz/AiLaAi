@@ -81,12 +81,11 @@ fun SheetHeader(
                 verticalArrangement = Arrangement.spacedBy(.5f.pad),
                 horizontalArrangement = Arrangement.spacedBy(1.pad)
             ) {
-                // todo
                 listOf(
-                    SheetContent.Posts,
+                    SheetContent.Events,
                     SheetContent.Groups,
-                    SheetContent.Pages,
-                    // SheetContent.Events
+                    SheetContent.Posts,
+                    SheetContent.Pages
                 ).forEach { button ->
                     FilledTonalButton(
                         onClick = {

@@ -40,6 +40,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -141,6 +143,7 @@ import com.queatz.ailaai.ui.screens.ProfileScreen
 import com.queatz.ailaai.ui.screens.ScheduleScreen
 import com.queatz.ailaai.ui.screens.SettingsScreen
 import com.queatz.ailaai.ui.screens.WelcomeDialog
+import com.queatz.ailaai.ui.shopping.ShoppingScreen
 import com.queatz.ailaai.ui.stickers.StickerPackEditorScreen
 import com.queatz.ailaai.ui.stickers.StickerPackScreen
 import com.queatz.ailaai.ui.stickers.StickerPacksScreen
@@ -215,6 +218,7 @@ class MainActivity : AppCompatActivity() {
     private val menuItems by lazy {
         listOf(
             NavButton(AppNav.Messages, getString(R.string.messages), Icons.Outlined.Forum),
+            NavButton(AppNav.Shopping, getString(R.string.shopping), Icons.Outlined.ShoppingBag),
             NavButton(AppNav.Explore, getString(R.string.map), Icons.Outlined.Map),
             NavButton(AppNav.Schedule, getString(R.string.schedule), Icons.Outlined.CalendarMonth),
         )
@@ -775,6 +779,11 @@ class MainActivity : AppCompatActivity() {
                                             composable("reminder/{id}") {
                                                 ReminderScreen(it.arguments!!.getString("id")!!)
                                             }
+                                            composable("reminder/{id}/edit") {
+                                                StoryCreatorScreen(
+                                                    source = StorySource.Reminder(it.arguments!!.getString("id")!!)
+                                                )
+                                            }
                                             composable(
                                                 "story/{id}",
                                                 deepLinks = listOf(navDeepLink { uriPattern = "$appDomain/story/{id}?comment={comment}" })
@@ -835,6 +844,9 @@ class MainActivity : AppCompatActivity() {
                                                 StickerPackEditorScreen(
                                                     it.arguments!!.getString("id")!!
                                                 )
+                                            }
+                                            composable("shopping") {
+                                                ShoppingScreen()
                                             }
                                             composable("settings") {
                                                 SettingsScreen(appUi, { appUi = it }) {

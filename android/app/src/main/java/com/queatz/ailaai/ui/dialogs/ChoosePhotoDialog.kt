@@ -75,6 +75,7 @@ fun ChoosePhotoDialog(
     multiple: Boolean = true,
     imagesOnly: Boolean = false,
     aspect: Double = 1.5,
+    allowGenerateMultiple: Boolean = false,
     transparentBackground: Boolean = false,
     onDismissRequest: () -> Unit,
     onRemove: (() -> Unit)? = null,
@@ -417,12 +418,14 @@ fun ChoosePhotoDialog(
                     promptHistoryMenu = true
                 }
 
-                item(
-                    icon = Icons.Outlined.Queue,
-                    name = state.count.value.toString(),
-                    selected = state.count.value > 1
-                ) {
-                    countDialog = true
+                if (allowGenerateMultiple) {
+                    item(
+                        icon = Icons.Outlined.Queue,
+                        name = state.count.value.toString(),
+                        selected = state.count.value > 1
+                    ) {
+                        countDialog = true
+                    }
                 }
 
                 item(

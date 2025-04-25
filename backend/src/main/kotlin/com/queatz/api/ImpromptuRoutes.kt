@@ -1,22 +1,27 @@
 package com.queatz.api
 
-import com.queatz.db.*
+import com.queatz.db.Db
+import com.queatz.db.Impromptu
+import com.queatz.db.ImpromptuHistory
+import com.queatz.db.ImpromptuSeek
+import com.queatz.db.getImpromptu
+import com.queatz.db.getImpromptuHistory
 import com.queatz.plugins.db
 import com.queatz.plugins.me
 import com.queatz.plugins.respond
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.routing.*
-import kotlinx.datetime.Clock
-import kotlin.time.Duration.Companion.days
+import io.ktor.server.auth.authenticate
+import io.ktor.server.request.receive
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 
 fun Route.impromptuRoutes() {
     authenticate {
         // Get a person's impromptu settings
         get("me/impromptu") {
             val me = me
-            respond { 
+            respond {
                 db.getImpromptu(me.id!!) ?: Impromptu(
                     person = me.id,
                 ).let {
@@ -29,7 +34,7 @@ fun Route.impromptuRoutes() {
         post("me/impromptu") {
             val me = me
             val impromptu = call.receive<Impromptu>()
-            respond { 
+            respond {
                 db.updateImpromptu(me.id!!, impromptu)
             }
         }
@@ -87,6 +92,33 @@ fun Route.impromptuRoutes() {
                 }
             }
         }
+
+        // Get a person's impromptu history
+        get("me/impromptu/history") {
+            val me = me
+            val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
+            val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 20
+            respond {
+                db.getImpromptuHistory(me.id!!, page, pageSize)
+            }
+        }
+
+        // Delete an impromptu history
+        post("me/impromptu/history/{id}/delete") {
+            val me = me
+            respond {
+                if (
+                    db.deleteImpromptuHistory(
+                        id = call.parameters["id"]!!,
+                        person = me.id!!
+                    )
+                ) {
+                    HttpStatusCode.OK
+                } else {
+                    HttpStatusCode.NotFound
+                }
+            }
+        }
     }
 }
 
@@ -119,5 +151,19 @@ private fun Db.updateImpromptu(person: String, impromptu: Impromptu): Impromptu 
                 }
             }
         )
+    }
+}
+
+private fun Db.deleteImpromptuHistory(id: String, person: String): Boolean {
+    val history = document(ImpromptuHistory::class, id)
+    return if (history != null && history.person == person) {
+        update(
+            history.apply {
+                gone = true
+            }
+        )
+        true
+    } else {
+        false
     }
 }

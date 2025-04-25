@@ -57,6 +57,7 @@ import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.DisplayText
+import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.LocationScaffold
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.ScanQrCodeButton
@@ -206,35 +207,41 @@ fun ExploreScreen() {
             bottomEnd = CornerSize(0.dp),
         ),
         sheetContent = {
-            StoriesScreen(
-                mapCardsControl = mapCardsControl,
-                geo = mapGeo ?: geo,
-                myGeo = geo,
-                title = mapCardsControl.areaCard?.name,
-                hint = mapCardsControl.areaCard?.hint,
-                distance = geo?.let { myGeo ->
-                    mapCardsControl.areaCard?.geo?.toLatLng()?.let {
-                        myGeo.distance(it).formatDistance()
-                    }
-                },
-                onTitleClick = {
-                    mapCardsControl.areaCard?.takeIf { !it.name.isNullOrBlank() }?.let { card ->
-                        nav.appNavigate(AppNav.Page(card.id!!))
-                    }
-                },
-                onExpandRequest = {
-                    scope.launch {
-                        if (bottomSheetState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
-                            bottomSheetState.bottomSheetState.expand()
+            if ((mapGeo ?: geo) == null) {
+                EmptyText(
+                    text = stringResource(R.string.updating_location)
+                )
+            } else {
+                StoriesScreen(
+                    mapCardsControl = mapCardsControl,
+                    geo = mapGeo ?: geo,
+                    myGeo = geo,
+                    title = mapCardsControl.areaCard?.name,
+                    hint = mapCardsControl.areaCard?.hint,
+                    distance = geo?.let { myGeo ->
+                        mapCardsControl.areaCard?.geo?.toLatLng()?.let {
+                            myGeo.distance(it).formatDistance()
                         }
-                    }
-                },
-                valueChange = { value = it },
-                storiesState = storiesState,
-                value = value,
-                locationSelector = locationSelector,
-                filters = filters,
-            )
+                    },
+                    onTitleClick = {
+                        mapCardsControl.areaCard?.takeIf { !it.name.isNullOrBlank() }?.let { card ->
+                            nav.appNavigate(AppNav.Page(card.id!!))
+                        }
+                    },
+                    onExpandRequest = {
+                        scope.launch {
+                            if (bottomSheetState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
+                                bottomSheetState.bottomSheetState.expand()
+                            }
+                        }
+                    },
+                    valueChange = { value = it },
+                    storiesState = storiesState,
+                    value = value,
+                    locationSelector = locationSelector,
+                    filters = filters,
+                )
+            }
         }
     ) { paddingValues ->
         val title = stringResource(R.string.map)

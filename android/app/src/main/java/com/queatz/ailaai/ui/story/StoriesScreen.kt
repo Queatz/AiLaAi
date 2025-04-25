@@ -54,6 +54,7 @@ import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.control.MapCardsControl
+import com.queatz.ailaai.ui.event.EventsScreen
 import com.queatz.ailaai.ui.screens.GroupsScreen
 import com.queatz.ailaai.ui.screens.SearchContent
 import com.queatz.ailaai.ui.sheet.SheetHeader
@@ -81,10 +82,10 @@ class StoriesScreenState() {
 }
 
 enum class SheetContent {
+    Events,
     Posts,
     Groups,
-    Pages,
-    Events
+    Pages
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -306,7 +307,26 @@ fun StoriesScreen(
                         }
                     )
                 }
-                else -> Unit
+
+                SheetContent.Events -> {
+                    EventsScreen(
+                        geo = geo?.toGeo(),
+                        locationSelector = locationSelector,
+                        header = {
+                            item {
+                                SheetHeader(
+                                    title = title,
+                                    distance = distance,
+                                    hint = hint,
+                                    onTitleClick = onTitleClick,
+                                    selected = sheetContent,
+                                    onSelected = { sheetContent = it },
+                                    onExpandRequest = onExpandRequest
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
 
