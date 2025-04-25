@@ -82,6 +82,12 @@ fun Db.processAllImpromptu() = query(
                     otherPerson.${f(Person::geo)}[0],
                     otherPerson.${f(Person::geo)}[1]
                 )
+                
+                // Ensure the local time for both people is between 7am and 7pm
+                let personLocalTime = DATE_HOUR(DATE_ADD(DATE_NOW(), person.${f(Person::utcOffset)} || 0, "hours"))
+                let otherPersonLocalTime = DATE_HOUR(DATE_ADD(DATE_NOW(), otherPerson.${f(Person::utcOffset)} || 0, "hours"))
+                filter personLocalTime >= 7 and personLocalTime < 19
+                    and otherPersonLocalTime >= 7 and otherPersonLocalTime < 19
 
                 // Check if either person has a seek that matches the other's criteria
                 for seek in @@impromptuSeekCollection
@@ -98,6 +104,16 @@ fun Db.processAllImpromptu() = query(
     
                         filter lower(seek.${f(ImpromptuSeek::name)}) == lower(otherSeek.${f(ImpromptuSeek::name)})
     
+                        // TODO Ensure there is no ImpromptuHistory with the same person and otherPerson and ImpromptuSeeks
+                        filter count(
+                            for history in @@impromptuHistoryCollection
+                                filter history.${f(ImpromptuHistory::person)} == person._key
+                                    and history.${f(ImpromptuHistory::otherPerson)} == otherPerson._key
+                                    and seek in history.${f(ImpromptuHistory::seeks)}
+                                    and otherSeek in history.${f(ImpromptuHistory::seeks)}
+                            return true
+                        ) == 0
+    
                         return {
                             ${f(ImpromptuProposal::person)}: person,
                             ${f(ImpromptuProposal::otherPerson)}: otherPerson,
@@ -110,6 +126,7 @@ fun Db.processAllImpromptu() = query(
     mapOf(
         "@impromptuCollection" to Impromptu::class.collection(),
         "@impromptuSeekCollection" to ImpromptuSeek::class.collection(),
+        "@impromptuHistoryCollection" to ImpromptuHistory::class.collection(),
         "@personCollection" to Person::class.collection(),
     )
 )

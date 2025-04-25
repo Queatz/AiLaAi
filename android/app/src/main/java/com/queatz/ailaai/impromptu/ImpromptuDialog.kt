@@ -551,10 +551,14 @@ private fun ImpromptuSeekItem(
             description = stringResource(
                 R.string.distance_and_expiry,
                 (item.radius ?: 5.0).format(),
-                stringResource(
-                    R.string.expires_x,
-                    item.expiresAt?.formatFuture() ?: ": Never"
-                )
+                if (item.expiresAt == null) {
+                    stringResource(R.string.never_expires)
+                } else {
+                    stringResource(
+                        if (item.expiresAt?.let { it <= Clock.System.now() } == true) R.string.expired_x else R.string.expires_x,
+                        item.expiresAt?.formatFuture().orEmpty()
+                    )
+                }
             ),
             modifier = Modifier
                 .weight(1f)

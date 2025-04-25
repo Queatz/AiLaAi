@@ -580,6 +580,7 @@
     <string name="added_to_inventory">Đồ được thêm vào túi đồ của bạn</string>
     <string name="quantity">Số lượng</string>
     <string name="expires_x">Hết hạn %1$s</string>
+    <string name="expired_x">Đã hết hạn %1$s</string>
     <string name="x_remaining">Còn %1$s</string>
     <string name="expired">Hết hạn</string>
     <string name="inline_on">trong</string>

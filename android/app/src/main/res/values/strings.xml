@@ -638,6 +638,7 @@
     <string name="added_to_inventory">Items added to your inventory</string>
     <string name="quantity">Quantity</string>
     <string name="expires_x">Expires %1$s</string>
+    <string name="expired_x">Expired %1$s</string>
     <string name="x_remaining">%1$s remaining</string>
     <string name="expired">Expired</string>
     <string name="inline_on">on</string>
