@@ -269,8 +269,8 @@ fun EditCardDialog(
                             )
                         }
                         OutlinedTextField(
-                            titleState,
-                            { value ->
+                            value = titleState,
+                            onValueChange = { value ->
                                 titleState = value
                                 it.title = value
                             },

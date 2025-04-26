@@ -81,6 +81,7 @@ import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.DialogCloseButton
+import com.queatz.ailaai.ui.dialogs.DialogHeader
 import com.queatz.ailaai.ui.dialogs.Menu
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.menuItem
@@ -545,16 +546,7 @@ private fun ImpromptuSettingsDialog(
     ) {
         DialogLayout(
             content = {
-                // Dialog header
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = stringResource(R.string.impromptu_settings),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
+                DialogHeader(stringResource(R.string.impromptu_settings))
 
                 Spacer(modifier = Modifier.height(2.pad))
 
@@ -930,16 +922,7 @@ private fun ImpromptuItemDialog(
     ) {
         DialogLayout(
             content = {
-                // Dialog header
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (isSeek) stringResource(R.string.im_seeking) else stringResource(R.string.im_providing),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
+                DialogHeader(if (isSeek) stringResource(R.string.im_seeking) else stringResource(R.string.im_providing))
 
                 Spacer(modifier = Modifier.height(2.pad))
 

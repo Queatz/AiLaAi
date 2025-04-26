@@ -1003,4 +1003,11 @@
     <string name="sell">Bán</string>
     <string name="no_events">Chưa có sự kiện</string>
     <string name="join">Tham gia</string>
+    <string name="price">Giá</string>
+    <string name="untitled_event">Sự kiện chưa có tiêu đề</string>
+    <string name="set_duration">Đặt khoảng thời gian</string>
+    <string name="duration">Thời lượng</string>
+    <string name="hours">Giờ</string>
+    <string name="minutes">Phút</string>
+    <string name="inline_to">đến</string>
 </resources>

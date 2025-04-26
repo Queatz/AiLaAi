@@ -1,14 +1,20 @@
 package com.queatz.ailaai.schedule
 
 import ReminderEvent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.AlarmOff
@@ -18,18 +24,22 @@ import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material.icons.outlined.Update
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,17 +47,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.Button
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.deleteReminder
 import app.ailaai.api.joinReminder
@@ -73,6 +79,8 @@ import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.card.CardContent
 import com.queatz.ailaai.ui.components.AppBar
 import com.queatz.ailaai.ui.components.BackButton
+import com.queatz.ailaai.ui.components.DialogBase
+import com.queatz.ailaai.ui.components.DialogLayout
 import com.queatz.ailaai.ui.components.Dropdown
 import com.queatz.ailaai.ui.components.Friends
 import com.queatz.ailaai.ui.components.Loading
@@ -82,6 +90,8 @@ import com.queatz.ailaai.ui.dialogs.ChooseCategoryDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePeopleDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialogState
+import com.queatz.ailaai.ui.dialogs.DialogCloseButton
+import com.queatz.ailaai.ui.dialogs.DialogHeader
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
@@ -93,6 +103,93 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import toEvents
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+
+@Composable
+fun DurationDialog(
+    onDismissRequest: () -> Unit,
+    initialDuration: Long = 0L,
+    onDuration: suspend (Long) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var isLoading by rememberStateOf(false)
+    var duration by remember { mutableStateOf(initialDuration) }
+
+    DialogBase(onDismissRequest) {
+        DialogLayout(
+            content = {
+                var hours by remember { mutableStateOf(duration.milliseconds.inWholeHours) }
+                var minutes by remember { mutableStateOf(duration.milliseconds.inWholeMinutes - hours.hours.inWholeMinutes) }
+
+                var hoursText by remember { mutableStateOf(hours.toString()) }
+                var minutesText by remember { mutableStateOf(minutes.toString()) }
+
+                LaunchedEffect(hours, minutes) {
+                    duration = hours.hours.inWholeMilliseconds + minutes.minutes.inWholeMilliseconds
+
+                    if (hours == 24L) {
+                        minutes = 0L
+                        minutesText = ""
+                    }
+                }
+
+                DialogHeader(stringResource(R.string.duration))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 1.pad),
+                    verticalArrangement = Arrangement.spacedBy(1.pad)
+                ) {
+                    OutlinedTextField(
+                        value = hoursText,
+                        onValueChange = { value ->
+                            runCatching {
+                                hours = (value.toLongOrNull() ?: 0L).coerceIn(0L..24L)
+                                hoursText = hours.toString()
+                            }
+                        },
+                        label = { Text(stringResource(R.string.hours)) },
+                        shape = MaterialTheme.shapes.large,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = minutesText,
+                        onValueChange = { value ->
+                            runCatching {
+                                minutes = (value.toLongOrNull() ?: 0L).coerceIn(0L..59L)
+                                minutesText = minutes.toString()
+                            }
+                        },
+                        label = { Text(stringResource(R.string.minutes)) },
+                        shape = MaterialTheme.shapes.large,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            actions = {
+                DialogCloseButton(onDismissRequest)
+                Button(
+                    onClick = {
+                        isLoading = true
+                        scope.launch {
+                            onDuration(duration)
+                            isLoading = false
+                        }
+                    },
+                    enabled = !isLoading,
+                ) {
+                    Text(stringResource(R.string.update))
+                }
+            }
+        )
+    }
+}
 
 @Composable
 fun ReminderScreen(reminderId: String) {
@@ -107,6 +204,7 @@ fun ReminderScreen(reminderId: String) {
     var showDelete by rememberStateOf(false)
     var showLeave by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
+    var showDurationDialog by rememberStateOf(false)
     var isPhotoLoading by rememberStateOf(false)
     var reminder by rememberStateOf<Reminder?>(null)
     var events by rememberStateOf(emptyList<ReminderEvent>())
@@ -260,7 +358,7 @@ fun ReminderScreen(reminderId: String) {
             button = stringResource(R.string.update),
             showDismiss = true,
             dismissButtonText = stringResource(R.string.cancel),
-            initialValue = reminder?.note ?: ""
+            initialValue = reminder?.note.orEmpty()
         ) {
             api.updateReminder(reminderId, Reminder(note = it)) {
                 reload()
@@ -348,6 +446,24 @@ fun ReminderScreen(reminderId: String) {
                 }
             }
         }
+    }
+
+    if (showDurationDialog && reminder != null) {
+        DurationDialog(
+            onDismissRequest = {
+                showDurationDialog = false
+            },
+            initialDuration = reminder?.duration ?: 1.hours.inWholeMilliseconds,
+            onDuration = { duration ->
+                api.updateReminder(
+                    id = reminderId,
+                    reminder = Reminder(duration = duration)
+                ) {
+                    reload()
+                    showDurationDialog = false
+                }
+            }
+        )
     }
 
     if (showPhotoDialog) {
@@ -448,19 +564,6 @@ fun ReminderScreen(reminderId: String) {
                     .fillMaxSize()
             ) {
                 item {
-                    reminder?.photo?.notBlank?.let { photo ->
-                        AsyncImage(
-                            model = photo.let(api::url),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 1.pad)
-                                .aspectRatio(1.5f)
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp))
-                        )
-                    }
                     if (isMine) {
                         Toolbar {
                             item(
@@ -540,6 +643,13 @@ fun ReminderScreen(reminderId: String) {
                             ) {
                                 showCategory = true
                             }
+                            item(
+                                icon = Icons.Outlined.Timer,
+                                name = stringResource(R.string.set_duration),
+                                selected = reminder?.duration != null && reminder?.duration!! > 0
+                            ) {
+                                showDurationDialog = true
+                            }
                             if (reminder?.person == me?.id) {
                                 item(
                                     icon = Icons.Outlined.Delete,
@@ -559,6 +669,19 @@ fun ReminderScreen(reminderId: String) {
                             }
                         }
                     }
+                    reminder?.photo?.notBlank?.let { photo ->
+                        AsyncImage(
+                            model = photo.let(api::url),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 1.pad)
+                                .aspectRatio(1.5f)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp))
+                        )
+                    }
                     reminder?.note?.notBlank?.let {
                         OutlinedCard(
                             onClick = {
@@ -566,15 +689,13 @@ fun ReminderScreen(reminderId: String) {
                                     showEditNote = true
                                 }
                             },
-                            shape = MaterialTheme.shapes.large,
+                            shape = MaterialTheme.shapes.medium,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(1.pad)
                         ) {
                             Text(
                                 it,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier
                                     .padding(1.5f.pad)
                             )

@@ -1065,4 +1065,10 @@
     <string name="no_events">No events</string>
     <string name="join">Join</string>
     <string name="untitled_event">Untitled event</string>
+    <string name="set_duration">Set duration</string>
+    <string name="duration">Duration</string>
+    <string name="price">Price</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="inline_to">to</string>
 </resources>

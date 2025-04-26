@@ -83,8 +83,8 @@ fun CreateItemDialog(
                     verticalArrangement = Arrangement.spacedBy(1.pad)
                 ) {
                     SetPhotoButton(
-                        name,
-                        photo
+                        photoText = name,
+                        photo = photo
                     ) { photo = it }
                     OutlinedTextField(
                         name,

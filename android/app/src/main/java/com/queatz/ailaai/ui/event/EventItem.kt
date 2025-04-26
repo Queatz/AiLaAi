@@ -2,10 +2,8 @@ package com.queatz.ailaai.ui.event
 
 import ReminderEvent
 import ReminderEventType
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,14 +33,20 @@ import coil3.compose.AsyncImage
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.contactPhoto
+import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.formatDateAndTime
+import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
+import com.queatz.ailaai.schedule.formatDateTime
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun EventItem(
@@ -72,7 +76,6 @@ fun EventItem(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun EventItemContent(
     modifier: Modifier = Modifier,
@@ -103,12 +106,15 @@ private fun EventItemContent(
 
     // Format the event time
     val eventTime = when (event.event) {
-        // todo: translate
-        ReminderEventType.Start -> "Starts ${event.date.formatDateAndTime()}"
-        // todo: translate
-        ReminderEventType.End -> "Ends ${event.date.formatDateAndTime()}"
         ReminderEventType.Occur -> event.date.formatDateAndTime()
+        else -> return
     }
+
+    val eventDuration = (event.occurrence?.duration ?: event.reminder.duration)?.let { duration ->
+        " ${stringResource(R.string.inline_to)} ${
+            (event.date + duration.milliseconds).formatTime()
+        } (${duration.milliseconds.format()})"
+    }.orEmpty()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(1.pad),
@@ -163,7 +169,7 @@ private fun EventItemContent(
         }
 
         Text(
-            text = eventTime,
+            text = "$eventTime$eventDuration",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,

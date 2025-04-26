@@ -152,9 +152,12 @@ fun Route.cardRoutes() {
 
                     db.insert(
                         Card(
-                            person.id!!,
+                            person = person.id!!,
                             name = card.name,
                             location = card.location,
+                            photo = card.photo,
+                            video = card.video,
+                            background = card.background,
                             pay = card.pay,
                             conversation = card.conversation,
                             categories = card.categories,
@@ -165,7 +168,9 @@ fun Route.cardRoutes() {
                             group = card.group,
                             geo = card.geo,
                             content = card.content,
-                            active = card.active ?: false
+                            active = card.active ?: false,
+                            npc = card.npc,
+                            size = card.size
                         )
                     )
                 }

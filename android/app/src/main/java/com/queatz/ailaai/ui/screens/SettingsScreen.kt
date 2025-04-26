@@ -507,6 +507,7 @@ fun SettingsScreen(
                         when {
                             appLanguage?.startsWith("vi") == true -> stringResource(R.string.language_vietnamese)
                             appLanguage?.startsWith("zh") == true -> stringResource(R.string.language_chinese)
+                            appLanguage?.startsWith("ru") == true -> stringResource(R.string.language_russian)
                             else -> stringResource(R.string.language_english)
                         },
                         style = MaterialTheme.typography.labelMedium,

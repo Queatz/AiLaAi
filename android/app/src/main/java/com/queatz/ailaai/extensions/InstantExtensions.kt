@@ -8,13 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.queatz.ailaai.R
+import com.queatz.ailaai.appLanguage
 import kotlinx.coroutines.delay
 import kotlinx.datetime.*
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import java.time.Duration
-import java.time.ZoneId
+import kotlin.time.Duration as KotlinDuration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -138,6 +139,9 @@ fun Instant.formatFuture() = when {
 
 // todo: internationalize
 fun Instant.formatDate() = format("EEEE, MMMM d")
+
+// todo: internationalize
+fun Instant.formatTime() = format("h:mm a")
 
 // todo: internationalize
 @Composable
@@ -331,6 +335,47 @@ fun Instant.timeUntil() = Duration.between(
         }
     }
 }!!
+
+fun KotlinDuration.format(): String {
+    val language = appLanguage ?: "en"
+    val seconds = inWholeSeconds
+    val minutes = seconds / 60
+    val hours = minutes / 60
+    val days = hours / 24
+    val weeks = days / 7
+    val months = days / 30
+    val years = days / 365
+
+    val s = seconds % 60
+    val m = minutes % 60
+    val h = hours % 24
+    val d = days % 7
+    val w = weeks % 4
+    val mo = months % 12
+    val y = years
+
+    return when {
+        language.startsWith("vi") -> buildString {
+            if (y > 0) append("$y năm ")
+            if (mo > 0) append("$mo tháng ")
+            if (w > 0) append("$w tuần ")
+            if (d > 0) append("$d ngày ")
+            if (h > 0) append("$h tiếng ")
+            if (m > 0) append("$m phút ")
+            if (s > 0) append("$s giây")
+        }.trim()
+
+        else -> buildString {
+            if (y > 0) append("${y}y ")
+            if (mo > 0) append("${mo}mo ")
+            if (w > 0) append("${w}w ")
+            if (d > 0) append("${d}d ")
+            if (h > 0) append("${h}h ")
+            if (m > 0) append("${m}m ")
+            if (s > 0) append("${s}s")
+        }.trim()
+    }
+}
 
 @Composable
 fun Instant.formatDistance() = Duration.between(

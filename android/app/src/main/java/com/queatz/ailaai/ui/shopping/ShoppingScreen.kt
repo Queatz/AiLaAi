@@ -1,14 +1,12 @@
 package com.queatz.ailaai.ui.shopping
 
 import android.app.Activity
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -35,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.cards
@@ -46,7 +43,6 @@ import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.notBlank
-import com.queatz.ailaai.extensions.notEmpty
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
@@ -55,12 +51,13 @@ import com.queatz.ailaai.extensions.toGeo
 import com.queatz.ailaai.helpers.ResumeEffect
 import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.ui.card.template.CreateCardWithTemplate
+import com.queatz.ailaai.ui.card.template.CreateCardWithTemplateDialog
 import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.PageInput
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
-import com.queatz.ailaai.ui.dialogs.EditCardDialog
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.CancellationException
@@ -143,17 +140,14 @@ fun ShoppingScreen() {
     }
 
     if (showEditCardDialog) {
-        EditCardDialog(
-            card = Card(),
+        CreateCardWithTemplateDialog(
             onDismissRequest = {
                 showEditCardDialog = false
             },
-            create = true,
-            onChange = { newCard ->
-                showEditCardDialog = false
-                nav.appNavigate(AppNav.Page(newCard.id!!))
-            }
-        )
+            template = CreateCardWithTemplate.Product,
+        ) { card ->
+            nav.appNavigate(AppNav.Page(card.id!!))
+        }
     }
 
     Column(
@@ -173,7 +167,7 @@ fun ShoppingScreen() {
                     }
                 ) {
                     Icon(
-                        Icons.Outlined.Sell,
+                        imageVector = Icons.Outlined.Sell,
                         contentDescription = stringResource(R.string.sell)
                     )
                 }
