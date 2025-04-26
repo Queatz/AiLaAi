@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditorTextField(
-    value: String,
+    initialValue: String,
     onValueChange: (String) -> Unit,
     focusRequester: FocusRequester,
     placeholder: String,
@@ -36,13 +36,13 @@ fun EditorTextField(
     textStyle: Typography.() -> TextStyle = { bodyMedium },
 ) {
     var textFieldValue by remember {
-        mutableStateOf(TextFieldValue(value))
+        mutableStateOf(TextFieldValue(initialValue))
     }
 
     BasicEditorTextField(
-        textFieldValue,
-        {
-            if (it.text != value) {
+        value = textFieldValue,
+        onValueChange = {
+            if (it.text != initialValue) {
                 onValueChange(it.text)
             }
             textFieldValue = it
@@ -89,7 +89,7 @@ fun EditorTextField(
                 if (it.type == KeyEventType.KeyDown) {
                     when (it.key) {
                         Key.Backspace -> {
-                            if (value.isEmpty()) {
+                            if (initialValue.isEmpty()) {
                                 onDelete?.invoke()
                                 true
                             } else {

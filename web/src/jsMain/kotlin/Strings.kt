@@ -2110,6 +2110,11 @@ object Strings {
         vn = "Ngoài đời",
         ru = "Оффлайн"
     )
+    val multiple = Translation(
+        en = "Multiple",
+        vn = "Nhiều",
+        ru = "Множество"
+    )
 }
 
 /**

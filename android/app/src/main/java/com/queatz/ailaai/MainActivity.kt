@@ -315,6 +315,7 @@ class MainActivity : AppCompatActivity() {
                                 || it.startsWith("sticker-pack/")
                                 || (it.startsWith("card/") && it.endsWith("/edit"))
                                 || (it.startsWith("profile/") && it.endsWith("/edit"))
+                                || (it.startsWith("reminder/") && it.endsWith("/edit"))
                                 || it == "sticker-packs"
                     } != true && !(slideshowActive && userIsInactive))
 

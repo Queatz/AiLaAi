@@ -52,6 +52,7 @@ fun <T> Recommendations(
         state = state,
         contentPadding = PaddingValues(horizontal = 1.pad),
         horizontalArrangement = Arrangement.spacedBy(1.pad),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .onPlaced { viewport = it.boundsInParent().size }

@@ -4,7 +4,7 @@ import com.queatz.db.StoryContent
 import kotlin.random.Random.Default.nextInt
 
 class CreatorScope<T : StoryContent>(
-    val id: Int = nextInt(),
+    val id: String,
     val source: StorySource,
     val part: T,
     val partIndex: Int,

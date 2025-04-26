@@ -593,7 +593,8 @@ fun PageTreeWidget(widgetId: String) {
 
                 IconButton(
                     name = "list",
-                    title = appString { publish },
+                    title = appString { multiple },
+                    background = true,
                     onClick = {
                         addMultiple()
                     }

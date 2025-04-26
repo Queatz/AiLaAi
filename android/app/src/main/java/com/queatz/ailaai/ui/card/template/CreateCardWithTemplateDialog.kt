@@ -243,7 +243,7 @@ fun CreateCardWithTemplateDialog(
                     enabled = !isLoading && when (template) {
                         CreateCardWithTemplate.Product,
                         CreateCardWithTemplate.Service ->
-                            name.isNotBlank() && description.isNotBlank()
+                            name.isNotBlank() && description.isNotBlank() && price.isNotBlank()
 
                         CreateCardWithTemplate.Job ->
                             title.isNotBlank() && description.isNotBlank()
@@ -253,7 +253,7 @@ fun CreateCardWithTemplateDialog(
                             title.isNotBlank() && description.isNotBlank()
                     },
                 ) {
-                    Text(stringResource(R.string.create))
+                    Text(stringResource(R.string.post))
                 }
             }
         )

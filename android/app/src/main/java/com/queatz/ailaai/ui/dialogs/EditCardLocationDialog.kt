@@ -451,7 +451,9 @@ fun EditCardLocationDialog(
                             api.updateCard(
                                 card.id!!,
                                 Card(
-                                    geo = position.toList(),
+                                    geo = position.toList().takeIf {
+                                        cardParentType == CardParentType.Map
+                                    },
                                     parent = card.parent,
                                     group = card.group,
                                     equipped = card.equipped,

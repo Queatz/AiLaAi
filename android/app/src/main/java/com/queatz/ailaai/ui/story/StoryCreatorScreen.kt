@@ -498,6 +498,7 @@ fun StoryCreatorScreen(
                 .weight(1f)
         ) {
             fun <T : StoryContent> creatorScope(part: T, partIndex: Int) = CreatorScope(
+                id = "$partIndex:${part::class.simpleName}",
                 source = source,
                 part = part,
                 partIndex = partIndex,
