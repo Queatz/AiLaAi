@@ -62,6 +62,7 @@ import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.margin
@@ -450,11 +451,21 @@ fun ExplorePage(
                             item(inAPage, selected = card.parent != null, "description") {
                                 moveToPage()
                             }
-                            item(appString { none }, selected = card.offline == true) {
+                            item(appString { offline }, selected = card.offline == true) {
                                 scope.launch {
                                     api.updateCard(
                                         card.id!!,
                                         Card(offline = true, parent = null, equipped = false, geo = null)
+                                    ) {
+                                        onCardUpdated(it)
+                                    }
+                                }
+                            }
+                            item(appString { none }, selected = card.parent == null && card.group == null && card.offline != true && card.equipped != true && card.geo == null) {
+                                scope.launch {
+                                    api.updateCard(
+                                        card.id!!,
+                                        Card(offline = false, parent = null, equipped = false, geo = null)
                                     ) {
                                         onCardUpdated(it)
                                     }
@@ -756,6 +767,9 @@ fun ExplorePage(
         }
 
         NewCardInput(
+            styles = {
+                flexShrink(0)
+            },
             onSubmit = { name, active ->
                 newSubCard(card, name, active)
             }

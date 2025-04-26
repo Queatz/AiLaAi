@@ -77,24 +77,20 @@ fun EditCardLocationDialog(
 
     var cardParentType by remember { mutableStateOf<CardParentType?>(null) }
 
-    if (card.offline.isTrue) {
-        cardParentType = null
-    } else if (card.equipped == true) {
-        cardParentType = CardParentType.Person
-    } else if (card.group != null) {
-        cardParentType = CardParentType.Group
-
-        LaunchedEffect(Unit) {
-            api.group(card.group!!) { parentGroup = it }
-        }
-    } else if (card.parent != null) {
-        cardParentType = CardParentType.Card
-
-        LaunchedEffect(Unit) {
+    LaunchedEffect(card) {
+        if (card.offline.isTrue) {
+            cardParentType = CardParentType.Offline
+        } else if (card.equipped == true) {
+            cardParentType = CardParentType.Person
+        } else if (card.group != null) {
+            cardParentType = CardParentType.Group
+             api.group(card.group!!) { parentGroup = it }
+        } else if (card.parent != null) {
+            cardParentType = CardParentType.Card
             api.card(card.parent!!) { parentCard = it }
+        } else if (card.geo != null) {
+            cardParentType = CardParentType.Map
         }
-    } else if (card.geo != null) {
-        cardParentType = CardParentType.Map
     }
 
     when (permissionState.status) {
@@ -181,8 +177,17 @@ fun EditCardLocationDialog(
                         card.parent = null
                     }
 
-                    else -> {
+                    CardParentType.Offline -> {
                         card.offline = true
+                        card.parent = null
+                        card.group = null
+                        parentCard = null
+                        parentGroup = null
+                        card.equipped = false
+                    }
+
+                    else -> {
+                        card.offline = false
                         card.parent = null
                         card.group = null
                         parentCard = null
@@ -200,7 +205,8 @@ fun EditCardLocationDialog(
                         CardParentType.Card -> stringResource(R.string.inside_another_card)
                         CardParentType.Group -> stringResource(R.string.in_a_group)
                         CardParentType.Person -> stringResource(R.string.on_profile)
-                        CardParentType.Offline, null -> stringResource(R.string.none)
+                        CardParentType.Offline -> stringResource(R.string.offline)
+                        null -> stringResource(R.string.none)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -416,7 +422,7 @@ fun EditCardLocationDialog(
 
                     }
 
-                    else -> {
+                    CardParentType.Offline -> {
                         Text(
                             stringResource(R.string.discoverable_by_link),
                             style = MaterialTheme.typography.bodyMedium,
@@ -425,6 +431,8 @@ fun EditCardLocationDialog(
                                 .padding(vertical = 1.pad)
                         )
                     }
+
+                    else -> Unit
                 }
             }
             Row(
@@ -434,13 +442,7 @@ fun EditCardLocationDialog(
             ) {
                 var disableSaveButton by rememberStateOf(false)
 
-                TextButton(
-                    {
-                        onDismissRequest()
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
+                DialogCloseButton(onDismissRequest)
                 TextButton(
                     {
                         disableSaveButton = true
@@ -476,4 +478,3 @@ fun EditCardLocationDialog(
         }
     }
 }
-

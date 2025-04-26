@@ -279,7 +279,8 @@ fun Route.meRoutes() {
                     childCards.forEach { childCard ->
                         if (childCard.person == person.id) {
                             childCard.parent = null
-                            childCard.offline = true
+                            childCard.parent = null
+                            childCard.offline = false
                             db.update(childCard)
                         }
                     }

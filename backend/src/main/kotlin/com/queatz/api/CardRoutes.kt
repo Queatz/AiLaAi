@@ -144,10 +144,6 @@ fun Route.cardRoutes() {
                 } else if (parentCard?.isMineOrIAmCollaborator(me) == false) {
                     HttpStatusCode.Forbidden.description("Not a collaborator on this parent")
                 } else {
-                    if (card.parent == null && card.equipped == null && card.geo == null && card.group == null) {
-                        card.offline = true
-                    }
-
                     db.insert(
                         Card(
                             person = person.id!!,

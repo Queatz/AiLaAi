@@ -11,6 +11,7 @@ import appString
 import components.IconButton
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
@@ -26,6 +27,7 @@ import r
 @Composable
 fun NewCardInput(
     defaultMargins: Boolean = true,
+    styles: StyleScope.() -> Unit = {},
     onSubmit: (name: String, active: Boolean) -> Unit,
 ) {
     var newCardTitle by remember { mutableStateOf("") }
@@ -35,8 +37,8 @@ fun NewCardInput(
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Row)
-            flexShrink(0)
             alignItems("center")
+            styles()
         }
     }) {
         NavSearchInput(

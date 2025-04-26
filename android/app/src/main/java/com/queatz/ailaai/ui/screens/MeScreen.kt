@@ -310,8 +310,7 @@ fun MeScreen() {
                         modifier = Modifier
                             .wrapContentWidth(unbounded = true)
                             .padding(horizontal = 1.pad)
-                            .padding(bottom = .5f.pad),
-                        showOffline = true
+                            .padding(bottom = .5f.pad)
                     ) {
                         setParentType(if (it == cardParentType) null else it)
                     }

@@ -237,19 +237,24 @@ fun Db.explore(
                         or contains(lower(x.${f(Card::conversation)}), @search)
                         or (is_array(x.${f(Card::categories)}) and first(for c in (x.${f(Card::categories)} || []) filter contains(lower(c), @search) return true) == true)
                 )
-                and x.${f(Card::geo)} != null
-            let d = distance(x.${f(Card::geo)}[0], x.${f(Card::geo)}[1], @geo[0], @geo[1])
-            filter (
-                d <= @nearbyMaxDistance
-            )
-            sort x.${f(Card::level)} desc, ${if (altitude == null) "x.${f(Card::size)} desc" else "abs((x.${f(Card::size)} || 0) - @altitude)"}, d == null, d
-            limit @offset, @limit
-            return merge(
-                x,
-                {
-                    cardCount: count(for card in @@collection filter card.${f(Card::active)} == true && card.${f(Card::parent)} == x._key return true)
-                }
-            )
+            for person in ${Person::class.collection()}
+                filter person._key == x.${f(Card::person)}
+                
+                let geo = x.${f(Card::geo)} == null ? person.${f(Person::geo)} : x.${f(Card::geo)}
+                let d = geo == null ? null : distance(geo[0], geo[1], @geo[0], @geo[1])
+                filter d != null and d <= @nearbyMaxDistance
+                sort x.${f(Card::level)} desc,
+                    ${if (altitude == null) "x.${f(Card::size)} desc" else "abs((x.${f(Card::size)} || 0) - @altitude)"},
+                    d == null,
+                    d,
+                    x.${f(Card::createdAt)} desc
+                limit @offset, @limit
+                return merge(
+                    x,
+                    {
+                        cardCount: count(for card in @@collection filter card.${f(Card::active)} == true && card.${f(Card::parent)} == x._key return true)
+                    }
+                )
     """.trimIndent(),
     buildMap {
         put("geo", geo)

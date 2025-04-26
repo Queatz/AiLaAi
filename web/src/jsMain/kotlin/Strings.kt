@@ -2105,6 +2105,11 @@ object Strings {
         vn = "Chia sẻ những suy nghĩ của bạn",
         ru = "Поделитесь мыслью"
     )
+    val offline = Translation(
+        en = "Offline",
+        vn = "Ngoài đời",
+        ru = "Оффлайн"
+    )
 }
 
 /**

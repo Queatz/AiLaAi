@@ -1026,14 +1026,16 @@ fun CardScreen(
                                         card.parent != null -> stringResource(R.string.inside_another_card)
                                         card.group != null -> stringResource(R.string.in_a_group)
                                         card.equipped == true -> stringResource(R.string.on_profile)
-                                        card.offline != true -> stringResource(R.string.at_a_location)
+                                        card.geo != null -> stringResource(R.string.at_a_location)
+                                        card.offline == true -> stringResource(R.string.offline)
                                         else -> stringResource(R.string.none)
                                     },
                                     selected = when {
                                         card.parent != null -> true
                                         card.group != null -> true
                                         card.equipped == true -> true
-                                        card.offline != true -> true
+                                        card.geo != null -> true
+                                        card.offline == true -> true
                                         else -> false
                                     }
                                 ) {

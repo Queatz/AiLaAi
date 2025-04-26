@@ -49,6 +49,7 @@ import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
@@ -63,7 +64,9 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
+import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.percent
@@ -431,14 +434,170 @@ fun PageTreeWidget(widgetId: String) {
         }
     }
 
+    fun addMultiple() {
+        scope.launch {
+            val text = inputDialog(
+                // todo: translate
+                title = "Add multiple",
+                singleLine = false,
+                // todo: translate
+                placeholder = "Paste one page per line. Indented lines (2+ spaces or tabs) will be used as descriptions.",
+                // todo: translate
+                confirmButton = "Review"
+            )
+
+            if (text.isNullOrBlank()) return@launch
+
+            // Parse the input text to identify cards and their descriptions
+            val cards = mutableListOf<Pair<String, String?>>()
+            var currentCard: String? = null
+            var currentDescription = StringBuilder()
+
+            text.lines().forEach { line ->
+                val trimmedLine = line.trim()
+                if (trimmedLine.isBlank()) {
+                    // Skip blank lines
+                    return@forEach
+                }
+
+                // Check if this is a description (indented line)
+                val isDescription = line.startsWith("  ") || line.startsWith("\t")
+
+                if (isDescription && currentCard != null) {
+                    // Add to the current card's description
+                    if (currentDescription.isNotEmpty()) {
+                        currentDescription.append("\n")
+                    }
+                    currentDescription.append(trimmedLine)
+                } else {
+                    // Save the previous card if there was one
+                    currentCard?.let { cardName ->
+                        cards.add(Pair(cardName, if (currentDescription.isNotEmpty()) currentDescription.toString() else null))
+                        currentDescription = StringBuilder()
+                    }
+                    // Start a new card
+                    currentCard = trimmedLine
+                }
+            }
+
+            // Add the last card if there is one
+            currentCard?.let { cardName ->
+                cards.add(Pair(cardName, if (currentDescription.isNotEmpty()) currentDescription.toString() else null))
+            }
+
+            if (cards.isEmpty()) return@launch
+
+            // Show a preview of the cards to be created
+            val confirmed = dialog(
+                // todo: translate
+                title = "Review",
+                // todo: translate
+                confirmButton = "${cards.size} pages will be created",
+                cancelButton = application.appString { cancel }
+            ) { resolve ->
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(1.r)
+                    }
+                }) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            gap(.5.r)
+                            maxHeight(20.r)
+                            overflow("auto")
+                        }
+                    }) {
+                        cards.forEach { (name, description) ->
+                            Div({
+                                style {
+                                    display(DisplayStyle.Flex)
+                                    flexDirection(FlexDirection.Column)
+                                    padding(.5.r)
+                                    borderRadius(.25.r)
+                                }
+                            }) {
+                                Div({
+                                    style {
+                                        fontWeight("bold")
+                                    }
+                                }) {
+                                    Text(name)
+                                }
+
+                                description?.let {
+                                    Div({
+                                        style {
+                                            fontSize(14.px)
+                                            opacity(.85)
+                                        }
+                                    }) {
+                                        Text(it)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (confirmed == true) {
+                // Create cards one by one via the API
+                cards.forEach { (name, description) ->
+                    api.newCard(Card(
+                        name = name,
+                        parent = data?.card ?: return@forEach,
+                        active = true
+                    )) { card ->
+                        // If there's a description, update the card with it
+                        if (description != null) {
+                            saveConversation(card, description)
+                        }
+
+                        // Add tags to the card if there are any
+                        if (newPageTags.isNotEmpty()) {
+                            addTagsToCard(card, newPageTags)
+                        }
+                    }
+                }
+
+                // Refresh the page
+                reload()
+            }
+        }
+    }
+
     Div(
         {
             classes(WidgetStyles.pageTree)
         }
     ) {
         if (isMine) {
-            NewCardInput(defaultMargins = false) { name, active ->
-                newSubCard(data?.card ?: return@NewCardInput, name, active)
+            Div(
+                {
+                    style {
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        gap(1.r)
+                    }
+                }
+            ) {
+                NewCardInput(defaultMargins = false, styles = {
+                    flexGrow(1)
+                }) { name, active ->
+                    newSubCard(data?.card ?: return@NewCardInput, name, active)
+                }
+
+                IconButton(
+                    name = "list",
+                    title = appString { publish },
+                    onClick = {
+                        addMultiple()
+                    }
+                )
             }
 
             Tags(

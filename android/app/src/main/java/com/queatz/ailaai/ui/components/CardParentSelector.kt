@@ -16,7 +16,6 @@ import com.queatz.ailaai.ui.theme.pad
 fun CardParentSelector(
     value: CardParentType?,
     modifier: Modifier = Modifier,
-    showOffline: Boolean = false,
     onChange: (CardParentType) -> Unit
 ) {
     // todo: make this a loop
@@ -73,17 +72,15 @@ fun CardParentSelector(
             Text(stringResource(R.string.in_a_group), modifier = Modifier.padding(start = 1.pad))
         }
 
-        if (showOffline) {
-            Button(
-                {
-                    onChange(CardParentType.Offline)
-                },
-                colors = if (value == CardParentType.Offline) checkedColors else colors,
-                elevation = ButtonDefaults.elevatedButtonElevation(.5f.pad)
-            ) {
-                Icon(Icons.Outlined.LocationOff, stringResource(R.string.none))
-                Text(stringResource(R.string.none), modifier = Modifier.padding(start = 1.pad))
-            }
+        Button(
+            {
+                onChange(CardParentType.Offline)
+            },
+            colors = if (value == CardParentType.Offline) checkedColors else colors,
+            elevation = ButtonDefaults.elevatedButtonElevation(.5f.pad)
+        ) {
+            Icon(Icons.Outlined.LocationOff, stringResource(R.string.offline))
+            Text(stringResource(R.string.offline), modifier = Modifier.padding(start = 1.pad))
         }
     }
 }
