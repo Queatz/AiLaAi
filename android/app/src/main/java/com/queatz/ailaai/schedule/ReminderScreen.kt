@@ -67,6 +67,8 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.format
+import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.inList
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
@@ -645,7 +647,7 @@ fun ReminderScreen(reminderId: String) {
                             }
                             item(
                                 icon = Icons.Outlined.Timer,
-                                name = stringResource(R.string.set_duration),
+                                name = reminder?.duration?.takeIf { it > 0 }?.let { it.milliseconds.format() } ?: stringResource(R.string.set_duration),
                                 selected = reminder?.duration != null && reminder?.duration!! > 0
                             ) {
                                 showDurationDialog = true
@@ -766,7 +768,7 @@ fun ReminderScreen(reminderId: String) {
                         )
                     }
                 } else {
-                    if (me?.id !in (reminder?.people ?: emptyList())) {
+                    if (reminder != null && me?.id !in (reminder?.people ?: emptyList())) {
                         item {
                             Button(
                                 onClick = {

@@ -216,26 +216,20 @@ fun Db.updateEquippedCards(person: String, geo: List<Double>) = query(
  * @limit Page size
  */
 fun Db.explore(
-    person: String?,
     geo: List<Double>,
     altitude: Double? = null,
     search: String? = null,
     paid: Boolean? = null,
     nearbyMaxDistance: Double = 0.0,
     offset: Int = 0,
-    limit: Int = 20,
-    public: Boolean = false
+    limit: Int = 20
 ) = list(
     Card::class,
     """
         for x in @@collection
             filter x.${f(Card::active)} == true
-                and (x.${f(Card::parent)} == null or @search != null) // When searching, include cards inside other cards
-                and (x.${f(Card::geo)} != null or @search != null) // When searching, include cards inside other cards
-                ${if (public) "and x.${f(Card::equipped)} != true" else ""}
                 ${if (paid != null) "and x.${f(Card::pay)} ${if (paid) "!=" else "=="} null" else ""}
                 and x.${f(Card::offline)} != true
-                ${if (person == null || public) "" else "and x.${f(Card::person)} != @personKey"}
                 and (
                     @search == null 
                         or contains(lower(x.${f(Card::name)}), @search)
@@ -243,11 +237,12 @@ fun Db.explore(
                         or contains(lower(x.${f(Card::conversation)}), @search)
                         or (is_array(x.${f(Card::categories)}) and first(for c in (x.${f(Card::categories)} || []) filter contains(lower(c), @search) return true) == true)
                 )
-            let d = x.${f(Card::geo)} == null ? null : distance(x.${f(Card::geo)}[0], x.${f(Card::geo)}[1], @geo[0], @geo[1])
+                and x.${f(Card::geo)} != null
+            let d = distance(x.${f(Card::geo)}[0], x.${f(Card::geo)}[1], @geo[0], @geo[1])
             filter (
-                ${if (person == null || public) "d != null and d <= @nearbyMaxDistance" else isFriendCard()}
+                d <= @nearbyMaxDistance
             )
-            sort x.${f(Card::level)}desc, ${if (altitude == null) "x.${f(Card::size)} desc" else "abs((x.${f(Card::size)} || 0) - @altitude)"}, d == null, d
+            sort x.${f(Card::level)} desc, ${if (altitude == null) "x.${f(Card::size)} desc" else "abs((x.${f(Card::size)} || 0) - @altitude)"}, d == null, d
             limit @offset, @limit
             return merge(
                 x,
@@ -257,20 +252,12 @@ fun Db.explore(
             )
     """.trimIndent(),
     buildMap {
-        if (person != null) {
-            if (!public) {
-                put("personKey", person.asKey())
-                put("person", person.asId(Person::class))
-            }
-        }
         put("geo", geo)
         if (altitude != null) {
             put("altitude", altitude)
         }
         put("search", search?.trim()?.lowercase())
-        if (person == null || public) {
-            put("nearbyMaxDistance", nearbyMaxDistance)
-        }
+        put("nearbyMaxDistance", nearbyMaxDistance)
         put("offset", offset)
         put("limit", limit)
     }

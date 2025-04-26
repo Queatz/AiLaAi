@@ -244,9 +244,9 @@
     <string name="introduce_yourself">Giới thiệu bản thân ở đây…</string>
     <string name="add_your_name">Thêm tên của bạn…</string>
     <string name="view_profile">Xem trang cá nhân</string>
-    <string name="pay">Lương</string>
-    <string name="add_pay">Thêm lương</string>
-    <string name="change_pay">Đổi lương</string>
+    <string name="pay">Giá / lương</string>
+    <string name="add_pay">Thêm giá / lương</string>
+    <string name="change_pay">Đổi giá / lương</string>
     <string name="set_category">Chọn danh mục</string>
     <string name="choose_x_quoted">Chọn \"%1$s\"</string>
     <string name="choose_none">Chọn không</string>

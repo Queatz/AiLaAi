@@ -234,9 +234,9 @@
     <string name="introduce_yourself">Introduce yourself</string>
     <string name="add_your_name">Add your name</string>
     <string name="view_profile">View profile</string>
-    <string name="pay">Pay</string>
-    <string name="add_pay">Add pay</string>
-    <string name="change_pay">Change pay</string>
+    <string name="pay">Price / Pay</string>
+    <string name="add_pay">Add price / pay</string>
+    <string name="change_pay">Change price / pay</string>
     <string name="set_category">Set category</string>
     <string name="choose_x_quoted">Choose \"%1$s\"</string>
     <string name="choose_none">Choose none</string>

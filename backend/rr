@@ -1,1 +1,0 @@
-ssh -t root@api.ailaai.app "./r"

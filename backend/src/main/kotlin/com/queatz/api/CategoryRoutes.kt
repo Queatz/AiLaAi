@@ -31,7 +31,6 @@ fun Route.categoryRoutes() {
                     (
                         (
                             db.explore(
-                                person = person.id!!,
                                 geo = geo,
                                 search = call.parameters["search"]?.notBlank,
                                 nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,

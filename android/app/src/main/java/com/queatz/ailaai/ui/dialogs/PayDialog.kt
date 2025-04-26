@@ -66,10 +66,10 @@ fun PayDialog(
                 PayFrequency.entries.forEach {
                     val isSelected = payFrequency == it
                     GroupMember(
-                        null,
-                        it.appString,
-                        null,
-                        isSelected
+                        photos = null,
+                        name = it.appString,
+                        info = null,
+                        selected = isSelected
                     ) {
                         payFrequency = if (payFrequency == it) null else it
                     }

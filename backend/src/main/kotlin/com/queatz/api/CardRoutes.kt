@@ -113,7 +113,6 @@ fun Route.cardRoutes() {
                 val paid = call.parameters["paid"]?.toBoolean()
 
                 db.explore(
-                    person = person?.id,
                     geo = geo,
                     altitude = call.parameters["altitude"]?.toDoubleOrNull(),
                     search = search,
@@ -121,7 +120,6 @@ fun Route.cardRoutes() {
                     nearbyMaxDistance = defaultNearbyMaxDistanceInMeters,
                     offset = call.parameters["offset"]?.toInt() ?: 0,
                     limit = call.parameters["limit"]?.toInt() ?: 20,
-                    public = (call.parameters["public"]?.toBoolean() ?: false) || (person == null)
                 )
             }
         }

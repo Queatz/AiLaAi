@@ -624,15 +624,15 @@ fun CardScreen(
 
     if (showPay) {
         PayDialog(
-            {
+            onDismissRequest = {
                 showPay = false
             },
             defaultPay = card?.pay?.pay,
             defaultFrequency = card?.pay?.frequency
         ) { pay ->
             api.updateCard(
-                cardId,
-                Card(pay = pay)
+                id = cardId,
+                card = Card(pay = pay)
             ) {
                 reload()
             }
