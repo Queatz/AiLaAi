@@ -23,6 +23,9 @@ import application
 import com.queatz.db.Invite
 import com.queatz.db.PersonProfile
 import components.Loading
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
 import notBlank
 import org.jetbrains.compose.web.attributes.ATarget
@@ -140,7 +143,19 @@ fun InviteCard(
                     scope.launch {
                         if (me == null) {
                             api.signUp(
-                                inviteCode = invite.code!!
+                                inviteCode = invite.code!!,
+                                onError = { error ->
+                                    scope.launch {
+                                        dialog(
+                                            title = application.appString { inviteCodeCannotBeUsed },
+                                            cancelButton = null
+                                        ) {
+                                            (error as? ResponseException)?.response?.status?.description?.let {
+                                                Text(it)
+                                            }
+                                        }
+                                    }
+                                }
                             ) {
                                 application.setToken(it.token)
 
@@ -154,6 +169,7 @@ fun InviteCard(
                             api.useInvite(
                                 code = invite.code!!,
                                 onError = {
+                                    console.error(it)
                                     scope.launch {
                                         dialog(
                                             title = application.appString { inviteCodeCannotBeUsed },
@@ -175,7 +191,7 @@ fun InviteCard(
                 }
             }
         ) {
-            appText { acceptInvite }
+            appText { if (me == null) signUpAndAcceptInvite else acceptInvite }
         }
     }
 }

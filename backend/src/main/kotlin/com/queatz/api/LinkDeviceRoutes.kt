@@ -5,23 +5,29 @@ import com.queatz.db.linkDeviceToken
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
+import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 
 fun Route.linkDeviceRoutes() {
-    post("/link-device") {
-        respond {
-            db.insert(
-                LinkDeviceToken(token = (1..128).token())
-            )
+    authenticate(optional = true) {
+        post("/link-device") {
+            respond {
+                db.insert(
+                    LinkDeviceToken(
+                        person = meOrNull?.id,
+                        token = (1..128).token(),
+                    )
+                )
+            }
         }
-    }
 
-    get("/link-device/{token}") {
-        respond {
-            db.linkDeviceToken(parameter("token")) ?: HttpStatusCode.NotFound
+        get("/link-device/{token}") {
+            respond {
+                db.linkDeviceToken(parameter("token")) ?: HttpStatusCode.NotFound
+            }
         }
     }
 

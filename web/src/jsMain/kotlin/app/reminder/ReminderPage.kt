@@ -4,6 +4,7 @@ import LocalConfiguration
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +18,13 @@ import app.ailaai.api.groups
 import app.ailaai.api.people
 import app.ailaai.api.profile
 import app.ailaai.api.updateReminder
+import app.dialog.photoDialog
+import baseUrl
+import components.CardContent
+import org.jetbrains.compose.web.dom.Img
+import org.jetbrains.compose.web.css.percent
+import stories.StoryStyles
+import stories.StoryContents
 import app.components.EditField
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -52,9 +60,15 @@ import org.jetbrains.compose.web.dom.H3
 import org.jetbrains.compose.web.dom.NumberInput
 import org.jetbrains.compose.web.dom.Text
 import kotlinx.browser.window
+import notBlank
+import org.jetbrains.compose.web.css.FlexWrap
+import org.jetbrains.compose.web.css.flexWrap
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import stories.asStoryContents
 import kotlin.js.Date
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
@@ -67,6 +81,7 @@ fun ReminderPage(
     onDelete: (Reminder) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val me = application.me.collectAsState().value
 
     var menuTarget by remember(reminder) {
         mutableStateOf<DOMRect?>(null)
@@ -372,8 +387,10 @@ fun ReminderPage(
         }
 
         // Render people on the reminder if there are any
-        val people = reminder.people
-        if (people != null && people.isNotEmpty()) {
+        val people = (reminder.people.orEmpty() + reminder.person!!).takeIf {
+            !(it.size == 1 && it.first() == me?.id)
+        }
+        if (!people.isNullOrEmpty()) {
             // Add a title for the people section
             Div({
                 style {
@@ -388,8 +405,8 @@ fun ReminderPage(
                 style {
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Row)
+                    flexWrap(FlexWrap.Wrap)
                     margin(1.r)
-                    overflowX("auto")
                 }
             }) {
                 people.forEach { personId ->
@@ -418,6 +435,44 @@ fun ReminderPage(
                         )
                     }
                 }
+            }
+        }
+
+        // Display reminder photo if available
+        reminder.photo?.let { photo ->
+            Div({
+                style {
+                    margin(1.r)
+                }
+            }) {
+                val url = "$baseUrl$photo"
+                Img(src = url, attrs = {
+                    classes(StoryStyles.contentPhotosPhoto)
+
+                    onClick {
+                        scope.launch {
+                            photoDialog(url)
+                        }
+                    }
+                })
+            }
+        }
+
+        val content = remember(reminder.content) {
+            reminder.content?.notBlank?.asStoryContents() ?: emptyList()
+        }
+
+        // Display reminder content if available
+        if (content.isNotEmpty()) {
+            Div({
+                style {
+                    marginLeft(1.r)
+                    marginRight(1.r)
+                }
+            }) {
+                StoryContents(
+                    content = content
+                )
             }
         }
 

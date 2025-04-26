@@ -476,8 +476,8 @@ fun InventoryScreen() {
                 .align(Alignment.BottomCenter)
         ) {
             SearchFieldAndAction(
-                search,
-                { search = it },
+                value = search,
+                valueChange = { search = it },
                 action = {
                     Icon(Icons.Outlined.Edit, null)
                 }

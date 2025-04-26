@@ -245,6 +245,11 @@ object Strings {
         vn = "Chấp nhận lời mời",
         ru = "Принять приглашение"
     )
+    val signUpAndAcceptInvite = Translation(
+        en = "Sign up and accept invite",
+        vn = "Đăng ký và chấp nhận lời mời",
+        ru = "Зарегистрируйтесь и примите приглашение"
+    )
     val name = Translation(
         en = "Name",
         vn = "Tên",
@@ -1407,7 +1412,7 @@ object Strings {
     )
     val signOutOrTransfer = Translation(
         en = "Sign out or transfer",
-        vn = "Đăng xuất hoặc chuyển",
+        vn = "Đăng xuất hoặc chuyển khoản",
         ru = "Выйти или перенести"
     )
     val signOutQuestion = Translation(

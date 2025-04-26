@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import app.ailaai.api.useInvite
 import com.huawei.hms.api.ConnectionResult
 import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.hmsscankit.ScanKitActivity
@@ -21,6 +22,7 @@ import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.appDomain
 import com.queatz.ailaai.dataStore
 import com.queatz.ailaai.extensions.appNavigate
@@ -28,6 +30,7 @@ import com.queatz.ailaai.extensions.cameraSupported
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.navOrNull
 import com.queatz.ailaai.ui.dialogs.DialogCloseButton
 import com.queatz.ailaai.ui.dialogs.RationaleDialog
 import com.queatz.ailaai.ui.permission.permissionRequester
@@ -42,10 +45,12 @@ sealed class ScanQrCodeResult {
     data class Story(val id: String) : ScanQrCodeResult()
     data class Profile(val id: String) : ScanQrCodeResult()
     data class LinkDevice(val token: String) : ScanQrCodeResult()
+    data class Invite(val code: String) : ScanQrCodeResult()
 }
 
 @Composable
 fun ScanQrCodeButton() {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val nav = nav
 
@@ -70,12 +75,26 @@ fun ScanQrCodeButton() {
             is ScanQrCodeResult.LinkDevice -> {
                 nav.appNavigate(AppNav.LinkDevice(it.token))
             }
+            is ScanQrCodeResult.Invite -> {
+                scope.launch {
+                    api.useInvite(
+                        it.code
+                    ) {
+                        it.group?.let {
+                            nav.appNavigate(AppNav.Group(it))
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
+fun ScanQrCodeButton(
+    button: (@Composable (onClick: () -> Unit) -> Unit)? = null,
+    onResult: (ScanQrCodeResult) -> Unit
+) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showQrCodeExplanationDialog by rememberStateOf(false)
@@ -88,7 +107,8 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
     )
-    val nav = nav
+
+    val nav = navOrNull
 
     val scanQrLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -128,6 +148,11 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
                                 onResult(ScanQrCodeResult.LinkDevice(token))
                                 true
                             }
+                            it.startsWith("/invite/") -> {
+                                val code = it.split("/").getOrNull(2) ?: return@let null
+                                onResult(ScanQrCodeResult.Invite(code))
+                                true
+                            }
                             else -> null
                         }
                     }
@@ -141,7 +166,7 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
         scanQrLauncher.launch(
             // https://developer.huawei.com/consumer/en/doc/development/HMSCore-Guides/android-parsing-result-codes-0000001050043969
             // Extracted from ScanUtil.java (startScan)
-            Intent(nav.context as Activity, ScanKitActivity::class.java).apply {
+            Intent(nav?.context ?: context as Activity, ScanKitActivity::class.java).apply {
                 putExtra("ScanFormatValue", HmsScan.QRCODE_SCAN_TYPE)
                 putExtra("ScanViewValue", 1)
             }
@@ -224,9 +249,13 @@ fun ScanQrCodeButton(onResult: (ScanQrCodeResult) -> Unit) {
         )
     }
 
-    IconButton({
-        launchScanQrCode()
-    }) {
-        Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
+    if (button == null) {
+        IconButton({
+            launchScanQrCode()
+        }) {
+            Icon(Icons.Outlined.QrCodeScanner, stringResource(R.string.scan))
+        }
+    } else {
+        button(::launchScanQrCode)
     }
 }

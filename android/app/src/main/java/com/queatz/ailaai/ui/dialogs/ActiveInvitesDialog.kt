@@ -88,6 +88,9 @@ fun ActiveInvitesDialog(
                 scope.launch {
                     reload()
                 }
+                it.code?.let { code ->
+                    selectedInviteCode = code
+                }
                 showCreateInviteDialog = false
             }
         )

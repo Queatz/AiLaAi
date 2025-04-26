@@ -120,7 +120,7 @@ fun <T> ChooseDialog(
                 )
 
                 if (onQrCodeScan != null) {
-                    ScanQrCodeButton(onQrCodeScan)
+                    ScanQrCodeButton(onResult = onQrCodeScan)
                 }
 
                 actions()

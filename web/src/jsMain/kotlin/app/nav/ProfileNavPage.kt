@@ -30,25 +30,35 @@ import com.queatz.db.Person
 import com.queatz.db.PersonProfile
 import com.queatz.db.Profile
 import components.IconButton
+import components.Loading
 import components.QrImg
 import components.Wbr
 import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import linkDevice
 import notBlank
+import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginRight
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
+import qr
 import r
 import webBaseUrl
 import kotlin.time.Duration.Companion.seconds
@@ -329,6 +339,52 @@ fun ProfileNavPage(
                 api.transferCode {
                     transferCode = it.code ?: ""
                     showingTransferCode = true
+                }
+            }
+        }
+
+        // Link Device button
+        // todo: translate
+        NavMenuItem("phone_android", "Link device") {
+            scope.launch {
+                dialog(
+                    title = "Link device",
+                    cancelButton = null
+                ) {
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            flexDirection(FlexDirection.Column)
+                            alignItems(AlignItems.Center)
+                            gap(1.r)
+                            padding(1.r)
+                        }
+                    }) {
+                        // todo: translate
+                        Text("Scan this QR code from your other device to sign in")
+
+                        var qrCode by remember { mutableStateOf<String?>(null) }
+
+                        LaunchedEffect(Unit) {
+                            api.linkDevice {
+                                qrCode = "$webBaseUrl/link-device/${it.token!!}".qr
+                            }
+                        }
+
+                        Div({
+                            style {
+                                borderRadius(1.r)
+                                overflow("hidden")
+                            }
+                        }) {
+                            if (qrCode != null) {
+                                Img(src = qrCode!!)
+                            } else {
+                                // todo: translate
+                                Loading()
+                            }
+                        }
+                    }
                 }
             }
         }

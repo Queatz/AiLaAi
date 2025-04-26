@@ -81,7 +81,7 @@ fun SetPhotoButton(
             imagesOnly = true,
             aspect = aspect,
             transparentBackground = transparentBackground,
-            onRemove = onRemove?.let { onRemove ->
+            onRemove = onRemove?.takeIf { photo.isNotBlank() }?.let { onRemove ->
                 {
                     onRemove()
                     choosePhotoDialog = false

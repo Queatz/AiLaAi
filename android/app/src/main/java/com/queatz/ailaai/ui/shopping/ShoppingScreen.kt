@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,10 +13,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.ailaai.api.cards
+import app.ailaai.api.savedCards
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -57,7 +58,9 @@ import com.queatz.ailaai.ui.components.AppHeader
 import com.queatz.ailaai.ui.components.CardItem
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.PageInput
+import com.queatz.ailaai.ui.components.ScanQrCodeButton
 import com.queatz.ailaai.ui.components.SearchFieldAndAction
+import com.queatz.ailaai.ui.screens.SearchContent
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
 import kotlinx.coroutines.CancellationException
@@ -71,6 +74,7 @@ fun ShoppingScreen() {
     var searchText by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     var allCards by remember { mutableStateOf(emptyList<Card>()) }
+    var favoriteCards by remember { mutableStateOf(emptyList<Card>()) }
     var isLoading by rememberStateOf(true)
     var geo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
@@ -80,48 +84,74 @@ fun ShoppingScreen() {
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var categories by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var showEditCardDialog by remember { mutableStateOf(false) }
+    var showFavorites by rememberSaveable { mutableStateOf(false) }
     val locationSelector = locationSelector(
         geo = geo,
         onGeoChange = { geo = it },
         activity = nav.context as Activity
     )
 
-    LaunchedEffect(allCards) {
-        categories = allCards
+    LaunchedEffect(allCards, favoriteCards, showFavorites) {
+        categories = if (showFavorites) {
+            favoriteCards
+        } else {
+            allCards
+        }
             .flatMap { it.categories ?: emptyList() }
             .sortedDistinct()
     }
 
     val filteredCards = remember(
         allCards,
+        favoriteCards,
         searchText,
-        selectedCategory
+        selectedCategory,
+        showFavorites
     ) {
-        allCards
-            .filter { card ->
-                (searchText.isBlank() || card.name?.contains(searchText, true) == true ||
-                        card.conversation?.contains(searchText, true) == true ||
-                        card.location?.contains(searchText, true) == true) &&
-                (selectedCategory == null || card.categories?.contains(selectedCategory) == true)
-            }
+        if (showFavorites) {
+            favoriteCards
+        } else {
+            allCards
+
+        }.filter { card ->
+            (searchText.isBlank() || card.name?.contains(searchText, true) == true ||
+                    card.conversation?.contains(searchText, true) == true ||
+                    card.location?.contains(searchText, true) == true) &&
+                    (selectedCategory == null || card.categories?.contains(selectedCategory) == true)
+        }
     }
 
     suspend fun reload(passive: Boolean = false) {
-        isLoading = !passive || allCards.isEmpty()
-        geo?.let { currentGeo ->
-            api.cards(
-                geo = currentGeo.toGeo(),
-                paid = true,
+        isLoading = !passive || (if (showFavorites) favoriteCards.isEmpty() else allCards.isEmpty())
+
+        if (showFavorites) {
+            api.savedCards(
                 search = searchText.notBlank,
-                onError = {
-                    if (!passive && it !is CancellationException) {
+                onError = { error ->
+                    if (!passive && error !is CancellationException) {
                         // Handle error
                     }
                 }
-            ) {
-                allCards = it
+            ) { result ->
+                favoriteCards = result.mapNotNull { it.card }
+            }
+        } else {
+            geo?.let { currentGeo ->
+                api.cards(
+                    geo = currentGeo.toGeo(),
+                    paid = true,
+                    search = searchText.notBlank,
+                    onError = { error ->
+                        if (!passive && error !is CancellationException) {
+                            // Handle error
+                        }
+                    }
+                ) { result ->
+                    allCards = result
+                }
             }
         }
+
         isLoading = false
     }
 
@@ -131,7 +161,7 @@ fun ShoppingScreen() {
         }
     }
 
-    LaunchedEffect(geo, searchText) {
+    LaunchedEffect(geo, searchText, showFavorites) {
         reloadFlow.emit(false)
     }
 
@@ -163,6 +193,19 @@ fun ShoppingScreen() {
             actions = {
                 IconButton(
                     onClick = {
+                        showFavorites = !showFavorites
+                        scope.launch {
+                            reloadFlow.emit(false)
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (showFavorites) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = "Favorites"
+                    )
+                }
+                IconButton(
+                    onClick = {
                         showEditCardDialog = true
                     }
                 ) {
@@ -171,6 +214,7 @@ fun ShoppingScreen() {
                         contentDescription = stringResource(R.string.sell)
                     )
                 }
+                ScanQrCodeButton()
             }
         )
 
@@ -241,28 +285,13 @@ fun ShoppingScreen() {
                         h = it.size.height
                     }
             ) {
-                // Categories filter
-                if (categories.isNotEmpty()) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(1.pad),
-                        modifier = Modifier.padding(horizontal = 1.pad)
-                    ) {
-                        categories.forEach { category ->
-                            val isSelected = selectedCategory == category
-                            Button(
-                                onClick = {
-                                    selectedCategory = if (isSelected) null else category
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            ) {
-                                Text(category)
-                            }
-                        }
-                    }
-                }
+                SearchContent(
+                    locationSelector = locationSelector,
+                    isLoading = isLoading,
+                    categories = categories,
+                    category = selectedCategory,
+                    onCategory = { selectedCategory = it }
+                )
                 SearchFieldAndAction(
                     value = searchText,
                     valueChange = { searchText = it },

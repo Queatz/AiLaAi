@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -32,10 +35,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import app.ailaai.api.signIn
+import app.ailaai.api.signInWithLink
 import app.ailaai.api.signUp
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.ui.components.ScanQrCodeButton
+import com.queatz.ailaai.ui.components.ScanQrCodeResult
 import com.queatz.ailaai.ui.theme.pad
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
@@ -104,10 +110,23 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
         )
     }
 
+    fun signInWithLink(link: String) {
+        scope.launch {
+            api.signInWithLink(
+                link = link
+            ) {
+                api.setToken(it.token)
+                onKnown(false)
+                keyboardController.hide()
+            }
+            codeValueEnabled = true
+        }
+    }
+
     fun signUp(code: String? = null) {
         scope.launch {
             api.signUp(
-                code,
+                inviteCode = code,
                 onError = { ex ->
                     if (ex is ResponseException) {
                         if (ex.response.status in listOf(HttpStatusCode.Unauthorized, HttpStatusCode.NotFound)) {
@@ -128,7 +147,14 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
-            .background(linearGradient(listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.tertiary)))
+            .background(
+                linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.tertiary
+                    )
+                )
+            )
             .fillMaxSize()
             .padding(
                 PaddingValues(
@@ -205,6 +231,41 @@ fun InitialScreen(onKnown: (isSignUp: Boolean) -> Unit) {
                 modifier = Modifier.padding(vertical = 3.pad)
             ) {
                 Text(stringResource(R.string.sign_in))
+            }
+        }
+
+        ScanQrCodeButton(
+            button = { scan ->
+                OutlinedButton(
+                    onClick = scan,
+                    modifier = Modifier.padding(vertical = 1.pad)
+                ) {
+                    Icon(
+                        Icons.Outlined.QrCodeScanner,
+                        // todo: translate
+                        contentDescription = "Scan QR",
+                        modifier = Modifier.padding(end = 1.pad)
+                    )
+                    // todo: translate
+                    Text("Scan QR")
+                }
+            }
+        ) { result ->
+            // Handle standard app URLs
+            when (result) {
+                is ScanQrCodeResult.Invite -> {
+                    codeValueEnabled = false
+                    signUp(result.code)
+                }
+
+                is ScanQrCodeResult.LinkDevice -> {
+                    if (result.token.isNotBlank()) {
+                        codeValueEnabled = false
+                        signInWithLink(result.token)
+                    }
+                }
+
+                else -> Unit
             }
         }
     }

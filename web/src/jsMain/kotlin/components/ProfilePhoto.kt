@@ -95,6 +95,10 @@ fun ProfilePhoto(
                 Span(
                     {
                         classes("material-symbols-outlined")
+
+                        style {
+                            property("font-size", "inherit")
+                        }
                     }
                 ) {
                     Text(fallback)
