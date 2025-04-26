@@ -1,9 +1,38 @@
+1.0.5
+=====
+
+ -
+ -
+ -
+
 1.0.4
 ======
 
+Reminders:
  - Make reminder open
- - Set reminder location
+ - Set reminder location, photo, content
+ - Sticky reminders
+ - See & join nearby events
+ - Set reminder duration
+
+Groups:
  - Rate messages
+ - Connect with people in-person via the Impromptu feature
+ - Create and manage group invite links
+ - Search messages by rating and reaction
+
+Pages:
+ - Scripts: Render Audio, Groups, Profiles, Pages
+ - View page in fullscreen
+ - Pages added to your homescreen now start in fullscreen
+ - Easily create pages with templates
+ - Shopping tab
+
+Other:
+ - View your AI prompt history
+ - Scan QR code to accept invite
+ - Scan QR code to join group via invite
+ - Scan QR code to link device
 
 1.0.3
 ======
