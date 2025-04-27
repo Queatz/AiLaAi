@@ -39,13 +39,10 @@ import com.queatz.ailaai.extensions.formatTime
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.me
-import com.queatz.ailaai.schedule.formatDateTime
 import com.queatz.ailaai.services.authors
 import com.queatz.ailaai.ui.components.GroupPhoto
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -146,7 +143,7 @@ private fun EventItemContent(
         }
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             GroupPhoto(photos)
             Column(

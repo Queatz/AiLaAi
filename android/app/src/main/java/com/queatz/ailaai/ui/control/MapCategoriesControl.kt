@@ -32,10 +32,10 @@ fun mapCategoriesControl(
     fun updateCategories() {
         scope.launch {
             selectedCategory = selectedCategory?.notBlank
-            categories = cards.flatMap { it.categories ?: emptyList() } + (
-                    selectedCategory?.inList()?.sortedDistinct()
+            categories = (cards.flatMap { it.categories ?: emptyList() } + (
+                    selectedCategory?.inList()
                         ?: emptyList()
-                    )
+                    )).sortedDistinct()
         }
     }
 

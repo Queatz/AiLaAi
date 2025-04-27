@@ -14,60 +14,55 @@ import api
 import app.AppStyles
 import app.PageTopBar
 import app.ailaai.api.deleteReminder
-import app.ailaai.api.groups
-import app.ailaai.api.people
 import app.ailaai.api.profile
 import app.ailaai.api.updateReminder
-import app.dialog.photoDialog
-import baseUrl
-import components.CardContent
-import org.jetbrains.compose.web.dom.Img
-import org.jetbrains.compose.web.css.percent
-import stories.StoryStyles
-import stories.StoryContents
 import app.components.EditField
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.dialog.photoDialog
 import app.dialog.searchDialog
 import app.group.friendsDialog
 import app.menu.Menu
 import appString
 import appText
 import application
-import components.ProfilePhoto
-import components.Switch
+import baseUrl
 import bulletedString
-import com.queatz.db.Card
 import com.queatz.db.Person
 import com.queatz.db.Reminder
+import components.ProfilePhoto
+import components.Switch
 import focusable
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import lib.RawTimeZone
 import lib.rawTimeZones
+import notBlank
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.FlexWrap
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexWrap
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H3
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.NumberInput
 import org.jetbrains.compose.web.dom.Text
-import kotlinx.browser.window
-import notBlank
-import org.jetbrains.compose.web.css.FlexWrap
-import org.jetbrains.compose.web.css.flexWrap
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.marginRight
 import org.w3c.dom.DOMRect
 import org.w3c.dom.HTMLElement
 import r
+import stories.StoryContents
+import stories.StoryStyles
 import stories.asStoryContents
 import kotlin.js.Date
 import kotlin.time.Duration.Companion.hours
@@ -106,6 +101,11 @@ fun ReminderPage(
 
     menuTarget?.let { target ->
         Menu({ menuTarget = null }, target) {
+            if (reminder.open == true) {
+                item(appString { openInNewTab }, icon = "open_in_new") {
+                    window.open("/event/${reminder.id}", "_blank")
+                }
+            }
             item(appString { rename }) {
                 scope.launch {
                     val title = inputDialog(

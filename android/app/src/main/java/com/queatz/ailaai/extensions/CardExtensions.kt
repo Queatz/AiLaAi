@@ -21,6 +21,7 @@ fun cardUrl(id: String) = "$appDomain/page/$id"
 fun storyUrl(urlOrId: String) = "$appDomain/story/$urlOrId"
 fun profileUrl(id: String) = "$appDomain/profile/$id"
 fun groupUrl(id: String) = "$appDomain/group/$id"
+fun eventUrl(id: String) = "$appDomain/event/$id"
 
 
 val Card.hint @Composable get() = bulletedString(

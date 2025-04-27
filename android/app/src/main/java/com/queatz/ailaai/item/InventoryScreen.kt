@@ -45,7 +45,6 @@ import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
-import com.queatz.ailaai.extensions.swipe
 import com.queatz.ailaai.extensions.toItemQuantity
 import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.extensions.toast

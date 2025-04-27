@@ -1,6 +1,7 @@
 package com.queatz.ailaai.schedule
 
 import ReminderEvent
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.AlarmOff
 import androidx.compose.material.icons.outlined.CameraAlt
@@ -25,8 +27,10 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
@@ -46,11 +50,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,14 +73,19 @@ import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.eventUrl
 import com.queatz.ailaai.extensions.format
 import com.queatz.ailaai.extensions.formatTime
+import com.queatz.ailaai.extensions.groupUrl
 import com.queatz.ailaai.extensions.inList
+import com.queatz.ailaai.extensions.name
 import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.popBackStackOrFinish
 import com.queatz.ailaai.extensions.rememberStateOf
+import com.queatz.ailaai.extensions.shareAsUrl
 import com.queatz.ailaai.extensions.toLatLng
 import com.queatz.ailaai.extensions.toList
+import com.queatz.ailaai.helpers.locationSelector
 import com.queatz.ailaai.me
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.authors
@@ -97,6 +108,7 @@ import com.queatz.ailaai.ui.dialogs.DialogHeader
 import com.queatz.ailaai.ui.dialogs.SetLocationDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.dialogs.defaultConfirmFormatter
+import com.queatz.ailaai.ui.state.latLngSaver
 import com.queatz.ailaai.ui.story.StorySource
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Reminder
@@ -215,6 +227,13 @@ fun ReminderScreen(reminderId: String) {
     }
     val nav = nav
     val me = me
+    val context = LocalContext.current
+    var geo: LatLng? by rememberSaveable(stateSaver = latLngSaver()) { mutableStateOf(null) }
+    val locationSelector = locationSelector(
+        geo = geo,
+        onGeoChange = { geo = it },
+        activity = nav.context as Activity
+    )
 
     suspend fun reloadEvents() {
         if (reminder == null) {
@@ -300,7 +319,8 @@ fun ReminderScreen(reminderId: String) {
 
     if (showLocationDialog) {
         SetLocationDialog(
-            initialLocation = reminder?.geo?.toLatLng() ?: LatLng(0.0, 0.0),
+            initialLocation = reminder?.geo?.toLatLng() ?: geo ?: LatLng(0.0, 0.0),
+            initialZoom = 14f,
             onDismissRequest = {
                 showLocationDialog = false
             },
@@ -470,7 +490,7 @@ fun ReminderScreen(reminderId: String) {
 
     if (showPhotoDialog) {
         ChoosePhotoDialog(
-            state = remember { ChoosePhotoDialogState(mutableStateOf("")) },
+            state = remember { ChoosePhotoDialogState(mutableStateOf(reminder?.title.orEmpty())) },
             onDismissRequest = {
                 showPhotoDialog = false
             },
@@ -561,6 +581,7 @@ fun ReminderScreen(reminderId: String) {
             Loading()
         } else {
             LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(1.pad),
                 contentPadding = PaddingValues(1.pad),
                 modifier = Modifier
                     .fillMaxSize()
@@ -574,6 +595,17 @@ fun ReminderScreen(reminderId: String) {
                                 selected = reminder?.open == true
                             ) {
                                 togglePosted()
+                            }
+                            if (reminder?.open == true) {
+                                item(
+                                    icon = Icons.Outlined.Share,
+                                    name = stringResource(R.string.share)
+                                ) {
+                                    eventUrl(reminderId).shareAsUrl(
+                                        context = context,
+                                        name = reminder?.title
+                                    )
+                                }
                             }
                             item(
                                 icon = Icons.Outlined.PersonAdd,
@@ -590,7 +622,8 @@ fun ReminderScreen(reminderId: String) {
                             }
                             item(
                                 icon = Icons.Outlined.Update,
-                                name = stringResource(R.string.reschedule)
+                                name = stringResource(R.string.reschedule),
+                                selected = reminder?.schedule != null || reminder?.stickiness != null
                             ) {
                                 showReschedule = true
                             }
@@ -694,7 +727,6 @@ fun ReminderScreen(reminderId: String) {
                             shape = MaterialTheme.shapes.medium,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(1.pad)
                         ) {
                             Text(
                                 it,
@@ -729,8 +761,6 @@ fun ReminderScreen(reminderId: String) {
                                 )
                                 Friends(
                                     people = people,
-                                    modifier = Modifier
-                                        .padding(vertical = 1.pad)
                                 ) {
                                     nav.appNavigate(AppNav.Profile(it.id!!))
                                 }

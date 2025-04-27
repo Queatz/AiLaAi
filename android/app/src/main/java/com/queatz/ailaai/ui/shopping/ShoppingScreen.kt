@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -76,6 +78,9 @@ fun ShoppingScreen() {
     var allCards by remember { mutableStateOf(emptyList<Card>()) }
     var favoriteCards by remember { mutableStateOf(emptyList<Card>()) }
     var isLoading by rememberStateOf(true)
+    var hasMore by remember { mutableStateOf(true) }
+    val pageSize = 20
+    var page by remember { mutableStateOf(0) }
     var geo: LatLng? by remember { mutableStateOf(null) }
     val nav = nav
     val reloadFlow = remember {
@@ -121,19 +126,31 @@ fun ShoppingScreen() {
         }
     }
 
-    suspend fun reload(passive: Boolean = false) {
+    suspend fun reload(passive: Boolean = false, loadMore: Boolean = false) {
+        if (!loadMore) {
+            page = 0
+            hasMore = true
+        }
+
         isLoading = !passive || (if (showFavorites) favoriteCards.isEmpty() else allCards.isEmpty())
 
         if (showFavorites) {
             api.savedCards(
                 search = searchText.notBlank,
+                offset = if (loadMore) page * pageSize else 0,
+                limit = pageSize,
                 onError = { error ->
                     if (!passive && error !is CancellationException) {
                         // Handle error
                     }
                 }
             ) { result ->
-                favoriteCards = result.mapNotNull { it.card }
+                favoriteCards = if (loadMore) {
+                    (favoriteCards + result.mapNotNull { it.card }).distinctBy { it.id!! }
+                } else {
+                    result.mapNotNull { it.card }
+                }
+                hasMore = result.isNotEmpty()
             }
         } else {
             geo?.let { currentGeo ->
@@ -141,13 +158,23 @@ fun ShoppingScreen() {
                     geo = currentGeo.toGeo(),
                     paid = true,
                     search = searchText.notBlank,
+                    offset = if (loadMore) page * pageSize else 0,
+                    limit = pageSize,
                     onError = { error ->
                         if (!passive && error !is CancellationException) {
                             // Handle error
                         }
                     }
                 ) { result ->
-                    allCards = result
+                    allCards = if (loadMore) {
+                        (allCards + result).distinctBy { it.id!! }
+                    } else {
+                        result
+                    }
+                    hasMore = result.isNotEmpty()
+                    if (loadMore && result.isNotEmpty()) {
+                        page++
+                    }
                 }
             }
         }
@@ -155,9 +182,15 @@ fun ShoppingScreen() {
         isLoading = false
     }
 
+    suspend fun loadMore() {
+        if (hasMore && !isLoading) {
+            reload(passive = true, loadMore = true)
+        }
+    }
+
     LaunchedEffect(Unit) {
-        reloadFlow.collectLatest {
-            reload(it)
+        reloadFlow.collectLatest { passive ->
+            reload(passive, false)
         }
     }
 
@@ -201,6 +234,7 @@ fun ShoppingScreen() {
                 ) {
                     Icon(
                         imageVector = if (showFavorites) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                        // todo: translate
                         contentDescription = "Favorites"
                     )
                 }
@@ -274,6 +308,13 @@ fun ShoppingScreen() {
                                 nav.appNavigate(AppNav.Page(card.id!!))
                             }
                         )
+
+                        // Check if we're at the last item and need to load more
+                        if (card == filteredCards.lastOrNull()) {
+                            LaunchedEffect(card) {
+                                loadMore()
+                            }
+                        }
                     }
                 }
             }

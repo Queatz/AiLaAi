@@ -1022,7 +1022,7 @@ object Strings {
     )
     val clickToHide = Translation(
         en = "Click to hide",
-        vn = "Nhấn để mở",
+        vn = "Nhấp để ẩn",
         ru = "Нажмите, чтобы скрыть"
     )
     val error = Translation(

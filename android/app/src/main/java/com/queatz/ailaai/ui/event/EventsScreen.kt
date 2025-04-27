@@ -38,8 +38,6 @@ import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.sortedDistinct
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
-import com.queatz.ailaai.schedule.PeriodEvent
-import com.queatz.ailaai.schedule.ScheduleView
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.LoadMore
@@ -49,7 +47,6 @@ import com.queatz.ailaai.ui.screens.SearchContent
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Geo
 import com.queatz.db.toList
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit

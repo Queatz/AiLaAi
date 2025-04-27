@@ -16,6 +16,7 @@ import app.info.TosPage
 import app.invites.InvitePage
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
+import event.EventPage
 import app.widget.WidgetStyles
 import components.AppFooter
 import components.AppHeader
@@ -268,6 +269,14 @@ fun main() {
                     AppHeader(appName)
                     TosPage()
                     AppFooter()
+                }
+
+                route("event") {
+                    string { eventId ->
+                        AppHeader(appName)
+                        EventPage(eventId)
+                        AppFooter()
+                    }
                 }
 
                 string { profileUrl ->

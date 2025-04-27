@@ -685,6 +685,7 @@ object Styles : StyleSheet() {
         cursor("pointer")
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
         fontWeight("bold")
         overflow("hidden")
         backgroundImage("linear-gradient(to bottom, #ffffff36, #ffffff00)")
