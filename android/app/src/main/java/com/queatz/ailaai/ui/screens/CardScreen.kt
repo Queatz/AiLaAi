@@ -992,6 +992,7 @@ fun CardScreen(
             scope: CoroutineScope,
             elevation: Int = 1,
             playVideo: Boolean = false,
+            onVideoClick: () -> Unit
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(
@@ -1154,6 +1155,11 @@ fun CardScreen(
                         scope = scope,
                         elevation = elevation,
                         playVideo = playVideo,
+                        onClick = {
+                            if (!card?.video.isNullOrBlank()) {
+                                onVideoClick()
+                            }
+                        },
                         onReply = if (showInFullscreen) {
                             { conversation ->
                                 showScanMe = true
@@ -1181,14 +1187,22 @@ fun CardScreen(
             )
         } else {
             val isLandscape = LocalConfiguration.current.screenWidthDp > LocalConfiguration.current.screenHeightDp
-            var playingVideo by remember { mutableStateOf<Card?>(null) }
+            var playingVideo by remember(card) { mutableStateOf(card) }
             val isAtTop by state.isAtTop()
             val autoplayIndex by state.rememberAutoplayIndex()
+
             LaunchedEffect(autoplayIndex, isLandscape) {
                 playingVideo = cards.getOrNull(
                     (autoplayIndex - (if (isLandscape) 0 else 1)).coerceAtLeast(0)
                 )
             }
+
+            LaunchedEffect(card, isAtTop) {
+                if (isAtTop) {
+                    playingVideo = card
+                }
+            }
+
             Box {
                 Row(
                     modifier = Modifier.fillMaxSize()
@@ -1210,7 +1224,10 @@ fun CardScreen(
                                 aspect = 1.5f,
                                 scope = scope,
                                 elevation = 2,
-                                playVideo = isAtTop
+                                playVideo = playingVideo == card && isAtTop,
+                                onVideoClick = {
+                                    playingVideo = null
+                                }
                             )
                         }
                     }
@@ -1229,7 +1246,10 @@ fun CardScreen(
                                 isMine = isMine,
                                 aspect = 1.5f,
                                 scope = scope,
-                                playVideo = isAtTop
+                                playVideo = playingVideo == card && isAtTop,
+                                onVideoClick = {
+                                    playingVideo = null
+                                }
                             )
                         }
                         if (cards.isNotEmpty()) {

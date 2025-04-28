@@ -231,14 +231,12 @@ fun StoryContents(
                         }
                     )
 
-                    is StoryContent.Input -> {
-                        inputItem(
-                            content = content,
-                            onValueChange = {
-                                input = input + (content.key to it)
-                            }
-                        )
-                    }
+                    is StoryContent.Input -> inputItem(
+                        content = content,
+                        onValueChange = {
+                            input = input + (content.key to it)
+                        }
+                    )
 
                     is StoryContent.Profiles -> profilesItem(content)
                 }

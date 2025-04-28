@@ -16,6 +16,7 @@ import app.ailaai.api.group
 import app.components.EditField
 import app.components.TextBox
 import app.dialog.photoDialog
+import app.dialog.rememberChoosePhotoDialog
 import app.group.GroupInfo
 import app.group.GroupItem
 import app.widget.FormWidget
@@ -34,10 +35,12 @@ import com.queatz.db.ButtonStyle
 import com.queatz.db.Comment
 import com.queatz.db.CommentExtended
 import com.queatz.db.GroupExtended
+import com.queatz.db.InputType
 import com.queatz.db.StoryContent
 import com.queatz.widgets.Widgets
 import components.CardItem
 import components.Icon
+import components.IconButton
 import components.LinkifyText
 import components.LoadingText
 import kotlinx.browser.window
@@ -51,6 +54,7 @@ import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
@@ -63,8 +67,10 @@ import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
-import org.jetbrains.compose.web.css.transform
+import org.jetbrains.compose.web.css.right
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Audio
@@ -484,17 +490,82 @@ fun StoryContents(
                 var value by remember(part.value.orEmpty()) {
                     mutableStateOf(part.value.orEmpty())
                 }
-                TextBox(
-                    value = value,
-                    onValue = {
-                        input = input + (part.key to it)
-                        value = it
-                    },
-                    styles = {
-                        width(100.percent)
-                    },
-                    placeholder = part.hint.orEmpty()
-                )
+
+                when (part.inputType) {
+                    InputType.Text -> {
+                        TextBox(
+                            value = value,
+                            onValue = {
+                                input = input + (part.key to it)
+                                value = it
+                            },
+                            styles = {
+                                width(100.percent)
+                            },
+                            placeholder = part.hint.orEmpty()
+                        )
+                    }
+
+                    InputType.Photo -> {
+                        val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
+                        val isGenerating = choosePhoto.isGenerating.collectAsState().value
+
+                        if (value.isBlank()) {
+                            Button({
+                                classes(Styles.outlineButton)
+                                if (isGenerating) {
+                                    disabled()
+                                }
+                                onClick {
+                                    scope.launch {
+                                        choosePhoto.launch { photoUrl ->
+                                            input = input + (part.key to photoUrl)
+                                            value = photoUrl
+                                        }
+                                    }
+                                }
+                            }) {
+                                // todo: translate
+                                Text("Choose photo")
+                            }
+                        } else {
+                            Div({
+                                style {
+                                    position(Position.Relative)
+                                    width(100.percent)
+                                }
+                            }) {
+                                Img(src = "$baseUrl$value") {
+                                    style {
+                                        width(100.percent)
+                                        borderRadius(1.r)
+                                        overflow("hidden")
+                                    }
+                                    onClick {
+                                        scope.launch {
+                                            photoDialog(value)
+                                        }
+                                    }
+                                }
+
+                                // Delete button
+                                IconButton(
+                                    name = "delete",
+                                    title = appString { remove },
+                                    styles = {
+                                        position(Position.Absolute)
+                                        top(1.r)
+                                        right(1.r)
+                                        color(Styles.colors.red)
+                                    }
+                                ) {
+                                    input = input + (part.key to "")
+                                    value = ""
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             is StoryContent.Profiles -> {

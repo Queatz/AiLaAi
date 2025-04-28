@@ -1,4 +1,5 @@
 import com.queatz.db.ButtonStyle
+import com.queatz.db.InputType
 import com.queatz.db.StoryContent
 
 class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
@@ -39,11 +40,13 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
         key: String,
         value: String? = null,
         hint: String? = null,
+        type: InputType = InputType.Text,
     ) {
         result += StoryContent.Input(
             key = key,
             value = value,
             hint = hint,
+            inputType = type,
         )
     }
 
@@ -56,7 +59,6 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
 
     fun video(
         url: String,
-        aspect: Float? = null,
     ) {
         result += StoryContent.Video(url)
     }

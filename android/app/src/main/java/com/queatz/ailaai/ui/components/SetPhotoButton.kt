@@ -48,7 +48,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SetPhotoButton(
     photoText: String,
-    photo: String,
+    photo: String? = null,
+    video: String? = null,
     modifier: Modifier = Modifier,
     aspect: Double = 1.5,
     transparentBackground: Boolean = false,
@@ -71,8 +72,11 @@ fun SetPhotoButton(
             onDismissRequest = {
                 showPhotoDialog = false
             },
-            initialMedia = Media.Photo(photo),
-            medias = listOf(Media.Photo(photo))
+            initialMedia = video?.let { Media.Video(it) } ?: Media.Photo(photo!!),
+            medias = buildList {
+                photo?.let { add(Media.Photo(it)) }
+                video?.let { add(Media.Video(it)) }
+            }
         )
     }
 
@@ -85,7 +89,7 @@ fun SetPhotoButton(
             imagesOnly = imagesOnly,
             aspect = aspect,
             transparentBackground = transparentBackground,
-            onRemove = onRemove?.takeIf { photo.isNotBlank() }?.let { onRemove ->
+            onRemove = onRemove?.takeIf { photo.orEmpty().isNotBlank() }?.let { onRemove ->
                 {
                     onRemove()
                     choosePhotoDialog = false
@@ -127,33 +131,47 @@ fun SetPhotoButton(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        if (photo.isNotBlank() && !isGeneratingPhoto) {
+        if (!(photo.isNullOrBlank() && video.isNullOrBlank()) && !isGeneratingPhoto) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(1.pad),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .align(Alignment.Center)
             ) {
-                AsyncImage(
-                    model = photo.let { api.url(it) },
-                    contentDescription = "",
-                    contentScale = if (transparentBackground) { ContentScale.Inside } else { ContentScale.Crop },
-                    alignment = Alignment.Center,
-                    modifier = Modifier
-                        .requiredSize(64.dp)
-                        .then(
-                            if (transparentBackground) {
-                                Modifier
-                            } else {
-                                Modifier
-                                    .clip(MaterialTheme.shapes.large)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                if (!photo.isNullOrBlank()) {
+                    AsyncImage(
+                        model = photo.let(api::url),
+                        contentDescription = "",
+                        contentScale = if (transparentBackground) { ContentScale.Inside } else { ContentScale.Crop },
+                        alignment = Alignment.Center,
+                        modifier = Modifier
+                            .requiredSize(64.dp)
+                            .then(
+                                if (transparentBackground) {
+                                    Modifier
+                                } else {
+                                    Modifier
+                                        .clip(MaterialTheme.shapes.large)
+                                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                                }
+                            )
+                            .clickable {
+                                showPhotoDialog = true
                             }
-                        )
-                        .clickable {
-                            showPhotoDialog = true
-                        }
-                )
+                    )
+                } else if (!video.isNullOrBlank()) {
+                    Video(
+                        url = video.let(api::url),
+                        isPlaying = true,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clickable {
+                                showPhotoDialog = true
+                            }
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                    )
+                }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(1.pad),
                     verticalAlignment = Alignment.CenterVertically

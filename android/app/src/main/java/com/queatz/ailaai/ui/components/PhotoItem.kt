@@ -41,14 +41,14 @@ fun PhotoItem(photo: String, onClick: () -> Unit, onLongClick: () -> Unit) {
             .build(),
         alpha = if (isLoaded) 1f else .125f,
 //        placeholder = rememberVectorPainter(Icons.Outlined.Photo),
-        contentScale = ContentScale.Companion.Fit,
+        contentScale = ContentScale.Fit,
         onSuccess = {
             isLoaded = true
             aspect = it.result.image.width.toFloat() / it.result.image.height.toFloat()
         },
         contentDescription = "",
-        alignment = Alignment.Companion.Center,
-        modifier = Modifier.Companion
+        alignment = Alignment.Center,
+        modifier = Modifier
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp /* Card elevation */))
             .combinedClickable(

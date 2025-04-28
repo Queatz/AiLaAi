@@ -22,8 +22,8 @@ The following are functions passed into scripts: `render`, `http`
 # Rendering content
 
 ```kotlin
-// Optional
 import com.queatz.db.ButtonStyle
+import com.queatz.db.InputType
 
 render {
     section("<Title>") // Markdown supported
@@ -48,7 +48,9 @@ render {
     // Optional
     value = "<value>",
     // Optional
-    hint = "<hint>"
+    hint = "<hint>",
+    // Optional
+    inputType = InputType.Text or InputType.Photo
     )
     profiles(
         profiles = listOf("<Profile IDs>") // List of profile IDs to display

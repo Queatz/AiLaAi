@@ -56,7 +56,7 @@ class ChoosePhotoDialogControl(
     private var aiStyles = MutableStateFlow(emptyList<Pair<String, String>>())
     private var count = MutableStateFlow(1)
 
-    fun launch(onPhoto: suspend (String) -> Unit) {
+    fun launch(multiple: Boolean = false, onPhoto: suspend (String) -> Unit) {
         scope.launch {
             if (aiStyles.value.isEmpty()) {
                 scope.launch {
@@ -127,6 +127,7 @@ private suspend fun choosePhotoDialog(
     aiStyles: StateFlow<List<Pair<String, String>>>,
     aiStyle: StateFlow<String?>,
     count: MutableStateFlow<Int> = MutableStateFlow(1),
+    multiple: Boolean = false,
     showUpload: Boolean = false,
     onAiStyle: (String?) -> Unit,
     onFile: (file: File) -> Unit,
@@ -144,34 +145,36 @@ private suspend fun choosePhotoDialog(
         inputAction = { resolve, value, onValue ->
             val scope = rememberCoroutineScope()
 
-            // Number input for photo count
-            Div({
-                style {
-                    position(Absolute)
-                    right(3.r)
-                    top(1.r)
-                    bottom(1.r)
-                    property("display", "flex")
-                    property("align-items", "center")
-                }
-            }) {
-                NumberInput(
-                    value = count.collectAsState().value,
-                    min = 1,
-                    max = 10,
-                    attrs = {
-                        classes(Styles.dateTimeInput)
-                        style {
-                            width(3.r)
-                        }
+            if (multiple) {
+                // Number input for photo count
+                Div({
+                    style {
+                        position(Absolute)
+                        right(3.r)
+                        top(1.r)
+                        bottom(1.r)
+                        property("display", "flex")
+                        property("align-items", "center")
+                    }
+                }) {
+                    NumberInput(
+                        value = count.collectAsState().value,
+                        min = 1,
+                        max = 10,
+                        attrs = {
+                            classes(Styles.dateTimeInput)
+                            style {
+                                width(3.r)
+                            }
 
-                        onInput {
-                            runCatching {
-                                count.value = (it.value?.toInt() ?: 1).coerceIn(1..10)
+                            onInput {
+                                runCatching {
+                                    count.value = (it.value?.toInt() ?: 1).coerceIn(1..10)
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
 
             IconButton("expand_more", appString { history }, styles = {
@@ -197,7 +200,7 @@ private suspend fun choosePhotoDialog(
         extraButtons = { resolve ->
             if (showUpload) {
                 IconButton("photo", application.appString { choosePhoto }) {
-                    pickPhotos(multiple = false) { files ->
+                    pickPhotos(multiple = multiple) { files ->
                         onFile(files.first())
                     }
                     resolve(false)

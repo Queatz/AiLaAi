@@ -3,7 +3,6 @@ package com.queatz.db
 import com.queatz.widgets.Widgets
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
@@ -78,6 +77,7 @@ sealed class StoryContent {
         val key: String,
         val value: String?,
         val hint: String? = null,
+        val inputType: InputType = InputType.Text,
     ) : StoryContent()
     @Serializable
     data class Profiles(
@@ -87,6 +87,11 @@ sealed class StoryContent {
     data class Video(
         val video: String
     ) : StoryContent()
+}
+
+enum class InputType {
+    Text,
+    Photo
 }
 
 @Serializable

@@ -85,7 +85,8 @@ fun CreateCardWithTemplateDialog(
                         CreateCardWithTemplate.Product, CreateCardWithTemplate.Service -> {
                             // Photo button
                             SetPhotoButton(
-                                photo = photoUrl.orEmpty(),
+                                photo = photoUrl,
+                                video = videoUrl,
                                 photoText = title,
                                 imagesOnly = false,
                                 onPhoto = { 
@@ -178,7 +179,8 @@ fun CreateCardWithTemplateDialog(
                         CreateCardWithTemplate.Music -> {
                             // Photo button
                             SetPhotoButton(
-                                photo = photoUrl.orEmpty(),
+                                photo = photoUrl,
+                                video = videoUrl,
                                 photoText = title,
                                 imagesOnly = false,
                                 onPhoto = { 
