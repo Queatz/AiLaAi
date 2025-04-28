@@ -83,6 +83,10 @@ sealed class StoryContent {
     data class Profiles(
         val profiles: List<String>
     ) : StoryContent()
+    @Serializable
+    data class Video(
+        val video: String
+    ) : StoryContent()
 }
 
 @Serializable
@@ -110,6 +114,7 @@ fun StoryContent.partType() = when (this) {
     is StoryContent.Groups -> "groups"
     is StoryContent.Photos -> "photos"
     is StoryContent.Audio -> "audio"
+    is StoryContent.Video -> "video"
     is StoryContent.Widget -> "widget"
     is StoryContent.Button -> "button"
     is StoryContent.Input -> "input"
@@ -124,6 +129,7 @@ fun StoryContent.isPart() = when (this) {
     is StoryContent.Groups -> true
     is StoryContent.Photos -> true
     is StoryContent.Audio -> true
+    is StoryContent.Video -> true
     is StoryContent.Widget -> true
     is StoryContent.Button -> true
     is StoryContent.Input -> true

@@ -809,7 +809,9 @@ fun ColumnScope.MessageContent(
                     Video(
                         it.let(api::url),
                         isPlaying = isPlaying,
-                        modifier = Modifier.clip(MaterialTheme.shapes.large).clickable {
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable {
                             isPlaying = !isPlaying
                         }
                     )

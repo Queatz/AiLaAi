@@ -575,18 +575,35 @@ private fun ImpromptuSettingsDialog(
                     val hasBackgroundLocation = backgroundLocationPermission.status == PermissionStatus.Granted
 
                     AnimatedVisibility(selectedLocationUpdate != ImpromptuLocationUpdates.Off && !hasBackgroundLocation) {
+                        var showDisclosureDialog by rememberStateOf(false)
                         val backgroundLocationPermissionLauncher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.RequestPermission()
                         ) {}
 
                         OutlinedButton(
                             onClick = {
-                                backgroundLocationPermissionLauncher.launch(permission)
+                                showDisclosureDialog = true
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
                             Text(stringResource(R.string.enable_background_location))
+                        }
+
+                        if (showDisclosureDialog) {
+                            Alert(
+                                onDismissRequest = { showDisclosureDialog = false },
+                                // todo: translate
+                                title = "Background location",
+                                // todo: translate
+                                text = "Your location is not saved except for the last location received in order to power the Impromptu feature.",
+                                dismissButton = stringResource(R.string.cancel),
+                                confirmButton = stringResource(R.string.accept),
+                                onConfirm = {
+                                    showDisclosureDialog = false
+                                    backgroundLocationPermissionLauncher.launch(permission)
+                                }
+                            )
                         }
                     }
                     ImpromptuLocationUpdates.entries.forEach { option ->

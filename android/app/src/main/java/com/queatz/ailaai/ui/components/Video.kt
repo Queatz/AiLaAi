@@ -23,6 +23,7 @@ fun Video(
     url: String,
     modifier: Modifier = Modifier,
     isPlaying: Boolean = false,
+    showController: Boolean = false,
 ) {
     val context = LocalContext.current
     val exoPlayer = remember {
@@ -75,7 +76,7 @@ fun Video(
     ) {
         root.apply {
             player = exoPlayer
-            useController = false
+            useController = showController
             useArtwork = true
             setShutterBackgroundColor(color)
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM

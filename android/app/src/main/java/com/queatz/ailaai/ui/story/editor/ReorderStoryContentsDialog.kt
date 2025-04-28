@@ -204,6 +204,10 @@ fun ReorderStoryContentsDialog(
                 Stub(it.text)
             }
 
+            is StoryContent.Video -> {
+                Stub(stringResource(R.string.video))
+            }
+
             is StoryContent.Input -> {
                 Stub(
                     bulletedString(

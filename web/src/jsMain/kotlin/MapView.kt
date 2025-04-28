@@ -156,7 +156,8 @@ fun MapView(
             search = searchText.notBlank ?: selectedCategory?.notBlank,
             public = true
         ) {
-            searchResults = it
+            // todo: filter geo != null on backend
+            searchResults = it.filter { it.geo != null }
         }
 
         isLoading = false

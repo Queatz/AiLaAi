@@ -54,9 +54,12 @@ sealed class Media {
     data class Photo(val url: String) : Media()
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PhotoDialog(onDismissRequest: () -> Unit, initialMedia: Media, medias: List<Media>) {
+fun PhotoDialog(
+    onDismissRequest: () -> Unit,
+    initialMedia: Media,
+    medias: List<Media>
+) {
     val savedString = stringResource(R.string.saved)
     var showMenu by rememberStateOf(false)
     val scope = rememberCoroutineScope()

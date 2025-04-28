@@ -23,6 +23,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "cards" -> json.decodeFromJsonElement<StoryContent.Cards>(content)
         "groups" -> json.decodeFromJsonElement<StoryContent.Groups>(content)
         "photos" -> json.decodeFromJsonElement<StoryContent.Photos>(content)
+        "video" -> json.decodeFromJsonElement<StoryContent.Video>(content)
         "audio" -> json.decodeFromJsonElement<StoryContent.Audio>(content)
         "widget" -> try {
             json.decodeFromJsonElement<StoryContent.Widget>(content)
@@ -77,6 +78,7 @@ fun StoryContent.isNotBlank() = when (this) {
     is StoryContent.Section -> section.isNotBlank()
     is StoryContent.Text -> text.isNotBlank()
     is StoryContent.Photos -> photos.isNotEmpty()
+    is StoryContent.Video -> video.isNotEmpty()
     is StoryContent.Groups -> groups.isNotEmpty()
     is StoryContent.Cards -> cards.isNotEmpty()
     else -> true

@@ -39,6 +39,7 @@ import com.queatz.ailaai.api.uploadProfileContentAudioFromUri
 import com.queatz.ailaai.api.uploadProfileContentPhotosFromUri
 import com.queatz.ailaai.api.uploadStoryAudioFromUri
 import com.queatz.ailaai.api.uploadStoryPhotosFromUri
+import com.queatz.ailaai.api.uploadVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.data.json
 import com.queatz.ailaai.extensions.inList
@@ -79,6 +80,7 @@ fun StoryCreatorTools(
     var showWidgetsMenu by rememberStateOf(false)
     var showPhotoDialog by rememberStateOf(false)
     var isGeneratingPhoto by rememberStateOf(false)
+    var isUploadingPhotoOrVideo by rememberStateOf(false)
     var isUploadingAudio by remember { mutableStateOf(false) }
     val photoState = remember {
         ChoosePhotoDialogState(mutableStateOf(""))
@@ -102,9 +104,26 @@ fun StoryCreatorTools(
         ChoosePhotoDialog(
             scope = scope,
             onDismissRequest = { showPhotoDialog = false },
-            imagesOnly = true,
+            imagesOnly = false,
             state = photoState,
+            onVideos = { videoUrls ->
+                isUploadingPhotoOrVideo = true
+                scope.launch {
+                    api.uploadVideoFromUri(
+                        context = context,
+                        video = videoUrls.first(),
+                        processingCallback = { progress -> }
+                    ) {
+                        it.urls.firstOrNull()?.let {
+                            addPart(StoryContent.Video(it))
+                            addPart(StoryContent.Text(""))
+                        }
+                    }
+                    isUploadingPhotoOrVideo = false
+                }
+            },
             onPhotos = { photoUrls ->
+                isUploadingPhotoOrVideo = true
                 scope.launch {
                     when (source) {
                         is StorySource.Story -> {
@@ -145,6 +164,8 @@ fun StoryCreatorTools(
 
                         else -> {}
                     }
+
+                    isUploadingPhotoOrVideo = false
                 }
             },
             onGeneratedPhoto = { photo ->
@@ -459,8 +480,8 @@ fun StoryCreatorTools(
             }
             item(
                 icon = Icons.Outlined.Photo,
-                name = stringResource(R.string.photo),
-                isLoading = isGeneratingPhoto
+                name = stringResource(R.string.photo_or_video),
+                isLoading = isGeneratingPhoto || isUploadingPhotoOrVideo
             ) {
                 showPhotoDialog = true
             }

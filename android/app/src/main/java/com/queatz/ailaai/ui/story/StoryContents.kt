@@ -56,6 +56,7 @@ import com.queatz.ailaai.ui.story.contents.reactionsItem
 import com.queatz.ailaai.ui.story.contents.sectionItem
 import com.queatz.ailaai.ui.story.contents.textItem
 import com.queatz.ailaai.ui.story.contents.titleItem
+import com.queatz.ailaai.ui.story.contents.videoItem
 import com.queatz.ailaai.ui.story.contents.widgetItem
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Card
@@ -211,6 +212,8 @@ fun StoryContents(
                     is StoryContent.Cards -> cardsItem(content, viewHeight)
 
                     is StoryContent.Photos -> photosItem(content, viewHeight)
+
+                    is StoryContent.Video -> videoItem(content)
 
                     is StoryContent.Audio -> audioItem(content)
 

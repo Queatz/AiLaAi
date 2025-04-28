@@ -10,7 +10,8 @@ suspend fun Api.uploadPhotos(
     onError: ErrorBlock = null,
     onSuccess: SuccessBlock<UploadResponse>,
 ) {
-    return post("upload/photos", MultiPartFormDataContent(
+    return post(
+        "upload/photos", MultiPartFormDataContent(
         formData {
             if (removeBackground) {
                 append("removeBackground", true)
@@ -26,6 +27,28 @@ suspend fun Api.uploadPhotos(
                     }
                 )
             }
+        }
+    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+}
+
+suspend fun Api.uploadVideo(
+    video: InputProvider,
+    contentType: String,
+    filename: String,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<UploadResponse>,
+) {
+    return post(
+        "upload/video", MultiPartFormDataContent(
+        formData {
+            append(
+                "video",
+                video,
+                Headers.build {
+                    append(HttpHeaders.ContentType, contentType)
+                    append(HttpHeaders.ContentDisposition, "filename=${filename}")
+                }
+            )
         }
     ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
 }

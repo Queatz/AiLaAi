@@ -49,10 +49,11 @@ fun NpcDialog(
                     photoText = npc.text.orEmpty(),
                     photo = npc.photo.orEmpty(),
                     aspect = .75,
-                    transparentBackground = true
-                ) {
-                    npc = npc.copy(photo = it)
-                }
+                    transparentBackground = true,
+                    onPhoto = {
+                        npc = npc.copy(photo = it)
+                    }
+                )
                 OutlinedTextField(
                     value = npc.name.orEmpty(),
                     onValueChange = { npc = npc.copy(name = it) },

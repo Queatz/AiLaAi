@@ -6,7 +6,10 @@ import app.ailaai.api.Api
 import app.ailaai.api.ErrorBlock
 import app.ailaai.api.SuccessBlock
 import app.ailaai.api.uploadPhotos
+import app.ailaai.api.uploadVideo
+import com.queatz.ailaai.extensions.asInputProvider
 import com.queatz.ailaai.extensions.asScaledJpeg
+import com.queatz.ailaai.extensions.asScaledVideo
 import com.queatz.db.UploadResponse
 
 suspend fun Api.uploadPhotosFromUris(
@@ -22,6 +25,31 @@ suspend fun Api.uploadPhotosFromUris(
     return uploadPhotos(
         photos = scaledPhotos,
         removeBackground = removeBackground,
+        onError = onError,
+        onSuccess = onSuccess
+    )
+}
+
+suspend fun Api.uploadVideoFromUri(
+    context: Context,
+    video: Uri,
+    processingCallback: (Float) -> Unit = {},
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<UploadResponse>,
+) {
+    val scaledVideo = try {
+        video.asScaledVideo(context, progressCallback = processingCallback).asInputProvider()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        onError?.invoke(e)
+        return
+    }
+    uploadVideo(
+        video = scaledVideo,
+        contentType = context.contentResolver.getType(video) ?: "video/*",
+        filename = video.lastPathSegment ?: "video.${
+            context.contentResolver.getType(video)?.split("/")?.lastOrNull() ?: ""
+        }",
         onError = onError,
         onSuccess = onSuccess
     )

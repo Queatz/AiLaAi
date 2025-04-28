@@ -44,6 +44,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import lib.isThisYear
+import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.target
@@ -54,13 +55,16 @@ import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.backgroundImage
 import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Audio
@@ -70,6 +74,7 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.Video
 import profile.ProfileCard
 import r
 import time.format
@@ -80,6 +85,7 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
     format(it, "MMMM do${if (isThisYear(it)) "" else ", yyyy"}")
 } ?: appString { draft }
 
+@OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun StoryContents(
     content: List<StoryContent>,
@@ -366,6 +372,29 @@ fun StoryContents(
                         attr("src", "$baseUrl${part.audio}")
                         attr("type", "audio/mp4")
                     })
+                }
+            }
+
+            is StoryContent.Video -> {
+                Div({
+                    style {
+                        width(100.percent)
+                        margin(1.r, 0.r)
+                    }
+                }) {
+                    Video({
+                        classes(Styles.video)
+
+                        attr("controls", "")
+                        attr("preload", "metadata")
+                        attr("loop", "")
+                        attr("playsinline", "")
+                    }) {
+                        Source({
+                            attr("src", "$baseUrl${part.video}")
+                            attr("type", "video/mp4")
+                        })
+                    }
                 }
             }
 

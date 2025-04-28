@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Handyman
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.School
@@ -105,13 +104,39 @@ fun MeScreen() {
     var newCard by rememberStateOf<Card?>(null)
 
     // List of card templates
+    // todo: translate
     val cardTemplates = remember {
         listOf(
-            Recommendation(CreateCardWithTemplate.Product, "Sell a product", Icons.Outlined.ShoppingBag, "List an item for sale"),
-            Recommendation(CreateCardWithTemplate.Service, "Provide a service", Icons.Outlined.Handyman, "Offer your skills and services"),
-            Recommendation(CreateCardWithTemplate.Job, "Post a job", Icons.Outlined.Work, "Find someone for a job"),
-            Recommendation(CreateCardWithTemplate.Classes, "Education", Icons.Outlined.School, "Offer classes or tutoring"),
-            Recommendation(CreateCardWithTemplate.Music, "Music", Icons.Outlined.MusicNote, "Lessons and performances"),
+            Recommendation(
+                value = CreateCardWithTemplate.Product,
+                name = "Sell a product",
+                icon = Icons.Outlined.ShoppingBag,
+                description = "List an item for sale"
+            ),
+            Recommendation(
+                value = CreateCardWithTemplate.Service,
+                name = "Provide a service",
+                icon = Icons.Outlined.Handyman,
+                description = "Offer your skills and services"
+            ),
+            Recommendation(
+                value = CreateCardWithTemplate.Job,
+                name = "Post a job",
+                icon = Icons.Outlined.Work,
+                description = "Find someone for a job"
+            ),
+            Recommendation(
+                value = CreateCardWithTemplate.Classes,
+                name = "Education",
+                icon = Icons.Outlined.School,
+                description = "Offer classes or tutoring"
+            ),
+            Recommendation(
+                value = CreateCardWithTemplate.Music,
+                name = "Music",
+                icon = Icons.Outlined.MusicNote,
+                description = "Lessons and performances"
+            ),
         )
     }
 
@@ -229,15 +254,6 @@ fun MeScreen() {
             }
         )
 
-        // Card Template Selector
-        Recommendations(
-            items = cardTemplates,
-            modifier = Modifier
-                .padding(vertical = 1.pad)
-        ) {
-            showTemplate = it
-        }
-
         Box(
             contentAlignment = Alignment.BottomCenter,
             modifier = Modifier
@@ -264,6 +280,17 @@ fun MeScreen() {
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Adaptive(240.dp)
                 ) {
+                    // Card Template Selector
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Recommendations(
+                            items = cardTemplates,
+                            modifier = Modifier
+                                .padding(vertical = 1.pad)
+                        ) {
+                            showTemplate = it
+                        }
+                    }
+
                     items(cards, key = { it.id!! }) { card ->
                         CardLayout(
                             card = card,
@@ -318,7 +345,7 @@ fun MeScreen() {
                         {
                             setFilters(filters.minus(Filter.NotActive).toggle(Filter.Active))
                         },
-                              elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
+                        elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
                         colors = if (!filters.contains(Filter.Active)) ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onBackground
@@ -328,10 +355,10 @@ fun MeScreen() {
                         Text(stringResource(R.string.posted))
                     }
                     Button(
-                        {
+                        onClick = {
                             setFilters(filters.minus(Filter.Active).toggle(Filter.NotActive))
                         },
-                               elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
+                        elevation = ButtonDefaults.elevatedButtonElevation(.5f.elevation),
                         colors = if (!filters.contains(Filter.NotActive)) ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onBackground

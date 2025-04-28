@@ -54,6 +54,13 @@ class ScriptRender(private val onRender: (List<StoryContent>) -> Unit) {
         result += StoryContent.Photos(listOf(url), aspect = aspect)
     }
 
+    fun video(
+        url: String,
+        aspect: Float? = null,
+    ) {
+        result += StoryContent.Video(url)
+    }
+
     fun audio(
         url: String,
     ) {

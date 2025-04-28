@@ -33,7 +33,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.queatz.ailaai.R
+import com.queatz.ailaai.api.uploadCardVideoFromUri
 import com.queatz.ailaai.api.uploadPhotosFromUris
+import com.queatz.ailaai.api.uploadVideoFromUri
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.ui.dialogs.ChoosePhotoDialog
@@ -50,7 +52,9 @@ fun SetPhotoButton(
     modifier: Modifier = Modifier,
     aspect: Double = 1.5,
     transparentBackground: Boolean = false,
+    imagesOnly: Boolean = true,
     onRemove: (() -> Unit)? = null,
+    onVideo: (String) -> Unit = {},
     onPhoto: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -78,7 +82,7 @@ fun SetPhotoButton(
             state = setPhotoState,
             onDismissRequest = { choosePhotoDialog = false },
             multiple = false,
-            imagesOnly = true,
+            imagesOnly = imagesOnly,
             aspect = aspect,
             transparentBackground = transparentBackground,
             onRemove = onRemove?.takeIf { photo.isNotBlank() }?.let { onRemove ->
@@ -88,12 +92,26 @@ fun SetPhotoButton(
                 }
             },
             onPhotos = { photos ->
+                isGeneratingPhoto = true
                 scope.launch {
-                    isGeneratingPhoto = true
                     api.uploadPhotosFromUris(context, photos, removeBackground = transparentBackground) {
                         onPhoto(it.urls.first())
                     }
                     isGeneratingPhoto = false
+                }
+            },
+            onVideos = { videos ->
+                if (videos.isNotEmpty()) {
+                    isGeneratingPhoto = true
+                    scope.launch {
+                        api.uploadVideoFromUri(
+                            context = context,
+                            video = videos.first(),
+                        ) {
+                            onVideo(it.urls.first())
+                        }
+                        isGeneratingPhoto = false
+                    }
                 }
             },
             onGeneratedPhoto = {

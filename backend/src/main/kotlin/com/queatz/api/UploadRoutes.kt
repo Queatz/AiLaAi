@@ -5,6 +5,7 @@ import com.queatz.hasTransparency
 import com.queatz.plugins.ai
 import com.queatz.plugins.meOrNull
 import com.queatz.plugins.respond
+import com.queatz.receiveFile
 import com.queatz.receiveFiles
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.statement.bodyAsText
@@ -45,6 +46,16 @@ fun Route.uploadRoutes() {
                 }
 
                 UploadResponse(urls)
+            }
+        }
+
+        post("/upload/video") {
+            respond {
+                var url = ""
+                call.receiveFile("video", "upload-${meOrNull?.id}") { fileName, _ ->
+                    url = fileName
+                }
+                UploadResponse(listOf(url))
             }
         }
     }

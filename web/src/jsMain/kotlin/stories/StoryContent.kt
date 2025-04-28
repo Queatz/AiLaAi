@@ -19,6 +19,7 @@ fun JsonObject.toStoryContent(): StoryContent? = get("content")?.jsonObject?.let
         "groups" -> json.decodeFromJsonElement<StoryContent.Groups>(content)
         "cards" -> json.decodeFromJsonElement<StoryContent.Cards>(content)
         "photos" -> json.decodeFromJsonElement<StoryContent.Photos>(content)
+        "video" -> json.decodeFromJsonElement<StoryContent.Video>(content)
         "audio" -> json.decodeFromJsonElement<StoryContent.Audio>(content)
         "widget" -> try {
             json.decodeFromJsonElement<StoryContent.Widget>(content)

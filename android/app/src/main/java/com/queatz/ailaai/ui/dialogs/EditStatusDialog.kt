@@ -125,10 +125,11 @@ fun EditStatusDialog(
                             photo = null
                         }
                     },
-                    modifier = Modifier.padding(bottom = 1.pad)
-                ) {
-                    photo = it
-                }
+                    modifier = Modifier.padding(bottom = 1.pad),
+                    onPhoto = {
+                        photo = it
+                    }
+                )
 
                 SearchField(
                     value = note,

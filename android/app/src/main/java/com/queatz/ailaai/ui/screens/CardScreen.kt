@@ -350,11 +350,11 @@ fun CardScreen(
                     videoUploadProgress = 0f
                     isUploadingVideo = true
                     api.uploadCardVideoFromUri(
-                        context,
-                        card!!.id!!,
-                        it,
-                        context.contentResolver.getType(it) ?: "video/*",
-                        it.lastPathSegment ?: "video.${
+                        context = context,
+                        id = card!!.id!!,
+                        video = it,
+                        contentType = context.contentResolver.getType(it) ?: "video/*",
+                        filename = it.lastPathSegment ?: "video.${
                             context.contentResolver.getType(it)?.split("/")?.lastOrNull() ?: ""
                         }",
                         processingCallback = {

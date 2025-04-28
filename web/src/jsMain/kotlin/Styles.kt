@@ -105,6 +105,22 @@ object Styles : StyleSheet() {
         }
     }
 
+    val video by style {
+        width(100.percent)
+        property("z-index", "0")
+        backgroundColor(Styles.colors.background)
+        property("object-fit", "cover")
+        borderRadius(1.r)
+        overflow("hidden")
+        transform {
+            translateZ(1.px)
+        }
+
+        dark(self) {
+            backgroundColor(colors.dark.background)
+        }
+    }
+
     val markdown by style {
         whiteSpace("initial")
         property("word-break", "break-word")

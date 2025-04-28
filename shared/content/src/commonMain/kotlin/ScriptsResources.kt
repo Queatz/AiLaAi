@@ -42,6 +42,7 @@ render {
     )
     audio("<Url>") // Must start with /static/
     photo("<Url>", <Aspect ratio float>?) // Must start with /static/
+    video("<Url>") // Must start with /static/
     input(
     key = "<key>",
     // Optional

@@ -57,6 +57,7 @@ fun CreateCardWithTemplateDialog(
     var pay by rememberStateOf("")
     var title by rememberStateOf("")
     var photoUrl by rememberStateOf<String?>(null)
+    var videoUrl by rememberStateOf<String?>(null)
 
     DialogBase(onDismissRequest) {
         DialogLayout(
@@ -86,8 +87,19 @@ fun CreateCardWithTemplateDialog(
                             SetPhotoButton(
                                 photo = photoUrl.orEmpty(),
                                 photoText = title,
-                                onPhoto = { photoUrl = it },
-                                onRemove = { photoUrl = null },
+                                imagesOnly = false,
+                                onPhoto = { 
+                                    photoUrl = it
+                                    videoUrl = null
+                                },
+                                onVideo = { 
+                                    videoUrl = it
+                                    photoUrl = null
+                                },
+                                onRemove = { 
+                                    photoUrl = null
+                                    videoUrl = null
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             )
 
@@ -168,8 +180,19 @@ fun CreateCardWithTemplateDialog(
                             SetPhotoButton(
                                 photo = photoUrl.orEmpty(),
                                 photoText = title,
-                                onPhoto = { photoUrl = it },
-                                onRemove = { photoUrl = null },
+                                imagesOnly = false,
+                                onPhoto = { 
+                                    photoUrl = it
+                                    videoUrl = null
+                                },
+                                onVideo = { 
+                                    videoUrl = it
+                                    photoUrl = null
+                                },
+                                onRemove = { 
+                                    photoUrl = null
+                                    videoUrl = null
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             )
 
@@ -230,6 +253,7 @@ fun CreateCardWithTemplateDialog(
                                     this.name = name.trim()
                                     this.pay = price.notBlank { Pay(pay = it.trim())}
                                     this.photo = photoUrl?.notBlank
+                                    this.video = videoUrl?.notBlank
                                     this.active = true
                                     this.conversation = json.encodeToString(conversation)
                                 }

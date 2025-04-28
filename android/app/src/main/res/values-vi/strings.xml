@@ -100,6 +100,7 @@
     </plurals>
     <string name="on_profile_description">Vị trí của trang này sẽ được cập nhật vào vị trí hiện tại của bạn bất cứ khi nào bạn mở ứng dụng này.</string>
     <string name="set_photo">Chọn ảnh hoặc video</string>
+    <string name="photo_or_video">Ảnh hoặc video</string>
     <string name="card">Trang</string>
     <string name="copy_link">Sao chép liên kết</string>
     <string name="clear">Bỏ</string>

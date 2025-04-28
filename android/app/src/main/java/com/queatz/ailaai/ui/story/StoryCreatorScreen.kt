@@ -66,6 +66,7 @@ import com.queatz.ailaai.ui.story.creator.profilesCreatorItem
 import com.queatz.ailaai.ui.story.creator.sectionCreatorItem
 import com.queatz.ailaai.ui.story.creator.textCreatorItem
 import com.queatz.ailaai.ui.story.creator.titleCreatorItem
+import com.queatz.ailaai.ui.story.creator.videoCreatorItem
 import com.queatz.ailaai.ui.story.creator.widgetCreatorItem
 import com.queatz.ailaai.ui.story.editor.ReorderStoryContentsDialog
 import com.queatz.ailaai.ui.story.editor.SaveChangesDialog
@@ -526,6 +527,8 @@ fun StoryCreatorScreen(
                     is StoryContent.Cards -> cardsCreatorItem(creatorScope(part, partIndex))
 
                     is StoryContent.Photos -> photosCreatorItem(creatorScope(part, partIndex))
+
+                    is StoryContent.Video -> videoCreatorItem(creatorScope(part, partIndex))
 
                     is StoryContent.Widget -> widgetCreatorItem(creatorScope(part, partIndex))
 

@@ -84,8 +84,9 @@ fun CreateItemDialog(
                 ) {
                     SetPhotoButton(
                         photoText = name,
-                        photo = photo
-                    ) { photo = it }
+                        photo = photo,
+                        onPhoto = { photo = it }
+                    )
                     OutlinedTextField(
                         name,
                         { name = it },
