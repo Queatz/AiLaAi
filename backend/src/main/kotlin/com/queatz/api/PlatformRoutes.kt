@@ -6,6 +6,7 @@ import com.queatz.db.PlatformAccountsPointsBody
 import com.queatz.db.PlatformConfig
 import com.queatz.db.PlatformMeResponse
 import com.queatz.db.accountsByPoints
+import com.queatz.db.f
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
@@ -76,6 +77,27 @@ fun Route.platformRoutes() {
                 )
 
                 HttpStatusCode.OK
+            }
+        }
+
+        get("/platform/members") {
+            hosts {
+                val offset = call.parameters["offset"]?.toIntOrNull() ?: 0
+                val limit = call.parameters["limit"]?.toIntOrNull() ?: 20
+
+                db.list(
+                    Person::class,
+                    """
+                        for x in @@collection
+                            sort x.createdAt desc
+                            limit @offset, @limit
+                            return x
+                    """.trimIndent(),
+                    mapOf(
+                        "offset" to offset,
+                        "limit" to limit
+                    )
+                )
             }
         }
     }

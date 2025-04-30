@@ -31,7 +31,7 @@ import com.queatz.ailaai.ui.theme.elevation
 @Composable
 fun FloatingButton(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onClickLabel: String? = null,

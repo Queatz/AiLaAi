@@ -250,11 +250,11 @@ fun CardsNavPage(
                 LazyColumn {
                     items(shownCards) {
                         CardItem(
-                            it,
-                            (nav as? CardNav.Selected)?.subCard == null,
-                            selected == it,
-                            saved.any { save -> save.id == it.id },
-                            it.active == true
+                            card = it,
+                            scroll = (nav as? CardNav.Selected)?.subCard == null,
+                            selected = selected == it,
+                            saved = saved.any { save -> save.id == it.id },
+                            published = it.active == true
                         ) { _ ->
                             onSelected(CardNav.Selected(it))
                         }

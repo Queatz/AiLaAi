@@ -708,6 +708,11 @@ object Strings {
         ru = "С %1\$s до %2\$s"
     )
 
+    val until = Translation(
+        en = "Until",
+        vn = "Cho đến khi"
+    )
+
     val section = Translation(
         en = "Section",
         vn = "Phần",

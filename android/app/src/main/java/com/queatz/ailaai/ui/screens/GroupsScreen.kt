@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -26,9 +27,14 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.queatz.ailaai.ui.dialogs.TextFieldDialog
+import app.ailaai.api.createGroup
 import app.ailaai.api.exploreGroups
+import app.ailaai.api.updateGroup
+import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
 import com.queatz.ailaai.data.api
+import com.queatz.ailaai.extensions.appNavigate
 import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
@@ -36,6 +42,7 @@ import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.sortedDistinct
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.me
+import com.queatz.ailaai.nav
 import com.queatz.ailaai.ui.components.ContactItem
 import com.queatz.ailaai.ui.components.EmptyText
 import com.queatz.ailaai.ui.components.GroupInfo
@@ -45,8 +52,10 @@ import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.components.SearchResult
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Geo
+import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import kotlin.random.Random.Default.nextInt
 
 private var groupsCache = emptyList<GroupExtended>()
@@ -59,6 +68,7 @@ fun GroupsScreen(
     header: LazyListScope.() -> Unit = {}
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var searchText by rememberSaveable { mutableStateOf("") }
     var allGroups by remember {
         mutableStateOf(groupsCache)
@@ -75,6 +85,8 @@ fun GroupsScreen(
     }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var h by rememberStateOf(80.dp.px)
+    val nav = nav
+    var showCreateGroupDialog by rememberStateOf(false)
 
     LaunchedEffect(reloadKey) {
         if (geo != null) {
@@ -201,7 +213,38 @@ fun GroupsScreen(
                 value = searchText,
                 valueChange = { searchText = it },
                 placeholder = stringResource(R.string.search),
+                action = {
+                    Icon(Icons.Outlined.Add, stringResource(R.string.create_group))
+                },
+                onAction = {
+                    showCreateGroupDialog = true
+                },
             )
+        }
+    }
+
+    if (showCreateGroupDialog) {
+        TextFieldDialog(
+            onDismissRequest = { showCreateGroupDialog = false },
+            title = stringResource(R.string.group_name),
+            button = stringResource(R.string.create),
+            singleLine = true,
+            initialValue = searchText,
+            placeholder = stringResource(R.string.empty_group_name),
+            requireModification = false
+        ) { value ->
+            showCreateGroupDialog = false
+            scope.launch {
+                api.createGroup(emptyList()) { group ->
+                    // Set the group name and to open
+                    api.updateGroup(group.id!!, Group(name = value, open = true)) {
+                        // Open the group after creating it
+                        nav.appNavigate(AppNav.Group(group.id!!))
+                        // Refresh reloadKey
+                        reloadKey = nextInt()
+                    }
+                }
+            }
         }
     }
 }

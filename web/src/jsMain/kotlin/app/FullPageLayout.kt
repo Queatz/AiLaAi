@@ -5,15 +5,20 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
-fun FullPageLayout(maxWidth: CSSpxValue? = 800.px, content: @Composable () -> Unit) {
+fun FullPageLayout(
+    maxWidth: CSSpxValue? = 800.px,
+    content: @Composable () -> Unit
+) {
     Div({
         style {
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
             width(100.percent)
             height(100.percent)
-            overflowX("hidden")
-            overflowY("auto")
+            if (maxWidth == null) {
+                overflowX("hidden")
+                overflowY("auto")
+            }
         }
     }) {
         if (maxWidth == null) {
@@ -28,6 +33,8 @@ fun FullPageLayout(maxWidth: CSSpxValue? = 800.px, content: @Composable () -> Un
                     alignItems(AlignItems.Stretch)
                     maxWidth(maxWidth)
                     alignSelf(AlignSelf.Center)
+                    overflowX("hidden")
+                    overflowY("auto")
                 }
             }) {
                 content()

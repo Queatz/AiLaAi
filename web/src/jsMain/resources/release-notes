@@ -1,9 +1,14 @@
 1.0.5
 =====
 
- -
- -
- -
+ - Create open event from map
+ - Create open group from map
+ - Scan QR code to accept invite
+ - Scan QR code to join group via invite
+ - Scan QR code to link device
+ - Add videos to content
+ - Scripts: Upload photo input
+ - Scripts: Render videos
 
 1.0.4
 ======

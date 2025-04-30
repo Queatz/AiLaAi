@@ -13,6 +13,7 @@ import org.jetbrains.compose.web.css.Color
 sealed class PlatformNav {
     data object None : PlatformNav()
     data object Accounts : PlatformNav()
+    data object People : PlatformNav()
     data object Reviews : PlatformNav()
     data object Reports : PlatformNav()
     data object Stats : PlatformNav()
@@ -36,6 +37,10 @@ fun PlatformNavPage(
         // todo: translate
         NavMenuItem("people", "Accounts", selected = selected == PlatformNav.Accounts, iconColor = Color("#60BFBF")) {
         onSelected(PlatformNav.Accounts)
+        }
+        // todo: translate
+        NavMenuItem("person", "People", selected = selected == PlatformNav.People, iconColor = Color("#60BF60")) {
+        onSelected(PlatformNav.People)
         }
         // todo: translate
         NavMenuItem("favorite", "Health", selected = selected == PlatformNav.Health, iconColor = Color("#FF69B4")) {

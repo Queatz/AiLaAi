@@ -44,13 +44,13 @@ render {
     photo("<Url>", <Aspect ratio float>?) // Must start with /static/
     video("<Url>") // Must start with /static/
     input(
-    key = "<key>",
-    // Optional
-    value = "<value>",
-    // Optional
-    hint = "<hint>",
-    // Optional
-    inputType = InputType.Text or InputType.Photo
+        key = "<key>",
+        // Optional
+        value = "<value>",
+        // Optional
+        hint = "<hint>",
+        // Optional
+        type = InputType.Text or InputType.Photo
     )
     profiles(
         profiles = listOf("<Profile IDs>") // List of profile IDs to display

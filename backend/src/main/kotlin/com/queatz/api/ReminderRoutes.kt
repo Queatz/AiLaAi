@@ -77,6 +77,7 @@ fun Route.reminderRoutes() {
                         groups = new.groups,
                         people = new.people,
                         open = new.open,
+                        geo = new.geo,
                         attachment = new.attachment,
                         title = new.title,
                         note = new.note,

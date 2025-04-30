@@ -34,7 +34,7 @@ class LazyDsl internal constructor() {
 }
 
 /**
- * Only works when the immediate parent is scrolled
+ * Only works when the immediate parent is scrollable
  */
 @Composable
 fun LazyColumn(
@@ -49,7 +49,7 @@ fun LazyColumn(
 }
 
 /**
- * Only works when the immediate parent is scrolled
+ * Only works when the immediate parent is scrollable
  */
 @Composable
 fun LazyRow(

@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.ailaai.api.newReminder
 import app.ailaai.api.occurrences
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
@@ -36,9 +40,12 @@ import com.queatz.ailaai.extensions.inDp
 import com.queatz.ailaai.extensions.px
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.sortedDistinct
+import com.queatz.ailaai.extensions.startOfMinute
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
+import com.queatz.ailaai.schedule.ScheduleReminderDialog
 import com.queatz.ailaai.ui.components.EmptyText
+import com.queatz.ailaai.ui.components.FloatingButton
 import com.queatz.ailaai.ui.components.Loading
 import com.queatz.ailaai.ui.components.LoadMore
 import com.queatz.ailaai.ui.components.PageInput
@@ -46,11 +53,13 @@ import com.queatz.ailaai.ui.components.SearchFieldAndAction
 import com.queatz.ailaai.ui.screens.SearchContent
 import com.queatz.ailaai.ui.theme.pad
 import com.queatz.db.Geo
+import com.queatz.db.Reminder
 import com.queatz.db.toList
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
 import kotlinx.datetime.atTime
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
@@ -237,6 +246,53 @@ fun EventsScreen(
                 value = searchText,
                 valueChange = { searchText = it },
                 placeholder = stringResource(R.string.search),
+                action = {
+                    var showScheduleReminder by remember { mutableStateOf(false) }
+
+                    FloatingButton(
+                        onClick = {
+                            showScheduleReminder = true
+                        },
+                        onLongClick = {},
+                        onClickLabel = stringResource(R.string.create_event)
+                    ) {
+                        Icon(Icons.Outlined.Add, stringResource(R.string.create_event))
+                    }
+
+                    if (showScheduleReminder) {
+                        ScheduleReminderDialog(
+                            onDismissRequest = {
+                                showScheduleReminder = false
+                            },
+                            initialReminder = Reminder(
+                                start = Clock.System.now().startOfMinute(),
+                                open = true,
+                                geo = geo?.toList()
+                            ),
+                            showTitle = true,
+                            confirmText = stringResource(R.string.create_event)
+                        ) { reminder ->
+                            scope.launch {
+                                api.newReminder(
+                                    Reminder(
+                                        title = reminder.title,
+                                        start = reminder.start,
+                                        end = reminder.end,
+                                        schedule = reminder.schedule,
+                                        timezone = TimeZone.currentSystemDefault().id,
+                                        utcOffset = TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds / (60.0 * 60.0),
+                                        open = true,
+                                        geo = geo?.toList()
+                                    )
+                                ) { newReminder ->
+                                    loadEvents(false)
+                                    nav.appNavigate(AppNav.Reminder(newReminder.id!!))
+                                }
+                            }
+                            showScheduleReminder = false
+                        }
+                    }
+                }
             )
         }
     }

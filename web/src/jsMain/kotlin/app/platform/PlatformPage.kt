@@ -12,6 +12,7 @@ fun PlatformPage(selected: PlatformNav) {
         when (selected) {
             is PlatformNav.None -> {}
             is PlatformNav.Accounts -> AccountsPlatformPage()
+            is PlatformNav.People -> PeoplePlatformPage()
             is PlatformNav.Health -> HealthPlatformPage()
             is PlatformNav.Config -> ConfigPlatformPage()
             is PlatformNav.Reports -> ReportsPlatformPage()

@@ -1073,4 +1073,5 @@
     <string name="inline_to">to</string>
     <string name="photo_or_video">Photo or video</string>
     <string name="video">Video</string>
+    <string name="create_event">Create event</string>
 </resources>
