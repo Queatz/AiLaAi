@@ -110,7 +110,11 @@ fun ScriptCoverPage(scriptId: String) {
                     appText { noScripts }
                 }
             } else if (isLoading) {
-                Loading()
+                Loading {
+                    style {
+                        padding(2.r)
+                    }
+                }
             } else if (scriptResult != null) {
                 Div({
                     style {

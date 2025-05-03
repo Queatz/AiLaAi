@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
@@ -48,7 +47,6 @@ import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.InviteDialog
-import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.state.jsonSaver
@@ -61,7 +59,6 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun SettingsScreen(
@@ -74,21 +71,6 @@ fun SettingsScreen(
     var signOutDialog by rememberStateOf(false)
     var exportDataDialog by rememberStateOf(false)
     var inviteDialog by rememberStateOf(false)
-    var inviteCode by rememberStateOf<String?>(null)
-    var showInviteQrCode by rememberStateOf(false)
-    var isCreatingInvite by rememberStateOf(false)
-
-    fun createInvite() {
-        if (isCreatingInvite) return
-        isCreatingInvite = true
-        scope.launch {
-            api.createQuickInvite {
-                inviteCode = it.code
-                isCreatingInvite = false
-                showInviteQrCode = true
-            }
-        }
-    }
     var urlDialog by rememberStateOf(false)
     var showReleaseNotes by rememberStateOf(false)
     var showRefreshDialog by rememberStateOf(false)
@@ -175,21 +157,8 @@ fun SettingsScreen(
         InviteDialog(
             me?.name ?: context.getString(R.string.someone)
         ) { 
-            inviteDialog = false 
-            // Show QR code if invite code is available
-            if (inviteCode != null) {
-                showInviteQrCode = true
-            }
+            inviteDialog = false
         }
-    }
-
-    if (showInviteQrCode && inviteCode != null) {
-        QrCodeDialog(
-            onDismissRequest = { showInviteQrCode = false },
-            url = "$appDomain/invite/$inviteCode",
-            name = "Invite Code: $inviteCode",
-            title = "Scan to join"
-        )
     }
 
     if (urlDialog) {
@@ -415,11 +384,9 @@ fun SettingsScreen(
             },
             actions = {
                 ElevatedButton(
-                    {
+                    onClick = {
                         inviteDialog = true
-                        createInvite()
                     },
-                    enabled = !inviteDialog && !isCreatingInvite,
                     modifier = Modifier
                         .padding(horizontal = 2.pad)
                 ) {

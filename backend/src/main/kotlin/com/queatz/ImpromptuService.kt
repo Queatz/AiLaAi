@@ -17,6 +17,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.UtcOffset
+import kotlinx.datetime.asTimeZone
+import kotlinx.datetime.toLocalDateTime
+import java.time.ZoneOffset
 import java.util.logging.Logger
 import kotlin.time.Duration.Companion.hours
 
@@ -60,12 +65,29 @@ class ImpromptuService {
                     // Check if location update is needed based on ImpromptuLocationUpdates and Person.geoUpdatedAt
                     val shouldUpdate = when (impromptu.updateLocation) {
                         ImpromptuLocationUpdates.Hourly -> {
-                            val lastUpdate = person.geoUpdatedAt
-                            if (lastUpdate == null) {
-                                true
+
+                            val utcOffset = person.utcOffset?.let {
+                                val hours = it.hours.inWholeHours.toInt()
+                                UtcOffset(
+                                    hours = hours,
+                                    minutes = (it - hours).hours.inWholeMinutes.toInt()
+                                )
+                            } ?: UtcOffset.ZERO
+
+                            // Calculate local hour for the person
+                            val localHour = now.toLocalDateTime(utcOffset.asTimeZone()).hour
+
+                            // Don't update if it's before 7am or after 7pm local time
+                            if (localHour < 7 || localHour >= 19) {
+                                false
                             } else {
-                                val duration = now - lastUpdate
-                                duration.inWholeHours >= 1
+                                val lastUpdate = person.geoUpdatedAt
+                                if (lastUpdate == null) {
+                                    true
+                                } else {
+                                    val duration = now - lastUpdate
+                                    duration.inWholeHours >= 1
+                                }
                             }
                         }
 
