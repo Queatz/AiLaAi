@@ -329,6 +329,9 @@ fun AppPage() {
     LaunchedEffect(Unit) {
         appNav.navigate.collectLatest {
             when (it) {
+                is AppNavigation.Nav -> {
+                    nav = it.nav
+                }
                 is AppNavigation.Group -> {
                     if (it.groupExtended == null) {
                         api.group(it.id) {

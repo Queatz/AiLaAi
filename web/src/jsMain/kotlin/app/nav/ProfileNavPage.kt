@@ -63,6 +63,61 @@ import r
 import webBaseUrl
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Shows a dialog for sending app feedback.
+ * 
+ * @param feedbackType The type of feedback (suggestion, issue, other)
+ * @return True if feedback was successfully sent, false otherwise
+ */
+suspend fun appFeedbackDialog(
+    feedbackType: AppFeedbackType,
+    prefix: String = ""
+): Boolean {
+    val title = when (feedbackType) {
+        // todo: translate
+        AppFeedbackType.Suggestion -> "Request a feature"
+        // todo: translate
+        AppFeedbackType.Issue -> "Report a bug"
+        // todo: translate
+        AppFeedbackType.Other -> "Other feedback"
+        else -> ""
+    }
+
+    val feedback = inputDialog(
+        title = title,
+        // todo: translate
+        confirmButton = "Send",
+        singleLine = false
+    )
+
+    if (!feedback.isNullOrBlank()) {
+        var success = false
+        api.sendAppFeedback(AppFeedback(feedback = "$prefix$feedback", type = feedbackType)) {
+            success = true
+        }
+
+        if (success) {
+            // todo: translate
+            dialog("Thank you!", cancelButton = null)
+        } else {
+            val failMessage = when (feedbackType) {
+                // todo: translate
+                AppFeedbackType.Suggestion -> "Failed to send feature request"
+                // todo: translate
+                AppFeedbackType.Issue -> "Failed to send bug report"
+                // todo: translate
+                AppFeedbackType.Other -> "Failed to send feedback"
+                else -> ""
+            }
+            dialog(failMessage, cancelButton = null)
+        }
+
+        return success
+    }
+
+    return false
+}
+
 @Composable
 fun ProfileNavPage(
     onProfileClick: () -> Unit,
@@ -145,49 +200,8 @@ fun ProfileNavPage(
 
     if (sendAppFeedback != null) {
         scope.launch {
-            val title = when (sendAppFeedback) {
-                // todo: translate
-                AppFeedbackType.Suggestion -> "Request a feature"
-                // todo: translate
-                AppFeedbackType.Issue -> "Report a bug"
-                // todo: translate
-                AppFeedbackType.Other -> "Other feedback"
-                else -> ""
-            }
-
-            val feedback = inputDialog(
-                title = title,
-                // todo: translate
-                confirmButton = "Send",
-                singleLine = false
-            )
-
-            if (!feedback.isNullOrBlank()) {
-                var success = false
-                api.sendAppFeedback(AppFeedback(feedback = feedback, type = sendAppFeedback!!)) {
-                    success = true
-                    sendAppFeedback = null
-                }
-
-                if (success) {
-                    // todo: translate
-                    dialog("Thank you!", cancelButton = null)
-                } else {
-                    val failMessage = when (sendAppFeedback) {
-                        // todo: translate
-                        AppFeedbackType.Suggestion -> "Failed to send feature request"
-                        // todo: translate
-                        AppFeedbackType.Issue -> "Failed to send bug report"
-                        // todo: translate
-                        AppFeedbackType.Other -> "Failed to send feedback"
-                        else -> ""
-                    }
-                    dialog(failMessage, cancelButton = null)
-                    sendAppFeedback = null
-                }
-            } else {
-                sendAppFeedback = null
-            }
+            appFeedbackDialog(sendAppFeedback!!)
+            sendAppFeedback = null
         }
     }
 

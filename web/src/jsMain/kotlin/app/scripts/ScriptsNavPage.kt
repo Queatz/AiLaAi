@@ -164,7 +164,7 @@ fun ScriptsNavPage(
         Spacer()
 
         scripts.filter {
-            (searchQuery.isBlank() || it.name.orEmpty().contains(searchQuery, ignoreCase = true)) &&
+            (searchQuery.isBlank() || it.id == searchQuery || it.name.orEmpty().contains(searchQuery, ignoreCase = true)) &&
                     (selectedCategory.isNullOrBlank() || it.categories.orEmpty().contains(selectedCategory))
         }.forEach { script ->
             NavMenuItem(

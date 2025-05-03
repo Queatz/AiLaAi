@@ -52,3 +52,25 @@ suspend fun Api.uploadVideo(
         }
     ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
 }
+
+suspend fun Api.uploadAudio(
+    audio: InputProvider,
+    contentType: String = "audio/mp4",
+    filename: String = "audio.m4a",
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<UploadResponse>,
+) {
+    return post(
+        "upload/audio", MultiPartFormDataContent(
+        formData {
+            append(
+                "audio",
+                audio,
+                Headers.build {
+                    append(HttpHeaders.ContentType, contentType)
+                    append(HttpHeaders.ContentDisposition, "filename=${filename}")
+                }
+            )
+        }
+    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+}

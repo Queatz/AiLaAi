@@ -10,40 +10,86 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.AppNavigation
 import app.FullPageLayout
+import app.NavPage
 import app.ailaai.api.createGroup
 import app.ailaai.api.exploreGroups
 import app.ailaai.api.group
 import app.ailaai.api.updateGroup
+import app.appNav
 import app.components.TopBarSearch
 import app.dialog.inputDialog
 import app.nav.GroupNav
+import app.softwork.routingcompose.Router
 import appString
 import appText
 import application
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.asGeo
+import components.Icon
 import components.Loading
 import components.Tip
 import defaultGeo
 import format
 import kotlinx.coroutines.launch
 import notBlank
-import org.jetbrains.compose.web.css.AlignItems
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexDirection
-import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.justifyContent
-import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
 import r
+
+@Composable
+fun FeatureButton(
+    icon: String,
+    title: String,
+    description: String,
+    onClick: () -> Unit
+) {
+    Div({
+        classes(Styles.featureButton)
+        onClick {
+            onClick()
+        }
+    }) {
+        // Icon
+        Div({
+            style {
+                fontSize(24.px)
+                display(DisplayStyle.Flex)
+                justifyContent(JustifyContent.Center)
+                alignItems(AlignItems.Center)
+                marginBottom(0.5.r)
+            }
+        }) {
+            Icon(icon)
+        }
+
+        // Title
+        Div({
+            style {
+                fontSize(18.px)
+                fontWeight("bold")
+                textAlign("center")
+                marginBottom(0.5.r)
+            }
+        }) {
+            Text(title)
+        }
+
+        // Description
+        Div({
+            style {
+                fontSize(14.px)
+                textAlign("center")
+                opacity(.5f)
+            }
+        }) {
+            Text(description)
+        }
+    }
+}
 
 @Composable
 fun GroupPage(
@@ -107,12 +153,94 @@ fun GroupPage(
             style {
                 height(100.percent)
                 display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
                 alignItems(AlignItems.Center)
                 justifyContent(JustifyContent.Center)
-                opacity(.5)
+                padding(1.r)
             }
         }) {
-            appText { selectAGroup }
+            // todo: translate all
+            Div({
+                style {
+                    display(DisplayStyle.Grid)
+                    property("grid-template-columns", "repeat(auto-fill, minmax(200px, 1fr))")
+                    property("grid-gap", "1rem")
+                    width(100.percent)
+                    maxWidth(800.px)
+                }
+            }) {
+                // Create a page
+                FeatureButton(
+                    icon = "note_add",
+                    title = "Create a page",
+                    description = "Create a new page for your content",
+                    onClick = {
+                        scope.launch {
+                            appNav.navigate(AppNavigation.Nav(NavPage.Cards))
+                        }
+                    }
+                )
+
+                // Schedule
+                FeatureButton(
+                    icon = "calendar_month",
+                    title = "Schedule",
+                    description = "Manage your schedule and events",
+                    onClick = {
+                        scope.launch {
+                            appNav.navigate(AppNavigation.Nav(NavPage.Schedule))
+                        }
+                    }
+                )
+
+                // Profile
+                FeatureButton(
+                    icon = "person",
+                    title = "Profile",
+                    description = "View and edit your profile",
+                    onClick = {
+                        scope.launch {
+                            appNav.navigate(AppNavigation.Nav(NavPage.Profile))
+                        }
+                    }
+                )
+
+                // Write a post
+                FeatureButton(
+                    icon = "post_add",
+                    title = "Write a post",
+                    description = "Share your thoughts with others",
+                    onClick = {
+                        scope.launch {
+                            appNav.navigate(AppNavigation.Nav(NavPage.Stories))
+                        }
+                    }
+                )
+
+                // Create a script
+                FeatureButton(
+                    icon = "description",
+                    title = "Create a script",
+                    description = "Create a script to automate tasks",
+                    onClick = {
+                        scope.launch {
+                            appNav.navigate(AppNavigation.Nav(NavPage.Scripts))
+                        }
+                    }
+                )
+
+                // Explore
+                FeatureButton(
+                    icon = "explore",
+                    title = "Explore",
+                    description = "Discover new content and people",
+                    onClick = {
+                        scope.launch {
+                            appNav.navigate(AppNavigation.Nav(NavPage.Cards))
+                        }
+                    }
+                )
+            }
         }
     } else if (nav is GroupNav.Local || nav is GroupNav.Friends) {
         if (isLoading) {

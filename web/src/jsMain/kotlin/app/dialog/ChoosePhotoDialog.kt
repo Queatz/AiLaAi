@@ -71,6 +71,7 @@ class ChoosePhotoDialogControl(
                 aiStyles = aiStyles,
                 aiStyle = aiStyle,
                 count = count,
+                multiple = multiple,
                 showUpload = showUpload,
                 onAiStyle = {
                     aiStyle.value = it

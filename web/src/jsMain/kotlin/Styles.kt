@@ -105,6 +105,37 @@ object Styles : StyleSheet() {
         }
     }
 
+    val scriptCoverContainer by style {
+        backgroundColor(rgba(255, 255, 255, .92))
+        borderRadius(2.r)
+        marginTop(1.r)
+
+        dark(self) {
+            backgroundColor(rgba(0, 0, 0, .92))
+        }
+    }
+
+    val featureButton by style {
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        padding(1.r)
+        elevated(hoverElevation = 2.0)
+        cursor("pointer")
+
+        hover(self) style {
+            property("scale", 1.05)
+        }
+
+        transitions {
+            "transform" {
+                duration = 200.ms
+            }
+            "scale" {
+                duration = 200.ms
+            }
+        }
+    }
+
     val video by style {
         width(100.percent)
         property("z-index", "0")
@@ -230,10 +261,14 @@ object Styles : StyleSheet() {
         }
     }
 
-    fun CSSBuilder.elevated() {
-        property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
+    fun CSSBuilder.elevated(elevation: Double = 1.0, hoverElevation: Double? = null) {
+        property("box-shadow", "${elevation}px ${elevation}px ${elevation * 4.0}px rgba(0, 0, 0, 0.125)")
         backgroundColor(Color.white)
         borderRadius(1.r)
+
+        hoverElevation?.let { hoverElevation ->
+            property("box-shadow", "${hoverElevation}px ${hoverElevation}px ${hoverElevation * 4.0}px rgba(0, 0, 0, 0.125)")
+        }
 
         dark(self) {
             backgroundColor(colors.dark.background)

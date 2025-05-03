@@ -58,5 +58,15 @@ fun Route.uploadRoutes() {
                 UploadResponse(listOf(url))
             }
         }
+
+        post("/upload/audio") {
+            respond {
+                var url = ""
+                call.receiveFile("audio", "upload-${meOrNull?.id}") { fileName, _ ->
+                    url = fileName
+                }
+                UploadResponse(listOf(url))
+            }
+        }
     }
 }

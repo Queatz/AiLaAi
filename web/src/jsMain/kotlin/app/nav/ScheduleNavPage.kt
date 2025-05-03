@@ -185,7 +185,7 @@ fun ScheduleNavPage(
         }
     }
 
-    NavTopBar(me, appString { this.reminders }, onProfileClick) {
+    NavTopBar(me, appString { this.schedule }, onProfileClick) {
         IconButton("search", appString { search }) {
             showSearch = !showSearch
         }

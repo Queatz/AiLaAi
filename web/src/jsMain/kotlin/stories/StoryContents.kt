@@ -47,6 +47,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import lib.isThisYear
+import notBlank
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.disabled
@@ -91,7 +92,6 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
     format(it, "MMMM do${if (isThisYear(it)) "" else ", yyyy"}")
 } ?: appString { draft }
 
-@OptIn(ExperimentalComposeWebApi::class)
 @Composable
 fun StoryContents(
     content: List<StoryContent>,
@@ -367,17 +367,19 @@ fun StoryContents(
             }
 
             is StoryContent.Audio -> {
-                Audio({
-                    classes(StoryStyles.contentAudio)
-                    attr("controls", "")
-                    style {
-                        width(100.percent)
+                key(part.audio) {
+                    Audio({
+                        classes(StoryStyles.contentAudio)
+                        attr("controls", "")
+                        style {
+                            width(100.percent)
+                        }
+                    }) {
+                        Source({
+                            attr("src", "$baseUrl${part.audio}")
+                            attr("type", "audio/mp4")
+                        })
                     }
-                }) {
-                    Source({
-                        attr("src", "$baseUrl${part.audio}")
-                        attr("type", "audio/mp4")
-                    })
                 }
             }
 
@@ -526,7 +528,7 @@ fun StoryContents(
                                 }
                             }) {
                                 // todo: translate
-                                Text("Choose photo")
+                                Text(part.hint?.notBlank ?: "Choose photo")
                             }
                         } else {
                             Div({

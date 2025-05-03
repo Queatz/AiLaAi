@@ -4,6 +4,7 @@ import Styles
 import aiScript
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import app.ailaai.api.scriptData
 import app.ailaai.api.scripts
 import app.ailaai.api.updateScript
 import app.ailaai.api.updateScriptData
+import app.dialog.rememberChoosePhotoDialog
 import app.ailaai.shared.resources.ScriptsResources
 import app.components.TopBarSearch
 import app.dialog.categoryDialog
@@ -32,11 +34,14 @@ import app.dialog.inputSelectDialog
 import components.SearchField
 import app.menu.Menu
 import app.messaages.inList
+import app.nav.appFeedbackDialog
 import appString
 import appText
 import application
 import bulletedString
 import com.queatz.db.AiScriptRequest
+import com.queatz.db.AppFeedback
+import com.queatz.db.AppFeedbackType
 import com.queatz.db.Card
 import com.queatz.db.CardOptions
 import com.queatz.db.PromptContext
@@ -105,8 +110,6 @@ import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
 import stories.StoryContents
-import web.cssom.PropertyName.Companion.marginBottom
-import web.cssom.PropertyName.Companion.marginTop
 
 @Composable
 fun ResultPanel(
@@ -177,15 +180,38 @@ suspend fun selectScriptDialog(
             var isLoading by remember { mutableStateOf(true) }
             var search by remember { mutableStateOf("") }
 
-            LaunchedEffect(search) {
-                api.scripts(
-                    search = search.notBlank,
-                    offset = 0,
-                    limit = 20
-                ) {
-                    scripts = it.filter { it.id != script.id }
+            var hasMore by remember { mutableStateOf(true) }
+            var isLoadingMore by remember { mutableStateOf(false) }
+            var offset by remember { mutableStateOf(0) }
+            val limit = 20
+
+            fun loadMore() {
+                if (!hasMore || isLoadingMore) return
+                isLoadingMore = true
+                scope.launch {
+                    api.scripts(
+                        search = search.notBlank,
+                        offset = offset + limit,
+                        limit = limit
+                    ) {
+                        val newScripts = it.filter { it.id != script.id }
+                        if (offset == 0) {
+                            scripts = newScripts
+                        } else {
+                            scripts = (scripts + newScripts).distinctBy { it.id }
+                            offset += limit
+                        }
+                        hasMore = newScripts.size >= limit
+                        isLoadingMore = false
+                        isLoading = false
+                    }
                 }
-                isLoading = false
+            }
+
+            LaunchedEffect(search) {
+                offset = 0
+                isLoading = true
+                loadMore()
             }
 
             Div({
@@ -331,6 +357,7 @@ fun ScriptsPage(
     onScriptCreated: (Script) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
+    val choosePhoto = rememberChoosePhotoDialog(showUpload = true)
 
     when (nav) {
         is ScriptsNav.None -> Unit
@@ -380,6 +407,13 @@ fun ScriptsPage(
                     if (isLoading) {
                         Loading()
                     } else if (scripts.isNotEmpty()) {
+                        TopBarSearch(
+                            value = search,
+                            onValue = { search = it },
+                            styles = {
+                                margin(1.r, 0.r)
+                            }
+                        )
                         if (categories.isNotEmpty()) {
                             Div({
                                 style {
@@ -492,11 +526,6 @@ fun ScriptsPage(
                     }
                 }
             }
-
-            TopBarSearch(
-                value = search,
-                onValue = { search = it }
-            )
         }
 
         is ScriptsNav.Script -> {
@@ -510,11 +539,12 @@ fun ScriptsPage(
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
             var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
             var undoAiScript by remember(script) { mutableStateOf<String?>(null) }
-            var isEditorOnRight by remember(script) { mutableStateOf(false) }
+            var isEditorOnRight by remember { mutableStateOf(false) }
 
             var isLoading by remember { mutableStateOf(false) }
             var menuTarget by remember(script) { mutableStateOf<DOMRect?>(null) }
             var aiJob by remember { mutableStateOf<Job?>(null) }
+            var isBackgroundLoading by remember { mutableStateOf(false) }
             val state = remember { MonacoEditorState() }
 
             LaunchedEffect(script) {
@@ -530,6 +560,14 @@ fun ScriptsPage(
                     onDismissRequest = { menuTarget = null },
                     target = it,
                 ) {
+                    item(
+                        title = appString { openInNewTab },
+                        icon = "open_in_new",
+                        onClick = {
+                            menuTarget = null
+                            window.open("/script/${script.id}", "_blank")
+                        }
+                    )
 
                     if (isCurrentUserOwner) {
                         // Show all options for the script owner
@@ -539,6 +577,7 @@ fun ScriptsPage(
                                 menuTarget = null
                                 scope.launch {
                                     val name = inputDialog(
+                                        // todo: translate
                                         title = "Script name",
                                         confirmButton = application.appString { update },
                                         defaultValue = script.name.orEmpty()
@@ -624,6 +663,29 @@ fun ScriptsPage(
                             }
                         )
                         item(
+                            // todo: translate
+                            title = "Background",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    try {
+                                        choosePhoto.launch { photo ->
+                                            isBackgroundLoading = true
+                                            api.updateScript(
+                                                id = script.id!!,
+                                                script = Script(background = photo)
+                                            ) {
+                                                onUpdate(it)
+                                                isBackgroundLoading = false
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        isBackgroundLoading = false
+                                    }
+                                }
+                            }
+                        )
+                        item(
                             title = appString { delete },
                             onClick = {
                                 menuTarget = null
@@ -680,7 +742,7 @@ fun ScriptsPage(
                                     api.newCard(
                                         card = Card(
                                             name = script.name,
-                                            conversation = json.encodeToString(CardOptions(enableReplies = false, enableAnonymousReplies = false)),
+                                            options = json.encodeToString(CardOptions(enableReplies = false, enableAnonymousReplies = false)),
                                             content = json.encodeToString(
                                                 listOf(
                                                     StoryContent.Widget(
@@ -1033,6 +1095,24 @@ fun ScriptsPage(
                                 dialog(
                                     title = application.appString { kotlinScripts },
                                     cancelButton = null,
+                                    actions = {
+                                        Button(
+                                            attrs = {
+                                                classes(Styles.button)
+
+                                                onClick {
+                                                    scope.launch {
+                                                        appFeedbackDialog(
+                                                            AppFeedbackType.Suggestion,
+                                                            prefix = "Scripts request:\n\n"
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        ) {
+                                            Text("Request a feature")
+                                        }
+                                    },
                                     content = {
                                         Div(
                                             {
@@ -1052,7 +1132,8 @@ fun ScriptsPage(
                             title = appString { menu },
                             styles = {
                                 marginLeft(.5.r)
-                            }
+                            },
+                            isLoading = choosePhoto.isGenerating.collectAsState().value || isBackgroundLoading
                         ) {
                             menuTarget =
                                 if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null

@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 val appNav = AppNav()
 
 sealed interface AppNavigation {
-    class Group(val id: String, val groupExtended: GroupExtended? = null) : AppNavigation
-    class Page(val id: String, val card: Card? = null) : AppNavigation
+    data class Nav(val nav: NavPage) : AppNavigation
+    data class Group(val id: String, val groupExtended: GroupExtended? = null) : AppNavigation
+    data class Page(val id: String, val card: Card? = null) : AppNavigation
+
 }
 
 class AppNav {

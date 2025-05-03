@@ -22,12 +22,25 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun AppFooter() {
+fun AppFooter(
+    showHome: Boolean = false,
+) {
     val scope = rememberCoroutineScope()
     val router = Router.current
     Div({
         classes(Styles.appFooter)
     }) {
+        if (showHome) {
+            Span({
+                classes(Styles.menuButton)
+                onClick {
+                    router.navigate("/")
+                }
+            }) {
+                appText { appName }
+            }
+            Bullet()
+        }
         Span({
             classes(Styles.menuButton)
             onClick {

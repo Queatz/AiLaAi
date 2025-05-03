@@ -103,10 +103,10 @@ fun LazyGridScope.inputItem(
                         ) {
                             Icon(
                                 Icons.Outlined.AddPhotoAlternate,
-                                contentDescription = stringResource(R.string.add_photo),
+                                contentDescription = null,
                             )
                             Text(
-                                stringResource(R.string.photo)
+                                content.hint?.notBlank ?: stringResource(R.string.choose_photo)
                             )
                         }
                     }

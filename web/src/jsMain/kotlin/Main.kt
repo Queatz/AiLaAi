@@ -14,6 +14,7 @@ import app.group.GroupCoverPage
 import app.info.PrivacyPage
 import app.info.TosPage
 import app.invites.InvitePage
+import app.scripts.ScriptCoverPage
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import event.EventPage
@@ -172,6 +173,19 @@ fun main() {
                         )
                         InvitePage(code = code)
                         AppFooter()
+                    }
+                }
+
+                route("script") {
+                    string { script ->
+                        Background({
+                            classes(Styles.background)
+                        }) {
+                            ScriptCoverPage(scriptId = script)
+                            AppFooter(
+                                showHome = true
+                            )
+                        }
                     }
                 }
 

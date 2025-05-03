@@ -1,5 +1,6 @@
 package com.queatz.scripts
 
+import ScriptApp
 import ScriptRender
 import ScriptStorage
 import ScriptWithMavenDeps
@@ -13,6 +14,7 @@ import com.queatz.db.equippedItemsOfInventory
 import com.queatz.db.inventoryOfPerson
 import com.queatz.db.scriptData
 import com.queatz.plugins.db
+import com.queatz.scripts.app.MainScriptApp
 import com.queatz.scripts.store.ArangoScriptStorage
 import parseScript
 import kotlin.reflect.KTypeProjection.Companion.invariant
@@ -56,6 +58,7 @@ class RunScript(
                 "me" to Person::class.createType(nullable = true),
                 "self" to String::class.createType(),
                 "render" to ScriptRender::class.createType(),
+                "app" to ScriptApp::class.createType(),
                 "storage" to ScriptStorage::class.createType(),
                 "http" to ScriptHttp::class.createType(),
                 "data" to String::class.createType(nullable = true),
@@ -96,6 +99,10 @@ class RunScript(
                 },
                 "self" to script.id!!,
                 "render" to ScriptRender { content = it },
+                "app" to MainScriptApp(
+                    script = script.id!!,
+                    me = person?.id
+                ),
                 "storage" to ArangoScriptStorage(
                     scriptOwner = script.person!!,
                     person = person?.id
@@ -125,6 +132,7 @@ class RunScript(
                 content = listOf(
                     StoryContent.Text(
                         """Script compile error:  
+                            
                             ```${
                             compiledScript.reports.joinToString("\n")
                             }
@@ -155,6 +163,7 @@ class RunScript(
                 content = listOf(
                     StoryContent.Text(
                         """Script run error:  
+                            
                             ```
                             ${resultError?.let { "$it\n\n" }}${
                             result.reports.joinToString("\n")

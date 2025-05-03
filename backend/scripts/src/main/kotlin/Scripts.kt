@@ -36,6 +36,7 @@ import kotlin.script.experimental.jvm.jvmTarget
 )
 abstract class ScriptWithMavenDeps
 
+@Repeatable
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FILE)
 annotation class DependsOnScript(val id: String)

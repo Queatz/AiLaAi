@@ -488,6 +488,24 @@ fun ReminderPage(
             reminder.categories?.firstOrNull(),
             reminder.scheduleText
         ),
+        onTitleClick = {
+            scope.launch {
+                val newTitle = inputDialog(
+                    title = application.appString { title },
+                    defaultValue = reminder.title.orEmpty(),
+                    confirmButton = application.appString { update }
+                )
+
+                if (newTitle != null) {
+                    api.updateReminder(
+                        id = reminder.id!!,
+                        reminder = Reminder(title = newTitle)
+                    ) {
+                        onUpdate(it)
+                    }
+                }
+            }
+        },
         actions = {
             Switch(
                 value = isOpen,

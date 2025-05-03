@@ -472,6 +472,7 @@ class Script(
     var description: String? = null,
     var categories: List<String>? = null,
     var source: String? = null,
+    var background: String? = null,
 
     var author: Person? = null,
 ) : Model()

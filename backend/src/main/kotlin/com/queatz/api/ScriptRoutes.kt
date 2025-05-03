@@ -110,6 +110,10 @@ fun Route.scriptRoutes() {
                     script.categories = scriptUpdated.categories
                 }
 
+                if (scriptUpdated.background != null) {
+                    script.background = scriptUpdated.background
+                }
+
                 db.update(script)
             }
         }

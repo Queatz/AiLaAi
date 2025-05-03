@@ -33,6 +33,8 @@ object StoryStyles : StyleSheet() {
         justifyContent(JustifyContent.Stretch)
         fontSize(24.px)
         fontWeight("bold")
+        maxWidth(100.percent)
+        overflow("auto")
     }
 
     val contentText by style {
@@ -40,6 +42,8 @@ object StoryStyles : StyleSheet() {
         whiteSpace("pre-wrap")
         fontSize(16.px)
         textAlign("justify")
+        maxWidth(100.percent)
+        overflow("auto")
     }
 
     val contentPhotosMulti by style {  }

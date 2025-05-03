@@ -349,7 +349,7 @@ object Strings {
     )
     val goToAuthorProfile = Translation(
         en = "Go to author's profile",
-        vn = "Đi đến hồ sơ của tác giả",
+        vn = "Đi đến trang cá nhân của tác giả",
         ru = "Перейти к профилю автора"
     )
     val openScriptInNewPage = Translation(

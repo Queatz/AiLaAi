@@ -162,16 +162,18 @@ fun MessageContent(
                 }
 
                 is AudioAttachment -> {
-                    Audio({
-                        attr("controls", "")
-                        style {
-                            borderRadius(1.r)
+                    key(attachment.audio) {
+                        Audio({
+                            attr("controls", "")
+                            style {
+                                borderRadius(1.r)
+                            }
+                        }) {
+                            Source({
+                                attr("src", "$baseUrl${attachment.audio}")
+                                attr("type", "audio/mp4")
+                            })
                         }
-                    }) {
-                        Source({
-                            attr("src", "$baseUrl${attachment.audio}")
-                            attr("type", "audio/mp4")
-                        })
                     }
                 }
 

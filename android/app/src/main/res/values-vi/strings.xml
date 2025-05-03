@@ -1012,4 +1012,5 @@
     <string name="minutes">Phút</string>
     <string name="inline_to">đến</string>
     <string name="create_event">Tạo sự kiện</string>
+    <string name="choose_photo">Chọn ảnh</string>
 </resources>
