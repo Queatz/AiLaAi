@@ -167,6 +167,8 @@ fun GroupPage(
                     property("grid-gap", "1rem")
                     width(100.percent)
                     maxWidth(800.px)
+                    overflow("auto")
+                    maxHeight(100.percent)
                 }
             }) {
                 // Create a page

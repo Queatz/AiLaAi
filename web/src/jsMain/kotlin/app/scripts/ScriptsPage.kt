@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -110,6 +111,7 @@ import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
 import stories.StoryContents
+import kotlin.random.Random.Default.nextInt
 
 @Composable
 fun ResultPanel(
@@ -537,6 +539,7 @@ fun ScriptsPage(
             var isRunningScript by remember(script) { mutableStateOf(false) }
             var runScriptData by remember(script) { mutableStateOf<String?>(null) }
             var scriptResult by remember(script) { mutableStateOf<ScriptResult?>(null) }
+            var scriptResultKey by remember(script) { mutableStateOf(0) }
             var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
             var undoAiScript by remember(script) { mutableStateOf<String?>(null) }
             var isEditorOnRight by remember { mutableStateOf(false) }
@@ -793,6 +796,7 @@ fun ScriptsPage(
                         useCache = useCache
                     )
                 ) {
+                    scriptResultKey = nextInt()
                     scriptResult = it
                     isRunningScript = false
                 }
@@ -811,14 +815,16 @@ fun ScriptsPage(
                     // Conditionally arrange the editor and result panel based on isEditorOnRight
                     if (isEditorOnRight && showResultPanel) {
                         // Result Panel on the left
-                        ResultPanel(
-                            isRunningScript = isRunningScript,
-                            scriptResult = scriptResult,
-                            runScript = { scriptId, data, input, useCache ->
-                                runScript(scriptId, data, input, useCache)
-                            },
-                            isOnLeft = true
-                        )
+                        key(scriptResultKey) {
+                            ResultPanel(
+                                isRunningScript = isRunningScript,
+                                scriptResult = scriptResult,
+                                runScript = { scriptId, data, input, useCache ->
+                                    runScript(scriptId, data, input, useCache)
+                                },
+                                isOnLeft = true
+                            )
+                        }
                     }
 
                     // Editor (left by default, right when isEditorOnRight is true)
@@ -856,14 +862,16 @@ fun ScriptsPage(
 
                     // Result Panel on the right (when not isEditorOnRight)
                     if (!isEditorOnRight && showResultPanel) {
-                        ResultPanel(
-                            isRunningScript = isRunningScript,
-                            scriptResult = scriptResult,
-                            runScript = { scriptId, data, input, useCache ->
-                                runScript(scriptId, data, input, useCache)
-                            },
-                            isOnLeft = false
-                        )
+                        key(scriptResultKey) {
+                            ResultPanel(
+                                isRunningScript = isRunningScript,
+                                scriptResult = scriptResult,
+                                runScript = { scriptId, data, input, useCache ->
+                                    runScript(scriptId, data, input, useCache)
+                                },
+                                isOnLeft = false
+                            )
+                        }
                     }
                 }
                 PageTopBar(

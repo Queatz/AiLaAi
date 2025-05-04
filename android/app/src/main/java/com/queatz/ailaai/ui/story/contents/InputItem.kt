@@ -22,6 +22,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,7 +53,9 @@ fun LazyGridScope.inputItem(
     item(span = { GridItemSpan(maxLineSpan) }) {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
-        var value by rememberStateOf(content.value)
+        var value by remember(content) {
+            mutableStateOf(content.value)
+        }
 
         when (content.inputType) {
             InputType.Text -> {
@@ -74,7 +78,9 @@ fun LazyGridScope.inputItem(
                     if (showDialog) {
                         ChoosePhotoDialog(
                             scope = scope,
-                            onDismissRequest = {},
+                            onDismissRequest = {
+                                showDialog = false
+                            },
                             multiple = false,
                             onPhotos = { photos ->
                                 api.uploadPhotosFromUris(

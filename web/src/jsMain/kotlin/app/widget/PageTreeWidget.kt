@@ -595,6 +595,9 @@ fun PageTreeWidget(widgetId: String) {
                     name = "list",
                     title = appString { multiple },
                     background = true,
+                    styles = {
+                        marginTop(.5.r)
+                    },
                     onClick = {
                         addMultiple()
                     }

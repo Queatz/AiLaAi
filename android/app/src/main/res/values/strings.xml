@@ -226,7 +226,7 @@
     <string name="give_to_person">Give to %1$s</string>
     <string name="give_to_people">Give to %1$s and %2$s</string>
     <string name="give_to_x_people">Give to %1$s people</string>
-    <string name="invite_text">%1$s invited you to play Hi Town together! Download the app from https://hitown.chat and use invite code %2$s.</string>
+    <string name="invite_text">%1$s invited you to Hi Town! Download the app from https://hitown.chat/invite/%2$s.</string>
     <string name="group">Group</string>
     <string name="not_connected_yet">Not connected yet</string>
     <string name="no_cards_nearby">No pages nearby. All pages within 100km of you will be shown here.</string>

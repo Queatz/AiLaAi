@@ -489,7 +489,7 @@ fun StoryContents(
             }
 
             is StoryContent.Input -> {
-                var value by remember(part.value.orEmpty()) {
+                var value by remember(part, part.value.orEmpty()) {
                     mutableStateOf(part.value.orEmpty())
                 }
 
@@ -537,7 +537,8 @@ fun StoryContents(
                                     width(100.percent)
                                 }
                             }) {
-                                Img(src = "$baseUrl$value") {
+                                val src = "$baseUrl$value"
+                                Img(src = src) {
                                     style {
                                         width(100.percent)
                                         borderRadius(1.r)
@@ -545,7 +546,7 @@ fun StoryContents(
                                     }
                                     onClick {
                                         scope.launch {
-                                            photoDialog(value)
+                                            photoDialog(src)
                                         }
                                     }
                                 }
