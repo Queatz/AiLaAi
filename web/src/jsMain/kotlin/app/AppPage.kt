@@ -17,6 +17,7 @@ import app.cards.CardsPage
 import app.components.Background
 import app.group.GroupPage
 import app.nav.CardNav
+import components.IconButton
 import app.nav.CardsNavPage
 import app.nav.GroupNav
 import app.nav.GroupsNavPage
@@ -63,11 +64,17 @@ import notBlank
 import notifications
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
+import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
@@ -159,6 +166,10 @@ fun AppPage() {
 
     var playMessageSound by remember {
         mutableStateOf(false)
+    }
+
+    var sideLayoutVisible by remember {
+        mutableStateOf(true) // Default to visible
     }
 
     var platform by remember {
@@ -391,6 +402,12 @@ fun AppPage() {
     }) {
         Div({
             classes(AppStyles.sideLayout)
+            style {
+                // Add conditional styling based on visibility
+                if (!sideLayoutVisible) {
+                    display(DisplayStyle.None)
+                }
+            }
         }) {
             AppBottomBar(nav) { nav = it }
             Div({
@@ -491,6 +508,23 @@ fun AppPage() {
         Div({
             classes(AppStyles.mainLayout)
         }) {
+            // Add toggle button at the top of mainLayout
+            Div({
+                classes(AppStyles.fullscreenButton)
+            }) {
+                IconButton(
+                    name = if (sideLayoutVisible) "fullscreen" else "fullscreen_exit",
+                    title = appString { fullscreen },
+                    background = true,
+                    styles = {
+                        opacity(.5f)
+                    }
+
+                ) {
+                    // Toggle the visibility state
+                    sideLayoutVisible = !sideLayoutVisible
+                }
+            }
             when (nav) {
                 NavPage.Groups -> GroupPage(
                     nav = group,

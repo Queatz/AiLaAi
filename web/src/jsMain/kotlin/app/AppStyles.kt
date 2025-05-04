@@ -7,9 +7,33 @@ import ellipsize
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.*
 import r
+import web.cssom.translatex
 
 
 object AppStyles : StyleSheet() {
+
+    @OptIn(ExperimentalComposeWebApi::class)
+    val fullscreenButton by style {
+        position(Position.Fixed)
+        top(-1.r)
+        left(50.percent)
+        transform {
+            translateX((-50).percent)
+        }
+        property("z-index", "200")
+        cursor("pointer")
+
+        hover(self) style {
+            top(2.r)
+        }
+
+        transitions {
+            "top" {
+                delay = 500.ms
+                duration = 250.ms
+            }
+        }
+    }
 
     val scriptItem by style {
         display(DisplayStyle.Flex)
