@@ -68,6 +68,7 @@ fun StoryContents(
     content: List<StoryContent>,
     state: LazyGridState,
     modifier: Modifier = Modifier,
+    key: Int = 0,
     bottomContentPadding: Dp = 0.pad,
     horizontalPadding: Dp = 2.pad,
     fade: Boolean = false,
@@ -86,7 +87,7 @@ fun StoryContents(
     var fullscreenWebView by remember {
         mutableStateOf<Pair<View, WebChromeClient.CustomViewCallback>?>(null)
     }
-    var input by remember(content) {
+    var input by remember(key, content) {
         mutableStateOf(
             buildMap<String, String?> {
                 content.filterIsInstance<StoryContent.Input>().forEach {
@@ -233,6 +234,7 @@ fun StoryContents(
 
                     is StoryContent.Input -> inputItem(
                         content = content,
+                        key = key,
                         onValueChange = {
                             input = input + (content.key to it)
                         }

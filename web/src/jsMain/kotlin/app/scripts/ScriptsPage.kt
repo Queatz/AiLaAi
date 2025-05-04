@@ -117,6 +117,7 @@ import kotlin.random.Random.Default.nextInt
 fun ResultPanel(
     isRunningScript: Boolean,
     scriptResult: ScriptResult?,
+    scriptResultKey: Int,
     runScript: suspend (String, String?, Map<String, String?>, Boolean?) -> Unit,
     isOnLeft: Boolean
 ) {
@@ -145,6 +146,7 @@ fun ResultPanel(
                 }) {
                     StoryContents(
                         content = it,
+                        key = scriptResultKey,
                         onButtonClick = { script, data, input ->
                             runScript(
                                 script,
@@ -262,13 +264,15 @@ suspend fun selectScriptDialog(
                                         } else {
                                             "\n/* ${selectedScript.description.orEmpty()}\n */\n"
                                         }
-                                        val dependsOnLine = "$description@file:DependsOnScript(\"${selectedScript.id}\") // ${selectedScript.name}"
+                                        val dependsOnLine =
+                                            "$description@file:DependsOnScript(\"${selectedScript.id}\") // ${selectedScript.name}"
 
                                         // Check if the script already has a @file:DependsOnScript annotation
                                         val newSource = if (currentSource.contains("@file:DependsOnScript")) {
                                             // Insert the new annotation after the last @file:DependsOnScript annotation
                                             val lines = currentSource.lines()
-                                            val lastAnnotationIndex = lines.indexOfLast { it.contains("@file:DependsOnScript") }
+                                            val lastAnnotationIndex =
+                                                lines.indexOfLast { it.contains("@file:DependsOnScript") }
 
                                             if (lastAnnotationIndex >= 0) {
                                                 val updatedLines = lines.toMutableList()
@@ -543,7 +547,6 @@ fun ScriptsPage(
             var isAiScriptGenerating by remember(script) { mutableStateOf(false) }
             var undoAiScript by remember(script) { mutableStateOf<String?>(null) }
             var isEditorOnRight by remember { mutableStateOf(false) }
-
             var isLoading by remember { mutableStateOf(false) }
             var menuTarget by remember(script) { mutableStateOf<DOMRect?>(null) }
             var aiJob by remember { mutableStateOf<Job?>(null) }
@@ -745,7 +748,12 @@ fun ScriptsPage(
                                     api.newCard(
                                         card = Card(
                                             name = script.name,
-                                            options = json.encodeToString(CardOptions(enableReplies = false, enableAnonymousReplies = false)),
+                                            options = json.encodeToString(
+                                                CardOptions(
+                                                    enableReplies = false,
+                                                    enableAnonymousReplies = false
+                                                )
+                                            ),
                                             content = json.encodeToString(
                                                 listOf(
                                                     StoryContent.Widget(
@@ -787,20 +795,21 @@ fun ScriptsPage(
                 }
             }
 
-            val runScript: suspend (String, String?, Map<String, String?>, Boolean?) -> Unit = { scriptId, data, input, useCache ->
-                api.runScript(
-                    id = scriptId,
-                    data = RunScriptBody(
-                        data = data,
-                        input = input,
-                        useCache = useCache
-                    )
-                ) {
-                    scriptResultKey = nextInt()
-                    scriptResult = it
-                    isRunningScript = false
+            val runScript: suspend (String, String?, Map<String, String?>, Boolean?) -> Unit =
+                { scriptId, data, input, useCache ->
+                    api.runScript(
+                        id = scriptId,
+                        data = RunScriptBody(
+                            data = data,
+                            input = input,
+                            useCache = useCache
+                        )
+                    ) {
+                        scriptResultKey = nextInt()
+                        scriptResult = it
+                        isRunningScript = false
+                    }
                 }
-            }
 
             if (isLoading) {
                 Loading()
@@ -815,16 +824,15 @@ fun ScriptsPage(
                     // Conditionally arrange the editor and result panel based on isEditorOnRight
                     if (isEditorOnRight && showResultPanel) {
                         // Result Panel on the left
-                        key(scriptResultKey) {
-                            ResultPanel(
-                                isRunningScript = isRunningScript,
-                                scriptResult = scriptResult,
-                                runScript = { scriptId, data, input, useCache ->
-                                    runScript(scriptId, data, input, useCache)
-                                },
-                                isOnLeft = true
-                            )
-                        }
+                        ResultPanel(
+                            isRunningScript = isRunningScript,
+                            scriptResult = scriptResult,
+                            scriptResultKey = scriptResultKey,
+                            runScript = { scriptId, data, input, useCache ->
+                                runScript(scriptId, data, input, useCache)
+                            },
+                            isOnLeft = true
+                        )
                     }
 
                     // Editor (left by default, right when isEditorOnRight is true)
@@ -862,16 +870,15 @@ fun ScriptsPage(
 
                     // Result Panel on the right (when not isEditorOnRight)
                     if (!isEditorOnRight && showResultPanel) {
-                        key(scriptResultKey) {
-                            ResultPanel(
-                                isRunningScript = isRunningScript,
-                                scriptResult = scriptResult,
-                                runScript = { scriptId, data, input, useCache ->
-                                    runScript(scriptId, data, input, useCache)
-                                },
-                                isOnLeft = false
-                            )
-                        }
+                        ResultPanel(
+                            isRunningScript = isRunningScript,
+                            scriptResult = scriptResult,
+                            scriptResultKey = scriptResultKey,
+                            runScript = { scriptId, data, input, useCache ->
+                                runScript(scriptId, data, input, useCache)
+                            },
+                            isOnLeft = false
+                        )
                     }
                 }
                 PageTopBar(

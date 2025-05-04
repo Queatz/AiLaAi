@@ -28,6 +28,7 @@ import org.jetbrains.compose.web.dom.Div
 import r
 import stories.StoryContents
 import widget
+import kotlin.random.Random.Default.nextInt
 
 @Composable
 fun ScriptWidget(widgetId: String) {
@@ -46,6 +47,10 @@ fun ScriptWidget(widgetId: String) {
         mutableStateOf<ScriptResult?>(null)
     }
 
+    var scriptResultKey by remember(widgetId) {
+        mutableStateOf(0)
+    }
+
     LaunchedEffect(widgetId) {
         // todo loading
         api.widget(widgetId) {
@@ -59,6 +64,7 @@ fun ScriptWidget(widgetId: String) {
         data?.let { data ->
             api.runScript(data.script!!, RunScriptBody(data.data)) {
                 scriptResult = it
+                scriptResultKey = nextInt()
             }
         }
     }
@@ -66,6 +72,7 @@ fun ScriptWidget(widgetId: String) {
     scriptResult?.content?.notEmpty?.let { content ->
         StoryContents(
             content = content,
+            key = scriptResultKey,
             onGroupClick = {
                 scope.launch {
                     appNav.navigate(AppNavigation.Group(it.group!!.id!!, it))
@@ -80,6 +87,7 @@ fun ScriptWidget(widgetId: String) {
                     )
                 ) {
                     scriptResult = it
+                    scriptResultKey = nextInt()
                 }
             }
         )

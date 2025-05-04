@@ -24,18 +24,14 @@ import components.Loading
 import components.QrImg
 import mainContent
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
-import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.css.backgroundColor
-import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.bottom
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.left
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.padding
@@ -48,6 +44,7 @@ import org.jetbrains.compose.web.dom.Div
 import r
 import stories.StoryContents
 import webBaseUrl
+import kotlin.random.Random.Default.nextInt
 
 @OptIn(ExperimentalComposeWebApi::class)
 @Composable
@@ -64,6 +61,9 @@ fun ScriptCoverPage(scriptId: String) {
     }
     var scriptResult by remember {
         mutableStateOf<ScriptResult?>(null)
+    }
+    var contentKey by remember(scriptId) {
+        mutableStateOf(0)
     }
     var scriptDetails by remember {
         mutableStateOf<Script?>(null)
@@ -83,6 +83,7 @@ fun ScriptCoverPage(scriptId: String) {
             data = RunScriptBody()
         ) {
             scriptResult = it
+            contentKey = nextInt()
         }
         isLoading = false
     }
@@ -133,6 +134,7 @@ fun ScriptCoverPage(scriptId: String) {
                         }) {
                             StoryContents(
                                 content = it,
+                                key = contentKey,
                                 onButtonClick = { script, data, input ->
                                     api.runScript(
                                         id = script,
@@ -142,6 +144,7 @@ fun ScriptCoverPage(scriptId: String) {
                                         )
                                     ) {
                                         scriptResult = it
+                                        contentKey = nextInt()
                                     }
                                 }
                             )

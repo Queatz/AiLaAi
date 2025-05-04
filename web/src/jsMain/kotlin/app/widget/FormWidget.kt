@@ -65,6 +65,7 @@ import runWidget
 import stories.StoryContents
 import toBytes
 import widget
+import kotlin.random.Random.Default.nextInt
 
 @Composable
 fun FormWidget(widgetId: String) {
@@ -84,6 +85,10 @@ fun FormWidget(widgetId: String) {
 
     var scriptResult by remember {
         mutableStateOf<List<StoryContent>?>(null)
+    }
+
+    var scriptResultKey by remember(widgetId) {
+        mutableStateOf(0)
     }
 
     LaunchedEffect(widgetId) {
@@ -118,6 +123,7 @@ fun FormWidget(widgetId: String) {
                     )
                 ) {
                     scriptResult = it.content
+                    scriptResultKey = nextInt()
                 }
             }
         )
@@ -224,6 +230,7 @@ fun FormWidget(widgetId: String) {
                         )
                     } else {
                         scriptResult = it.content
+                        scriptResultKey = nextInt()
                     }
                 }
                 isLoading = false

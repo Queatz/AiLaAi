@@ -48,12 +48,13 @@ import com.queatz.db.StoryContent
 
 fun LazyGridScope.inputItem(
     content: StoryContent.Input,
+    key: Int = 0,
     onValueChange: (String) -> Unit
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
-        var value by remember(content) {
+        var value by remember(key, content) {
             mutableStateOf(content.value)
         }
 

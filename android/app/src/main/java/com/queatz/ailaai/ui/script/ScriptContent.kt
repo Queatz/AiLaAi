@@ -25,6 +25,7 @@ import com.queatz.db.StoryContent
 import com.queatz.db.Widget
 import com.queatz.widgets.widgets.ScriptData
 import widget
+import kotlin.random.Random.Default.nextInt
 
 fun LazyGridScope.ScriptContent(widgetId: String) {
     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -42,6 +43,10 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
             mutableStateOf(true)
         }
 
+        var contentKey by remember(widgetId) {
+            mutableStateOf(0)
+        }
+
         LaunchedEffect(widgetId) {
             // todo loading
             api.widget(widgetId) {
@@ -57,6 +62,7 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
                 RunScriptBody(data?.data)
             ) {
                 scriptUi = it.content ?: emptyList()
+                contentKey = nextInt()
             }
             isLoading = false
         }
@@ -74,6 +80,7 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
                 StoryContents(
                     source = null,
                     content = scriptUi,
+                    key = contentKey,
                     state = rememberLazyGridState(),
                     fade = true,
                     horizontalPadding = 0.dp,
@@ -86,6 +93,7 @@ fun LazyGridScope.ScriptContent(widgetId: String) {
                             )
                         ) {
                             scriptUi = it.content ?: emptyList()
+                            contentKey = nextInt()
                         }
                     }
                 )

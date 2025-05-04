@@ -95,6 +95,7 @@ fun storyStatus(publishDate: Instant?) = publishDate?.let { Date(it.toEpochMilli
 @Composable
 fun StoryContents(
     content: List<StoryContent>,
+    key: Int = 0,
     onGroupClick: (GroupExtended) -> Unit = {},
     onCardClick: ((cardId: String, openInNewWindow: Boolean) -> Unit)? = null,
     onButtonClick: (suspend (script: String, data: String?, input: Map<String, String?>) -> Unit)? = null,
@@ -109,7 +110,7 @@ fun StoryContents(
 
     val scope = rememberCoroutineScope()
 
-    var input by remember(content) {
+    var input by remember(key, content) {
         mutableStateOf(
             buildMap<String, String?> {
                 content.filterIsInstance<StoryContent.Input>().forEach {
@@ -489,7 +490,7 @@ fun StoryContents(
             }
 
             is StoryContent.Input -> {
-                var value by remember(part, part.value.orEmpty()) {
+                var value by remember(key, part) {
                     mutableStateOf(part.value.orEmpty())
                 }
 
