@@ -217,13 +217,10 @@ fun GroupsNavPage(
         }
     }
 
-    LaunchedEffect(me) {
+    // todo remove selectedGroup
+    LaunchedEffect(me, selected) {
         reload()
         isLoading = false
-    }
-
-    // todo remove selectedGroup
-    LaunchedEffect(selected) {
         groupUpdates.collectLatest {
             reload()
         }
@@ -331,7 +328,6 @@ fun GroupsNavPage(
             style {
                 overflowY("auto")
                 overflowX("hidden")
-                property("scrollbar-width", "none")
                 padding(1.r / 2)
             }
         }) {

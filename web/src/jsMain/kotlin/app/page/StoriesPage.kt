@@ -184,6 +184,10 @@ fun StoriesPage(
         Loading()
     } else {
         FullPageLayout {
+            TopBarSearch(
+                value = search,
+                onValue = { search = it }
+            )
             Div({
                 classes(Styles.cardContent)
                 style {
@@ -302,10 +306,5 @@ fun StoriesPage(
         ) {
             menuTarget = if (menuTarget == null) (it.target as HTMLElement).getBoundingClientRect() else null
         }
-    } else {
-        TopBarSearch(
-            value = search,
-            onValue = { search = it }
-        )
     }
 }

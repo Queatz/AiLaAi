@@ -177,7 +177,7 @@ fun EventsScreen(
                 }
             } else if (groupedEvents.isEmpty()) {
                 item {
-                    EmptyText(stringResource(R.string.none))
+                    EmptyText(stringResource(R.string.no_events))
                 }
             } else {
                 groupedEvents.forEach { (date, dateEvents) ->

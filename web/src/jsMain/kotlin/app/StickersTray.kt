@@ -51,7 +51,6 @@ fun StickersTray(onSticker: (Sticker) -> Unit) {
                         display(DisplayStyle.Flex)
                         marginBottom(1.r)
                         overflowX("auto")
-                        property("scrollbar-width", "none")
                     }
                 }) {
                     stickerPack.stickers?.forEach { sticker ->

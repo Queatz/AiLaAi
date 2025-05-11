@@ -249,6 +249,10 @@ fun GroupPage(
             Loading()
         } else {
             FullPageLayout {
+                TopBarSearch(
+                    value = search,
+                    onValue = { search = it}
+                )
                 Div({
                     style {
                         display(DisplayStyle.Flex)
@@ -289,10 +293,6 @@ fun GroupPage(
                 }
             }
         }
-        TopBarSearch(
-            value = search,
-            onValue = { search = it}
-        )
     } else if (nav is GroupNav.Selected) {
         if (isLoading) {
             Loading()

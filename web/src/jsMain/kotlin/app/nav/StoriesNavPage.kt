@@ -198,7 +198,6 @@ fun StoriesNavPage(
             style {
                 overflowY("auto")
                 overflowX("hidden")
-                property("scrollbar-width", "none")
                 padding(1.r / 2)
             }
         }) {

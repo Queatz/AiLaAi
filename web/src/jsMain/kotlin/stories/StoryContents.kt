@@ -556,6 +556,7 @@ fun StoryContents(
                                 IconButton(
                                     name = "delete",
                                     title = appString { remove },
+                                    background = true,
                                     styles = {
                                         position(Position.Absolute)
                                         top(1.r)
