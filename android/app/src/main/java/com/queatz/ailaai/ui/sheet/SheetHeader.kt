@@ -85,7 +85,8 @@ fun SheetHeader(
                     SheetContent.Events,
                     SheetContent.Groups,
                     SheetContent.Posts,
-                    SheetContent.Pages
+                    SheetContent.Pages,
+                    SheetContent.People
                 ).forEach { button ->
                     FilledTonalButton(
                         onClick = {
@@ -103,6 +104,7 @@ fun SheetHeader(
                                 SheetContent.Groups -> stringResource(R.string.sheet_content_groups)
                                 SheetContent.Pages -> stringResource(R.string.sheet_content_pages)
                                 SheetContent.Events -> stringResource(R.string.sheet_content_events)
+                                SheetContent.People -> "People"
                             }
                         )
                         // todo load counts from server

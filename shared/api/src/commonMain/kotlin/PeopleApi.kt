@@ -4,10 +4,28 @@ import com.queatz.db.*
 import io.ktor.http.*
 
 suspend fun Api.people(
-    search: String,
+    search: String? = null,
+    geo: List<Double>? = null,
+    offset: Int = 0,
+    limit: Int = 20,
     onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<List<Person>>,
-) = get("people", mapOf("search" to search), onError = onError, onSuccess = onSuccess)
+    onSuccess: SuccessBlock<List<PersonProfile>>,
+) {
+    val parameters = mutableMapOf<String, String>()
+
+    if (search != null) {
+        parameters["search"] = search
+    }
+
+    if (geo != null && geo.size >= 2) {
+        parameters["geo"] = "${geo[0]},${geo[1]}"
+    }
+
+    parameters["offset"] = offset.toString()
+    parameters["limit"] = limit.toString()
+
+    get("people", parameters, onError = onError, onSuccess = onSuccess)
+}
 
 suspend fun Api.profile(
     personId: String,

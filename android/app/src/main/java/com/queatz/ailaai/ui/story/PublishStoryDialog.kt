@@ -117,7 +117,7 @@ fun PublishStoryDialog(
     LaunchedEffect(me) {
         me?.id?.let { me ->
             api.profile(me) {
-                friendCount = it.stats.friendsCount
+                friendCount = it.stats?.friendsCount ?: 0
             }
         }
     }

@@ -92,7 +92,7 @@ data class ProfileStats(
 data class PersonProfile(
     val person: Person,
     val profile: Profile,
-    val stats: ProfileStats,
+    val stats: ProfileStats?,
     val subscription: Subscription?
 )
 

@@ -102,6 +102,7 @@ import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.Member
 import com.queatz.db.Person
+import com.queatz.db.PersonProfile
 import com.queatz.db.PersonStatus
 import com.queatz.db.Status
 import com.queatz.db.people
@@ -124,7 +125,7 @@ fun FriendsScreen() {
     val state = rememberLazyListState()
     var searchText by rememberSaveable { mutableStateOf("") }
     var allHiddenGroups by remember { mutableStateOf(emptyList<GroupExtended>()) }
-    var allPeople by remember { mutableStateOf(emptyList<Person>()) }
+    var allPeople by remember { mutableStateOf(emptyList<PersonProfile>()) }
     var createGroupName by remember { mutableStateOf("") }
     var showCreateGroupName by rememberStateOf(false)
     var showCreateGroupMembers by rememberStateOf(false)
@@ -194,7 +195,7 @@ fun FriendsScreen() {
         selectedCategory
     ) {
         allPeople
-            .map { SearchResult.Connect(it) } +
+            .map { SearchResult.Connect(it.person) } +
                 searchText.trim().let { text ->
                     (if (text.isBlank()) allGroups else allGroups.filter {
                         (it.group?.name?.contains(text, true) == true) ||

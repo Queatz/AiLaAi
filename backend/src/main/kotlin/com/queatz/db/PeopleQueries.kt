@@ -1,5 +1,7 @@
 package com.queatz.db
 
+import com.queatz.notBlank
+
 fun Db.openGroupsOfPerson(person: String, offset: Int = 0, limit: Int = 20) = query(
     GroupExtended::class,
     """
@@ -170,6 +172,42 @@ fun Db.peopleWithName(person: String, name: String, geo: List<Double>? = null, l
 )
 
 /**
+ * Find people near @geo sorted by distance.
+ */
+fun Db.peopleNearby(
+    person: String,
+    name: String? = null,
+    geo: List<Double>? = null,
+    offset: Int = 0,
+    limit: Int = 20
+) = query(
+    PersonProfile::class,
+    """
+        for x in `${Person::class.collection()}`
+            filter x._id != @person
+                and (@name == null || lower(x.${f(Person::name)}) == @name)
+            let d = x.${f(Person::geo)} == null || @geo == null ? null : distance(x.${f(Person::geo)}[0], x.${f(Person::geo)}[1], @geo[0], @geo[1])
+            filter (@geo == null && d == null) || d <= @maxDistance
+            sort d, x.${f(Person::seen)} desc
+            limit @offset, @limit
+            return ${personProfile()}
+    """.trimIndent(),
+    mapOf(
+        "person" to person.asId(Person::class),
+        "geo" to geo,
+        "name" to name?.notBlank,
+        "offset" to offset,
+        "limit" to limit,
+        "maxDistance" to (maxPeopleDistanceKm * 1000.0)
+    )
+)
+
+private fun Db.personProfile(personVar: String = "x") = """{
+    |   ${f(PersonProfile::person)}: $personVar,
+    |   ${f(PersonProfile::profile)}: first(for xProfile in `${Profile::class.collection()}` filter xProfile.${f(Profile::person)} == $personVar._key return xProfile) || {}
+    |}""".trimMargin()
+
+/**
  * @people The list of people to fetch
  */
 fun Db.people(people: List<String>) = list(
@@ -270,3 +308,5 @@ fun Db.pinned(personKey: String?, groupVar: String) = if (personKey == null) {
 } else {
     """count(for groupPin in `${GroupPin::class.collection()}` filter groupPin.${f(GroupPin::person)} == "$personKey" and groupPin.${f(GroupPin::group)} == $groupVar._key return true) != 0"""
 }
+
+const val maxPeopleDistanceKm = 10.0

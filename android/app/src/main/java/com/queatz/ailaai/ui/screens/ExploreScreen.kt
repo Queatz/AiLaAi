@@ -66,8 +66,8 @@ import com.queatz.ailaai.ui.components.SearchFilter
 import com.queatz.ailaai.ui.control.mapCardsControl
 import com.queatz.ailaai.ui.control.mapInventoryControl
 import com.queatz.ailaai.ui.state.latLngSaver
-import com.queatz.ailaai.ui.story.StoriesScreen
-import com.queatz.ailaai.ui.story.StoriesScreenState
+import com.queatz.ailaai.ui.story.SheetScreen
+import com.queatz.ailaai.ui.story.SheetScreenState
 import com.queatz.ailaai.ui.theme.elevation
 import com.queatz.ailaai.ui.theme.pad
 import kotlinx.coroutines.launch
@@ -138,7 +138,7 @@ fun ExploreScreen() {
         targetValue = if (bottomSheetState.bottomSheetState.targetValue == SheetValue.Expanded) 12.dp else 0.dp,
         animationSpec = tween(durationMillis = 500)
     )
-    val storiesState = remember { StoriesScreenState() }
+    val storiesState = remember { SheetScreenState() }
 
     LaunchedEffect(geo) {
         geo?.let {
@@ -212,7 +212,7 @@ fun ExploreScreen() {
                     text = stringResource(R.string.updating_location)
                 )
             } else {
-                StoriesScreen(
+                SheetScreen(
                     mapCardsControl = mapCardsControl,
                     geo = mapGeo ?: geo,
                     myGeo = geo,
@@ -236,7 +236,7 @@ fun ExploreScreen() {
                         }
                     },
                     valueChange = { value = it },
-                    storiesState = storiesState,
+                    sheetState = storiesState,
                     value = value,
                     locationSelector = locationSelector,
                     filters = filters,

@@ -20,10 +20,10 @@ fun Route.peopleRoutes() {
                     ?: return@respond HttpStatusCode.NotFound
 
                 PersonProfile(
-                    person,
-                    db.profile(person.id!!),
-                    person.stats(),
-                    meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
+                    person = person,
+                    profile = db.profile(person.id!!),
+                    stats = person.stats(),
+                    subscription = meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
                 )
             }
         }
@@ -36,10 +36,10 @@ fun Route.peopleRoutes() {
                     ?: return@respond HttpStatusCode.NotFound.description("Person not found")
 
                 PersonProfile(
-                    person,
-                    profile,
-                    person.stats(),
-                    meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
+                    person = person,
+                    profile = profile,
+                    stats = person.stats(),
+                    subscription = meOrNull?.id?.let { meId -> db.subscription(meId, person.id!!) }
                 )
             }
         }
@@ -117,11 +117,18 @@ fun Route.peopleRoutes() {
     authenticate {
         get("/people") {
             respond {
-                db.peopleWithName(
-                    me.id!!,
-                    call.parameters["search"]?.notBlank ?: return@respond HttpStatusCode.BadRequest.description("Missing 'search' parameter"),
-                    me.geo
-                ).forApi()
+                val search = call.parameters["search"]?.notBlank
+                val geo = call.parameters["geo"]?.split(",")?.map { it.toDoubleOrNull() ?: 0.0 }?.takeIf { it.size == 2 } ?: me.geo
+                val offset = call.parameters["offset"]?.toIntOrNull() ?: 0
+                val limit = call.parameters["limit"]?.toIntOrNull() ?: 20
+
+                db.peopleNearby(
+                    person = me.id!!,
+                    geo = geo,
+                    name = search,
+                    offset = offset,
+                    limit = limit
+                ).personProfilesForApi()
             }
         }
 
@@ -140,8 +147,8 @@ fun Route.peopleRoutes() {
     }
 }
 
-private fun List<Person>.forApi() = onEach {
-    it.forApi()
+private fun List<PersonProfile>.personProfilesForApi() = map {
+    it.copy(person = it.person.apply { forApi() })
 }
 
 private fun Person.forApi() {

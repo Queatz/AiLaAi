@@ -3,23 +3,29 @@ package com.queatz.ailaai.ui.story
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
 import com.queatz.ailaai.R
+import app.ailaai.api.people
 import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
@@ -59,7 +66,11 @@ import com.queatz.ailaai.ui.screens.GroupsScreen
 import com.queatz.ailaai.ui.screens.SearchContent
 import com.queatz.ailaai.ui.sheet.SheetHeader
 import com.queatz.ailaai.ui.story.editor.StoryActions
+import com.queatz.ailaai.ui.components.PersonItem
+import com.queatz.ailaai.ui.profile.ProfileCard
 import com.queatz.ailaai.ui.theme.pad
+import com.queatz.db.Person
+import com.queatz.db.PersonProfile
 import com.queatz.db.Story
 import com.queatz.db.StoryContent
 import kotlinx.coroutines.CancellationException
@@ -67,17 +78,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private var cache = emptyList<Story>()
+private var peopleCache = emptyList<PersonProfile>()
 
-class StoriesScreenState() {
+class SheetScreenState {
 
     internal var state: LazyGridState? = null
     internal var cardsState: LazyGridState? = null
     internal var groupsState: LazyListState? = null
+    internal var peopleState: LazyGridState? = null
 
     suspend fun scrollToTop() {
         state?.scrollToTop()
         cardsState?.scrollToTop()
         groupsState?.scrollToTop()
+        peopleState?.scrollToTop()
     }
 }
 
@@ -85,12 +99,12 @@ enum class SheetContent {
     Events,
     Posts,
     Groups,
-    Pages
+    Pages,
+    People
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun StoriesScreen(
+fun SheetScreen(
     mapCardsControl: MapCardsControl,
     geo: LatLng?,
     myGeo: LatLng?,
@@ -99,7 +113,7 @@ fun StoriesScreen(
     distance: String? = null,
     onTitleClick: (() -> Unit)? = null,
     onExpandRequest: () -> Unit = {},
-    storiesState: StoriesScreenState = remember { StoriesScreenState() },
+    sheetState: SheetScreenState = remember { SheetScreenState() },
     value: String,
     locationSelector: LocationSelector,
     filters: List<SearchFilter>,
@@ -109,6 +123,7 @@ fun StoriesScreen(
     val state = rememberLazyGridState()
     val cardsState = rememberLazyGridState()
     val groupsState = rememberLazyListState()
+    val peopleState = rememberLazyGridState()
     val context = LocalContext.current
     var stories by remember { mutableStateOf(cache) }
     val storyContents = remember(stories) {
@@ -122,24 +137,36 @@ fun StoriesScreen(
         }
     }
     var isLoading by rememberStateOf(stories.isEmpty())
+    var people by remember { mutableStateOf(peopleCache) }
+    var isPeopleLoading by rememberStateOf(people.isEmpty())
+    var peopleOffset by rememberStateOf(0)
+    var hasMorePeople by rememberStateOf(true)
     val nav = nav
     var showShareAThought by rememberStateOf(true)
     var sheetContent by rememberSavableStateOf(SheetContent.Posts)
 
     LaunchedEffect(state) {
-        storiesState.state = state
+        sheetState.state = state
     }
 
     LaunchedEffect(cardsState) {
-        storiesState.cardsState = cardsState
+        sheetState.cardsState = cardsState
     }
 
     LaunchedEffect(groupsState) {
-        storiesState.groupsState = groupsState
+        sheetState.groupsState = groupsState
+    }
+
+    LaunchedEffect(peopleState) {
+        sheetState.peopleState = peopleState
     }
 
     LaunchedEffect(stories) {
         cache = stories
+    }
+
+    LaunchedEffect(people) {
+        peopleCache = people
     }
 
     LaunchedEffect(Unit) {
@@ -167,8 +194,50 @@ fun StoriesScreen(
         }
     }
 
+    suspend fun loadPeople(loadMore: Boolean = false) {
+        if (geo != null) {
+            if (loadMore) {
+                peopleOffset += 20
+            } else {
+                peopleOffset = 0
+                isPeopleLoading = true
+            }
+
+            val geoList = listOf(geo.latitude, geo.longitude)
+
+            api.people(
+                geo = geoList,
+                offset = peopleOffset,
+                limit = 20,
+                onError = {
+                    if (it is CancellationException) {
+                        // Ignored, geo probably changes
+                    } else {
+                        isPeopleLoading = false
+                        context.showDidntWork()
+                    }
+                }
+            ) { result ->
+                if (loadMore) {
+                    people = people + result
+                    hasMorePeople = result.isNotEmpty()
+                } else {
+                    people = result
+                    hasMorePeople = result.size >= 20
+                }
+                isPeopleLoading = false
+            }
+        }
+    }
+
     LaunchedEffect(geo) {
         reload()
+    }
+
+    LaunchedEffect(geo, sheetContent) {
+        if (sheetContent == SheetContent.People) {
+            loadPeople()
+        }
     }
 
     Box(
@@ -326,6 +395,73 @@ fun StoriesScreen(
                             }
                         }
                     )
+                }
+
+                SheetContent.People -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 150.dp),
+                        state = peopleState,
+                        modifier = Modifier
+                            .widthIn(max = 640.dp)
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(1.pad),
+                        verticalArrangement = Arrangement.spacedBy(1.pad),
+                    ) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SheetHeader(
+                                title = title,
+                                distance = distance,
+                                hint = hint,
+                                onTitleClick = onTitleClick,
+                                selected = sheetContent,
+                                onSelected = { sheetContent = it },
+                                onExpandRequest = onExpandRequest
+                            )
+                        }
+
+                        if (isPeopleLoading && people.isEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Loading(
+                                    modifier = Modifier
+                                        .padding(1.pad)
+                                )
+                            }
+                        } else if (people.isEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                EmptyText(
+                                    stringResource(R.string.no_people_nearby)
+                                )
+                            }
+                        } else {
+                            items(people) { person ->
+                                ProfileCard(person) {
+                                    person.person.id?.let { AppNav.Profile(it) }?.let { nav.appNavigate(it) }
+                                }
+                            }
+
+                            if (hasMorePeople) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    LaunchedEffect(Unit) {
+                                        loadPeople(true)
+
+                                    }
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        if (isPeopleLoading) {
+                                            Loading(
+                                                modifier = Modifier
+                                                    .padding(2.pad)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

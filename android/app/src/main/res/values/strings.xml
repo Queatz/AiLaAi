@@ -592,6 +592,7 @@
     <string name="sheet_content_groups">Groups</string>
     <string name="sheet_content_pages">Pages</string>
     <string name="sheet_content_events">Events</string>
+    <string name="sheet_content_people">People</string>
     <string name="search_cards_of_x">Search %1$s\'s pages</string>
     <string name="pages_of_x">%1$s\'s pages</string>
     <string name="call">Call</string>
@@ -1075,4 +1076,5 @@
     <string name="video">Video</string>
     <string name="create_event">Create event</string>
     <string name="choose_photo">Choose photo</string>
+    <string name="no_people_nearby">No people nearby.</string>
 </resources>
