@@ -7,6 +7,7 @@ import com.queatz.db.allScripts
 import com.queatz.db.scriptData
 import com.queatz.db.scriptsOfPerson
 import com.queatz.db.searchScripts
+import com.queatz.notBlank
 import com.queatz.parameter
 import com.queatz.plugins.db
 import com.queatz.plugins.me
@@ -26,7 +27,7 @@ fun Route.scriptRoutes() {
     authenticate(optional = true) {
         get("/scripts") {
             respond {
-                val search = call.parameters["search"]
+                val search = call.parameters["search"]?.notBlank
                 val offset = call.parameters["offset"]?.toInt() ?: 0
                 val limit = call.parameters["limit"]?.toInt() ?: 20
 

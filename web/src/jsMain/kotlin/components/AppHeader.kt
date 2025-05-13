@@ -9,6 +9,7 @@ import appText
 import application
 import ellipsize
 import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import r
@@ -76,17 +77,19 @@ fun AppHeader(
                     router.navigate("/")
                 }
             }
-            Span({
-                classes(Styles.desktopOnly)
+            title.notBlank?.let { title ->
+                Span({
+                    classes(Styles.desktopOnly)
 
-                style {
-                    paddingLeft(1.r)
-                    fontSize(24.px)
-                    ellipsize()
-                    marginRight(.5.r)
+                    style {
+                        paddingLeft(1.r)
+                        fontSize(24.px)
+                        ellipsize()
+                        marginRight(.5.r)
+                    }
+                }) {
+                    Text(title)
                 }
-            }) {
-                Text(title)
             }
         }
         Div({

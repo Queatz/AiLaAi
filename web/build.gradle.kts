@@ -28,6 +28,7 @@ kotlin {
             }
         }
         binaries.executable()
+//        useEsModules()
     }
     sourceSets {
         val jsMain by getting {

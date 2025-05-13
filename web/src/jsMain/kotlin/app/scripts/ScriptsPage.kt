@@ -195,7 +195,7 @@ suspend fun selectScriptDialog(
                 scope.launch {
                     api.scripts(
                         search = search.notBlank,
-                        offset = offset + limit,
+                        offset = offset,
                         limit = limit
                     ) {
                         val newScripts = it.filter { it.id != script.id }
@@ -206,15 +206,17 @@ suspend fun selectScriptDialog(
                             offset += limit
                         }
                         hasMore = newScripts.size >= limit
-                        isLoadingMore = false
-                        isLoading = false
+                        offset += limit
                     }
+                    isLoadingMore = false
+                    isLoading = false
                 }
             }
 
             LaunchedEffect(search) {
                 offset = 0
                 isLoading = true
+                hasMore = true
                 loadMore()
             }
 

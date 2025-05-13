@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,9 +33,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -46,11 +49,14 @@ import com.queatz.ailaai.api.createStory
 import com.queatz.ailaai.api.stories
 import com.queatz.ailaai.data.api
 import com.queatz.ailaai.extensions.appNavigate
+import com.queatz.ailaai.extensions.inDp
+import com.queatz.ailaai.extensions.notBlank
 import com.queatz.ailaai.extensions.rememberSavableStateOf
 import com.queatz.ailaai.extensions.rememberStateOf
 import com.queatz.ailaai.extensions.scrollToTop
 import com.queatz.ailaai.extensions.showDidntWork
 import com.queatz.ailaai.extensions.toGeo
+import com.queatz.ailaai.extensions.toList
 import com.queatz.ailaai.helpers.LocationSelector
 import com.queatz.ailaai.nav
 import com.queatz.ailaai.services.mePresence
@@ -141,6 +147,7 @@ fun SheetScreen(
     var isPeopleLoading by rememberStateOf(people.isEmpty())
     var peopleOffset by rememberStateOf(0)
     var hasMorePeople by rememberStateOf(true)
+    var peopleSearchText by rememberSaveable { mutableStateOf("") }
     val nav = nav
     var showShareAThought by rememberStateOf(true)
     var sheetContent by rememberSavableStateOf(SheetContent.Posts)
@@ -203,10 +210,9 @@ fun SheetScreen(
                 isPeopleLoading = true
             }
 
-            val geoList = listOf(geo.latitude, geo.longitude)
-
             api.people(
-                geo = geoList,
+                search = peopleSearchText.notBlank,
+                geo = geo.toList(),
                 offset = peopleOffset,
                 limit = 20,
                 onError = {
@@ -234,7 +240,19 @@ fun SheetScreen(
         reload()
     }
 
-    LaunchedEffect(geo, sheetContent) {
+    // Filter people based on search text
+    val filteredPeople = remember(people, peopleSearchText) {
+        if (peopleSearchText.isBlank()) {
+            people
+        } else {
+            people.filter { person ->
+                person.person.name?.contains(peopleSearchText, ignoreCase = true) == true ||
+                person.profile.about?.contains(peopleSearchText, ignoreCase = true) == true
+            }
+        }
+    }
+
+    LaunchedEffect(geo, sheetContent, peopleSearchText) {
         if (sheetContent == SheetContent.People) {
             loadPeople()
         }
@@ -398,68 +416,89 @@ fun SheetScreen(
                 }
 
                 SheetContent.People -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 150.dp),
-                        state = peopleState,
+                    Box(
+                        contentAlignment = Alignment.TopCenter,
                         modifier = Modifier
-                            .widthIn(max = 640.dp)
-                            .fillMaxWidth()
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(1.pad),
-                        verticalArrangement = Arrangement.spacedBy(1.pad),
+                            .fillMaxSize()
                     ) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            SheetHeader(
-                                title = title,
-                                distance = distance,
-                                hint = hint,
-                                onTitleClick = onTitleClick,
-                                selected = sheetContent,
-                                onSelected = { sheetContent = it },
-                                onExpandRequest = onExpandRequest
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 160.dp),
+                            state = peopleState,
+                            modifier = Modifier
+                                .widthIn(max = 640.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(1.pad),
+                            verticalArrangement = Arrangement.spacedBy(1.pad),
+                            contentPadding = PaddingValues(
+                                start = 1.pad,
+                                top = 0.dp,
+                                end = 1.pad,
+                                bottom = 3.5f.pad + 80.dp
                             )
-                        }
-
-                        if (isPeopleLoading && people.isEmpty()) {
+                        ) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                Loading(
-                                    modifier = Modifier
-                                        .padding(1.pad)
+                                SheetHeader(
+                                    title = title,
+                                    distance = distance,
+                                    hint = hint,
+                                    onTitleClick = onTitleClick,
+                                    selected = sheetContent,
+                                    onSelected = { sheetContent = it },
+                                    onExpandRequest = onExpandRequest
                                 )
                             }
-                        } else if (people.isEmpty()) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                EmptyText(
-                                    stringResource(R.string.no_people_nearby)
-                                )
-                            }
-                        } else {
-                            items(people) { person ->
-                                ProfileCard(person) {
-                                    person.person.id?.let { AppNav.Profile(it) }?.let { nav.appNavigate(it) }
-                                }
-                            }
 
-                            if (hasMorePeople) {
+                            if (isPeopleLoading && people.isEmpty()) {
                                 item(span = { GridItemSpan(maxLineSpan) }) {
-                                    LaunchedEffect(Unit) {
-                                        loadPeople(true)
-
-                                    }
-                                    Box(
-                                        contentAlignment = Alignment.Center,
+                                    Loading(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                    ) {
-                                        if (isPeopleLoading) {
-                                            Loading(
-                                                modifier = Modifier
-                                                    .padding(2.pad)
-                                            )
+                                            .padding(1.pad)
+                                    )
+                                }
+                            } else if (people.isEmpty()) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    EmptyText(
+                                        stringResource(R.string.no_people_nearby)
+                                    )
+                                }
+                            } else {
+                                items(filteredPeople) { person ->
+                                    ProfileCard(person) {
+                                        person.person.id?.let { AppNav.Profile(it) }?.let { nav.appNavigate(it) }
+                                    }
+                                }
+
+                                if (hasMorePeople) {
+                                    item(span = { GridItemSpan(maxLineSpan) }) {
+                                        LaunchedEffect(Unit) {
+                                            loadPeople(loadMore = true)
+                                        }
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        ) {
+                                            if (isPeopleLoading) {
+                                                Loading(
+                                                    modifier = Modifier
+                                                        .padding(2.pad)
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
+                        }
+
+                        PageInput(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                        ) {
+                            SearchFieldAndAction(
+                                value = peopleSearchText,
+                                valueChange = { peopleSearchText = it },
+                                placeholder = stringResource(R.string.search)
+                            )
                         }
                     }
                 }

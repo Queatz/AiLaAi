@@ -218,7 +218,7 @@ fun GroupsNavPage(
     }
 
     // todo remove selectedGroup
-    LaunchedEffect(me, selected) {
+    LaunchedEffect(me, (selected as? GroupNav.Selected)?.group?.group?.id) {
         reload()
         isLoading = false
         groupUpdates.collectLatest {

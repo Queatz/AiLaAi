@@ -28,7 +28,6 @@ import application
 import com.queatz.db.Group
 import com.queatz.db.GroupExtended
 import com.queatz.db.asGeo
-import components.Icon
 import components.Loading
 import components.Tip
 import defaultGeo
@@ -39,57 +38,8 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
-
-@Composable
-fun FeatureButton(
-    icon: String,
-    title: String,
-    description: String,
-    onClick: () -> Unit
-) {
-    Div({
-        classes(Styles.featureButton)
-        onClick {
-            onClick()
-        }
-    }) {
-        // Icon
-        Div({
-            style {
-                fontSize(24.px)
-                display(DisplayStyle.Flex)
-                justifyContent(JustifyContent.Center)
-                alignItems(AlignItems.Center)
-                marginBottom(0.5.r)
-            }
-        }) {
-            Icon(icon)
-        }
-
-        // Title
-        Div({
-            style {
-                fontSize(18.px)
-                fontWeight("bold")
-                textAlign("center")
-                marginBottom(0.5.r)
-            }
-        }) {
-            Text(title)
-        }
-
-        // Description
-        Div({
-            style {
-                fontSize(14.px)
-                textAlign("center")
-                opacity(.5f)
-            }
-        }) {
-            Text(description)
-        }
-    }
-}
+import app.group.FeatureButton
+import app.group.FeaturePreview
 
 @Composable
 fun GroupPage(
@@ -149,101 +99,7 @@ fun GroupPage(
     }
 
     if (nav == GroupNav.None) {
-        Div({
-            style {
-                height(100.percent)
-                display(DisplayStyle.Flex)
-                flexDirection(FlexDirection.Column)
-                alignItems(AlignItems.Center)
-                justifyContent(JustifyContent.Center)
-                padding(1.r)
-            }
-        }) {
-            // todo: translate all
-            Div({
-                style {
-                    display(DisplayStyle.Grid)
-                    property("grid-template-columns", "repeat(auto-fill, minmax(200px, 1fr))")
-                    property("grid-gap", "1rem")
-                    width(100.percent)
-                    maxWidth(800.px)
-                    overflow("auto")
-                    maxHeight(100.percent)
-                }
-            }) {
-                // Create a page
-                FeatureButton(
-                    icon = "note_add",
-                    title = "Create a page",
-                    description = "Create a new page for your content",
-                    onClick = {
-                        scope.launch {
-                            appNav.navigate(AppNavigation.Nav(NavPage.Cards))
-                        }
-                    }
-                )
-
-                // Schedule
-                FeatureButton(
-                    icon = "calendar_month",
-                    title = "Schedule",
-                    description = "Manage your schedule and events",
-                    onClick = {
-                        scope.launch {
-                            appNav.navigate(AppNavigation.Nav(NavPage.Schedule))
-                        }
-                    }
-                )
-
-                // Profile
-                FeatureButton(
-                    icon = "person",
-                    title = "Profile",
-                    description = "View and edit your profile",
-                    onClick = {
-                        scope.launch {
-                            appNav.navigate(AppNavigation.Nav(NavPage.Profile))
-                        }
-                    }
-                )
-
-                // Write a post
-                FeatureButton(
-                    icon = "post_add",
-                    title = "Write a post",
-                    description = "Share your thoughts with others",
-                    onClick = {
-                        scope.launch {
-                            appNav.navigate(AppNavigation.Nav(NavPage.Stories))
-                        }
-                    }
-                )
-
-                // Create a script
-                FeatureButton(
-                    icon = "description",
-                    title = "Create a script",
-                    description = "Create a script to automate tasks",
-                    onClick = {
-                        scope.launch {
-                            appNav.navigate(AppNavigation.Nav(NavPage.Scripts))
-                        }
-                    }
-                )
-
-                // Explore
-                FeatureButton(
-                    icon = "explore",
-                    title = "Explore",
-                    description = "Discover new content and people",
-                    onClick = {
-                        scope.launch {
-                            appNav.navigate(AppNavigation.Nav(NavPage.Cards))
-                        }
-                    }
-                )
-            }
-        }
+        FeaturePreview()
     } else if (nav is GroupNav.Local || nav is GroupNav.Friends) {
         if (isLoading) {
             Loading()

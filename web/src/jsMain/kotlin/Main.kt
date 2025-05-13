@@ -181,6 +181,10 @@ fun main() {
                         Background({
                             classes(Styles.background)
                         }) {
+                            AppHeader(
+                                title = "",
+                                background = false
+                            )
                             ScriptCoverPage(scriptId = script)
                             AppFooter(
                                 showHome = true

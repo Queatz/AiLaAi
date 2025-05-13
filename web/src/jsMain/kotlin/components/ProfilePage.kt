@@ -360,13 +360,13 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     Div({
                                         classes(ProfileStyles.infoCard)
                                     }) {
-                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats.friendsCount}") }
+                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats?.friendsCount}") }
                                         Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { friends }) }
                                     }
                                     Div({
                                         classes(ProfileStyles.infoCard)
                                     }) {
-                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats.cardCount}") }
+                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats?.cardCount}") }
                                         Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { this.cards }) }
                                     }
                                     Div({
@@ -383,13 +383,13 @@ fun ProfilePage(personId: String? = null, url: String? = null, onProfile: (Perso
                                     Div({
                                         classes(ProfileStyles.infoCard)
                                     }) {
-                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats.storiesCount}") }
+                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats?.storiesCount}") }
                                         Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { stories }) }
                                     }
                                     Div({
                                         classes(ProfileStyles.infoCard)
                                     }) {
-                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats.subscriberCount}") }
+                                        Div({ classes(ProfileStyles.infoCardValue) }) { Text("${profile.stats?.subscriberCount}") }
                                         Div({ classes(ProfileStyles.infoCardName) }) { Text(appString { subscribers }) }
                                     }
                                 }

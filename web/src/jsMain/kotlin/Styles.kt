@@ -108,7 +108,6 @@ object Styles : StyleSheet() {
     val scriptCoverContainer by style {
         backgroundColor(rgba(255, 255, 255, .92))
         borderRadius(2.r)
-        marginTop(1.r)
 
         dark(self) {
             backgroundColor(rgba(0, 0, 0, .92))

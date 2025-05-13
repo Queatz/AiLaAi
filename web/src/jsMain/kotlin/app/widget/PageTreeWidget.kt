@@ -31,6 +31,7 @@ import com.queatz.db.Widget
 import com.queatz.widgets.widgets.PageTreeData
 import components.Icon
 import components.IconButton
+import components.LinkifyText
 import components.getConversation
 import isMine
 import json
@@ -1186,7 +1187,7 @@ fun PageTreeWidget(widgetId: String) {
                                     fontSize(16.px)
                                 }
                             }) {
-                                Text(it)
+                                LinkifyText(it)
                             }
                         }
 

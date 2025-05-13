@@ -117,7 +117,7 @@ fun Route.peopleRoutes() {
     authenticate {
         get("/people") {
             respond {
-                val search = call.parameters["search"]?.notBlank
+                val search = call.parameters["search"]?.notBlank?.lowercase()
                 val geo = call.parameters["geo"]?.split(",")?.map { it.toDoubleOrNull() ?: 0.0 }?.takeIf { it.size == 2 } ?: me.geo
                 val offset = call.parameters["offset"]?.toIntOrNull() ?: 0
                 val limit = call.parameters["limit"]?.toIntOrNull() ?: 20
