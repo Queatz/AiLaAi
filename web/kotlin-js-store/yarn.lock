@@ -2,6 +2,16 @@
 # yarn lockfile v1
 
 
+"@babylonjs/core@8.7.0":
+  version "8.7.0"
+  resolved "https://registry.yarnpkg.com/@babylonjs/core/-/core-8.7.0.tgz#230edfd486458c65e6d006d986df3dddb2daa50d"
+  integrity sha512-6yVCq4lidd6B9xnyL2Ubs6v+IX6tHX3SmoMDUrrrIMYUSW/qPIG1qRWs3+3bD9gvTM8A+UY+tcMPsHkaLVnaRA==
+
+"@babylonjs/materials@8.7.0":
+  version "8.7.0"
+  resolved "https://registry.yarnpkg.com/@babylonjs/materials/-/materials-8.7.0.tgz#067ec644b2a709468f5acf013a6c2641c47ae5f7"
+  integrity sha512-v2240oEPEPSOsw9cuQva8Q3yBQvFyCfrkgfWXEDL9fJBmUHmylK6pPZZArwIx4gm50azkpltGjRdcK7R6/vScg==
+
 "@colors/colors@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"

@@ -12,6 +12,63 @@ import web.cssom.translatex
 
 object AppStyles : StyleSheet() {
 
+    // Game Editor Panel Styles
+    val editorTabContainer by style {
+        flexShrink(0)
+        display(DisplayStyle.Flex)
+        padding(0.5.r)
+        marginBottom(0.5.r)
+        overflowY("auto")
+    }
+
+    val editorTab by style {
+        padding(0.5.r)
+        cursor("pointer")
+        marginRight(0.25.r)
+    }
+
+    val editorTabSelected by style {
+        fontWeight("bold")
+        property("border-bottom", "2px solid #007bff")
+    }
+
+    val editorPanelSection by style {
+        marginBottom(1.r)
+    }
+
+    val editorPanelHeader by style {
+        display(DisplayStyle.Flex)
+        alignItems(AlignItems.Center)
+        padding(0.5.r)
+        cursor("pointer")
+        borderRadius(0.5.r)
+
+        hover(self) style {
+            backgroundColor(Color("#f0f0f0"))
+        }
+
+        dark(self) {
+            hover(self) style {
+                backgroundColor(Color("#333333"))
+            }
+        }
+    }
+
+    val editorPanelHeaderIcon by style {
+        marginRight(0.5.r)
+    }
+
+    val editorPanelContent by style {
+        padding(1.r)
+        backgroundColor(Color("#f0f0f0"))
+        borderRadius(0.5.r)
+        marginTop(0.5.r)
+
+        dark(self) {
+            backgroundColor(Color("#222222"))
+        }
+    }
+
     @OptIn(ExperimentalComposeWebApi::class)
     val fullscreenButton by style {
         position(Position.Fixed)

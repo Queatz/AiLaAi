@@ -123,6 +123,7 @@ fun ProfileNavPage(
     onProfileClick: () -> Unit,
     onPlatformClick: () -> Unit,
     onScriptsClick: () -> Unit,
+    onScenesClick: () -> Unit = {},
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
@@ -405,6 +406,10 @@ fun ProfileNavPage(
 
         NavMenuItem("history_edu", appString { scripts }) {
             onScriptsClick()
+        }
+
+        NavMenuItem("landscape", "Scenes") {
+            onScenesClick()
         }
 
         if (isPlatformHost) {

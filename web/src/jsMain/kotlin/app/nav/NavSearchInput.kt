@@ -9,6 +9,8 @@ import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.attributes.type
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.TextInput
 import r
 
@@ -33,7 +35,8 @@ fun NavSearchInput(
         }
 
         style {
-            if (defaultMargins) margin(.5.r, 1.r, 0.r, 1.r)
+            width(100.percent)
+            if (defaultMargins) margin(.5.r, 0.r, 0.r, 0.r)
             styles()
         }
         onKeyDown {

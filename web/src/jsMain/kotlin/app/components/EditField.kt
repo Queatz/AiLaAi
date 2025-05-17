@@ -150,7 +150,8 @@ fun EditField(
         }
     }
 
-    if (messageChanged && messageText != value) {
+    // Show buttons if message has changed or if there's text in the field
+    if ((messageChanged && messageText != value) || messageText.isNotBlank()) {
         Div({
             style {
                 margin(.5.r)
@@ -172,14 +173,14 @@ fun EditField(
                     save()
                 }
 
-                if (isSaving) {
+                if (isSaving || messageText.isBlank()) {
                     disabled()
                 }
             }) {
                 Text(button)
             }
 
-            if (showDiscard) {
+            if (showDiscard && messageChanged && messageText != value) {
                 Button({
                     classes(Styles.outlineButton)
                     style {

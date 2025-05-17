@@ -78,6 +78,7 @@ import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.position
+import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.whiteSpace
@@ -315,10 +316,16 @@ fun GroupsNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
-            searchText = ""
-            showSearch = false
-        })
+        Div({
+            style {
+                width(100.percent)
+            }
+        }) {
+            NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
+                searchText = ""
+                showSearch = false
+            })
+        }
     }
 
     if (isLoading) {

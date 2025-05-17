@@ -10,6 +10,7 @@ import app.appNav
 import app.call.CallLayout
 import app.call.CallStyles
 import app.components.Background
+import app.game.GameCoverPage
 import app.group.GroupCoverPage
 import app.info.PrivacyPage
 import app.info.TosPage
@@ -45,10 +46,11 @@ import org.w3c.dom.get
 import org.w3c.dom.set
 import stories.StoryStyles
 
-const val baseUrl = "https://api.ailaai.app"
+const val baseUrl = "http://0.0.0.0:8080"
+//const val baseUrl = "https://api.ailaai.app"
 
-//const val baseUrl = "http://0.0.0.0:8080"
-const val webBaseUrl = "https://hitown.chat"
+const val webBaseUrl = "http://0.0.0.0:4040"
+//const val webBaseUrl = "https://hitown.chat"
 
 val json = Json {
     encodeDefaults = true
@@ -66,6 +68,7 @@ val http = HttpClient(Js) {
 }
 
 fun main() {
+    // Mapbox
     js("require(\"mapbox-gl/dist/mapbox-gl.css\")")
 
     mapboxgl.accessToken =
@@ -294,6 +297,12 @@ fun main() {
                         AppHeader(appName)
                         EventPage(eventId)
                         AppFooter()
+                    }
+                }
+
+                route("scene") {
+                    string { sceneId ->
+                        GameCoverPage(sceneId)
                     }
                 }
 

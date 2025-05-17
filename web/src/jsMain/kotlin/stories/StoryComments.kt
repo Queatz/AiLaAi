@@ -62,7 +62,7 @@ fun StoryComments(
 
     suspend fun loadCommentReplies(comment: CommentExtended) {
         api.comment(comment.comment!!.id!!) {
-            loadedCommentReplies = loadedCommentReplies + (it.comment!!.id!! to it.replies!!)
+            loadedCommentReplies = loadedCommentReplies + (it.comment!!.id!! to it.replies.orEmpty())
         }
     }
 
@@ -90,9 +90,11 @@ fun StoryComments(
                 Div({
                     classes(StoryStyles.comment)
                 }) {
-                    ProfilePhoto(comment.person!!, onClick = {
-                        window.open("/profile/${comment.person!!.id!!}", "_blank")
-                    })
+                    comment.person?.let { person ->
+                        ProfilePhoto(person, onClick = {
+                            window.open("/profile/${person.id!!}", "_blank")
+                        })
+                    }
                     Div({
                         classes(StoryStyles.commentLayout)
                     }) {
@@ -102,7 +104,7 @@ fun StoryComments(
                             Div({
                                 classes(StoryStyles.commentInfo)
                             }) {
-                                Text(comment.person!!.name ?: appString { someone })
+                                Text(comment.person?.name ?: appString { someone })
                             }
                             Div({
                                 classes(StoryStyles.commentComment)
@@ -138,7 +140,7 @@ fun StoryComments(
                             }
                         }
 
-                        val showTotalReplies = comment.totalReplies!! > 0
+                        val showTotalReplies = (comment.totalReplies ?: 0) > 0
                         val replies = (comment.replies ?: loadedCommentReplies[comment.comment!!.id!!])?.notEmpty
 
                         if (showReply || replies != null || showTotalReplies) {

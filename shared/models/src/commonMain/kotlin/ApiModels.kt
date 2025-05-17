@@ -359,3 +359,10 @@ class PlatformAccountsPointsBody(
 class UseInviteResponse(
     val group: String? = null
 )
+
+@Serializable
+data class GameDiscussionExtended(
+    val discussion: GameDiscussion? = null,
+    val person: Person? = null,
+    val comments: List<CommentExtended>? = null
+)

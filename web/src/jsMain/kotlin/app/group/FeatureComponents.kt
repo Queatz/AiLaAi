@@ -69,7 +69,7 @@ fun FeaturePreview() {
     val scope = rememberCoroutineScope()
 
     // TODO Add AI What do you want to do today? input
-    
+
     // Feature Preview Div
     Div({
         style {
@@ -162,6 +162,18 @@ fun FeaturePreview() {
                 onClick = {
                     scope.launch {
                         appNav.navigate(AppNavigation.Nav(NavPage.Cards))
+                    }
+                }
+            )
+
+            // Create a scene
+            FeatureButton(
+                icon = "movie",
+                title = "Create a scene",
+                description = "Create a new interactive scene",
+                onClick = {
+                    scope.launch {
+                        appNav.navigate(AppNavigation.Nav(NavPage.Scenes))
                     }
                 }
             )

@@ -105,6 +105,14 @@ object Styles : StyleSheet() {
         }
     }
 
+    val fullscreenContainer by style {
+        backgroundColor(Color.white)
+
+        dark(self) {
+            backgroundColor(Color.black)
+        }
+    }
+
     val scriptCoverContainer by style {
         backgroundColor(rgba(255, 255, 255, .92))
         borderRadius(2.r)

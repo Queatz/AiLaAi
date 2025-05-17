@@ -23,8 +23,11 @@ import app.nav.GroupNav
 import app.nav.GroupsNavPage
 import app.nav.ProfileNavPage
 import app.nav.ScheduleNavPage
+import app.nav.SceneNav
+import app.nav.SceneNavPage
 import app.nav.StoriesNavPage
 import app.nav.StoryNav
+import app.page.ScenePage
 import app.page.SchedulePage
 import app.page.ScheduleView
 import app.page.ScheduleViewType
@@ -70,6 +73,7 @@ import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.position
@@ -78,6 +82,7 @@ import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
 import push
+import r
 import stories.StoryStyles
 import stories.commentDialog
 
@@ -90,6 +95,7 @@ enum class NavPage {
     Profile,
     Platform,
     Scripts,
+    Scenes,
 }
 
 @Composable
@@ -178,6 +184,10 @@ fun AppPage() {
 
     var script by remember {
         mutableStateOf<ScriptsNav>(ScriptsNav.None)
+    }
+
+    var scene by remember {
+        mutableStateOf<SceneNav>(SceneNav.None)
     }
 
     LaunchedEffect(nav) {
@@ -478,6 +488,9 @@ fun AppPage() {
                         },
                         onScriptsClick = {
                             nav = NavPage.Scripts
+                        },
+                        onScenesClick = {
+                            nav = NavPage.Scenes
                         }
                     )
                     NavPage.Platform -> PlatformNavPage(
@@ -499,6 +512,15 @@ fun AppPage() {
                             }
                         },
                         onProfileClick = {
+                            nav = NavPage.Profile
+                        }
+                    )
+                    NavPage.Scenes -> SceneNavPage(
+                        selected = scene,
+                        onSelected = { selectedScene ->
+                            scene = selectedScene
+                        },
+                        onBackClick = {
                             nav = NavPage.Profile
                         }
                     )
@@ -609,6 +631,18 @@ fun AppPage() {
                         }
                     }
                 )
+
+                NavPage.Scenes -> {
+                    ScenePage(
+                        nav = scene,
+                        onBackClick = {
+                            scene = SceneNav.None
+                        },
+                        onSceneSelected = { selectedScene ->
+                            scene = selectedScene
+                        }
+                    )
+                }
             }
         }
     }

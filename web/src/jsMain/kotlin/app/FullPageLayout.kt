@@ -7,6 +7,7 @@ import org.jetbrains.compose.web.dom.Div
 @Composable
 fun FullPageLayout(
     maxWidth: CSSpxValue? = 800.px,
+    useVh: Boolean = false,
     content: @Composable () -> Unit
 ) {
     Div({
@@ -14,7 +15,11 @@ fun FullPageLayout(
             display(DisplayStyle.Flex)
             flexDirection(FlexDirection.Column)
             width(100.percent)
-            height(100.percent)
+            if (useVh) {
+                height(100.vh)
+            } else {
+                height(100.percent)
+            }
             if (maxWidth == null) {
                 overflowX("hidden")
                 overflowY("auto")

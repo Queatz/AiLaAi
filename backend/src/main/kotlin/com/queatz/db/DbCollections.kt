@@ -6,6 +6,32 @@ import com.arangodb.model.GeoIndexOptions
 import com.arangodb.model.PersistentIndexOptions
 
 fun collections() = listOf(
+    GameScene::class.db {
+        ensurePersistentIndex(listOf(GameScene::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameScene::published.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameScene::url.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameScene::categories.name), PersistentIndexOptions())
+    },
+    GameTile::class.db {
+        ensurePersistentIndex(listOf(GameTile::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameTile::published.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameTile::categories.name), PersistentIndexOptions())
+    },
+    GameObject::class.db {
+        ensurePersistentIndex(listOf(GameObject::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameObject::published.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameObject::categories.name), PersistentIndexOptions())
+    },
+    GameMusic::class.db {
+        ensurePersistentIndex(listOf(GameMusic::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameMusic::published.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameMusic::categories.name), PersistentIndexOptions())
+    },
+    GameDiscussion::class.db {
+        ensurePersistentIndex(listOf(GameDiscussion::person.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameDiscussion::scene.name), PersistentIndexOptions())
+        ensurePersistentIndex(listOf(GameDiscussion::title.name), PersistentIndexOptions())
+    },
     Impromptu::class.db {
         ensurePersistentIndex(listOf(Impromptu::person.name), PersistentIndexOptions())
         ensurePersistentIndex(listOf(Impromptu::mode.name), PersistentIndexOptions())
@@ -179,7 +205,14 @@ fun collections() = listOf(
         ensurePersistentIndex(listOf(Reaction::reaction.name), PersistentIndexOptions())
         ensureFulltextIndex(listOf(Reaction::comment.name), FulltextIndexOptions())
     },
-    Comment::class.db(CollectionType.EDGES, listOf(Person::class, Card::class, Comment::class, Story::class, Message::class)) {
+    Comment::class.db(CollectionType.EDGES, listOf(
+        Person::class,
+        Card::class,
+        Comment::class,
+        Story::class,
+        Message::class,
+        GameDiscussion::class
+    )) {
         ensureFulltextIndex(listOf(Comment::comment.name), FulltextIndexOptions())
     },
     PlatformConfig::class.db {

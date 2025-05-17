@@ -65,8 +65,10 @@ class Ai {
         private const val endpointRemoveBackground = "https://api.dezgo.com/remove-background"
         private const val height = 416
         private const val width = 608
+        private const val square = 512
         private const val heightXl = 832
         private const val widthXl = 1216
+        private const val squareXl = 1024
         private val basePrompt = TextPrompt(
             "lovely, beautiful, cute, happy, sweet, natural",
             .125
@@ -100,8 +102,18 @@ class Ai {
         val isXlLightning = model.isXlLightning
         val isXl = model.isXl
 
-        val height = if (isXl) heightXl else height
-        val width = if (isXl) widthXl else width
+        val height = if (isXl) {
+            if (aspect == 1.0) squareXl else heightXl
+        } else {
+            if (aspect == 1.0) square else height
+        }
+        val width = if (isXl) {
+            if (aspect == 1.0) squareXl else widthXl
+        } else {
+            if (aspect == 1.0) square else width
+        }
+
+        val ext = if (transparentBackground) "png" else "jpg"
 
         val body = when {
             isFlux -> {
@@ -111,7 +123,7 @@ class Ai {
                         height = if (aspect < 1.0) width else height,
                         width = if (aspect < 1.0) height else width,
                         transparentBackground = transparentBackground,
-                        format = if (transparentBackground) "png" else "jpg"
+                        format = ext
                     )
                 )
             }
@@ -127,7 +139,7 @@ class Ai {
                         height = if (aspect < 1.0) width else height,
                         width = if (aspect < 1.0) height else width,
                         transparentBackground = if (isXl) transparentBackground else null,
-                        format = if (transparentBackground) "png" else "jpg"
+                        format = ext
                     )
                 )
             }
@@ -144,11 +156,11 @@ class Ai {
             }
         ) {
             header("X-Dezgo-Key", secrets.dezgo.key)
-            accept(ContentType.Image.JPEG)
+            accept(if (ext == "png") ContentType.Image.PNG else ContentType.Image.JPEG)
             contentType(ContentType.Application.Json.withCharset(UTF_8))
             setBody(body)
         }.body<ByteArray>().let {
-            save("$prefix-$model", it).let { path ->
+            save("$prefix-$model", it, ext).let { path ->
                 // Dezgo doesn't support transparent for non-XL models out of the box
                 if (transparentBackground && !isXl) {
                     runCatching {
@@ -187,18 +199,18 @@ class Ai {
                 )
             )
         }.body<ByteArray>().let {
-            save("photo", it)
+            save("photo", it, "png")
         }
     }
 
-    private suspend fun save(prefix: String, image: ByteArray): String {
+    private suspend fun save(prefix: String, image: ByteArray, fileExtension: String = "jpg"): String {
         val folder = "./static/ai"
 
         if (!File(folder).isDirectory) {
             File(folder).mkdirs()
         }
 
-        val fileName = "$prefix-${Random.nextInt(100_000_000, 999_999_999)}-ai.jpg"
+        val fileName = "$prefix-${Random.nextInt(100_000_000, 999_999_999)}-ai.$fileExtension"
         val file = File("$folder/$fileName")
 
         withContext(Dispatchers.IO) {

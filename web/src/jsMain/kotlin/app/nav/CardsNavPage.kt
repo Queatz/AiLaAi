@@ -201,10 +201,16 @@ fun CardsNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
-            searchText = ""
-            showSearch = false
-        })
+        Div({
+            style {
+                width(100.percent)
+            }
+        }) {
+            NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
+                searchText = ""
+                showSearch = false
+            })
+        }
     }
     if (isLoading) {
         Loading()

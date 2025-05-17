@@ -47,6 +47,8 @@ class ChoosePhotoDialogControl(
     private val scope: CoroutineScope,
     private var aiPrompt: String,
     private val showUpload: Boolean,
+    private var aspectRatio: Double? = null,
+    private val removeBackground: Boolean = false,
 ) {
 
     private var _isGenerating = MutableStateFlow(false)
@@ -55,6 +57,7 @@ class ChoosePhotoDialogControl(
     private var aiStyle = MutableStateFlow<String?>(null)
     private var aiStyles = MutableStateFlow(emptyList<Pair<String, String>>())
     private var count = MutableStateFlow(1)
+    private var aspect = MutableStateFlow(aspectRatio)
 
     fun launch(multiple: Boolean = false, onPhoto: suspend (String) -> Unit) {
         scope.launch {
@@ -98,7 +101,12 @@ class ChoosePhotoDialogControl(
                 var completedCount = 0
 
                 repeat(photoCount) {
-                    api.aiPhoto(AiPhotoRequest(result, aiStyle.value)) { photo ->
+                    api.aiPhoto(AiPhotoRequest(
+                        prompt = result,
+                        style = aiStyle.value,
+                        aspect = aspect.value,
+                        removeBackground = removeBackground
+                    )) { photo ->
                         onPhoto(photo.photo)
                         completedCount++
                         if (completedCount >= photoCount) {
@@ -115,11 +123,13 @@ class ChoosePhotoDialogControl(
 fun rememberChoosePhotoDialog(
     aiPrompt: String = "",
     showUpload: Boolean = false,
+    aspectRatio: Double? = null,
+    removeBackground: Boolean = false,
 ): ChoosePhotoDialogControl {
     val scope = rememberCoroutineScope()
 
     return remember {
-        ChoosePhotoDialogControl(scope, aiPrompt, showUpload)
+        ChoosePhotoDialogControl(scope, aiPrompt, showUpload, aspectRatio, removeBackground)
     }
 }
 
@@ -146,35 +156,48 @@ private suspend fun choosePhotoDialog(
         inputAction = { resolve, value, onValue ->
             val scope = rememberCoroutineScope()
 
-            if (multiple) {
-                // Number input for photo count
-                Div({
-                    style {
-                        position(Absolute)
-                        right(3.r)
-                        top(1.r)
-                        bottom(1.r)
-                        property("display", "flex")
-                        property("align-items", "center")
-                    }
-                }) {
-                    NumberInput(
-                        value = count.collectAsState().value,
-                        min = 1,
-                        max = 10,
-                        attrs = {
-                            classes(Styles.dateTimeInput)
-                            style {
-                                width(3.r)
-                            }
+            // Container for inputs
+            Div({
+                style {
+                    position(Absolute)
+                    right(3.r)
+                    top(1.r)
+                    bottom(1.r)
+                    property("display", "flex")
+                    property("align-items", "center")
+                    property("gap", "0.5rem")
+                }
+            }) {
 
-                            onInput {
-                                runCatching {
-                                    count.value = (it.value?.toInt() ?: 1).coerceIn(1..10)
+                // Number input for photo count (only when multiple is true)
+                if (multiple) {
+                    Div({
+                        style {
+                            property("display", "flex")
+                            property("flex-direction", "column")
+                            property("align-items", "center")
+                            property("font-size", "0.75rem")
+                        }
+                    }) {
+                        Text("Count")
+                        NumberInput(
+                            value = count.collectAsState().value,
+                            min = 1,
+                            max = 10,
+                            attrs = {
+                                classes(Styles.dateTimeInput)
+                                style {
+                                    width(3.r)
+                                }
+
+                                onInput {
+                                    runCatching {
+                                        count.value = (it.value?.toInt() ?: 1).coerceIn(1..10)
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
 

@@ -75,6 +75,7 @@ fun Application.configureRouting() {
         appRoutes()
         inviteRoutes()
         impromptuRoutes()
+        gameRoutes()
 
         staticFiles("/static", File("static")) {
             install(CachingHeaders) {

@@ -28,14 +28,11 @@ import com.queatz.widgets.widgets.SpaceItem
 import json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import lib.ResizeObserver
 import notBlank
-import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Canvas
 import org.jetbrains.compose.web.dom.Div
