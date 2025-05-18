@@ -48,6 +48,7 @@ fun CurrentSelectionSection(map: Map) {
     // Track editing state
     var isEditing by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf("") }
+    var newDescription by remember { mutableStateOf("") }
     var newWidth by remember { mutableStateOf(1.0) }
     var newHeight by remember { mutableStateOf(1.0) }
 
@@ -63,19 +64,22 @@ fun CurrentSelectionSection(map: Map) {
         // Reset editing state when selection changes
         isEditing = false
 
-        // Initialize name and dimensions for editing
+        // Initialize name, description, and dimensions for editing
         currentTile?.let { tile ->
             newName = tile.name ?: "Unnamed Tile"
+            newDescription = tile.description ?: ""
         }
 
         currentObject?.let { obj ->
             newName = obj.name ?: "Unnamed Object"
+            newDescription = obj.description ?: ""
             newWidth = obj.width?.toDoubleOrNull() ?: 1.0
             newHeight = obj.height?.toDoubleOrNull() ?: 1.0
         }
 
         currentMusic?.let { music ->
             newName = music.name ?: "Unnamed Music"
+            newDescription = music.description ?: ""
         }
     }
 
@@ -183,6 +187,26 @@ fun CurrentSelectionSection(map: Map) {
                                         marginBottom(0.5.r)
                                     }
                                 }) {
+                                    Text("Description")
+                                    Div({
+                                        style {
+                                            padding(0.5.r)
+                                            property("background-color", "rgba(0, 0, 0, 0.05)")
+                                            property("border-radius", "4px")
+                                        }
+                                    }) {
+                                        Text(currentTile?.description ?: "No description")
+                                    }
+                                }
+
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Column)
+                                        gap(0.25.r)
+                                        marginBottom(0.5.r)
+                                    }
+                                }) {
                                     Text("Published")
                                     Div({
                                         style {
@@ -250,6 +274,26 @@ fun CurrentSelectionSection(map: Map) {
                                         }
                                     }) {
                                         Text(currentObject?.name ?: "Unnamed Object")
+                                    }
+                                }
+
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Column)
+                                        gap(0.25.r)
+                                        marginBottom(0.5.r)
+                                    }
+                                }) {
+                                    Text("Description")
+                                    Div({
+                                        style {
+                                            padding(0.5.r)
+                                            property("background-color", "rgba(0, 0, 0, 0.05)")
+                                            property("border-radius", "4px")
+                                        }
+                                    }) {
+                                        Text(currentObject?.description ?: "No description")
                                     }
                                 }
 
@@ -350,6 +394,26 @@ fun CurrentSelectionSection(map: Map) {
                                         marginBottom(0.5.r)
                                     }
                                 }) {
+                                    Text("Description")
+                                    Div({
+                                        style {
+                                            padding(0.5.r)
+                                            property("background-color", "rgba(0, 0, 0, 0.05)")
+                                            property("border-radius", "4px")
+                                        }
+                                    }) {
+                                        Text(currentMusic?.description ?: "No description")
+                                    }
+                                }
+
+                                Div({
+                                    style {
+                                        display(DisplayStyle.Flex)
+                                        flexDirection(FlexDirection.Column)
+                                        gap(0.25.r)
+                                        marginBottom(0.5.r)
+                                    }
+                                }) {
                                     Text("Duration")
                                     Div({
                                         style {
@@ -411,6 +475,25 @@ fun CurrentSelectionSection(map: Map) {
                                 value(newName)
                                 onInput { event ->
                                     newName = event.value
+                                }
+                            }
+                        }
+
+                        // Description field
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                alignItems(AlignItems.Center)
+                                gap(0.5.r)
+                                marginBottom(0.5.r)
+                            }
+                        }) {
+                            Text("Description:")
+                            TextInput {
+                                classes(Styles.textarea)
+                                value(newDescription)
+                                onInput { event ->
+                                    newDescription = event.value
                                 }
                             }
                         }
@@ -482,7 +565,8 @@ fun CurrentSelectionSection(map: Map) {
                                         when {
                                             currentTile != null -> {
                                                 val updatedTile = currentTile!!.copy(
-                                                    name = newName
+                                                    name = newName,
+                                                    description = newDescription
                                                 )
                                                 api.updateGameTile(currentTile!!.id!!, updatedTile) {
                                                     // Update the current tile with the new values
@@ -493,6 +577,7 @@ fun CurrentSelectionSection(map: Map) {
                                             currentObject != null -> {
                                                 val updatedObject = currentObject!!.copy(
                                                     name = newName,
+                                                    description = newDescription,
                                                     width = newWidth.toString(),
                                                     height = newHeight.toString()
                                                 )
@@ -504,7 +589,8 @@ fun CurrentSelectionSection(map: Map) {
                                             }
                                             currentMusic != null -> {
                                                 val updatedMusic = currentMusic!!.copy(
-                                                    name = newName
+                                                    name = newName,
+                                                    description = newDescription
                                                 )
                                                 api.updateGameMusic(currentMusic!!.id!!, updatedMusic) {
                                                     // Update the current music with the new values
@@ -564,7 +650,8 @@ fun CurrentSelectionSection(map: Map) {
                                         when {
                                             currentTile != null -> {
                                                 val updatedTile = currentTile!!.copy(
-                                                    published = true
+                                                    published = true,
+                                                    description = currentTile!!.description
                                                 )
                                                 api.updateGameTile(currentTile!!.id!!, updatedTile) {
                                                     // Update the current tile with the new values
@@ -573,7 +660,8 @@ fun CurrentSelectionSection(map: Map) {
                                             }
                                             currentObject != null -> {
                                                 val updatedObject = currentObject!!.copy(
-                                                    published = true
+                                                    published = true,
+                                                    description = currentObject!!.description
                                                 )
                                                 api.updateGameObject(currentObject!!.id!!, updatedObject) {
                                                     // Update the current object with the new values
@@ -582,7 +670,8 @@ fun CurrentSelectionSection(map: Map) {
                                             }
                                             currentMusic != null -> {
                                                 val updatedMusic = currentMusic!!.copy(
-                                                    published = true
+                                                    published = true,
+                                                    description = currentMusic!!.description
                                                 )
                                                 api.updateGameMusic(currentMusic!!.id!!, updatedMusic) {
                                                     // Update the current music with the new values

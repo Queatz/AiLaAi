@@ -106,7 +106,7 @@ suspend fun createBotDialog(
                         size = 84.px
                     ) {
                         scope.launch {
-                            photoDialog("$baseUrl/$photo")
+                            photoDialog("$baseUrl$photo")
                         }
                     }
                 }

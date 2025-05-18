@@ -348,7 +348,7 @@ fun MapView(
                                     if (isNpc) {
                                         width(32.r)
                                         height(32.r)
-                                        backgroundImage("url(\"$baseUrl/${card.npc!!.photo}\")")
+                                        backgroundImage("url(\"$baseUrl${card.npc!!.photo}\")")
                                         backgroundPosition("center")
                                         backgroundSize("contain")
                                     } else if (!card.photo.isNullOrBlank()) {

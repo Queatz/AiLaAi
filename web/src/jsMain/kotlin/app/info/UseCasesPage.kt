@@ -72,7 +72,7 @@ fun UseCasesPage() {
                 }
             }) {
                 Div {
-                    Img(src = "$baseUrl/${useCase.photo}", attrs = {
+                    Img(src = "$baseUrl${useCase.photo}", attrs = {
                         style {
                             width(33.vw)
                             property("aspect-ratio", "1.5")

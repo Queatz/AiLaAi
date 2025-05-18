@@ -29,6 +29,7 @@ data class GameDiscussion(
 data class GameTile(
     var person: String? = null,
     var name: String? = null,
+    var description: String? = null,
     var published: Boolean? = null,
     var categories: List<String>? = null,
     var photo: String? = null,
@@ -39,6 +40,7 @@ data class GameTile(
 data class GameObject(
     var person: String? = null,
     var name: String? = null,
+    var description: String? = null,
     var published: Boolean? = null,
     var categories: List<String>? = null,
     var photo: String? = null,
@@ -50,6 +52,7 @@ data class GameObject(
 data class GameMusic(
     var person: String? = null,
     var name: String? = null,
+    var description: String? = null,
     var published: Boolean? = null,
     var categories: List<String>? = null,
     var audio: String? = null,

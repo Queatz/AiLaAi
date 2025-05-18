@@ -70,6 +70,7 @@ fun ToolGrid(
                     padding(.5.r)
                     borderRadius(.5.r)
                     cursor("pointer")
+                    textAlign("center")
 
                     // Apply styles based on selection state and dark mode
                     if (isDarkMode) {

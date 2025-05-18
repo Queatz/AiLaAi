@@ -1,5 +1,6 @@
 package app
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -8,11 +9,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.flow.collectLatest
 import api
 import app.ailaai.api.gameObject
 import app.ailaai.api.gameTile
 import app.game.GameEditorPanel
+import app.game.GameMusicPlayer
 import app.game.GameObjectsData
 import app.game.GameTilesData
 import app.game.editor.Seekbar
@@ -24,6 +25,7 @@ import game.Game
 import game.Side
 import kotlinx.browser.document
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lib.FullscreenApi
 import lib.ResizeObserver
@@ -403,6 +405,8 @@ fun GamePage(
         }
     }
 
+    GameMusicPlayer(game)
+
     Div({
         // Add a class to identify the game container for fullscreen
         classes(Styles.fullscreenContainer)
@@ -413,6 +417,8 @@ fun GamePage(
             boxSizing("border-box")
             if (!isFullscreen) {
                 padding(1.r)
+            } else {
+                position(Position.Fixed)
             }
             styles()
         }

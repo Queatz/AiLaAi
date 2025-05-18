@@ -290,6 +290,9 @@ fun Route.gameRoutes() {
                     if (update.name != null) {
                         gameTile.name = update.name
                     }
+                    if (update.description != null) {
+                        gameTile.description = update.description
+                    }
                     if (update.categories != null) {
                         gameTile.categories = update.categories
                     }
@@ -410,6 +413,12 @@ fun Route.gameRoutes() {
                     if (update.published != null) {
                         gameObject.published = update.published
                     }
+                    if (update.name != null) {
+                        gameObject.name = update.name
+                    }
+                    if (update.description != null) {
+                        gameObject.description = update.description
+                    }
                     if (update.categories != null) {
                         gameObject.categories = update.categories
                     }
@@ -521,6 +530,9 @@ fun Route.gameRoutes() {
 
                     if (update.name != null) {
                         gameMusic.name = update.name
+                    }
+                    if (update.description != null) {
+                        gameMusic.description = update.description
                     }
                     if (update.audio != null) {
                         gameMusic.audio = update.audio

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,26 +82,30 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
     }
 
     // Audio component for playback (hidden in the UI)
-    Audio({
-        style {
-            display(DisplayStyle.None)
-        }
-
-        // Set loop attribute to make music loop during animation
-        attr("loop", "true")
-
-        ref {
-            audioElement = it
-
-            onDispose { }
-        }
-    }) {
-        // Only add Source when we have a valid audio URL
+    key(currentAudioSrc) {
         currentAudioSrc?.let { src ->
-            Source({
-                attr("src", src)
-                attr("type", "audio/mp4") // Assuming MP4 format, adjust if needed
-            })
+            Audio({
+                style {
+                    display(DisplayStyle.None)
+                }
+
+                // Set loop attribute to make music loop during animation
+                attr("loop", "true")
+
+                ref {
+                    audioElement = it
+
+                    onDispose {
+                        audioElement = null
+                    }
+                }
+            }) {
+                // Only add Source when we have a valid audio URL
+                Source({
+                    attr("src", src)
+                    attr("type", "audio/mp4") // Assuming MP4 format, adjust if needed
+                })
+            }
         }
     }
 
@@ -131,7 +136,7 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
             console.log("Playing music: ${musicToPlay.name} at marker time ${marker.time}")
 
             // Update the current audio source
-            currentAudioSrc = "$baseUrl/${musicToPlay.audio}"
+            currentAudioSrc = "$baseUrl${musicToPlay.audio}"
             currentMusic = musicToPlay
 
             // The LaunchedEffect will handle loading the audio
@@ -150,7 +155,7 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
             g.animationData.onTimeUpdate = { time ->
                 // Find markers at or very close to the current time
                 // Use a wider window for more reliable detection
-                val markersAtTime = g.animationData.markers.filter { marker -> 
+                val markersAtTime = g.animationData.markers.filter { marker ->
                     abs(marker.time - time) < 1.0 // Within 1 second for more reliable detection
                 }
 
@@ -174,7 +179,7 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
                     console.log("Animation started playing at time: $time")
 
                     // Find markers at or very close to the current time
-                    val markersAtTime = game.animationData.markers.filter { marker -> 
+                    val markersAtTime = game.animationData.markers.filter { marker ->
                         abs(marker.time - time) < 1.0 // Within 1 second for more reliable detection
                     }
 
@@ -302,7 +307,7 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
                 } else {
                     if (music.audio != null) {
                         // Update the current audio source
-                        currentAudioSrc = "$baseUrl/${music.audio}"
+                        currentAudioSrc = "$baseUrl${music.audio}"
                         currentMusic = music
                         // The LaunchedEffect will handle loading and playing the audio
                     }
@@ -370,8 +375,8 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
         },
         searchFilter = { musicAsset, query ->
             musicAsset.name.contains(query, ignoreCase = true) ||
-            musicAsset.id.contains(query, ignoreCase = true) ||
-            musicAsset.createdAt?.toString()?.contains(query, ignoreCase = true) ?: false
+                    musicAsset.id.contains(query, ignoreCase = true) ||
+                    musicAsset.createdAt?.toString()?.contains(query, ignoreCase = true) ?: false
         },
         createButtonText = "Upload Music",
         emptyText = "No music available. Upload some music to get started.",
