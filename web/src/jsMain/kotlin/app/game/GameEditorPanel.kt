@@ -34,6 +34,7 @@ fun GameEditorPanel(
     gameScene: GameScene? = null,
     onPixelatedChanged: (Boolean) -> Unit = {},
     onSceneDeleted: () -> Unit = {},
+    onScenePublished: () -> Unit = {},
     styles: StyleScope.() -> Unit = {}
 ) {
     Div(
@@ -51,20 +52,28 @@ fun GameEditorPanel(
     ) {
         var selectedTab by remember { mutableStateOf(0) }
 
-        // Use the reusable TabBar component
+        data class TabInfo(
+            val name: String,
+            val content: @Composable () -> Unit
+        )
+
+        val tabs = remember {
+            listOf(
+                TabInfo("Editor") { GameEditorTabEditor(engine, map, gameScene, onSceneDeleted, onPixelatedChanged) },
+                TabInfo("Discussion") { GameEditorTabDiscussion(engine, map, gameScene) },
+                TabInfo("Library") { GameEditorTabLibrary(engine, map, gameScene) },
+                TabInfo("Help") { GameEditorInstructions() },
+                TabInfo("Publish") { GameEditorTabPublish(engine, map, gameScene, onUploaded = onScenePublished) }
+            )
+        }
+
         TabBar(
-            tabs = listOf("Editor", "Discussion", "Help", "Publish"),
+            tabs = tabs.map { it.name },
             initialSelectedIndex = selectedTab,
             onTabSelected = { selectedTab = it }
         )
 
         // Tab content
-        when (selectedTab) {
-            0 -> GameEditorTabEditor(engine, map, gameScene, onSceneDeleted, onPixelatedChanged)
-//            1 -> GameEditorTabLibrary(engine, map, gameScene)
-            1 -> GameEditorTabDiscussion(engine, map, gameScene)
-            2 -> GameEditorInstructions()
-            3 -> GameEditorTabPublish(engine, map, gameScene)
-        }
+        tabs[selectedTab].content()
     }
 }

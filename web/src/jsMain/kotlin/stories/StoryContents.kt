@@ -521,7 +521,7 @@ fun StoryContents(
                                 }
                                 onClick {
                                     scope.launch {
-                                        choosePhoto.launch { photoUrl ->
+                                        choosePhoto.launch { photoUrl, _, _ ->
                                             input = input + (part.key to photoUrl)
                                             value = photoUrl
                                         }

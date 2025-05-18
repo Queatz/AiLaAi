@@ -64,7 +64,7 @@ suspend fun createBotDialog(
                 Menu({ menuTarget = null }, it) {
                     item(application.appString { this.choosePhoto }) {
                         scope.launch {
-                            choosePhoto.launch {
+                            choosePhoto.launch { it, _, _ ->
                                 photo.value = it
                             }
                         }

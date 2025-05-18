@@ -23,7 +23,8 @@ fun BrushSection(map: Map? = null) {
     PanelSection(
         title = "Brush",
         icon = "brush",
-        initiallyExpanded = true
+        initiallyExpanded = true,
+        closeOtherPanels = true
     ) {
         Div({
             style {

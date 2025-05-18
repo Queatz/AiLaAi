@@ -12,6 +12,7 @@ data class GameScene(
     var tiles: String? = null,
     var objects: String? = null,
     var config: String? = null,
+    var photo: String? = null,
 ) : Model()
 
 @Serializable
@@ -38,7 +39,7 @@ data class GameTile(
 data class GameObject(
     var person: String? = null,
     var name: String? = null,
-    var published: String? = null,
+    var published: Boolean? = null,
     var categories: List<String>? = null,
     var photo: String? = null,
     var width: String? = null,
@@ -68,7 +69,22 @@ data class GameSceneConfig(
     val bloomEnabled: Boolean? = null,
     val sharpenEnabled: Boolean? = null,
     val colorCorrectionEnabled: Boolean? = null,
-    val linearSamplingEnabled: Boolean? = null
+    val linearSamplingEnabled: Boolean? = null,
+    val depthOfFieldEnabled: Boolean? = null,
+    val ambienceIntensity: Float? = null,
+    val sunIntensity: Float? = null,
+    val fogDensity: Float? = null,
+    val timeOfDay: Float? = null,
+    val pixelSize: Int? = null,
+    val brushSize: Int? = null,
+    val brushDensity: Int? = null,
+    val gridSize: Int? = null,
+    val snowEffectEnabled: Boolean? = null,
+    val snowEffectIntensity: Float? = null,
+    val rainEffectEnabled: Boolean? = null,
+    val rainEffectIntensity: Float? = null,
+    val dustEffectEnabled: Boolean? = null,
+    val dustEffectIntensity: Float? = null
 )
 
 /**

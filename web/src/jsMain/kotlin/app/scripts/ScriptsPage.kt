@@ -677,7 +677,7 @@ fun ScriptsPage(
                                 menuTarget = null
                                 scope.launch {
                                     try {
-                                        choosePhoto.launch { photo ->
+                                        choosePhoto.launch { photo, _, _ ->
                                             isBackgroundLoading = true
                                             api.updateScript(
                                                 id = script.id!!,

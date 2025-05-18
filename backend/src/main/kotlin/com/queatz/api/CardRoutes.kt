@@ -624,7 +624,7 @@ fun Route.cardRoutes() {
                             }
                         )
 
-                        card.photo = url
+                        card.photo = url.first
                         db.update(card)
 
                         if (card.active == true) {

@@ -21,7 +21,7 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null) {
+fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null, onUploaded: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
 
     Div({
@@ -56,7 +56,7 @@ fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null)
                                         val updatedGameScene = gameScene.copy(published = true)
                                         gameScene.id?.let { id ->
                                             api.updateGameScene(id, updatedGameScene) {
-                                                window.alert("Game published successfully!")
+                                                onUploaded()
                                             }
                                         }
                                     }

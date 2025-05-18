@@ -578,12 +578,16 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    v.y = 0f
-                    Quaternion.FromLookDirectionRHToRef(
-                        v.normalize(),
-                        Vector3.Up(),
-                        node.rotationQuaternion!!
-                    )
+                    if (v.length() > 2f) {
+                        v.y = 0f
+                        Quaternion.FromLookDirectionRHToRef(
+                            v.normalize(),
+                            Vector3.Up(),
+                            node.rotationQuaternion!!
+                        )
+                    } else {
+                        node.rotationQuaternion = node.rotationQuaternion!!
+                    }
                 }
             }
             Side.X -> {
@@ -592,12 +596,16 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    v.x = 0f
-                    Quaternion.FromLookDirectionRHToRef(
-                        v.normalize(),
-                        Vector3.Right(),
-                        node.rotationQuaternion!!
-                    )
+                    if (v.length() > 2f) {
+                        v.x = 0f
+                        Quaternion.FromLookDirectionRHToRef(
+                            v.normalize(),
+                            Vector3.Right(),
+                            node.rotationQuaternion!!
+                        )
+                    } else {
+                        node.rotationQuaternion = node.rotationQuaternion!!
+                    }
                 }
             }
             Side.Z -> {
@@ -606,12 +614,16 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    v.z = 0f
-                    Quaternion.FromLookDirectionRHToRef(
-                        v.normalize(),
-                        Vector3.Forward(),
-                        node.rotationQuaternion!!
-                    )
+                    if (v.length() > 2f) {
+                        v.z = 0f
+                        Quaternion.FromLookDirectionRHToRef(
+                            v.normalize(),
+                            Vector3.Forward(),
+                            node.rotationQuaternion!!
+                        )
+                    } else {
+                        node.rotationQuaternion = node.rotationQuaternion!!
+                    }
                 }
             }
             Side.NEGATIVE_Y -> {
@@ -620,12 +632,16 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    v.y = 0f
-                    Quaternion.FromLookDirectionRHToRef(
-                        v.normalize(),
-                        Vector3.Down(),
-                        node.rotationQuaternion!!
-                    )
+                    if (v.length() > 2f) {
+                        v.y = 0f
+                        Quaternion.FromLookDirectionRHToRef(
+                            v.normalize(),
+                            Vector3.Down(),
+                            node.rotationQuaternion!!
+                        )
+                    } else {
+                        node.rotationQuaternion = node.rotationQuaternion!!
+                    }
                 }
             }
             Side.NEGATIVE_X -> {
@@ -634,12 +650,16 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    v.x = 0f
-                    Quaternion.FromLookDirectionRHToRef(
-                        v.normalize(),
-                        Vector3.Left(),
-                        node.rotationQuaternion!!
-                    )
+                    if (v.length() > 2f) {
+                        v.x = 0f
+                        Quaternion.FromLookDirectionRHToRef(
+                            v.normalize(),
+                            Vector3.Left(),
+                            node.rotationQuaternion!!
+                        )
+                    } else {
+                        node.rotationQuaternion = node.rotationQuaternion!!
+                    }
                 }
             }
             Side.NEGATIVE_Z -> {
@@ -648,12 +668,16 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    v.z = 0f
-                    Quaternion.FromLookDirectionRHToRef(
-                        v.normalize(),
-                        Vector3.Backward(),
-                        node.rotationQuaternion!!
-                    )
+                    if (v.length() > 2f) {
+                        v.z = 0f
+                        Quaternion.FromLookDirectionRHToRef(
+                            v.normalize(),
+                            Vector3.Backward(),
+                            node.rotationQuaternion!!
+                        )
+                    } else {
+                        node.rotationQuaternion = node.rotationQuaternion!!
+                    }
                 }
             }
         }

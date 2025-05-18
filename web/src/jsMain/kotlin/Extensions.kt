@@ -376,6 +376,15 @@ fun Number.format1Decimal(): String {
     }
 }
 
+/**
+ * Formats a number to 3 decimal places
+ */
+fun Number.format3Decimals(): String {
+    return (round(this.toDouble() * 1000) / 1000).toString().let {
+        if (it.endsWith(".0")) it.removeSuffix(".0") else it
+    }
+}
+
 fun Int.withPlus() = let {
     if (it > 0) {
         "+$it"

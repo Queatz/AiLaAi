@@ -1,6 +1,7 @@
 package game
 
 import com.queatz.db.GameObject
+import com.queatz.db.GameMusic
 import com.queatz.db.GameTile
 import lib.*
 
@@ -9,6 +10,11 @@ class Map(private val scene: Scene) {
     val post: Post
     val camera: Camera
     var world: World = World(scene)
+
+    // Weather effects
+    private val snowEffect = SnowEffect(scene)
+    private val rainEffect = RainEffect(scene)
+    private val dustEffect = DustEffect(scene)
 
     // Reference to the parent Game instance
     var game: Game? = null
@@ -141,7 +147,9 @@ class Map(private val scene: Scene) {
                     return
                 }
 
-                if (event.type == PointerEventTypes.POINTERDOWN || event.type == PointerEventTypes.POINTERMOVE) {
+                // For Clone mode, only call draw on POINTERDOWN to prevent unwanted selections during mouse movement
+                if (event.type == PointerEventTypes.POINTERDOWN || 
+                    (event.type == PointerEventTypes.POINTERMOVE && tilemapEditor.drawMode != DrawMode.Clone)) {
                     tilemapEditor.draw(event.event.altKey)
                 }
             }
@@ -199,6 +207,18 @@ class Map(private val scene: Scene) {
                     scene.clearColor = Color4(r, g, b, a)
                 }
             }
+            "snowEffectEnabled" -> {
+                val enabled = value.lowercase() == "true"
+                setSnowEffectEnabled(enabled)
+            }
+            "rainEffectEnabled" -> {
+                val enabled = value.lowercase() == "true"
+                setRainEffectEnabled(enabled)
+            }
+            "dustEffectEnabled" -> {
+                val enabled = value.lowercase() == "true"
+                setDustEffectEnabled(enabled)
+            }
         }
     }
 
@@ -240,6 +260,18 @@ class Map(private val scene: Scene) {
             "timeOfDay" -> {
                 val time = value.toFloat().coerceIn(0f, 1f)
                 world.timeOfDay = time
+            }
+            "snowEffectIntensity" -> {
+                val intensity = value.toFloat().coerceIn(0f, 1f)
+                setSnowEffectIntensity(intensity)
+            }
+            "rainEffectIntensity" -> {
+                val intensity = value.toFloat().coerceIn(0f, 1f)
+                setRainEffectIntensity(intensity)
+            }
+            "dustEffectIntensity" -> {
+                val intensity = value.toFloat().coerceIn(0f, 1f)
+                setDustEffectIntensity(intensity)
             }
         }
     }
@@ -324,5 +356,98 @@ class Map(private val scene: Scene) {
      */
     fun getTimeOfDay(): Float {
         return world.timeOfDay
+    }
+
+    /**
+     * Sets whether the snow effect is enabled
+     */
+    fun setSnowEffectEnabled(enabled: Boolean) {
+        snowEffect.setEnabled(enabled)
+    }
+
+    /**
+     * Gets whether the snow effect is enabled
+     */
+    fun isSnowEffectEnabled(): Boolean {
+        return snowEffect.isEnabled()
+    }
+
+    /**
+     * Sets the intensity of the snow effect (0-1)
+     */
+    fun setSnowEffectIntensity(intensity: Float) {
+        snowEffect.intensity = intensity
+    }
+
+    /**
+     * Gets the intensity of the snow effect
+     */
+    fun getSnowEffectIntensity(): Float {
+        return snowEffect.intensity
+    }
+
+    /**
+     * Sets whether the rain effect is enabled
+     */
+    fun setRainEffectEnabled(enabled: Boolean) {
+        rainEffect.setEnabled(enabled)
+    }
+
+    /**
+     * Gets whether the rain effect is enabled
+     */
+    fun isRainEffectEnabled(): Boolean {
+        return rainEffect.isEnabled()
+    }
+
+    /**
+     * Sets the intensity of the rain effect (0-1)
+     */
+    fun setRainEffectIntensity(intensity: Float) {
+        rainEffect.intensity = intensity
+    }
+
+    /**
+     * Gets the intensity of the rain effect
+     */
+    fun getRainEffectIntensity(): Float {
+        return rainEffect.intensity
+    }
+
+    /**
+     * Sets whether the dust effect is enabled
+     */
+    fun setDustEffectEnabled(enabled: Boolean) {
+        dustEffect.setEnabled(enabled)
+    }
+
+    /**
+     * Gets whether the dust effect is enabled
+     */
+    fun isDustEffectEnabled(): Boolean {
+        return dustEffect.isEnabled()
+    }
+
+    /**
+     * Sets the intensity of the dust effect (0-1)
+     */
+    fun setDustEffectIntensity(intensity: Float) {
+        dustEffect.intensity = intensity
+    }
+
+    /**
+     * Gets the intensity of the dust effect
+     */
+    fun getDustEffectIntensity(): Float {
+        return dustEffect.intensity
+    }
+
+    /**
+     * Sets the current GameMusic to play
+     */
+    fun setCurrentGameMusic(gameMusic: GameMusic?) {
+        tilemapEditor.currentGameMusic = gameMusic
+        tilemapEditor.currentGameTile = null
+        tilemapEditor.currentGameObject = null
     }
 }

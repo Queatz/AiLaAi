@@ -1,12 +1,18 @@
 package game
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import com.queatz.db.GameObject
+import com.queatz.db.GameMusic
 import com.queatz.db.GameTile
 import lib.Color3
 import lib.CreateGroundOptions
 import lib.CreatePlaneOptions
+import lib.GlowLayer
 import lib.GridMaterial
 import lib.Math
+import lib.Math.abs
+import lib.Math.min
 import lib.Matrix
 import lib.Mesh
 import lib.MeshBuilder
@@ -16,15 +22,53 @@ import lib.StandardMaterial
 import lib.Texture
 import lib.Vector3
 import lib.VertexBuffer
+import kotlin.math.max
 
 enum class DrawMode {
     Tile,
-    Object
+    Object,
+    Clone
 }
 
 class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
     val cursor: Mesh
     var grid: Mesh
+
+    // Glow layer for clone tool visualization
+    private val cloneGlowLayer = GlowLayer("cloneGlow", scene).apply {
+        intensity = 0.75f
+        blurKernelSize = 8f
+    }
+
+    // Clone tool selection visualization
+    private var cloneSelectionPlane: Mesh? = null
+    private var cloneSelectionAdditionalPlanes: MutableList<Mesh> = mutableListOf()
+
+    // Clone insertion preview visualization
+    private var cloneInsertionPreview: Mesh? = null
+    private var cloneInsertionAdditionalPlanes: MutableList<Mesh> = mutableListOf()
+
+    // Clone selection state
+    enum class CloneSelectionState {
+        NotStarted,
+        FirstPointSelected,
+        SecondPointSelected,
+        Complete
+    }
+
+    // Clone selection variables
+    private var cloneSelectionState: CloneSelectionState = CloneSelectionState.NotStarted
+    private var cloneFirstPoint: Vector3 = Vector3.Zero()
+    private var cloneSecondPoint: Vector3 = Vector3.Zero()
+    private var cloneHeight: Int = 1
+
+    // Clone selection box dimensions
+    private var cloneSelectionWidth: Int = 0
+    private var cloneSelectionDepth: Int = 0
+    private var cloneSelectionHeight: Int = 0
+
+    // Stored tiles for cloning
+    private var clonedTiles: MutableMap<String, String> = mutableMapOf()
 
     // Flag to track if initialization is complete
     private var initialized = false
@@ -61,11 +105,38 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             }
         }
 
-    // Current GameTile to paint with
-    var currentGameTile: GameTile? = null
+    // Current GameTile to paint with (as observable state)
+    private var _currentGameTile = mutableStateOf<GameTile?>(null)
+    var currentGameTile: GameTile?
+        get() = _currentGameTile.value
+        set(value) {
+            _currentGameTile.value = value
+        }
+    // Public getter for the state object
+    @Composable
+    fun getCurrentGameTileState() = _currentGameTile
 
-    // Current GameObject to place
-    var currentGameObject: GameObject? = null
+    // Current GameObject to place (as observable state)
+    private var _currentGameObject = mutableStateOf<GameObject?>(null)
+    var currentGameObject: GameObject?
+        get() = _currentGameObject.value
+        set(value) {
+            _currentGameObject.value = value
+        }
+    // Public getter for the state object
+    @Composable
+    fun getCurrentGameObjectState() = _currentGameObject
+
+    // Current GameMusic to play (as observable state)
+    private var _currentGameMusic = mutableStateOf<GameMusic?>(null)
+    var currentGameMusic: GameMusic?
+        get() = _currentGameMusic.value
+        set(value) {
+            _currentGameMusic.value = value
+        }
+    // Public getter for the state object
+    @Composable
+    fun getCurrentGameMusicState() = _currentGameMusic
 
     init {
         // Create a square cursor that represents the brush area
@@ -159,9 +230,11 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             Side.X, Side.NEGATIVE_X -> {
                 newGrid.rotation = Vector3(0f, 0f, Math.PI / 2)
             }
+
             Side.Y, Side.NEGATIVE_Y -> {
                 newGrid.rotation = Vector3(0f, -Math.PI / 2, 0f)
             }
+
             Side.Z, Side.NEGATIVE_Z -> {
                 newGrid.rotation = Vector3(Math.PI / 2, 0f, 0f)
             }
@@ -170,12 +243,15 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
 
     fun update() {
         // Check if a tile or object is selected based on draw mode
-        val hasSelection = if (drawMode == DrawMode.Tile) currentGameTile != null else currentGameObject != null
+        val hasSelection = when (drawMode) {
+            DrawMode.Tile -> currentGameTile != null
+            DrawMode.Object -> currentGameObject != null
+            DrawMode.Clone -> true // Always show cursor in clone mode
+        }
 
-        // Only show cursor and grid if editing is allowed and something is selected
-        // This ensures the cursor mesh is hidden when no object and no tile is selected
-        cursor.isVisible = editable && hasSelection
-        grid.isVisible = editable && hasSelection
+        // Always show cursor in clone mode, otherwise only show when something is selected
+        cursor.isVisible = editable && (drawMode == DrawMode.Clone || hasSelection)
+        grid.isVisible = editable && (drawMode == DrawMode.Clone || hasSelection)
 
         // Even if nothing is selected, still update the cursor position
         // but don't allow drawing without selection
@@ -193,6 +269,327 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         ray.origin.projectOnPlaneToRef(plane, ray.origin.add(ray.direction), pickedPoint)
 
         updateDraw(pickedPoint)
+
+        // Update clone selection visualization if in clone mode
+        if (drawMode == DrawMode.Clone && cloneSelectionState != CloneSelectionState.NotStarted) {
+            updateCloneSelection()
+
+            // Show insertion preview if clone selection is complete
+            if (cloneSelectionState == CloneSelectionState.Complete) {
+                updateCloneInsertionPreview()
+            } else {
+                // Remove insertion preview if not in complete state
+                removeCloneInsertionPreview()
+            }
+        } else {
+            // Remove insertion preview if not in clone mode
+            removeCloneInsertionPreview()
+        }
+    }
+
+    /**
+     * Updates the clone insertion preview at the cursor position
+     */
+    private fun updateCloneInsertionPreview() {
+        // Get the dimensions of the clone selection
+        // Use the exact dimensions of the selection without adding perimeter
+        // to ensure the clone box matches the clone cursor box
+        val width = cloneSelectionWidth
+        val depth = cloneSelectionDepth
+        val height = cloneSelectionHeight
+
+        // Create or update the insertion preview
+        // Adjust position by subtracting 1 from X and Z to match the actual clone operation
+        val adjustedPos = Vector3(tilePos.x, tilePos.y, tilePos.z)
+        createOrUpdateCloneInsertionPreview(adjustedPos, Vector3(width.toFloat(), height.toFloat(), depth.toFloat()))
+    }
+
+    /**
+     * Removes the clone insertion preview
+     */
+    private fun removeCloneInsertionPreview() {
+        if (cloneInsertionPreview != null) {
+            // Remove from glow layer first
+            cloneGlowLayer.removeIncludedOnlyMesh(cloneInsertionPreview!!)
+            scene.removeMesh(cloneInsertionPreview!!)
+            cloneInsertionPreview = null
+        }
+
+        cloneInsertionAdditionalPlanes.forEach { plane ->
+            // Remove from glow layer first
+            cloneGlowLayer.removeIncludedOnlyMesh(plane)
+            scene.removeMesh(plane)
+        }
+        cloneInsertionAdditionalPlanes.clear()
+    }
+
+    /**
+     * Creates or updates the clone insertion preview
+     */
+    private fun createOrUpdateCloneInsertionPreview(position: Vector3, size: Vector3) {
+        // Remove existing preview if it exists
+        removeCloneInsertionPreview()
+
+        // Create a new plane for the base (bottom)
+        cloneInsertionPreview = MeshBuilder.CreatePlane("cloneInsertionPreview", object : CreatePlaneOptions {
+            override val width = size.x
+            override val height = size.z
+            override val updatable = true
+        }, scene)
+
+        // Create a semi-transparent material
+        val material = StandardMaterial("cloneInsertionMaterial", scene)
+        material.emissiveColor = Color3(1f, 1f, 0f) // Yellow color
+        material.specularColor = Color3.Black()
+        material.alpha = 0.3f
+        material.backFaceCulling = false
+        material.wireframe = true
+        cloneInsertionPreview!!.material = material
+
+        // Rotate to be horizontal (bottom plane)
+        cloneInsertionPreview!!.rotation = Vector3(Math.PI / 2, 0f, 0f)
+
+        // Position the bottom plane
+        cloneInsertionPreview!!.position = position.add(Vector3(size.x / 2, 0f, size.z / 2))
+
+        // Add to glow layer
+        cloneGlowLayer.addIncludedOnlyMesh(cloneInsertionPreview!!)
+
+        // Create top plane
+        val topPlane = MeshBuilder.CreatePlane("cloneInsertionTop", object : CreatePlaneOptions {
+            override val width = size.x
+            override val height = size.z
+            override val updatable = true
+        }, scene)
+        topPlane.material = material
+        topPlane.rotation = Vector3(Math.PI / 2, 0f, 0f)
+        topPlane.position = position.add(Vector3(size.x / 2, size.y, size.z / 2))
+        cloneInsertionAdditionalPlanes.add(topPlane)
+        cloneGlowLayer.addIncludedOnlyMesh(topPlane)
+
+        // Create front plane
+        val frontPlane = MeshBuilder.CreatePlane("cloneInsertionFront", object : CreatePlaneOptions {
+            override val width = size.x
+            override val height = size.y
+            override val updatable = true
+        }, scene)
+        frontPlane.material = material
+        frontPlane.position = position.add(Vector3(size.x / 2, size.y / 2, 0f))
+        cloneInsertionAdditionalPlanes.add(frontPlane)
+        cloneGlowLayer.addIncludedOnlyMesh(frontPlane)
+
+        // Create back plane
+        val backPlane = MeshBuilder.CreatePlane("cloneInsertionBack", object : CreatePlaneOptions {
+            override val width = size.x
+            override val height = size.y
+            override val updatable = true
+        }, scene)
+        backPlane.material = material
+        backPlane.rotation = Vector3(0f, Math.PI, 0f)
+        backPlane.position = position.add(Vector3(size.x / 2, size.y / 2, size.z))
+        cloneInsertionAdditionalPlanes.add(backPlane)
+        cloneGlowLayer.addIncludedOnlyMesh(backPlane)
+
+        // Create left plane
+        val leftPlane = MeshBuilder.CreatePlane("cloneInsertionLeft", object : CreatePlaneOptions {
+            override val width = size.z
+            override val height = size.y
+            override val updatable = true
+        }, scene)
+        leftPlane.material = material
+        leftPlane.rotation = Vector3(0f, Math.PI / 2, 0f)
+        leftPlane.position = position.add(Vector3(0f, size.y / 2, size.z / 2))
+        cloneInsertionAdditionalPlanes.add(leftPlane)
+        cloneGlowLayer.addIncludedOnlyMesh(leftPlane)
+
+        // Create right plane
+        val rightPlane = MeshBuilder.CreatePlane("cloneInsertionRight", object : CreatePlaneOptions {
+            override val width = size.z
+            override val height = size.y
+            override val updatable = true
+        }, scene)
+        rightPlane.material = material
+        rightPlane.rotation = Vector3(0f, -Math.PI / 2, 0f)
+        rightPlane.position = position.add(Vector3(size.x, size.y / 2, size.z / 2))
+        cloneInsertionAdditionalPlanes.add(rightPlane)
+        cloneGlowLayer.addIncludedOnlyMesh(rightPlane)
+    }
+
+    /**
+     * Updates the clone selection visualization based on the current selection state
+     */
+    private fun updateCloneSelection() {
+        // Calculate dimensions based on selection state
+        when (cloneSelectionState) {
+            CloneSelectionState.FirstPointSelected -> {
+                // Just show a marker at the first point
+                createOrUpdateCloneSelectionPlane(
+                    cloneFirstPoint,
+                    Vector3(1f, 1f, 0f)
+                )
+            }
+
+            CloneSelectionState.SecondPointSelected -> {
+                // Show a flat plane with width and depth
+                val width = abs(cloneSecondPoint.x - cloneFirstPoint.x) + 1
+                val depth = abs(cloneSecondPoint.z - cloneFirstPoint.z) + 1
+
+                // Store dimensions
+                cloneSelectionWidth = width.toInt()
+                cloneSelectionDepth = depth.toInt()
+
+                // Calculate the min point (corner of the selection)
+                val minX = min(cloneFirstPoint.x, cloneSecondPoint.x)
+                val minZ = min(cloneFirstPoint.z, cloneSecondPoint.z)
+
+                createOrUpdateCloneSelectionPlane(
+                    Vector3(minX, cloneFirstPoint.y, minZ),
+                    Vector3(width, 0.1f, depth)
+                )
+            }
+
+            CloneSelectionState.Complete -> {
+                // Show a plane with width and depth (height is visualized differently)
+                val width = abs(cloneSecondPoint.x - cloneFirstPoint.x) + 1
+                val depth = abs(cloneSecondPoint.z - cloneFirstPoint.z) + 1
+
+                // Store dimensions
+                cloneSelectionWidth = width.toInt()
+                cloneSelectionDepth = depth.toInt()
+                cloneSelectionHeight = cloneHeight
+
+                // Calculate the min point (corner of the selection)
+                val minX = min(cloneFirstPoint.x, cloneSecondPoint.x)
+                val minZ = min(cloneFirstPoint.z, cloneSecondPoint.z)
+
+                createOrUpdateCloneSelectionPlane(
+                    Vector3(minX, cloneFirstPoint.y, minZ),
+                    Vector3(width, 0.1f, depth)
+                )
+            }
+
+            else -> {
+                // Remove the plane if not in a selection state
+                if (cloneSelectionPlane != null) {
+                    scene.removeMesh(cloneSelectionPlane!!)
+                    cloneSelectionPlane = null
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates or updates the clone selection visualization
+     * Uses multiple planes to form a box-like structure
+     */
+    private fun createOrUpdateCloneSelectionPlane(position: Vector3, size: Vector3) {
+        // Determine the height to use for the box
+        val boxHeight = if (cloneSelectionState == CloneSelectionState.Complete) cloneHeight.toFloat() else 1f
+
+        // Remove existing visualization if it exists
+        if (cloneSelectionPlane != null) {
+            // Remove from glow layer first
+            cloneGlowLayer.removeIncludedOnlyMesh(cloneSelectionPlane!!)
+            scene.removeMesh(cloneSelectionPlane!!)
+            cloneSelectionPlane = null
+        }
+
+        // Remove any additional planes
+        cloneSelectionAdditionalPlanes.forEach { plane ->
+            // Remove from glow layer first
+            cloneGlowLayer.removeIncludedOnlyMesh(plane)
+            scene.removeMesh(plane)
+        }
+        cloneSelectionAdditionalPlanes.clear()
+
+        // Create a new plane for the base (bottom)
+        cloneSelectionPlane = MeshBuilder.CreatePlane("cloneSelectionPlane", object : CreatePlaneOptions {
+            override val width = size.x
+            override val height = size.z
+            override val updatable = true
+        }, scene)
+
+        // Create a semi-transparent material
+        val material = StandardMaterial("cloneSelectionMaterial", scene)
+        material.emissiveColor = Color3(0f, 1f, 1f) // Cyan color
+        material.specularColor = Color3.Black()
+        material.alpha = 0.3f
+        material.backFaceCulling = false
+        material.wireframe = true
+        cloneSelectionPlane!!.material = material
+
+        // Rotate to be horizontal (bottom plane)
+        cloneSelectionPlane!!.rotation = Vector3(Math.PI / 2, 0f, 0f)
+
+        // Position the bottom plane
+        cloneSelectionPlane!!.position = position.add(Vector3(size.x / 2, 0f, size.z / 2))
+
+        // Add to glow layer
+        cloneGlowLayer.addIncludedOnlyMesh(cloneSelectionPlane!!)
+
+        // Only create additional planes for the box if we're in a state that needs it
+        if (cloneSelectionState == CloneSelectionState.SecondPointSelected || 
+            cloneSelectionState == CloneSelectionState.Complete) {
+
+            // Create top plane
+            val topPlane = MeshBuilder.CreatePlane("cloneSelectionTop", object : CreatePlaneOptions {
+                override val width = size.x
+                override val height = size.z
+                override val updatable = true
+            }, scene)
+            topPlane.material = material
+            topPlane.rotation = Vector3(Math.PI / 2, 0f, 0f)
+            topPlane.position = position.add(Vector3(size.x / 2, boxHeight, size.z / 2))
+            cloneSelectionAdditionalPlanes.add(topPlane)
+            cloneGlowLayer.addIncludedOnlyMesh(topPlane)
+
+            // Create front plane
+            val frontPlane = MeshBuilder.CreatePlane("cloneSelectionFront", object : CreatePlaneOptions {
+                override val width = size.x
+                override val height = boxHeight
+                override val updatable = true
+            }, scene)
+            frontPlane.material = material
+            frontPlane.position = position.add(Vector3(size.x / 2, boxHeight / 2, 0f))
+            cloneSelectionAdditionalPlanes.add(frontPlane)
+            cloneGlowLayer.addIncludedOnlyMesh(frontPlane)
+
+            // Create back plane
+            val backPlane = MeshBuilder.CreatePlane("cloneSelectionBack", object : CreatePlaneOptions {
+                override val width = size.x
+                override val height = boxHeight
+                override val updatable = true
+            }, scene)
+            backPlane.material = material
+            backPlane.rotation = Vector3(0f, Math.PI, 0f)
+            backPlane.position = position.add(Vector3(size.x / 2, boxHeight / 2, size.z))
+            cloneSelectionAdditionalPlanes.add(backPlane)
+            cloneGlowLayer.addIncludedOnlyMesh(backPlane)
+
+            // Create left plane
+            val leftPlane = MeshBuilder.CreatePlane("cloneSelectionLeft", object : CreatePlaneOptions {
+                override val width = size.z
+                override val height = boxHeight
+                override val updatable = true
+            }, scene)
+            leftPlane.material = material
+            leftPlane.rotation = Vector3(0f, Math.PI / 2, 0f)
+            leftPlane.position = position.add(Vector3(0f, boxHeight / 2, size.z / 2))
+            cloneSelectionAdditionalPlanes.add(leftPlane)
+            cloneGlowLayer.addIncludedOnlyMesh(leftPlane)
+
+            // Create right plane
+            val rightPlane = MeshBuilder.CreatePlane("cloneSelectionRight", object : CreatePlaneOptions {
+                override val width = size.z
+                override val height = boxHeight
+                override val updatable = true
+            }, scene)
+            rightPlane.material = material
+            rightPlane.rotation = Vector3(0f, -Math.PI / 2, 0f)
+            rightPlane.position = position.add(Vector3(size.x, boxHeight / 2, size.z / 2))
+            cloneSelectionAdditionalPlanes.add(rightPlane)
+            cloneGlowLayer.addIncludedOnlyMesh(rightPlane)
+        }
     }
 
     private fun updateDraw(pickedPoint: Vector3) {
@@ -219,7 +616,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         if (curPosAnimated == null) {
             curPosAnimated = curPos
         } else if (!curPosAnimated!!.equals(curPos)) {
-            curPosAnimated = Vector3.Lerp(curPosAnimated!!, curPos, Math.min(1f, scene.deltaTime / 30f))
+            curPosAnimated = Vector3.Lerp(curPosAnimated!!, curPos, min(1f, scene.deltaTime / 30f))
         }
 
         tilePos.copyFrom(curPos)
@@ -251,9 +648,11 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 Side.Z -> {
                     cursor.rotation = Vector3(0f, 0f, 0f)
                 }
+
                 Side.X -> {
                     cursor.rotation = Vector3(0f, -Math.PI / 2, 0f)
                 }
+
                 else -> {
                     cursor.rotation = Vector3(Math.PI / 2, 0f, 0f)
                 }
@@ -280,6 +679,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 pickForward = { v -> v.z }
                 pickRight = { v -> v.x }
             }
+
             Side.X -> {
                 up = Vector3.Right().scale(0.5f)
                 forward = Vector3(0.5f, 0.5f, 0f)
@@ -289,6 +689,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 pickForward = { v -> v.y }
                 pickRight = { v -> v.z }
             }
+
             Side.Z -> {
                 up = Vector3.Forward().scale(0.5f)
                 forward = Vector3(0f, 0.5f, 0.5f)
@@ -298,6 +699,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 pickForward = { v -> v.y }
                 pickRight = { v -> v.x }
             }
+
             else -> throw IllegalArgumentException("Invalid side: $side")
         }
 
@@ -307,8 +709,16 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             val forwardPos = pickedPoint.add(forward).floor()
             val rightPos = pickedPoint.add(right).floor()
 
-            if (autoRotate && (Math.abs(pickForward(pickedPoint) - pickForward(forwardPos)) > 0.25f || Math.abs(pickRight(pickedPoint) - pickRight(rightPos)) > 0.25f)) {
-                if (Math.abs(pickForward(pickedPoint) - pickForward(forwardPos)) < Math.abs(pickRight(pickedPoint) - pickRight(rightPos))) {
+            if (autoRotate && (abs(pickForward(pickedPoint) - pickForward(forwardPos)) > 0.25f || abs(
+                    pickRight(pickedPoint) - pickRight(rightPos)
+                ) > 0.25f)
+            ) {
+                if (abs(pickForward(pickedPoint) - pickForward(forwardPos)) < abs(
+                        pickRight(pickedPoint) - pickRight(
+                            rightPos
+                        )
+                    )
+                ) {
                     this.side = sideForward
                     return forwardPos
                 } else {
@@ -322,10 +732,88 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
     }
 
     fun draw(eraser: Boolean) {
+        // Handle Clone mode separately
+        if (drawMode == DrawMode.Clone) {
+            if (eraser) {
+                // Alt+click in clone mode - erase tiles in the cloned area size at cursor
+                if (cloneSelectionState == CloneSelectionState.Complete) {
+                    eraseCloneAreaAtCursor()
+                }
+            } else {
+                handleCloneClick()
+            }
+            return
+        }
+
         // Only draw if we have a selection or if we're erasing
         val hasSelection = if (drawMode == DrawMode.Tile) currentGameTile != null else currentGameObject != null
         if (eraser || hasSelection) {
             drawBrush(tilePos, side, eraser)
+        }
+    }
+
+    /**
+     * Erases all tiles in an area the size of the clone selection at the current cursor position
+     * Also erases perimeter tiles similar to how storeClonedTiles() works
+     */
+    private fun eraseCloneAreaAtCursor() {
+        // Only proceed if we have a complete clone selection
+        if (cloneSelectionState != CloneSelectionState.Complete) return
+
+        // Get the dimensions of the clone selection
+        val width = cloneSelectionWidth
+        val depth = cloneSelectionDepth
+        val height = cloneSelectionHeight
+
+        // Get the current cursor position as the starting point
+        val startPos = tilePos.clone()
+
+        // Calculate the min and max points of the selection box
+        val minX = startPos.x.toInt()
+        val maxX = minX + width - 1
+        val minY = startPos.y.toInt()
+        val maxY = minY + height - 1
+        val minZ = startPos.z.toInt()
+        val maxZ = minZ + depth - 1
+
+        // Expand the area to include the perimeter
+        val expandedMinX = minX - 1
+        val expandedMaxX = maxX + 1
+        val expandedMinZ = minZ - 1
+        val expandedMaxZ = maxZ + 1
+
+        // Iterate through all positions in the expanded selection box
+        for (x in expandedMinX..expandedMaxX) {
+            for (y in minY..maxY) {
+                for (z in expandedMinZ..expandedMaxZ) {
+                    // Check if this position is on the perimeter or inside the original selection
+                    val isPerimeterX = x == expandedMinX || x == expandedMaxX
+                    val isPerimeterZ = z == expandedMinZ || z == expandedMaxZ
+                    val isInside = x in minX..maxX && z in minZ..maxZ
+
+                    // Only process if it's inside the original selection or on the X/Z perimeter
+                    if (isInside || isPerimeterX || isPerimeterZ) {
+                        // For perimeter tiles, only include X, -X, Z, -Z sides (not Y or -Y)
+                        // For inside tiles, include all sides
+                        val isPerimeter = isPerimeterX || isPerimeterZ
+                        val sidesToCheck = if (isPerimeter && !isInside) {
+                            // For perimeter-only tiles, exclude Y and -Y sides
+                            listOf(Side.X, Side.Z, Side.NEGATIVE_X, Side.NEGATIVE_Z)
+                        } else {
+                            // For inside tiles, include all sides
+                            Side.entries.toList()
+                        }
+
+                        // Create a position vector
+                        val position = Vector3(x.toFloat(), y.toFloat(), z.toFloat())
+
+                        // Remove tiles on the appropriate sides at this position
+                        sidesToCheck.forEach { side ->
+                            tilemap.removeTile(position, side)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -355,14 +843,17 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                         o.z = x.toFloat()
                         o.y = y.toFloat()
                     }
+
                     Side.Y -> {
                         o.x = x.toFloat()
                         o.z = y.toFloat()
                     }
+
                     Side.Z -> {
                         o.x = x.toFloat()
                         o.y = y.toFloat()
                     }
+
                     else -> throw IllegalArgumentException("Unexpected side: $side")
                 }
                 if (brushDensity == 100 || Math.random() < brushDensity / 100f) {
@@ -412,6 +903,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                     side = Side.Y
                 }
             }
+
             Side.Y -> {
                 if (isReverse) {
                     drawPlane = Side.X
@@ -423,6 +915,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                     side = Side.Z
                 }
             }
+
             Side.Z -> {
                 if (isReverse) {
                     drawPlane = Side.Y
@@ -442,9 +935,11 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             Side.X, Side.NEGATIVE_X -> {
                 grid.rotation = Vector3(0f, 0f, Math.PI / 2)
             }
+
             Side.Y, Side.NEGATIVE_Y -> {
                 grid.rotation = Vector3(0f, -Math.PI / 2, 0f)
             }
+
             Side.Z, Side.NEGATIVE_Z -> {
                 grid.rotation = Vector3(Math.PI / 2, 0f, 0f)
             }
@@ -470,6 +965,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                         }
                     ).floor()
                 }
+
                 Side.Y, Side.NEGATIVE_Y -> {
                     pos = pickedPoint.add(
                         when (side) {
@@ -479,6 +975,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                         }
                     ).floor()
                 }
+
                 Side.Z, Side.NEGATIVE_Z -> {
                     pos = pickedPoint.add(
                         when (side) {
@@ -508,10 +1005,6 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
 
     fun adjustPlane(distance: Int) {
         drawPlaneOffset += distance
-    }
-
-    fun toggleDrawMode() {
-        drawMode = if (drawMode == DrawMode.Tile) DrawMode.Object else DrawMode.Tile
     }
 
     fun toggleAutoRotate() {
@@ -552,9 +1045,11 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             Side.Z, Side.NEGATIVE_Z -> {
                 cursor.rotation = Vector3(0f, 0f, 0f)
             }
+
             Side.X, Side.NEGATIVE_X -> {
                 cursor.rotation = Vector3(0f, -Math.PI / 2, 0f)
             }
+
             Side.Y, Side.NEGATIVE_Y -> {
                 cursor.rotation = Vector3(Math.PI / 2, 0f, 0f)
             }
@@ -565,5 +1060,183 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
     private fun updateCursorSize() {
         cursor.scaling.x = brushSize.toFloat()
         cursor.scaling.y = brushSize.toFloat()
+    }
+
+    /**
+     * Handles a click in clone mode based on the current selection state
+     */
+    fun handleCloneClick() {
+        when (cloneSelectionState) {
+            CloneSelectionState.NotStarted -> {
+                // First click - store the first point
+                cloneFirstPoint = tilePos.clone()
+                cloneSelectionState = CloneSelectionState.FirstPointSelected
+            }
+
+            CloneSelectionState.FirstPointSelected -> {
+                // Second click - store the second point (on XZ plane)
+                cloneSecondPoint = Vector3(tilePos.x, cloneFirstPoint.y, tilePos.z)
+                cloneSelectionState = CloneSelectionState.SecondPointSelected
+            }
+
+            CloneSelectionState.SecondPointSelected -> {
+                // Third click - set the height
+                cloneHeight = max(1, abs(tilePos.y - cloneFirstPoint.y).toInt() + 1)
+                cloneSelectionState = CloneSelectionState.Complete
+
+                // Store the tiles in the selection box
+                storeClonedTiles()
+            }
+
+            CloneSelectionState.Complete -> {
+                // Clone the tiles to the current position
+                cloneTiles()
+            }
+        }
+    }
+
+    /**
+     * Stores all tiles within the clone selection box and on its perimeter
+     */
+    private fun storeClonedTiles() {
+        clonedTiles.clear()
+
+        // Calculate the min and max points of the selection box
+        val minX = min(cloneFirstPoint.x, cloneSecondPoint.x).toInt()
+        val maxX = max(cloneFirstPoint.x, cloneSecondPoint.x).toInt()
+        val minY = cloneFirstPoint.y.toInt()
+        val maxY = (cloneFirstPoint.y + cloneHeight - 1).toInt()
+        val minZ = min(cloneFirstPoint.z, cloneSecondPoint.z).toInt()
+        val maxZ = max(cloneFirstPoint.z, cloneSecondPoint.z).toInt()
+
+        // Get all tiles in the selection box
+        val tileTypes = tilemap.getTileTypes()
+
+        // Expand the search area to include the perimeter
+        val expandedMinX = minX - 1
+        val expandedMaxX = maxX + 1
+        val expandedMinZ = minZ - 1
+        val expandedMaxZ = maxZ + 1
+
+        // Iterate through all positions in the expanded selection box
+        for (x in expandedMinX..expandedMaxX) {
+            for (y in minY..maxY) {
+                for (z in expandedMinZ..expandedMaxZ) {
+                    // Check if this position is on the perimeter or inside the original selection
+                    val isPerimeterX = x == expandedMinX || x == expandedMaxX
+                    val isPerimeterZ = z == expandedMinZ || z == expandedMaxZ
+                    val isInside = x in minX..maxX && z >= minZ && z <= maxZ
+
+                    // Only process if it's inside the original selection or on the X/Z perimeter
+                    if (isInside || isPerimeterX || isPerimeterZ) {
+                        // For perimeter tiles, only include X, -X, Z, -Z sides (not Y or -Y)
+                        // For inside tiles, include all sides
+                        val isPerimeter = isPerimeterX || isPerimeterZ
+                        val sidesToCheck = if (isPerimeter && !isInside) {
+                            // For perimeter-only tiles, exclude Y and -Y sides
+                            listOf(Side.X, Side.Z, Side.NEGATIVE_X, Side.NEGATIVE_Z)
+                        } else {
+                            // For inside tiles, include all sides
+                            listOf(Side.X, Side.Y, Side.Z, Side.NEGATIVE_X, Side.NEGATIVE_Y, Side.NEGATIVE_Z)
+                        }
+
+                        for (side in sidesToCheck) {
+                            val key = "$x,$y,$z,$side"
+                            if (tileTypes.containsKey(key)) {
+                                // Store the tile type with its relative position in the expanded selection box
+                                val relX = x - expandedMinX
+                                val relY = y - minY
+                                val relZ = z - expandedMinZ
+                                val relKey = "$relX,$relY,$relZ,$side"
+                                clonedTiles[relKey] = tileTypes[key]!!
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Clones the stored tiles to the current cursor position
+     */
+    private fun cloneTiles() {
+        if (clonedTiles.isEmpty()) return
+
+        // Get the target position (top-left corner of the clone)
+        val targetPos = tilePos.clone()
+
+        // Clone all stored tiles to the target position
+        val newTiles = buildList {
+            for ((relPosKey, tileId) in clonedTiles) {
+                val parts = relPosKey.split(",")
+                if (parts.size == 4) {
+                    val relX = parts[0].toIntOrNull() ?: 0
+                    val relY = parts[1].toIntOrNull() ?: 0
+                    val relZ = parts[2].toIntOrNull() ?: 0
+                    val side = parts[3]
+
+                    // Calculate the absolute position
+                    // Subtract 1 from X and Z to correct the offset
+                    val absX = targetPos.x.toInt() + relX - 1
+                    val absY = targetPos.y.toInt() + relY
+                    val absZ = targetPos.z.toInt() + relZ - 1
+
+                    // Create a GameTile with the stored ID
+                    val gameTile = GameTile().apply {
+                        this.id = tileId
+                    }
+
+                    this@buildList.add(
+                        Triple(
+                            Vector3(absX.toFloat(), absY.toFloat(), absZ.toFloat()),
+                            Side.fromString(side),
+                            gameTile
+                        )
+                    )
+                }
+            }
+        }
+
+        if (newTiles.isNotEmpty()) {
+            // Set the tile at the calculated position
+            tilemap.setTiles(newTiles)
+        }
+    }
+
+    /**
+     * Resets the clone selection process
+     */
+    fun resetCloneSelection() {
+        cloneSelectionState = CloneSelectionState.NotStarted
+
+        // Remove the main selection plane
+        if (cloneSelectionPlane != null) {
+            // Remove from glow layer first
+            cloneGlowLayer.removeIncludedOnlyMesh(cloneSelectionPlane!!)
+            scene.removeMesh(cloneSelectionPlane!!)
+            cloneSelectionPlane = null
+        }
+
+        // Remove all additional planes
+        cloneSelectionAdditionalPlanes.forEach { plane ->
+            // Remove from glow layer first
+            cloneGlowLayer.removeIncludedOnlyMesh(plane)
+            scene.removeMesh(plane)
+        }
+        cloneSelectionAdditionalPlanes.clear()
+
+        // Remove the insertion preview
+        removeCloneInsertionPreview()
+
+        // Clear stored tiles
+        clonedTiles.clear()
+    }
+
+    /**
+     * Returns the current clone selection state
+     */
+    fun getCloneSelectionState(): CloneSelectionState {
+        return cloneSelectionState
     }
 }

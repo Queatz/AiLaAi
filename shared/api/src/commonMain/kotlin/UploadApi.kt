@@ -96,3 +96,23 @@ suspend fun Api.uploadAudio(
         }
     ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
 }
+
+suspend fun Api.uploadScreenshot(
+    screenshot: ByteArray,
+    onError: ErrorBlock = null,
+    onSuccess: SuccessBlock<UploadResponse>,
+) {
+    return post(
+        "upload/photos", MultiPartFormDataContent(
+        formData {
+            append(
+                "photo[0]",
+                screenshot,
+                Headers.build {
+                    append(HttpHeaders.ContentType, "image/png")
+                    append(HttpHeaders.ContentDisposition, "filename=screenshot.png")
+                }
+            )
+        }
+    ), client = httpDataClient, onError = onError, onSuccess = onSuccess)
+}

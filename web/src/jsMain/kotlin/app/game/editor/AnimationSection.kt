@@ -11,6 +11,8 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.collectLatest
 import components.IconButton
 import format1Decimal
+import format3Decimals
+import kotlin.math.round
 import game.AnimationMarker
 import game.Game
 import org.jetbrains.compose.web.attributes.placeholder
@@ -41,7 +43,8 @@ fun AnimationSection(game: Game?) {
         title = "Animation",
         icon = "animation",
         enabled = game != null,
-        initiallyExpanded = false
+        initiallyExpanded = false,
+        closeOtherPanels = true
     ) {
         if (game == null) {
             Text("No game loaded")
@@ -58,18 +61,16 @@ fun AnimationSection(game: Game?) {
             }
         }
 
-        // For backward compatibility, still handle the callback
-        DisposableEffect(game) {
-            val originalCallback = game.onPlayStateChanged
 
-            game.onPlayStateChanged = { playing ->
-                isPlaying = playing
-                originalCallback?.invoke(playing)
+        // Current time display
+        Div({
+            style {
+                display(DisplayStyle.Flex)
+                justifyContent(JustifyContent.Center)
+                marginBottom(0.5.r)
             }
-
-            onDispose {
-                game.onPlayStateChanged = originalCallback
-            }
+        }) {
+            Text("${game.animationData.currentTime.format1Decimal()} seconds")
         }
 
         // Animation controls
@@ -272,8 +273,16 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     onClick { 
                         if (editName.isNotBlank()) {
                             marker.name = editName
-                            marker.time = editTime.toDoubleOrNull() ?: marker.time
-                            marker.duration = editDuration.toDoubleOrNull() ?: marker.duration
+                            // Clip time to 3 decimal places
+                            marker.time = editTime.toDoubleOrNull()?.let { 
+                                (round(it * 1000.0) / 1000.0)
+                            } ?: marker.time
+                            // Clip duration to 3 decimal places
+                            marker.duration = editDuration.toDoubleOrNull()?.let { 
+                                (round(it * 1000.0) / 1000.0)
+                            } ?: marker.duration
+                            // Force update of markers list to trigger UI recomposition
+                            game.animationData.updateMarkers()
                             // Update seekbar right away when changing marker duration
                             game.setTime(game.animationData.currentTime)
                             isEditing = false
@@ -305,7 +314,7 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     }) {
                         Text(marker.name)
                     }
-                    Text("${marker.time.format1Decimal()} ${if (marker.duration > 0) marker.duration.format1Decimal() else ""}")
+                    Text("${marker.time.format3Decimals()} ${if (marker.duration > 0) marker.duration.format3Decimals() else ""}")
                 }
 
                 Div({

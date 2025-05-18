@@ -65,6 +65,20 @@ class AnimationData {
         get() = _cameraKeyframes.value.maxByOrNull { it.time }?.time ?: 60.0
 
     /**
+     * Force update of markers list to trigger UI recomposition
+     */
+    fun updateMarkers() {
+        _markers.value = _markers.value.toMutableList()
+    }
+
+    /**
+     * Force update of camera keyframes list to trigger UI recomposition
+     */
+    fun updateCameraKeyframes() {
+        _cameraKeyframes.value = _cameraKeyframes.value.toMutableList()
+    }
+
+    /**
      * Add a new marker at the current time
      * @param name Name of the marker
      * @return The created marker

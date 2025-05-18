@@ -73,7 +73,8 @@ class Ai {
             "lovely, beautiful, cute, happy, sweet, natural",
             .125
         )
-        private val negativePrompt = "tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, blurry, bad anatomy, blurred, watermark, grainy, signature, cut off, draft, weapon"
+        private val negativePrompt =
+            "tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, blurry, bad anatomy, blurred, watermark, grainy, signature, cut off, draft, weapon"
     }
 
     private val http = HttpClient(CIO) {
@@ -92,8 +93,10 @@ class Ai {
         prompts: List<TextPrompt>,
         style: String? = null,
         aspect: Double = 1.5,
-        transparentBackground: Boolean = false
-    ): String {
+        processBytes: (ByteArray, ContentType) -> ByteArray = { it, _ -> it },
+        transparentBackground: Boolean = false,
+        crop: Boolean = false
+    ): Pair<String, Pair<Int, Int>?> {
         val model = style?.takeIf { it in defaultStylePresets } ?: defaultStylePresets.filter {
             it.isXlLightning || it.isXl
         }.random()
@@ -127,6 +130,7 @@ class Ai {
                     )
                 )
             }
+
             else -> {
                 json.encodeToString(
                     DezgoPrompt(
@@ -147,7 +151,9 @@ class Ai {
 
         Logger.getAnonymousLogger().info("Sending text-to-image prompt: $body")
 
-        return http.post(
+        val contentType = if (ext == "png") ContentType.Image.PNG else ContentType.Image.JPEG
+
+        val imageBytes = http.post(
             when {
                 isFlux -> endpointFlux
                 isXlLightning -> endpointXlLightning
@@ -156,27 +162,41 @@ class Ai {
             }
         ) {
             header("X-Dezgo-Key", secrets.dezgo.key)
-            accept(if (ext == "png") ContentType.Image.PNG else ContentType.Image.JPEG)
+            accept(contentType)
             contentType(ContentType.Application.Json.withCharset(UTF_8))
             setBody(body)
-        }.body<ByteArray>().let {
-            save("$prefix-$model", it, ext).let { path ->
-                // Dezgo doesn't support transparent for non-XL models out of the box
-                if (transparentBackground && !isXl) {
-                    runCatching {
-                        removeBackground(File(".$path"))
-                    }.onFailure {
-                        it.printStackTrace()
-                        (it as? ServerResponseException)?.let {
-                            println("Remove background error:")
-                            println(it.response.bodyAsText())
-                        }
-                    }.getOrDefault(path)
-                } else {
-                    path
-                }
+        }.body<ByteArray>()
+            .let {
+                processBytes(it, contentType)
+            }
+
+        // Apply cropping if needed
+        val (finalBytes, dimensions) = if (transparentBackground && crop) {
+            // Crop the image based on transparency
+            imageBytes.cropTransparentBackground()
+        } else {
+            // No cropping, just return the original bytes with null dimensions
+            Pair(imageBytes, null)
+        }
+
+        val path = save("$prefix-$model", finalBytes, ext).let { path ->
+            // Dezgo doesn't support transparent for non-XL models out of the box
+            if (transparentBackground && !isXl) {
+                runCatching {
+                    removeBackground(File(".$path"))
+                }.onFailure {
+                    it.printStackTrace()
+                    (it as? ServerResponseException)?.let {
+                        println("Remove background error:")
+                        println(it.response.bodyAsText())
+                    }
+                }.getOrDefault(path)
+            } else {
+                path
             }
         }
+
+        return Pair(path, dimensions)
     }
 
     suspend fun removeBackground(photo: File): String {

@@ -9,7 +9,8 @@ fun PortalsSection() {
         title = "Portals",
         icon = "door_front",
         enabled = false,
-        initiallyExpanded = false
+        initiallyExpanded = false,
+        closeOtherPanels = true
     ) {
         Text("Placeholder content for Portals")
     }

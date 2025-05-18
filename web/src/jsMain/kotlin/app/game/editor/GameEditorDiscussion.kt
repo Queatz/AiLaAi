@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.AppStyles
 import app.ailaai.api.commentOnGameDiscussion
 import app.ailaai.api.createGameDiscussion
 import app.ailaai.api.gameDiscussion
@@ -23,6 +24,8 @@ import com.queatz.db.GameDiscussion
 import com.queatz.db.GameDiscussionExtended
 import com.queatz.db.GameScene
 import com.queatz.db.Vector3Data
+import components.GroupPhoto
+import components.GroupPhotoItem
 import components.LinkifyText
 import components.ProfilePhoto
 import game.DiscussionMarkers
@@ -48,7 +51,9 @@ import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.flex
 import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -349,14 +354,9 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                     val isSelected = discussionId == selectedDiscussionId
 
                     Div({
-                        style {
-                            padding(0.75.r)
-                            marginBottom(0.5.r)
-                            backgroundColor(if (isSelected) rgba(240, 240, 240, 0.7) else rgba(255, 255, 255, 0.5))
-                            borderRadius(1.r)
-                            cursor("pointer")
-                            property("box-shadow", "0 1px 3px rgba(0, 0, 0, 0.1)")
-                            property("transition", "background-color 0.2s, transform 0.2s")
+                        classes(AppStyles.groupItem, AppStyles.groupItemOnSurface)
+                        if (isSelected) {
+                            classes(AppStyles.groupItemSelected)
                         }
                         onClick {
                             if (discussionId != null) {
@@ -375,8 +375,40 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                             }
                         }
                     }) {
-                        // Discussion content - just the text
-                        Text(discussion.discussion?.comment ?: "")
+                        // Show the photo of the person who started the discussion
+                        discussion.person?.let { person ->
+                            GroupPhoto(
+                                items = listOf(
+                                    GroupPhotoItem(
+                                        photo = person.photo,
+                                        name = person.name
+                                    )
+                                )
+                            )
+                        }
+
+                        Div({
+                            style {
+                                marginLeft(1.r)
+                                flex(1)
+                            }
+                        }) {
+                            // Discussion title/initial comment
+                            Div({
+                                classes(AppStyles.groupItemName)
+                            }) {
+                                Text(discussion.discussion?.comment ?: "")
+                            }
+
+                            // Show latest comment if available
+                            discussion.comments?.lastOrNull()?.let { latestComment ->
+                                Div({
+                                    classes(AppStyles.groupItemMessage)
+                                }) {
+                                    Text(latestComment.comment?.comment ?: "")
+                                }
+                            }
+                        }
                     }
                 }
             }

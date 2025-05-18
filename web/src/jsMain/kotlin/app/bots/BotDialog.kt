@@ -124,7 +124,7 @@ suspend fun botDialog(
                     if (me?.id == bot.creator) {
                         item(application.appString { this.choosePhoto }) {
                             scope.launch {
-                                choosePhoto.launch {
+                                choosePhoto.launch { it, _, _ ->
                                     api.updateBot(bot.id!!, Bot(photo = it)) {
                                         photo.value = it.photo ?: ""
                                     }

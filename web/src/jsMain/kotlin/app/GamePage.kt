@@ -230,6 +230,90 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                 game.map.linearSamplingEnabled = enabled
                 console.log("Linear Sampling enabled set to $enabled")
             }
+
+            // Set Depth of Field
+            config.depthOfFieldEnabled?.let { enabled ->
+                game.map.post.depthOfFieldEnabled = enabled
+                console.log("Depth of Field enabled set to $enabled")
+            }
+
+            // Set Ambience Intensity
+            config.ambienceIntensity?.let { intensity ->
+                game.map.set("ambienceIntensity", intensity)
+                console.log("Ambience Intensity set to $intensity")
+            }
+
+            // Set Sun Intensity
+            config.sunIntensity?.let { intensity ->
+                game.map.set("sunIntensity", intensity)
+                console.log("Sun Intensity set to $intensity")
+            }
+
+            // Set Fog Density
+            config.fogDensity?.let { density ->
+                game.map.set("fogDensity", density)
+                console.log("Fog Density set to $density")
+            }
+
+            // Set Time of Day
+            config.timeOfDay?.let { time ->
+                game.map.set("timeOfDay", time)
+                console.log("Time of Day set to $time")
+            }
+
+            // Set Brush Size
+            config.brushSize?.let { size ->
+                game.map.set("brushSize", size)
+                console.log("Brush Size set to $size")
+            }
+
+            // Set Brush Density
+            config.brushDensity?.let { density ->
+                game.map.set("brushDensity", density)
+                console.log("Brush Density set to $density")
+            }
+
+            // Set Grid Size
+            config.gridSize?.let { size ->
+                game.map.set("gridSize", size)
+                console.log("Grid Size set to $size")
+            }
+
+            // Set Pixel Size
+            config.pixelSize?.let { size ->
+                game.engine.setHardwareScalingLevel(size)
+                console.log("Pixel Size set to $size")
+            }
+
+            // Set Snow Effect
+            config.snowEffectEnabled?.let { enabled ->
+                game.map.set("snowEffectEnabled", enabled.toString())
+                console.log("Snow Effect enabled set to $enabled")
+            }
+            config.snowEffectIntensity?.let { intensity ->
+                game.map.set("snowEffectIntensity", intensity)
+                console.log("Snow Effect intensity set to $intensity")
+            }
+
+            // Set Rain Effect
+            config.rainEffectEnabled?.let { enabled ->
+                game.map.set("rainEffectEnabled", enabled.toString())
+                console.log("Rain Effect enabled set to $enabled")
+            }
+            config.rainEffectIntensity?.let { intensity ->
+                game.map.set("rainEffectIntensity", intensity)
+                console.log("Rain Effect intensity set to $intensity")
+            }
+
+            // Set Dust Effect
+            config.dustEffectEnabled?.let { enabled ->
+                game.map.set("dustEffectEnabled", enabled.toString())
+                console.log("Dust Effect enabled set to $enabled")
+            }
+            config.dustEffectIntensity?.let { intensity ->
+                game.map.set("dustEffectIntensity", intensity)
+                console.log("Dust Effect intensity set to $intensity")
+            }
         } catch (e: Exception) {
             console.error("Error loading animation data: ${e.message}")
         }
@@ -241,6 +325,7 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
 fun GamePage(
     gameScene: GameScene? = null,
     onSceneDeleted: () -> Unit = {},
+    onScenePublished: () -> Unit = {},
     styles: StyleScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
     showSidePanel: Boolean = true,
@@ -251,7 +336,7 @@ fun GamePage(
     var canvasRef by remember { mutableStateOf<HTMLCanvasElement?>(null) }
 
     // Make game state depend on gameScene to ensure recreation when gameScene changes
-    var game by remember {
+    var game by remember(gameScene) {
         mutableStateOf<Game?>(null)
     }
 
@@ -303,10 +388,6 @@ fun GamePage(
                 loadGameSceneData(scope, it, gameScene)
             }
 
-            // For backward compatibility
-            it.onPlayStateChanged = { playing ->
-                isPlaying = playing
-            }
         }
         game = localGame
 
@@ -598,6 +679,7 @@ fun GamePage(
                     map = game.map,
                     gameScene = gameScene,
                     onSceneDeleted = onSceneDeleted,
+                    onScenePublished = onScenePublished,
                     styles = {
                         flexShrink(0)
                     },

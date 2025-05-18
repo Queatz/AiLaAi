@@ -16,6 +16,8 @@ import application
 import com.queatz.db.AiPhotoRequest
 import components.IconButton
 import focusable
+import kotlinx.browser.document
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +40,9 @@ import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.NumberInput
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.HTMLImageElement
 import org.w3c.files.File
+import org.w3c.files.FileReader
 import pickPhotos
 import r
 import toBytes
@@ -49,6 +53,7 @@ class ChoosePhotoDialogControl(
     private val showUpload: Boolean,
     private var aspectRatio: Double? = null,
     private val removeBackground: Boolean = false,
+    private val crop: Boolean = false,
 ) {
 
     private var _isGenerating = MutableStateFlow(false)
@@ -59,7 +64,7 @@ class ChoosePhotoDialogControl(
     private var count = MutableStateFlow(1)
     private var aspect = MutableStateFlow(aspectRatio)
 
-    fun launch(multiple: Boolean = false, onPhoto: suspend (String) -> Unit) {
+    fun launch(multiple: Boolean = false, onPhoto: suspend (String, Int?, Int?) -> Unit) {
         scope.launch {
             if (aiStyles.value.isEmpty()) {
                 scope.launch {
@@ -82,10 +87,43 @@ class ChoosePhotoDialogControl(
                 onFile = { photo ->
                     scope.launch {
                         _isGenerating.value = true
+
+                        // Get image dimensions using a similar approach to File.toScaledBlob
+                        val imageDeferred = CompletableDeferred<HTMLImageElement>()
+                        val reader = FileReader()
+
+                        reader.onload = { _ ->
+                            val img = document.createElement("img") as HTMLImageElement
+
+                            img.onerror = { _, _, _, _, _ ->
+                                imageDeferred.completeExceptionally(Throwable("Error reading image"))
+                                Unit
+                            }
+
+                            img.onload = { _ ->
+                                imageDeferred.complete(img)
+                                Unit
+                            }
+
+                            img.src = reader.result as String // data url
+                            Unit
+                        }
+
+                        reader.onerror = { _ ->
+                            imageDeferred.completeExceptionally(Throwable("Error reading file"))
+                        }
+
+                        reader.readAsDataURL(photo)
+
+                        // Wait for the image to load to get dimensions
+                        val img = imageDeferred.await()
+                        val width = img.width
+                        val height = img.height
+
                         api.uploadPhotos(
                             listOf(photo.toBytes())
                         ) {
-                            onPhoto(it.urls.first())
+                            onPhoto(it.urls.first(), width, height)
                         }
                         _isGenerating.value = false
                     }
@@ -105,9 +143,10 @@ class ChoosePhotoDialogControl(
                         prompt = result,
                         style = aiStyle.value,
                         aspect = aspect.value,
-                        removeBackground = removeBackground
+                        removeBackground = removeBackground,
+                        crop = crop
                     )) { photo ->
-                        onPhoto(photo.photo)
+                        onPhoto(photo.photo, photo.width, photo.height)
                         completedCount++
                         if (completedCount >= photoCount) {
                             _isGenerating.value = false
@@ -125,11 +164,12 @@ fun rememberChoosePhotoDialog(
     showUpload: Boolean = false,
     aspectRatio: Double? = null,
     removeBackground: Boolean = false,
+    crop: Boolean = false,
 ): ChoosePhotoDialogControl {
     val scope = rememberCoroutineScope()
 
     return remember {
-        ChoosePhotoDialogControl(scope, aiPrompt, showUpload, aspectRatio, removeBackground)
+        ChoosePhotoDialogControl(scope, aiPrompt, showUpload, aspectRatio, removeBackground, crop)
     }
 }
 

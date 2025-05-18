@@ -21,7 +21,8 @@ fun EnvironmentSection(map: Map? = null) {
         title = "Environment",
         icon = "landscape",
         enabled = map != null,
-        initiallyExpanded = true
+        initiallyExpanded = true,
+        closeOtherPanels = true
     ) {
         if (map == null) {
             Text("No map loaded")

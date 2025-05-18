@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import components.IconButton
 import format1Decimal
+import format3Decimals
+import kotlin.math.round
 import game.CameraKeyframe
 import game.Map
 import org.jetbrains.compose.web.attributes.placeholder
@@ -36,7 +38,8 @@ fun CameraSection(map: Map?) {
     PanelSection(
         title = "Camera",
         icon = "camera",
-        initiallyExpanded = false
+        initiallyExpanded = false,
+        closeOtherPanels = true
     ) {
         if (map == null) {
             Text("No map loaded")
@@ -194,7 +197,14 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                 Button({
                     classes(Styles.button)
                     onClick { 
-                        keyframe.time = editTime.toDoubleOrNull() ?: keyframe.time
+                        // Clip time to 3 decimal places
+                        keyframe.time = editTime.toDoubleOrNull()?.let { 
+                            (round(it * 1000.0) / 1000.0) 
+                        } ?: keyframe.time
+                        // Force update of camera keyframes list to trigger UI recomposition
+                        game.animationData.updateCameraKeyframes()
+                        // Update seekbar right away
+                        game.setTime(game.animationData.currentTime)
                         isEditing = false
                     }
                 }) {
@@ -216,7 +226,7 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                         flexDirection(FlexDirection.Column)
                     }
                 }) {
-                    Text("Camera position at ${keyframe.time.format1Decimal()} seconds")
+                    Text("Camera position at ${keyframe.time.format3Decimals()} seconds")
                 }
 
                 Div({

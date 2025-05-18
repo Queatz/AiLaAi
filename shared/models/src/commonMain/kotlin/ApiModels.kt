@@ -115,6 +115,7 @@ class AiPhotoRequest(
     val style: String? = null,
     val aspect: Double? = null,
     val removeBackground: Boolean? = null,
+    val crop: Boolean? = null,
 )
 
 @Serializable
@@ -129,7 +130,9 @@ class AiTranscribeResponse(
 
 @Serializable
 class AiPhotoResponse(
-    val photo: String
+    val photo: String,
+    val width: Int? = null,
+    val height: Int? = null
 )
 
 @Serializable

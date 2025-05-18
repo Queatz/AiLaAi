@@ -173,6 +173,9 @@ fun Route.gameRoutes() {
                     if (update.categories != null) {
                         gameScene.categories = update.categories
                     }
+                    if (update.photo != null) {
+                        gameScene.photo = update.photo
+                    }
 
                     db.update(gameScene)
                 }

@@ -19,19 +19,22 @@ fun GameEditorTabLibrary(engine: Engine, map: Map, gameScene: GameScene? = null)
             padding(1.r)
         }
     }) {
+        // Add the current asset section at the top
+        CurrentSelectionSection(map)
+
         // Include the three required panels with placeholder content
         TilesSection(
             map = map,
             onTileSelected = null,
             clearSelection = false
         )
-        
+
         ObjectsSection(
             map = map,
             onObjectSelected = null,
             clearSelection = false
         )
-        
-        MusicSection(map.game)
+
+        MusicSection(map.game, map)
     }
 }

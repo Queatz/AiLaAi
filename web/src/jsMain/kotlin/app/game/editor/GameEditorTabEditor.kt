@@ -51,6 +51,7 @@ fun GameEditorTabEditor(
     var clearTileSelection by remember { mutableStateOf(false) }
     var clearObjectSelection by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
+    var currentPixelSize by remember { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
 
     // Function to convert Vector3 to Vector3Data
@@ -112,7 +113,22 @@ fun GameEditorTabEditor(
             bloomEnabled = map.post.bloomEnabled,
             sharpenEnabled = map.post.sharpenEnabled,
             colorCorrectionEnabled = map.post.colorCorrectionEnabled,
-            linearSamplingEnabled = map.linearSamplingEnabled
+            linearSamplingEnabled = map.linearSamplingEnabled,
+            depthOfFieldEnabled = map.post.depthOfFieldEnabled,
+            ambienceIntensity = map.getAmbienceIntensity(),
+            sunIntensity = map.getSunIntensity(),
+            fogDensity = map.getFogDensity(),
+            timeOfDay = map.getTimeOfDay(),
+            pixelSize = currentPixelSize,
+            brushSize = map.tilemapEditor.brushSize,
+            brushDensity = map.tilemapEditor.brushDensity,
+            gridSize = map.tilemapEditor.gridSize,
+            snowEffectEnabled = map.isSnowEffectEnabled(),
+            snowEffectIntensity = map.getSnowEffectIntensity(),
+            rainEffectEnabled = map.isRainEffectEnabled(),
+            rainEffectIntensity = map.getRainEffectIntensity(),
+            dustEffectEnabled = map.isDustEffectEnabled(),
+            dustEffectIntensity = map.getDustEffectIntensity()
         )
 
         // Serialize to JSON
@@ -313,8 +329,7 @@ fun GameEditorTabEditor(
                 Text("Launch scene")
             }
         }
-        CurrentSelectionSection()
-        CurrentToolSection()
+        CurrentToolSection(map)
         BrushSection(map)
 
         // Pass callbacks to clear selections when the other type is selected
@@ -353,8 +368,15 @@ fun GameEditorTabEditor(
         AnimationSection(map.game)
         CameraSection(map)
         EnvironmentSection(map)
-        GraphicsSection(engine, map, onPixelatedChanged)
-        MusicSection(map.game)
+        WeatherSection(map)
+        GraphicsSection(
+            engine = engine,
+            map = map,
+            onPixelatedChanged = onPixelatedChanged,
+            initialPixelSize = currentPixelSize,
+            onPixelSizeChanged = { size -> currentPixelSize = size }
+        )
+        MusicSection(map.game, map)
         SceneSection(
             gameScene = gameScene,
             onSceneDeleted = onSceneDeleted

@@ -14,7 +14,6 @@ import app.ailaai.api.createGameMusic
 import app.ailaai.api.gameMusics
 import app.ailaai.api.uploadAudio
 import app.components.HorizontalSpacer
-import app.nav.NavSearchInput
 import baseUrl
 import com.queatz.db.GameMusic
 import components.IconButton
@@ -26,14 +25,17 @@ import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.boxSizing
+import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Audio
-import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Text
@@ -44,7 +46,7 @@ import toBytes
 import kotlin.math.abs
 
 @Composable
-fun MusicSection(game: Game?) {
+fun MusicSection(game: Game?, mapParam: game.Map) {
     val scope = rememberCoroutineScope()
     var musicList by remember { mutableStateOf<List<GameMusic>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
@@ -52,10 +54,6 @@ fun MusicSection(game: Game?) {
     var currentMusic by remember { mutableStateOf<GameMusic?>(null) }
     var audioElement by remember { mutableStateOf<HTMLAudioElement?>(null) }
     var currentAudioSrc by remember { mutableStateOf<String?>(null) }
-
-    // Search functionality
-    var showSearch by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
 
     // Load music list on component mount
     LaunchedEffect(Unit) {
@@ -161,17 +159,6 @@ fun MusicSection(game: Game?) {
                     playMusicAtMarker(marker)
                 }
             }
-
-            // For backward compatibility
-            g.onPlayStateChanged = { isPlaying ->
-                if (!isPlaying) {
-                    // Pause the audio when animation is paused
-                    audioElement?.pause()
-                } else if (currentMusic != null) {
-                    // Resume the audio if we have a current music and animation is playing
-                    audioElement?.play()
-                }
-            }
         }
     }
 
@@ -265,130 +252,148 @@ fun MusicSection(game: Game?) {
         }
     }
 
-    PanelSection(
-        title = "Music",
-        icon = "music_note",
-        enabled = true,
-        initiallyExpanded = false
-    ) {
-        // Search icon and input
-        Div({
-            style {
-                property("display", "flex")
-                property("align-items", "center")
-                marginBottom(1.r)
-            }
-        }) {
-            if (showSearch) {
-                NavSearchInput(
-                    value = searchQuery,
-                    onChange = { searchQuery = it },
-                    onDismissRequest = { 
-                        showSearch = false
-                        searchQuery = ""
-                    }
-                )
-            } else {
-                IconButton(
-                    name = "search",
-                    title = "Search music"
-                ) {
-                    showSearch = true
-                }
-            }
-        }
+    // Convert GameMusic to GameMusicAsset
+    val musicAssets = musicList.map { GameMusicAsset(it) }
 
-        // Upload and Add Music buttons
+    // Track selected music ID
+    var selectedMusicId by remember { mutableStateOf<String?>(null) }
+
+    // Custom tool renderer for music assets
+    val renderMusicTool = @Composable { music: GameMusic ->
         Div({
             style {
                 display(DisplayStyle.Flex)
-                gap(1.r)
-                marginBottom(1.r)
+                alignItems(AlignItems.Center)
+                padding(0.5.r)
+                gap(0.5.r)
+                width(100.percent)
+                boxSizing("border-box")
+                // Add a background color if this music is selected
+                if (selectedMusicId == music.id) {
+                    backgroundColor(Styles.colors.primary)
+                    borderRadius(.5.r)
+                }
+                // Make the div clickable
+                cursor("pointer")
+            }
+            // Add click handler to select/deselect this music
+            onClick {
+                val newSelectedId = if (selectedMusicId == music.id) null else music.id
+                selectedMusicId = newSelectedId
+
+                // Update the current music in the map
+                if (mapParam != null) {
+                    if (newSelectedId != null) {
+                        mapParam.setCurrentGameMusic(music)
+                    } else {
+                        mapParam.setCurrentGameMusic(null)
+                    }
+                }
             }
         }) {
-            Button({
-                classes(Styles.button)
-                onClick { uploadMusic() }
-                if (isUploading) {
-                    attr("disabled", "true")
+            // Play/pause button
+            IconButton(
+                name = if (currentMusic?.id == music.id) "pause" else "play_arrow",
+                title = if (currentMusic?.id == music.id) "Pause" else "Play",
+            ) {
+                if (currentMusic?.id == music.id) {
+                    audioElement?.pause()
+                    currentMusic = null
+                } else {
+                    if (music.audio != null) {
+                        // Update the current audio source
+                        currentAudioSrc = "$baseUrl/${music.audio}"
+                        currentMusic = music
+                        // The LaunchedEffect will handle loading and playing the audio
+                    }
                 }
-            }) {
-                Text(if (isUploading) "Uploading..." else "Upload Music")
+            }
+
+            // Music name
+            Text(music.name ?: "Unnamed Music")
+
+            HorizontalSpacer(fill = true)
+
+            // Add to current frame button
+            IconButton(
+                name = "add",
+                title = "Add to current frame",
+            ) {
+                addMusicToCurrentFrame(music)
             }
         }
+    }
 
-        // Music library
-        if (isLoading) {
-            Text("Loading music...")
-        } else if (musicList.isEmpty()) {
-            Text("No music available. Upload some music to get started.")
-        } else {
+    // Use the generic AssetSection component with custom content
+    AssetSection(
+        title = "Music",
+        icon = "music_note",
+        assets = musicAssets,
+        isLoading = isLoading,
+        isCreating = isUploading,
+        selectedAssetId = selectedMusicId,
+        onAssetSelected = { musicAsset ->
+            // Toggle selection
+            val newSelectedId = if (musicAsset?.id == selectedMusicId) null else musicAsset?.id
+            selectedMusicId = newSelectedId
+
+            // Find the selected music in the list
+            if (newSelectedId != null) {
+                val selectedMusic = musicList.find { it.id == newSelectedId }
+                // Update the current music
+                currentMusic = selectedMusic
+
+                // Update the current music in the map
+                if (mapParam != null && selectedMusic != null) {
+                    mapParam.setCurrentGameMusic(selectedMusic)
+                }
+            } else {
+                // If deselected, set to null
+                currentMusic = null
+
+                // Clear the current music in the map
+                if (mapParam != null) {
+                    mapParam.setCurrentGameMusic(null)
+                }
+            }
+        },
+        onCreateAsset = {
+            uploadMusic()
+        },
+        assetToTool = { musicAsset ->
+            Tool(
+                id = musicAsset.id,
+                name = musicAsset.name,
+                photoUrl = "$baseUrl/assets/icons/music_note.svg", // Default music icon
+                description = musicAsset.description
+            )
+        },
+        searchFilter = { musicAsset, query ->
+            musicAsset.name.contains(query, ignoreCase = true) ||
+            musicAsset.id.contains(query, ignoreCase = true) ||
+            musicAsset.createdAt?.toString()?.contains(query, ignoreCase = true) ?: false
+        },
+        createButtonText = "Upload Music",
+        emptyText = "No music available. Upload some music to get started.",
+        loadingText = "Loading music...",
+        processingText = "Uploading music...",
+        customContent = { filteredAssets: List<GameMusicAsset> ->
+            // Custom content for the music section
             Toolbox(
                 styles = {
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Column)
                     gap(0.5.r)
-                    marginTop(1.r)
                 }
             ) {
-                // Filter music based on search query
-                val filteredMusic = if (searchQuery.isNotEmpty()) {
-                    musicList.filter { music ->
-                        // Filter by name, ID, or creation date
-                        val name = music.name ?: ""
-                        val id = music.id ?: ""
-                        val createdAtStr = music.createdAt?.toString() ?: ""
-
-                        name.contains(searchQuery, ignoreCase = true) || 
-                        id.contains(searchQuery, ignoreCase = true) ||
-                        createdAtStr.contains(searchQuery, ignoreCase = true)
-                    }
-                } else {
-                    musicList
-                }
-
-                filteredMusic.forEach { music ->
-                    Div({
-                        style {
-                            display(DisplayStyle.Flex)
-                            alignItems(AlignItems.Center)
-                            padding(0.5.r)
-                            gap(0.5.r)
-                        }
-                    }) {
-                        // Play/pause button
-                        IconButton(
-                            name = if (currentMusic?.id == music.id) "pause" else "play_arrow",
-                            title = if (currentMusic?.id == music.id) "Pause" else "Play",
-                        ) {
-                            if (currentMusic?.id == music.id) {
-                                audioElement?.pause()
-                                currentMusic = null
-                            } else {
-                                if (music.audio != null) {
-                                    // Update the current audio source
-                                    currentAudioSrc = "$baseUrl/${music.audio}"
-                                    currentMusic = music
-                                    // The LaunchedEffect will handle loading and playing the audio
-                                }
-                            }
-                        }
-
-                        // Music name
-                        Text(music.name ?: "Unnamed Music")
-
-                        HorizontalSpacer(fill = true)
-
-                        // Add to current frame button
-                        IconButton(
-                            name = "add",
-                            title = "Add to current frame",
-                        ) {
-                            addMusicToCurrentFrame(music)
-                        }
+                // For each filtered music asset, find the original GameMusic and render it
+                filteredAssets.forEach { musicAsset ->
+                    val originalMusic = musicList.find { it.id == musicAsset.id }
+                    if (originalMusic != null) {
+                        renderMusicTool(originalMusic)
                     }
                 }
             }
         }
-    }
+    )
 }

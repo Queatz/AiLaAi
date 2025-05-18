@@ -25,11 +25,14 @@ fun GraphicsSection(
     engine: Engine? = null,
     map: Map? = null,
     onPixelatedChanged: (Boolean) -> Unit = {},
+    initialPixelSize: Int? = null,
+    onPixelSizeChanged: (Int) -> Unit = {},
 ) {
     PanelSection(
         title = "Graphics",
         icon = "settings",
-        initiallyExpanded = false
+        initiallyExpanded = false,
+        closeOtherPanels = true
     ) {
         Div({
             style {
@@ -37,10 +40,21 @@ fun GraphicsSection(
             }
         }) {
             // Pixel size input (1-16)
-            var pixelSize by remember { mutableStateOf("") }
+            var pixelSize by remember { mutableStateOf(initialPixelSize?.toString() ?: "1") }
+
+            // Initialize hardware scaling level if initialPixelSize is provided
+            LaunchedEffect(initialPixelSize) {
+                initialPixelSize?.let { size ->
+                    if (engine != null) {
+                        val clampedSize = minOf(16, maxOf(1, size))
+                        engine.setHardwareScalingLevel(clampedSize)
+                        pixelSize = clampedSize.toString()
+                    }
+                }
+            }
 
             TextInput(pixelSize) {
-                classes(Styles.textarea)
+            classes(Styles.textarea)
                 placeholder("Pixel size (1-16)")
                 style {
                     width(100.percent)
@@ -52,6 +66,8 @@ fun GraphicsSection(
                         pixelSize = clampedSize.toString()
                         // Set the hardware scaling level
                         engine.setHardwareScalingLevel(clampedSize)
+                        // Notify about the change
+                        onPixelSizeChanged(clampedSize)
                     } else {
                         pixelSize = event.value
                     }

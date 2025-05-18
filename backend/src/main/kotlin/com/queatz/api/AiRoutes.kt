@@ -40,14 +40,19 @@ fun Route.aiRoutes() {
                     db.addPrompt(me.id!!, it)
                 }
 
+                val (photoPath, dimensions) = ai.photo(
+                    prefix = "group",
+                    prompts = listOf(TextPrompt(request.prompt)),
+                    style = request.style,
+                    aspect = request.aspect ?: 1.5,
+                    transparentBackground = request.removeBackground == true,
+                    crop = request.crop == true
+                )
+
                 AiPhotoResponse(
-                    ai.photo(
-                        prefix = "group",
-                        prompts = listOf(TextPrompt(request.prompt)),
-                        style = request.style,
-                        aspect = request.aspect ?: 1.5,
-                        transparentBackground = request.removeBackground == true
-                    )
+                    photo = photoPath,
+                    width = dimensions?.first,
+                    height = dimensions?.second
                 )
             }
         }

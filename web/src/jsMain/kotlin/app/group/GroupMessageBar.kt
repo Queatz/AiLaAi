@@ -222,7 +222,7 @@ fun GroupMessageBar(
     fun describePhoto() {
         choosePhoto.launch(
             multiple = true
-        ) { photo ->
+        ) { photo, _, _ ->
             api.sendMessage(
                 group.group!!.id!!,
                 Message(

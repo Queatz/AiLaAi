@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.util.rememberDragTracker
 import format1Decimal
+import format3Decimals
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.css.cursor
 import org.jetbrains.compose.web.css.left
@@ -101,7 +102,7 @@ fun Seekbar(
                         onPositionChange(marker.position)
                         it.stopPropagation()
                     }
-                    title("Click to set position to ${marker.position.format1Decimal()} seconds")
+                    title("Click to set position to ${marker.position.format3Decimals()} seconds")
                     style {
                         cursor("pointer")
                     }

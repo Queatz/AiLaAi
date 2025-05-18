@@ -18,6 +18,7 @@ import app.components.TopBarSearch
 import app.nav.SceneNav
 import appString
 import appText
+import baseUrl
 import bulletedString
 import com.queatz.db.GameScene
 import components.IconButton
@@ -30,6 +31,7 @@ import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
@@ -50,7 +52,9 @@ import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import r
 
@@ -145,6 +149,19 @@ fun ScenePage(
                                         onSceneSelected(SceneNav.Selected(scene))
                                     }
                                 }) {
+                                    // Display scene photo if it exists
+                                    if (scene.photo != null) {
+                                        Img(src = "$baseUrl${scene.photo!!}", attrs = {
+                                            style {
+                                                width(100.percent)
+                                                property("aspect-ratio", "2")
+                                                property("object-fit", "cover")
+                                                marginBottom(.5.r)
+                                                borderRadius(.5.r)
+                                            }
+                                        })
+                                    }
+
                                     Div({
                                         style {
                                             fontSize(18.px)
@@ -215,6 +232,18 @@ fun ScenePage(
                     gameScene = scene,
                     onSceneDeleted = {
                         onSceneSelected(SceneNav.None)
+                    },
+                    onScenePublished = {
+                        // Reload the scene via the API
+                        scope.launch {
+                            // Use a local copy of the scene to access its id
+                            val currentScene = scene
+                            if (currentScene?.id != null) {
+                                api.gameScene(currentScene.id!!) { updatedScene ->
+                                    scene = updatedScene
+                                }
+                            }
+                        }
                     }
                 )
             }

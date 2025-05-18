@@ -22,7 +22,8 @@ fun ExportSection(game: Game?) {
         title = "Export",
         icon = "file_download",
         enabled = game != null,
-        initiallyExpanded = false
+        initiallyExpanded = false,
+        closeOtherPanels = true
     ) {
         if (game == null) {
             Text("No game loaded")

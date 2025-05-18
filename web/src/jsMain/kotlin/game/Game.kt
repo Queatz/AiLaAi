@@ -29,9 +29,6 @@ class Game(
      */
     val playStateFlow: StateFlow<Boolean> = _playStateFlow.asStateFlow()
 
-    // Callback for when play state changes (deprecated, use playStateFlow instead)
-    @Deprecated("Use playStateFlow instead", ReplaceWith("playStateFlow"))
-    var onPlayStateChanged: ((Boolean) -> Unit)? = null
 
     fun resize() {
         engine.resize()
@@ -50,7 +47,6 @@ class Game(
         isPlaying = true
         lastFrameTime = Date().getTime()
         _playStateFlow.value = true
-        onPlayStateChanged?.invoke(true)
     }
 
     /**
@@ -59,7 +55,6 @@ class Game(
     fun pause() {
         isPlaying = false
         _playStateFlow.value = false
-        onPlayStateChanged?.invoke(false)
     }
 
     /**
@@ -115,7 +110,6 @@ class Game(
                     // Change the Pause button back to Play when animation reaches the end
                     isPlaying = false
                     _playStateFlow.value = false
-                    onPlayStateChanged?.invoke(false)
                 }
 
                 // Apply camera keyframe at the current time
