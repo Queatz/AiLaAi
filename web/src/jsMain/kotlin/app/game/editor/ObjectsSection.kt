@@ -16,6 +16,8 @@ import app.dialog.rememberChoosePhotoDialog
 import baseUrl
 import com.queatz.db.GameObject
 import kotlinx.coroutines.launch
+import app.game.editor.assetManager
+import app.game.editor.rememberObjects
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
@@ -34,27 +36,21 @@ fun ObjectsSection(
     clearSelection: Boolean = false
 ) {
     val scope = rememberCoroutineScope()
-    var objects by remember { mutableStateOf<List<GameObject>>(emptyList()) }
+    // Use the AssetManager to get objects
+    val objects = rememberObjects()
     var isLoading by remember { mutableStateOf(true) }
     // Track object creation state separately from photo generation
-    var isObjectCreationInProgress by remember { mutableStateOf(false) }
     val choosePhotoDialog = rememberChoosePhotoDialog(showUpload = true, aspectRatio = 1.0, removeBackground = true, crop = true)
 
-    // Get the photo generation state
-    val isGenerating by choosePhotoDialog.isGenerating.collectAsState()
-
-    // Combine both states to determine if we're creating an object
-    var isCreatingObject by remember { mutableStateOf(false) }
-    LaunchedEffect(isGenerating, isObjectCreationInProgress) {
-        isCreatingObject = isGenerating || isObjectCreationInProgress
-    }
+    val generatingCount by choosePhotoDialog.generatingCount.collectAsState()
 
     // Load objects when the component is first rendered
     LaunchedEffect(Unit) {
         isLoading = true
         api.gameObjects(
             onSuccess = { objectsList ->
-                objects = objectsList
+                // Update the AssetManager with the loaded objects
+                assetManager.setObjects(objectsList)
                 isLoading = false
             }
         )
@@ -80,7 +76,8 @@ fun ObjectsSection(
         icon = "category",
         assets = objectAssets,
         isLoading = isLoading,
-        isCreating = isCreatingObject,
+        isCreating = generatingCount > 0,
+        queueCount = generatingCount,
         selectedAssetId = selectedObjectId,
         onAssetSelected = { objectAsset ->
             // Toggle selection
@@ -95,9 +92,8 @@ fun ObjectsSection(
                     // Notify that an object was selected
                     onObjectSelected?.invoke()
                 }
-            } else if (map != null) {
-                // If deselected, set to null
-                map.setCurrentGameObject(null)
+            } else {
+                map?.setCurrentGameObject(null)
             }
         },
         onCreateAsset = {
@@ -205,7 +201,6 @@ fun ObjectsSection(
                         if (result == true) {
                             // Process the photo URL with width and height
                             scope.launch {
-                                isObjectCreationInProgress = true
                                 // Create a new object with the photo URL and dimensions
                                 api.createGameObject(
                                     gameObject = GameObject(
@@ -214,12 +209,8 @@ fun ObjectsSection(
                                         height = heightValue.toString()
                                     ),
                                     onSuccess = { newObject ->
-                                        // Add the new object to the list
-                                        objects = listOf(newObject) + objects
-                                        isObjectCreationInProgress = false
-                                    },
-                                    onError = {
-                                        isObjectCreationInProgress = false
+                                        // Add the new object to the AssetManager
+                                        assetManager.addObject(newObject)
                                     }
                                 )
                             }

@@ -1,6 +1,7 @@
 package app.game
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,6 +12,7 @@ import app.game.editor.GameEditorTabLibrary
 import app.game.editor.GameEditorTabPublish
 import app.game.editor.GameEditorTabDiscussion
 import app.game.editor.TabBar
+import application
 import com.queatz.db.GameScene
 import game.Map
 import lib.Engine
@@ -37,6 +39,9 @@ fun GameEditorPanel(
     onScenePublished: () -> Unit = {},
     styles: StyleScope.() -> Unit = {}
 ) {
+    // Get the current user
+    val me by application.me.collectAsState()
+
     Div(
         attrs = {
             style {
@@ -57,14 +62,38 @@ fun GameEditorPanel(
             val content: @Composable () -> Unit
         )
 
-        val tabs = remember {
-            listOf(
-                TabInfo("Editor") { GameEditorTabEditor(engine, map, gameScene, onSceneDeleted, onPixelatedChanged) },
-                TabInfo("Discussion") { GameEditorTabDiscussion(engine, map, gameScene) },
-                TabInfo("Library") { GameEditorTabLibrary(engine, map, gameScene) },
-                TabInfo("Help") { GameEditorInstructions() },
-                TabInfo("Publish") { GameEditorTabPublish(engine, map, gameScene, onUploaded = onScenePublished) }
-            )
+        // Create tabs list based on scene ownership
+        val isCurrentUserOwner = gameScene?.person == me?.id
+
+        val tabs = remember(isCurrentUserOwner) {
+            buildList {
+                if (isCurrentUserOwner) {
+                    add(TabInfo("Editor") {
+                        GameEditorTabEditor(
+                            engine,
+                            map,
+                            gameScene,
+                            onSceneDeleted,
+                            onPixelatedChanged
+                        )
+                    })
+                }
+
+                add(TabInfo("Discussion") { GameEditorTabDiscussion(engine, map, gameScene) })
+
+                if (isCurrentUserOwner) {
+                    add(TabInfo("Library") { GameEditorTabLibrary(engine, map, gameScene) })
+                    add(TabInfo("Help") { GameEditorInstructions() })
+                    add(TabInfo("Publish") {
+                        GameEditorTabPublish(
+                            engine,
+                            map,
+                            gameScene,
+                            onUploaded = onScenePublished
+                        )
+                    })
+                }
+            }
         }
 
         TabBar(

@@ -28,7 +28,8 @@ import org.w3c.dom.HTMLElement
 data class SeekbarMarker(
     val position: Double,
     val name: String,
-    val duration: Double = 0.0
+    val duration: Double = 0.0,
+    val visible: Boolean = true
 )
 
 /**
@@ -60,7 +61,8 @@ fun Seekbar(
     var isDragging by remember { mutableStateOf(false) }
 
     // Calculate total duration based on the last keyframe + its duration
-    var totalDuration = remember(keyframes) {
+    // Use keyframes.size and markers.size to force recomposition when keyframes or markers are added/removed
+    var totalDuration = remember(keyframes.size, keyframes.toString(), markers.size, markers.toString()) {
         if (keyframes.isEmpty()) {
             60.0 // Default duration if no keyframes
         } else {
@@ -70,14 +72,14 @@ fun Seekbar(
     }
 
     // Normalize position to 0.0-1.0 range
-    val normalizePosition = remember(totalDuration) {
+    val normalizePosition = remember(totalDuration, keyframes.size, keyframes.toString(), markers.size, markers.toString()) {
         { seconds: Double ->
             (seconds / totalDuration).coerceIn(0.0, 1.0)
         }
     }
 
     // Convert normalized position (0.0-1.0) back to seconds
-    val denormalizePosition = remember(totalDuration) {
+    val denormalizePosition = remember(totalDuration, keyframes.size, keyframes.toString(), markers.size, markers.toString()) {
         { normalized: Double ->
             (normalized * totalDuration).coerceIn(0.0, totalDuration)
         }
@@ -90,8 +92,8 @@ fun Seekbar(
         Div({
             classes(SeekbarStyles.seekbarMarkersContainer)
         }) {
-            // Render marker labels
-            markers.forEach { marker ->
+            // Render marker labels (only visible ones)
+            markers.filter { it.visible }.forEach { marker ->
                 Div({
                     classes(SeekbarStyles.seekbarMarkerLabel)
                     style {
@@ -116,7 +118,7 @@ fun Seekbar(
         var seekbarElement by remember { mutableStateOf<HTMLElement?>(null) }
 
         // Function to calculate position from mouse coordinates
-        val calculatePosition = remember(totalDuration) {
+        val calculatePosition = remember(totalDuration, keyframes.toString()) {
             { clientX: Int ->
                 // Use the seekbarElement if available
                 val position = seekbarElement?.let { element ->
@@ -206,8 +208,8 @@ fun Seekbar(
                 }
             }
 
-            // Render markers
-            markers.forEach { marker ->
+            // Render markers (only visible ones)
+            markers.filter { it.visible }.forEach { marker ->
                 Div({
                     classes(SeekbarStyles.seekbarMarker)
                     style {

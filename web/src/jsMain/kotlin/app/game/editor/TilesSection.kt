@@ -25,18 +25,9 @@ fun TilesSection(
     val scope = rememberCoroutineScope()
     var tiles by remember { mutableStateOf<List<GameTile>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    // Track tile creation state separately from photo generation
-    var isTileCreationInProgress by remember { mutableStateOf(false) }
     val choosePhotoDialog = rememberChoosePhotoDialog(showUpload = true, aspectRatio = 1.0)
 
-    // Get the photo generation state
-    val isGenerating by choosePhotoDialog.isGenerating.collectAsState()
-
-    // Combine both states to determine if we're creating a tile
-    var isCreatingTile by remember { mutableStateOf(false) }
-    LaunchedEffect(isGenerating, isTileCreationInProgress) {
-        isCreatingTile = isGenerating || isTileCreationInProgress
-    }
+    val generatingCount by choosePhotoDialog.generatingCount.collectAsState()
 
     // Load tiles when the component is first rendered
     LaunchedEffect(Unit) {
@@ -69,7 +60,8 @@ fun TilesSection(
         icon = "map",
         assets = tileAssets,
         isLoading = isLoading,
-        isCreating = isCreatingTile,
+        isCreating = generatingCount > 0,
+        queueCount = generatingCount,
         selectedAssetId = selectedTileId,
         onAssetSelected = { tileAsset ->
             // Toggle selection
@@ -95,8 +87,6 @@ fun TilesSection(
                 choosePhotoDialog.launch { photoUrl, _, _ ->
                     // Process the photo URL
                     scope.launch {
-                        isTileCreationInProgress = true
-                        // Create a new tile with the photo URL
                         api.createGameTile(
                             gameTile = GameTile(
                                 photo = photoUrl
@@ -104,10 +94,6 @@ fun TilesSection(
                             onSuccess = { newTile ->
                                 // Add the new tile to the list
                                 tiles = listOf(newTile) + tiles
-                                isTileCreationInProgress = false
-                            },
-                            onError = {
-                                isTileCreationInProgress = false
                             }
                         )
                     }

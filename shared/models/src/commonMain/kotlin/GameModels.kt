@@ -46,6 +46,7 @@ data class GameObject(
     var photo: String? = null,
     var width: String? = null,
     var height: String? = null,
+    var options: String? = null,
 ) : Model()
 
 @Serializable
@@ -102,6 +103,23 @@ data class Color4Data(
 )
 
 /**
+ * Base interface for marker events
+ */
+@Serializable
+sealed class MarkerEvent {
+    abstract val type: String
+}
+
+/**
+ * Event for playing music when a marker is reached
+ */
+@Serializable
+data class PlayMusicEvent(
+    val musicId: String,
+    override val type: String = "play_music"
+) : MarkerEvent()
+
+/**
  * Serializable version of AnimationMarker
  */
 @Serializable
@@ -109,7 +127,8 @@ data class AnimationMarkerData(
     val id: String,
     val name: String,
     val time: Double,
-    val duration: Double = 0.0
+    val duration: Double = 0.0,
+    val event: MarkerEvent? = null
 )
 
 /**
@@ -135,4 +154,13 @@ data class CameraKeyframeData(
     val beta: Float,
     val radius: Float,
     val fov: Float
+)
+
+/**
+ * Serializable options for GameObject
+ */
+@Serializable
+data class GameObjectOptions(
+    val scaleVariation: Float = 0f,
+    val colorVariation: Float = 0f
 )

@@ -1,6 +1,7 @@
 package game
 
 import androidx.compose.runtime.mutableStateOf
+import com.queatz.db.MarkerEvent
 import lib.Vector3
 import kotlin.js.Date
 
@@ -15,7 +16,9 @@ data class AnimationMarker(
     val id: String,
     var name: String,
     var time: Double,
-    var duration: Double = 0.0
+    var duration: Double = 0.0,
+    var visible: Boolean = true,
+    var event: MarkerEvent? = null
 )
 
 /**
@@ -193,6 +196,21 @@ class AnimationData {
             // Use the keyframe after
             applyKeyframeToCamera(camera, keyframesAfter)
         }
+    }
+
+    /**
+     * Apply a specific keyframe to the camera without changing the current time
+     * @param camera The camera to update
+     * @param keyframeId The ID of the keyframe to apply
+     * @return True if the keyframe was found and applied, false otherwise
+     */
+    fun applyCameraKeyframeById(camera: Camera, keyframeId: String): Boolean {
+        val keyframe = cameraKeyframes.find { it.id == keyframeId }
+        if (keyframe != null) {
+            applyKeyframeToCamera(camera, keyframe)
+            return true
+        }
+        return false
     }
 
     /**

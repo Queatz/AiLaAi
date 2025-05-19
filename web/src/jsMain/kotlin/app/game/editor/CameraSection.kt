@@ -141,7 +141,7 @@ fun CameraSection(map: Map?) {
 @Composable
 private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
     var isEditing by remember { mutableStateOf(false) }
-    var editTime by remember { mutableStateOf(keyframe.time.toString()) }
+    var editTime by remember(keyframe) { mutableStateOf(keyframe.time.toString()) }
 
     Div({
         style {
@@ -226,7 +226,8 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                         flexDirection(FlexDirection.Column)
                     }
                 }) {
-                    Text("Camera position at ${keyframe.time.format3Decimals()} seconds")
+                    // todo translate
+                    Text("${keyframe.time.format3Decimals()} seconds")
                 }
 
                 Div({
@@ -256,6 +257,15 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                         title = "Go to keyframe",
                         onClick = {
                             game.setTime(keyframe.time)
+                        }
+                    )
+
+                    // Apply camera position without changing time
+                    IconButton(
+                        name = "camera_alt",
+                        title = "Apply camera position without changing time",
+                        onClick = {
+                            game.animationData.applyCameraKeyframeById(game.map.camera, keyframe.id)
                         }
                     )
                 }

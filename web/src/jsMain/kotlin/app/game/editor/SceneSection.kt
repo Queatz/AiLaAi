@@ -2,6 +2,7 @@ package app.game.editor
 
 import Styles
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,20 +14,17 @@ import app.ailaai.api.updateGameScene
 import app.ailaai.api.uploadScreenshot
 import app.dialog.dialog
 import app.dialog.inputDialog
+import app.group.friendsDialog
+import application
 import baseUrl
 import com.queatz.db.GameScene
+import com.queatz.db.Person
 import com.queatz.db.UploadResponse
 import kotlinx.browser.document
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import org.w3c.files.Blob
-import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginLeft
-import org.jetbrains.compose.web.css.maxWidth
-import org.jetbrains.compose.web.css.padding
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
@@ -42,7 +40,13 @@ fun SceneSection(
 ) {
     val scope = rememberCoroutineScope()
 
-    var scenePhoto by remember (gameScene) { mutableStateOf(gameScene?.photo) }
+    // Get the current user
+    val me by application.me.collectAsState()
+
+    // Check if the current user is the owner of the scene
+    val isCurrentUserOwner = gameScene?.person == me?.id
+
+    var scenePhoto by remember(gameScene) { mutableStateOf(gameScene?.photo) }
 
     PanelSection(
         title = "Scene",
@@ -52,107 +56,176 @@ fun SceneSection(
     ) {
         Div({
             style {
-                padding(.5.r)
+                padding(1.r)
+                display(DisplayStyle.Flex)
+                flexDirection(FlexDirection.Column)
+                gap(1.r)
             }
         }) {
+            // Scene Info Section with elevated style
             Div({
                 style {
-                    padding(.5.r, 0.r)
+                    padding(1.r)
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(1.r)
                 }
             }) {
-                Text("Scene name: ${gameScene?.name ?: "New Scene"}")
-
-                Button({
-                    classes(Styles.outlineButton)
+                // Scene Name
+                Div({
                     style {
-                        marginLeft(.5.r)
-                    }
-                    onClick {
-                        scope.launch {
-                            val newName = inputDialog(
-                                title = "Rename Scene",
-                                placeholder = "Enter new scene name",
-                                defaultValue = gameScene?.name ?: ""
-                            )
-
-                            if (newName != null && gameScene?.id != null) {
-                                val updatedGameScene = GameScene(name = newName)
-                                api.updateGameScene(gameScene.id!!, updatedGameScene) {
-                                    // Scene renamed successfully
-                                }
-                            }
-                        }
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        justifyContent(JustifyContent.SpaceBetween)
                     }
                 }) {
-                    Text("Rename")
-                }
-            }
-
-            Div({
-                style {
-                    padding(.5.r, 0.r)
-                }
-            }) {
-                Text("Scene URL: ${gameScene?.url ?: gameScene?.id ?: "Not saved yet"}")
-
-                Button({
-                    classes(Styles.outlineButton)
-                    style {
-                        marginLeft(.5.r)
+                    Div({
+                        style {
+                            fontWeight("bold")
+                        }
+                    }) {
+                        Text("Scene Name")
                     }
-                    onClick {
-                        scope.launch {
-                            val newUrl = inputDialog(
-                                title = "Edit Scene URL",
-                                placeholder = "Enter scene URL",
-                                defaultValue = gameScene?.url ?: ""
-                            )
 
-                            if (newUrl != null && gameScene?.id != null) {
-                                val updatedGameScene = GameScene(url = newUrl)
-                                api.updateGameScene(gameScene.id!!, updatedGameScene) {
-                                    // Scene URL updated successfully
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            gap(0.5.r)
+                        }
+                    }) {
+                        Text(gameScene?.name ?: "New Scene")
+
+                        Button({
+                            classes(Styles.outlineButton)
+                            onClick {
+                                scope.launch {
+                                    val newName = inputDialog(
+                                        title = "Rename Scene",
+                                        placeholder = "Enter new scene name",
+                                        defaultValue = gameScene?.name ?: ""
+                                    )
+
+                                    if (newName != null && gameScene?.id != null) {
+                                        val updatedGameScene = GameScene(name = newName)
+                                        api.updateGameScene(gameScene.id!!, updatedGameScene) {
+                                            // Scene renamed successfully
+                                        }
+                                    }
                                 }
                             }
+                        }) {
+                            Text("Rename")
                         }
                     }
+                }
+
+                // Scene URL
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        justifyContent(JustifyContent.SpaceBetween)
+                    }
                 }) {
-                    Text("Edit URL")
+                    Div({
+                        style {
+                            fontWeight("bold")
+                        }
+                    }) {
+                        Text("Scene URL")
+                    }
+
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            gap(0.5.r)
+                        }
+                    }) {
+                        Text(gameScene?.url ?: gameScene?.id ?: "Not saved yet")
+
+                        Button({
+                            classes(Styles.outlineButton)
+                            onClick {
+                                scope.launch {
+                                    val newUrl = inputDialog(
+                                        title = "Edit Scene URL",
+                                        placeholder = "Enter scene URL",
+                                        defaultValue = gameScene?.url ?: ""
+                                    )
+
+                                    if (newUrl != null && gameScene?.id != null) {
+                                        val updatedGameScene = GameScene(url = newUrl)
+                                        api.updateGameScene(gameScene.id!!, updatedGameScene) {
+                                            // Scene URL updated successfully
+                                        }
+                                    }
+                                }
+                            }
+                        }) {
+                            Text("Edit URL")
+                        }
+                    }
                 }
             }
 
             // Scene Photo Section
             Div({
                 style {
-                    padding(.5.r, 0.r)
+                    property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
+                    padding(1.r)
+                    borderRadius(1.r)
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(1.r)
                 }
             }) {
+                Div({
+                    style {
+                        fontWeight("bold")
+                        marginBottom(0.5.r)
+                    }
+                }) {
+                    Text("Scene Photo")
+                }
+
                 // Display the scene photo if it exists
                 if (scenePhoto != null) {
                     Div({
                         style {
-                            marginBottom(.5.r)
+                            borderRadius(0.5.r)
+                            overflow("hidden")
                         }
                     }) {
-                        Text("Scene Photo:")
+                        Img(src = "$baseUrl${scenePhoto!!}", attrs = {
+                            style {
+                                maxWidth(100.percent)
+                                height(12.r)
+                                property("object-fit", "cover")
+                            }
+                        })
                     }
-
-                    Img(src = "$baseUrl${scenePhoto!!}", attrs = {
+                } else {
+                    Div({
                         style {
-                            maxWidth(100.percent)
                             height(12.r)
-                            property("object-fit", "cover")
-                            marginBottom(.5.r)
+                            borderRadius(0.5.r)
+                            display(DisplayStyle.Flex)
+                            justifyContent(JustifyContent.Center)
+                            alignItems(AlignItems.Center)
+                            opacity(.5)
                         }
-                    })
+                    }) {
+                        Text("No photo set")
+                    }
                 }
 
                 // Button to take a screenshot and set as scene photo
                 Button({
-                    classes(Styles.outlineButton)
+                    classes(Styles.button)
                     style {
-                        marginLeft(if (scenePhoto != null) 0.r else .5.r)
-                        marginBottom(.5.r)
+                        width(100.percent)
                     }
                     onClick {
                         scope.launch {
@@ -200,16 +273,78 @@ fun SceneSection(
                 }
             }
 
-            // Delete Scene Button
+            // Scene Actions Section
             Div({
                 style {
-                    padding(.5.r, 0.r)
+                    property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
+                    padding(1.r)
+                    borderRadius(1.r)
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(1.r)
                 }
             }) {
+                Div({
+                    style {
+                        fontWeight("bold")
+                        marginBottom(0.5.r)
+                    }
+                }) {
+                    Text("Scene Actions")
+                }
+
+                // Change Owner Button - Only show if the current user is the owner
+                if (isCurrentUserOwner && gameScene?.id != null) {
+                    Button({
+                        classes(Styles.outlineButton)
+                        style {
+                            width(100.percent)
+                            marginBottom(0.5.r)
+                        }
+                        onClick {
+                            scope.launch {
+                                friendsDialog(
+                                    title = "Change Scene Owner",
+                                    multiple = false,
+                                    confirmButton = "Cancel"
+                                ) { selectedPeople ->
+                                    if (selectedPeople.isNotEmpty()) {
+                                        val newOwner = selectedPeople.first()
+
+                                        // Confirm the owner change
+                                        scope.launch {
+                                            val confirmed = dialog(
+                                                title = "Change Owner",
+                                                confirmButton = "Change",
+                                                cancelButton = "Cancel"
+                                            ) {
+                                                Text("Are you sure you want to transfer ownership of this scene to ${newOwner.name ?: "this user"}?")
+                                            }
+
+                                            if (confirmed == true) {
+                                                // Update the scene with the new owner
+                                                val updatedGameScene = GameScene(person = newOwner.id)
+                                                api.updateGameScene(gameScene.id!!, updatedGameScene) {
+                                                    // Scene owner updated successfully
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        Text("Change Owner")
+                    }
+                }
+
+                // Delete Scene Button
                 Button({
                     classes(Styles.outlineButton)
                     style {
-                        marginLeft(.5.r)
+                        width(100.percent)
+                        color(Styles.colors.red)
+                        border(1.px, LineStyle.Solid, Styles.colors.red)
                     }
                     onClick {
                         scope.launch {

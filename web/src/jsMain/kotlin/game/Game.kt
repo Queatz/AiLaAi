@@ -81,7 +81,7 @@ class Game(
      * @param time Time in seconds
      */
     fun setTime(time: Double) {
-        animationData.currentTime = time.coerceIn(0.0, animationData.totalDuration)
+        animationData.currentTime = time.coerceAtLeast(0.0)
         // Apply camera keyframe at the current time
         animationData.applyCameraKeyframeAtCurrentTime(map.camera)
     }

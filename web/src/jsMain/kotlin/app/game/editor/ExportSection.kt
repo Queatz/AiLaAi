@@ -1,15 +1,12 @@
 package app.game.editor
 
+import Styles
 import androidx.compose.runtime.Composable
 import components.IconButton
 import game.Game
 import kotlinx.browser.document
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexDirection
-import org.jetbrains.compose.web.css.gap
-import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLCanvasElement
@@ -32,28 +29,54 @@ fun ExportSection(game: Game?) {
 
         Div({
             style {
+                padding(1.r)
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Column)
                 gap(1.r)
-                marginBottom(1.r)
             }
         }) {
-            // Screenshot button
+            // Export Options Section with elevated style
             Div({
                 style {
+                    property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
+                    padding(1.r)
+                    borderRadius(1.r)
                     display(DisplayStyle.Flex)
-                    gap(0.5.r)
-                    marginBottom(0.5.r)
+                    flexDirection(FlexDirection.Column)
+                    gap(1.r)
                 }
             }) {
-                IconButton(
-                    name = "photo_camera",
-                    title = "Take Screenshot",
-                    onClick = {
+                Div({
+                    style {
+                        fontWeight("bold")
+                        marginBottom(0.5.r)
+                    }
+                }) {
+                    Text("Export Options")
+                }
+
+                // Screenshot button
+                Button({
+                    classes(Styles.button)
+                    style {
+                        width(100.percent)
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        justifyContent(JustifyContent.Center)
+                        gap(0.5.r)
+                    }
+                    onClick {
                         takeScreenshot(game.canvas)
                     }
-                )
-                Text("Take Screenshot")
+                }) {
+                    // Material icon
+                    Div({
+                        classes("material-symbols-outlined")
+                    }) {
+                        Text("photo_camera")
+                    }
+                    Text("Take Screenshot")
+                }
             }
         }
     }

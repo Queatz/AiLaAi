@@ -2,7 +2,10 @@ package game
 
 import baseUrl
 import com.queatz.db.GameObject
+import com.queatz.db.GameObjectOptions
 import com.queatz.db.GameTile
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import lib.Scene
 import lib.DirectionalLight
 import lib.AbstractMesh
@@ -73,6 +76,9 @@ class Tilemap(
 
     // { 'x,y,z,d': gameObjectId }
     private val objectTypes = mutableMapOf<String, String>()
+
+    // { 'x,y,z,d': options }
+    private val objectOptions = mutableMapOf<String, String>()
 
     // Store base meshes by GameObject id
     private val objectBaseMeshes = mutableMapOf<String, Mesh>()
@@ -234,6 +240,21 @@ class Tilemap(
      */
     fun getObjectTypes(): kotlin.collections.Map<String, String> {
         return objectTypes.toMap()
+    }
+
+    /**
+     * Get a map of all object options in the scene
+     * Key format: "x,y,z,side", Value: options JSON string
+     */
+    fun getObjectOptions(): kotlin.collections.Map<String, String> {
+        return objectOptions.toMap()
+    }
+
+    /**
+     * Get options for a specific object
+     */
+    fun getObjectOptions(key: String): String? {
+        return objectOptions[key]
     }
 
     /**
@@ -515,6 +536,11 @@ class Tilemap(
             objectTypes[key] = gameObject.id!!
         }
 
+        // Store the GameObject options
+        if (gameObject.options != null) {
+            objectOptions[key] = gameObject.options!!
+        }
+
         // Get or create the base mesh for this object type
         val baseMesh = if (gameObject.id != null && objectBaseMeshes.containsKey(gameObject.id)) {
             // Reuse existing base mesh
@@ -571,6 +597,51 @@ class Tilemap(
 
         // Create an instance of the base mesh
         val newObject = baseMesh.createInstance("Object")
+
+        // Parse options if available - first try from the provided gameObject
+        var options = try {
+            gameObject.options?.let { Json.decodeFromString<GameObjectOptions>(it) }
+        } catch (e: Exception) {
+            null
+        }
+
+        // If no options in the provided gameObject, check if we should use default options from the key
+        if (options == null || (options.scaleVariation == 0f && options.colorVariation == 0f)) {
+            try {
+                // This is a fallback to ensure we're using the current editor settings
+                val currentOptions = gameObject.options ?: objectOptions[key]
+                if (currentOptions != null) {
+                    options = Json.decodeFromString<GameObjectOptions>(currentOptions)
+                }
+            } catch (e: Exception) {
+                console.error("Failed to parse object options", e)
+            }
+        }
+
+        // Apply scale variation if specified in options
+        if (options?.scaleVariation != null && options.scaleVariation > 0) {
+            // Generate random scale factor between (1-variation) and (1+variation)
+            val scaleFactor = 1f + (Math.random() * 2f - 1f) * options.scaleVariation
+            newObject.scaling.scaleInPlace(scaleFactor)
+        }
+
+        // Apply color variation if specified in options
+        if (options?.colorVariation != null && options.colorVariation > 0) {
+            // Get the material from the instance
+            val material = newObject.material as StandardMaterial
+
+            // Generate random color variation
+            val r = 1f + (Math.random() * 2f - 1f) * options.colorVariation
+            val g = 1f + (Math.random() * 2f - 1f) * options.colorVariation
+            val b = 1f + (Math.random() * 2f - 1f) * options.colorVariation
+
+            // Apply color variation to the diffuse color
+            material.diffuseColor = Color3(
+                r.coerceIn(0f, 1f),
+                g.coerceIn(0f, 1f),
+                b.coerceIn(0f, 1f)
+            )
+        }
 
         when (side) {
             Side.Y -> {

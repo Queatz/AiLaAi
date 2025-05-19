@@ -20,8 +20,11 @@ import kotlinx.browser.document
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.Position.Companion.Absolute
 import org.jetbrains.compose.web.css.bottom
@@ -56,8 +59,9 @@ class ChoosePhotoDialogControl(
     private val crop: Boolean = false,
 ) {
 
-    private var _isGenerating = MutableStateFlow(false)
-    val isGenerating = _isGenerating.asStateFlow()
+    private var _generatingCount = MutableStateFlow(0)
+    val generatingCount = _generatingCount.asStateFlow()
+    val isGenerating = _generatingCount.map { it > 0 }.stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     private var aiStyle = MutableStateFlow<String?>(null)
     private var aiStyles = MutableStateFlow(emptyList<Pair<String, String>>())
@@ -86,7 +90,7 @@ class ChoosePhotoDialogControl(
                 },
                 onFile = { photo ->
                     scope.launch {
-                        _isGenerating.value = true
+                        _generatingCount.value++
 
                         // Get image dimensions using a similar approach to File.toScaledBlob
                         val imageDeferred = CompletableDeferred<HTMLImageElement>()
@@ -125,32 +129,30 @@ class ChoosePhotoDialogControl(
                         ) {
                             onPhoto(it.urls.first(), width, height)
                         }
-                        _isGenerating.value = false
+                        _generatingCount.value--
                     }
                 }
             )
 
             if (!result.isNullOrBlank()) {
                 aiPrompt = result
-                _isGenerating.value = true
+                _generatingCount.value++
 
                 // Generate multiple photos based on count
                 val photoCount = count.value
-                var completedCount = 0
 
                 repeat(photoCount) {
-                    api.aiPhoto(AiPhotoRequest(
-                        prompt = result,
-                        style = aiStyle.value,
-                        aspect = aspect.value,
-                        removeBackground = removeBackground,
-                        crop = crop
-                    )) { photo ->
+                    api.aiPhoto(
+                        AiPhotoRequest(
+                            prompt = result,
+                            style = aiStyle.value,
+                            aspect = aspect.value,
+                            removeBackground = removeBackground,
+                            crop = crop
+                        )
+                    ) { photo ->
                         onPhoto(photo.photo, photo.width, photo.height)
-                        completedCount++
-                        if (completedCount >= photoCount) {
-                            _isGenerating.value = false
-                        }
+                        _generatingCount.value--
                     }
                 }
             }
@@ -169,7 +171,14 @@ fun rememberChoosePhotoDialog(
     val scope = rememberCoroutineScope()
 
     return remember {
-        ChoosePhotoDialogControl(scope, aiPrompt, showUpload, aspectRatio, removeBackground, crop)
+        ChoosePhotoDialogControl(
+            scope = scope,
+            aiPrompt = aiPrompt,
+            showUpload = showUpload,
+            aspectRatio = aspectRatio,
+            removeBackground = removeBackground,
+            crop = crop
+        )
     }
 }
 

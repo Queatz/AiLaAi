@@ -28,6 +28,7 @@ import r
  * @param assets The list of assets to display
  * @param isLoading Whether the assets are currently loading
  * @param isCreating Whether an asset is currently being created
+ * @param queueCount Number of items remaining in the creation queue
  * @param selectedAssetId The ID of the currently selected asset
  * @param onAssetSelected Callback when an asset is selected
  * @param onCreateAsset Callback when the create button is clicked
@@ -46,6 +47,7 @@ fun <T : Asset> AssetSection(
     assets: List<T>,
     isLoading: Boolean,
     isCreating: Boolean,
+    queueCount: Int = 0,
     selectedAssetId: String?,
     onAssetSelected: (T?) -> Unit,
     onCreateAsset: () -> Unit,
@@ -115,8 +117,8 @@ fun <T : Asset> AssetSection(
                 Text(createButtonText)
             }
 
-            // Show loading indicator when creating an asset
-            if (isCreating) {
+            // Show loading indicator when creating an asset or items are in queue
+            if (isCreating || queueCount > 0) {
                 Div({
                     style {
                         padding(.5.r)
@@ -130,7 +132,11 @@ fun <T : Asset> AssetSection(
                             marginTop(.5.r)
                         }
                     }) {
-                        Text(processingText)
+                        if (queueCount > 0) {
+                            Text("$processingText ($queueCount remaining)")
+                        } else {
+                            Text(processingText)
+                        }
                     }
                 }
             }

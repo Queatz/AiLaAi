@@ -69,7 +69,8 @@ fun GameEditorTabEditor(
             id = marker.id,
             name = marker.name,
             time = marker.time,
-            duration = marker.duration
+            duration = marker.duration,
+            event = marker.event
         )
     }
 
@@ -210,6 +211,9 @@ fun GameEditorTabEditor(
                     val z = parts[2].toIntOrNull() ?: 0
                     val side = parts[3]
 
+                    // Get the object options from the tilemap
+                    val objectOptions = map.tilemapEditor.tilemap.getObjectOptions(key)
+
                     // Add the object to the list
                     objectsList.add(
                         GameObjectData(
@@ -217,7 +221,8 @@ fun GameEditorTabEditor(
                             y = y,
                             z = z,
                             side = side,
-                            objectId = objectId
+                            objectId = objectId,
+                            options = objectOptions
                         )
                     )
                 }
@@ -234,7 +239,8 @@ fun GameEditorTabEditor(
                         y = position.y.toInt(),
                         z = position.z.toInt(),
                         side = side.toString(),
-                        objectId = currentObject.id
+                        objectId = currentObject.id,
+                        options = currentObject.options
                     )
                 )
             }

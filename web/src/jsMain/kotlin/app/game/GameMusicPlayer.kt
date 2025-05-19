@@ -13,6 +13,7 @@ import api
 import app.ailaai.api.gameMusics
 import baseUrl
 import com.queatz.db.GameMusic
+import com.queatz.db.PlayMusicEvent
 import game.AnimationMarker
 import game.Game
 import kotlinx.coroutines.flow.collectLatest
@@ -26,28 +27,27 @@ import kotlin.math.abs
 @Composable
 fun GameMusicPlayer(game: Game?) {
     val scope = rememberCoroutineScope()
-    var musicList by remember { mutableStateOf<List<GameMusic>>(emptyList()) }
-    var currentMusic by remember { mutableStateOf<GameMusic?>(null) }
+    // Create an instance of GameMusicPlayerUtil
+    val musicPlayerUtil = remember { GameMusicPlayerUtil() }
     var audioElement by remember { mutableStateOf<HTMLAudioElement?>(null) }
     var currentAudioSrc by remember { mutableStateOf<String?>(null) }
 
-    // Load music list on component mount
+    // Track current music for UI updates
+    var currentMusic by remember { mutableStateOf<GameMusic?>(null) }
+
+    // Update currentMusic and currentAudioSrc when they change in the util
     LaunchedEffect(Unit) {
-        api.gameMusics(
-            onError = {
-                console.error("Failed to load music", it)
-            }
-        ) { musics ->
-            musicList = musics
-        }
+        // We don't need to load all music at once anymore
+        // We'll load music on demand when markers are encountered
+        currentMusic = musicPlayerUtil.getCurrentMusic()
+        currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
     }
 
     // DisposableEffect to stop audio when component is unmounted or game changes
     DisposableEffect(game) {
         onDispose {
             // Stop any playing audio when component is unmounted or game changes
-            audioElement?.pause()
-            audioElement?.src = ""
+            musicPlayerUtil.stopMusic()
             currentMusic = null
             currentAudioSrc = null
         }
@@ -65,9 +65,14 @@ fun GameMusicPlayer(game: Game?) {
                 attr("loop", "true")
 
                 ref {
+                    // Store the audio element in our local state
                     audioElement = it
+                    // Also pass it to the utility
+                    musicPlayerUtil.setAudioElement(it)
+
                     onDispose {
                         audioElement = null
+                        musicPlayerUtil.setAudioElement(null)
                     }
                 }
             }) {
@@ -100,34 +105,25 @@ fun GameMusicPlayer(game: Game?) {
 
     // Function to play music at a marker
     fun playMusicAtMarker(marker: AnimationMarker) {
-        // If we have a current music and it matches the marker name, play it
-        val musicToPlay = musicList.find { it.name == marker.name }
-        if (musicToPlay?.audio != null) {
-            console.log("Playing music: ${musicToPlay.name} ($baseUrl${musicToPlay.audio}) at marker time ${marker.time}")
+        // Use the utility to play music for this marker
+        musicPlayerUtil.playMusicForMarker(marker)
 
-            // Update the current audio source
-            currentAudioSrc = "$baseUrl${musicToPlay.audio}"
-            currentMusic = musicToPlay
-        } else {
-            console.log("No matching music found for marker: ${marker.name} at time ${marker.time}")
-            console.log("Available music: ${musicList.map { it.name }}")
-        }
+        // Update our local state to reflect changes in the utility
+        currentMusic = musicPlayerUtil.getCurrentMusic()
+        currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
     }
 
     // Register a callback with the game to check for markers during animation
-    LaunchedEffect(game, musicList) {
+    LaunchedEffect(game) {
         game?.let { g ->
             // Add a callback to check for markers during animation
             g.animationData.onTimeUpdate = { time ->
-                // Find markers at or very close to the current time
-                val markersAtTime = g.animationData.markers.filter { marker ->
-                    abs(marker.time - time) < 1.0 // Within 1 second for more reliable detection
-                }
+                // Use the utility to process markers at the current time
+                musicPlayerUtil.processMarkersAtTime(g, time)
 
-                // Play music for any markers at this time
-                markersAtTime.forEach { marker ->
-                    playMusicAtMarker(marker)
-                }
+                // Update our local state to reflect changes in the utility
+                currentMusic = musicPlayerUtil.getCurrentMusic()
+                currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
             }
         }
     }
@@ -137,31 +133,23 @@ fun GameMusicPlayer(game: Game?) {
         game?.playStateFlow?.collectLatest { isPlaying ->
             if (!isPlaying) {
                 // Pause the audio when animation is paused
-                audioElement?.pause()
+                musicPlayerUtil.pauseMusic()
             } else {
                 // When animation starts playing, check for markers at the current time
                 game.animationData.currentTime.let { time ->
                     console.log("Animation started playing at time: $time")
 
-                    // Find markers at or very close to the current time
-                    val markersAtTime = game.animationData.markers.filter { marker ->
-                        abs(marker.time - time) < 1.0 // Within 1 second for more reliable detection
-                    }
+                    // Use the utility to process markers at the current time
+                    musicPlayerUtil.processMarkersAtTime(game, time)
 
-                    // Play music for any markers at this time
-                    if (markersAtTime.isNotEmpty()) {
-                        console.log("Found ${markersAtTime.size} markers at start time: $time")
-                        markersAtTime.forEach { marker ->
-                            playMusicAtMarker(marker)
-                        }
-                    } else {
-                        console.log("No markers found at start time: $time")
-                    }
+                    // Update our local state to reflect changes in the utility
+                    currentMusic = musicPlayerUtil.getCurrentMusic()
+                    currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
                 }
 
                 // Resume the audio if we have a current music and animation is playing
-                if (currentMusic != null) {
-                    audioElement?.play()
+                if (musicPlayerUtil.getCurrentMusic() != null) {
+                    musicPlayerUtil.resumeMusic()
                 }
             }
         }

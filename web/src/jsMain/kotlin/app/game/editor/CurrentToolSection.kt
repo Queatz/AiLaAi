@@ -13,10 +13,7 @@ import game.Map
 import game.TilemapEditor
 import kotlinx.browser.window
 import kotlin.js.Date
-import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginRight
-import org.jetbrains.compose.web.css.marginTop
-import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -120,30 +117,121 @@ fun CurrentToolSection(map: Map) {
 
             // Show clone instructions and current step if in clone mode
             if (currentDrawMode == DrawMode.Clone) {
+                // Use updateTimestamp to force recomposition when the clone state changes
+                // This is a dummy usage that doesn't affect the UI but ensures recomposition
+                @Suppress("UNUSED_VARIABLE")
+                val dummy = updateTimestamp
+
+                val currentStep = when (cloneState) {
+                    TilemapEditor.CloneSelectionState.NotStarted -> 1
+                    TilemapEditor.CloneSelectionState.FirstPointSelected -> 2
+                    TilemapEditor.CloneSelectionState.SecondPointSelected -> 3
+                    TilemapEditor.CloneSelectionState.Complete -> 4
+                    else -> 1
+                }
+
+                // Step indicator with 4 sections
                 Div({
                     style {
-                        padding(.5.r)
-                        marginTop(.5.r)
-                        marginBottom(.5.r)
+                        display(DisplayStyle.Flex)
+                        justifyContent(JustifyContent.SpaceBetween)
+                        marginTop(1.r)
+                        marginBottom(1.r)
                     }
                 }) {
-                    // Use updateTimestamp to force recomposition when the clone state changes
-                    // This is a dummy usage that doesn't affect the UI but ensures recomposition
-                    @Suppress("UNUSED_VARIABLE")
-                    val dummy = updateTimestamp
+                    // Create 4 step indicators
+                    for (step in 1..4) {
+                        Div({
+                            style {
+                                display(DisplayStyle.Flex)
+                                flexDirection(FlexDirection.Column)
+                                alignItems(AlignItems.Center)
+                                gap(0.5.r)
+                                width(5.r)
+                            }
+                        }) {
+                            // Step circle
+                            Div({
+                                style {
+                                    width(2.r)
+                                    height(2.r)
+                                    borderRadius(1.r)
+                                    backgroundColor(if (step == currentStep) Styles.colors.primary else Color("#e0e0e0"))
+                                    display(DisplayStyle.Flex)
+                                    justifyContent(JustifyContent.Center)
+                                    alignItems(AlignItems.Center)
+                                    color(if (step == currentStep) Color.white else Color("#666666"))
+                                    fontWeight(if (step == currentStep) "bold" else "normal")
+                                }
+                            }) {
+                                Text("$step")
+                            }
+
+                            // Step label
+                            Div({
+                                style {
+                                    fontSize(12.px)
+                                    textAlign("center")
+                                    color(if (step == currentStep) Styles.colors.primary else Color("#666666"))
+                                    fontWeight(if (step == currentStep) "bold" else "normal")
+                                }
+                            }) {
+                                Text(
+                                    when (step) {
+                                        1 -> "First Corner"
+                                        2 -> "Second Corner"
+                                        3 -> "Height"
+                                        4 -> "Draw!"
+                                        else -> ""
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Instruction box with rounded corners and primary color
+                Div({
+                    style {
+                        padding(1.r)
+                        marginTop(.5.r)
+                        marginBottom(1.r)
+                        borderRadius(1.r)
+                        border(1.px, LineStyle.Solid, Styles.colors.primary)
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        gap(0.5.r)
+                    }
+                }) {
+                    // Add an icon based on the current step
+                    Div({
+                        classes("material-symbols-outlined")
+                        style {
+                            color(Styles.colors.primary)
+                            fontSize(24.px)
+                        }
+                    }) {
+                        Text(when (cloneState) {
+                            TilemapEditor.CloneSelectionState.NotStarted -> "touch_app"
+                            TilemapEditor.CloneSelectionState.FirstPointSelected -> "open_with"
+                            TilemapEditor.CloneSelectionState.SecondPointSelected -> "height"
+                            TilemapEditor.CloneSelectionState.Complete -> "content_copy"
+                            else -> "help"
+                        })
+                    }
 
                     val instructionText = when (cloneState) {
                         TilemapEditor.CloneSelectionState.NotStarted ->
-                            "Step 1/4: Click to select the first corner of your selection"
+                            "Click to select the first corner of your selection"
 
                         TilemapEditor.CloneSelectionState.FirstPointSelected ->
-                            "Step 2/4: Click to select the second corner (width/depth)"
+                            "Click to select the second corner (width/depth)"
 
                         TilemapEditor.CloneSelectionState.SecondPointSelected ->
-                            "Step 3/4: Click to set the height of your selection"
+                            "Click to set the height of your selection"
 
                         TilemapEditor.CloneSelectionState.Complete ->
-                            "Step 4/4: Click to place your cloned selection. Alt+click to erase."
+                            "Click to place your cloned selection. Alt+click to erase."
 
                         else -> ""
                     }
@@ -154,10 +242,11 @@ fun CurrentToolSection(map: Map) {
                 if (cloneState != TilemapEditor.CloneSelectionState.NotStarted) {
                     // Reset clone selection button
                     Button({
-                        classes(Styles.outlineButton)
+                        classes(Styles.button)
                         style {
                             marginRight(0.5.r)
                             marginBottom(0.5.r)
+                            width(100.percent)
                         }
                         onClick {
                             // Reset the clone selection

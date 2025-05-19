@@ -2,19 +2,18 @@ package app.game.editor
 
 import Styles
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.flow.collectLatest
+import app.dialog.inputDialog
 import components.IconButton
 import format1Decimal
 import format3Decimals
-import kotlin.math.round
 import game.AnimationMarker
 import game.Game
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -36,6 +35,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextInput
 import r
+import kotlin.math.round
 
 @Composable
 fun AnimationSection(game: Game?) {
@@ -62,15 +62,49 @@ fun AnimationSection(game: Game?) {
         }
 
 
-        // Current time display
+        // Current time display with jump button
         Div({
             style {
                 display(DisplayStyle.Flex)
                 justifyContent(JustifyContent.Center)
+                alignItems(AlignItems.Center)
+                gap(0.5.r)
                 marginBottom(0.5.r)
             }
         }) {
             Text("${game.animationData.currentTime.format1Decimal()} seconds")
+
+            // Jump to time button
+            var showJumpDialog by remember { mutableStateOf(false) }
+            var jumpTimeInput by remember { mutableStateOf("") }
+
+            IconButton(
+                name = "timer",
+                title = "Jump to time",
+                onClick = {
+                    showJumpDialog = true
+                    jumpTimeInput = game.animationData.currentTime.format1Decimal()
+                }
+            )
+
+            // Jump dialog using inputDialog
+            LaunchedEffect(showJumpDialog) {
+                if (showJumpDialog) {
+                    val result = inputDialog(
+                        title = "Jump to Time (seconds)",
+                        defaultValue = game.animationData.currentTime.format1Decimal(),
+                        confirmButton = "Jump",
+                        cancelButton = "Cancel",
+                        singleLine = true
+                    )
+
+                    result?.toDoubleOrNull()?.let { time: Double ->
+                        game.setTime(time)
+                    }
+
+                    showJumpDialog = false
+                }
+            }
         }
 
         // Animation controls
@@ -186,9 +220,10 @@ fun AnimationSection(game: Game?) {
 @Composable
 private fun MarkerItem(game: Game, marker: AnimationMarker) {
     var isEditing by remember { mutableStateOf(false) }
-    var editName by remember { mutableStateOf(marker.name) }
-    var editTime by remember { mutableStateOf(marker.time.toString()) }
-    var editDuration by remember { mutableStateOf(marker.duration.toString()) }
+    var editName by remember(marker) { mutableStateOf(marker.name) }
+    var editTime by remember(marker) { mutableStateOf(marker.time.toString()) }
+    var editDuration by remember(marker) { mutableStateOf(marker.duration.toString()) }
+    var editVisible by remember(marker) { mutableStateOf(marker.visible) }
 
     Div({
         style {
@@ -241,10 +276,32 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     placeholder("Duration (seconds, 0 = play until end)")
                     style {
                         width(100.percent)
+                        marginBottom(0.5.r)
                     }
                     onInput { event ->
                         editDuration = event.value
                     }
+                }
+
+                // Visibility toggle
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        alignItems(AlignItems.Center)
+                        gap(0.5.r)
+                        width(100.percent)
+                    }
+                }) {
+                    Text("Visible on seekbar:")
+
+                    // Toggle button
+                    IconButton(
+                        name = if (editVisible) "visibility" else "visibility_off",
+                        title = if (editVisible) "Marker is visible" else "Marker is hidden",
+                        onClick = {
+                            editVisible = !editVisible
+                        }
+                    )
                 }
             }
 
@@ -262,6 +319,8 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         isEditing = false
                         editName = marker.name
                         editTime = marker.time.toString()
+                        editDuration = marker.duration.toString()
+                        editVisible = marker.visible
                     }
                 }) {
                     Text("Cancel")
@@ -281,6 +340,8 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                             marker.duration = editDuration.toDoubleOrNull()?.let { 
                                 (round(it * 1000.0) / 1000.0)
                             } ?: marker.duration
+                            // Update visibility
+                            marker.visible = editVisible
                             // Force update of markers list to trigger UI recomposition
                             game.animationData.updateMarkers()
                             // Update seekbar right away when changing marker duration
@@ -344,6 +405,17 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         title = "Go to marker",
                         onClick = {
                             game.setTime(marker.time)
+                        }
+                    )
+
+                    // Visibility toggle
+                    IconButton(
+                        name = if (marker.visible) "visibility" else "visibility_off",
+                        title = if (marker.visible) "Hide marker on seekbar" else "Show marker on seekbar",
+                        onClick = {
+                            marker.visible = !marker.visible
+                            // Force update of markers list to trigger UI recomposition
+                            game.animationData.updateMarkers()
                         }
                     )
                 }

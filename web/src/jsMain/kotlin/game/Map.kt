@@ -63,6 +63,13 @@ class Map(private val scene: Scene) {
 
         // Input
         scene.onKeyboardObservable.add(fun (event: KeyboardInfo) {
+            // Stop animation if it's playing on ANY keyboard input
+            game?.let { g ->
+                if (g.isPlaying()) {
+                    g.pause()
+                }
+            }
+
             // todo if Tab, toggle camera view
             if (listOf("w", "a", "s", "d", "q", "r").contains(event.event.key)) {
                 if (event.type == KeyboardEventTypes.KEYDOWN) {
@@ -117,6 +124,21 @@ class Map(private val scene: Scene) {
         })
 
         scene.onPointerObservable.add(fun(event: PointerInfo) {
+            if (event.type == PointerEventTypes.POINTERWHEEL) {
+                // Auto recenter camera target on mousewheel zoom
+                if (camera.view == CameraView.Free) {
+                    camera.recenter()
+                }
+
+                // Stop animation if it's playing
+                game?.let { g ->
+                    if (g.isPlaying()) {
+                        g.pause()
+                    }
+                }
+                return
+            }
+
             if (event.type == PointerEventTypes.POINTERUP) {
                 camera.isMoving = false
                 isDrawing = false

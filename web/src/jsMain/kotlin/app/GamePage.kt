@@ -349,6 +349,13 @@ fun GamePage(
     var isPlaying by remember { mutableStateOf(false) }
     var isPixelated by remember { mutableStateOf(false) }
 
+    // Hide play button when animation is playing
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            showPlayButton = false
+        }
+    }
+
     // Function to toggle fullscreen mode
     fun toggleFullscreen(element: HTMLElement) {
         if (!isFullscreen) {
@@ -402,6 +409,10 @@ fun GamePage(
     LaunchedEffect(game) {
         game?.playStateFlow?.collectLatest { playing ->
             isPlaying = playing
+            // Hide the play button when animation starts playing
+            if (playing) {
+                showPlayButton = false
+            }
         }
     }
 
@@ -409,7 +420,7 @@ fun GamePage(
 
     Div({
         // Add a class to identify the game container for fullscreen
-        classes(Styles.fullscreenContainer)
+        classes(Styles.fullscreenContainer, "game-container")
         style {
             display(DisplayStyle.Flex)
             width(100.percent)
@@ -418,7 +429,13 @@ fun GamePage(
             if (!isFullscreen) {
                 padding(1.r)
             } else {
-                position(Position.Fixed)
+                // Hide scrollbars without using position: fixed or overflow: hidden
+                // which can break other functionality
+                property("scrollbar-width", "none") // Firefox
+                property("-ms-overflow-style", "none") // IE/Edge
+
+                // For WebKit browsers (Chrome, Safari)
+                property("&::-webkit-scrollbar", "{display: none;}")
             }
             styles()
         }
@@ -666,7 +683,7 @@ fun GamePage(
                     Seekbar(
                         currentPosition = game.animationData.currentTime,
                         markers = game.animationData.markers.map { marker ->
-                            app.game.editor.SeekbarMarker(marker.time, marker.name, marker.duration)
+                            app.game.editor.SeekbarMarker(marker.time, marker.name, marker.duration, marker.visible)
                         },
                         keyframes = if (editable) game.animationData.cameraKeyframes.map { keyframe ->
                             app.game.editor.SeekbarKeyframe(keyframe.time)

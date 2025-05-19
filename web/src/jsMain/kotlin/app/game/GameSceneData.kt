@@ -27,7 +27,8 @@ data class GameObjectData(
     val y: Int = 0,
     val z: Int = 0,
     val side: String = "y",
-    val objectId: String? = null
+    val objectId: String? = null,
+    val options: String? = null
 )
 
 // Wrapper class for a collection of tiles

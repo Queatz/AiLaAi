@@ -378,7 +378,8 @@ fun Route.gameRoutes() {
                         photo = gameObject.photo,
                         width = gameObject.width,
                         height = gameObject.height,
-                        published = gameObject.published
+                        published = gameObject.published,
+                        options = gameObject.options,
                     )
                 )
             }
@@ -421,6 +422,10 @@ fun Route.gameRoutes() {
                     }
                     if (update.categories != null) {
                         gameObject.categories = update.categories
+                    }
+
+                    if (update.options != null) {
+                        gameObject.options = update.options
                     }
 
                     db.update(gameObject)
