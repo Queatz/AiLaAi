@@ -137,10 +137,17 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
         }
     }
 
-    // Load animation data if available
+            // Load animation data if available
     if (gameScene.config != null) {
         try {
             val config = json.decodeFromString<GameSceneConfig>(gameScene.config!!)
+
+            // Load saved positions
+            config.savedPositions.forEach { positionData ->
+                // Add the saved position to the animation data
+                game.animationData.savedPositions += positionData
+                console.log("Loaded saved position: ${positionData.name} at position (${positionData.position.x}, ${positionData.position.y}, ${positionData.position.z})")
+            }
 
             // Load markers
             config.markers.forEach { markerData ->
@@ -174,8 +181,8 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
             console.log("Animation data loaded successfully")
 
             // Set camera position to the first keyframe if any exist
-            if (game.animationData.cameraKeyframes.isNotEmpty()) {
-                val firstKeyframe = game.animationData.cameraKeyframes.minByOrNull { it.time }
+            if (game.animationData._cameraKeyframes.isNotEmpty()) {
+                val firstKeyframe = game.animationData._cameraKeyframes.minByOrNull { it.time }
                 firstKeyframe?.let { keyframe ->
                     // Apply the first keyframe to the camera
                     game.setTime(keyframe.time)
@@ -328,6 +335,7 @@ fun GamePage(
     gameScene: GameScene? = null,
     onSceneDeleted: () -> Unit = {},
     onScenePublished: () -> Unit = {},
+    onSceneForked: (GameScene) -> Unit = {},
     styles: StyleScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
     showSidePanel: Boolean = true,
@@ -344,11 +352,12 @@ fun GamePage(
 
     var showPlayButton by remember(game) { mutableStateOf(true) }
 
-    // Track fullscreen and playing states
+    // Track fullscreen, playing, and side-panel visibility states
     var isFullscreen by remember { mutableStateOf(false) }
     var isPlaying by remember { mutableStateOf(false) }
     var isPixelated by remember { mutableStateOf(false) }
 
+    var showPanel by remember { mutableStateOf(showSidePanel) }
     // Hide play button when animation is playing
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
@@ -466,19 +475,49 @@ fun GamePage(
 
                     tabIndex(1)
 
-                    // Add keyboard event listener for animation control
+                    // Add keyboard event listener for animation control and tool-aware play/pause
                     onKeyDown { event ->
-                        if (game?.isPlaying() == true) {
+                        // When no tile or object tool is selected, Space toggles play/pause
+                        if (event.key == " "
+                            && game?.map?.tilemapEditor?.currentGameTile == null
+                            && game?.map?.tilemapEditor?.currentGameObject == null
+                        ) {
+                            game?.togglePlayback()
+                            isPlaying = game?.isPlaying() ?: false
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        // If already playing, any key pauses playback
+                        else if (game?.isPlaying() == true) {
                             game?.pause()
                             isPlaying = false
                             event.preventDefault()
                         } else if (event.key == "Escape") {
                             showPlayButton = false
                             event.preventDefault()
+                        } else if (event.key == "ArrowLeft" && event.altKey && event.shiftKey) {
+                            // Scrub backward by 1 second when Shift+Alt+Left
+                            game?.let {
+                                val newTime = (it.animationData.currentTime - 1.0)
+                                    .coerceIn(0.0, it.animationData.totalDuration)
+                                it.setTime(newTime)
+                            }
+                            event.preventDefault()
+                            event.stopPropagation()
                         } else if (event.key == "ArrowLeft" && event.altKey) {
                             // Scrub backward by 0.1 second
                             game?.let {
-                                val newTime = (it.animationData.currentTime - 0.1).coerceIn(0.0, it.animationData.totalDuration)
+                                val newTime = (it.animationData.currentTime - 0.1)
+                                    .coerceIn(0.0, it.animationData.totalDuration)
+                                it.setTime(newTime)
+                            }
+                            event.preventDefault()
+                            event.stopPropagation()
+                        } else if (event.key == "ArrowRight" && event.altKey && event.shiftKey) {
+                            // Scrub forward by 1 second when Shift+Alt+Right
+                            game?.let {
+                                val newTime = (it.animationData.currentTime + 1.0)
+                                    .coerceIn(0.0, it.animationData.totalDuration)
                                 it.setTime(newTime)
                             }
                             event.preventDefault()
@@ -486,7 +525,8 @@ fun GamePage(
                         } else if (event.key == "ArrowRight" && event.altKey) {
                             // Scrub forward by 0.1 second
                             game?.let {
-                                val newTime = (it.animationData.currentTime + 0.1).coerceIn(0.0, it.animationData.totalDuration)
+                                val newTime = (it.animationData.currentTime + 0.1)
+                                    .coerceIn(0.0, it.animationData.totalDuration)
                                 it.setTime(newTime)
                             }
                             event.preventDefault()
@@ -633,6 +673,23 @@ fun GamePage(
                 ) {
                     game?.togglePlayback()
                 }
+                // Toggle side panel visibility when not editable
+                if (!editable) {
+                    IconButton(
+                        name = if (showPanel) "chevron_right" else "chevron_left",
+                        title = if (showPanel) "Hide side panel" else "Show side panel",
+                        background = true,
+                        styles = {
+                            backgroundColor(rgba(0, 0, 0, 0.5))
+                            color(Color.white)
+                            padding(0.5.r)
+                            borderRadius(0.5.r)
+                            property("margin-right", "0.5rem")
+                        }
+                    ) {
+                        showPanel = !showPanel
+                    }
+                }
 
                 // Screenshot button
                 if (showScreenshot) {
@@ -681,9 +738,14 @@ fun GamePage(
             ) {
                 game?.let { game ->
                     Seekbar(
-                        currentPosition = game.animationData.currentTime,
+                        currentPosition = game.animationData.collectCurrentTime(),
                         markers = game.animationData.markers.map { marker ->
-                            app.game.editor.SeekbarMarker(marker.time, marker.name, marker.duration, marker.visible)
+                            app.game.editor.SeekbarMarker(
+                                position = marker.time,
+                                name = marker.name,
+                                duration = marker.duration,
+                                visible = marker.visible
+                            )
                         },
                         keyframes = if (editable) game.animationData.cameraKeyframes.map { keyframe ->
                             app.game.editor.SeekbarKeyframe(keyframe.time)
@@ -695,7 +757,7 @@ fun GamePage(
                 }
             }
         }
-        if (showSidePanel) {
+        if (showPanel) {
             game?.let { game ->
                 GameEditorPanel(
                     engine = game.engine,
@@ -703,6 +765,7 @@ fun GamePage(
                     gameScene = gameScene,
                     onSceneDeleted = onSceneDeleted,
                     onScenePublished = onScenePublished,
+                    onSceneForked = onSceneForked,
                     styles = {
                         flexShrink(0)
                     },

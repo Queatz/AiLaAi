@@ -54,9 +54,10 @@ fun SceneSection(
         initiallyExpanded = false,
         closeOtherPanels = true
     ) {
+        // Main content wrapper (spacing via gap, outer padding handled by PanelSection)
         Div({
             style {
-                padding(1.r)
+                // padding removed to prevent excessive nesting padding
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Column)
                 gap(1.r)
@@ -195,13 +196,15 @@ fun SceneSection(
                     Div({
                         style {
                             borderRadius(0.5.r)
-                            overflow("hidden")
+                            property("overflow", "hidden")
+                            width(100.percent)
+                            property("aspect-ratio", "2 / 1")
                         }
                     }) {
                         Img(src = "$baseUrl${scenePhoto!!}", attrs = {
                             style {
-                                maxWidth(100.percent)
-                                height(12.r)
+                                width(100.percent)
+                                height(100.percent)
                                 property("object-fit", "cover")
                             }
                         })
@@ -209,8 +212,9 @@ fun SceneSection(
                 } else {
                     Div({
                         style {
-                            height(12.r)
                             borderRadius(0.5.r)
+                            width(100.percent)
+                            property("aspect-ratio", "2 / 1")
                             display(DisplayStyle.Flex)
                             justifyContent(JustifyContent.Center)
                             alignItems(AlignItems.Center)

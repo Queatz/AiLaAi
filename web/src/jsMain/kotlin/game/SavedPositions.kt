@@ -1,7 +1,6 @@
 package game
 
-import com.queatz.db.GameDiscussionExtended
-import com.queatz.db.Vector3Data
+import com.queatz.db.SavedPositionData
 import lib.ActionManager
 import lib.Color3
 import lib.CreatePlaneOptions
@@ -21,14 +20,14 @@ import lib.Vector3
 import lib.VertexBuffer
 
 /**
- * Class to manage discussion markers in the 3D scene
+ * Class to manage saved positions in the 3D scene
  */
-class DiscussionMarkers(private val scene: Scene) {
+class SavedPositions(private val scene: Scene) {
     private val markers = mutableMapOf<String, Mesh>()
     private val textLabels = mutableMapOf<String, Mesh>()
 
     // Glow layer for the markers
-    private val glowLayer = GlowLayer("discussionGlow", scene).apply {
+    private val glowLayer = GlowLayer("savedPositionsGlow", scene).apply {
         intensity = 0.75f
         blurKernelSize = 16f
     }
@@ -39,20 +38,20 @@ class DiscussionMarkers(private val scene: Scene) {
     /**
      * Add a marker to the scene
      */
-    fun addMarker(id: String, position: Vector3Data, comment: String? = null) {
-        // Create a yellow sphere for the marker
+    fun addMarker(id: String, position: Vector3, name: String? = null) {
+        // Create a white sphere for the marker
         val markerMesh = MeshBuilder.CreateSphere(id, object : CreateSphereOptions {
             override val diameter = 0.5f
             override val segments = 16
         }, scene)
 
         // Position the marker
-        markerMesh.position = Vector3(position.x, position.y, position.z)
+        markerMesh.position = position.clone()
 
-        // Create a yellow material
+        // Create a white material
         val material = StandardMaterial("marker-material-$id", scene)
-        material.diffuseColor = Color3(1f, 1f, 0f) // Yellow color
-        material.emissiveColor = Color3(.2f, .2f, 0f) // Add emissive color for glow
+        material.diffuseColor = Color3(1f, 1f, 1f) // White color
+        material.emissiveColor = Color3(.2f, .2f, .2f) // Add emissive color for glow
         material.specularColor = Color3(0.1f, 0.1f, 0.1f)
         markerMesh.material = material
 
@@ -73,16 +72,16 @@ class DiscussionMarkers(private val scene: Scene) {
         // Add the marker to the glow layer
         glowLayer.addIncludedOnlyMesh(markerMesh)
 
-        // Add text label if comment is provided
-        if (!comment.isNullOrBlank()) {
-            addTextLabel(id, position, comment)
+        // Add text label if name is provided
+        if (!name.isNullOrBlank()) {
+            addTextLabel(id, position, name)
         }
     }
 
     /**
      * Add a text label next to a marker
      */
-    private fun addTextLabel(id: String, position: Vector3Data, text: String) {
+    private fun addTextLabel(id: String, position: Vector3, text: String) {
         // Measurement setup
         val measureTexture = DynamicTexture(
             name = "measure-texture",
@@ -124,9 +123,8 @@ class DiscussionMarkers(private val scene: Scene) {
         }.toTypedArray()
         plane.setVerticesData(VertexBuffer.PositionKind, bv, false)
 
-
         // Position and billboard setup
-        plane.position = Vector3(position.x, position.y, position.z)
+        plane.position = position.clone()
         plane.billboardMode = Mesh.BILLBOARDMODE_ALL
 
         // Create the render texture
@@ -221,23 +219,22 @@ class DiscussionMarkers(private val scene: Scene) {
     }
 
     /**
-     * Update markers based on discussions
+     * Update markers based on saved positions
      */
-    fun updateMarkers(discussions: List<GameDiscussionExtended>) {
+    fun updateMarkers(savedPositions: List<SavedPositionData>) {
         // Clear existing markers
         clearMarkers()
 
-        // Add markers for all discussions
-        discussions.forEach { discussion ->
-            val discussionObj = discussion.discussion
-            if (discussionObj != null) {
-                val id = discussionObj.id
-                val position = discussionObj.position
-                val comment = discussionObj.comment
-                if (id != null && position != null) {
-                    addMarker(id, position, comment)
-                }
-            }
+        // Add markers for all saved positions
+        savedPositions.forEach { savedPosition ->
+            val id = savedPosition.id
+            val position = savedPosition.position
+            val name = savedPosition.name
+            addMarker(
+                id = id,
+                position = Vector3(position.x, position.y, position.z),
+                name = name
+            )
         }
     }
 

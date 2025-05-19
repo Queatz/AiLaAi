@@ -44,6 +44,10 @@ class Game(
      * Start animation playback
      */
     fun play() {
+        // If at or beyond end, restart from beginning
+        if (animationData.currentTime >= animationData.totalDuration) {
+            setTime(0.0)
+        }
         isPlaying = true
         lastFrameTime = Date().getTime()
         _playStateFlow.value = true
@@ -87,7 +91,11 @@ class Game(
     }
 
     init {
-        engine = Engine(canvas, true, js("{ preserveDrawingBuffer: true, disableWebGL2Support: false }"))
+        engine = Engine(
+            canvas,
+            true,
+            js("({ preserveDrawingBuffer: true, disableWebGL2Support: false })")
+        )
         scene = Scene(engine)
         map = Map(scene)
 
@@ -104,9 +112,9 @@ class Game(
                 // Update current time
                 animationData.currentTime += deltaTime
 
-                // Loop back to start if we reach the end
-                if (animationData.currentTime > animationData.totalDuration) {
-                    animationData.currentTime = 0.0
+                // Stop at end if we reach or pass the end of the animation
+                if (animationData.currentTime >= animationData.totalDuration) {
+                    animationData.currentTime = animationData.totalDuration
                     // Change the Pause button back to Play when animation reaches the end
                     isPlaying = false
                     _playStateFlow.value = false

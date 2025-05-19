@@ -64,9 +64,17 @@ data class GameMusic(
  * Serializable data class for storing animation configuration
  */
 @Serializable
+data class SavedPositionData(
+    val id: String,
+    val name: String,
+    val position: Vector3Data
+)
+
+@Serializable
 data class GameSceneConfig(
     val markers: List<AnimationMarkerData> = emptyList(),
     val cameraKeyframes: List<CameraKeyframeData> = emptyList(),
+    val savedPositions: List<SavedPositionData> = emptyList(),
     val backgroundColor: Color4Data? = null,
     val cameraFov: Float? = null,
     val ssaoEnabled: Boolean? = null,
@@ -107,7 +115,7 @@ data class Color4Data(
  */
 @Serializable
 sealed class MarkerEvent {
-    abstract val type: String
+    abstract val action: String
 }
 
 /**
@@ -116,7 +124,7 @@ sealed class MarkerEvent {
 @Serializable
 data class PlayMusicEvent(
     val musicId: String,
-    override val type: String = "play_music"
+    override val action: String = "play_music"
 ) : MarkerEvent()
 
 /**

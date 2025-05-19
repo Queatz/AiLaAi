@@ -20,7 +20,10 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun CurrentToolSection(map: Map) {
+fun CurrentToolSection(
+    map: Map,
+    onToolDeselected: () -> Unit = {}
+) {
     PanelSection(
         title = "Tool",
         icon = "build",
@@ -28,6 +31,16 @@ fun CurrentToolSection(map: Map) {
         closeOtherPanels = true
     ) {
         var currentDrawMode by remember { mutableStateOf(map.tilemapEditor.drawMode) }
+        // Track which tool is selected; null means deselected
+        // Track which tool is selected; null means deselected
+        var selectedToolId by remember {
+            mutableStateOf<String?>(
+                when (currentDrawMode) {
+                    DrawMode.Tile, DrawMode.Object -> "draw"
+                    DrawMode.Clone -> "clone"
+                }
+            )
+        }
 
         // Use a state variable for the clone selection state so it can be updated
         var cloneState by remember { mutableStateOf<TilemapEditor.CloneSelectionState?>(null) }
@@ -90,26 +103,32 @@ fun CurrentToolSection(map: Map) {
                 )
             )
 
-            // Determine selected tool ID based on current draw mode
-            val selectedToolId = when (currentDrawMode) {
-                DrawMode.Tile, DrawMode.Object -> "draw"
-                DrawMode.Clone -> "clone"
-            }
-
-            // Use ToolGrid for tool selection
+            // Use ToolGrid for tool selection with toggle-to-deselect behavior
             ToolGrid(
                 tools = tools,
                 selectedToolId = selectedToolId,
                 onToolSelected = { tool ->
-                    when (tool.id) {
-                        "draw" -> {
-                            map.tilemapEditor.drawMode = DrawMode.Tile
-                            currentDrawMode = DrawMode.Tile
-                        }
-
-                        "clone" -> {
-                            map.tilemapEditor.drawMode = DrawMode.Clone
-                            currentDrawMode = DrawMode.Clone
+                    if (tool.id == selectedToolId) {
+                        // Deselect current tool and clear selections
+                        selectedToolId = null
+                        map.tilemapEditor.currentGameTile = null
+                        map.tilemapEditor.currentGameObject = null
+                        // Reset to default draw mode
+                        map.tilemapEditor.drawMode = DrawMode.Tile
+                        currentDrawMode = DrawMode.Tile
+                        onToolDeselected()
+                    } else {
+                        // Select new tool
+                        selectedToolId = tool.id
+                        when (tool.id) {
+                            "draw" -> {
+                                map.tilemapEditor.drawMode = DrawMode.Tile
+                                currentDrawMode = DrawMode.Tile
+                            }
+                            "clone" -> {
+                                map.tilemapEditor.drawMode = DrawMode.Clone
+                                currentDrawMode = DrawMode.Clone
+                            }
                         }
                     }
                 }

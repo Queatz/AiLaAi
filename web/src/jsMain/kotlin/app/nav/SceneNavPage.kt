@@ -1,6 +1,5 @@
 package app.nav
 
-import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,7 +19,6 @@ import application
 import com.queatz.db.GameScene
 import components.IconButton
 import components.Loading
-import app.nav.NavSearchInput
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -108,6 +106,7 @@ fun SceneNavPage(
     LaunchedEffect(selected) {
         searchText = ""
         showSearch = false
+        loadScenes()
     }
 
     if (filterMenuTarget != null) {

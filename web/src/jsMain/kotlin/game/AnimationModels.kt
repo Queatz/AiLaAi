@@ -1,7 +1,13 @@
 package game
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.queatz.db.MarkerEvent
+import com.queatz.db.SavedPositionData
+import com.queatz.db.Vector3Data
 import lib.Vector3
 import kotlin.js.Date
 
@@ -10,7 +16,7 @@ import kotlin.js.Date
  * @param id Unique identifier for the marker
  * @param name Name of the marker
  * @param time Time in seconds where the marker is placed
- * @param duration Duration in seconds (0 = play until end)
+ * @param duration Duration in seconds (0 = play until `end)
  */
 data class AnimationMarker(
     val id: String,
@@ -40,45 +46,50 @@ data class CameraKeyframe(
     val alpha: Float,
     val beta: Float,
     val radius: Float,
-    val fov: Float
+    var fov: Float
 )
 
 /**
  * Class to manage animation data
  */
 class AnimationData {
-    private val _markers = mutableStateOf(mutableListOf<AnimationMarker>())
-    val markers: List<AnimationMarker> get() = _markers.value.sortedBy { it.time }
+    val _markers = mutableStateListOf<AnimationMarker>()
+    val markers: List<AnimationMarker> @Composable get() = _markers.sortedBy { it.time }
 
-    private val _cameraKeyframes = mutableStateOf(mutableListOf<CameraKeyframe>())
-    val cameraKeyframes: List<CameraKeyframe> get() = _cameraKeyframes.value.sortedBy { it.time }
+    var _cameraKeyframes by mutableStateOf(mutableListOf<CameraKeyframe>())
+    val cameraKeyframes: List<CameraKeyframe> @Composable get() = _cameraKeyframes.sortedBy { it.time }
 
-    private val _currentTime = mutableStateOf(0.0)
+    var _savedPositions by mutableStateOf(mutableListOf<SavedPositionData>())
+    var savedPositions: List<SavedPositionData>
+        get() = _savedPositions
+        set(value) {
+            _savedPositions = value.toMutableList()
+        }
+
+    val _currentTime = mutableStateOf(0.0)
+
+    @Composable
+    fun collectCurrentTime() = _currentTime.value
+
     var currentTime: Double
         get() = _currentTime.value
         set(value) {
             _currentTime.value = value
-            onTimeUpdate?.invoke(value)
         }
 
-    // Callback for when the current time changes
-    var onTimeUpdate: ((Double) -> Unit)? = null
-
     val totalDuration: Double
-        get() = _cameraKeyframes.value.maxByOrNull { it.time }?.time ?: 60.0
+        get() = _cameraKeyframes.maxByOrNull { it.time }?.time ?: 60.0
 
     /**
-     * Force update of markers list to trigger UI recomposition
+     * No-op: list is already a state list, modifying elements or list will trigger recomposition
      */
-    fun updateMarkers() {
-        _markers.value = _markers.value.toMutableList()
-    }
+    fun updateMarkers() {}
 
     /**
      * Force update of camera keyframes list to trigger UI recomposition
      */
     fun updateCameraKeyframes() {
-        _cameraKeyframes.value = _cameraKeyframes.value.toMutableList()
+        _cameraKeyframes = _cameraKeyframes.toMutableList()
     }
 
     /**
@@ -89,9 +100,7 @@ class AnimationData {
     fun addMarker(name: String): AnimationMarker {
         val id = "marker_${Date().getTime().toLong()}"
         val marker = AnimationMarker(id, name, currentTime)
-        val newList = _markers.value.toMutableList()
-        newList.add(marker)
-        _markers.value = newList
+        _markers.add(marker)
         return marker
     }
 
@@ -100,9 +109,7 @@ class AnimationData {
      * @param id ID of the marker to remove
      */
     fun removeMarker(id: String) {
-        val newList = _markers.value.toMutableList()
-        newList.removeAll { marker -> marker.id == id }
-        _markers.value = newList
+        _markers.removeAll { marker -> marker.id == id }
     }
 
     /**
@@ -122,9 +129,9 @@ class AnimationData {
             radius = camera.camera.radius,
             fov = camera.camera.fov
         )
-        val newList = _cameraKeyframes.value.toMutableList()
+        val newList = _cameraKeyframes.toMutableList()
         newList.add(keyframe)
-        _cameraKeyframes.value = newList
+        _cameraKeyframes = newList
         return keyframe
     }
 
@@ -160,9 +167,9 @@ class AnimationData {
             radius = radius,
             fov = fov
         )
-        val newList = _cameraKeyframes.value.toMutableList()
+        val newList = _cameraKeyframes.toMutableList()
         newList.add(keyframe)
-        _cameraKeyframes.value = newList
+        _cameraKeyframes = newList
         return keyframe
     }
 
@@ -171,9 +178,9 @@ class AnimationData {
      * @param id ID of the keyframe to remove
      */
     fun removeCameraKeyframe(id: String) {
-        val newList = _cameraKeyframes.value.toMutableList()
+        val newList = _cameraKeyframes.toMutableList()
         newList.removeAll { keyframe -> keyframe.id == id }
-        _cameraKeyframes.value = newList
+        _cameraKeyframes = newList
     }
 
     /**
@@ -182,8 +189,8 @@ class AnimationData {
      */
     fun applyCameraKeyframeAtCurrentTime(camera: Camera) {
         // Find the nearest keyframe before and after current time
-        val keyframesBefore = cameraKeyframes.filter { it.time <= currentTime }.maxByOrNull { it.time }
-        val keyframesAfter = cameraKeyframes.filter { it.time > currentTime }.minByOrNull { it.time }
+        val keyframesBefore = _cameraKeyframes.filter { it.time <= currentTime }.maxByOrNull { it.time }
+        val keyframesAfter = _cameraKeyframes.filter { it.time > currentTime }.minByOrNull { it.time }
 
         if (keyframesBefore != null && keyframesAfter != null) {
             // Interpolate between keyframes
@@ -205,7 +212,7 @@ class AnimationData {
      * @return True if the keyframe was found and applied, false otherwise
      */
     fun applyCameraKeyframeById(camera: Camera, keyframeId: String): Boolean {
-        val keyframe = cameraKeyframes.find { it.id == keyframeId }
+        val keyframe = _cameraKeyframes.find { it.id == keyframeId }
         if (keyframe != null) {
             applyKeyframeToCamera(camera, keyframe)
             return true
@@ -249,5 +256,61 @@ class AnimationData {
         camera.camera.beta = beta
         camera.camera.radius = radius
         camera.camera.fov = fov
+    }
+
+    /**
+     * Add a new saved position
+     * @param name Name of the position
+     * @param position The 3D position
+     * @return The created saved position
+     */
+    fun addSavedPosition(name: String, position: Vector3): SavedPositionData {
+        val id = "position_${Date().getTime().toLong()}"
+        val savedPosition = SavedPositionData(
+            id = id,
+            name = name,
+            position = Vector3Data(position.x, position.y, position.z)
+        )
+        val newList = _savedPositions.toMutableList()
+        newList.add(savedPosition)
+        _savedPositions = newList
+        return savedPosition
+    }
+
+    /**
+     * Remove a saved position by id
+     * @param id ID of the saved position to remove
+     */
+    fun removeSavedPosition(id: String) {
+        val newList = _savedPositions.toMutableList()
+        newList.removeAll { position -> position.id == id }
+        _savedPositions = newList
+    }
+
+    /**
+     * Update a saved position
+     * @param id ID of the saved position to update
+     * @param name New name (or null to keep existing)
+     * @param position New position (or null to keep existing)
+     * @return True if the position was found and updated, false otherwise
+     */
+    fun updateSavedPosition(id: String, name: String? = null, position: Vector3? = null): Boolean {
+        val index = _savedPositions.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            val currentPosition = _savedPositions[index]
+            val updatedPosition = currentPosition.copy(
+                name = name ?: currentPosition.name,
+                position = if (position != null) {
+                    Vector3Data(position.x, position.y, position.z)
+                } else {
+                    currentPosition.position
+                }
+            )
+            val newList = _savedPositions.toMutableList()
+            newList[index] = updatedPosition
+            _savedPositions = newList
+            return true
+        }
+        return false
     }
 }

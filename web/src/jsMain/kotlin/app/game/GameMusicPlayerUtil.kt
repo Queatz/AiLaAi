@@ -31,6 +31,8 @@ import kotlin.math.abs
 class GameMusicPlayerUtil {
     private var musicList: List<GameMusic> = emptyList()
     private var currentMusic: GameMusic? = null
+    // Currently playing marker with duration, for stopping music at its end
+    private var currentMarker: AnimationMarker? = null
     private var audioElement: HTMLAudioElement? = null
     private var currentAudioSrc: String? = null
 
@@ -114,6 +116,8 @@ class GameMusicPlayerUtil {
      * Play music for a marker
      */
     fun playMusicForMarker(marker: AnimationMarker) {
+        // Track the marker that triggered playback
+        currentMarker = marker
         // Check if the marker has a PlayMusicEvent
         val event = marker.event
         if (event is PlayMusicEvent) {
@@ -180,9 +184,16 @@ class GameMusicPlayerUtil {
      * Process markers at current time
      */
     fun processMarkersAtTime(game: Game, time: Double) {
+        // If a marker with duration is playing, stop when its duration elapses
+        currentMarker?.let { m ->
+            if (m.duration > 0.0 && time >= m.time + m.duration) {
+                stopMusic()
+                currentMarker = null
+            }
+        }
         // Find markers at or very close to the current time
-        val markersAtTime = game.animationData.markers.filter { marker ->
-            abs(marker.time - time) < 1.0 // Within 1 second for more reliable detection
+        val markersAtTime = game.animationData._markers.filter { marker ->
+            abs(marker.time - time) < .1 // with buffer
         }
 
         // Play music for any markers at this time

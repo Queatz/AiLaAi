@@ -31,8 +31,8 @@ fun BrushSection(map: Map? = null) {
                 padding(.5.r)
             }
         }) {
-            // Brush size input (1-100)
-            var brushSize by remember { mutableStateOf(1) }
+            // Brush size input (1-100), initialize from map state when available
+            var brushSize by remember(map) { mutableStateOf(map?.tilemapEditor?.brushSize ?: 1) }
 
             Text("Brush Size")
 
@@ -72,8 +72,8 @@ fun BrushSection(map: Map? = null) {
                 }
             }
 
-            // Brush density input (1-100)
-            var brushDensity by remember { mutableStateOf(100.0) }
+            // Brush density input (0.1-100), initialize from map state when available
+            var brushDensity by remember(map) { mutableStateOf(map?.tilemapEditor?.brushDensity?.toDouble() ?: 100.0) }
 
             Text("Brush Density")
 
@@ -113,8 +113,12 @@ fun BrushSection(map: Map? = null) {
                 }
             }
 
-            // Grid size input (10-100)
-            var gridSize by remember { mutableStateOf(50) }
+            // Grid size input (10-100), initialize from map state when available (map.gridSize is 11-101)
+            var gridSize by remember(map) {
+                // subtract 1 to convert map.gridSize (11-101) to slider value (10-100)
+                val initial = map?.tilemapEditor?.gridSize?.minus(1) ?: 50
+                mutableStateOf(initial)
+            }
 
             Text("Grid Size")
 

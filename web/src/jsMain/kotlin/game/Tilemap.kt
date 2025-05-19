@@ -4,6 +4,7 @@ import baseUrl
 import com.queatz.db.GameObject
 import com.queatz.db.GameObjectOptions
 import com.queatz.db.GameTile
+import json
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import lib.Scene
@@ -587,6 +588,10 @@ class Tilemap(
             objectMesh.material = material
             objectMesh.receiveShadows = true
 
+            objectMesh.registerInstancedBuffer("color", 4)
+            // Initialize base mesh color buffer to avoid null value during instancing
+            objectMesh.instancedBuffers["color"] = Color3.White().toColor4()
+
             // Store the base mesh for future reuse
             if (gameObject.id != null) {
                 objectBaseMeshes[gameObject.id!!] = objectMesh
@@ -600,7 +605,7 @@ class Tilemap(
 
         // Parse options if available - first try from the provided gameObject
         var options = try {
-            gameObject.options?.let { Json.decodeFromString<GameObjectOptions>(it) }
+            gameObject.options?.let { json.decodeFromString<GameObjectOptions>(it) }
         } catch (e: Exception) {
             null
         }
@@ -611,7 +616,7 @@ class Tilemap(
                 // This is a fallback to ensure we're using the current editor settings
                 val currentOptions = gameObject.options ?: objectOptions[key]
                 if (currentOptions != null) {
-                    options = Json.decodeFromString<GameObjectOptions>(currentOptions)
+                    options = json.decodeFromString<GameObjectOptions>(currentOptions)
                 }
             } catch (e: Exception) {
                 console.error("Failed to parse object options", e)
@@ -619,28 +624,30 @@ class Tilemap(
         }
 
         // Apply scale variation if specified in options
-        if (options?.scaleVariation != null && options.scaleVariation > 0) {
-            // Generate random scale factor between (1-variation) and (1+variation)
-            val scaleFactor = 1f + (Math.random() * 2f - 1f) * options.scaleVariation
-            newObject.scaling.scaleInPlace(scaleFactor)
+        if (options?.scaleVariation != null && options.scaleVariation > 0f) {
+            // Generate random scale factor between (1 - variation) and (1 + variation)
+            val randomOffset = ((Math.random() * 2.0) - 1.0).toFloat() * options.scaleVariation
+            val scaleFactor = 1f + randomOffset
+            // Set uniform scaling across all axes
+            newObject.scaling = Vector3(scaleFactor, scaleFactor, scaleFactor)
         }
 
         // Apply color variation if specified in options
         if (options?.colorVariation != null && options.colorVariation > 0) {
-            // Get the material from the instance
-            val material = newObject.material as StandardMaterial
-
             // Generate random color variation
             val r = 1f + (Math.random() * 2f - 1f) * options.colorVariation
             val g = 1f + (Math.random() * 2f - 1f) * options.colorVariation
             val b = 1f + (Math.random() * 2f - 1f) * options.colorVariation
 
-            // Apply color variation to the diffuse color
-            material.diffuseColor = Color3(
-                r.coerceIn(0f, 1f),
-                g.coerceIn(0f, 1f),
-                b.coerceIn(0f, 1f)
+            // Apply color variation to the instance's color buffer
+            newObject.instancedBuffers["color"] = Color4(
+                r = r.coerceIn(0f, 1f),
+                g = g.coerceIn(0f, 1f),
+                b = b.coerceIn(0f, 1f),
+                a = 1f
             )
+        } else {
+            newObject.instancedBuffers["color"] = Color3.White().toColor4()
         }
 
         when (side) {
@@ -649,7 +656,7 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 2f) {
+                    if (v.length() > 5f) {
                         v.y = 0f
                         Quaternion.FromLookDirectionRHToRef(
                             v.normalize(),
@@ -667,7 +674,7 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 2f) {
+                    if (v.length() > 5f) {
                         v.x = 0f
                         Quaternion.FromLookDirectionRHToRef(
                             v.normalize(),
@@ -685,7 +692,7 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 2f) {
+                    if (v.length() > 5f) {
                         v.z = 0f
                         Quaternion.FromLookDirectionRHToRef(
                             v.normalize(),
@@ -703,7 +710,7 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 2f) {
+                    if (v.length() > 5f) {
                         v.y = 0f
                         Quaternion.FromLookDirectionRHToRef(
                             v.normalize(),
@@ -721,7 +728,7 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 2f) {
+                    if (v.length() > 5f) {
                         v.x = 0f
                         Quaternion.FromLookDirectionRHToRef(
                             v.normalize(),
@@ -739,7 +746,7 @@ class Tilemap(
                 newObject.rotationQuaternion = Quaternion.Identity()
                 newObject.onAfterWorldMatrixUpdateObservable.add { node ->
                     val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 2f) {
+                    if (v.length() > 5f) {
                         v.z = 0f
                         Quaternion.FromLookDirectionRHToRef(
                             v.normalize(),

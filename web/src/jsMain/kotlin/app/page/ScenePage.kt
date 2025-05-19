@@ -244,6 +244,9 @@ fun ScenePage(
                                 }
                             }
                         }
+                    },
+                    onSceneForked = { newScene ->
+                        onSceneSelected(SceneNav.Selected(newScene))
                     }
                 )
             }

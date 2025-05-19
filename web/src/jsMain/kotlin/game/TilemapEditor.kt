@@ -36,8 +36,13 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
 
     // Glow layer for clone tool visualization
     private val cloneGlowLayer = GlowLayer("cloneGlow", scene).apply {
-        intensity = 0.75f
-        blurKernelSize = 8f
+        intensity = .8f
+        blurKernelSize = 16f
+    }
+    // Glow layer for cursor visualization
+    private val cursorGlowLayer = GlowLayer("cursorGlow", scene).apply {
+        intensity = .8f
+        blurKernelSize = 16f
     }
 
     // Clone tool selection visualization
@@ -147,15 +152,17 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         }, scene)
         // Create a semi-transparent material for the cursor
         val material = StandardMaterial("cursorMaterial", scene)
-        material.emissiveColor = Color3.White().scale(2.0f)  // Increase emissive intensity for better visibility
+        material.emissiveColor = Color3.White()
         material.specularColor = Color3.Black()
-        material.alpha = 0.5f  // More visible but still semi-transparent
+        material.alpha = 0.3f
         material.backFaceCulling = false  // Show both sides
-        material.zOffset = -0.01f  // Ensure it's drawn on top
+        material.zOffset = -0.01f  // Draw on top
         material.zOffsetUnits = -1
         cursor.rotation = Vector3(Math.PI / 2, 0f, 0f)
         cursor.material = material
         this.cursor = cursor
+        // Add cursor to glow layer for enhanced visibility
+        cursorGlowLayer.addIncludedOnlyMesh(cursor)
 
         // Create the grid with initial size
         val brushGrid = MeshBuilder.CreateGround("Grid", object : CreateGroundOptions {
@@ -249,7 +256,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             DrawMode.Clone -> true // Always show cursor in clone mode
         }
 
-        // Always show cursor in clone mode, otherwise only show when something is selected
+        // Show cursor and grid only when a tool is actually selected
         cursor.isVisible = editable && (drawMode == DrawMode.Clone || hasSelection)
         grid.isVisible = editable && (drawMode == DrawMode.Clone || hasSelection)
 
@@ -284,6 +291,17 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         } else {
             // Remove insertion preview if not in clone mode
             removeCloneInsertionPreview()
+            // Remove clone selection visualization if not in clone mode
+            if (cloneSelectionPlane != null) {
+                cloneGlowLayer.removeIncludedOnlyMesh(cloneSelectionPlane!!)
+                scene.removeMesh(cloneSelectionPlane!!)
+                cloneSelectionPlane = null
+            }
+            cloneSelectionAdditionalPlanes.forEach { plane ->
+                cloneGlowLayer.removeIncludedOnlyMesh(plane)
+                scene.removeMesh(plane)
+            }
+            cloneSelectionAdditionalPlanes.clear()
         }
     }
 
@@ -292,16 +310,28 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
      */
     private fun updateCloneInsertionPreview() {
         // Get the dimensions of the clone selection
-        // Use the exact dimensions of the selection without adding perimeter
-        // to ensure the clone box matches the clone cursor box
         val width = cloneSelectionWidth
         val depth = cloneSelectionDepth
         val height = cloneSelectionHeight
 
-        // Create or update the insertion preview
-        // Adjust position by subtracting 1 from X and Z to match the actual clone operation
-        val adjustedPos = Vector3(tilePos.x, tilePos.y, tilePos.z)
-        createOrUpdateCloneInsertionPreview(adjustedPos, Vector3(width.toFloat(), height.toFloat(), depth.toFloat()))
+        // Determine preview anchor using smoothed cursor position and brush offset
+        val posAnimated = curPosAnimated ?: tilePos.clone()
+        // Calculate same offset used when rendering cursor
+        val offset = run {
+            val r = Math.floor(brushSize / 2f)
+            when (drawPlane.abs) {
+                Side.X -> Vector3(0f, r, r)
+                Side.Y -> Vector3(r, 0f, r)
+                Side.Z -> Vector3(r, r, 0f)
+                else -> Vector3.Zero()
+            }
+        }
+        val previewPos = posAnimated.subtract(offset)
+        // Create or update the insertion preview at the preview position
+        createOrUpdateCloneInsertionPreview(
+            position = previewPos,
+            size = Vector3(width.toFloat(), height.toFloat(), depth.toFloat())
+        )
     }
 
     /**
@@ -425,7 +455,7 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 // Just show a marker at the first point
                 createOrUpdateCloneSelectionPlane(
                     cloneFirstPoint,
-                    Vector3(1f, 1f, 0f)
+                    Vector3(1f, 1f, 1f) // z=1f for visualization purposes
                 )
             }
 

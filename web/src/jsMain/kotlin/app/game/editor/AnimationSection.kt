@@ -111,6 +111,8 @@ fun AnimationSection(game: Game?) {
         Div({
             style {
                 display(DisplayStyle.Flex)
+                justifyContent(JustifyContent.Center)
+                alignItems(AlignItems.Center)
                 gap(0.5.r)
                 marginBottom(1.r)
             }
@@ -240,6 +242,7 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
             Div({
                 style {
                     display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
                     gap(0.5.r)
                     marginBottom(0.5.r)
                 }
@@ -250,7 +253,7 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     placeholder("Marker name")
                     style {
                         width(100.percent)
-                        marginRight(0.5.r)
+                        marginBottom(0.5.r)
                     }
                     onInput { event ->
                         editName = event.value
@@ -290,6 +293,7 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         alignItems(AlignItems.Center)
                         gap(0.5.r)
                         width(100.percent)
+                        marginBottom(0.5.r)
                     }
                 }) {
                     Text("Visible on seekbar:")
@@ -414,8 +418,8 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         title = if (marker.visible) "Hide marker on seekbar" else "Show marker on seekbar",
                         onClick = {
                             marker.visible = !marker.visible
-                            // Force update of markers list to trigger UI recomposition
                             game.animationData.updateMarkers()
+                            game.setTime(game.animationData.currentTime)
                         }
                     )
                 }

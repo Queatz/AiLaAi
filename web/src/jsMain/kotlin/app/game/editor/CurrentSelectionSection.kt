@@ -45,6 +45,9 @@ import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.NumberInput
 import org.jetbrains.compose.web.dom.RangeInput
 import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.attributes.ATarget
+import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.dom.TextInput
 import r
 
@@ -212,11 +215,12 @@ fun CurrentSelectionSection(map: Map) {
                     gap(1.r)
                 }
             }) {
-                // Asset preview and info
+                // Asset preview and info (vertical layout)
                 Div({
                     style {
                         display(DisplayStyle.Flex)
-                        alignItems(AlignItems.Center)
+                        flexDirection(FlexDirection.Column)
+                        alignItems(AlignItems.FlexStart)
                         gap(1.r)
                         marginBottom(1.r)
                     }
@@ -330,29 +334,43 @@ fun CurrentSelectionSection(map: Map) {
                                     }
                                 }) {
                                     Text("Creator")
-                                    Div({
-                                        style {
-                                            padding(0.5.r)
-                                            property("background-color", "rgba(0, 0, 0, 0.05)")
-                                            property("border-radius", "4px")
-                                            display(DisplayStyle.Flex)
-                                            alignItems(AlignItems.Center)
-                                            gap(0.5.r)
-                                        }
-                                    }) {
-                                        if (creatorProfile != null) {
-                                            // Use GroupPhoto to display creator's photo
+                                    // Creator profile link
+                                    if (creatorProfile != null) {
+                                        A("/profile/${creatorProfile!!.person.id}", {
+                                            target(ATarget.Blank)
+                                            style {
+                                                padding(0.5.r)
+                                                property("background-color", "rgba(0, 0, 0, 0.05)")
+                                                property("border-radius", "4px")
+                                                display(DisplayStyle.Flex)
+                                                alignItems(AlignItems.Center)
+                                                gap(0.5.r)
+                                                property("text-decoration", "none")
+                                                property("color", "inherit")
+                                            }
+                                        }) {
                                             GroupPhoto(
                                                 items = listOf(
                                                     GroupPhotoItem(
-                                                        photo = creatorProfile?.person?.photo,
-                                                        name = creatorProfile?.person?.name
+                                                        photo = creatorProfile!!.person.photo,
+                                                        name = creatorProfile!!.person.name
                                                     )
                                                 ),
                                                 size = 24.px
                                             )
-                                            Text(creatorProfile?.person?.name ?: "Unknown")
-                                        } else {
+                                            Text(creatorProfile!!.person.name ?: "Unknown")
+                                        }
+                                    } else {
+                                        Div({
+                                            style {
+                                                padding(0.5.r)
+                                                property("background-color", "rgba(0, 0, 0, 0.05)")
+                                                property("border-radius", "4px")
+                                                display(DisplayStyle.Flex)
+                                                alignItems(AlignItems.Center)
+                                                gap(0.5.r)
+                                            }
+                                        }) {
                                             Text("Unknown")
                                         }
                                     }

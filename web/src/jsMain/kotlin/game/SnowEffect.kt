@@ -52,8 +52,8 @@ class SnowEffect(private val scene: Scene) {
         for (i in 0 until count) {
             // Create a small plane for each snowflake
             val options = object : CreatePlaneOptions {
-                override val width = 0.1f
-                override val height = 0.1f
+                override val width = 0.35f
+                override val height = 0.35f
                 override val updatable = false
             }
 

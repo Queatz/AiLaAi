@@ -8,11 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.createGameScene
 import app.ailaai.api.updateGameScene
 import app.game.GameObjectData
 import app.game.GameObjectsData
 import app.game.GameTileData
 import app.game.GameTilesData
+import app.game.editor.SavedPositionsSection
 import app.game.json
 import com.queatz.db.AnimationMarkerData
 import com.queatz.db.CameraKeyframeData
@@ -41,15 +43,17 @@ import r
 
 @Composable
 fun GameEditorTabEditor(
-    engine: Engine, 
-    map: Map, 
+    engine: Engine,
+    map: Map,
     gameScene: GameScene? = null,
     onSceneDeleted: () -> Unit = {},
-    onPixelatedChanged: (Boolean) -> Unit = {}
+    onPixelatedChanged: (Boolean) -> Unit = {},
+    onSceneForked: (GameScene) -> Unit = {}
 ) {
     // Create state variables to track when to clear selections
     var clearTileSelection by remember { mutableStateOf(false) }
     var clearObjectSelection by remember { mutableStateOf(false) }
+    var clearMusicSelection by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     var currentPixelSize by remember { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
@@ -106,8 +110,9 @@ fun GameEditorTabEditor(
 
         // Create GameSceneConfig with animation data and graphics settings
         val config = GameSceneConfig(
-            markers = game.animationData.markers.map { toAnimationMarkerData(it) },
-            cameraKeyframes = game.animationData.cameraKeyframes.map { toCameraKeyframeData(it) },
+            markers = game.animationData._markers.map { toAnimationMarkerData(it) },
+            cameraKeyframes = game.animationData._cameraKeyframes.map { toCameraKeyframeData(it) },
+            savedPositions = game.animationData.savedPositions,
             backgroundColor = backgroundColor,
             cameraFov = game.scene.activeCamera?.fov,
             ssaoEnabled = map.post.ssaoEnabled,
@@ -265,6 +270,7 @@ fun GameEditorTabEditor(
                 padding(0.r, 0.r, 0.5.r, 0.r)
             }
         }) {
+            // Save button
             Button({
                 classes(Styles.button)
                 style {
@@ -311,6 +317,45 @@ fun GameEditorTabEditor(
             }) {
                 Text(if (isSaving) "Saving..." else "Save")
             }
+            // Fork button: duplicate scene under new ID
+            Button({
+                classes(Styles.outlineButton)
+                style {
+                    marginRight(0.5.r)
+                }
+                if (isSaving) disabled()
+                onClick {
+                    if (gameScene?.id != null && !isSaving) {
+                        isSaving = true
+                        scope.launch {
+                            try {
+                                val tilesJson = saveTilesToJson(map)
+                                val objectsJson = saveObjectsToJson(map)
+                                val configJson = saveAnimationConfigToJson(map)
+                                val newName = "Fork of " + (gameScene.name ?: "Untitled")
+                                val fork = gameScene.copy(
+                                    url = null,
+                                    name = newName,
+                                    published = false,
+                                    tiles = tilesJson,
+                                    objects = objectsJson,
+                                    config = configJson
+                                )
+                                api.createGameScene(fork) { created ->
+                                    onSceneForked(created)
+                                }
+                            } catch (e: Exception) {
+                                console.error("Error forking game scene: ${e.message}")
+                            }
+                            isSaving = false
+                        }
+                    } else {
+                        console.error("Cannot fork: GameScene ID is null or saving in progress")
+                    }
+                }
+            }) {
+                Text("Fork")
+            }
 
             Button({
                 classes(Styles.outlineButton, Styles.outlineButtonTonal)
@@ -335,7 +380,12 @@ fun GameEditorTabEditor(
                 Text("Launch scene")
             }
         }
-        CurrentToolSection(map)
+        CurrentToolSection(map) {
+            // When tool is deselected, clear tile, object, and music selections
+            clearTileSelection = true
+            clearObjectSelection = true
+            clearMusicSelection = true
+        }
         BrushSection(map)
 
         // Pass callbacks to clear selections when the other type is selected
@@ -371,6 +421,7 @@ fun GameEditorTabEditor(
         }
 
         PortalsSection()
+        SavedPositionsSection(map)
         AnimationSection(map.game)
         CameraSection(map)
         EnvironmentSection(map)
@@ -382,7 +433,21 @@ fun GameEditorTabEditor(
             initialPixelSize = currentPixelSize,
             onPixelSizeChanged = { size -> currentPixelSize = size }
         )
-        MusicSection(map.game, map)
+        MusicSection(
+            game = map.game,
+            mapParam = map,
+            clearSelection = clearMusicSelection
+        )
+        // Reset clear flags after they've been processed
+        LaunchedEffect(clearTileSelection) {
+            if (clearTileSelection) clearTileSelection = false
+        }
+        LaunchedEffect(clearObjectSelection) {
+            if (clearObjectSelection) clearObjectSelection = false
+        }
+        LaunchedEffect(clearMusicSelection) {
+            if (clearMusicSelection) clearMusicSelection = false
+        }
         SceneSection(
             gameScene = gameScene,
             onSceneDeleted = onSceneDeleted

@@ -37,6 +37,7 @@ fun GameEditorPanel(
     onPixelatedChanged: (Boolean) -> Unit = {},
     onSceneDeleted: () -> Unit = {},
     onScenePublished: () -> Unit = {},
+    onSceneForked: (GameScene) -> Unit = {},
     styles: StyleScope.() -> Unit = {}
 ) {
     // Get the current user
@@ -70,11 +71,12 @@ fun GameEditorPanel(
                 if (isCurrentUserOwner) {
                     add(TabInfo("Editor") {
                         GameEditorTabEditor(
-                            engine,
-                            map,
-                            gameScene,
-                            onSceneDeleted,
-                            onPixelatedChanged
+                            engine = engine,
+                            map = map,
+                            gameScene = gameScene,
+                            onSceneDeleted = onSceneDeleted,
+                            onPixelatedChanged = onPixelatedChanged,
+                            onSceneForked = onSceneForked
                         )
                     })
                 }

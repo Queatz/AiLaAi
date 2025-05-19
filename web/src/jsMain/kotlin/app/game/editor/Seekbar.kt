@@ -61,8 +61,8 @@ fun Seekbar(
     var isDragging by remember { mutableStateOf(false) }
 
     // Calculate total duration based on the last keyframe + its duration
-    // Use keyframes.size and markers.size to force recomposition when keyframes or markers are added/removed
-    var totalDuration = remember(keyframes.size, keyframes.toString(), markers.size, markers.toString()) {
+    // Use the entire keyframes and markers lists as dependencies to ensure recomposition when they change
+    val totalDuration = remember(keyframes, markers) {
         if (keyframes.isEmpty()) {
             60.0 // Default duration if no keyframes
         } else {
@@ -72,14 +72,14 @@ fun Seekbar(
     }
 
     // Normalize position to 0.0-1.0 range
-    val normalizePosition = remember(totalDuration, keyframes.size, keyframes.toString(), markers.size, markers.toString()) {
+    val normalizePosition = remember(totalDuration, keyframes, markers) {
         { seconds: Double ->
             (seconds / totalDuration).coerceIn(0.0, 1.0)
         }
     }
 
     // Convert normalized position (0.0-1.0) back to seconds
-    val denormalizePosition = remember(totalDuration, keyframes.size, keyframes.toString(), markers.size, markers.toString()) {
+    val denormalizePosition = remember(totalDuration, keyframes, markers) {
         { normalized: Double ->
             (normalized * totalDuration).coerceIn(0.0, totalDuration)
         }
@@ -118,7 +118,7 @@ fun Seekbar(
         var seekbarElement by remember { mutableStateOf<HTMLElement?>(null) }
 
         // Function to calculate position from mouse coordinates
-        val calculatePosition = remember(totalDuration, keyframes.toString()) {
+        val calculatePosition = remember(totalDuration, keyframes) {
             { clientX: Int ->
                 // Use the seekbarElement if available
                 val position = seekbarElement?.let { element ->

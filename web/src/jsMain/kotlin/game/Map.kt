@@ -4,6 +4,9 @@ import com.queatz.db.GameObject
 import com.queatz.db.GameMusic
 import com.queatz.db.GameTile
 import lib.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 class Map(private val scene: Scene) {
     val tilemapEditor: TilemapEditor
@@ -15,6 +18,10 @@ class Map(private val scene: Scene) {
     private val snowEffect = SnowEffect(scene)
     private val rainEffect = RainEffect(scene)
     private val dustEffect = DustEffect(scene)
+    // Compose-observable state for weather effect toggles
+    private var snowEffectEnabledState by mutableStateOf(false)
+    private var rainEffectEnabledState by mutableStateOf(false)
+    private var dustEffectEnabledState by mutableStateOf(false)
 
     // Reference to the parent Game instance
     var game: Game? = null
@@ -385,13 +392,14 @@ class Map(private val scene: Scene) {
      */
     fun setSnowEffectEnabled(enabled: Boolean) {
         snowEffect.setEnabled(enabled)
+        snowEffectEnabledState = enabled
     }
 
     /**
      * Gets whether the snow effect is enabled
      */
     fun isSnowEffectEnabled(): Boolean {
-        return snowEffect.isEnabled()
+        return snowEffectEnabledState
     }
 
     /**
@@ -413,13 +421,14 @@ class Map(private val scene: Scene) {
      */
     fun setRainEffectEnabled(enabled: Boolean) {
         rainEffect.setEnabled(enabled)
+        rainEffectEnabledState = enabled
     }
 
     /**
      * Gets whether the rain effect is enabled
      */
     fun isRainEffectEnabled(): Boolean {
-        return rainEffect.isEnabled()
+        return rainEffectEnabledState
     }
 
     /**
@@ -441,13 +450,14 @@ class Map(private val scene: Scene) {
      */
     fun setDustEffectEnabled(enabled: Boolean) {
         dustEffect.setEnabled(enabled)
+        dustEffectEnabledState = enabled
     }
 
     /**
      * Gets whether the dust effect is enabled
      */
     fun isDustEffectEnabled(): Boolean {
-        return dustEffect.isEnabled()
+        return dustEffectEnabledState
     }
 
     /**

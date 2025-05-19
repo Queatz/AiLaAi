@@ -17,6 +17,7 @@ import com.queatz.db.PlayMusicEvent
 import game.AnimationMarker
 import game.Game
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.runtime.snapshotFlow
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.dom.Audio
@@ -113,18 +114,15 @@ fun GameMusicPlayer(game: Game?) {
         currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
     }
 
-    // Register a callback with the game to check for markers during animation
+    // Process markers during animation based on currentTime changes
     LaunchedEffect(game) {
         game?.let { g ->
-            // Add a callback to check for markers during animation
-            g.animationData.onTimeUpdate = { time ->
-                // Use the utility to process markers at the current time
-                musicPlayerUtil.processMarkersAtTime(g, time)
-
-                // Update our local state to reflect changes in the utility
-                currentMusic = musicPlayerUtil.getCurrentMusic()
-                currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
-            }
+            snapshotFlow { g.animationData.currentTime }
+                .collectLatest { time ->
+                    musicPlayerUtil.processMarkersAtTime(g, time)
+                    currentMusic = musicPlayerUtil.getCurrentMusic()
+                    currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
+                }
         }
     }
 

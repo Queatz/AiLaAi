@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import components.IconButton
 import format1Decimal
 import format3Decimals
@@ -61,10 +62,15 @@ fun CameraSection(map: Map?) {
             // FOV text input and slider (0.25-2.0)
             // Initialize with the current camera FOV or default to 0.5f if not available
             var fovValue by remember { mutableStateOf(map.game?.scene?.activeCamera?.fov ?: 0.5f) }
+            LaunchedEffect(game.animationData.currentTime) {
+                game.scene.activeCamera?.fov?.let { fov ->
+                    fovValue = fov
+                }
+            }
 
             Text("Field of View")
 
-            TextInput(fovValue.toString()) {
+            TextInput(fovValue.format3Decimals()) {
                 classes(Styles.textarea)
                 placeholder("Field of view (0.25 – 2.0)")
                 style {
@@ -142,6 +148,7 @@ fun CameraSection(map: Map?) {
 private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
     var isEditing by remember { mutableStateOf(false) }
     var editTime by remember(keyframe) { mutableStateOf(keyframe.time.toString()) }
+    var editFov by remember(keyframe) { mutableStateOf(keyframe.fov) }
 
     Div({
         style {
@@ -174,6 +181,44 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                     }
                 }
             }
+            // FOV input for keyframe
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(0.5.r)
+                    marginBottom(0.5.r)
+                }
+            }) {
+                Text("Field of View")
+                TextInput(editFov.format3Decimals()) {
+                    classes(Styles.textarea)
+                    placeholder("Field of view (0.25 – 2.0)")
+                    style {
+                        width(100.percent)
+                        marginBottom(0.5.r)
+                    }
+                    onInput { event ->
+                        val f = event.value.toFloatOrNull()
+                        if (f != null) {
+                            editFov = f.coerceIn(0.25f, 2f)
+                        }
+                    }
+                }
+                RangeInput(
+                    editFov,
+                    min = 0.25,
+                    max = 2.0,
+                    step = 0.01
+                ) {
+                    style {
+                        width(100.percent)
+                    }
+                    onInput {
+                        editFov = it.value!!.toFloat()
+                    }
+                }
+            }
 
             Div({
                 style {
@@ -198,9 +243,11 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                     classes(Styles.button)
                     onClick { 
                         // Clip time to 3 decimal places
-                        keyframe.time = editTime.toDoubleOrNull()?.let { 
-                            (round(it * 1000.0) / 1000.0) 
+                        keyframe.time = editTime.toDoubleOrNull()?.let {
+                            (round(it * 1000.0) / 1000.0)
                         } ?: keyframe.time
+                        // Update keyframe FOV
+                        keyframe.fov = editFov.coerceIn(0.25f, 2f)
                         // Force update of camera keyframes list to trigger UI recomposition
                         game.animationData.updateCameraKeyframes()
                         // Update seekbar right away

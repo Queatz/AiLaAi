@@ -82,6 +82,7 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
     var selectedDiscussion by remember { mutableStateOf<GameDiscussionExtended?>(null) }
     var previewMarker by remember { mutableStateOf<Mesh?>(null) }
     var discussionComment by remember { mutableStateOf("") }
+    var isDialogOpen by remember { mutableStateOf(false) } // Flag to prevent multiple dialogs
 
     // Create a discussion markers manager
     val discussionMarkers = remember { 
@@ -205,9 +206,12 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
             // Register pointer down observer to place the discussion
             val pointerDownObserver = scene.onPointerObservable.add(fun(info: PointerInfo) {
                 // Only process clicks when isPlacingDiscussion is true
-                if (info.type == PointerEventTypes.POINTERDOWN && isPlacingDiscussion && !info.event.shiftKey) {
+                if (info.type == PointerEventTypes.POINTERDOWN && isPlacingDiscussion && !info.event.shiftKey && !isDialogOpen) {
                     // Get the current position of the preview marker
                     val position = marker.position.clone()
+
+                    // Set flag to prevent multiple dialogs
+                    isDialogOpen = true
 
                     // Show input dialog to get user's comment after clicking
                     scope.launch {
@@ -225,6 +229,7 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                         } finally {
                             // Reset state regardless of success or failure
                             isPlacingDiscussion = false
+                            isDialogOpen = false // Reset dialog flag
                             // Explicitly remove the preview marker
                             if (previewMarker != null) {
                                 map.game?.scene?.removeMesh(previewMarker!!)

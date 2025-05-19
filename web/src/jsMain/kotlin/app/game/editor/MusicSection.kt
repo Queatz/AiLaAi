@@ -24,6 +24,7 @@ import components.IconButton
 import game.AnimationMarker
 import game.Game
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -50,7 +51,11 @@ import toBytes
 import kotlin.math.abs
 
 @Composable
-fun MusicSection(game: Game?, mapParam: game.Map) {
+fun MusicSection(
+    game: Game?,
+    mapParam: game.Map,
+    clearSelection: Boolean = false
+) {
     val scope = rememberCoroutineScope()
     // Create an instance of GameMusicPlayerUtil
     val musicPlayerUtil = remember { GameMusicPlayerUtil() }
@@ -148,18 +153,15 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
         currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
     }
 
-    // Register a callback with the game to check for markers during animation
+    // Process markers during animation based on currentTime changes
     LaunchedEffect(game) {
         game?.let { g ->
-            // Add a callback to check for markers during animation
-            g.animationData.onTimeUpdate = { time ->
-                // Use the utility to process markers at the current time
-                musicPlayerUtil.processMarkersAtTime(g, time)
-
-                // Update our local state to reflect changes in the utility
-                currentMusic = musicPlayerUtil.getCurrentMusic()
-                currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
-            }
+            snapshotFlow { g.animationData.currentTime }
+                .collectLatest { time ->
+                    musicPlayerUtil.processMarkersAtTime(g, time)
+                    currentMusic = musicPlayerUtil.getCurrentMusic()
+                    currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
+                }
         }
     }
 
@@ -192,8 +194,8 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
 
     // Upload music function
     fun uploadMusic() {
-        isUploading = true
         pickAudio { file ->
+            isUploading = true
             scope.launch {
                 try {
                     val audioBytes = file.toBytes()
@@ -268,6 +270,13 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
 
     // Track selected music ID
     var selectedMusicId by remember { mutableStateOf<String?>(null) }
+    // Clear selection when requested externally
+    LaunchedEffect(clearSelection) {
+        if (clearSelection) {
+            selectedMusicId = null
+            mapParam.setCurrentGameMusic(null)
+        }
+    }
 
     // Custom tool renderer for music assets
     val renderMusicTool = @Composable { music: GameMusic ->
@@ -308,7 +317,7 @@ fun MusicSection(game: Game?, mapParam: game.Map) {
                 title = if (musicPlayerUtil.getCurrentMusic()?.id == music.id) "Pause" else "Play",
             ) {
                 if (musicPlayerUtil.getCurrentMusic()?.id == music.id) {
-                    musicPlayerUtil.pauseMusic()
+                    musicPlayerUtil.stopMusic()
                     currentMusic = null
                     currentAudioSrc = null
                 } else {

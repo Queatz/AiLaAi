@@ -70,10 +70,6 @@ external class Color4(
     fun scale(scale: Float): Color4
     fun subtract(color: Color4): Color4
     fun asArray(): Array<Float>
-
-    companion object {
-        fun FromHexString(hex: String): Color4
-    }
 }
 
 external class DirectionalLight(name: String, direction: Vector3, scene: Scene) {
