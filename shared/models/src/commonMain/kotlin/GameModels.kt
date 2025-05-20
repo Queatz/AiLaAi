@@ -8,6 +8,7 @@ data class GameScene(
     var published: Boolean? = null,
     var url: String? = null,
     var name: String? = null,
+    var description: String? = null,
     var categories: List<String>? = null,
     var tiles: String? = null,
     var objects: String? = null,
@@ -96,7 +97,9 @@ data class GameSceneConfig(
     val rainEffectEnabled: Boolean? = null,
     val rainEffectIntensity: Float? = null,
     val dustEffectEnabled: Boolean? = null,
-    val dustEffectIntensity: Float? = null
+    val dustEffectIntensity: Float? = null,
+    /** Captions to display on the timeline and during playback */
+    val captions: List<CaptionData> = emptyList()
 )
 
 /**
@@ -137,6 +140,21 @@ data class AnimationMarkerData(
     val time: Double,
     val duration: Double = 0.0,
     val event: MarkerEvent? = null
+)
+
+/**
+ * Serializable version of GameCaption
+ * @param id Unique identifier for the caption
+ * @param time Time in seconds when the caption appears
+ * @param text The caption text
+ * @param duration Duration in seconds to display after typing
+ */
+@Serializable
+data class CaptionData(
+    val id: String,
+    val time: Double,
+    val text: String,
+    val duration: Double = 5.0
 )
 
 /**

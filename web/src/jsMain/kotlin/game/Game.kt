@@ -7,6 +7,7 @@ import lib.*
 import org.w3c.dom.HTMLCanvasElement
 import web.timers.setTimeout
 import kotlin.js.Date
+import app.game.GameMusicPlayerUtil
 
 class Game(
     val canvas: HTMLCanvasElement,
@@ -16,6 +17,9 @@ class Game(
     val map: Map
     val engine: Engine
     val animationData = AnimationData()
+
+    // Music player utility for playing music
+    var musicPlayerUtil: GameMusicPlayerUtil? = null
 
     // Animation playback state
     private var isPlaying = false

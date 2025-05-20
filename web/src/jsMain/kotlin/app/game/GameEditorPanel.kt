@@ -12,6 +12,7 @@ import app.game.editor.GameEditorTabLibrary
 import app.game.editor.GameEditorTabPublish
 import app.game.editor.GameEditorTabDiscussion
 import app.game.editor.TabBar
+import app.game.editor.TabInfo
 import application
 import com.queatz.db.GameScene
 import game.Map
@@ -33,11 +34,13 @@ import r
 fun GameEditorPanel(
     engine: Engine,
     map: Map,
+    editable: Boolean,
     gameScene: GameScene? = null,
     onPixelatedChanged: (Boolean) -> Unit = {},
     onSceneDeleted: () -> Unit = {},
     onScenePublished: () -> Unit = {},
     onSceneForked: (GameScene) -> Unit = {},
+    onSceneUpdated: (GameScene) -> Unit = {},
     styles: StyleScope.() -> Unit = {}
 ) {
     // Get the current user
@@ -58,40 +61,37 @@ fun GameEditorPanel(
     ) {
         var selectedTab by remember { mutableStateOf(0) }
 
-        data class TabInfo(
-            val name: String,
-            val content: @Composable () -> Unit
-        )
-
         // Create tabs list based on scene ownership
         val isCurrentUserOwner = gameScene?.person == me?.id
 
         val tabs = remember(isCurrentUserOwner) {
             buildList {
-                if (isCurrentUserOwner) {
-                    add(TabInfo("Editor") {
+                if (isCurrentUserOwner && editable) {
+                    add(TabInfo("Editor", "edit") {
                         GameEditorTabEditor(
                             engine = engine,
                             map = map,
                             gameScene = gameScene,
+                            editable = editable,
                             onSceneDeleted = onSceneDeleted,
                             onPixelatedChanged = onPixelatedChanged,
-                            onSceneForked = onSceneForked
+                            onSceneForked = onSceneForked,
+                            onSceneUpdated = onSceneUpdated
                         )
                     })
                 }
 
-                add(TabInfo("Discussion") { GameEditorTabDiscussion(engine, map, gameScene) })
+                add(TabInfo("Discussion", "forum") { GameEditorTabDiscussion(engine, map, gameScene) })
 
-                if (isCurrentUserOwner) {
-                    add(TabInfo("Library") { GameEditorTabLibrary(engine, map, gameScene) })
-                    add(TabInfo("Help") { GameEditorInstructions() })
-                    add(TabInfo("Publish") {
-                        GameEditorTabPublish(
-                            engine,
-                            map,
-                            gameScene,
-                            onUploaded = onScenePublished
+                if (isCurrentUserOwner && editable) {
+                    add(TabInfo("Library", "collections_bookmark") { GameEditorTabLibrary(engine, map, gameScene) })
+                    add(TabInfo("Learn", "menu_book") { GameEditorInstructions() })
+                    add(TabInfo("Publish", "publish") {
+                    GameEditorTabPublish(
+                        engine = engine,
+                        map = map,
+                        gameScene = gameScene,
+                        onUploaded = onScenePublished
                         )
                     })
                 }
@@ -99,8 +99,8 @@ fun GameEditorPanel(
         }
 
         TabBar(
-            tabs = tabs.map { it.name },
-            initialSelectedIndex = selectedTab,
+            tabs = tabs,
+            initialSelectedIndex = selectedTab.coerceIn(0, tabs.lastIndex),
             onTabSelected = { selectedTab = it }
         )
 

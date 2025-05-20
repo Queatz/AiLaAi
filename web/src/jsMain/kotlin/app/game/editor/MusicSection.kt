@@ -2,30 +2,25 @@ package app.game.editor
 
 import Styles
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.createGameMusic
-import app.ailaai.api.gameMusic
 import app.ailaai.api.gameMusics
 import app.ailaai.api.uploadAudio
-import app.game.GameMusicPlayerUtil
 import app.components.HorizontalSpacer
 import baseUrl
 import com.queatz.db.GameMusic
 import com.queatz.db.PlayMusicEvent
 import components.IconButton
-import game.AnimationMarker
 import game.Game
-import kotlinx.coroutines.flow.collectLatest
-import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.launch
+import app.game.editor.assetManager
+import app.game.editor.rememberMusic
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -40,15 +35,11 @@ import org.jetbrains.compose.web.css.gap
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Source
 import org.jetbrains.compose.web.dom.Text
-import org.w3c.dom.HTMLAudioElement
 import pickAudio
 import r
 import toBytes
-import kotlin.math.abs
 
 @Composable
 fun MusicSection(
@@ -57,14 +48,20 @@ fun MusicSection(
     clearSelection: Boolean = false
 ) {
     val scope = rememberCoroutineScope()
-    // Create an instance of GameMusicPlayerUtil
-    val musicPlayerUtil = remember { GameMusicPlayerUtil() }
-    var musicList by remember { mutableStateOf<List<GameMusic>>(emptyList()) }
+    // Use the AssetManager to get music
+    val musicList = rememberMusic()
     var isLoading by remember { mutableStateOf(false) }
     var isUploading by remember { mutableStateOf(false) }
-    var currentMusic by remember { mutableStateOf<GameMusic?>(null) }
-    var audioElement by remember { mutableStateOf<HTMLAudioElement?>(null) }
-    var currentAudioSrc by remember { mutableStateOf<String?>(null) }
+
+    // Track currently playing music
+    var currentlyPlayingMusicId by remember { mutableStateOf<String?>(null) }
+
+    // Update currentlyPlayingMusicId when the game's musicPlayerUtil changes
+    LaunchedEffect(game?.musicPlayerUtil) {
+        game?.musicPlayerUtil?.getCurrentMusic()?.id?.let { musicId ->
+            currentlyPlayingMusicId = musicId
+        }
+    }
 
     // Load music list on component mount
     LaunchedEffect(Unit) {
@@ -75,120 +72,9 @@ fun MusicSection(
                 isLoading = false
             }
         ) { musics ->
-            musicList = musics
-            // Also set the music list in the utility
-            musicPlayerUtil.setMusicList(musics)
+            // Update the AssetManager with the loaded music
+            assetManager.setMusic(musics)
             isLoading = false
-        }
-    }
-
-    // DisposableEffect to stop audio when component is unmounted or game changes
-    DisposableEffect(game) {
-        onDispose {
-            // Stop any playing audio when component is unmounted or game changes
-            musicPlayerUtil.stopMusic()
-            currentMusic = null
-            currentAudioSrc = null
-        }
-    }
-
-    // Audio component for playback (hidden in the UI)
-    key(currentAudioSrc) {
-        currentAudioSrc?.let { src ->
-            Audio({
-                style {
-                    display(DisplayStyle.None)
-                }
-
-                // Set loop attribute to make music loop during animation
-                attr("loop", "true")
-
-                ref {
-                    // Store the audio element in our local state
-                    audioElement = it
-                    // Also pass it to the utility
-                    musicPlayerUtil.setAudioElement(it)
-
-                    onDispose {
-                        audioElement = null
-                        musicPlayerUtil.setAudioElement(null)
-                    }
-                }
-            }) {
-                // Only add Source when we have a valid audio URL
-                Source({
-                    attr("src", src)
-                    attr("type", "audio/mp4") // Assuming MP4 format, adjust if needed
-                })
-            }
-        }
-    }
-
-    // Update audio element when source changes
-    LaunchedEffect(currentAudioSrc) {
-        currentAudioSrc?.let { src ->
-            audioElement?.apply {
-                // Set up event handler for when the audio can play
-                oncanplay = {
-                    play() // Play the audio when it's ready
-                    Unit
-                }
-
-                try {
-                    load() // Reload with the new source
-                } catch (e: Throwable) {
-                    console.error("Error loading audio: $src", e)
-                }
-            }
-        }
-    }
-
-    // Function to play music at a marker
-    fun playMusicAtMarker(marker: AnimationMarker) {
-        // Use the utility to play music for this marker
-        musicPlayerUtil.playMusicForMarker(marker)
-
-        // Update our local state to reflect changes in the utility
-        currentMusic = musicPlayerUtil.getCurrentMusic()
-        currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
-    }
-
-    // Process markers during animation based on currentTime changes
-    LaunchedEffect(game) {
-        game?.let { g ->
-            snapshotFlow { g.animationData.currentTime }
-                .collectLatest { time ->
-                    musicPlayerUtil.processMarkersAtTime(g, time)
-                    currentMusic = musicPlayerUtil.getCurrentMusic()
-                    currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
-                }
-        }
-    }
-
-    // Set up flow collection to handle play state changes
-    LaunchedEffect(game) {
-        game?.playStateFlow?.collectLatest { isPlaying ->
-            if (!isPlaying) {
-                // Pause the audio when animation is paused
-                musicPlayerUtil.pauseMusic()
-            } else {
-                // When animation starts playing, check for markers at the current time
-                game.animationData.currentTime.let { time ->
-                    console.log("Animation started playing at time: $time")
-
-                    // Use the utility to process markers at the current time
-                    musicPlayerUtil.processMarkersAtTime(game, time)
-
-                    // Update our local state to reflect changes in the utility
-                    currentMusic = musicPlayerUtil.getCurrentMusic()
-                    currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
-                }
-
-                // Resume the audio if we have a current music and animation is playing
-                if (musicPlayerUtil.getCurrentMusic() != null) {
-                    musicPlayerUtil.resumeMusic()
-                }
-            }
         }
     }
 
@@ -224,8 +110,8 @@ fun MusicSection(
                                 isUploading = false
                             }
                         ) { savedMusic ->
-                            // Add to list
-                            musicList = musicList + savedMusic
+                            // Add to the AssetManager
+                            assetManager.addMusic(savedMusic)
                             isUploading = false
                         }
                     }
@@ -257,11 +143,6 @@ fun MusicSection(
             g.animationData.updateMarkers()
 
             console.log("Added music marker with event: ${marker.event}")
-
-            // Make sure the music is in the utility's list
-            if (music.id != null && musicPlayerUtil.getMusicList().none { it.id == music.id }) {
-                musicPlayerUtil.setMusicList(musicPlayerUtil.getMusicList() + listOf(music))
-            }
         }
     }
 
@@ -270,6 +151,7 @@ fun MusicSection(
 
     // Track selected music ID
     var selectedMusicId by remember { mutableStateOf<String?>(null) }
+
     // Clear selection when requested externally
     LaunchedEffect(clearSelection) {
         if (clearSelection) {
@@ -302,37 +184,43 @@ fun MusicSection(
                 selectedMusicId = newSelectedId
 
                 // Update the current music in the map
-                if (mapParam != null) {
-                    if (newSelectedId != null) {
-                        mapParam.setCurrentGameMusic(music)
-                    } else {
-                        mapParam.setCurrentGameMusic(null)
-                    }
+                if (newSelectedId != null) {
+                    mapParam.setCurrentGameMusic(music)
+                } else {
+                    mapParam.setCurrentGameMusic(null)
                 }
             }
         }) {
             // Play/pause button
             IconButton(
-                name = if (musicPlayerUtil.getCurrentMusic()?.id == music.id) "pause" else "play_arrow",
-                title = if (musicPlayerUtil.getCurrentMusic()?.id == music.id) "Pause" else "Play",
+                name = if (currentlyPlayingMusicId == music.id) "pause" else "play_arrow",
+                title = if (currentlyPlayingMusicId == music.id) "Pause" else "Play",
             ) {
-                if (musicPlayerUtil.getCurrentMusic()?.id == music.id) {
-                    musicPlayerUtil.stopMusic()
-                    currentMusic = null
-                    currentAudioSrc = null
-                } else {
-                    if (music.audio != null) {
-                        // Make sure the music is in the utility's list
-                        if (music.id != null && musicPlayerUtil.getMusicList().none { it.id == music.id }) {
-                            musicPlayerUtil.setMusicList(musicPlayerUtil.getMusicList() + listOf(music))
+                // Get the musicPlayerUtil from the game object
+                val musicPlayerUtil = game?.musicPlayerUtil
+                if (musicPlayerUtil != null) {
+                    if (currentlyPlayingMusicId == music.id) {
+                        // Stop the currently playing music
+                        musicPlayerUtil.stopMusic()
+                        currentlyPlayingMusicId = null
+                    } else {
+                        if (music.audio != null && music.id != null) {
+                            // Make sure the music is in the utility's list
+                            if (musicPlayerUtil.getMusicList().none { it.id == music.id }) {
+                                musicPlayerUtil.setMusicList(musicPlayerUtil.getMusicList() + listOf(music))
+                            }
+
+                            // Play the selected music
+                            scope.launch {
+                                val musicId = music.id ?: return@launch
+                                musicPlayerUtil.playMusicById(musicId)
+                                currentlyPlayingMusicId = musicId
+                                // Start the game animation
+                                game?.play()
+                                // Force UI update
+                                game.setTime(game.animationData.currentTime)
+                            }
                         }
-
-                        // Update the current audio source
-                        currentAudioSrc = "$baseUrl${music.audio}"
-                        currentMusic = music
-
-                        // Also update the utility
-                        musicPlayerUtil.playMusicById(music.id ?: "")
                     }
                 }
             }
@@ -368,21 +256,14 @@ fun MusicSection(
             // Find the selected music in the list
             if (newSelectedId != null) {
                 val selectedMusic = musicList.find { it.id == newSelectedId }
-                // Update the current music
-                currentMusic = selectedMusic
 
                 // Update the current music in the map
-                if (mapParam != null && selectedMusic != null) {
+                if (selectedMusic != null) {
                     mapParam.setCurrentGameMusic(selectedMusic)
                 }
             } else {
-                // If deselected, set to null
-                currentMusic = null
-
                 // Clear the current music in the map
-                if (mapParam != null) {
-                    mapParam.setCurrentGameMusic(null)
-                }
+                mapParam.setCurrentGameMusic(null)
             }
         },
         onCreateAsset = {

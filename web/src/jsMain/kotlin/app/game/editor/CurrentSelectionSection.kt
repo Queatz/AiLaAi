@@ -13,6 +13,7 @@ import api
 import app.ailaai.api.deleteGameMusic
 import app.ailaai.api.deleteGameObject
 import app.ailaai.api.deleteGameTile
+import app.ailaai.api.gameObjects
 import app.ailaai.api.profile
 import app.ailaai.api.updateGameMusic
 import app.ailaai.api.updateGameObject
@@ -48,6 +49,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
+import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.dom.TextInput
 import r
 
@@ -231,8 +233,9 @@ fun CurrentSelectionSection(map: Map) {
                             currentTile?.photo?.let { photo ->
                                 Img(src = "$baseUrl$photo") {
                                     style {
-                                        width(100.r)
-                                        property("height", "100px")
+                                        width(100.percent)
+                                        height(12.r)
+
                                         property("object-fit", "contain")
                                     }
                                 }
@@ -381,8 +384,8 @@ fun CurrentSelectionSection(map: Map) {
                             currentObject?.photo?.let { photo ->
                                 Img(src = "$baseUrl$photo") {
                                     style {
-                                        width(100.r)
-                                        property("height", "100px")
+                                        width(100.percent)
+                                        height(12.r)
                                         property("object-fit", "contain")
                                     }
                                 }
@@ -815,6 +818,14 @@ fun CurrentSelectionSection(map: Map) {
                                                         map.setCurrentGameObject(it)
                                                         // Update the AssetManager
                                                         assetManager.updateObject(it)
+                                                        // Force reload of objects in the AssetManager
+                                                        scope.launch {
+                                                            api.gameObjects(
+                                                                onSuccess = { objectsList ->
+                                                                    assetManager.setObjects(objectsList)
+                                                                }
+                                                            )
+                                                        }
                                                         // Update UI inputs with the latest values
                                                         newName = it.name ?: "Unnamed Object"
                                                         newDescription = it.description ?: ""
@@ -929,6 +940,14 @@ fun CurrentSelectionSection(map: Map) {
                                                         map.setCurrentGameObject(it)
                                                         // Update the AssetManager
                                                         assetManager.updateObject(it)
+                                                        // Force reload of objects in the AssetManager
+                                                        scope.launch {
+                                                            api.gameObjects(
+                                                                onSuccess = { objectsList ->
+                                                                    assetManager.setObjects(objectsList)
+                                                                }
+                                                            )
+                                                        }
                                                         // Update UI inputs with the latest values
                                                         newName = it.name ?: "Unnamed Object"
                                                         newDescription = it.description ?: ""

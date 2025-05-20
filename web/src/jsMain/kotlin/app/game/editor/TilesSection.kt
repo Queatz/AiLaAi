@@ -15,6 +15,8 @@ import app.dialog.rememberChoosePhotoDialog
 import baseUrl
 import com.queatz.db.GameTile
 import kotlinx.coroutines.launch
+import app.game.editor.assetManager
+import app.game.editor.rememberTiles
 
 @Composable
 fun TilesSection(
@@ -23,7 +25,8 @@ fun TilesSection(
     clearSelection: Boolean = false
 ) {
     val scope = rememberCoroutineScope()
-    var tiles by remember { mutableStateOf<List<GameTile>>(emptyList()) }
+    // Use the AssetManager to get tiles
+    val tiles = rememberTiles()
     var isLoading by remember { mutableStateOf(true) }
     val choosePhotoDialog = rememberChoosePhotoDialog(showUpload = true, aspectRatio = 1.0)
 
@@ -34,10 +37,18 @@ fun TilesSection(
         isLoading = true
         api.gameTiles(
             onSuccess = { tilesList ->
-                tiles = tilesList
+                // Update the AssetManager with the loaded tiles
+                assetManager.setTiles(tilesList)
                 isLoading = false
             }
         )
+    }
+
+    // Observe changes to the tiles in the AssetManager
+    LaunchedEffect(tiles) {
+        // This effect will be triggered whenever the tiles list changes
+        // No need to do anything here, as the UI will automatically update
+        isLoading = false
     }
 
     // Convert GameTiles to GameTileAssets
@@ -92,8 +103,8 @@ fun TilesSection(
                                 photo = photoUrl
                             ),
                             onSuccess = { newTile ->
-                                // Add the new tile to the list
-                                tiles = listOf(newTile) + tiles
+                                // Add the new tile to the AssetManager
+                                assetManager.addTile(newTile)
                             }
                         )
                     }

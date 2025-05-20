@@ -3,8 +3,9 @@
 
 package lib
 
-import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.CanvasRenderingContext2D
+import org.w3c.dom.HTMLCanvasElement
+import org.w3c.dom.events.KeyboardEvent
 
 abstract external class AbstractMesh {
     var isVisible: Boolean
@@ -234,6 +235,7 @@ external class Vector3(x: Float = definedExternally, y: Float = definedExternall
     fun add(otherVector: Vector3): Vector3
     fun addInPlace(otherVector: Vector3): Vector3
     fun multiply(otherVector: Vector3): Vector3
+    fun multiplyInPlace(otherVector: Vector3): Vector3
     fun scale(scale: Float): Vector3
     fun subtract(otherVector: Vector3): Vector3
     fun floor(): Vector3
@@ -252,6 +254,7 @@ external class Vector3(x: Float = definedExternally, y: Float = definedExternall
         fun TransformCoordinates(vector: Vector3, transformation: Matrix): Vector3
         fun Distance(v1: Vector3, v2: Vector3): Float
         fun Lerp(start: Vector3, end: Vector3, amount: Float): Vector3
+        fun Dot(left: Vector3, right: Vector3): Float
     }
 }
 
@@ -264,12 +267,16 @@ external class Matrix {
 }
 
 external class Quaternion {
+    fun multiplyInPlace(q1: Quaternion): Quaternion
     fun toEulerAngles(): Vector3
+    fun clone(): Quaternion
 
     companion object {
         fun Identity(): Quaternion
         fun FromLookDirectionRHToRef(direction: Vector3, up: Vector3, result: Quaternion): Quaternion
         fun FromLookDirectionLH(direction: Vector3, up: Vector3): Quaternion
+        fun SlerpToRef(start: Quaternion, end: Quaternion, amount: Float, result: Quaternion): Unit
+        fun RotationAxis(axis: Vector3, angle: Float): Quaternion
     }
 }
 
@@ -281,6 +288,7 @@ abstract external class Camera {
     var globalPosition: Vector3
 
     fun getDirection(direction: Vector3): Vector3
+    fun getForwardRay(length: Float = definedExternally): Ray
 }
 
 external class ArcRotateCamera(
@@ -329,14 +337,6 @@ external class KeyboardEventTypes {
 external class KeyboardInfo {
     val type: Number
     val event: KeyboardEvent
-}
-
-external class KeyboardEvent {
-    val key: String
-    val shiftKey: Boolean
-    val ctrlKey: Boolean
-    val altKey: Boolean
-    fun preventDefault()
 }
 
 external class PointerEventTypes {

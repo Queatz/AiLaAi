@@ -35,6 +35,8 @@ class GameMusicPlayerUtil {
     private var currentMarker: AnimationMarker? = null
     private var audioElement: HTMLAudioElement? = null
     private var currentAudioSrc: String? = null
+    // Track last processed time to catch markers in between frames
+    private var lastTime: Double = 0.0
 
     /**
      * Load music list from API
@@ -94,47 +96,60 @@ class GameMusicPlayerUtil {
     }
 
     /**
-     * Play music by ID
+     * Play music by ID, loading from API if not already present
      */
-    fun playMusicById(musicId: String) {
+    suspend fun playMusicById(musicId: String) {
+        // Try to find in current list
         val musicToPlay = musicList.find { it.id == musicId }
         if (musicToPlay?.audio != null) {
-            console.log("Playing music by ID: ${musicToPlay.name} ($baseUrl${musicToPlay.audio})")
-
-            // Update the current audio source
-            currentAudioSrc = "$baseUrl${musicToPlay.audio}"
+            val path = musicToPlay.audio!!
+            val url = when {
+                path.startsWith("http") -> path
+                path.startsWith("/") -> "$baseUrl$path"
+                else -> "$baseUrl/$path"
+            }
+            console.log("Playing music by ID:", musicToPlay.name, "url=", url)
+            currentAudioSrc = url
             currentMusic = musicToPlay
-
-            // The audio element will be updated by the composable
         } else {
-            console.log("No matching music found for ID: $musicId")
-            console.log("Available music: ${musicList.map { "${it.id}: ${it.name}" }}")
+            console.log("No matching music found for ID: $musicId; attempting to load from API")
+            api.gameMusic(
+                id = musicId,
+                onError = { error ->
+                    console.error("Failed to load music with ID: $musicId", error)
+                },
+                onSuccess = { music ->
+                    if (musicList.none { it.id == music.id }) {
+                        musicList = musicList + listOf(music)
+                    }
+                    val path = music.audio!!
+                    val url = "$baseUrl/$path"
+                    console.log("Playing loaded music:", music.name, "url=", url)
+                    currentAudioSrc = url
+                    currentMusic = music
+                }
+            )
         }
     }
 
     /**
-     * Play music for a marker
+     * Play music for a marker, restarting same track if triggered again
      */
-    fun playMusicForMarker(marker: AnimationMarker) {
-        // Track the marker that triggered playback
+    suspend fun playMusicForMarker(marker: AnimationMarker) {
+        console.log("playMusicForMarker called for marker:", marker.id, "time:", marker.time, "duration:", marker.duration, "event:", marker.event)
         currentMarker = marker
-        // Check if the marker has a PlayMusicEvent
         val event = marker.event
         if (event is PlayMusicEvent) {
-            // Play music by ID from the event
-            playMusicById(event.musicId)
-        } else {
-            // Legacy fallback: try to find music by name
-            val musicToPlay = musicList.find { it.name == marker.name }
-            if (musicToPlay?.audio != null) {
-                console.log("Playing music by name (legacy): ${musicToPlay.name} ($baseUrl${musicToPlay.audio}) at marker time ${marker.time}")
-
-                // Update the current audio source
-                currentAudioSrc = "$baseUrl${musicToPlay.audio}"
-                currentMusic = musicToPlay
+            // If same music is already playing, restart from beginning
+            if (currentMusic?.id == event.musicId) {
+                audioElement?.let {
+                    it.currentTime = 0.0
+                    try {
+                        it.play()
+                    } catch (_: Throwable) {}
+                }
             } else {
-                console.log("No matching music found for marker: ${marker.name} at time ${marker.time}")
-                console.log("Available music: ${musicList.map { it.name }}")
+                playMusicById(event.musicId)
             }
         }
     }
@@ -181,28 +196,31 @@ class GameMusicPlayerUtil {
     }
 
     /**
-     * Process markers at current time
+     * Process markers at current time, catching those between lastTime and time
      */
-    fun processMarkersAtTime(game: Game, time: Double) {
-        // If a marker with duration is playing, stop when its duration elapses
+    suspend fun processMarkersAtTime(game: Game, time: Double) {
+        // Stop music if current marker exceeded its duration
         currentMarker?.let { m ->
             if (m.duration > 0.0 && time >= m.time + m.duration) {
                 stopMusic()
                 currentMarker = null
             }
         }
-        // Find markers at or very close to the current time
-        val markersAtTime = game.animationData._markers.filter { marker ->
-            abs(marker.time - time) < .1 // with buffer
+        // Reset tracking if timeline rewound
+        if (time < lastTime) {
+            lastTime = 0.0
         }
-
-        // Play music for any markers at this time
-        if (markersAtTime.isNotEmpty()) {
-            console.log("Found ${markersAtTime.size} markers at time: $time")
-            markersAtTime.forEach { marker ->
+        // Find markers between lastTime (exclusive) and current time (inclusive)
+        val markersToPlay = game.animationData._markers.filter { marker ->
+            marker.time > lastTime && marker.time <= time
+        }
+        if (markersToPlay.isNotEmpty()) {
+            console.log("Found ${markersToPlay.size} markers between $lastTime and $time")
+            markersToPlay.forEach { marker ->
                 playMusicForMarker(marker)
             }
         }
+        lastTime = time
     }
 }
 

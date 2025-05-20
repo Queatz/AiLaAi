@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.card
 import app.ailaai.api.comment
+import app.ailaai.api.gameScene
 import app.ailaai.api.group
 import app.cards.CardsPage
 import app.components.Background
@@ -44,6 +45,7 @@ import application
 import asNaturalList
 import call
 import com.queatz.db.Card
+import com.queatz.db.GameScene
 import com.queatz.db.Reminder
 import com.queatz.db.Script
 import com.queatz.db.Story
@@ -140,6 +142,10 @@ fun AppPage() {
 
     val reminderUpdates = remember {
         MutableSharedFlow<Reminder>()
+    }
+
+    val sceneUpdates = remember {
+        MutableSharedFlow<GameScene>()
     }
 
     var reminderSearch by remember {
@@ -347,6 +353,7 @@ fun AppPage() {
         }
     }
 
+    // Perform the AppNav navigation
     LaunchedEffect(Unit) {
         appNav.navigate.collectLatest {
             when (it) {
@@ -373,6 +380,22 @@ fun AppPage() {
                     } else {
                         nav = NavPage.Cards
                         card = CardNav.Selected(it.card)
+                    }
+                }
+                is AppNavigation.GameScene -> {
+                    // Handle GameScene navigation
+                    val gameSceneId = it.id
+
+                    if (it.gameScene == null) {
+                        // If gameScene is null, fetch it by ID
+                        api.gameScene(gameSceneId) { fetchedScene ->
+                            nav = NavPage.Scenes
+                            scene = SceneNav.Selected(fetchedScene)
+                        }
+                    } else {
+                        // If gameScene is provided, use it directly
+                        nav = NavPage.Scenes
+                        scene = SceneNav.Selected(it.gameScene)
                     }
                 }
             }
@@ -522,7 +545,8 @@ fun AppPage() {
                         },
                         onBackClick = {
                             nav = NavPage.Profile
-                        }
+                        },
+                        updates = sceneUpdates
                     )
                 }
             }
@@ -640,6 +664,11 @@ fun AppPage() {
                         },
                         onSceneSelected = { selectedScene ->
                             scene = selectedScene
+                        },
+                        onSceneUpdated = {
+                            scope.launch {
+                                sceneUpdates.emit(it)
+                            }
                         }
                     )
                 }

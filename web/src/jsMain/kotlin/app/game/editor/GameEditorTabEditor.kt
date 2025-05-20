@@ -1,7 +1,9 @@
 package app.game.editor
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,10 +16,11 @@ import app.game.GameObjectData
 import app.game.GameObjectsData
 import app.game.GameTileData
 import app.game.GameTilesData
-import app.game.editor.SavedPositionsSection
 import app.game.json
+import application
 import com.queatz.db.AnimationMarkerData
 import com.queatz.db.CameraKeyframeData
+import com.queatz.db.CaptionData
 import com.queatz.db.Color4Data
 import com.queatz.db.GameScene
 import com.queatz.db.GameSceneConfig
@@ -27,8 +30,6 @@ import game.CameraKeyframe
 import game.Map
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import lib.Engine
 import lib.Vector3
 import org.jetbrains.compose.web.attributes.disabled
@@ -46,9 +47,11 @@ fun GameEditorTabEditor(
     engine: Engine,
     map: Map,
     gameScene: GameScene? = null,
+    editable: Boolean = true,
     onSceneDeleted: () -> Unit = {},
     onPixelatedChanged: (Boolean) -> Unit = {},
-    onSceneForked: (GameScene) -> Unit = {}
+    onSceneForked: (GameScene) -> Unit = {},
+    onSceneUpdated: (GameScene) -> Unit = {}
 ) {
     // Create state variables to track when to clear selections
     var clearTileSelection by remember { mutableStateOf(false) }
@@ -57,6 +60,7 @@ fun GameEditorTabEditor(
     var isSaving by remember { mutableStateOf(false) }
     var currentPixelSize by remember { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
+    val me = application.me.collectAsState()
 
     // Function to convert Vector3 to Vector3Data
     fun toVector3Data(vector3: Vector3): Vector3Data {
@@ -134,7 +138,16 @@ fun GameEditorTabEditor(
             rainEffectEnabled = map.isRainEffectEnabled(),
             rainEffectIntensity = map.getRainEffectIntensity(),
             dustEffectEnabled = map.isDustEffectEnabled(),
-            dustEffectIntensity = map.getDustEffectIntensity()
+            dustEffectIntensity = map.getDustEffectIntensity(),
+            // Captions
+            captions = game.animationData.getAllCaptions().map { cap ->
+                CaptionData(
+                    id = cap.id,
+                    time = cap.time,
+                    text = cap.text,
+                    duration = cap.duration
+                )
+            }
         )
 
         // Serialize to JSON
@@ -291,6 +304,8 @@ fun GameEditorTabEditor(
                                 val objectsJson = saveObjectsToJson(map)
                                 val configJson = saveAnimationConfigToJson(map)
 
+                                // Debug: log config JSON to confirm captions are included
+                                console.log("Saving GameScene config JSON: $configJson")
                                 // Update the GameScene with the new data
                                 val updatedGameScene = gameScene.copy(
                                     tiles = tilesJson,
@@ -317,13 +332,16 @@ fun GameEditorTabEditor(
             }) {
                 Text(if (isSaving) "Saving..." else "Save")
             }
+
             // Fork button: duplicate scene under new ID
             Button({
                 classes(Styles.outlineButton)
                 style {
                     marginRight(0.5.r)
                 }
+
                 if (isSaving) disabled()
+
                 onClick {
                     if (gameScene?.id != null && !isSaving) {
                         isSaving = true
@@ -357,29 +375,32 @@ fun GameEditorTabEditor(
                 Text("Fork")
             }
 
-            Button({
-                classes(Styles.outlineButton, Styles.outlineButtonTonal)
-                style {
-                    marginRight(0.5.r)
-                }
-                onClick {
-                    if (gameScene?.id != null) {
-                        // Determine the URL based on whether the scene has a custom URL or just an ID
-                        val url = if (gameScene.url != null && gameScene.url!!.isNotBlank()) {
-                            "/scene/${gameScene.url}"
-                        } else {
-                            "/scene/${gameScene.id}"
-                        }
-                        // Open the URL in a new tab
-                        window.open(url, "_blank")
-                    } else {
-                        console.error("Cannot open: GameScene ID is null")
+            if (editable) {
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonTonal)
+                    style {
+                        marginRight(0.5.r)
                     }
+                    onClick {
+                        if (gameScene?.id != null) {
+                            // Determine the URL based on whether the scene has a custom URL or just an ID
+                            val url = if (gameScene.url != null && gameScene.url!!.isNotBlank()) {
+                                "/scene/${gameScene.url}"
+                            } else {
+                                "/scene/${gameScene.id}"
+                            }
+                            // Open the URL in a new tab
+                            window.open(url, "_blank")
+                        } else {
+                            console.error("Cannot open: GameScene ID is null")
+                        }
+                    }
+                }) {
+                    Text("Launch scene")
                 }
-            }) {
-                Text("Launch scene")
             }
         }
+
         CurrentToolSection(map) {
             // When tool is deselected, clear tile, object, and music selections
             clearTileSelection = true
@@ -423,6 +444,7 @@ fun GameEditorTabEditor(
         PortalsSection()
         SavedPositionsSection(map)
         AnimationSection(map.game)
+        CaptionsSection(map.game)
         CameraSection(map)
         EnvironmentSection(map)
         WeatherSection(map)
@@ -450,7 +472,8 @@ fun GameEditorTabEditor(
         }
         SceneSection(
             gameScene = gameScene,
-            onSceneDeleted = onSceneDeleted
+            onSceneDeleted = onSceneDeleted,
+            onSceneUpdated = onSceneUpdated
         )
         ExportSection(map.game)
     }

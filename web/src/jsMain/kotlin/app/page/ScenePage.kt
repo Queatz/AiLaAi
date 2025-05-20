@@ -8,12 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
-import app.ailaai.api.gameScene
-import app.ailaai.api.gameScenes
+import app.AppNavigation
 import app.AppStyles
 import app.FullPageLayout
 import app.GamePage
-import app.PageTopBar
+import app.ailaai.api.gameScene
+import app.ailaai.api.gameScenes
+import app.appNav
 import app.components.TopBarSearch
 import app.nav.SceneNav
 import appString
@@ -21,8 +22,6 @@ import appText
 import baseUrl
 import bulletedString
 import com.queatz.db.GameScene
-import components.IconButton
-import components.LinkifyText
 import components.Loading
 import kotlinx.coroutines.launch
 import notBlank
@@ -41,14 +40,11 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
-import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.textAlign
@@ -62,7 +58,8 @@ import r
 fun ScenePage(
     nav: SceneNav,
     onBackClick: () -> Unit,
-    onSceneSelected: (SceneNav) -> Unit = {}
+    onSceneSelected: (SceneNav) -> Unit = {},
+    onSceneUpdated: (GameScene) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
 
@@ -179,8 +176,7 @@ fun ScenePage(
                                         Text(
                                             bulletedString(
                                                 scene.categories?.firstOrNull(),
-                                                scene.url,
-                                                scene.id!!
+                                                scene.description
                                             )
                                         )
                                     }
@@ -246,7 +242,18 @@ fun ScenePage(
                         }
                     },
                     onSceneForked = { newScene ->
-                        onSceneSelected(SceneNav.Selected(newScene))
+                        scope.launch {
+                            appNav.navigate(
+                                AppNavigation.GameScene(
+                                    id = newScene.id!!,
+                                    gameScene = newScene
+                                )
+                            )
+                        }
+                    },
+                    onSceneUpdated = { updatedScene ->
+                        scene = updatedScene
+                        onSceneUpdated(updatedScene)
                     }
                 )
             }

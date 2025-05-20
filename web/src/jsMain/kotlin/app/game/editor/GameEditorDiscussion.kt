@@ -47,6 +47,7 @@ import lib.PointerInfo
 import lib.Ray
 import lib.StandardMaterial
 import lib.Vector3
+import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
@@ -81,7 +82,6 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
     var selectedDiscussionId by remember { mutableStateOf<String?>(null) }
     var selectedDiscussion by remember { mutableStateOf<GameDiscussionExtended?>(null) }
     var previewMarker by remember { mutableStateOf<Mesh?>(null) }
-    var discussionComment by remember { mutableStateOf("") }
     var isDialogOpen by remember { mutableStateOf(false) } // Flag to prevent multiple dialogs
 
     // Create a discussion markers manager
@@ -311,7 +311,7 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
             initiallyExpanded = true
         ) {
             // Start new discussion button
-            if (me != null && gameScene?.id != null) {
+            if (gameScene?.id != null) {
                 Button({
                     classes(Styles.button)
                     style {
@@ -321,11 +321,13 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                     onClick {
                         startNewDiscussion()
                     }
-                    if (isPlacingDiscussion) {
-                        attr("disabled", "true")
+                    if (isPlacingDiscussion || me == null) {
+                        disabled()
                     }
                 }) {
-                    if (isPlacingDiscussion) {
+                    if (me == null) {
+                        Text("Sign in to comment")
+                    } else if (isPlacingDiscussion) {
                         Text("Click on the scene to place discussion...")
                     } else {
                         Text("Start New Discussion")

@@ -36,7 +36,8 @@ import toBytes
 @Composable
 fun SceneSection(
     gameScene: GameScene? = null,
-    onSceneDeleted: () -> Unit = {}  // Add this parameter with a default empty function
+    onSceneDeleted: () -> Unit = {},  // Add this parameter with a default empty function
+    onSceneUpdated: (GameScene) -> Unit = {}  // Add callback for scene updates
 ) {
     val scope = rememberCoroutineScope()
 
@@ -46,6 +47,8 @@ fun SceneSection(
     // Check if the current user is the owner of the scene
     val isCurrentUserOwner = gameScene?.person == me?.id
 
+    // Local state version of gameScene that we update when we rename or change the URL
+    var localGameScene by remember(gameScene) { mutableStateOf(gameScene) }
     var scenePhoto by remember(gameScene) { mutableStateOf(gameScene?.photo) }
 
     PanelSection(
@@ -95,7 +98,7 @@ fun SceneSection(
                             gap(0.5.r)
                         }
                     }) {
-                        Text(gameScene?.name ?: "New Scene")
+                        Text(localGameScene?.name ?: "New Scene")
 
                         Button({
                             classes(Styles.outlineButton)
@@ -104,13 +107,18 @@ fun SceneSection(
                                     val newName = inputDialog(
                                         title = "Rename Scene",
                                         placeholder = "Enter new scene name",
-                                        defaultValue = gameScene?.name ?: ""
+                                        defaultValue = localGameScene?.name ?: ""
                                     )
 
-                                    if (newName != null && gameScene?.id != null) {
-                                        val updatedGameScene = GameScene(name = newName)
-                                        api.updateGameScene(gameScene.id!!, updatedGameScene) {
-                                            // Scene renamed successfully
+                                    if (newName != null) {
+                                        localGameScene?.id?.let { sceneId ->
+                                            val updatedGameScene = GameScene(name = newName)
+                                            api.updateGameScene(sceneId, updatedGameScene) {
+                                                // Update local state with the new name
+                                                localGameScene = localGameScene?.copy(name = it.name)
+                                                // Notify parent components about the update
+                                                onSceneUpdated(it)
+                                            }
                                         }
                                     }
                                 }
@@ -144,7 +152,7 @@ fun SceneSection(
                             gap(0.5.r)
                         }
                     }) {
-                        Text(gameScene?.url ?: gameScene?.id ?: "Not saved yet")
+                        Text(localGameScene?.url ?: localGameScene?.id ?: "Not saved yet")
 
                         Button({
                             classes(Styles.outlineButton)
@@ -153,13 +161,24 @@ fun SceneSection(
                                     val newUrl = inputDialog(
                                         title = "Edit Scene URL",
                                         placeholder = "Enter scene URL",
-                                        defaultValue = gameScene?.url ?: ""
+                                        defaultValue = localGameScene?.url ?: ""
                                     )
 
-                                    if (newUrl != null && gameScene?.id != null) {
-                                        val updatedGameScene = GameScene(url = newUrl)
-                                        api.updateGameScene(gameScene.id!!, updatedGameScene) {
-                                            // Scene URL updated successfully
+                                    if (newUrl != null) {
+                                        localGameScene?.id?.let { sceneId ->
+                                            val updatedGameScene = GameScene(url = newUrl)
+                                            api.updateGameScene(sceneId, updatedGameScene, onError = {
+                                                dialog(
+                                                    title = "Error",
+                                                    confirmButton = "OK"
+                                                ) {
+                                                    Text("This URL is already taken. Please choose a different URL.")
+                                                }
+                                            }) {
+                                                // Scene URL update d successfully
+                                                localGameScene = it
+                                            }
+
                                         }
                                     }
                                 }
@@ -168,6 +187,70 @@ fun SceneSection(
                             Text("Edit URL")
                         }
                     }
+                }
+            }
+
+            // Scene Description Section
+            Div({
+                style {
+                    property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
+                    padding(1.r)
+                    borderRadius(1.r)
+                    display(DisplayStyle.Flex)
+                    flexDirection(FlexDirection.Column)
+                    gap(1.r)
+                }
+            }) {
+                Div({
+                    style {
+                        fontWeight("bold")
+                        marginBottom(0.5.r)
+                    }
+                }) {
+                    Text("Scene Description")
+                }
+
+                // Display the current description or a placeholder
+                Div({
+                    style {
+                        padding(0.5.r)
+                        borderRadius(0.5.r)
+                        backgroundColor(rgba(0, 0, 0, 0.05))
+                        minHeight(4.r)
+                    }
+                }) {
+                    Text(localGameScene?.description ?: "No description")
+                }
+
+                // Button to edit the description
+                Button({
+                    classes(Styles.outlineButton)
+                    style {
+                        width(100.percent)
+                        marginTop(0.5.r)
+                    }
+                    onClick {
+                        scope.launch {
+                            val newDescription = inputDialog(
+                                title = "Edit Scene Description",
+                                placeholder = "Enter scene description",
+                                defaultValue = localGameScene?.description ?: "",
+                                singleLine = false
+                            )
+
+                            if (newDescription != null) {
+                                localGameScene?.id?.let { sceneId ->
+                                    val updatedGameScene = GameScene(description = newDescription)
+                                    api.updateGameScene(sceneId, updatedGameScene) {
+                                        // Update local state with the new description
+                                        localGameScene = localGameScene?.copy(description = it.description)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }) {
+                    Text("Edit Description")
                 }
             }
 
@@ -233,7 +316,7 @@ fun SceneSection(
                     }
                     onClick {
                         scope.launch {
-                            if (gameScene?.id != null) {
+                            localGameScene?.id?.let { sceneId ->
                                 // Find the canvas element
                                 val canvas = document.querySelector("canvas") as? HTMLCanvasElement
 
@@ -262,8 +345,9 @@ fun SceneSection(
                                                 // Update the scene with the photo URL
                                                 val photoUrl = response.urls.first()
                                                 val updatedGameScene = GameScene(photo = photoUrl)
-                                                api.updateGameScene(gameScene.id!!, updatedGameScene) {
+                                                api.updateGameScene(sceneId, updatedGameScene) {
                                                     scenePhoto = it.photo
+                                                    localGameScene = localGameScene?.copy(photo = it.photo)
                                                 }
                                             }
                                         }
@@ -298,7 +382,7 @@ fun SceneSection(
                 }
 
                 // Change Owner Button - Only show if the current user is the owner
-                if (isCurrentUserOwner && gameScene?.id != null) {
+                if (isCurrentUserOwner && localGameScene?.id != null) {
                     Button({
                         classes(Styles.outlineButton)
                         style {
@@ -328,8 +412,11 @@ fun SceneSection(
                                             if (confirmed == true) {
                                                 // Update the scene with the new owner
                                                 val updatedGameScene = GameScene(person = newOwner.id)
-                                                api.updateGameScene(gameScene.id!!, updatedGameScene) {
-                                                    // Scene owner updated successfully
+                                                localGameScene?.id?.let { sceneId ->
+                                                    api.updateGameScene(sceneId, updatedGameScene) {
+                                                        // Scene owner updated successfully
+                                                        localGameScene = localGameScene?.copy(person = newOwner.id)
+                                                    }
                                                 }
                                             }
                                         }
@@ -352,7 +439,7 @@ fun SceneSection(
                     }
                     onClick {
                         scope.launch {
-                            if (gameScene?.id != null) {
+                            localGameScene?.id?.let { sceneId ->
                                 val confirmed = dialog(
                                     title = "Delete Scene",
                                     confirmButton = "Delete",
@@ -362,7 +449,7 @@ fun SceneSection(
                                 }
 
                                 if (confirmed == true) {
-                                    api.deleteGameScene(gameScene.id!!) {
+                                    api.deleteGameScene(sceneId) {
                                         // Scene deleted successfully
                                         onSceneDeleted()  // Call the callback after successful deletion
                                     }

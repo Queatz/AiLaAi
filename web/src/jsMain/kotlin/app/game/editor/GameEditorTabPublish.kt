@@ -23,6 +23,7 @@ import r
 @Composable
 fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null, onUploaded: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
+    var published by remember { mutableStateOf(gameScene?.published == true) }
 
     Div({
         style {
@@ -35,7 +36,7 @@ fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null,
             initiallyExpanded = true
         ) {
             if (gameScene != null) {
-                if (gameScene.published != true) {
+                if (!published) {
                     Div({
                         style {
                             padding(1.r, 0.r)
@@ -56,7 +57,7 @@ fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null,
                                         val updatedGameScene = gameScene.copy(published = true)
                                         gameScene.id?.let { id ->
                                             api.updateGameScene(id, updatedGameScene) {
-                                                onUploaded()
+                                                published = true
                                             }
                                         }
                                     }
@@ -82,7 +83,7 @@ fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null,
                             var isCopied by remember { mutableStateOf(false) }
 
                             Button({
-                                classes(Styles.button)
+                                classes(Styles.outlineButton, Styles.outlineButtonTonal)
 
                                 onClick {
                                     // Copy game URL to clipboard

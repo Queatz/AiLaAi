@@ -385,6 +385,19 @@ fun Number.format3Decimals(): String {
     }
 }
 
+/**
+ * Parses a string to a double, handling empty strings and trailing periods.
+ * Returns null if the string cannot be parsed to a valid number.
+ */
+fun String.toDoubleOrNullAllowEmpty(): Double? {
+    return when {
+        this.isEmpty() -> 0.0
+        this == "." -> 0.0
+        this.endsWith(".") -> trimEnd('.').toDoubleOrNull()
+        else -> this.toDoubleOrNull()
+    }
+}
+
 fun Int.withPlus() = let {
     if (it > 0) {
         "+$it"

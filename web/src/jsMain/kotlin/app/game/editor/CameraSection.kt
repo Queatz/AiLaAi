@@ -2,18 +2,16 @@ package app.game.editor
 
 import Styles
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import components.IconButton
-import format1Decimal
+import components.NumberTextField
 import format3Decimals
-import kotlin.math.round
 import game.CameraKeyframe
 import game.Map
-import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -31,8 +29,8 @@ import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.RangeInput
 import org.jetbrains.compose.web.dom.Text
-import org.jetbrains.compose.web.dom.TextInput
 import r
+import kotlin.math.round
 
 @Composable
 fun CameraSection(map: Map?) {
@@ -70,23 +68,21 @@ fun CameraSection(map: Map?) {
 
             Text("Field of View")
 
-            TextInput(fovValue.format3Decimals()) {
-                classes(Styles.textarea)
-                placeholder("Field of view (0.25 – 2.0)")
-                style {
+            NumberTextField(
+                value = fovValue,
+                onValueChange = { fov ->
+                    val clampedFov = minOf(2.0f, maxOf(0.25f, fov.toFloat()))
+                    fovValue = clampedFov
+                    // Set the FOV in the map
+                    map.set("fov", clampedFov)
+                },
+                placeholder = "Field of view (0.25 – 2.0)",
+                decimals = 3,
+                styleScope = {
                     width(100.percent)
                     marginBottom(0.5.r)
                 }
-                onInput { event ->
-                    val fov = event.value.toFloatOrNull()
-                    if (fov != null) {
-                        val clampedFov = minOf(2.0f, maxOf(0.25f, fov))
-                        fovValue = clampedFov
-                        // Set the FOV in the map
-                        map.set("fov", clampedFov)
-                    }
-                }
-            }
+            )
 
             // FOV slider (0.25-2.0)
             RangeInput(
@@ -147,7 +143,7 @@ fun CameraSection(map: Map?) {
 @Composable
 private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
     var isEditing by remember { mutableStateOf(false) }
-    var editTime by remember(keyframe) { mutableStateOf(keyframe.time.toString()) }
+    var editTime by remember(keyframe) { mutableStateOf(keyframe.time) }
     var editFov by remember(keyframe) { mutableStateOf(keyframe.fov) }
 
     Div({
@@ -170,16 +166,19 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                 }
             }) {
                 // Input for keyframe time
-                TextInput(editTime) {
-                    classes(Styles.textarea)
-                    placeholder("Time (seconds)")
-                    style {
+                NumberTextField(
+                    value = editTime,
+                    onValueChange = { 
+                        editTime = it.toDouble()
+                        // Update seekbar instantly when time is changed
+                        game.setTime(it.toDouble())
+                    },
+                    placeholder = "Time (seconds)",
+                    decimals = 3,
+                    styleScope = {
                         width(100.percent)
                     }
-                    onInput { event ->
-                        editTime = event.value
-                    }
-                }
+                )
             }
             // FOV input for keyframe
             Div({
@@ -191,20 +190,18 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                 }
             }) {
                 Text("Field of View")
-                TextInput(editFov.format3Decimals()) {
-                    classes(Styles.textarea)
-                    placeholder("Field of view (0.25 – 2.0)")
-                    style {
+                NumberTextField(
+                    value = editFov,
+                    onValueChange = { 
+                        editFov = it.toFloat().coerceIn(0.25f, 2f)
+                    },
+                    placeholder = "Field of view (0.25 – 2.0)",
+                    decimals = 3,
+                    styleScope = {
                         width(100.percent)
                         marginBottom(0.5.r)
                     }
-                    onInput { event ->
-                        val f = event.value.toFloatOrNull()
-                        if (f != null) {
-                            editFov = f.coerceIn(0.25f, 2f)
-                        }
-                    }
-                }
+                )
                 RangeInput(
                     editFov,
                     min = 0.25,
@@ -232,7 +229,7 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                     classes(Styles.textButton)
                     onClick { 
                         isEditing = false
-                        editTime = keyframe.time.toString()
+                        editTime = keyframe.time
                     }
                 }) {
                     Text("Cancel")
@@ -243,15 +240,13 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                     classes(Styles.button)
                     onClick { 
                         // Clip time to 3 decimal places
-                        keyframe.time = editTime.toDoubleOrNull()?.let {
-                            (round(it * 1000.0) / 1000.0)
-                        } ?: keyframe.time
+                        keyframe.time = (round(editTime * 1000.0) / 1000.0)
                         // Update keyframe FOV
                         keyframe.fov = editFov.coerceIn(0.25f, 2f)
                         // Force update of camera keyframes list to trigger UI recomposition
                         game.animationData.updateCameraKeyframes()
-                        // Update seekbar right away
-                        game.setTime(game.animationData.currentTime)
+                        // Update seekbar right away with the new time to ensure instant recomposition
+                        game.setTime(keyframe.time)
                         isEditing = false
                     }
                 }) {

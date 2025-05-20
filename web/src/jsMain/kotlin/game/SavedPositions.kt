@@ -92,7 +92,7 @@ class SavedPositions(private val scene: Scene) {
             scene = scene,
             format = Engine.TEXTUREFORMAT_ALPHA
         )
-        val fontSize = 32f
+        val fontSize = 48f  // Increased font size from 32f to 48f
         val measureContext = measureTexture.getContext()
         measureContext.font = "bold ${fontSize}px 'Ysabeau Infant'"
 
@@ -108,8 +108,8 @@ class SavedPositions(private val scene: Scene) {
         val textureHeight = baseTextureHeight
 
         // Plane dimensions - match texture aspect ratio
-        val planeHeight = .125f
-        val planeWidth = planeHeight * textureAspectRatio
+        val planeHeight = .2f  // Increased from .125f to match the larger font size
+        val planeWidth = (planeHeight * textureAspectRatio).toFloat()
 
         // Create the plane
         val plane = MeshBuilder.CreatePlane("text-$id", object : CreatePlaneOptions {

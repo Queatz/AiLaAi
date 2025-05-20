@@ -16,15 +16,18 @@ object AppStyles : StyleSheet() {
     val editorTabContainer by style {
         flexShrink(0)
         display(DisplayStyle.Flex)
+        justifyContent(JustifyContent.FlexStart)
         padding(0.5.r)
         marginBottom(0.5.r)
         overflowY("auto")
+        gap(.5.r)
+        boxSizing("border-box")
     }
 
     val editorTab by style {
         padding(0.5.r)
         cursor("pointer")
-        marginRight(0.25.r)
+        display(DisplayStyle.Flex)
     }
 
     val editorTabSelected by style {

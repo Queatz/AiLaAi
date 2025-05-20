@@ -1,15 +1,12 @@
 package app.ailaai.api
 
-import app.ailaai.api.Api
-import app.ailaai.api.ErrorBlock
-import app.ailaai.api.SuccessBlock
 import com.queatz.db.Comment
 import com.queatz.db.GameDiscussion
 import com.queatz.db.GameDiscussionExtended
+import com.queatz.db.GameMusic
+import com.queatz.db.GameObject
 import com.queatz.db.GameScene
 import com.queatz.db.GameTile
-import com.queatz.db.GameObject
-import com.queatz.db.GameMusic
 import io.ktor.http.HttpStatusCode
 
 // GameScene API functions
@@ -19,16 +16,6 @@ suspend fun Api.gameScene(
     onSuccess: SuccessBlock<GameScene>,
 ) = get(
     url = "game-scene/$id",
-    onError = onError,
-    onSuccess = onSuccess
-)
-
-suspend fun Api.gameSceneByUrl(
-    url: String,
-    onError: ErrorBlock = null,
-    onSuccess: SuccessBlock<GameScene>,
-) = get(
-    url = "game-scene/url/$url",
     onError = onError,
     onSuccess = onSuccess
 )

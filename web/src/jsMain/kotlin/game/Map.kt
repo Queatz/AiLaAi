@@ -69,11 +69,19 @@ class Map(private val scene: Scene) {
         val walk = Vector3.Zero()
 
         // Input
-        scene.onKeyboardObservable.add(fun (event: KeyboardInfo) {
-            // Stop animation if it's playing on ANY keyboard input
-            game?.let { g ->
-                if (g.isPlaying()) {
-                    g.pause()
+        scene.onKeyboardObservable.add(fun(event: KeyboardInfo) {
+            // Stop animation if it's playing on keyboard input (except spacebar)
+            if (event.event.key == " " || event.event.key == "Space") {
+                if (event.type == KeyboardEventTypes.KEYDOWN && !event.event.repeat) {
+                    if (tilemapEditor.currentGameTile == null && tilemapEditor.currentGameObject == null) {
+                        game?.togglePlayback()
+                    }
+                }
+            } else {
+                game?.let { g ->
+                    if (g.isPlaying()) {
+                        g.pause()
+                    }
                 }
             }
 
@@ -96,12 +104,12 @@ class Map(private val scene: Scene) {
                 return
             }
 
-            if (event.event.key == "Alt") {
+            if ((event.event.key == "ArrowLeft" || event.event.key == "ArrowRight") && event.event.altKey) {
                 if (event.type == KeyboardEventTypes.KEYDOWN) {
-                    // Detach camera control when Alt is pressed
+                    // Detach camera control when Alt + Arrow is pressed
                     camera.camera.detachControl()
                 } else if (event.type == KeyboardEventTypes.KEYUP) {
-                    // Reattach camera control when Alt is released
+                    // Reattach camera control when Alt + Arrow is released
                     camera.camera.attachControl()
                 }
                 event.event.preventDefault()
@@ -117,10 +125,18 @@ class Map(private val scene: Scene) {
                     }
 
                     " " -> {
-                        if (event.event.ctrlKey) {
-                            tilemapEditor.toggleSide(event.event.shiftKey)
-                        } else {
-                            tilemapEditor.togglePlane(event.event.shiftKey)
+                        // Only handle spacebar for editor functions if we're in edit mode
+                        // and have a tile or object selected (otherwise let it be used for play/pause)
+                        if (game?.editable == true &&
+                            (tilemapEditor.currentGameTile != null || tilemapEditor.currentGameObject != null)
+                        ) {
+                            if (event.event.ctrlKey) {
+                                tilemapEditor.toggleSide(event.event.shiftKey)
+                            } else {
+                                tilemapEditor.togglePlane(event.event.shiftKey)
+                            }
+                            // Prevent the event from being used for play/pause
+                            event.event.preventDefault()
                         }
                     }
 

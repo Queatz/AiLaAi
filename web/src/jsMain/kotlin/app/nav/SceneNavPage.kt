@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.createGameScene
 import app.ailaai.api.gameScenes
+import app.components.Empty
 import app.components.Spacer
 import app.dialog.inputDialog
 import app.menu.Menu
@@ -59,6 +60,10 @@ fun SceneNavPage(
         mutableStateOf<List<GameScene>?>(null)
     }
 
+    var loadError by remember {
+        mutableStateOf(false)
+    }
+
     var showSearch by remember {
         mutableStateOf(false)
     }
@@ -92,8 +97,13 @@ fun SceneNavPage(
     }
 
     suspend fun loadScenes() {
-        api.gameScenes {
-            scenes = it
+        loadError = false
+        try {
+            api.gameScenes {
+                scenes = it
+            }
+        } catch (e: Exception) {
+            loadError = true
         }
     }
 
@@ -195,7 +205,19 @@ fun SceneNavPage(
             Spacer()
         }
 
-        if (scenes == null) {
+        if (loadError) {
+            Div({
+                style {
+                    display(DisplayStyle.Flex)
+                    justifyContent(JustifyContent.Center)
+                    padding(1.r)
+                }
+            }) {
+                Empty {
+                    Text("Failed to load.")
+                }
+            }
+        } else if (scenes == null) {
             Div({
                 style {
                     display(DisplayStyle.Flex)
@@ -220,10 +242,11 @@ fun SceneNavPage(
                 } else {
                     Text("No scenes found")
                     Button({
+                        classes(Styles.button)
                         onClick {
                             scope.launch {
                                 val newScene = GameScene(
-                                    name = "New Scene"
+                                    name = "Create a Scene"
                                 )
                                 api.createGameScene(
                                     gameScene = newScene,

@@ -18,6 +18,7 @@ import app.game.GameObjectsData
 import app.game.GameTilesData
 import app.game.editor.Seekbar
 import app.game.json
+import appText
 import com.queatz.db.GameScene
 import com.queatz.db.GameSceneConfig
 import components.IconButton
@@ -61,6 +62,7 @@ import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.transform
 import org.jetbrains.compose.web.css.unaryMinus
 import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Canvas
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -149,14 +151,29 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                 console.log("Loaded saved position: ${positionData.name} at position (${positionData.position.x}, ${positionData.position.y}, ${positionData.position.z})")
             }
 
-            // Load markers
+            // Load markers (including any PlayMusicEvent)
             config.markers.forEach { markerData ->
-                // Create a new marker with the same id, name, and time
+                // Create a new marker with the same name and time
                 val marker = game.animationData.addMarker(markerData.name)
                 // Update the marker properties
                 marker.time = markerData.time
                 marker.duration = markerData.duration
-                console.log("Loaded marker: ${markerData.name} at time ${markerData.time} with duration ${markerData.duration}")
+                // Preserve any associated event (e.g., PlayMusicEvent)
+                marker.event = markerData.event
+                console.log(
+                    "Loaded marker: ${markerData.name} at time ${markerData.time} " +
+                    "with duration ${markerData.duration} and event=${markerData.event}"
+                )
+            }
+            // Load captions
+            config.captions.forEach { captionData ->
+                game.animationData.addCaptionFromData(
+                    captionData.id,
+                    captionData.time,
+                    captionData.text,
+                    captionData.duration
+                )
+                console.log("Loaded caption: ${captionData.text} at time ${captionData.time} with duration ${captionData.duration}")
             }
 
             // Load camera keyframes
@@ -336,17 +353,22 @@ fun GamePage(
     onSceneDeleted: () -> Unit = {},
     onScenePublished: () -> Unit = {},
     onSceneForked: (GameScene) -> Unit = {},
+    onSceneUpdated: (GameScene) -> Unit = {},
     styles: StyleScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
     showSidePanel: Boolean = true,
     showScreenshot: Boolean = true,
-    editable: Boolean = true
+    editable: Boolean = true,
+    me: Any? = null
 ) {
     val scope = rememberCoroutineScope()
     var canvasRef by remember { mutableStateOf<HTMLCanvasElement?>(null) }
 
-    // Make game state depend on gameScene to ensure recreation when gameScene changes
-    var game by remember(gameScene) {
+    // Create a mutable state for gameScene to update it when renamed
+    var localGameScene by remember(gameScene) { mutableStateOf(gameScene) }
+
+    // Make game state depend on localGameScene to ensure recreation when gameScene changes
+    var game by remember(localGameScene) {
         mutableStateOf<Game?>(null)
     }
 
@@ -397,13 +419,13 @@ fun GamePage(
         }
     }
 
-    DisposableEffect(gameScene, canvasRef, editable) {
-        gameScene ?: return@DisposableEffect onDispose { }
+    DisposableEffect(localGameScene, canvasRef, editable) {
+        localGameScene ?: return@DisposableEffect onDispose { }
         canvasRef ?: return@DisposableEffect onDispose { }
 
         val localGame = Game(canvasRef!!, editable).also {
-            if (gameScene.tiles != null || gameScene.objects != null || gameScene.config != null) {
-                loadGameSceneData(scope, it, gameScene)
+            if (localGameScene?.tiles != null || localGameScene?.objects != null || localGameScene?.config != null) {
+                loadGameSceneData(scope, it, localGameScene!!)
             }
 
         }
@@ -418,18 +440,12 @@ fun GamePage(
     LaunchedEffect(game) {
         game?.playStateFlow?.collectLatest { playing ->
             isPlaying = playing
-            // Hide the play button when animation starts playing
-            if (playing) {
-                showPlayButton = false
-            }
         }
     }
 
-    GameMusicPlayer(game)
-
     Div({
         // Add a class to identify the game container for fullscreen
-        classes(Styles.fullscreenContainer, "game-container")
+        classes(Styles.fullscreenContainer)
         style {
             display(DisplayStyle.Flex)
             width(100.percent)
@@ -441,14 +457,24 @@ fun GamePage(
                 // Hide scrollbars without using position: fixed or overflow: hidden
                 // which can break other functionality
                 property("scrollbar-width", "none") // Firefox
-                property("-ms-overflow-style", "none") // IE/Edge
-
-                // For WebKit browsers (Chrome, Safari)
-                property("&::-webkit-scrollbar", "{display: none;}")
             }
             styles()
         }
     }) {
+        // Show sign in button if editable is false and me is null
+        if (!editable && me == null) {
+            Button({
+                classes(Styles.textButton)
+                style {
+                    marginRight(.5.r)
+                }
+                onClick {
+                    Router.current.navigate("/signin")
+                }
+            }) {
+                appText { signUp }
+            }
+        }
         Div(
             attrs = {
                 style {
@@ -477,60 +503,62 @@ fun GamePage(
 
                     // Add keyboard event listener for animation control and tool-aware play/pause
                     onKeyDown { event ->
-                        // When no tile or object tool is selected, Space toggles play/pause
-                        if (event.key == " "
-                            && game?.map?.tilemapEditor?.currentGameTile == null
-                            && game?.map?.tilemapEditor?.currentGameObject == null
-                        ) {
-                            game?.togglePlayback()
-                            isPlaying = game?.isPlaying() ?: false
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }
-                        // If already playing, any key pauses playback
-                        else if (game?.isPlaying() == true) {
-                            game?.pause()
-                            isPlaying = false
-                            event.preventDefault()
-                        } else if (event.key == "Escape") {
-                            showPlayButton = false
-                            event.preventDefault()
-                        } else if (event.key == "ArrowLeft" && event.altKey && event.shiftKey) {
-                            // Scrub backward by 1 second when Shift+Alt+Left
-                            game?.let {
-                                val newTime = (it.animationData.currentTime - 1.0)
-                                    .coerceIn(0.0, it.animationData.totalDuration)
-                                it.setTime(newTime)
+                        when {
+                            (event.key == " " || event.code == "Space") -> {
+                                // Always prevent default for spacebar to avoid scrolling
+                                event.preventDefault()
+                                // Stop propagation for repeat events to prevent constant toggling
+                                if (event.repeat) {
+                                    event.stopPropagation()
+                                }
                             }
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else if (event.key == "ArrowLeft" && event.altKey) {
-                            // Scrub backward by 0.1 second
-                            game?.let {
-                                val newTime = (it.animationData.currentTime - 0.1)
-                                    .coerceIn(0.0, it.animationData.totalDuration)
-                                it.setTime(newTime)
+                            game?.isPlaying() == true -> {
+                                game?.pause()
+                                isPlaying = false
+                                event.preventDefault()
+                                event.stopPropagation()
                             }
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else if (event.key == "ArrowRight" && event.altKey && event.shiftKey) {
-                            // Scrub forward by 1 second when Shift+Alt+Right
-                            game?.let {
-                                val newTime = (it.animationData.currentTime + 1.0)
-                                    .coerceIn(0.0, it.animationData.totalDuration)
-                                it.setTime(newTime)
+                            event.key == "Escape" -> {
+                                showPlayButton = false
+                                event.preventDefault()
+                                event.stopPropagation()
                             }
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else if (event.key == "ArrowRight" && event.altKey) {
-                            // Scrub forward by 0.1 second
-                            game?.let {
-                                val newTime = (it.animationData.currentTime + 0.1)
-                                    .coerceIn(0.0, it.animationData.totalDuration)
-                                it.setTime(newTime)
+                            event.key == "ArrowLeft" && event.altKey && event.shiftKey -> {
+                                game?.let {
+                                    val newTime = (it.animationData.currentTime - 1.0)
+                                        .coerceIn(0.0, it.animationData.totalDuration)
+                                    it.setTime(newTime)
+                                }
+                                event.preventDefault()
+                                event.stopPropagation()
                             }
-                            event.preventDefault()
-                            event.stopPropagation()
+                            event.key == "ArrowLeft" && event.altKey -> {
+                                game?.let {
+                                    val newTime = (it.animationData.currentTime - 0.1)
+                                        .coerceIn(0.0, it.animationData.totalDuration)
+                                    it.setTime(newTime)
+                                }
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            event.key == "ArrowRight" && event.altKey && event.shiftKey -> {
+                                game?.let {
+                                    val newTime = (it.animationData.currentTime + 1.0)
+                                        .coerceIn(0.0, it.animationData.totalDuration)
+                                    it.setTime(newTime)
+                                }
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            event.key == "ArrowRight" && event.altKey -> {
+                                game?.let {
+                                    val newTime = (it.animationData.currentTime + 0.1)
+                                        .coerceIn(0.0, it.animationData.totalDuration)
+                                    it.setTime(newTime)
+                                }
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
                         }
                     }
 
@@ -545,6 +573,7 @@ fun GamePage(
 
                     ref { canvas ->
                         canvasRef = canvas
+                        canvas.focus()
 
                         canvas.width = canvas.clientWidth
                         canvas.height = canvas.clientHeight
@@ -564,6 +593,39 @@ fun GamePage(
                     }
                 }
             )
+            // Caption overlay: display active captions at bottom, above seekbar
+            game?.let { g ->
+                val currentTime = g.animationData.collectCurrentTime()
+                val activeCaptions = g.animationData.captions.filter { cap ->
+                    currentTime >= cap.time && currentTime <= cap.time + cap.duration
+                }
+                if (activeCaptions.isNotEmpty()) {
+                    Div({
+                        style {
+                            position(Position.Absolute)
+                            bottom(6.r)
+                            left(50.percent)
+                            transform { translateX(-50.percent) }
+                            backgroundColor(rgba(0, 0, 0, 0.7f))
+                            color(Color.white)
+                            padding(2.r)
+                            borderRadius(2.r)
+                            fontSize(28.px)
+                            property("text-align", "center")
+                            property("z-index", "50")
+                            property("pointer-events", "none")
+                        }
+                    }) {
+                        activeCaptions.forEach { cap ->
+                            val elapsed = currentTime - cap.time
+                            val revealCount = (elapsed * 15).toInt().coerceIn(0, cap.text.length)
+                            Text(cap.text.take(revealCount))
+                        }
+                    }
+                }
+            }
+
+            GameMusicPlayer(game)
 
             if (showPlayButton) {
                 Div({
@@ -583,7 +645,7 @@ fun GamePage(
                         fontSize(32.px)
                     }
                 }) {
-                    Text(gameScene?.name ?: "Location Name")
+                    Text(localGameScene?.name ?: "Location Name")
                 }
 
                 Div({
@@ -676,8 +738,8 @@ fun GamePage(
                 // Toggle side panel visibility when not editable
                 if (!editable) {
                     IconButton(
-                        name = if (showPanel) "chevron_right" else "chevron_left",
-                        title = if (showPanel) "Hide side panel" else "Show side panel",
+                        name = "forum",
+                        title = "Show discussion",
                         background = true,
                         styles = {
                             backgroundColor(rgba(0, 0, 0, 0.5))
@@ -762,10 +824,14 @@ fun GamePage(
                 GameEditorPanel(
                     engine = game.engine,
                     map = game.map,
-                    gameScene = gameScene,
+                    editable = editable,
+                    gameScene = localGameScene,
                     onSceneDeleted = onSceneDeleted,
                     onScenePublished = onScenePublished,
                     onSceneForked = onSceneForked,
+                    onSceneUpdated = { updatedScene ->
+                        localGameScene = updatedScene
+                    },
                     styles = {
                         flexShrink(0)
                     },

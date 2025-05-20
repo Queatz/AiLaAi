@@ -40,7 +40,7 @@ fun WeatherSection(map: Map? = null) {
                 isEnabled = true
             )
             if (snowEnabled) {
-                val snowIntensity = map.getSnowEffectIntensity()
+                var snowIntensity by remember { mutableStateOf(map.getSnowEffectIntensity()) }
                 Div({ style { marginBottom(0.5.r) } }) {
                     Text("Intensity")
                     RangeInput(
@@ -52,6 +52,7 @@ fun WeatherSection(map: Map? = null) {
                         style { width(100.percent) }
                         onInput {
                             val value = it.value!!.toFloat()
+                            snowIntensity = value
                             map.setSnowEffectIntensity(value)
                         }
                     }
@@ -69,7 +70,7 @@ fun WeatherSection(map: Map? = null) {
                 isEnabled = true
             )
             if (rainEnabled) {
-                val rainIntensity = map.getRainEffectIntensity()
+                var rainIntensity by remember { mutableStateOf(map.getRainEffectIntensity()) }
                 Div({ style { marginBottom(0.5.r) } }) {
                     Text("Intensity")
                     RangeInput(
@@ -81,6 +82,7 @@ fun WeatherSection(map: Map? = null) {
                         style { width(100.percent) }
                         onInput {
                             val value = it.value!!.toFloat()
+                            rainIntensity = value
                             map.setRainEffectIntensity(value)
                         }
                     }
@@ -98,7 +100,7 @@ fun WeatherSection(map: Map? = null) {
                 isEnabled = true
             )
             if (dustEnabled) {
-                val dustIntensity = map.getDustEffectIntensity()
+                var dustIntensity by remember { mutableStateOf(map.getDustEffectIntensity()) }
                 Div({ style { marginBottom(0.5.r) } }) {
                     Text("Intensity")
                     RangeInput(
@@ -110,6 +112,7 @@ fun WeatherSection(map: Map? = null) {
                         style { width(100.percent) }
                         onInput {
                             val value = it.value!!.toFloat()
+                            dustIntensity = value
                             map.setDustEffectIntensity(value)
                         }
                     }

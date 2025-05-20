@@ -9,8 +9,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.dialog.inputDialog
 import components.IconButton
+import components.NumberTextField
 import format1Decimal
 import format3Decimals
+import toDoubleOrNullAllowEmpty
 import game.AnimationMarker
 import game.Game
 import kotlinx.coroutines.flow.collectLatest
@@ -98,7 +100,7 @@ fun AnimationSection(game: Game?) {
                         singleLine = true
                     )
 
-                    result?.toDoubleOrNull()?.let { time: Double ->
+                    result?.toDoubleOrNullAllowEmpty()?.let { time: Double ->
                         game.setTime(time)
                     }
 
@@ -223,8 +225,8 @@ fun AnimationSection(game: Game?) {
 private fun MarkerItem(game: Game, marker: AnimationMarker) {
     var isEditing by remember { mutableStateOf(false) }
     var editName by remember(marker) { mutableStateOf(marker.name) }
-    var editTime by remember(marker) { mutableStateOf(marker.time.toString()) }
-    var editDuration by remember(marker) { mutableStateOf(marker.duration.toString()) }
+    var editTime by remember(marker) { mutableStateOf(marker.time) }
+    var editDuration by remember(marker) { mutableStateOf(marker.duration) }
     var editVisible by remember(marker) { mutableStateOf(marker.visible) }
 
     Div({
@@ -261,30 +263,32 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                 }
 
                 // Input for marker time
-                TextInput(editTime) {
-                    classes(Styles.textarea)
-                    placeholder("Time (seconds)")
-                    style {
+                NumberTextField(
+                    value = editTime,
+                    onValueChange = { 
+                        editTime = it.toDouble()
+                        // Update seekbar instantly when time is changed
+                        game.setTime(it.toDouble())
+                    },
+                    placeholder = "Time (seconds)",
+                    decimals = 3,
+                    styleScope = {
                         width(100.percent)
                         marginBottom(0.5.r)
                     }
-                    onInput { event ->
-                        editTime = event.value
-                    }
-                }
+                )
 
                 // Input for marker duration
-                TextInput(editDuration) {
-                    classes(Styles.textarea)
-                    placeholder("Duration (seconds, 0 = play until end)")
-                    style {
+                NumberTextField(
+                    value = editDuration,
+                    onValueChange = { editDuration = it.toDouble() },
+                    placeholder = "Duration (seconds, 0 = play until end)",
+                    decimals = 3,
+                    styleScope = {
                         width(100.percent)
                         marginBottom(0.5.r)
                     }
-                    onInput { event ->
-                        editDuration = event.value
-                    }
-                }
+                )
 
                 // Visibility toggle
                 Div({
@@ -322,8 +326,8 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     onClick { 
                         isEditing = false
                         editName = marker.name
-                        editTime = marker.time.toString()
-                        editDuration = marker.duration.toString()
+                        editTime = marker.time
+                        editDuration = marker.duration
                         editVisible = marker.visible
                     }
                 }) {
@@ -337,13 +341,9 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         if (editName.isNotBlank()) {
                             marker.name = editName
                             // Clip time to 3 decimal places
-                            marker.time = editTime.toDoubleOrNull()?.let { 
-                                (round(it * 1000.0) / 1000.0)
-                            } ?: marker.time
+                            marker.time = (round(editTime * 1000.0) / 1000.0)
                             // Clip duration to 3 decimal places
-                            marker.duration = editDuration.toDoubleOrNull()?.let { 
-                                (round(it * 1000.0) / 1000.0)
-                            } ?: marker.duration
+                            marker.duration = (round(editDuration * 1000.0) / 1000.0)
                             // Update visibility
                             marker.visible = editVisible
                             // Force update of markers list to trigger UI recomposition
@@ -379,7 +379,7 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     }) {
                         Text(marker.name)
                     }
-                    Text("${marker.time.format3Decimals()} ${if (marker.duration > 0) marker.duration.format3Decimals() else ""}")
+                    Text("${marker.time.format3Decimals()} ${if (marker.duration > 0) "(${marker.duration.format3Decimals()})" else ""}")
                 }
 
                 Div({
@@ -417,9 +417,14 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         name = if (marker.visible) "visibility" else "visibility_off",
                         title = if (marker.visible) "Hide marker on seekbar" else "Show marker on seekbar",
                         onClick = {
+                            // Toggle visibility
                             marker.visible = !marker.visible
+                            // Force update of markers list to trigger UI recomposition
                             game.animationData.updateMarkers()
+                            // Update seekbar right away to reflect visibility change
                             game.setTime(game.animationData.currentTime)
+                            // Force recomposition of this component
+                            editVisible = marker.visible
                         }
                     )
                 }

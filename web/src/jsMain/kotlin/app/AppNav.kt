@@ -2,6 +2,7 @@ package app
 
 import application
 import com.queatz.db.Card
+import com.queatz.db.GameScene as GameSceneModel
 import com.queatz.db.GroupExtended
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -12,7 +13,7 @@ sealed interface AppNavigation {
     data class Nav(val nav: NavPage) : AppNavigation
     data class Group(val id: String, val groupExtended: GroupExtended? = null) : AppNavigation
     data class Page(val id: String, val card: Card? = null) : AppNavigation
-
+    data class GameScene(val id: String, val gameScene: GameSceneModel? = null) : AppNavigation
 }
 
 class AppNav {

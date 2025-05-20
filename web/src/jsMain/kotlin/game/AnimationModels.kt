@@ -53,6 +53,41 @@ data class CameraKeyframe(
  * Class to manage animation data
  */
 class AnimationData {
+    // Captions attached to the animation timeline (composable)
+    private val _captions = mutableStateListOf<GameCaption>()
+    val captions: List<GameCaption> @Composable get() = _captions.sortedBy { it.time }
+    /** Non-composable accessor for all captions */
+    fun getAllCaptions(): List<GameCaption> = _captions.toList()
+
+    /**
+     * Add a new caption at the current time
+     * @param text The caption text to display
+     * @param duration Duration in seconds to display after typing (default 5 seconds)
+     */
+    fun addCaption(text: String, duration: Double = 5.0): GameCaption {
+        val id = "caption_${Date().getTime().toLong()}"
+        val caption = GameCaption(id, currentTime, text, duration)
+        _captions.add(caption)
+        return caption
+    }
+
+    /**
+     * Remove a caption by id
+     */
+    fun removeCaption(id: String) {
+        _captions.removeAll { it.id == id }
+    }
+    /**
+     * Add a caption from serialized data
+     * @param id Unique identifier
+     * @param time Time in seconds when the caption appears
+     * @param text Caption text
+     * @param duration Duration in seconds to display after typing
+     */
+    fun addCaptionFromData(id: String, time: Double, text: String, duration: Double) {
+        val caption = GameCaption(id, time, text, duration)
+        _captions.add(caption)
+    }
     val _markers = mutableStateListOf<AnimationMarker>()
     val markers: List<AnimationMarker> @Composable get() = _markers.sortedBy { it.time }
 
@@ -84,6 +119,33 @@ class AnimationData {
      * No-op: list is already a state list, modifying elements or list will trigger recomposition
      */
     fun updateMarkers() {}
+
+    /**
+     * Update a caption's properties and ensure UI recomposition
+     * @param id ID of the caption to update
+     * @param text New text (or null to keep existing)
+     * @param time New time (or null to keep existing)
+     * @param duration New duration (or null to keep existing)
+     * @return True if the caption was found and updated, false otherwise
+     */
+    fun updateCaption(id: String, text: String? = null, time: Double? = null, duration: Double? = null): Boolean {
+        val index = _captions.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            val caption = _captions[index]
+
+            // Update properties if provided
+            if (text != null) caption.text = text
+            if (time != null) caption.time = time
+            if (duration != null) caption.duration = duration
+
+            // Force recomposition by removing and re-adding the caption
+            _captions.removeAt(index)
+            _captions.add(caption)
+
+            return true
+        }
+        return false
+    }
 
     /**
      * Force update of camera keyframes list to trigger UI recomposition
@@ -314,3 +376,17 @@ class AnimationData {
         return false
     }
 }
+
+/**
+ * Data class representing a caption in the animation
+ * @param id Unique identifier
+ * @param time Time in seconds when the caption appears
+ * @param text The caption text
+ */
+data class GameCaption(
+    val id: String,
+    var time: Double,
+    var text: String,
+    /** Duration in seconds to display after typing (default 5 seconds) */
+    var duration: Double = 5.0
+)

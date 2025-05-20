@@ -1,8 +1,6 @@
 package com.queatz.api
 
-import com.queatz.api.urlize
 import com.queatz.db.Comment
-import com.queatz.db.CommentExtended
 import com.queatz.db.GameDiscussion
 import com.queatz.db.GameDiscussionExtended
 import com.queatz.db.GameScene
@@ -28,19 +26,7 @@ import io.ktor.server.routing.post
 fun Route.gameRoutes() {
     // GameScene routes
     authenticate(optional = true) {
-        get("/game-scene/{id}") {
-            respond {
-                val gameScene = db.document(GameScene::class, parameter("id"))
-
-                if (gameScene == null || (gameScene.published != true && gameScene.person != meOrNull?.id)) {
-                    HttpStatusCode.NotFound
-                } else {
-                    gameScene
-                }
-            }
-        }
-
-        get("/game-scene/url/{url}") {
+        get("/game-scene/{url}") {
             respond {
                 val url = parameter("url")
 
@@ -52,17 +38,11 @@ fun Route.gameRoutes() {
                     RETURN scene
                 """
 
-                val scenes = db.query(
+                db.query(
                     GameScene::class,
                     query,
                     mapOf("url" to url, "person" to meOrNull?.id)
-                ).toList()
-
-                if (scenes.isEmpty()) {
-                    HttpStatusCode.NotFound
-                } else {
-                    scenes.first()
-                }
+                ).firstOrNull() ?: HttpStatusCode.NotFound
             }
         }
 
@@ -129,7 +109,10 @@ fun Route.gameRoutes() {
                     val update = call.receive<GameScene>()
 
                     if (update.name != null) {
-                        gameScene.name = update.name
+                        gameScene.name = update.name?.trim()
+                    }
+                    if (update.name != null) {
+                        gameScene.description = update.description?.trim()
                     }
                     if (update.url != null) {
                         if (update.url.isNullOrBlank()) {
@@ -140,7 +123,7 @@ fun Route.gameRoutes() {
                             // Check if URL is already in use by another scene
                             val query = """
                                 FOR scene IN `${GameScene::class.collection()}`
-                                FILTER scene.url == @url AND scene._key != @id
+                                FILTER LOWER(scene.url) == @url AND scene._key != @id
                                 LIMIT 1
                                 RETURN scene
                             """
@@ -148,11 +131,11 @@ fun Route.gameRoutes() {
                             val existingScene = db.query(
                                 GameScene::class,
                                 query,
-                                mapOf("url" to url, "id" to gameScene.id)
+                                mapOf("url" to url.lowercase(), "id" to gameScene.id)
                             ).firstOrNull()
 
                             if (existingScene != null) {
-                                return@respond HttpStatusCode.Conflict.description("URL is already in use")
+                                return@respond HttpStatusCode.Conflict
                             }
 
                             gameScene.url = url
@@ -178,6 +161,7 @@ fun Route.gameRoutes() {
                     }
 
                     db.update(gameScene)
+                    gameScene
                 }
             }
         }
@@ -205,7 +189,7 @@ fun Route.gameRoutes() {
             respond {
                 val gameTile = db.document(GameTile::class, parameter("id"))
 
-                if (gameTile == null || (gameTile.published != null && gameTile.person != meOrNull?.id)) {
+                if (gameTile == null) {
                     HttpStatusCode.NotFound
                 } else {
                     gameTile
@@ -288,10 +272,10 @@ fun Route.gameRoutes() {
                         gameTile.published = update.published
                     }
                     if (update.name != null) {
-                        gameTile.name = update.name
+                        gameTile.name = update.name?.trim()
                     }
                     if (update.description != null) {
-                        gameTile.description = update.description
+                        gameTile.description = update.description?.trim()
                     }
                     if (update.categories != null) {
                         gameTile.categories = update.categories
@@ -325,13 +309,7 @@ fun Route.gameRoutes() {
     authenticate(optional = true) {
         get("/game-object/{id}") {
             respond {
-                val gameObject = db.document(GameObject::class, parameter("id"))
-
-                if (gameObject == null || (gameObject.published != null && gameObject.person != meOrNull?.id)) {
-                    HttpStatusCode.NotFound
-                } else {
-                    gameObject
-                }
+                db.document(GameObject::class, parameter("id")) ?: HttpStatusCode.NotFound
             }
         }
 
@@ -415,10 +393,10 @@ fun Route.gameRoutes() {
                         gameObject.published = update.published
                     }
                     if (update.name != null) {
-                        gameObject.name = update.name
+                        gameObject.name = update.name?.trim()
                     }
                     if (update.description != null) {
-                        gameObject.description = update.description
+                        gameObject.description = update.description?.trim()
                     }
                     if (update.categories != null) {
                         gameObject.categories = update.categories
@@ -458,7 +436,7 @@ fun Route.gameRoutes() {
             respond {
                 val gameMusic = db.document(GameMusic::class, parameter("id"))
 
-                if (gameMusic == null || (gameMusic.published != true && gameMusic.person != meOrNull?.id)) {
+                if (gameMusic == null) {
                     HttpStatusCode.NotFound
                 } else {
                     gameMusic
@@ -534,10 +512,10 @@ fun Route.gameRoutes() {
                     }
 
                     if (update.name != null) {
-                        gameMusic.name = update.name
+                        gameMusic.name = update.name?.trim()
                     }
                     if (update.description != null) {
-                        gameMusic.description = update.description
+                        gameMusic.description = update.description?.trim()
                     }
                     if (update.audio != null) {
                         gameMusic.audio = update.audio

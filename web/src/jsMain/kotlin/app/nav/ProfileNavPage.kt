@@ -80,7 +80,6 @@ suspend fun appFeedbackDialog(
         AppFeedbackType.Issue -> "Report a bug"
         // todo: translate
         AppFeedbackType.Other -> "Other feedback"
-        else -> ""
     }
 
     val feedback = inputDialog(
@@ -107,7 +106,6 @@ suspend fun appFeedbackDialog(
                 AppFeedbackType.Issue -> "Failed to send bug report"
                 // todo: translate
                 AppFeedbackType.Other -> "Failed to send feedback"
-                else -> ""
             }
             dialog(failMessage, cancelButton = null)
         }

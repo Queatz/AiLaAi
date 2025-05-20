@@ -75,6 +75,21 @@ fun <T : Asset> AssetSection(
                 marginBottom(1.r)
             }
         }) {
+            // Button to create a new asset
+            Button({
+                classes(Styles.button)
+
+                style {
+                    width(100.percent)
+                    marginBottom(1.r)
+                }
+                onClick {
+                    onCreateAsset()
+                }
+            }) {
+                Text(createButtonText)
+            }
+
             // Search icon and input
             Div({
                 style {
@@ -100,21 +115,6 @@ fun <T : Asset> AssetSection(
                         showSearch = true
                     }
                 }
-            }
-
-            // Button to create a new asset
-            Button({
-                classes(Styles.button)
-
-                style {
-                    width(100.percent)
-                    marginBottom(1.r)
-                }
-                onClick {
-                    onCreateAsset()
-                }
-            }) {
-                Text(createButtonText)
             }
 
             // Show loading indicator when creating an asset or items are in queue

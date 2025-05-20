@@ -22,6 +22,7 @@ import lib.Quaternion
 import lib.Color4
 import lib.Math
 import lib.CreatePlaneOptions
+import kotlin.js.Date
 import lib.TextureOptions
 
 enum class Side(val value: String) {
@@ -86,6 +87,14 @@ class Tilemap(
 
     // Store textures by GameTile id
     private val tileTextures = mutableMapOf<String, Texture>()
+
+    // Rotation blending state per object node
+    private data class RotationBlendInfo(
+        var blending: Boolean = true,
+        var startTime: Double = 0.0,
+        var startRotation: Quaternion = Quaternion.Identity()
+    )
+    private val rotationBlendInfos = mutableMapOf<AbstractMesh, RotationBlendInfo>()
 
     // Texture atlas for rendering tiles
     private var textureAtlas = TextureAtlas(scene, useLinearSampling)
@@ -650,113 +659,126 @@ class Tilemap(
             newObject.instancedBuffers["color"] = Color3.White().toColor4()
         }
 
+        fun setupObjectRotation(
+            newObject: AbstractMesh,
+            position: Vector3,
+            offset: Vector3,
+            initialRotation: (AbstractMesh) -> Unit,
+            upVector: Vector3,
+            zeroAxis: (Vector3) -> Unit
+        ) {
+            newObject.position.copyFrom(position.add(offset))
+            initialRotation(newObject)
+            newObject.rotationQuaternion = Quaternion.Identity()
+            newObject.onAfterWorldMatrixUpdateObservable.add { node ->
+                val v = node.position.subtract(scene.activeCamera!!.globalPosition)
+                val info = rotationBlendInfos.getOrPut(node) { RotationBlendInfo() }
+                val now = Date().getTime()
+                if (v.length() > 5f) {
+                    zeroAxis(v)
+                    val targetQ = Quaternion()
+                    val normalizedV = v.normalize()
+
+                    // Calculate if object is behind camera using dot product
+                    val cameraDirection = scene.activeCamera!!.getForwardRay().direction
+                    val isBehind = Vector3.Dot(normalizedV, cameraDirection) < 0
+
+                    Quaternion.FromLookDirectionRHToRef(
+                        direction = normalizedV,
+                        up = upVector,
+                        result = targetQ
+                    )
+
+                    // Add 180-degree rotation if behind camera
+                    if (isBehind) {
+                        val rotation180 = Quaternion.RotationAxis(upVector, Math.PI)
+                        targetQ.multiplyInPlace(rotation180)
+                    }
+
+                    if (!info.blending) {
+                        info.blending = true
+                        info.startTime = now
+                        info.startRotation = node.rotationQuaternion!!.clone()
+                    }
+                    val t = ((now - info.startTime) / 1000.0).toFloat().coerceIn(0f, 1f)
+                    Quaternion.SlerpToRef(
+                        start = info.startRotation,
+                        end = targetQ,
+                        amount = t,
+                        result = node.rotationQuaternion!!
+                    )
+                } else {
+                    info.blending = false
+                    node.rotationQuaternion = node.rotationQuaternion!!
+                }
+            }
+        }
+
         when (side) {
             Side.Y -> {
-                newObject.position.copyFrom(position.add(Vector3(0.5f, 0f, 0.5f)))
-                newObject.rotationQuaternion = Quaternion.Identity()
-                newObject.onAfterWorldMatrixUpdateObservable.add { node ->
-                    val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 5f) {
-                        v.y = 0f
-                        Quaternion.FromLookDirectionRHToRef(
-                            v.normalize(),
-                            Vector3.Up(),
-                            node.rotationQuaternion!!
-                        )
-                    } else {
-                        node.rotationQuaternion = node.rotationQuaternion!!
-                    }
-                }
+                setupObjectRotation(
+                    newObject,
+                    position,
+                    Vector3(0.5f, 0f, 0.5f),
+                    { _ -> },
+                    Vector3.Up(),
+                    { v -> v.y = 0f }
+                )
             }
+
             Side.X -> {
-                newObject.position.copyFrom(position.add(Vector3(0f, 0.5f, 0.5f)))
-                newObject.rotation.z = -Math.PI / 2
-                newObject.rotationQuaternion = Quaternion.Identity()
-                newObject.onAfterWorldMatrixUpdateObservable.add { node ->
-                    val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 5f) {
-                        v.x = 0f
-                        Quaternion.FromLookDirectionRHToRef(
-                            v.normalize(),
-                            Vector3.Right(),
-                            node.rotationQuaternion!!
-                        )
-                    } else {
-                        node.rotationQuaternion = node.rotationQuaternion!!
-                    }
-                }
+                setupObjectRotation(
+                    newObject,
+                    position,
+                    Vector3(0f, 0.5f, 0.5f),
+                    { obj -> obj.rotation.z = -Math.PI / 2 },
+                    Vector3.Right(),
+                    { v -> v.x = 0f }
+                )
             }
+
             Side.Z -> {
-                newObject.position.copyFrom(position.add(Vector3(0.5f, 0.5f, 0f)))
-                newObject.rotation.x = Math.PI / 2
-                newObject.rotationQuaternion = Quaternion.Identity()
-                newObject.onAfterWorldMatrixUpdateObservable.add { node ->
-                    val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 5f) {
-                        v.z = 0f
-                        Quaternion.FromLookDirectionRHToRef(
-                            v.normalize(),
-                            Vector3.Forward(),
-                            node.rotationQuaternion!!
-                        )
-                    } else {
-                        node.rotationQuaternion = node.rotationQuaternion!!
-                    }
-                }
+                setupObjectRotation(
+                    newObject,
+                    position,
+                    Vector3(0.5f, 0.5f, 0f),
+                    { obj -> obj.rotation.x = Math.PI / 2 },
+                    Vector3.Forward(),
+                    { v -> v.z = 0f }
+                )
             }
+
             Side.NEGATIVE_Y -> {
-                newObject.position.copyFrom(position.add(Vector3(0.5f, 0f, 0.5f)))
-                newObject.rotation.z = -Math.PI
-                newObject.rotationQuaternion = Quaternion.Identity()
-                newObject.onAfterWorldMatrixUpdateObservable.add { node ->
-                    val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 5f) {
-                        v.y = 0f
-                        Quaternion.FromLookDirectionRHToRef(
-                            v.normalize(),
-                            Vector3.Down(),
-                            node.rotationQuaternion!!
-                        )
-                    } else {
-                        node.rotationQuaternion = node.rotationQuaternion!!
-                    }
-                }
+                setupObjectRotation(
+                    newObject,
+                    position,
+                    Vector3(0.5f, 0f, 0.5f),
+                    { obj -> obj.rotation.z = -Math.PI },
+                    Vector3.Down(),
+                    { v -> v.y = 0f }
+                )
             }
+
             Side.NEGATIVE_X -> {
-                newObject.position.copyFrom(position.add(Vector3(0f, 0.5f, 0.5f)))
-                newObject.rotation.z = Math.PI / 2
-                newObject.rotationQuaternion = Quaternion.Identity()
-                newObject.onAfterWorldMatrixUpdateObservable.add { node ->
-                    val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 5f) {
-                        v.x = 0f
-                        Quaternion.FromLookDirectionRHToRef(
-                            v.normalize(),
-                            Vector3.Left(),
-                            node.rotationQuaternion!!
-                        )
-                    } else {
-                        node.rotationQuaternion = node.rotationQuaternion!!
-                    }
-                }
+                setupObjectRotation(
+                    newObject,
+                    position,
+                    Vector3(0f, 0.5f, 0.5f),
+                    { obj -> obj.rotation.z = Math.PI / 2 },
+                    Vector3.Left(),
+                    { v -> v.x = 0f }
+                )
             }
+
             Side.NEGATIVE_Z -> {
-                newObject.position.copyFrom(position.add(Vector3(0.5f, 0.5f, 0f)))
-                newObject.rotation.x = -Math.PI / 2
-                newObject.rotationQuaternion = Quaternion.Identity()
-                newObject.onAfterWorldMatrixUpdateObservable.add { node ->
-                    val v = node.position.subtract(scene.activeCamera!!.globalPosition)
-                    if (v.length() > 5f) {
-                        v.z = 0f
-                        Quaternion.FromLookDirectionRHToRef(
-                            v.normalize(),
-                            Vector3.Backward(),
-                            node.rotationQuaternion!!
-                        )
-                    } else {
-                        node.rotationQuaternion = node.rotationQuaternion!!
-                    }
-                }
+                setupObjectRotation(
+                    newObject,
+                    position,
+                    Vector3(0.5f, 0.5f, 0f),
+                    { obj -> obj.rotation.x = -Math.PI / 2 },
+                    Vector3.Backward(),
+                    { v -> v.z = 0f }
+                )
             }
         }
 
