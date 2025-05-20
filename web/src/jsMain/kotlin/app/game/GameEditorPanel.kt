@@ -45,6 +45,9 @@ fun GameEditorPanel(
 ) {
     // Get the current user
     val me by application.me.collectAsState()
+    var localGameScene by remember(gameScene) {
+        mutableStateOf(gameScene)
+    }
 
     Div(
         attrs = {
@@ -88,11 +91,12 @@ fun GameEditorPanel(
                     add(TabInfo("Learn", "menu_book") { GameEditorInstructions() })
                     add(TabInfo("Publish", "publish") {
                     GameEditorTabPublish(
-                        engine = engine,
-                        map = map,
                         gameScene = gameScene,
-                        onUploaded = onScenePublished
-                        )
+                        onUpdated = {
+                            localGameScene = it
+                            onScenePublished()
+                        }
+                    )
                     })
                 }
             }

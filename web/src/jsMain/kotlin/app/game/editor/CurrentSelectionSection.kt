@@ -49,6 +49,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
+import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.dom.TextInput
 import r
@@ -380,6 +381,7 @@ fun CurrentSelectionSection(map: Map) {
                                 }
                             }
                         }
+
                         currentObject != null -> {
                             currentObject?.photo?.let { photo ->
                                 Img(src = "$baseUrl$photo") {
@@ -498,6 +500,7 @@ fun CurrentSelectionSection(map: Map) {
                                 }
                             }
                         }
+
                         currentMusic != null -> {
                             Div({
                                 style {
@@ -625,12 +628,14 @@ fun CurrentSelectionSection(map: Map) {
                             Div({
                                 style {
                                     display(DisplayStyle.Flex)
-                                    alignItems(AlignItems.Center)
+                                    flexDirection(FlexDirection.Column)
                                     gap(0.5.r)
                                     marginBottom(0.5.r)
                                 }
                             }) {
-                                Text("Name:")
+                                Div({
+                                    style { fontWeight("bold") }
+                                }) { Text("Name") }
                                 TextInput {
                                     classes(Styles.textarea)
                                     value(newName)
@@ -644,12 +649,14 @@ fun CurrentSelectionSection(map: Map) {
                             Div({
                                 style {
                                     display(DisplayStyle.Flex)
-                                    alignItems(AlignItems.Center)
+                                    flexDirection(FlexDirection.Column)
                                     gap(0.5.r)
                                     marginBottom(0.5.r)
                                 }
                             }) {
-                                Text("Description:")
+                                Div({
+                                    style { fontWeight("bold") }
+                                }) { Text("Description") }
                                 TextInput {
                                     classes(Styles.textarea)
                                     value(newDescription)
@@ -664,12 +671,14 @@ fun CurrentSelectionSection(map: Map) {
                                 Div({
                                     style {
                                         display(DisplayStyle.Flex)
-                                        alignItems(AlignItems.Center)
+                                        flexDirection(FlexDirection.Column)
                                         gap(0.5.r)
                                         marginBottom(0.5.r)
                                     }
                                 }) {
-                                    Text("Width:")
+                                    Div({
+                                        style { fontWeight("bold") }
+                                    }) { Text("Width") }
                                     NumberInput(
                                         value = newWidth,
                                         min = 0.1,
@@ -689,12 +698,14 @@ fun CurrentSelectionSection(map: Map) {
                                 Div({
                                     style {
                                         display(DisplayStyle.Flex)
-                                        alignItems(AlignItems.Center)
+                                        flexDirection(FlexDirection.Column)
                                         gap(0.5.r)
                                         marginBottom(0.5.r)
                                     }
                                 }) {
-                                    Text("Height:")
+                                    Div({
+                                        style { fontWeight("bold") }
+                                    }) { Text("Height") }
                                     NumberInput(
                                         value = newHeight,
                                         min = 0.1,
@@ -723,7 +734,9 @@ fun CurrentSelectionSection(map: Map) {
                                         marginBottom(0.5.r)
                                     }
                                 }) {
-                                    Text("Scale variation:")
+                                    Div({
+                                        style { fontWeight("bold") }
+                                    }) { Text("Scale variation") }
                                     RangeInput(
                                         value = scaleVariation.toDouble(),
                                         min = 0.0,
@@ -749,7 +762,9 @@ fun CurrentSelectionSection(map: Map) {
                                         marginBottom(0.5.r)
                                     }
                                 }) {
-                                    Text("Color variation:")
+                                    Div({
+                                        style { fontWeight("bold") }
+                                    }) { Text("Color variation") }
                                     RangeInput(
                                         value = colorVariation.toDouble(),
                                         min = 0.0,

@@ -2,12 +2,28 @@ package app.game.editor
 
 import Styles
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import app.compose.rememberDarkMode
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.Color
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.alignItems
+import org.jetbrains.compose.web.css.backgroundColor
+import org.jetbrains.compose.web.css.border
+import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.color
+import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.height
+import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.textAlign
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
@@ -109,57 +125,4 @@ fun ToolGrid(
             }
         }
     }
-}
-
-/**
- * Example usage of the ToolGrid component
- */
-@Composable
-fun ToolGridExample() {
-    val exampleTools = listOf(
-        Tool(
-            id = "brush",
-            name = "Brush",
-            photoUrl = "/assets/icons/brush.svg",
-            description = "Paint brush tool for drawing"
-        ),
-        Tool(
-            id = "eraser",
-            name = "Eraser",
-            photoUrl = "/assets/icons/eraser.svg",
-            description = "Eraser tool for removing content"
-        ),
-        Tool(
-            id = "select",
-            name = "Select",
-            photoUrl = "/assets/icons/select.svg",
-            description = "Selection tool for selecting objects"
-        ),
-        Tool(
-            id = "move",
-            name = "Move",
-            photoUrl = "/assets/icons/move.svg",
-            description = "Move tool for repositioning objects"
-        ),
-        Tool(
-            id = "text",
-            name = "Text",
-            photoUrl = "/assets/icons/text.svg",
-            description = "Text tool for adding text"
-        )
-    )
-
-    var selectedToolId by remember { mutableStateOf<String?>(null) }
-
-    ToolGrid(
-        tools = exampleTools,
-        selectedToolId = selectedToolId,
-        onToolSelected = { tool ->
-            // If the tool is already selected, deselect it
-            // Otherwise, select the tool
-            val isDeselecting = tool.id == selectedToolId
-            selectedToolId = if (isDeselecting) null else tool.id
-            println("Selected tool: ${if (isDeselecting) "None (deselected)" else tool.name}")
-        }
-    )
 }

@@ -32,6 +32,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLCanvasElement
 import r
 import toBytes
+import components.IconButton
 
 @Composable
 fun SceneSection(
@@ -79,30 +80,29 @@ fun SceneSection(
                 Div({
                     style {
                         display(DisplayStyle.Flex)
-                        alignItems(AlignItems.Center)
-                        justifyContent(JustifyContent.SpaceBetween)
+                        flexDirection(FlexDirection.Column)
+                        gap(0.5.r)
                     }
                 }) {
                     Div({
                         style {
-                            fontWeight("bold")
-                        }
-                    }) {
-                        Text("Scene Name")
-                    }
-
-                    Div({
-                        style {
                             display(DisplayStyle.Flex)
                             alignItems(AlignItems.Center)
-                            gap(0.5.r)
+                            justifyContent(JustifyContent.SpaceBetween)
                         }
                     }) {
-                        Text(localGameScene?.name ?: "New Scene")
+                        Div({
+                            style {
+                                fontWeight("bold")
+                            }
+                        }) {
+                            Text("Scene Name")
+                        }
 
-                        Button({
-                            classes(Styles.outlineButton)
-                            onClick {
+                        IconButton(
+                            name = "edit",
+                            title = "Rename Scene",
+                            onClick = {
                                 scope.launch {
                                     val newName = inputDialog(
                                         title = "Rename Scene",
@@ -123,9 +123,16 @@ fun SceneSection(
                                     }
                                 }
                             }
-                        }) {
-                            Text("Rename")
+                        )
+                    }
+
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
                         }
+                    }) {
+                        Text(localGameScene?.name ?: "New Scene")
                     }
                 }
 
@@ -133,30 +140,30 @@ fun SceneSection(
                 Div({
                     style {
                         display(DisplayStyle.Flex)
-                        alignItems(AlignItems.Center)
-                        justifyContent(JustifyContent.SpaceBetween)
+                        flexDirection(FlexDirection.Column)
+                        gap(0.5.r)
+                        marginTop(1.r)
                     }
                 }) {
                     Div({
                         style {
-                            fontWeight("bold")
-                        }
-                    }) {
-                        Text("Scene URL")
-                    }
-
-                    Div({
-                        style {
                             display(DisplayStyle.Flex)
                             alignItems(AlignItems.Center)
-                            gap(0.5.r)
+                            justifyContent(JustifyContent.SpaceBetween)
                         }
                     }) {
-                        Text(localGameScene?.url ?: localGameScene?.id ?: "Not saved yet")
+                        Div({
+                            style {
+                                fontWeight("bold")
+                            }
+                        }) {
+                            Text("Scene URL")
+                        }
 
-                        Button({
-                            classes(Styles.outlineButton)
-                            onClick {
+                        IconButton(
+                            name = "edit",
+                            title = "Edit Scene URL",
+                            onClick = {
                                 scope.launch {
                                     val newUrl = inputDialog(
                                         title = "Edit Scene URL",
@@ -175,17 +182,23 @@ fun SceneSection(
                                                     Text("This URL is already taken. Please choose a different URL.")
                                                 }
                                             }) {
-                                                // Scene URL update d successfully
+                                                // Scene URL updated successfully
                                                 localGameScene = it
                                             }
-
                                         }
                                     }
                                 }
                             }
-                        }) {
-                            Text("Edit URL")
+                        )
+                    }
+
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
                         }
+                    }) {
+                        Text(localGameScene?.url ?: localGameScene?.id ?: "Not saved yet")
                     }
                 }
             }
@@ -193,7 +206,6 @@ fun SceneSection(
             // Scene Description Section
             Div({
                 style {
-                    property("box-shadow", "1px 1px 4px rgba(0, 0, 0, 0.125)")
                     padding(1.r)
                     borderRadius(1.r)
                     display(DisplayStyle.Flex)
@@ -203,54 +215,61 @@ fun SceneSection(
             }) {
                 Div({
                     style {
-                        fontWeight("bold")
-                        marginBottom(0.5.r)
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        gap(0.5.r)
                     }
                 }) {
-                    Text("Scene Description")
-                }
+                    Div({
+                        style {
+                            display(DisplayStyle.Flex)
+                            alignItems(AlignItems.Center)
+                            justifyContent(JustifyContent.SpaceBetween)
+                        }
+                    }) {
+                        Div({
+                            style {
+                                fontWeight("bold")
+                            }
+                        }) {
+                            Text("Description")
+                        }
 
-                // Display the current description or a placeholder
-                Div({
-                    style {
-                        padding(0.5.r)
-                        borderRadius(0.5.r)
-                        backgroundColor(rgba(0, 0, 0, 0.05))
-                        minHeight(4.r)
-                    }
-                }) {
-                    Text(localGameScene?.description ?: "No description")
-                }
+                        IconButton(
+                            name = "edit",
+                            title = "Edit Description",
+                            onClick = {
+                                scope.launch {
+                                    val newDescription = inputDialog(
+                                        title = "Edit Scene Description",
+                                        placeholder = "Enter scene description",
+                                        defaultValue = localGameScene?.description ?: "",
+                                        singleLine = false
+                                    )
 
-                // Button to edit the description
-                Button({
-                    classes(Styles.outlineButton)
-                    style {
-                        width(100.percent)
-                        marginTop(0.5.r)
-                    }
-                    onClick {
-                        scope.launch {
-                            val newDescription = inputDialog(
-                                title = "Edit Scene Description",
-                                placeholder = "Enter scene description",
-                                defaultValue = localGameScene?.description ?: "",
-                                singleLine = false
-                            )
-
-                            if (newDescription != null) {
-                                localGameScene?.id?.let { sceneId ->
-                                    val updatedGameScene = GameScene(description = newDescription)
-                                    api.updateGameScene(sceneId, updatedGameScene) {
-                                        // Update local state with the new description
-                                        localGameScene = localGameScene?.copy(description = it.description)
+                                    if (newDescription != null) {
+                                        localGameScene?.id?.let { sceneId ->
+                                            val updatedGameScene = GameScene(description = newDescription)
+                                            api.updateGameScene(sceneId, updatedGameScene) {
+                                                // Update local state with the new description
+                                                localGameScene = localGameScene?.copy(description = it.description)
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
+                        )
                     }
-                }) {
-                    Text("Edit Description")
+
+                    // Display the current description or a placeholder
+                    Div({
+                        style {
+                            borderRadius(0.5.r)
+                            minHeight(2.r)
+                        }
+                    }) {
+                        Text(localGameScene?.description ?: "No description")
+                    }
                 }
             }
 

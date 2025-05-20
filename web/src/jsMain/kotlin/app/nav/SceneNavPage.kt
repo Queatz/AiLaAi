@@ -20,6 +20,8 @@ import application
 import com.queatz.db.GameScene
 import components.IconButton
 import components.Loading
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -51,7 +53,8 @@ sealed class SceneNav {
 fun SceneNavPage(
     selected: SceneNav = SceneNav.None,
     onSelected: (SceneNav) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    updates: MutableSharedFlow<GameScene> = MutableSharedFlow()
 ) {
     val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
@@ -117,6 +120,13 @@ fun SceneNavPage(
         searchText = ""
         showSearch = false
         loadScenes()
+    }
+
+    LaunchedEffect(Unit) {
+        updates.collectLatest { updatedScene ->
+            // Reload the scenes list when a scene is updated (e.g., renamed)
+            loadScenes()
+        }
     }
 
     if (filterMenuTarget != null) {

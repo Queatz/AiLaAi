@@ -339,16 +339,16 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                     classes(Styles.button)
                     onClick { 
                         if (editName.isNotBlank()) {
-                            marker.name = editName
-                            // Clip time to 3 decimal places
-                            marker.time = (round(editTime * 1000.0) / 1000.0)
-                            // Clip duration to 3 decimal places
-                            marker.duration = (round(editDuration * 1000.0) / 1000.0)
-                            // Update visibility
-                            marker.visible = editVisible
-                            // Force update of markers list to trigger UI recomposition
-                            game.animationData.updateMarkers()
-                            // Update seekbar right away when changing marker duration
+                            // Use the new update method:
+                            game.animationData.updateMarker(
+                                id = marker.id,
+                                name = editName,
+                                time = round(editTime * 1000.0) / 1000.0,
+                                duration = round(editDuration * 1000.0) / 1000.0,
+                                visible = editVisible
+                            )
+
+                            // Update seekbar right away
                             game.setTime(game.animationData.currentTime)
                             isEditing = false
                         }
@@ -417,14 +417,16 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         name = if (marker.visible) "visibility" else "visibility_off",
                         title = if (marker.visible) "Hide marker on seekbar" else "Show marker on seekbar",
                         onClick = {
-                            // Toggle visibility
-                            marker.visible = !marker.visible
-                            // Force update of markers list to trigger UI recomposition
-                            game.animationData.updateMarkers()
+                            // Toggle visibility using the new update method
+                            val newVisibility = !marker.visible
+                            game.animationData.updateMarker(
+                                id = marker.id,
+                                visible = newVisibility
+                            )
                             // Update seekbar right away to reflect visibility change
                             game.setTime(game.animationData.currentTime)
                             // Force recomposition of this component
-                            editVisible = marker.visible
+                            editVisible = newVisibility
                         }
                     )
                 }

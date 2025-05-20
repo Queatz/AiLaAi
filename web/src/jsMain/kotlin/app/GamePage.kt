@@ -4,6 +4,7 @@ import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,7 +19,9 @@ import app.game.GameObjectsData
 import app.game.GameTilesData
 import app.game.editor.Seekbar
 import app.game.json
+import app.softwork.routingcompose.Router
 import appText
+import application
 import com.queatz.db.GameScene
 import com.queatz.db.GameSceneConfig
 import components.IconButton
@@ -51,6 +54,7 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -71,7 +75,9 @@ import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.EventListener
 import r
+import web.cssom.Cursor
 import web.cssom.ImageRendering
+import web.cssom.PropertyName.Companion.zIndex
 import kotlin.js.Date
 
 // Function to load tiles, objects, and animation data from gameScene
@@ -359,10 +365,11 @@ fun GamePage(
     showSidePanel: Boolean = true,
     showScreenshot: Boolean = true,
     editable: Boolean = true,
-    me: Any? = null
 ) {
+    val me by application.me.collectAsState()
     val scope = rememberCoroutineScope()
     var canvasRef by remember { mutableStateOf<HTMLCanvasElement?>(null) }
+    val router = Router.current
 
     // Create a mutable state for gameScene to update it when renamed
     var localGameScene by remember(gameScene) { mutableStateOf(gameScene) }
@@ -461,20 +468,6 @@ fun GamePage(
             styles()
         }
     }) {
-        // Show sign in button if editable is false and me is null
-        if (!editable && me == null) {
-            Button({
-                classes(Styles.textButton)
-                style {
-                    marginRight(.5.r)
-                }
-                onClick {
-                    Router.current.navigate("/signin")
-                }
-            }) {
-                appText { signUp }
-            }
-        }
         Div(
             attrs = {
                 style {
@@ -626,6 +619,24 @@ fun GamePage(
             }
 
             GameMusicPlayer(game)
+
+            // Show sign in button if editable is false and me is null
+            if (!editable && me == null && !isPlaying && !isFullscreen) {
+                Button({
+                    classes(Styles.outlineButton)
+                    style {
+                        top(1.r)
+                        left(1.r)
+                        position(Position.Absolute)
+                        property("z-index", "10")
+                    }
+                    onClick {
+                        router.navigate("/signin")
+                    }
+                }) {
+                    appText { signUp }
+                }
+            }
 
             if (showPlayButton) {
                 Div({

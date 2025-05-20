@@ -91,14 +91,15 @@ class AnimationData {
     val _markers = mutableStateListOf<AnimationMarker>()
     val markers: List<AnimationMarker> @Composable get() = _markers.sortedBy { it.time }
 
-    var _cameraKeyframes by mutableStateOf(mutableListOf<CameraKeyframe>())
+    val _cameraKeyframes = mutableStateListOf<CameraKeyframe>()
     val cameraKeyframes: List<CameraKeyframe> @Composable get() = _cameraKeyframes.sortedBy { it.time }
 
-    var _savedPositions by mutableStateOf(mutableListOf<SavedPositionData>())
+    val _savedPositions = mutableStateListOf<SavedPositionData>()
     var savedPositions: List<SavedPositionData>
-        get() = _savedPositions
+        get() = _savedPositions.toList()
         set(value) {
-            _savedPositions = value.toMutableList()
+            _savedPositions.clear()
+            _savedPositions.addAll(value)
         }
 
     val _currentTime = mutableStateOf(0.0)
@@ -119,6 +120,43 @@ class AnimationData {
      * No-op: list is already a state list, modifying elements or list will trigger recomposition
      */
     fun updateMarkers() {}
+
+    /**
+     * Update a marker's properties
+     * @param id ID of the marker to update
+     * @param name New name (or null to keep existing)
+     * @param time New time (or null to keep existing)
+     * @param duration New duration (or null to keep existing)
+     * @param visible New visibility (or null to keep existing)
+     * @return True if the marker was found and updated, false otherwise
+     */
+    fun updateMarker(
+        id: String, 
+        name: String? = null, 
+        time: Double? = null, 
+        duration: Double? = null,
+        visible: Boolean? = null
+    ): Boolean {
+        val index = _markers.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            val marker = _markers[index]
+
+            // Create a new marker with updated properties
+            val updatedMarker = marker.copy(
+                name = name ?: marker.name,
+                time = time ?: marker.time,
+                duration = duration ?: marker.duration,
+                visible = visible ?: marker.visible,
+                event = marker.event
+            )
+
+            // Replace the marker in the list
+            _markers.removeAt(index)
+            _markers.add(index, updatedMarker)
+            return true
+        }
+        return false
+    }
 
     /**
      * Update a caption's properties and ensure UI recomposition
@@ -149,9 +187,41 @@ class AnimationData {
 
     /**
      * Force update of camera keyframes list to trigger UI recomposition
+     * Note: This is now a no-op since _cameraKeyframes is a mutableStateListOf
+     * which automatically triggers recomposition when modified
      */
     fun updateCameraKeyframes() {
-        _cameraKeyframes = _cameraKeyframes.toMutableList()
+        // No-op: mutableStateListOf automatically triggers recomposition
+    }
+
+    /**
+     * Update a camera keyframe's properties
+     * @param id ID of the keyframe to update
+     * @param time New time (or null to keep existing)
+     * @param fov New FOV (or null to keep existing)
+     * @return True if the keyframe was found and updated, false otherwise
+     */
+    fun updateCameraKeyframe(
+        id: String, 
+        time: Double? = null, 
+        fov: Float? = null
+    ): Boolean {
+        val index = _cameraKeyframes.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            val keyframe = _cameraKeyframes[index]
+
+            // Create a new keyframe with updated properties
+            val updatedKeyframe = keyframe.copy(
+                time = time ?: keyframe.time,
+                fov = fov ?: keyframe.fov
+            )
+
+            // Replace the keyframe in the list
+            _cameraKeyframes.removeAt(index)
+            _cameraKeyframes.add(index, updatedKeyframe)
+            return true
+        }
+        return false
     }
 
     /**
@@ -191,9 +261,7 @@ class AnimationData {
             radius = camera.camera.radius,
             fov = camera.camera.fov
         )
-        val newList = _cameraKeyframes.toMutableList()
-        newList.add(keyframe)
-        _cameraKeyframes = newList
+        _cameraKeyframes.add(keyframe)
         return keyframe
     }
 
@@ -229,9 +297,7 @@ class AnimationData {
             radius = radius,
             fov = fov
         )
-        val newList = _cameraKeyframes.toMutableList()
-        newList.add(keyframe)
-        _cameraKeyframes = newList
+        _cameraKeyframes.add(keyframe)
         return keyframe
     }
 
@@ -240,9 +306,7 @@ class AnimationData {
      * @param id ID of the keyframe to remove
      */
     fun removeCameraKeyframe(id: String) {
-        val newList = _cameraKeyframes.toMutableList()
-        newList.removeAll { keyframe -> keyframe.id == id }
-        _cameraKeyframes = newList
+        _cameraKeyframes.removeAll { keyframe -> keyframe.id == id }
     }
 
     /**
@@ -333,9 +397,7 @@ class AnimationData {
             name = name,
             position = Vector3Data(position.x, position.y, position.z)
         )
-        val newList = _savedPositions.toMutableList()
-        newList.add(savedPosition)
-        _savedPositions = newList
+        _savedPositions.add(savedPosition)
         return savedPosition
     }
 
@@ -344,9 +406,7 @@ class AnimationData {
      * @param id ID of the saved position to remove
      */
     fun removeSavedPosition(id: String) {
-        val newList = _savedPositions.toMutableList()
-        newList.removeAll { position -> position.id == id }
-        _savedPositions = newList
+        _savedPositions.removeAll { position -> position.id == id }
     }
 
     /**
@@ -368,9 +428,7 @@ class AnimationData {
                     currentPosition.position
                 }
             )
-            val newList = _savedPositions.toMutableList()
-            newList[index] = updatedPosition
-            _savedPositions = newList
+            _savedPositions[index] = updatedPosition
             return true
         }
         return false

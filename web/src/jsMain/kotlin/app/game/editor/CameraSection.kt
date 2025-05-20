@@ -239,14 +239,15 @@ private fun CameraKeyframeItem(game: game.Game, keyframe: CameraKeyframe) {
                 Button({
                     classes(Styles.button)
                     onClick { 
-                        // Clip time to 3 decimal places
-                        keyframe.time = (round(editTime * 1000.0) / 1000.0)
-                        // Update keyframe FOV
-                        keyframe.fov = editFov.coerceIn(0.25f, 2f)
-                        // Force update of camera keyframes list to trigger UI recomposition
-                        game.animationData.updateCameraKeyframes()
-                        // Update seekbar right away with the new time to ensure instant recomposition
-                        game.setTime(keyframe.time)
+                        // Use the new update method:
+                        game.animationData.updateCameraKeyframe(
+                            id = keyframe.id,
+                            time = round(editTime * 1000.0) / 1000.0,
+                            fov = editFov.coerceIn(0.25f, 2f)
+                        )
+
+                        // Update seekbar right away with the new time
+                        game.setTime(editTime)
                         isEditing = false
                     }
                 }) {

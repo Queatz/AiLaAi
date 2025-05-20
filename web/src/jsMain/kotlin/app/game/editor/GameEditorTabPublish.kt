@@ -21,9 +21,12 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 @Composable
-fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null, onUploaded: () -> Unit = {}) {
+fun GameEditorTabPublish(
+    gameScene: GameScene? = null,
+    onUpdated: (GameScene) -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
-    var published by remember { mutableStateOf(gameScene?.published == true) }
+    var published by remember(gameScene) { mutableStateOf(gameScene?.published == true) }
 
     Div({
         style {
@@ -57,7 +60,8 @@ fun GameEditorTabPublish(engine: Engine, map: Map, gameScene: GameScene? = null,
                                         val updatedGameScene = gameScene.copy(published = true)
                                         gameScene.id?.let { id ->
                                             api.updateGameScene(id, updatedGameScene) {
-                                                published = true
+                                                published = it.published == true
+                                                onUpdated(it)
                                             }
                                         }
                                     }
