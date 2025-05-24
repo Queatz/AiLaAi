@@ -665,6 +665,9 @@ object AppStyles : StyleSheet() {
             backgroundColor(Styles.colors.dark.background)
         }
     }
+    val iconButtonOutlined by style {
+        border(1.px, LineStyle.Solid, Styles.colors.primary)
+    }
 
     val iconButtonCount by style {
         position(Position.Absolute)

@@ -23,6 +23,7 @@ import components.Loading
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import notBlank
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
@@ -278,7 +279,7 @@ fun SceneNavPage(
             shownScenes?.forEach { scene ->
                 NavMenuItem(
                     icon = "landscape", 
-                    title = scene.name ?: "Unnamed Scene",
+                    title = scene.name?.notBlank ?: "New scene",
                     selected = (selected as? SceneNav.Selected)?.scene?.id == scene.id
                 ) {
                     onSelected(SceneNav.Selected(scene))

@@ -5,6 +5,10 @@ import org.w3c.dom.HTMLElement
 @JsModule("mapbox-gl")
 @JsNonModule
 external object mapboxgl {
+    interface IControl {
+        fun onAdd(map: Map): HTMLElement
+        fun onRemove(map: Map)
+    }
     var accessToken: String
 
     interface MapMouseEvent {
@@ -13,7 +17,7 @@ external object mapboxgl {
 
     interface MapEvent {
     }
-    
+
     interface LngLat {
         var lng: Double
         var lat: Double
@@ -97,6 +101,7 @@ external object mapboxgl {
         fun project(latLng: LngLat): Point
         fun getFreeCameraOptions(): dynamic
         fun on(event: String, block: (event: mapboxgl.MapEvent) -> Unit)
+        fun setStyle(style: String)
     }
 
     class GeolocateControl(options: dynamic = definedExternally) {

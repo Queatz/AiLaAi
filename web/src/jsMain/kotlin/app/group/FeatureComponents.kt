@@ -29,7 +29,7 @@ fun FeatureButton(
         // Icon
         Div({
             style {
-                fontSize(24.px)
+                fontSize(36.px)
                 display(DisplayStyle.Flex)
                 justifyContent(JustifyContent.Center)
                 alignItems(AlignItems.Center)

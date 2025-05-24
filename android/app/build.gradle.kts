@@ -42,8 +42,8 @@ android {
         applicationId = "com.ailaai.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 106
-        versionName = "1.0.6"
+        versionCode = 107
+        versionName = "1.0.7"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -85,6 +85,21 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    flavorDimensions += "variant"
+
+    productFlavors {
+        create("default") {
+            dimension = "variant"
+            manifestPlaceholders["IMPROMPTU_ENABLED"] = "merge" // true
+            buildConfigField("boolean", "ENABLE_IMPROMPTU", "true")
+        }
+        create("google") {
+            dimension = "variant"
+            manifestPlaceholders["IMPROMPTU_ENABLED"] = "remove" // false
+            buildConfigField("boolean", "ENABLE_IMPROMPTU", "false")
         }
     }
     compileOptions {

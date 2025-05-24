@@ -3,7 +3,6 @@ package app.game.editor
 import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,7 +16,6 @@ import app.game.GameObjectsData
 import app.game.GameTileData
 import app.game.GameTilesData
 import app.game.json
-import application
 import com.queatz.db.AnimationMarkerData
 import com.queatz.db.CameraKeyframeData
 import com.queatz.db.CaptionData
@@ -58,9 +56,8 @@ fun GameEditorTabEditor(
     var clearObjectSelection by remember { mutableStateOf(false) }
     var clearMusicSelection by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
-    var currentPixelSize by remember { mutableStateOf<Int?>(null) }
+    var currentPixelSize by remember { mutableStateOf<Int?>(map.pixelSize) }
     val scope = rememberCoroutineScope()
-    val me = application.me.collectAsState()
 
     // Function to convert Vector3 to Vector3Data
     fun toVector3Data(vector3: Vector3): Vector3Data {
@@ -78,6 +75,7 @@ fun GameEditorTabEditor(
             name = marker.name,
             time = marker.time,
             duration = marker.duration,
+            visible = marker.visible,
             event = marker.event
         )
     }
@@ -119,6 +117,7 @@ fun GameEditorTabEditor(
             savedPositions = game.animationData.savedPositions,
             backgroundColor = backgroundColor,
             cameraFov = game.scene.activeCamera?.fov,
+            cameraOrthographic = map.isOrthographicEnabled(),
             ssaoEnabled = map.post.ssaoEnabled,
             bloomEnabled = map.post.bloomEnabled,
             sharpenEnabled = map.post.sharpenEnabled,
@@ -147,7 +146,9 @@ fun GameEditorTabEditor(
                     text = cap.text,
                     duration = cap.duration
                 )
-            }
+            },
+            // Sketch layers
+            sketchLayers = map.sketchManager.toModel()
         )
 
         // Serialize to JSON
@@ -330,7 +331,7 @@ fun GameEditorTabEditor(
                     }
                 }
             }) {
-                Text(if (isSaving) "Saving..." else "Save")
+                Text("Save")
             }
 
             // Fork button: duplicate scene under new ID
@@ -408,6 +409,8 @@ fun GameEditorTabEditor(
             clearMusicSelection = true
         }
         BrushSection(map)
+        // Sketch layers management panel
+        SketchLayersSection(map)
 
         // Pass callbacks to clear selections when the other type is selected
         TilesSection(

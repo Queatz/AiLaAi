@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.browser.document
 import app.ailaai.api.card
 import app.ailaai.api.cards
 import app.ailaai.api.newCard
@@ -116,6 +117,15 @@ fun MapView(
     var selectedFilters by remember { mutableStateOf(emptyList<SearchFilter>()) }
     var cardNavHistory by remember { mutableStateOf(listOf<Card>()) }
     val isDarkMode = rememberDarkMode()
+    var currentStyleIndex by remember { mutableStateOf(0) }
+
+    // Define map styles
+    val mapStyles = listOf(
+        "mapbox://styles/mapbox/standard",
+        "mapbox://styles/mapbox/satellite-streets-v12",
+        "mapbox://styles/mapbox/navigation-day-v1",
+        "mapbox://styles/mapbox/navigation-night-v1"
+    )
 
     val categories = remember(searchResults) {
         if (selectedCategory == null) {
@@ -406,8 +416,51 @@ fun MapView(
             options.center = initialLngLat
             options.bearing = initialBearing.toDouble()
             options.pitch = initialPitch.toDouble()
+            options.style = mapStyles[currentStyleIndex] // Use the current style
             map = mapboxgl.Map(options).apply {
                 addControl(locateMeControl, "bottom-right")
+
+                // Create style toggle button
+                val styleToggleControl = object : mapboxgl.IControl {
+                    private var button: HTMLElement? = null
+                    private var iconElement: HTMLElement? = null
+
+                    override fun onAdd(map: mapboxgl.Map): HTMLElement {
+                        button = document.createElement("button") as HTMLElement
+                        button?.className = "mapboxgl-ctrl-icon mapboxgl-ctrl-style-toggle"
+                        button?.style?.display = "flex"
+                        button?.style?.alignItems = "center"
+                        button?.style?.justifyContent = "center"
+
+                        // Create material icon
+                        iconElement = document.createElement("span") as HTMLElement
+                        iconElement?.className = "material-symbols-outlined"
+                        iconElement?.textContent = "layers"
+                        iconElement?.style?.fontSize = "24px"
+
+                        button?.appendChild(iconElement!!)
+
+                        button?.addEventListener("click", {
+                            // Cycle to the next style
+                            currentStyleIndex = (currentStyleIndex + 1) % mapStyles.size
+
+                            // Apply the new style
+                            map.setStyle(mapStyles[currentStyleIndex])
+                        })
+
+                        val container = document.createElement("div") as HTMLElement
+                        container.className = "mapboxgl-ctrl mapboxgl-ctrl-group"
+                        container.appendChild(button!!)
+                        return container
+                    }
+
+                    override fun onRemove(map: mapboxgl.Map) {
+                        button = null
+                        iconElement = null
+                    }
+                }
+
+                addControl(styleToggleControl, "bottom-left")
 
                 on("load") {
                     geo = getCameraLngLat().let { Geo(it.lat, it.lng) }

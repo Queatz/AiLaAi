@@ -112,7 +112,7 @@ fun TilesSection(
             }
         },
         assetToTool = { tileAsset ->
-            Tool(
+            AssetTool(
                 id = tileAsset.id,
                 name = tileAsset.name,
                 photoUrl = "$baseUrl${tileAsset.content}",

@@ -20,8 +20,10 @@ import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.gap
+import org.jetbrains.compose.web.css.gridTemplateColumns
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginBottom
+import org.jetbrains.compose.web.css.marginTop
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
@@ -99,6 +101,103 @@ fun CameraSection(map: Map?) {
                     fovValue = fov
                     // Set the FOV in the map
                     map.set("fov", fov)
+                }
+            }
+        }
+
+        // Camera view buttons grid
+        Div({
+            style {
+                marginBottom(1.r)
+            }
+        }) {
+            Text("Camera Views")
+
+            // Grid container for camera view buttons
+            Div({
+                style {
+                    display(DisplayStyle.Grid)
+                    property("grid-gap", .5.r)
+                    gridTemplateColumns("1fr 1fr 1fr")
+                    marginTop(0.5.r)
+                }
+            }) {
+                // Top view button
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonAlt)
+                    style {
+                        width(100.percent)
+                    }
+                    onClick {
+                        map.camera.setTopView()
+                    }
+                }) {
+                    Text("Top")
+                }
+
+                // Front view button
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonAlt)
+                    style {
+                        width(100.percent)
+                    }
+                    onClick {
+                        map.camera.setFrontView()
+                    }
+                }) {
+                    Text("Front")
+                }
+
+                // Right view button
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonAlt)
+                    style {
+                        width(100.percent)
+                    }
+                    onClick {
+                        map.camera.setRightView()
+                    }
+                }) {
+                    Text("Right")
+                }
+
+                // Bottom view button
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonAlt)
+                    style {
+                        width(100.percent)
+                    }
+                    onClick {
+                        map.camera.setBottomView()
+                    }
+                }) {
+                    Text("Bottom")
+                }
+
+                // Back view button
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonAlt)
+                    style {
+                        width(100.percent)
+                    }
+                    onClick {
+                        map.camera.setBackView()
+                    }
+                }) {
+                    Text("Back")
+                }
+
+                // Left view button
+                Button({
+                    classes(Styles.outlineButton, Styles.outlineButtonAlt)
+                    style {
+                        width(100.percent)
+                    }
+                    onClick {
+                        map.camera.setLeftView()
+                    }
+                }) {
+                    Text("Left")
                 }
             }
         }

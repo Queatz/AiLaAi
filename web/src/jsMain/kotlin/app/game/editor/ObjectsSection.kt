@@ -220,7 +220,7 @@ fun ObjectsSection(
             }
         },
         assetToTool = { objectAsset ->
-            Tool(
+            AssetTool(
                 id = objectAsset.id,
                 name = objectAsset.name,
                 photoUrl = "$baseUrl${objectAsset.content}",

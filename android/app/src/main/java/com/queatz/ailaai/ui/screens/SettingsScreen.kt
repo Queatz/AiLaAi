@@ -30,7 +30,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import app.ailaai.api.*
-import app.ailaai.api.createQuickInvite
 import com.queatz.ailaai.AppUi
 import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
@@ -47,6 +46,7 @@ import com.queatz.ailaai.ui.components.BackButton
 import com.queatz.ailaai.ui.components.BiometricPrompt
 import com.queatz.ailaai.ui.dialogs.Alert
 import com.queatz.ailaai.ui.dialogs.InviteDialog
+import com.queatz.ailaai.ui.dialogs.QrCodeDialog
 import com.queatz.ailaai.ui.dialogs.ReleaseNotesDialog
 import com.queatz.ailaai.ui.dialogs.TextFieldDialog
 import com.queatz.ailaai.ui.state.jsonSaver
@@ -79,6 +79,8 @@ fun SettingsScreen(
     var showBiometrics by rememberStateOf(false)
     var biometricsSucceeded by rememberStateOf(false)
     var onBiometricsSucceeded by rememberStateOf<(() -> Unit)?>(null)
+    var showLinkDeviceDialog by rememberStateOf(false)
+    var linkDeviceToken by rememberStateOf("")
     var profile by rememberSaveable(stateSaver = jsonSaver<PersonProfile?>()) {
         mutableStateOf(null)
     }
@@ -102,6 +104,13 @@ fun SettingsScreen(
             }
             showBiometrics = true
         }
+    }
+
+    fun loadLinkDeviceToken() {
+        // TODO: Implement the API call to get the link device token
+        // For now, use a dummy token for testing
+        linkDeviceToken = "dummy-token"
+        showLinkDeviceDialog = true
     }
 
     BiometricPrompt(
@@ -373,6 +382,15 @@ fun SettingsScreen(
         }
     }
 
+    if (showLinkDeviceDialog) {
+        QrCodeDialog(
+            onDismissRequest = { showLinkDeviceDialog = false },
+            url = "$appDomain/link-device/$linkDeviceToken",
+            name = stringResource(R.string.app_name),
+            title = "Link Device"
+        )
+    }
+
     Column {
         AppBar(
             title = {
@@ -553,6 +571,16 @@ fun SettingsScreen(
                     }
                 }
             }
+
+            DropdownMenuItem({
+                Text(
+                    text = stringResource(R.string.link_device),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(1.pad)
+                )
+            }, {
+                loadLinkDeviceToken()
+            })
 
             Column(
                 modifier = Modifier

@@ -111,7 +111,7 @@ fun ExportSection(game: Game?) {
                             game.map.setCurrentGameObject(null)
                             progress = 0.0
                             isRecording = true
-                            val fps = 30
+                            val fps = 60
                             val totalMs = (totalDuration * 1000).toInt()
                             val stream = game.canvas.unsafeCast<dynamic>().captureStream(fps)
                             val chunks = mutableListOf<dynamic>()

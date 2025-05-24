@@ -11,12 +11,19 @@ import androidx.compose.runtime.setValue
 import game.DrawMode
 import game.Map
 import game.TilemapEditor
+import game.ToolType
+import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlin.js.Date
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLTextAreaElement
+import org.w3c.dom.events.Event
+import org.w3c.dom.events.EventListener
+import org.w3c.dom.events.KeyboardEvent
 import r
 
 @Composable
@@ -30,17 +37,15 @@ fun CurrentToolSection(
         initiallyExpanded = true,
         closeOtherPanels = true
     ) {
-        var currentDrawMode by remember { mutableStateOf(map.tilemapEditor.drawMode) }
-        // Track which tool is selected; null means deselected
-        // Track which tool is selected; null means deselected
-        var selectedToolId by remember {
-            mutableStateOf<String?>(
-                when (currentDrawMode) {
-                    DrawMode.Tile, DrawMode.Object -> "draw"
-                    DrawMode.Clone -> "clone"
-                }
-            )
-        }
+        // Use the toolState for draw mode and selected tool
+        // This ensures we have a single source of truth
+        var currentDrawMode by remember { mutableStateOf(map.toolState.drawMode) }
+        var selectedToolType by remember { mutableStateOf<ToolType?>(
+            when (currentDrawMode) {
+                DrawMode.Tile, DrawMode.Object -> ToolType.DRAW
+                DrawMode.Clone -> ToolType.CLONE
+            }
+        ) }
 
         // Use a state variable for the clone selection state so it can be updated
         var cloneState by remember { mutableStateOf<TilemapEditor.CloneSelectionState?>(null) }
@@ -82,6 +87,89 @@ fun CurrentToolSection(
             }
         }
 
+        // Set up keyboard event listeners for number keys 1, 2, 3
+        DisposableEffect(Unit) {
+            // Function to handle key press events
+            val keydownListener = object : EventListener {
+                override fun handleEvent(event: Event) {
+                    // Cast to KeyboardEvent
+                    val keyEvent = event as? KeyboardEvent ?: return
+
+                    // Only process if not in an input field
+                    val target = keyEvent.target
+                    val isInputField = target is HTMLInputElement ||
+                                      target is HTMLTextAreaElement
+
+                    if (!isInputField) {
+                        when (keyEvent.key) {
+                            "1" -> {
+                                // Toggle Draw tool
+                                if (selectedToolType == ToolType.DRAW) {
+                                    // Deselect current tool
+                                    selectedToolType = null
+                                    map.toolState.selectTool(null as ToolType?)
+                                    currentDrawMode = map.toolState.drawMode
+                                    map.camera.camera.attachControl()
+                                    onToolDeselected()
+                                } else {
+                                    // Select Draw tool
+                                    selectedToolType = ToolType.DRAW
+                                    map.toolState.selectTool(ToolType.DRAW)
+                                    currentDrawMode = map.toolState.drawMode
+                                }
+                                keyEvent.preventDefault()
+                            }
+                            "2" -> {
+                                // Toggle Clone tool
+                                if (selectedToolType == ToolType.CLONE) {
+                                    // Deselect current tool
+                                    selectedToolType = null
+                                    map.toolState.selectTool(null as ToolType?)
+                                    currentDrawMode = map.toolState.drawMode
+                                    map.camera.camera.attachControl()
+                                    onToolDeselected()
+                                } else {
+                                    // Select Clone tool
+                                    selectedToolType = ToolType.CLONE
+                                    map.toolState.selectTool(ToolType.CLONE)
+                                    currentDrawMode = map.toolState.drawMode
+                                }
+                                keyEvent.preventDefault()
+                            }
+                            "3" -> {
+                                // Toggle Sketch tool
+                                if (selectedToolType == ToolType.SKETCH) {
+                                    // Deselect current tool
+                                    selectedToolType = null
+                                    map.toolState.selectTool(null as ToolType?)
+                                    currentDrawMode = map.toolState.drawMode
+                                    map.camera.camera.attachControl()
+                                    onToolDeselected()
+                                } else {
+                                    // Select Sketch tool
+                                    selectedToolType = ToolType.SKETCH
+                                    map.toolState.selectTool(ToolType.SKETCH)
+                                    currentDrawMode = map.toolState.drawMode
+                                    // Detach camera control while sketching
+                                    map.camera.camera.detachControl()
+                                }
+                                keyEvent.preventDefault()
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add event listener to document
+            kotlinx.browser.document.addEventListener("keydown", keydownListener)
+
+            // Clean up event listener when component is disposed
+            onDispose {
+                kotlinx.browser.document.removeEventListener("keydown", keydownListener)
+            }
+        }
+
+
         Div({
             style {
                 padding(.5.r)
@@ -90,45 +178,53 @@ fun CurrentToolSection(
             // Create tool list for ToolGrid
             val tools = listOf(
                 Tool(
-                    id = "draw",
+                    id = ToolType.DRAW,
                     name = "Draw",
                     photoUrl = "/assets/icons/brush.svg",
-                    description = "Draw tiles and objects"
+                    description = "Draw tiles and objects",
+                    number = 1
                 ),
                 Tool(
-                    id = "clone",
+                    id = ToolType.CLONE,
                     name = "Clone",
                     photoUrl = "/assets/icons/select.svg",
-                    description = "Clone a selection of tiles"
+                    description = "Clone a selection of tiles",
+                    number = 2
+                ),
+                Tool(
+                    id = ToolType.SKETCH,
+                    name = "Sketch",
+                    photoUrl = "/assets/icons/sketch.svg",
+                    description = "Draw freehand sketches",
+                    number = 3
                 )
             )
 
             // Use ToolGrid for tool selection with toggle-to-deselect behavior
             ToolGrid(
                 tools = tools,
-                selectedToolId = selectedToolId,
+                selectedToolType = selectedToolType,
                 onToolSelected = { tool ->
-                    if (tool.id == selectedToolId) {
-                        // Deselect current tool and clear selections
-                        selectedToolId = null
-                        map.tilemapEditor.currentGameTile = null
-                        map.tilemapEditor.currentGameObject = null
-                        // Reset to default draw mode
-                        map.tilemapEditor.drawMode = DrawMode.Tile
-                        currentDrawMode = DrawMode.Tile
+                    if (tool.id == selectedToolType) {
+                        // Deselect current tool
+                        selectedToolType = null
+                        map.toolState.selectTool(null as ToolType?)
+                        currentDrawMode = map.toolState.drawMode
+                        // Re-enable camera and show cursor
+                        map.camera.camera.attachControl()
+                        map.tilemapEditor.cursor.isVisible = true
                         onToolDeselected()
                     } else {
                         // Select new tool
-                        selectedToolId = tool.id
-                        when (tool.id) {
-                            "draw" -> {
-                                map.tilemapEditor.drawMode = DrawMode.Tile
-                                currentDrawMode = DrawMode.Tile
-                            }
-                            "clone" -> {
-                                map.tilemapEditor.drawMode = DrawMode.Clone
-                                currentDrawMode = DrawMode.Clone
-                            }
+                        selectedToolType = tool.id
+                        map.toolState.selectTool(tool.id)
+                        currentDrawMode = map.toolState.drawMode
+
+                        // Handle camera control based on tool
+                        if (tool.id == ToolType.SKETCH) {
+                            // Detach camera control while sketching
+                            map.camera.camera.detachControl()
+                            // Cursor visibility is handled in TilemapEditor.update() based on toolState.isSketching
                         }
                     }
                 }

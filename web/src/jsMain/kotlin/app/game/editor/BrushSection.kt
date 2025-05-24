@@ -7,15 +7,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import game.Map
+import lib.Color4
+import notBlank
 import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.RangeInput
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextInput
+import org.jetbrains.compose.web.dom.Input
+import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.css.display
+import org.jetbrains.compose.web.css.flexDirection
 import r
 
 @Composable
@@ -31,6 +39,64 @@ fun BrushSection(map: Map? = null) {
                 padding(.5.r)
             }
         }) {
+            // If sketch tool is active, show sketch color and thickness
+            if (map?.isSketching == true) {
+                // Color picker
+                // Initialize color picker with the current sketch color
+                val initColor = map.sketchManager.currentColor
+                var colorHex by remember { mutableStateOf(
+                    "#" + listOf(initColor.r, initColor.g, initColor.b)
+                        .map { (it * 255).toInt().coerceIn(0,255).toString(16).padStart(2,'0') }
+                        .joinToString("")
+                ) }
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        marginBottom(0.5.r)
+                    }
+                }) {
+                    Div { Text("Color") }
+                    Input(type = InputType.Color) {
+                        attr("value", colorHex)
+                        onInput { event ->
+                            val hex = event.value.notBlank ?: "#000000"
+                            colorHex = hex
+                            val hexStr = hex.removePrefix("#")
+                            if (hexStr.length >= 6) {
+                                val r = hexStr.substring(0, 2).toInt(16) / 255f
+                                val g = hexStr.substring(2, 4).toInt(16) / 255f
+                                val b = hexStr.substring(4, 6).toInt(16) / 255f
+                                map.sketchManager.currentColor = Color4(r, g, b, 1f)
+                            }
+                        }
+                    }
+                }
+                // Thickness slider group
+                var thickness by remember { mutableStateOf(map.sketchManager.currentThickness) }
+                Div({
+                    style {
+                        display(DisplayStyle.Flex)
+                        flexDirection(FlexDirection.Column)
+                        marginBottom(1.r)
+                    }
+                }) {
+                    Div { Text("Thickness") }
+                    RangeInput(
+                        value = thickness.toDouble(),
+                        min = 1.0,
+                        max = 10.0,
+                        step = 1.0
+                    ) {
+                        onInput { event ->
+                            val t = event.value!!.toInt()
+                            thickness = t
+                            map.sketchManager.currentThickness = t
+                        }
+                    }
+                }
+                return@Div
+            }
             // Brush size input (1-100), initialize from map state when available
             var brushSize by remember(map) { mutableStateOf(map?.tilemapEditor?.brushSize ?: 1) }
 
@@ -131,12 +197,38 @@ fun BrushSection(map: Map? = null) {
             ) {
                 style {
                     width(100.percent)
+                    marginBottom(1.r)
                 }
                 onInput {
                     val size = it.value!!.toInt()
                     gridSize = size
                     // Add 1 to the value for the actual implementation (11-101)
                     map?.set("gridSize", size + 1)
+                }
+            }
+
+            // Grid line width input (1-10), initialize from map state when available
+            var gridLineAlpha by remember(map) {
+                val initial = map?.tilemapEditor?.gridLineAlpha ?: 1
+                mutableStateOf(initial)
+            }
+
+            Text("Grid Alpha")
+
+            // Grid line width slider (1-10)
+            RangeInput(
+                gridLineAlpha.toDouble(),
+                min = 1.0,
+                max = 10.0,
+                step = 1.0
+            ) {
+                style {
+                    width(100.percent)
+                }
+                onInput {
+                    val width = it.value!!.toInt()
+                    gridLineAlpha = width
+                    map?.set("gridLineAlpha", width)
                 }
             }
         }

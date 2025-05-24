@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if ! grep -q '//const val baseUrl = "http://0.0.0.0:8080"$' src/jsMain/kotlin/Main.kt; then
+    echo "Error: Main.kt is missing comment on local URL"
+    exit 1
+fi
+
+# Run webpack production build
+./gradlew :jsBrowserProductionWebpack

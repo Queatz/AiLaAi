@@ -7,12 +7,31 @@ import lib.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlin.js.asDynamic
 
 class Map(private val scene: Scene) {
     val tilemapEditor: TilemapEditor
     val post: Post
     val camera: Camera
     var world: World = World(scene)
+    /** Manager for sketch tool lines and layers */
+    val sketchManager: SketchManager
+    /** Single source of truth for tool state */
+    val toolState = ToolState()
+
+    /** Compatibility property for isSketching - delegates to toolState */
+    var isSketching: Boolean
+        get() = toolState.isSketching
+        set(value) {
+            if (value) {
+                toolState.selectTool(ToolType.SKETCH)
+            } else {
+                // Only change sketching state, not the selected tool
+                if (toolState.isSketching) {
+                    toolState.selectTool(null as ToolType?)
+                }
+            }
+        }
 
     // Weather effects
     private val snowEffect = SnowEffect(scene)
@@ -22,6 +41,16 @@ class Map(private val scene: Scene) {
     private var snowEffectEnabledState by mutableStateOf(false)
     private var rainEffectEnabledState by mutableStateOf(false)
     private var dustEffectEnabledState by mutableStateOf(false)
+    // Whether camera uses orthographic projection (FOV slider acts as scale in orthographic mode)
+    private var orthographicEnabledState by mutableStateOf(false)
+
+    var pixelSize = 1
+        set(value) {
+            if (field != value) {
+                field = value
+                game?.engine?.setHardwareScalingLevel(value)
+            }
+        }
 
     // Reference to the parent Game instance
     var game: Game? = null
@@ -56,7 +85,12 @@ class Map(private val scene: Scene) {
         })
         val camera = Camera(scene) { tilemap.mesh }
         val post = Post(scene, camera)
-        val tilemapEditor = TilemapEditor(scene, tilemap)
+        val tilemapEditor = TilemapEditor(scene, tilemap, toolState)
+        // Initialize TilemapEditor properties with values from toolState
+        tilemapEditor.side = toolState.side
+        tilemapEditor.drawPlane = toolState.drawPlane
+        tilemapEditor.drawPlaneOffset = toolState.drawPlaneOffset
+        tilemapEditor.drawMode = toolState.drawMode
         val player = Player(scene, linearSamplingEnabled)
         world.addShadowCaster(player.mesh) // todo move into Player class, also shadow needs to face light
 
@@ -64,16 +98,22 @@ class Map(private val scene: Scene) {
         this.post = post
         this.camera = camera
         this.player = player
+        sketchManager = SketchManager(scene)
 
         var isDrawing = false
         val walk = Vector3.Zero()
 
         // Input
         scene.onKeyboardObservable.add(fun(event: KeyboardInfo) {
+            // Cancel sketch line on Escape before pointer up
+            if (toolState.isSketching && event.type == KeyboardEventTypes.KEYDOWN && (event.event.key == "Escape" || event.event.key == "Esc")) {
+                sketchManager.cancelCurrentLine()
+                return
+            }
             // Stop animation if it's playing on keyboard input (except spacebar)
             if (event.event.key == " " || event.event.key == "Space") {
                 if (event.type == KeyboardEventTypes.KEYDOWN && !event.event.repeat) {
-                    if (tilemapEditor.currentGameTile == null && tilemapEditor.currentGameObject == null) {
+                    if (tilemapEditor.toolState.selectedToolType != null) {
                         game?.togglePlayback()
                     }
                 }
@@ -147,56 +187,97 @@ class Map(private val scene: Scene) {
         })
 
         scene.onPointerObservable.add(fun(event: PointerInfo) {
-            if (event.type == PointerEventTypes.POINTERWHEEL) {
-                // Auto recenter camera target on mousewheel zoom
-                if (camera.view == CameraView.Free) {
-                    camera.recenter()
-                }
-
-                // Stop animation if it's playing
-                game?.let { g ->
-                    if (g.isPlaying()) {
-                        g.pause()
-                    }
-                }
-                return
-            }
-
-            if (event.type == PointerEventTypes.POINTERUP) {
-                camera.isMoving = false
-                isDrawing = false
-                camera.camera.attachControl()
-                return
-            }
-
-            if (camera.isMoving) return
-
-            if (event.type != PointerEventTypes.POINTERDOWN && !isDrawing) {
-                return
-            }
-
-            if (event.event.shiftKey) {
-                camera.camera.attachControl()
-                camera.isMoving = true
-                camera.recenter()
-                return
-            } else {
-                camera.camera.detachControl()
-                isDrawing = true
-            }
-
-            // Only allow drawing and adjusting if the game is editable
-            if (game?.editable == true) {
-                if (event.event.ctrlKey) {
+            // Sketch tool captures all pointer events
+            if (toolState.isSketching) {
+                // Handle ctrl+click to set drawing plane offset
+                if (event.event.ctrlKey && event.type == PointerEventTypes.POINTERDOWN) {
                     tilemapEditor.pickAdjust()
                     return
                 }
 
-                // For Clone mode, only call draw on POINTERDOWN to prevent unwanted selections during mouse movement
-                if (event.type == PointerEventTypes.POINTERDOWN || 
-                    (event.type == PointerEventTypes.POINTERMOVE && tilemapEditor.drawMode != DrawMode.Clone)) {
-                    tilemapEditor.draw(event.event.altKey)
+                // Allow camera manipulation when holding shift
+                if (event.event.shiftKey) {
+                    camera.camera.attachControl()
+                    camera.isMoving = true
+                    camera.recenter()
+                    return
                 }
+
+                // On sketch start, detach camera control
+                if (event.type == PointerEventTypes.POINTERDOWN) {
+                    camera.camera.detachControl()
+                }
+                // Handle sketch drawing or erasing
+                sketchManager.handlePointer(
+                    event = event,
+                    drawPlane = tilemapEditor.drawPlane,
+                    offset = tilemapEditor.drawPlaneOffset,
+                    eraser = event.event.altKey  // Pass ALT key state for eraser mode
+                )
+                // On pointer up, re-enable camera control
+                if (event.type == PointerEventTypes.POINTERUP) {
+                    camera.camera.attachControl()
+                }
+                return
+            }
+
+            when (event.type) {
+                PointerEventTypes.POINTERWHEEL -> {
+                    // Auto recenter camera target on mousewheel zoom
+                    if (camera.view == CameraView.Free) {
+                        camera.recenter()
+                    }
+
+                    // Stop animation if it's playing
+                    game?.let { g ->
+                        if (g.isPlaying()) {
+                            g.pause()
+                        }
+                    }
+                    return
+                }
+
+                PointerEventTypes.POINTERUP -> {
+                    camera.isMoving = false
+                    isDrawing = false
+                    camera.camera.attachControl()
+                    return
+                }
+
+                PointerEventTypes.POINTERDOWN, PointerEventTypes.POINTERMOVE -> {
+                    if (camera.isMoving) return
+
+                    if (event.type != PointerEventTypes.POINTERDOWN && !isDrawing) {
+                        return
+                    }
+
+                    if (event.event.shiftKey) {
+                        camera.camera.attachControl()
+                        camera.isMoving = true
+                        camera.recenter()
+                        return
+                    } else {
+                        camera.camera.detachControl()
+                        isDrawing = true
+                    }
+
+                    // Only allow drawing and adjusting if the game is editable
+                    if (game?.editable == true) {
+                        if (event.event.ctrlKey) {
+                            tilemapEditor.pickAdjust()
+                            return
+                        }
+
+                        // For Clone mode, only call draw on POINTERDOWN to prevent unwanted selections during mouse movement
+                        if (event.type == PointerEventTypes.POINTERDOWN ||
+                            (event.type == PointerEventTypes.POINTERMOVE && tilemapEditor.drawMode != DrawMode.Clone)
+                        ) {
+                            tilemapEditor.draw(event.event.altKey)
+                        }
+                    }
+                }
+
+                else -> {} // Handle other pointer events if needed
             }
         })
 
@@ -211,12 +292,14 @@ class Map(private val scene: Scene) {
                         player.mesh.isVisible = false
                         camera.walk(walk)
                     }
+
                     CameraView.Player -> {
                         camera.walk(walk)
                         player.walk(walk)
                         player.mesh.isVisible = true
                         camera.camera.setTarget(player.mesh.position.add(Vector3(0f, .25f, 0f)))
                     }
+
                     CameraView.Eye -> {
                         player.mesh.isVisible = false
                         camera.walk(walk)
@@ -229,8 +312,30 @@ class Map(private val scene: Scene) {
 
             camera.update()
             world.update()
+            // Update the tilemap editor which will handle cursor visibility based on sketching state
             tilemapEditor.update()
             post.update()
+        }
+    }
+
+    /** Returns whether camera is in orthographic mode */
+    fun isOrthographicEnabled(): Boolean = orthographicEnabledState
+
+    /** Enable or disable orthographic projection for the camera */
+    fun setOrthographicEnabled(enabled: Boolean) {
+        orthographicEnabledState = enabled
+        scene.activeCamera?.let { cam ->
+            val dynamicCam = cam.asDynamic()
+            if (enabled) {
+                dynamicCam.mode = 1
+                val scale = (dynamicCam.orthoRight as? Float) ?: (cam.fov * 10f)
+                dynamicCam.orthoLeft = -scale
+                dynamicCam.orthoRight = scale
+                dynamicCam.orthoTop = scale
+                dynamicCam.orthoBottom = -scale
+            } else {
+                dynamicCam.mode = 0
+            }
         }
     }
 
@@ -240,7 +345,22 @@ class Map(private val scene: Scene) {
             "brushSize" -> tilemapEditor.brushSize = value.toIntOrNull()?.coerceIn(1, 100) ?: 1
             "brushDensity" -> tilemapEditor.brushDensity = value.toIntOrNull()?.coerceIn(1, 100) ?: 50
             "gridSize" -> tilemapEditor.gridSize = value.toIntOrNull()?.coerceIn(11, 101) ?: 51
-            "fov" -> scene.activeCamera?.let { it.fov = value.toFloatOrNull()?.coerceIn(0.25f, 2f) ?: 0.5f }
+            "fov" -> {
+                val floatVal = (value.toFloatOrNull()?.coerceIn(0.25f, 2f) ?: 0.5f)
+                if (orthographicEnabledState) {
+                    scene.activeCamera?.let { cam ->
+                        val floatVal = floatVal * 10f
+                        val dynamicCam = cam.asDynamic()
+                        dynamicCam.orthoLeft = -floatVal
+                        dynamicCam.orthoRight = floatVal
+                        dynamicCam.orthoTop = floatVal
+                        dynamicCam.orthoBottom = -floatVal
+                    }
+                } else {
+                    scene.activeCamera?.let { it.fov = floatVal }
+                }
+            }
+            "orthographic" -> setOrthographicEnabled(value.lowercase() == "true")
             "backgroundColor" -> {
                 // Parse the color string in format "r,g,b,a" where each component is a float between 0 and 1
                 val parts = value.split(",").mapNotNull { it.trim().toFloatOrNull()?.coerceIn(0f, 1f) }
@@ -273,7 +393,22 @@ class Map(private val scene: Scene) {
             "brushSize" -> tilemapEditor.brushSize = value.toInt().coerceIn(1, 100)
             "brushDensity" -> tilemapEditor.brushDensity = value.toInt().coerceIn(1, 100)
             "gridSize" -> tilemapEditor.gridSize = value.toInt().coerceIn(11, 101)
-            "fov" -> scene.activeCamera?.let { it.fov = value.toFloat().coerceIn(0.25f, 2f) }
+            "gridLineAlpha" -> tilemapEditor.gridLineAlpha = value.toInt().coerceIn(1, 10)
+            "fov" -> {
+                val floatVal = value.toFloat().coerceIn(0.25f, 2f)
+                if (orthographicEnabledState) {
+                    scene.activeCamera?.let { cam ->
+                        val floatVal = floatVal * 10f
+                        val dynamicCam = cam.asDynamic()
+                        dynamicCam.orthoLeft = -floatVal
+                        dynamicCam.orthoRight = floatVal
+                        dynamicCam.orthoTop = floatVal
+                        dynamicCam.orthoBottom = -floatVal
+                    }
+                } else {
+                    scene.activeCamera?.let { it.fov = floatVal }
+                }
+            }
             "backgroundColorR" -> {
                 val r = value.toFloat().coerceIn(0f, 1f)
                 scene.clearColor = Color4(r, scene.clearColor.g, scene.clearColor.b, scene.clearColor.a)
@@ -325,26 +460,18 @@ class Map(private val scene: Scene) {
      * Sets the current GameTile to paint with
      */
     fun setCurrentGameTile(gameTile: GameTile?) {
+        toolState.setCurrentGameTile(gameTile)
+        // TilemapEditor still needs to know about the current tile
         tilemapEditor.currentGameTile = gameTile
-        // Switch to tile mode when an tile is selected
-        if (gameTile != null) {
-            tilemapEditor.drawMode = DrawMode.Tile
-            // Clear the current game object when a tile is selected
-            tilemapEditor.currentGameObject = null
-        }
     }
 
     /**
      * Sets the current GameObject to place
      */
     fun setCurrentGameObject(gameObject: GameObject?) {
+        toolState.setCurrentGameObject(gameObject)
+        // TilemapEditor still needs to know about the current object
         tilemapEditor.currentGameObject = gameObject
-        // Switch to object mode when an object is selected
-        if (gameObject != null) {
-            tilemapEditor.drawMode = DrawMode.Object
-            // Clear the current game tile when an object is selected
-            tilemapEditor.currentGameTile = null
-        }
     }
 
     /**
@@ -494,6 +621,8 @@ class Map(private val scene: Scene) {
      * Sets the current GameMusic to play
      */
     fun setCurrentGameMusic(gameMusic: GameMusic?) {
+        toolState.setCurrentGameMusic(gameMusic)
+        // TilemapEditor still needs to know about the current music
         tilemapEditor.currentGameMusic = gameMusic
         tilemapEditor.currentGameTile = null
         tilemapEditor.currentGameObject = null

@@ -1077,4 +1077,5 @@
     <string name="create_event">Create event</string>
     <string name="choose_photo">Choose photo</string>
     <string name="no_people_nearby">No people nearby.</string>
+    <string name="link_device">Link device</string>
 </resources>

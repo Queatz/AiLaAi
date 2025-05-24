@@ -14,6 +14,7 @@ import app.ailaai.api.me
 import app.ailaai.api.signIn
 import app.ailaai.api.signInWithLink
 import app.ailaai.api.signUp
+import app.dialog.dialog
 import app.softwork.routingcompose.Router
 import appString
 import appText
@@ -134,8 +135,17 @@ fun SigninPage() {
             api.signUp(
                 inviteCode,
                 onError = {
-                    status = application.appString { error }
-
+                    scope.launch {
+                        dialog(
+                            title = "Hello!",
+                            confirmButton = application.appString { okay },
+                            cancelButton = null
+                        ) {
+                            Div {
+                                Text("Hi Town is currently in Invite Only mode. This means you will need to be invited by another user who is already using Hi Town. Thanks for your understanding!")
+                            }
+                        }
+                    }
                 }
             ) {
                 application.setToken(it.token)

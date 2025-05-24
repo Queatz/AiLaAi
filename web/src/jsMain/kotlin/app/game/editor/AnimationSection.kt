@@ -300,7 +300,7 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         marginBottom(0.5.r)
                     }
                 }) {
-                    Text("Visible on seekbar:")
+                    Text("Visible on seekbar")
 
                     // Toggle button
                     IconButton(
@@ -308,6 +308,10 @@ private fun MarkerItem(game: Game, marker: AnimationMarker) {
                         title = if (editVisible) "Marker is visible" else "Marker is hidden",
                         onClick = {
                             editVisible = !editVisible
+                            game.animationData.updateMarker(
+                                id = marker.id,
+                                visible = editVisible
+                            )
                         }
                     )
                 }

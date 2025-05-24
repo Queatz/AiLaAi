@@ -51,7 +51,7 @@ fun <T : Asset> AssetSection(
     selectedAssetId: String?,
     onAssetSelected: (T?) -> Unit,
     onCreateAsset: () -> Unit,
-    assetToTool: (T) -> Tool,
+    assetToTool: (T) -> AssetTool,
     searchFilter: (T, String) -> Boolean,
     createButtonText: String = "Create New Asset",
     emptyText: String = "No assets yet. Create your first asset!",
@@ -176,7 +176,7 @@ fun <T : Asset> AssetSection(
                     val assetTools = filteredAssets.map { asset -> assetToTool(asset) }
 
                     Toolbox {
-                        ToolGrid(
+                        AssetToolGrid(
                             tools = assetTools,
                             selectedToolId = selectedAssetId,
                             onToolSelected = { tool ->

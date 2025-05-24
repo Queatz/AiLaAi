@@ -227,6 +227,8 @@ fun web.blob.Blob.downloadAsAudio() {
 
 }
 
+
+
 suspend fun File.toScaledBytes(maxSize: Int = 1600) =
     toScaledBlob(maxSize).toBytes()
 
@@ -404,6 +406,39 @@ fun Int.withPlus() = let {
     } else {
         it.toString()
     }
+}
+
+data class ImageDimensions(val width: Int, val height: Int)
+
+/**
+ * Returns the dimensions of an image file
+ */
+suspend fun File.getImageDimensions(): ImageDimensions {
+    val result = CompletableDeferred<HTMLImageElement>()
+    val reader = FileReader()
+    reader.onload = {
+        val img = document.createElement("img") as HTMLImageElement
+        img.onerror = { _, _, _, _, _ ->
+            result.completeExceptionally(Throwable("Error reading image"))
+            Unit
+        }
+        img.onload = {
+            result.complete(img)
+            Unit
+        }
+
+        img.src = reader.result as String
+        Unit
+    }
+
+    reader.onerror = {
+        result.completeExceptionally(Throwable("Error reading file"))
+    }
+
+    reader.readAsDataURL(this)
+
+    val img = result.await()
+    return ImageDimensions(img.width, img.height)
 }
 
 /**

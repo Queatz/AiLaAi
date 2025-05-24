@@ -91,14 +91,12 @@ fun GameEditorTabPublish(
 
                                 onClick {
                                     // Copy game URL to clipboard
-                                    gameScene.id?.let { id ->
-                                        val gameUrl = window.location.origin + "/scene/" + id
-                                        window.navigator.clipboard.writeText(gameUrl).then {
-                                            isCopied = true
-                                            scope.launch {
-                                                delay(2000) // Wait for 2 seconds
-                                                isCopied = false
-                                            }
+                                    val gameUrl = window.location.origin + "/scene/" + (gameScene.url ?: gameScene.id!!)
+                                    window.navigator.clipboard.writeText(gameUrl).then {
+                                        isCopied = true
+                                        scope.launch {
+                                            delay(2000) // Wait for 2 seconds
+                                            isCopied = false
                                         }
                                     }
                                 }

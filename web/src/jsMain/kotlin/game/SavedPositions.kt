@@ -1,6 +1,7 @@
 package game
 
 import com.queatz.db.SavedPositionData
+import ellipsize
 import lib.ActionManager
 import lib.Color3
 import lib.CreatePlaneOptions
@@ -10,7 +11,6 @@ import lib.DynamicTextureOptions
 import lib.Engine
 import lib.ExecuteCodeAction
 import lib.GlowLayer
-import lib.Material
 import lib.Mesh
 import lib.MeshBuilder
 import lib.PointerEventTypes
@@ -25,6 +25,7 @@ import lib.VertexBuffer
 class SavedPositions(private val scene: Scene) {
     private val markers = mutableMapOf<String, Mesh>()
     private val textLabels = mutableMapOf<String, Mesh>()
+    private var visible = true
 
     // Glow layer for the markers
     private val glowLayer = GlowLayer("savedPositionsGlow", scene).apply {
@@ -47,6 +48,9 @@ class SavedPositions(private val scene: Scene) {
 
         // Position the marker
         markerMesh.position = position.clone()
+
+        // Set visibility based on current setting
+        markerMesh.isVisible = visible
 
         // Create a white material
         val material = StandardMaterial("marker-material-$id", scene)
@@ -96,7 +100,7 @@ class SavedPositions(private val scene: Scene) {
         val measureContext = measureTexture.getContext()
         measureContext.font = "bold ${fontSize}px 'Ysabeau Infant'"
 
-        val displayText = text.take(50)
+        val displayText = text.ellipsize(50)
         val metrics = measureContext.measureText(displayText)
         val textWidth = (metrics.actualBoundingBoxRight - metrics.actualBoundingBoxLeft).toFloat()
         val textHeight = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent).toFloat()
@@ -127,6 +131,9 @@ class SavedPositions(private val scene: Scene) {
         plane.position = position.clone()
         plane.billboardMode = Mesh.BILLBOARDMODE_ALL
 
+        // Set visibility based on current setting
+        plane.isVisible = visible
+
         // Create the render texture
         val textTexture = DynamicTexture(
             name = "text-texture-$id",
@@ -154,14 +161,10 @@ class SavedPositions(private val scene: Scene) {
         val material = StandardMaterial("text-material-$id", scene)
         with(material) {
             diffuseTexture = textTexture
-            diffuseColor = Color3.White()
-            specularColor = Color3(0f, 0f, 0f)
+            emissiveTexture = textTexture
+            opacityTexture = textTexture
             backFaceCulling = false
-            // Add a subtle emissive color to make text visible without excessive glow
-            emissiveColor = Color3(0.5f, 0.5f, 0.5f)
             disableLighting = true
-            useAlphaFromDiffuseTexture = true
-            transparencyMode = Material.MATERIAL_ALPHATEST
         }
 
         plane.material = material
@@ -222,6 +225,9 @@ class SavedPositions(private val scene: Scene) {
      * Update markers based on saved positions
      */
     fun updateMarkers(savedPositions: List<SavedPositionData>) {
+        // Remember current visibility state
+        val currentVisibility = visible
+
         // Clear existing markers
         clearMarkers()
 
@@ -236,6 +242,24 @@ class SavedPositions(private val scene: Scene) {
                 name = name
             )
         }
+
+        // Ensure visibility state is maintained after update
+        if (!currentVisibility) {
+            setVisible(false)
+        }
+    }
+
+    /**
+     * Set visibility of all markers
+     */
+    fun setVisible(isVisible: Boolean) {
+        if (visible == isVisible) return
+
+        visible = isVisible
+
+        // Update visibility of all existing markers
+        markers.values.forEach { it.isVisible = visible }
+        textLabels.values.forEach { it.isVisible = visible }
     }
 
     /**

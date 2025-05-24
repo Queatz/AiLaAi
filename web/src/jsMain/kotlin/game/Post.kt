@@ -145,7 +145,7 @@ class Post(private val scene: Scene, private val camera: Camera) {
     }
 
     fun update() {
-        if (camera.view == CameraView.Eye) {
+        if (camera.view in listOf(CameraView.Eye, CameraView.Free)) {
             // Cast a ray from the mouse pointer to find the object under it
             val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, Matrix.Identity(), scene.activeCamera)
             val pickResult = ray.intersectsMesh(camera.getPick())
@@ -157,7 +157,7 @@ class Post(private val scene: Scene, private val camera: Camera) {
                     pickResult.pickedPoint
                 )
             } else {
-                // Keep current focus
+                defaultFocus()
             }
         } else {
             // Default behavior for other camera views
@@ -166,5 +166,12 @@ class Post(private val scene: Scene, private val camera: Camera) {
                 (scene.activeCamera!! as ArcRotateCamera).target
             )
         }
+    }
+
+    fun defaultFocus() {
+        pipeline.depthOfField.focusDistance = 1000f * Vector3.Distance(
+            scene.activeCamera!!.globalPosition,
+            (scene.activeCamera!! as ArcRotateCamera).target
+        )
     }
 }

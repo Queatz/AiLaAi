@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import app.widget.form.FormFieldCheckbox
 import game.Map
 import org.jetbrains.compose.web.css.marginBottom
-import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div

@@ -30,7 +30,11 @@ enum class DrawMode {
     Clone
 }
 
-class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
+class TilemapEditor(
+    private val scene: Scene,
+    val tilemap: Tilemap,
+    val toolState: ToolState
+) {
     val cursor: Mesh
     var grid: Mesh
 
@@ -84,10 +88,21 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
     var pickedPoint: Vector3 = Vector3.Zero()
     var tilePos = Vector3.Zero()
     var curPosAnimated: Vector3? = null
+    // These properties now delegate to toolState
     var side: Side = Side.Y
     var drawPlane: Side = Side.Y
-    var drawPlaneOffset = 0
+    var drawPlaneOffset: Int = 0
+
     var drawMode: DrawMode = DrawMode.Tile
+        set(value) {
+            field = value
+            // Update toolState based on the draw mode
+            when (value) {
+                DrawMode.Tile -> toolState.selectTool(ToolType.DRAW)
+                DrawMode.Object -> toolState.selectTool(ToolType.DRAW)
+                DrawMode.Clone -> toolState.selectTool(ToolType.CLONE)
+            }
+        }
     var autoRotate = true
     var brushShape: String = "square"
     var brushSize = 1
@@ -110,34 +125,71 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             }
         }
 
-    // Current GameTile to paint with (as observable state)
+    // Grid line width property (1-10)
+    var gridLineAlpha = 5
+        set(value) {
+            // Store the old value
+            val oldValue = field
+            // Set the new value (1-10)
+            field = value
+            // Only update the grid material if the value has changed and initialization is complete
+            if (oldValue != value && initialized) {
+                updateGridLineAlpha()
+            }
+        }
+
+    // Updates the grid line width by adjusting the opacity property of the GridMaterial
+    // This keeps the grid density constant while changing the perceived width of the lines
+    private fun updateGridLineAlpha() {
+        // Get the grid material
+        val gridMaterial = grid.material as? GridMaterial ?: return
+
+        // Keep gridRatio constant to maintain grid density
+        // Use a fixed value that provides a good grid density
+        gridMaterial.gridRatio = 1f
+
+        // Adjust opacity based on gridLineAlpha to control perceived line width
+        // Higher gridLineAlpha means higher opacity (thicker lines)
+        // Scale to a reasonable range (0.1 to 0.5)
+        val baseOpacity = 0.1f
+        val normalized = (gridLineAlpha - 1) / 9f  // Normalize to 0-1 range (gridLineAlpha is 1-10)
+        gridMaterial.opacity = (baseOpacity + normalized).coerceIn(.1f, .99f)
+    }
+
+    // Current GameTile to paint with
     private var _currentGameTile = mutableStateOf<GameTile?>(null)
     var currentGameTile: GameTile?
         get() = _currentGameTile.value
         set(value) {
             _currentGameTile.value = value
+            // Update toolState as well
+            toolState.setCurrentGameTile(value)
         }
     // Public getter for the state object
     @Composable
     fun getCurrentGameTileState() = _currentGameTile
 
-    // Current GameObject to place (as observable state)
+    // Current GameObject to place
     private var _currentGameObject = mutableStateOf<GameObject?>(null)
     var currentGameObject: GameObject?
         get() = _currentGameObject.value
         set(value) {
             _currentGameObject.value = value
+            // Update toolState as well
+            toolState.setCurrentGameObject(value)
         }
     // Public getter for the state object
     @Composable
     fun getCurrentGameObjectState() = _currentGameObject
 
-    // Current GameMusic to play (as observable state)
+    // Current GameMusic to play
     private var _currentGameMusic = mutableStateOf<GameMusic?>(null)
     var currentGameMusic: GameMusic?
         get() = _currentGameMusic.value
         set(value) {
             _currentGameMusic.value = value
+            // Update toolState as well
+            toolState.setCurrentGameMusic(value)
         }
     // Public getter for the state object
     @Composable
@@ -178,9 +230,9 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         grid.opacityTexture = Texture("/assets/glow.png", scene)
         grid.mainColor = Color3.Black()
         grid.lineColor = Color3(0.25f, 0.5f, 1f)
-        grid.opacity = 0.25f
-        grid.alpha = 0.25f
-        grid.gridRatio = 1f
+        // Set a constant gridRatio to maintain consistent grid density
+        grid.gridRatio = 0.5f
+        // Opacity will be set by updategridLineAlpha() based on gridLineAlpha
         grid.majorUnitFrequency = 1
         grid.zOffsetUnits = -0.01f
         grid.fogEnabled = true
@@ -188,6 +240,10 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         grid.antialias = false
 
         brushGrid.material = grid
+
+        // Initialize grid opacity based on gridLineAlpha
+        updateGridLineAlpha()
+
         // Get the vertex data for the cursor
         var v = cursor.getVerticesData(VertexBuffer.PositionKind)!!
 
@@ -232,6 +288,9 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
         // Update the grid reference
         grid = newGrid
 
+        // Ensure grid opacity is set correctly based on gridLineAlpha
+        updateGridLineAlpha()
+
         // Update the grid rotation based on the current drawPlane
         when (drawPlane) {
             Side.X, Side.NEGATIVE_X -> {
@@ -256,9 +315,12 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
             DrawMode.Clone -> true // Always show cursor in clone mode
         }
 
-        // Show cursor and grid only when a tool is actually selected
-        cursor.isVisible = editable && (drawMode == DrawMode.Clone || hasSelection)
-        grid.isVisible = editable && (drawMode == DrawMode.Clone || hasSelection)
+        // Check if sketching is active
+        val isSketchingActive = toolState.isSketching
+
+        // Show cursor and grid only when a tool is actually selected AND not in sketching mode
+        cursor.isVisible = editable && !isSketchingActive && (drawMode == DrawMode.Clone || hasSelection)
+        grid.isVisible = editable && (isSketchingActive || drawMode == DrawMode.Clone || hasSelection)
 
         // Even if nothing is selected, still update the cursor position
         // but don't allow drawing without selection
@@ -730,7 +792,35 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 pickRight = { v -> v.x }
             }
 
-            else -> throw IllegalArgumentException("Invalid side: $side")
+            Side.NEGATIVE_Y -> {
+                up = Vector3.Up().scale(-0.5f)
+                forward = Vector3(0f, -0.5f, 0.5f)
+                right = Vector3(0.5f, -0.5f, 0f)
+                sideForward = Side.NEGATIVE_Z
+                sideRight = Side.NEGATIVE_X
+                pickForward = { v -> v.z }
+                pickRight = { v -> v.x }
+            }
+
+            Side.NEGATIVE_X -> {
+                up = Vector3.Right().scale(-0.5f)
+                forward = Vector3(-0.5f, 0.5f, 0f)
+                right = Vector3(-0.5f, 0f, 0.5f)
+                sideForward = Side.NEGATIVE_Y
+                sideRight = Side.NEGATIVE_Z
+                pickForward = { v -> v.y }
+                pickRight = { v -> v.z }
+            }
+
+            Side.NEGATIVE_Z -> {
+                up = Vector3.Forward().scale(-0.5f)
+                forward = Vector3(0f, 0.5f, -0.5f)
+                right = Vector3(0.5f, 0f, -0.5f)
+                sideForward = Side.NEGATIVE_Y
+                sideRight = Side.NEGATIVE_X
+                pickForward = { v -> v.y }
+                pickRight = { v -> v.x }
+            }
         }
 
         if (this.side == this.drawPlane) {
@@ -958,7 +1048,41 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 }
             }
 
-            else -> throw IllegalArgumentException("Unexpected side: $side")
+            Side.NEGATIVE_X -> {
+                if (isReverse) {
+                    drawPlane = Side.NEGATIVE_Z
+                    drawPlaneOffset = pos.z.toInt()
+                    side = Side.NEGATIVE_Z
+                } else {
+                    drawPlane = Side.NEGATIVE_Y
+                    drawPlaneOffset = pos.y.toInt()
+                    side = Side.NEGATIVE_Y
+                }
+            }
+
+            Side.NEGATIVE_Y -> {
+                if (isReverse) {
+                    drawPlane = Side.NEGATIVE_X
+                    drawPlaneOffset = pos.x.toInt()
+                    side = Side.NEGATIVE_X
+                } else {
+                    drawPlane = Side.NEGATIVE_Z
+                    drawPlaneOffset = pos.z.toInt()
+                    side = Side.NEGATIVE_Z
+                }
+            }
+
+            Side.NEGATIVE_Z -> {
+                if (isReverse) {
+                    drawPlane = Side.NEGATIVE_Y
+                    drawPlaneOffset = pos.y.toInt()
+                    side = Side.NEGATIVE_Y
+                } else {
+                    drawPlane = Side.NEGATIVE_X
+                    drawPlaneOffset = pos.x.toInt()
+                    side = Side.NEGATIVE_X
+                }
+            }
         }
 
         when (drawPlane) {
@@ -989,9 +1113,9 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 Side.X, Side.NEGATIVE_X -> {
                     pos = pickedPoint.add(
                         when (side) {
-                            Side.Y -> Vector3(0.5f, 0.5f, 0f)
-                            Side.Z -> Vector3(0.5f, 0f, 0.5f)
-                            else -> Vector3(0.5f, 0f, 0f)
+                            Side.Y, Side.NEGATIVE_Y -> Vector3(0.5f, 0.5f, 0f)
+                            Side.Z, Side.NEGATIVE_Z -> Vector3(0.5f, 0f, 0.5f)
+                            Side.X, Side.NEGATIVE_X -> Vector3(0.5f, 0f, 0f)
                         }
                     ).floor()
                 }
@@ -999,9 +1123,9 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 Side.Y, Side.NEGATIVE_Y -> {
                     pos = pickedPoint.add(
                         when (side) {
-                            Side.Y -> Vector3(0f, 0.5f, 0f)
-                            Side.Z -> Vector3(0f, 0.5f, 0.5f)
-                            else -> Vector3(0.5f, 0.5f, 0f)
+                            Side.Y, Side.NEGATIVE_Y -> Vector3(0f, 0.5f, 0f)
+                            Side.Z, Side.NEGATIVE_Z -> Vector3(0f, 0.5f, 0.5f)
+                            Side.X, Side.NEGATIVE_X -> Vector3(0.5f, 0.5f, 0f)
                         }
                     ).floor()
                 }
@@ -1009,9 +1133,9 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
                 Side.Z, Side.NEGATIVE_Z -> {
                     pos = pickedPoint.add(
                         when (side) {
-                            Side.Y -> Vector3(0f, 0.5f, 0.5f)
-                            Side.Z -> Vector3(0f, 0f, 0.5f)
-                            else -> Vector3(0.5f, 0f, 0.5f)
+                            Side.Y, Side.NEGATIVE_Y -> Vector3(0f, 0.5f, 0.5f)
+                            Side.Z, Side.NEGATIVE_Z -> Vector3(0f, 0f, 0.5f)
+                            Side.X, Side.NEGATIVE_X -> Vector3(0.5f, 0f, 0.5f)
                         }
                     ).floor()
                 }
@@ -1043,10 +1167,13 @@ class TilemapEditor(private val scene: Scene, val tilemap: Tilemap) {
 
     fun toggleSide(isReversed: Boolean) {
         if (autoRotate && side != drawPlane) {
-            side = when (drawPlane) {
-                Side.Y, Side.NEGATIVE_Y -> if (side == Side.Y) Side.Z else Side.Y
-                Side.X, Side.NEGATIVE_X -> if (side == Side.X) Side.Y else Side.X
-                Side.Z, Side.NEGATIVE_Z -> if (side == Side.Z) Side.X else Side.Z
+            side = when (drawPlane.abs) {
+                Side.Y -> if (side == Side.Y) Side.Z else Side.Y
+                Side.X -> if (side == Side.X) Side.Y else Side.X
+                Side.Z -> if (side == Side.Z) Side.X else Side.Z
+                Side.NEGATIVE_Y -> if (side == Side.NEGATIVE_Y) Side.NEGATIVE_Z else Side.NEGATIVE_Y
+                Side.NEGATIVE_X -> if (side == Side.NEGATIVE_X) Side.NEGATIVE_Y else Side.NEGATIVE_X
+                Side.NEGATIVE_Z -> if (side == Side.NEGATIVE_Z) Side.NEGATIVE_X else Side.NEGATIVE_Z
             }
         } else if (isReversed) {
             side = when (side) {

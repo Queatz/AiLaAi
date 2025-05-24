@@ -3,7 +3,6 @@ package app.game.editor
 import Styles
 import androidx.compose.runtime.Composable
 import app.compose.rememberDarkMode
-import game.ToolType
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -37,16 +36,16 @@ import org.jetbrains.compose.web.dom.Text
 import r
 
 /**
- * Represents a tool in the ToolGrid
+ * Represents an asset tool in the AssetToolGrid
  * 
- * @param id Unique identifier for the tool (ToolType enum)
- * @param name Name of the tool (displayed under the photo)
- * @param photoUrl URL to the tool's photo
- * @param description Description of the tool (shown as tooltip)
- * @param number Optional number for the tool (displayed in top right corner)
+ * @param id Unique identifier for the asset (String)
+ * @param name Name of the asset (displayed under the photo)
+ * @param photoUrl URL to the asset's photo
+ * @param description Description of the asset (shown as tooltip)
+ * @param number Optional number for the asset (displayed in top right corner)
  */
-data class Tool(
-    val id: ToolType,
+data class AssetTool(
+    val id: String,
     val name: String,
     val photoUrl: String,
     val description: String,
@@ -54,18 +53,18 @@ data class Tool(
 )
 
 /**
- * A grid component that displays a list of tools with photos, names, and descriptions.
+ * A grid component that displays a list of asset tools with photos, names, and descriptions.
  * The grid automatically adjusts its columns and rows based on the number of tools.
  * 
- * @param tools List of tools to display in the grid
- * @param selectedToolType ID of the currently selected tool (null if none selected)
- * @param onToolSelected Callback when a tool is selected
+ * @param tools List of asset tools to display in the grid
+ * @param selectedToolId ID of the currently selected asset tool (null if none selected)
+ * @param onToolSelected Callback when an asset tool is selected
  */
 @Composable
-fun ToolGrid(
-    tools: List<Tool>,
-    selectedToolType: ToolType? = null,
-    onToolSelected: (Tool) -> Unit = {}
+fun AssetToolGrid(
+    tools: List<AssetTool>,
+    selectedToolId: String? = null,
+    onToolSelected: (AssetTool) -> Unit = {}
 ) {
     // Calculate the number of columns based on the number of tools
     // Use a minimum of 2 columns and a maximum of 4
@@ -85,7 +84,7 @@ fun ToolGrid(
         }
     }) {
         tools.forEach { tool ->
-            val isSelected = tool.id == selectedToolType
+            val isSelected = tool.id == selectedToolId
 
             Div({
                 style {

@@ -250,9 +250,11 @@ fun SceneSection(
                                     if (newDescription != null) {
                                         localGameScene?.id?.let { sceneId ->
                                             val updatedGameScene = GameScene(description = newDescription)
-                                            api.updateGameScene(sceneId, updatedGameScene) {
+                                            api.updateGameScene(sceneId, updatedGameScene) { updated ->
                                                 // Update local state with the new description
-                                                localGameScene = localGameScene?.copy(description = it.description)
+                                                localGameScene = updated
+                                                // Notify parent about the scene update
+                                                onSceneUpdated(updated)
                                             }
                                         }
                                     }

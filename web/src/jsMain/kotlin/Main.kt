@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.compose.rememberMobileMode
 import app.AppStyles
 import app.appNav
 import app.call.CallLayout
@@ -16,6 +17,11 @@ import app.info.PrivacyPage
 import app.info.TosPage
 import app.invites.InvitePage
 import app.scripts.ScriptCoverPage
+import app.scripts.ScriptSourcePage
+import kotlinx.browser.window
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import app.softwork.routingcompose.BrowserRouter
 import app.softwork.routingcompose.Router
 import event.EventPage
@@ -23,6 +29,7 @@ import app.widget.WidgetStyles
 import components.AppFooter
 import components.AppHeader
 import components.CardPage
+import components.IconButton
 import components.InfoPage
 import components.NotificationsLayout
 import components.ProfilePage
@@ -34,23 +41,23 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
-import kotlinx.browser.window
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import lib.mapboxgl
 import org.jetbrains.compose.web.css.Style
+import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.renderComposableInBody
 import org.w3c.dom.HTMLLinkElement
 import org.w3c.dom.get
 import org.w3c.dom.set
 import stories.StoryStyles
 
-//const val baseUrl = "http://0.0.0.0:8080"
-const val baseUrl = "https://api.ailaai.app"
+const val baseUrl = "http://0.0.0.0:8080"
+//const val baseUrl = "https://api.ailaai.app"
 
-//const val webBaseUrl = "http://0.0.0.0:4040"
-const val webBaseUrl = "https://hitown.chat"
+const val webBaseUrl = "http://0.0.0.0:4040"
+//const val webBaseUrl = "https://hitown.chat"
 
 val json = Json {
     encodeDefaults = true
@@ -186,9 +193,62 @@ fun main() {
                         }) {
                             AppHeader(
                                 title = "",
-                                background = false
+                                background = false,
+                                customContent = {
+                                    val isMobile = rememberMobileMode()
+
+                                    if (isMobile) {
+                                        // Use IconButton on mobile
+                                        IconButton(
+                                            name = "code",
+                                            title = appString { viewSource },
+                                            outlined = true,
+                                            onClick = {
+                                                window.open("/script-source/$script", "_blank")
+                                            }
+                                        )
+                                    } else {
+                                        // Use regular Button on desktop
+                                        Button({
+                                            classes(Styles.outlineButton)
+                                            style {
+                                                marginRight(1.r)
+                                            }
+                                            onClick {
+                                                window.open("/script-source/$script", "_blank")
+                                            }
+                                        }) {
+                                            Span({
+                                                classes("material-symbols-outlined")
+                                            }) {
+                                                Text("code")
+                                            }
+                                            Text(" ${appString { viewSource }}")
+                                        }
+                                    }
+                                }
                             )
                             ScriptCoverPage(scriptId = script)
+                            AppFooter(
+                                showHome = true
+                            )
+                        }
+                    }
+                }
+
+                route("script-source") {
+                    string { script ->
+                        Background({
+                            classes(Styles.background)
+                        }) {
+                            AppHeader(
+                                title = appString { scriptSource },
+                                showBack = true,
+                                onBack = {
+                                    router.navigate("/script/$script")
+                                }
+                            )
+                            ScriptSourcePage(scriptId = script)
                             AppFooter(
                                 showHome = true
                             )

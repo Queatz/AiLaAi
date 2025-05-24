@@ -78,6 +78,7 @@ data class GameSceneConfig(
     val savedPositions: List<SavedPositionData> = emptyList(),
     val backgroundColor: Color4Data? = null,
     val cameraFov: Float? = null,
+    val cameraOrthographic: Boolean? = null,
     val ssaoEnabled: Boolean? = null,
     val bloomEnabled: Boolean? = null,
     val sharpenEnabled: Boolean? = null,
@@ -99,7 +100,9 @@ data class GameSceneConfig(
     val dustEffectEnabled: Boolean? = null,
     val dustEffectIntensity: Float? = null,
     /** Captions to display on the timeline and during playback */
-    val captions: List<CaptionData> = emptyList()
+    val captions: List<CaptionData> = emptyList(),
+    /** Sketch layers with freehand drawing data */
+    val sketchLayers: List<SketchLayerData> = emptyList()
 )
 
 /**
@@ -139,6 +142,7 @@ data class AnimationMarkerData(
     val name: String,
     val time: Double,
     val duration: Double = 0.0,
+    val visible: Boolean = true,
     val event: MarkerEvent? = null
 )
 
@@ -166,6 +170,25 @@ data class Vector3Data(
     val y: Float,
     val z: Float
 )
+
+// region Sketch data models
+@Serializable
+data class SketchLineData(
+    val points: List<Vector3Data>,
+    val color: Color4Data,
+    val thickness: Int,
+    val layerId: String
+)
+
+@Serializable
+data class SketchLayerData(
+    val id: String,
+    val name: String,
+    val visible: Boolean = true,
+    val glow: Boolean = false,
+    val lines: List<SketchLineData> = emptyList()
+)
+// endregion
 
 /**
  * Serializable version of CameraKeyframe

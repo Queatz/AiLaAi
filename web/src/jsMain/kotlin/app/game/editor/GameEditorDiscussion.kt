@@ -523,9 +523,8 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                     }
 
                     // Comment input field
-                    if (me != null) {
                         EditField(
-                            placeholder = "Add a comment...",
+                            placeholder = if (me == null) "Sign in to comment" else "Add a comment...",
                             styles = {
                                 width(100.percent)
                             },
@@ -535,7 +534,8 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                                 flexDirection(FlexDirection.RowReverse)
                             },
                             resetOnSubmit = true,
-                            button = "Post"
+                            button = "Post",
+                            enabled = me != null,
                         ) { commentText ->
                             // Return true to indicate success and reset the input field
                             discussion.discussion?.id?.let { discussionId ->
@@ -560,16 +560,7 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                             // Always return true to reset the input field
                             true
                         }
-                    } else {
-                        Div({
-                            style {
-                                padding(0.5.r)
-                                opacity(0.7f)
-                            }
-                        }) {
-                            Text("Sign in to comment")
-                        }
-                    }
+
 
                     // Comments section
                     discussion.comments?.let { comments ->

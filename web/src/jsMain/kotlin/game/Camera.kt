@@ -29,6 +29,54 @@ class Camera(private val scene: Scene, private val pick: () -> AbstractMesh) {
         this.camera = camera
     }
 
+    // Set camera to top view (looking down along Y axis)
+    fun setTopView() {
+        if (view != CameraView.Free) return
+        camera.targetScreenOffset.scaleInPlace(0f)
+        camera.alpha = PI.toFloat() / 2f // 90 degrees
+        camera.beta = 0f // 0 degrees (looking straight down)
+    }
+
+    // Set camera to bottom view (looking up along Y axis)
+    fun setBottomView() {
+        if (view != CameraView.Free) return
+        camera.targetScreenOffset.scaleInPlace(0f)
+        camera.alpha = PI.toFloat() / 2f // 90 degrees
+        camera.beta = PI.toFloat() // 180 degrees (looking straight up)
+    }
+
+    // Set camera to left view (looking along negative X axis)
+    fun setLeftView() {
+        if (view != CameraView.Free) return
+        camera.targetScreenOffset.scaleInPlace(0f)
+        camera.alpha = 0f // 0 degrees
+        camera.beta = PI.toFloat() / 2f // 90 degrees (looking straight ahead)
+    }
+
+    // Set camera to right view (looking along positive X axis)
+    fun setRightView() {
+        if (view != CameraView.Free) return
+        camera.targetScreenOffset.scaleInPlace(0f)
+        camera.alpha = PI.toFloat() // 180 degrees
+        camera.beta = PI.toFloat() / 2f // 90 degrees (looking straight ahead)
+    }
+
+    // Set camera to front view (looking along negative Z axis)
+    fun setFrontView() {
+        if (view != CameraView.Free) return
+        camera.targetScreenOffset.scaleInPlace(0f)
+        camera.alpha = PI.toFloat() / 2f // 90 degrees
+        camera.beta = PI.toFloat() / 2f // 90 degrees (looking straight ahead)
+    }
+
+    // Set camera to back view (looking along positive Z axis)
+    fun setBackView() {
+        if (view != CameraView.Free) return
+        camera.targetScreenOffset.scaleInPlace(0f)
+        camera.alpha = -PI.toFloat() / 2f // -90 degrees
+        camera.beta = PI.toFloat() / 2f // 90 degrees (looking straight ahead)
+    }
+
     fun update() {
         if (view == CameraView.Free) {
             val settled = !isMoving && camera.inertialRadiusOffset == 0f && camera.inertialAlphaOffset == 0f && 

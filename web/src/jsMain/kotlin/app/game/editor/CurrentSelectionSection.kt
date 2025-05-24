@@ -26,6 +26,7 @@ import com.queatz.db.PersonProfile
 import components.GroupPhoto
 import components.GroupPhotoItem
 import game.Map
+import kotlinx.browser.document
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.web.css.AlignItems
@@ -52,6 +53,7 @@ import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.fontWeight
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.dom.TextInput
+import org.w3c.dom.HTMLAnchorElement
 import r
 
 @Composable
@@ -606,6 +608,34 @@ fun CurrentSelectionSection(map: Map) {
                                         }
                                     }) {
                                         Text(if (currentMusic?.published == true) "Yes" else "No")
+                                    }
+                                }
+
+                                // Download button for music
+                                currentMusic?.audio?.let { audioPath ->
+                                    Div({
+                                        style {
+                                            display(DisplayStyle.Flex)
+                                            flexDirection(FlexDirection.Column)
+                                            gap(0.25.r)
+                                            marginBottom(0.5.r)
+                                        }
+                                    }) {
+                                        Button({
+                                            classes(Styles.outlineButton)
+                                            onClick {
+                                                // Create an anchor element programmatically
+                                                val a = document.createElement("a") as HTMLAnchorElement
+                                                a.href = "$baseUrl$audioPath"
+                                                a.download = currentMusic?.name ?: "Music"
+                                                // Append to body, click, and remove
+                                                document.body?.appendChild(a)
+                                                a.click()
+                                                document.body?.removeChild(a)
+                                            }
+                                        }) {
+                                            Text("Download Music")
+                                        }
                                     }
                                 }
                             }

@@ -1,5 +1,6 @@
 package app.game.editor
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,10 +16,7 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.TextInput
-import org.w3c.dom.CanvasRenderingContext2D
-import org.w3c.dom.RenderingContext
 import r
-import web.cssom.atrule.width
 
 @Composable
 fun GraphicsSection(
@@ -42,17 +40,6 @@ fun GraphicsSection(
             // Pixel size input (1-16)
             var pixelSize by remember { mutableStateOf(initialPixelSize?.toString() ?: "1") }
 
-            // Initialize hardware scaling level if initialPixelSize is provided
-            LaunchedEffect(initialPixelSize) {
-                initialPixelSize?.let { size ->
-                    if (engine != null) {
-                        val clampedSize = minOf(16, maxOf(1, size))
-                        engine.setHardwareScalingLevel(clampedSize)
-                        pixelSize = clampedSize.toString()
-                    }
-                }
-            }
-
             TextInput(pixelSize) {
             classes(Styles.textarea)
                 placeholder("Pixel size (1-16)")
@@ -65,7 +52,7 @@ fun GraphicsSection(
                         val clampedSize = minOf(16, maxOf(1, size))
                         pixelSize = clampedSize.toString()
                         // Set the hardware scaling level
-                        engine.setHardwareScalingLevel(clampedSize)
+                        map?.pixelSize = clampedSize
                         // Notify about the change
                         onPixelSizeChanged(clampedSize)
                     } else {
@@ -195,6 +182,23 @@ fun GraphicsSection(
                                 map.linearSamplingEnabled = it
                             },
                             title = "Pixel Art"
+                        )
+                    }
+                    Div({ style { padding(1.r, 0.r, 0.r, 0.r) } }) {}
+                    // Orthographic projection mode
+                    var orthographicEnabled by remember { mutableStateOf(map.isOrthographicEnabled()) }
+                    Div {
+                        LabeledSwitch(
+                            value = orthographicEnabled,
+                            onValue = {
+                                orthographicEnabled = it
+                                map.setOrthographicEnabled(it)
+                            },
+                            onChange = {
+                                orthographicEnabled = it
+                                map.setOrthographicEnabled(it)
+                            },
+                            title = "Orthographic"
                         )
                     }
                 }

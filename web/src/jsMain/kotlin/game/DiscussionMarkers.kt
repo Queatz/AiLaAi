@@ -2,6 +2,7 @@ package game
 
 import com.queatz.db.GameDiscussionExtended
 import com.queatz.db.Vector3Data
+import ellipsize
 import lib.ActionManager
 import lib.Color3
 import lib.CreatePlaneOptions
@@ -97,7 +98,7 @@ class DiscussionMarkers(private val scene: Scene) {
         val measureContext = measureTexture.getContext()
         measureContext.font = "bold ${fontSize}px 'Ysabeau Infant'"
 
-        val displayText = text.take(50)
+        val displayText = text.ellipsize(50)
         val metrics = measureContext.measureText(displayText)
         val textWidth = (metrics.actualBoundingBoxRight - metrics.actualBoundingBoxLeft).toFloat()
         val textHeight = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent).toFloat()
@@ -156,14 +157,10 @@ class DiscussionMarkers(private val scene: Scene) {
         val material = StandardMaterial("text-material-$id", scene)
         with(material) {
             diffuseTexture = textTexture
-            diffuseColor = Color3.White()
-            specularColor = Color3(0f, 0f, 0f)
+            emissiveTexture = textTexture
+            opacityTexture = textTexture
             backFaceCulling = false
-            // Add a subtle emissive color to make text visible without excessive glow
-            emissiveColor = Color3(0.5f, 0.5f, 0.5f)
             disableLighting = true
-            useAlphaFromDiffuseTexture = true
-            transparencyMode = Material.MATERIAL_ALPHATEST
         }
 
         plane.material = material

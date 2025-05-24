@@ -22,6 +22,7 @@ fun AppHeader(
     background: Boolean = true,
     showDownloadApp: Boolean = false,
     onBack: () -> Unit = {},
+    customContent: @Composable (() -> Unit)? = null,
 ) {
     val layout by application.layout.collectAsState()
     val router = Router.current
@@ -104,6 +105,10 @@ fun AppHeader(
         }) {
             Text("")
         }
+
+        // Render custom content if provided
+        customContent?.invoke()
+
         if (showDownloadApp) {
             Button({
                 classes(Styles.button)

@@ -121,6 +121,18 @@ object Strings {
         vn = "Tập lệnh mới",
         ru = "Новый скрипт"
     )
+
+    val viewSource = Translation(
+        en = "View source",
+        vn = "Xem mã nguồn",
+        ru = "Просмотр исходного кода"
+    )
+
+    val scriptSource = Translation(
+        en = "Script source",
+        vn = "Mã nguồn tập lệnh",
+        ru = "Исходный код скрипта"
+    )
     val removeRating = Translation(
         en = "Remove rating",
         vn = "Xóa đánh giá",

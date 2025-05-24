@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.ConnectWithoutContact
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.SpatialTracking
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -58,6 +57,7 @@ import app.ailaai.api.updateGroup
 import app.ailaai.api.updateMember
 import at.bluesource.choicesdk.maps.common.LatLng
 import com.queatz.ailaai.AppNav
+import com.queatz.ailaai.BuildConfig
 import com.queatz.ailaai.R
 import com.queatz.ailaai.cache.CacheKey
 import com.queatz.ailaai.cache.cache
@@ -437,24 +437,27 @@ fun FriendsScreen() {
                 }
             }
 
-            var showImpromptuDialog by rememberStateOf(false)
-            IconButton(
-                onClick = {
-                    showImpromptuDialog = true
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ConnectWithoutContact,
-                    contentDescription = stringResource(R.string.impromptu_mode)
-                )
-            }
-
-            if (showImpromptuDialog) {
-                ImpromptuDialog(
-                    onDismissRequest = {
-                        showImpromptuDialog = false
+            // Only show Impromptu button if the feature is enabled
+            if (BuildConfig.ENABLE_IMPROMPTU) {
+                var showImpromptuDialog by rememberStateOf(false)
+                IconButton(
+                    onClick = {
+                        showImpromptuDialog = true
                     }
-                )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ConnectWithoutContact,
+                        contentDescription = stringResource(R.string.impromptu_mode)
+                    )
+                }
+
+                if (showImpromptuDialog) {
+                    ImpromptuDialog(
+                        onDismissRequest = {
+                            showImpromptuDialog = false
+                        }
+                    )
+                }
             }
             ScanQrCodeButton()
         }

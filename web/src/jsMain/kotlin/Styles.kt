@@ -95,6 +95,7 @@ object Styles : StyleSheet() {
         val secondary = Color("#767676")
         val tertiary = Color("#2e8900")
         val red = Color("#761c1c")
+        val error = red
         val green = Color("#1c7626")
         val outline = Color("#fff6")
 
@@ -771,6 +772,7 @@ object Styles : StyleSheet() {
         cursor("pointer")
         display(DisplayStyle.Flex)
         alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
         fontWeight("bold")
 
         selector(".material-symbols-outlined") style {

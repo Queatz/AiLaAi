@@ -11,22 +11,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import api
+import app.ailaai.api.createGameObject
 import app.ailaai.api.gameObject
 import app.ailaai.api.gameTile
+import app.ailaai.api.uploadPhotos
+import app.dialog.dialog
 import app.game.GameEditorPanel
 import app.game.GameMusicPlayer
 import app.game.GameObjectsData
 import app.game.GameTilesData
 import app.game.editor.Seekbar
+import app.game.editor.assetManager
 import app.game.json
 import app.softwork.routingcompose.Router
 import appText
 import application
+import com.queatz.db.Color4Data
+import com.queatz.db.GameObject
 import com.queatz.db.GameScene
 import com.queatz.db.GameSceneConfig
 import components.IconButton
 import game.Game
 import game.Side
+import getImageDimensions
 import kotlinx.browser.document
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -54,7 +61,6 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.left
-import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -73,15 +79,18 @@ import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.clipboard.ClipboardEvent
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventListener
+import org.w3c.dom.get
+import org.w3c.files.File
 import r
-import web.cssom.Cursor
+import toBytes
 import web.cssom.ImageRendering
-import web.cssom.PropertyName.Companion.zIndex
 import kotlin.js.Date
 
 // Function to load tiles, objects, and animation data from gameScene
-private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: GameScene) {
+private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: GameScene, onPixelatedChanged: (Boolean) -> Unit = {}) {
     // Load tiles if available
     if (gameScene.tiles != null) {
         try {
@@ -102,9 +111,6 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                             val side = Side.fromString(tile.side)
                             Triple(position, side, gameTile)
                         }
-
-                        // Set the current GameTile
-                        game.map.setCurrentGameTile(gameTile)
 
                         // Set all tiles at once
                         game.map.tilemapEditor.tilemap.setTiles(tileList)
@@ -131,9 +137,6 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                             // Set the object at the specified position
                             val position = Vector3(obj.x.toFloat(), obj.y.toFloat(), obj.z.toFloat())
                             val side = Side.fromString(obj.side)
-
-                            // Set the current GameObject and add it to the map
-                            game.map.setCurrentGameObject(gameObject)
                             // Now we can access the tilemap via map.tilemapEditor.tilemap
                             game.map.tilemapEditor.tilemap.addObject(position, side, gameObject)
                         })
@@ -145,7 +148,7 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
         }
     }
 
-            // Load animation data if available
+    // Load animation data if available
     if (gameScene.config != null) {
         try {
             val config = json.decodeFromString<GameSceneConfig>(gameScene.config!!)
@@ -164,6 +167,8 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                 // Update the marker properties
                 marker.time = markerData.time
                 marker.duration = markerData.duration
+                // Set visibility if available (with fallback to true)
+                marker.visible = markerData.visible
                 // Preserve any associated event (e.g., PlayMusicEvent)
                 marker.event = markerData.event
                 console.log(
@@ -212,17 +217,21 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                 }
             }
 
-            // Set background color if available - do this last to ensure it overrides any default colors
-            if (config.backgroundColor != null) {
-                val bgColor = config.backgroundColor!!
-                game.scene.clearColor = lib.Color4(
-                    bgColor.r,
-                    bgColor.g,
-                    bgColor.b,
-                    bgColor.a
-                )
-                console.log("Background color set to (${bgColor.r}, ${bgColor.g}, ${bgColor.b}, ${bgColor.a})")
-            }
+            // Set background color
+            val bgColor = config.backgroundColor ?: Color4Data(.8f, .8f, .8f, 1f)
+            game.scene.clearColor = lib.Color4(
+                bgColor.r,
+                bgColor.g,
+                bgColor.b,
+                bgColor.a
+            )
+            console.log("Background color set to (${bgColor.r}, ${bgColor.g}, ${bgColor.b}, ${bgColor.a})")
+
+            config.snowEffectEnabled?.let { enabled -> game.map.setSnowEffectEnabled(enabled) }
+            config.rainEffectEnabled?.let { enabled -> game.map.setRainEffectEnabled(enabled) }
+            config.dustEffectEnabled?.let { enabled -> game.map.setDustEffectEnabled(enabled) }
+
+            console.log("Weather configured")
 
             // Set camera FOV if available
             if (config.cameraFov != null) {
@@ -230,6 +239,11 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                     it.fov = config.cameraFov!!
                     console.log("Camera FOV set to ${config.cameraFov}")
                 }
+            }
+            // Set camera orthographic mode if available
+            config.cameraOrthographic?.let { enabled ->
+                game.map.set("orthographic", enabled.toString())
+                console.log("Camera orthographic set to $enabled")
             }
 
             // Apply graphics settings if available
@@ -261,6 +275,7 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
             config.linearSamplingEnabled?.let { enabled ->
                 game.map.linearSamplingEnabled = enabled
                 console.log("Linear Sampling enabled set to $enabled")
+                onPixelatedChanged(enabled)
             }
 
             // Set Depth of Field
@@ -313,7 +328,7 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
 
             // Set Pixel Size
             config.pixelSize?.let { size ->
-                game.engine.setHardwareScalingLevel(size)
+                game.map.pixelSize = size
                 console.log("Pixel Size set to $size")
             }
 
@@ -346,6 +361,8 @@ private fun loadGameSceneData(scope: CoroutineScope, game: Game, gameScene: Game
                 game.map.set("dustEffectIntensity", intensity)
                 console.log("Dust Effect intensity set to $intensity")
             }
+            // Load sketch layers from config
+            game.map.sketchManager.loadData(config.sketchLayers)
         } catch (e: Exception) {
             console.error("Error loading animation data: ${e.message}")
         }
@@ -379,12 +396,14 @@ fun GamePage(
         mutableStateOf<Game?>(null)
     }
 
-    var showPlayButton by remember(game) { mutableStateOf(true) }
+    // If editable, hide the centered play overlay initially; otherwise show it
+    var showPlayButton by remember(game) { mutableStateOf(!editable) }
 
     // Track fullscreen, playing, and side-panel visibility states
     var isFullscreen by remember { mutableStateOf(false) }
     var isPlaying by remember { mutableStateOf(false) }
     var isPixelated by remember { mutableStateOf(false) }
+    var allowPaste by remember { mutableStateOf(false) }
 
     var showPanel by remember { mutableStateOf(showSidePanel) }
     // Hide play button when animation is playing
@@ -430,11 +449,21 @@ fun GamePage(
         localGameScene ?: return@DisposableEffect onDispose { }
         canvasRef ?: return@DisposableEffect onDispose { }
 
-        val localGame = Game(canvasRef!!, editable).also {
+        val localGame = Game(canvasRef!!, editable).also { gameImpl ->
+            // Load existing scene data (tiles, objects, config)
             if (localGameScene?.tiles != null || localGameScene?.objects != null || localGameScene?.config != null) {
-                loadGameSceneData(scope, it, localGameScene!!)
+                loadGameSceneData(scope, gameImpl, localGameScene!!) { pixelated ->
+                    isPixelated = pixelated
+                }
+            } else {
+                // Default scene setup
+                gameImpl.scene.clearColor = lib.Color4(
+                    r = .8f,
+                    g = .8f,
+                    b = .8f,
+                    a = 1f
+                )
             }
-
         }
         game = localGame
 
@@ -447,6 +476,116 @@ fun GamePage(
     LaunchedEffect(game) {
         game?.playStateFlow?.collectLatest { playing ->
             isPlaying = playing
+        }
+    }
+
+    DisposableEffect(canvasRef, allowPaste) {
+        if (!allowPaste) return@DisposableEffect onDispose {  }
+
+        val pasteListener = EventListener { event: Event ->
+            console.log(event)
+
+            val event = event as? ClipboardEvent ?: return@EventListener
+
+            // Only process if we have a game instance
+            val gameInstance = game ?: return@EventListener
+
+            // Get clipboard data
+            val clipboardData = event.clipboardData ?: return@EventListener
+
+            // Check for images
+            val items = clipboardData.items
+            val photos = mutableListOf<File>()
+
+            for (i in 0 until items.length) {
+                val item = items[i] ?: continue
+                val type = item.type
+
+                if (type.startsWith("image/")) {
+                    val file = item.getAsFile() ?: continue
+                    photos.add(file)
+                }
+            }
+
+            if (photos.isNotEmpty()) {
+                // Handle pasted image
+                event.preventDefault() // Prevent default only if we're handling the paste
+
+                // Process all photos
+                photos.forEach { photo ->
+                    scope.launch {
+                        try {
+                            // Get image dimensions
+                            val dimensions = photo.getImageDimensions()
+
+                            // Convert File to ByteArray
+                            val photoBytes = photo.toBytes()
+
+                            // Upload the image
+                            api.uploadPhotos(
+                                photos = listOf(photoBytes),
+                                onSuccess = { response ->
+                                    val photoUrl = response.urls.firstOrNull() ?: return@uploadPhotos
+
+                                    // Create a new game object with the uploaded image
+                                    // Use dimensions divided by 100
+                                    scope.launch {
+                                        api.createGameObject(
+                                            gameObject = GameObject(
+                                                photo = photoUrl,
+                                                width = (dimensions.width / 1000.0).toString(),
+                                                height = (dimensions.height / 1000.0).toString()
+                                            ),
+                                            onSuccess = { newObject ->
+                                                // Add the new object to the asset manager
+                                                assetManager.addObject(newObject)
+
+                                                // Set the current game object
+                                                gameInstance.map.setCurrentGameObject(newObject)
+
+                                                gameInstance.map.tilemapEditor.draw(false)
+                                            }
+                                        )
+                                    }
+                                }
+                            )
+                        } catch (e: Exception) {
+                            console.error("Error processing pasted image", e)
+                        }
+                    }
+                }
+            } else {
+                // Check for text
+                val text = clipboardData.getData("text/plain")
+                if (text.isNotEmpty()) {
+                    // Handle pasted text
+                    event.preventDefault() // Prevent default only if we're handling the paste
+
+                    gameInstance.map.tilemapEditor?.let { editor ->
+                        // Get the current cursor position
+                        val position = editor.pickedPoint
+
+                        // Add a new saved position with the pasted text
+                        gameInstance.animationData.addSavedPosition(text, position)
+                        scope.launch {
+                            gameInstance.animationDataChanged.emit(Unit)
+                        }
+                    }
+                } else {
+                    // No image or text found
+                    scope.launch {
+                        dialog(
+                            title = "Nothing found to paste.",
+                            cancelButton = null
+                        )
+                    }
+                }
+            }
+        }
+        document.addEventListener("paste", pasteListener)
+
+        onDispose {
+            document.removeEventListener("paste", pasteListener)
         }
     }
 
@@ -479,6 +618,14 @@ fun GamePage(
         ) {
             Canvas(
                 attrs = {
+                    onFocus {
+                        allowPaste = true
+                    }
+
+                    onBlur {
+                        allowPaste = false
+                    }
+
                     style {
                         height(100.percent)
                         width(100.percent)
@@ -618,7 +765,7 @@ fun GamePage(
                 }
             }
 
-            GameMusicPlayer(game)
+            game?.let { GameMusicPlayer(it) }
 
             // Show sign in button if editable is false and me is null
             if (!editable && me == null && !isPlaying && !isFullscreen) {

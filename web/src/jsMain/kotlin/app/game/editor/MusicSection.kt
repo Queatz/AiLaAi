@@ -270,7 +270,7 @@ fun MusicSection(
             uploadMusic()
         },
         assetToTool = { musicAsset ->
-            Tool(
+            AssetTool(
                 id = musicAsset.id,
                 name = musicAsset.name,
                 photoUrl = "$baseUrl/assets/icons/music_note.svg", // Default music icon

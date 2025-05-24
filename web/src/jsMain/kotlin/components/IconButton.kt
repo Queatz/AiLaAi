@@ -38,6 +38,7 @@ fun IconButton(
     text: String? = null,
     count: Int = 0,
     background: Boolean = false,
+    outlined: Boolean = false,
     backgroundColor: CSSColorValue? = null,
     isLoading: Boolean = false,
     small: Boolean = false,
@@ -61,6 +62,10 @@ fun IconButton(
 
         if (background) {
             classes(AppStyles.iconButtonBackground)
+        }
+
+        if (outlined) {
+            classes(AppStyles.iconButtonOutlined)
         }
 
         focusable()

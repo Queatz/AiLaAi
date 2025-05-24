@@ -8,10 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.queatz.db.GameMusic
 import game.Game
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.Audio
 import org.jetbrains.compose.web.dom.Div
@@ -22,7 +24,8 @@ import r
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun GameMusicPlayer(game: Game?) {
+fun GameMusicPlayer(game: Game) {
+    val scope = rememberCoroutineScope()
     val musicPlayerUtil = remember { GameMusicPlayerUtil() }
     var audioElement by remember { mutableStateOf<HTMLAudioElement?>(null) }
     var currentAudioSrc by remember { mutableStateOf<String?>(null) }
@@ -37,7 +40,7 @@ fun GameMusicPlayer(game: Game?) {
 
     // Set the musicPlayerUtil in the Game object so it can be accessed by MusicSection
     LaunchedEffect(musicPlayerUtil, game) {
-        game?.musicPlayerUtil = musicPlayerUtil
+        game.musicPlayerUtil = musicPlayerUtil
     }
 
     // Update currentMusic and currentAudioSrc when they change in the util
@@ -146,40 +149,40 @@ fun GameMusicPlayer(game: Game?) {
         }
     }
 
-    game?.let { game ->
-        val time = game.animationData.collectCurrentTime()
+    val time = game.animationData.collectCurrentTime()
 
-        // Process markers during animation based on currentTime changes
-        LaunchedEffect(time) {
+    // Process markers during animation based on currentTime changes
+    LaunchedEffect(time) {
+        scope.launch {
             musicPlayerUtil.processMarkersAtTime(game, time)
-            currentMusic = musicPlayerUtil.getCurrentMusic()
-            currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
         }
+        currentMusic = musicPlayerUtil.getCurrentMusic()
+        currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
+    }
 
-        // Set up state collection to handle play state changes
-        val isPlaying by game.playStateFlow.collectAsState(false)
+    // Set up state collection to handle play state changes
+    val isPlaying by game.playStateFlow.collectAsState(false)
 
-        LaunchedEffect(isPlaying) {
-            if (!isPlaying) {
-                // Pause the audio when animation is paused
-                musicPlayerUtil.pauseMusic()
-            } else {
-                // When animation starts playing, check for markers at the current time
-                game.animationData.currentTime.let { time ->
-                    console.log("Animation started playing at time: $time")
+    LaunchedEffect(isPlaying) {
+        if (!isPlaying) {
+            // Pause the audio when animation is paused
+            musicPlayerUtil.pauseMusic()
+        } else {
+            // When animation starts playing, check for markers at the current time
+            game.animationData.currentTime.let { time ->
+                console.log("Animation started playing at time: $time")
 
-                    // Use the utility to process markers at the current time
-                    musicPlayerUtil.processMarkersAtTime(game, time)
+                // Use the utility to process markers at the current time
+                musicPlayerUtil.processMarkersAtTime(game, time)
 
-                    // Update our local state to reflect changes in the utility
-                    currentMusic = musicPlayerUtil.getCurrentMusic()
-                    currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
-                }
+                // Update our local state to reflect changes in the utility
+                currentMusic = musicPlayerUtil.getCurrentMusic()
+                currentAudioSrc = musicPlayerUtil.getCurrentAudioSrc()
+            }
 
-                // Resume the audio if we have a current music and animation is playing
-                if (musicPlayerUtil.getCurrentMusic() != null) {
-                    musicPlayerUtil.resumeMusic()
-                }
+            // Resume the audio if we have a current music and animation is playing
+            if (musicPlayerUtil.getCurrentMusic() != null) {
+                musicPlayerUtil.resumeMusic()
             }
         }
     }
@@ -196,6 +199,7 @@ fun GameMusicPlayer(game: Game?) {
                 padding(1.r, 2.r)
                 borderRadius(1.r)
                 fontSize(18.px)
+                fontWeight("bold")
                 property("z-index", "100")
                 property("pointer-events", "none")
                 property("transition", "opacity 0.1s ease-out")

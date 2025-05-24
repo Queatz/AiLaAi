@@ -12,8 +12,11 @@ import app.dialog.inputDialog
 import com.queatz.db.SavedPositionData
 import com.queatz.db.Vector3Data
 import components.IconButton
+import ellipsize
 import game.Map
 import game.SavedPositions
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import lib.Color3
 import lib.CreateSphereOptions
@@ -38,6 +41,7 @@ import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.rgba
@@ -73,13 +77,15 @@ fun SavedPositionsSection(map: Map) {
     }
 
     // Load saved positions from the game's animation data
-    LaunchedEffect(Unit) {
-        // Get saved positions from the game
-        val positions = map.game?.animationData?.savedPositions ?: emptyList()
-        savedPositions = positions
+    LaunchedEffect(map.game) {
+        map.game?.animationDataChanged?.onStart { emit(Unit) }?.collectLatest {
+            // Get saved positions from the game
+            val positions = map.game?.animationData?.savedPositions ?: emptyList()
+            savedPositions = positions
 
-        // Update markers in the 3D scene
-        savedPositionsManager.updateMarkers(positions)
+            // Update markers in the 3D scene
+            savedPositionsManager.updateMarkers(positions)
+        }
     }
 
     // Clean up resources when the component is unmounted
@@ -87,6 +93,14 @@ fun SavedPositionsSection(map: Map) {
         onDispose {
             // Dispose of the saved positions manager
             savedPositionsManager.dispose()
+        }
+    }
+
+    // Observe animation playback state and hide/show markers accordingly
+    LaunchedEffect(map.game) {
+        map.game?.playStateFlow?.collectLatest { isPlaying ->
+            // Hide markers when animation is playing, show them when it's not
+            savedPositionsManager.setVisible(!isPlaying)
         }
     }
 
@@ -387,6 +401,7 @@ fun SavedPositionsSection(map: Map) {
                             padding(0.5.r)
                             marginBottom(0.5.r)
                             borderRadius(0.5.r)
+                            overflow("hidden")
                             cursor("pointer")
                             if (isSelected) {
                                 backgroundColor(rgba(0, 123, 255, 0.1))
@@ -403,7 +418,7 @@ fun SavedPositionsSection(map: Map) {
                         // Position name
                         Div({
                             style {
-                                flex(1)
+                                ellipsize()
                             }
                         }) {
                             Text(position.name)

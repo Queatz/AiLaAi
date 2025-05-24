@@ -114,6 +114,7 @@ external class Scene(engine: Engine? = definedExternally) {
 }
 external class Mesh(name: String = definedExternally, scene: Scene = definedExternally) : AbstractMesh {
     fun createInstance(name: String): Mesh
+    fun dispose()
 
     companion object {
         val BILLBOARDMODE_Y: Int
@@ -130,11 +131,34 @@ external class Mesh(name: String = definedExternally, scene: Scene = definedExte
         val ALPHA_COMPLEX: Int
     }
 }
+/**
+ * LinesMesh represents a dynamic line in 3D space created via MeshBuilder.CreateLines.
+ */
+external class LinesMesh(name: String = definedExternally, scene: Scene = definedExternally) : AbstractMesh {
+    /**
+     * Color of the line mesh. Controls RGBA of the line.
+     */
+    var color: Color4
+    /**
+     * Update the vertex positions of the line mesh. Expects flat float array [x,y,z,...].
+     */
+    fun updateVerticesData(kind: String, data: Array<Float>, updateExtends: Boolean = definedExternally)
+}
 external class MeshBuilder {
     companion object {
         fun CreateGround(name: String, options: dynamic = definedExternally, scene: Scene = definedExternally): Mesh
         fun CreatePlane(name: String, options: dynamic = definedExternally, scene: Scene = definedExternally): Mesh
         fun CreateSphere(name: String, options: dynamic = definedExternally, scene: Scene = definedExternally): Mesh
+        /**
+         * Create a tube along the given path to represent a thick line.
+         * Options: { path: Array<Vector3>, radius: Float, updatable?: Boolean }
+         */
+        fun CreateTube(name: String, options: dynamic = definedExternally, scene: Scene = definedExternally): Mesh
+        /**
+         * Create a dynamic line mesh in 3D space.
+         * Options: { points: Array<Vector3>, updatable: Boolean }
+         */
+        fun CreateLines(name: String, options: dynamic = definedExternally, scene: Scene = definedExternally): LinesMesh
     }
 }
 
@@ -162,6 +186,8 @@ abstract external class Material {
 
 external class StandardMaterial(name: String, scene: Scene) : Material {
     var diffuseTexture: Texture
+    var emissiveTexture: Texture
+    var opacityTexture: Texture
     var diffuseColor: Color3
     var specularColor: Color3
     var emissiveColor: Color3
