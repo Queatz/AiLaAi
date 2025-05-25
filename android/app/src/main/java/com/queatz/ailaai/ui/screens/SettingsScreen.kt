@@ -59,6 +59,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import linkDevice
 
 @Composable
 fun SettingsScreen(
@@ -107,10 +108,24 @@ fun SettingsScreen(
     }
 
     fun loadLinkDeviceToken() {
-        // TODO: Implement the API call to get the link device token
-        // For now, use a dummy token for testing
-        linkDeviceToken = "dummy-token"
-        showLinkDeviceDialog = true
+        if (biometricsSucceeded) {
+            scope.launch {
+                api.linkDevice {
+                    linkDeviceToken = it.token ?: ""
+                    showLinkDeviceDialog = true
+                }
+            }
+        } else {
+            onBiometricsSucceeded = {
+                scope.launch {
+                    api.linkDevice {
+                        linkDeviceToken = it.token ?: ""
+                        showLinkDeviceDialog = true
+                    }
+                }
+            }
+            showBiometrics = true
+        }
     }
 
     BiometricPrompt(
@@ -387,7 +402,7 @@ fun SettingsScreen(
             onDismissRequest = { showLinkDeviceDialog = false },
             url = "$appDomain/link-device/$linkDeviceToken",
             name = stringResource(R.string.app_name),
-            title = "Link Device"
+            title = stringResource(R.string.link_device)
         )
     }
 
@@ -574,7 +589,7 @@ fun SettingsScreen(
 
             DropdownMenuItem({
                 Text(
-                    text = stringResource(R.string.link_device),
+                    stringResource(R.string.link_device),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(1.pad)
                 )

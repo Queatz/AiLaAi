@@ -90,7 +90,7 @@ class Map(private val scene: Scene) {
         tilemapEditor.side = toolState.side
         tilemapEditor.drawPlane = toolState.drawPlane
         tilemapEditor.drawPlaneOffset = toolState.drawPlaneOffset
-        tilemapEditor.drawMode = toolState.drawMode
+        // No need to set drawMode as it now directly delegates to toolState.drawMode
         val player = Player(scene, linearSamplingEnabled)
         world.addShadowCaster(player.mesh) // todo move into Player class, also shadow needs to face light
 
@@ -113,7 +113,7 @@ class Map(private val scene: Scene) {
             // Stop animation if it's playing on keyboard input (except spacebar)
             if (event.event.key == " " || event.event.key == "Space") {
                 if (event.type == KeyboardEventTypes.KEYDOWN && !event.event.repeat) {
-                    if (tilemapEditor.toolState.selectedToolType != null) {
+                    if (tilemapEditor.toolState.selectedToolType == null) {
                         game?.togglePlayback()
                     }
                 }
@@ -166,9 +166,10 @@ class Map(private val scene: Scene) {
 
                     " " -> {
                         // Only handle spacebar for editor functions if we're in edit mode
-                        // and have a tile or object selected (otherwise let it be used for play/pause)
+                        // and have a tile or object selected, or if sketch tool is active
+                        // (otherwise let it be used for play/pause)
                         if (game?.editable == true &&
-                            (tilemapEditor.currentGameTile != null || tilemapEditor.currentGameObject != null)
+                            (tilemapEditor.currentGameTile != null || tilemapEditor.currentGameObject != null || toolState.isSketching)
                         ) {
                             if (event.event.ctrlKey) {
                                 tilemapEditor.toggleSide(event.event.shiftKey)
@@ -268,9 +269,11 @@ class Map(private val scene: Scene) {
                             return
                         }
 
-                        // For Clone mode, only call draw on POINTERDOWN to prevent unwanted selections during mouse movement
+                        // For Clone mode and LINE tool, only call draw on POINTERDOWN to prevent unwanted operations during mouse movement
                         if (event.type == PointerEventTypes.POINTERDOWN ||
-                            (event.type == PointerEventTypes.POINTERMOVE && tilemapEditor.drawMode != DrawMode.Clone)
+                            (event.type == PointerEventTypes.POINTERMOVE && 
+                             tilemapEditor.drawMode != DrawMode.Clone && 
+                             toolState.selectedToolType != ToolType.LINE)
                         ) {
                             tilemapEditor.draw(event.event.altKey)
                         }

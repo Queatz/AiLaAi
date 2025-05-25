@@ -660,6 +660,8 @@ fun GamePage(
                             }
                             event.key == "Escape" -> {
                                 showPlayButton = false
+                                // Cancel line drawing if active
+                                game?.map?.tilemapEditor?.cancelLineDrawing()
                                 event.preventDefault()
                                 event.stopPropagation()
                             }

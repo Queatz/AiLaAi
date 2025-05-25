@@ -316,6 +316,22 @@ fun ProfileNavPage(
             }
         }
 
+        // todo: translate
+        NavMenuItem("lightbulb", "Request a feature", iconColor = Styles.colors.green) {
+            sendAppFeedback = AppFeedbackType.Suggestion
+        }
+
+        // todo: translate
+        NavMenuItem("bug_report", "Report a bug", iconColor = Styles.colors.red) {
+            sendAppFeedback = AppFeedbackType.Issue
+        }
+
+        // todo: translate
+        NavMenuItem("feedback", "Other feedback", iconColor = Styles.colors.primary) {
+            sendAppFeedback = AppFeedbackType.Other
+        }
+
+
         val configuration = LocalConfiguration.current
 
         NavMenuItem(
@@ -415,22 +431,6 @@ fun ProfileNavPage(
                 onPlatformClick()
             }
         }
-
-        // todo: translate
-        NavMenuItem("lightbulb", "Request a feature", iconColor = Styles.colors.green) {
-            sendAppFeedback = AppFeedbackType.Suggestion
-        }
-
-        // todo: translate
-        NavMenuItem("bug_report", "Report a bug", iconColor = Styles.colors.red) {
-            sendAppFeedback = AppFeedbackType.Issue
-        }
-
-        // todo: translate
-        NavMenuItem("feedback", "Other feedback", iconColor = Styles.colors.primary) {
-            sendAppFeedback = AppFeedbackType.Other
-        }
-
         NavMenuItem("logout", signOutOrTransfer) {
             scope.launch {
                 val result = dialog(

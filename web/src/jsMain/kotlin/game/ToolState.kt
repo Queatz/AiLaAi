@@ -76,7 +76,11 @@ data class ToolState(
 
         when (toolType) {
             ToolType.DRAW -> {
-                drawMode = DrawMode.Tile
+                // Only set to Tile mode if no game object is selected
+                if (currentGameObject == null) {
+                    drawMode = DrawMode.Tile
+                }
+                // If a game object is selected, keep DrawMode.Object
                 isSketching = false
             }
             ToolType.CLONE -> {
@@ -85,6 +89,18 @@ data class ToolState(
             }
             ToolType.SKETCH -> {
                 isSketching = true
+            }
+            ToolType.BUCKET -> {
+                drawMode = DrawMode.Tile
+                isSketching = false
+            }
+            ToolType.LINE -> {
+                // Only set to Tile mode if no game object is selected
+                if (currentGameObject == null) {
+                    drawMode = DrawMode.Tile
+                }
+                // If a game object is selected, keep DrawMode.Object
+                isSketching = false
             }
             null -> {
                 // Deselect current tool
@@ -114,7 +130,10 @@ data class ToolState(
             drawMode = DrawMode.Tile
             currentGameObject = null
             currentGameMusic = null
-            selectedToolType = ToolType.DRAW
+
+            if (selectedToolType !in listOf(ToolType.DRAW, ToolType.BUCKET, ToolType.LINE)) {
+                selectedToolType = ToolType.DRAW
+            }
         }
     }
 
@@ -128,7 +147,9 @@ data class ToolState(
             drawMode = DrawMode.Object
             currentGameTile = null
             currentGameMusic = null
-            selectedToolType = ToolType.DRAW
+            if (selectedToolType !in listOf(ToolType.DRAW, ToolType.BUCKET, ToolType.LINE)) {
+                selectedToolType = ToolType.DRAW
+            }
         }
     }
 

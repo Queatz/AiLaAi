@@ -6,7 +6,9 @@ package game
 enum class ToolType {
     DRAW,
     CLONE,
-    SKETCH;
+    SKETCH,
+    BUCKET,
+    LINE;
 
     companion object {
         /**
@@ -17,6 +19,8 @@ enum class ToolType {
                 "draw" -> DRAW
                 "clone" -> CLONE
                 "sketch" -> SKETCH
+                "bucket" -> BUCKET
+                "line" -> LINE
                 else -> null
             }
         }
@@ -29,6 +33,8 @@ enum class ToolType {
                 DRAW -> "draw"
                 CLONE -> "clone"
                 SKETCH -> "sketch"
+                BUCKET -> "bucket"
+                LINE -> "line"
                 null -> null
             }
         }

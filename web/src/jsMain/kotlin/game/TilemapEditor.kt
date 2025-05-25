@@ -71,6 +71,11 @@ class TilemapEditor(
     private var cloneSecondPoint: Vector3 = Vector3.Zero()
     private var cloneHeight: Int = 1
 
+    // Line tool variables
+    private var lineStartPoint: Vector3? = null
+    private var isDrawingLine = false
+    private var linePreviewMeshes: MutableList<Mesh> = mutableListOf()
+
     // Clone selection box dimensions
     private var cloneSelectionWidth: Int = 0
     private var cloneSelectionDepth: Int = 0
@@ -93,16 +98,9 @@ class TilemapEditor(
     var drawPlane: Side = Side.Y
     var drawPlaneOffset: Int = 0
 
-    var drawMode: DrawMode = DrawMode.Tile
-        set(value) {
-            field = value
-            // Update toolState based on the draw mode
-            when (value) {
-                DrawMode.Tile -> toolState.selectTool(ToolType.DRAW)
-                DrawMode.Object -> toolState.selectTool(ToolType.DRAW)
-                DrawMode.Clone -> toolState.selectTool(ToolType.CLONE)
-            }
-        }
+    // Delegate drawMode to toolState to ensure SSOT
+    val drawMode: DrawMode
+        get() = toolState.drawMode
     var autoRotate = true
     var brushShape: String = "square"
     var brushSize = 1
@@ -204,7 +202,7 @@ class TilemapEditor(
         }, scene)
         // Create a semi-transparent material for the cursor
         val material = StandardMaterial("cursorMaterial", scene)
-        material.emissiveColor = Color3.White()
+        material.emissiveColor = Color3.White().scale(.1f)
         material.specularColor = Color3.Black()
         material.alpha = 0.3f
         material.backFaceCulling = false  // Show both sides
@@ -308,6 +306,9 @@ class TilemapEditor(
     }
 
     fun update() {
+        // No need to synchronize drawMode with toolState.drawMode anymore
+        // as we're now directly using toolState.drawMode as the source of truth
+
         // Check if a tile or object is selected based on draw mode
         val hasSelection = when (drawMode) {
             DrawMode.Tile -> currentGameTile != null
@@ -315,12 +316,44 @@ class TilemapEditor(
             DrawMode.Clone -> true // Always show cursor in clone mode
         }
 
-        // Check if sketching is active
-        val isSketchingActive = toolState.isSketching
+        // Determine cursor visibility based on the selected tool type
+        cursor.isVisible = when {
+            // Basic requirements for any cursor visibility
+            !editable -> false
+            isDrawingLine -> false
+            toolState.isSketching -> false
 
-        // Show cursor and grid only when a tool is actually selected AND not in sketching mode
-        cursor.isVisible = editable && !isSketchingActive && (drawMode == DrawMode.Clone || hasSelection)
-        grid.isVisible = editable && (isSketchingActive || drawMode == DrawMode.Clone || hasSelection)
+            // Show cursor when a drawing tool is selected and we have something to draw with
+            toolState.selectedToolType == ToolType.DRAW -> 
+                toolState.currentGameTile != null || toolState.currentGameObject != null
+
+            // Always show cursor for these tools
+            toolState.selectedToolType == ToolType.CLONE -> true
+            toolState.selectedToolType == ToolType.BUCKET -> true
+            toolState.selectedToolType == ToolType.LINE -> 
+                toolState.currentGameTile != null || toolState.currentGameObject != null
+
+            // Don't show cursor for other tools or when no tool is selected
+            else -> false
+        }
+
+        // Determine grid visibility with a similar pattern
+        grid.isVisible = when {
+            // Basic requirement for grid visibility
+            !editable -> false
+
+            // Show grid when sketching
+            toolState.isSketching -> true
+
+            // Show grid for drawing tools
+            toolState.selectedToolType == ToolType.DRAW -> true
+            toolState.selectedToolType == ToolType.CLONE -> true
+            toolState.selectedToolType == ToolType.BUCKET -> true
+            toolState.selectedToolType == ToolType.LINE -> true
+
+            // Don't show grid for other tools or when no tool is selected
+            else -> false
+        }
 
         // Even if nothing is selected, still update the cursor position
         // but don't allow drawing without selection
@@ -338,6 +371,14 @@ class TilemapEditor(
         ray.origin.projectOnPlaneToRef(plane, ray.origin.add(ray.direction), pickedPoint)
 
         updateDraw(pickedPoint)
+
+        // Update line preview if we're drawing a line
+        if (isDrawingLine && lineStartPoint != null) {
+            updateLinePreview(lineStartPoint!!, tilePos)
+        } else {
+            // Remove line preview if we're not drawing a line
+            removeLinePreview()
+        }
 
         // Update clone selection visualization if in clone mode
         if (drawMode == DrawMode.Clone && cloneSelectionState != CloneSelectionState.NotStarted) {
@@ -865,10 +906,152 @@ class TilemapEditor(
             return
         }
 
+        // Handle Bucket tool separately
+        if (toolState.selectedToolType == ToolType.BUCKET && !eraser) {
+            if (drawMode == DrawMode.Tile && currentGameTile != null) {
+                fillTiles(tilePos, side)
+            }
+            return
+        }
+
+        // Handle Line tool separately
+        if (toolState.selectedToolType == ToolType.LINE && !eraser) {
+            val hasSelection = if (drawMode == DrawMode.Tile) currentGameTile != null else currentGameObject != null
+            if (hasSelection) {
+                // On first click, store the start point
+                if (lineStartPoint == null) {
+                    lineStartPoint = tilePos.clone()
+                    isDrawingLine = true
+                } else {
+                    // On second click, draw the line and reset
+                    drawLine(lineStartPoint!!, tilePos, side, eraser)
+                    lineStartPoint = null
+                    isDrawingLine = false
+                }
+            }
+            return
+        }
+
         // Only draw if we have a selection or if we're erasing
         val hasSelection = if (drawMode == DrawMode.Tile) currentGameTile != null else currentGameObject != null
         if (eraser || hasSelection) {
             drawBrush(tilePos, side, eraser)
+        }
+    }
+
+    /**
+     * Implements the bucket fill algorithm to fill connected tiles of the same type
+     * with the currently selected tile type.
+     * 
+     * @param position The starting position for the fill
+     * @param side The side to fill on
+     */
+    private fun fillTiles(position: Vector3, side: Side) {
+        // If no tile is selected, do nothing
+        if (currentGameTile == null) return
+
+        // Get all tile types in the tilemap
+        val tileTypes = tilemap.getTileTypes()
+
+        // Get the key for the starting position
+        val startKey = tilemap.key(position, side)
+
+        // Get the tile type at the starting position (can be null if no tile)
+        val startTileType = tileTypes[startKey]
+
+        // If we're clicking on a position with no tile, we should fill all empty spaces
+        // If we're clicking on a tile, we should replace all connected tiles of the same type
+
+        // Set of visited positions to avoid revisiting
+        val visited = mutableSetOf<String>()
+
+        // Queue of positions to visit
+        val queue = ArrayDeque<Pair<Vector3, Side>>()
+
+        // List of positions to fill
+        val toFill = mutableListOf<Pair<Vector3, Side>>()
+
+        // Add the starting position to the queue
+        queue.add(Pair(position, side))
+
+        // Counter to limit the number of tiles processed
+        var tileCount = 0
+        val maxTiles = 1000
+
+        // Get the directions to check based on the active draw plane
+        val directions = when (drawPlane.abs) {
+            Side.X -> listOf(
+                // When on X plane, only check Y and Z directions
+                Vector3(0f, 1f, 0f),
+                Vector3(0f, -1f, 0f),
+                Vector3(0f, 0f, 1f),
+                Vector3(0f, 0f, -1f)
+            )
+            Side.Y -> listOf(
+                // When on Y plane, only check X and Z directions
+                Vector3(1f, 0f, 0f),
+                Vector3(-1f, 0f, 0f),
+                Vector3(0f, 0f, 1f),
+                Vector3(0f, 0f, -1f)
+            )
+            Side.Z -> listOf(
+                // When on Z plane, only check X and Y directions
+                Vector3(1f, 0f, 0f),
+                Vector3(-1f, 0f, 0f),
+                Vector3(0f, 1f, 0f),
+                Vector3(0f, -1f, 0f)
+            )
+            else -> listOf(
+                // Fallback to all directions for negative sides
+                Vector3(1f, 0f, 0f),
+                Vector3(-1f, 0f, 0f),
+                Vector3(0f, 1f, 0f),
+                Vector3(0f, -1f, 0f),
+                Vector3(0f, 0f, 1f),
+                Vector3(0f, 0f, -1f)
+            )
+        }
+
+        // Process the queue
+        while (queue.isNotEmpty() && tileCount < maxTiles) {
+            // Get the next position from the queue
+            val (pos, s) = queue.removeFirst()
+
+            // Generate the key for this position
+            val key = tilemap.key(pos, s)
+
+            // Skip if already visited
+            if (key in visited) continue
+
+            // Mark as visited
+            visited.add(key)
+            tileCount++
+
+            // Check if this position has the same tile type as the starting position
+            val tileType = tileTypes[key]
+            if (tileType == startTileType) {
+                // Add to the list of positions to fill
+                toFill.add(Pair(pos, s))
+
+                // Add adjacent positions to the queue
+                for (dir in directions) {
+                    val nextPos = pos.add(dir)
+                    queue.add(Pair(nextPos, s))
+                }
+            }
+        }
+
+        // If we exceeded the maximum tile count, don't fill anything
+        if (tileCount >= maxTiles) {
+            return
+        }
+
+        // Convert the list of positions to fill to the format expected by setTiles
+        val tilesToFill = toFill.map { (pos, s) -> Triple(pos, s, currentGameTile) }
+
+        // Fill all the tiles at once
+        if (tilesToFill.isNotEmpty()) {
+            tilemap.setTiles(tilesToFill)
         }
     }
 
@@ -993,6 +1176,211 @@ class TilemapEditor(
                 }
             }
         }
+    }
+
+    /**
+     * Updates the line preview mesh to show a preview of the line being drawn
+     * 
+     * @param start The starting point of the line
+     * @param end The ending point of the line
+     */
+    private fun updateLinePreview(start: Vector3, end: Vector3) {
+        // Remove existing preview if it exists
+        removeLinePreview()
+
+        // Determine which plane we're drawing on
+        val planeType = when (drawPlane.abs) {
+            Side.X -> PlaneType.YZ
+            Side.Y -> PlaneType.XZ
+            Side.Z -> PlaneType.XY
+            else -> PlaneType.XY // Default to XY plane
+        }
+
+        // Get the 2D coordinates based on the plane
+        val (x1, y1) = get2DCoordinates(start, planeType)
+        val (x2, y2) = get2DCoordinates(end, planeType)
+
+        // Use Bresenham's algorithm to get the points on the line
+        val points = bresenhamLine(x1, y1, x2, y2)
+
+        // Create a material for the preview
+        val material = StandardMaterial("linePreviewMaterial", scene)
+        material.emissiveColor = Color3(0f, .1f, .1f) // Cyan color
+        material.specularColor = Color3.Black()
+        material.alpha = 0.5f
+        material.backFaceCulling = false
+        material.zOffset = -0.01f // Draw on top
+        material.zOffsetUnits = -1
+
+        // Create a mesh for each point on the line
+        for ((x, y) in points) {
+            // Convert back to 3D coordinates
+            val position = get3DCoordinates(x, y, planeType, start, end)
+
+            // Create a cube at this position
+            val cube = MeshBuilder.CreatePlane("linePreviewCube", object : CreatePlaneOptions {
+                override val width = 1f
+                override val height = 1f
+                override val updatable = true
+            }, scene)
+
+            // Set the position and rotation based on the side
+            cube.position = getOffsetPositionForDrawPlane(position)
+
+            // Rotate the cube based on the side
+            when (side) {
+                Side.Z, Side.NEGATIVE_Z -> {
+                    cube.rotation = Vector3(0f, 0f, 0f)
+                }
+                Side.X, Side.NEGATIVE_X -> {
+                    cube.rotation = Vector3(0f, -Math.PI / 2, 0f)
+                }
+                Side.Y, Side.NEGATIVE_Y -> {
+                    cube.rotation = Vector3(Math.PI / 2, 0f, 0f)
+                }
+            }
+
+            cube.material = material
+
+            // Add to the list of preview meshes
+            linePreviewMeshes.add(cube)
+        }
+    }
+
+    /**
+     * Removes the line preview mesh
+     */
+    private fun removeLinePreview() {
+        // Remove all meshes in the list
+        linePreviewMeshes.forEach { mesh ->
+            scene.removeMesh(mesh)
+        }
+
+        // Clear the list
+        linePreviewMeshes.clear()
+    }
+
+    /**
+     * Cancels the current line drawing operation
+     */
+    fun cancelLineDrawing() {
+        if (isDrawingLine) {
+            lineStartPoint = null
+            isDrawingLine = false
+            removeLinePreview()
+        }
+    }
+
+    /**
+     * Draws a line of tiles between two points using Bresenham's line algorithm
+     * 
+     * @param start The starting point of the line
+     * @param end The ending point of the line
+     * @param side The side to draw on
+     * @param eraser Whether to erase tiles instead of drawing them
+     */
+    private fun drawLine(start: Vector3, end: Vector3, side: Side, eraser: Boolean = false) {
+        // Determine which plane we're drawing on
+        val planeType = when (drawPlane.abs) {
+            Side.X -> PlaneType.YZ
+            Side.Y -> PlaneType.XZ
+            Side.Z -> PlaneType.XY
+            else -> PlaneType.XY // Default to XY plane
+        }
+
+        // Get the 2D coordinates based on the plane
+        val (x1, y1) = get2DCoordinates(start, planeType)
+        val (x2, y2) = get2DCoordinates(end, planeType)
+
+        // Use Bresenham's algorithm to get the points on the line
+        val points = bresenhamLine(x1, y1, x2, y2)
+
+        // Draw at each point on the line
+        for ((x, y) in points) {
+            // Convert back to 3D coordinates
+            val position = get3DCoordinates(x, y, planeType, start, end)
+
+            // Draw the brush at this position
+            drawBrush(position, side, eraser)
+        }
+    }
+
+    /**
+     * Enum to represent the plane type
+     */
+    private enum class PlaneType {
+        XY, // Z is constant
+        XZ, // Y is constant
+        YZ  // X is constant
+    }
+
+    /**
+     * Converts 3D coordinates to 2D coordinates based on the plane type
+     */
+    private fun get2DCoordinates(point: Vector3, planeType: PlaneType): Pair<Int, Int> {
+        return when (planeType) {
+            PlaneType.XY -> Pair(point.x.toInt(), point.y.toInt())
+            PlaneType.XZ -> Pair(point.x.toInt(), point.z.toInt())
+            PlaneType.YZ -> Pair(point.y.toInt(), point.z.toInt())
+        }
+    }
+
+    /**
+     * Converts 2D coordinates back to 3D coordinates based on the plane type
+     */
+    private fun get3DCoordinates(x: Int, y: Int, planeType: PlaneType, start: Vector3, end: Vector3): Vector3 {
+        return when (planeType) {
+            PlaneType.XY -> Vector3(x.toFloat(), y.toFloat(), start.z)
+            PlaneType.XZ -> Vector3(x.toFloat(), start.y, y.toFloat())
+            PlaneType.YZ -> Vector3(start.x, x.toFloat(), y.toFloat())
+        }
+    }
+
+    private fun getOffsetPositionForDrawPlane(position: Vector3): Vector3 {
+        return when (drawPlane.abs) {
+            Side.X -> position.add(Vector3(0f, 0.5f, 0.5f))
+            Side.Y -> position.add(Vector3(0.5f, 0f, 0.5f))
+            Side.Z -> position.add(Vector3(0.5f, 0.5f, 0f))
+            else -> position.add(Vector3(0.5f, 0.5f, 0.5f))
+        }
+    }
+
+    /**
+     * Implements Bresenham's line algorithm to get the points on a line
+     */
+    private fun bresenhamLine(x1: Int, y1: Int, x2: Int, y2: Int): List<Pair<Int, Int>> {
+        val points = mutableListOf<Pair<Int, Int>>()
+
+        var x = x1
+        var y = y1
+
+        val dx = kotlin.math.abs(x2 - x1)
+        val dy = kotlin.math.abs(y2 - y1)
+
+        val sx = if (x1 < x2) 1 else -1
+        val sy = if (y1 < y2) 1 else -1
+
+        var err = dx - dy
+
+        while (true) {
+            points.add(Pair(x, y))
+
+            if (x == x2 && y == y2) break
+
+            val e2 = 2 * err
+            if (e2 > -dy) {
+                if (x == x2) break
+                err -= dy
+                x += sx
+            }
+            if (e2 < dx) {
+                if (y == y2) break
+                err += dx
+                y += sy
+            }
+        }
+
+        return points
     }
 
     fun togglePlane(isReverse: Boolean) {

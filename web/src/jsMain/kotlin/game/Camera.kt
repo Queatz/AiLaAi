@@ -15,7 +15,7 @@ class Camera(private val scene: Scene, private val pick: () -> AbstractMesh) {
     var view = CameraView.Free
 
     init {
-        val camera = ArcRotateCamera("camera", 0f, PI.toFloat() / 4f, 30f, Vector3.Zero(), scene)
+        val camera = ArcRotateCamera("camera", PI.toFloat() / 2f, PI.toFloat() / 4f, 30f, Vector3.Zero(), scene)
         camera.zoomToMouseLocation = true
         camera.wheelDeltaPercentage = 0.01f
         camera.wheelPrecision *= 0.1f

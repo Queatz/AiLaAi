@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Paint Bucket Body -->
+  <path d="M16 12L10 6L4 12L10 18L16 12Z" fill="#FFC107" stroke="#FF9800" stroke-width="1.5"/>
+  
+  <!-- Paint Bucket Handle -->
+  <path d="M16 12L19 9L21 11L18 14L16 12Z" fill="#9E9E9E" stroke="#757575" stroke-width="1.5"/>
+  
+  <!-- Paint Drip -->
+  <path d="M19 16C19 14.8954 18.1046 14 17 14C15.8954 14 15 14.8954 15 16C15 17.1046 15.8954 18 17 18C18.1046 18 19 17.1046 19 16Z" fill="#2196F3" stroke="#1976D2" stroke-width="1.5"/>
+  
+  <!-- Paint Flow -->
+  <path d="M17 14L17 12" stroke="#2196F3" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Bucket Highlight -->
+  <path d="M10 8L14 12" stroke="white" stroke-width="0.5" stroke-opacity="0.7"/>
+  
+  <!-- Handle Highlight -->
+  <path d="M17 11L19 9" stroke="white" stroke-width="0.5" stroke-opacity="0.5"/>
+  
+  <!-- Paint Splash Details -->
+  <path d="M17 17.5L18 19" stroke="#64B5F6" stroke-width="0.5" stroke-linecap="round"/>
+  <path d="M16 16.5L15 18" stroke="#64B5F6" stroke-width="0.5" stroke-linecap="round"/>
+</svg>

@@ -55,10 +55,10 @@ fun CurrentToolSection(
 
         // Initial update of the clone state
         LaunchedEffect(currentDrawMode) {
-            if (currentDrawMode == DrawMode.Clone) {
-                cloneState = map.tilemapEditor.getCloneSelectionState()
+            cloneState = if (currentDrawMode == DrawMode.Clone) {
+                map.tilemapEditor.getCloneSelectionState()
             } else {
-                cloneState = null
+                null
             }
         }
 
@@ -155,6 +155,47 @@ fun CurrentToolSection(
                                 }
                                 keyEvent.preventDefault()
                             }
+                            "4" -> {
+                                // Toggle Bucket tool
+                                if (selectedToolType == ToolType.BUCKET) {
+                                    // Deselect current tool
+                                    selectedToolType = null
+                                    map.toolState.selectTool(null as ToolType?)
+                                    currentDrawMode = map.toolState.drawMode
+                                    map.camera.camera.attachControl()
+                                    onToolDeselected()
+                                } else {
+                                    // Select Bucket tool
+                                    selectedToolType = ToolType.BUCKET
+                                    map.toolState.selectTool(ToolType.BUCKET)
+                                    currentDrawMode = map.toolState.drawMode
+                                }
+                                keyEvent.preventDefault()
+                            }
+                            "5" -> {
+                                // Toggle Line tool
+                                if (selectedToolType == ToolType.LINE) {
+                                    // Deselect current tool
+                                    selectedToolType = null
+                                    map.toolState.selectTool(null as ToolType?)
+                                    currentDrawMode = map.toolState.drawMode
+                                    map.camera.camera.attachControl()
+                                    onToolDeselected()
+                                } else {
+                                    // Select Line tool
+                                    selectedToolType = ToolType.LINE
+                                    map.toolState.selectTool(ToolType.LINE)
+                                    currentDrawMode = map.toolState.drawMode
+                                }
+                                keyEvent.preventDefault()
+                            }
+                            "Escape", "Esc" -> {
+                                if (selectedToolType == ToolType.LINE) {
+                                    // Cancel line drawing if active
+                                    map.tilemapEditor.cancelLineDrawing()
+                                    keyEvent.preventDefault()
+                                }
+                            }
                         }
                     }
                 }
@@ -197,6 +238,20 @@ fun CurrentToolSection(
                     photoUrl = "/assets/icons/sketch.svg",
                     description = "Draw freehand sketches",
                     number = 3
+                ),
+                Tool(
+                    id = ToolType.BUCKET,
+                    name = "Bucket",
+                    photoUrl = "/assets/icons/format_color_fill.svg",
+                    description = "Fill connected tiles of the same type",
+                    number = 4
+                ),
+                Tool(
+                    id = ToolType.LINE,
+                    name = "Line",
+                    photoUrl = "/assets/icons/timeline.svg",
+                    description = "Draw lines of tiles",
+                    number = 5
                 )
             )
 
