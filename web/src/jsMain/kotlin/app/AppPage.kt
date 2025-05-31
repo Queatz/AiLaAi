@@ -14,6 +14,7 @@ import app.ailaai.api.card
 import app.ailaai.api.comment
 import app.ailaai.api.gameScene
 import app.ailaai.api.group
+import app.ailaai.api.script
 import app.cards.CardsPage
 import app.components.Background
 import app.group.FeaturePreview
@@ -377,6 +378,18 @@ fun AppPage() {
                         card = CardNav.Selected(it.card)
                     }
                 }
+                is AppNavigation.ExploreScripts -> {
+                    script = ScriptsNav.Explore
+                }
+                is AppNavigation.Script -> {
+                    if (it.script == null) {
+                        api.script(it.id) {
+                            script = ScriptsNav.Script(it)
+                        }
+                    } else {
+                        script = ScriptsNav.Script(it.script)
+                    }
+                }
                 is AppNavigation.GameScene -> {
                     // Handle GameScene navigation
                     val gameSceneId = it.id
@@ -522,7 +535,19 @@ fun AppPage() {
                         updates = scriptUpdates,
                         selected = script,
                         onSelected = {
-                            script = it
+                            scope.launch {
+                                when (it) {
+                                    is ScriptsNav.Explore -> {
+                                        appNav.navigate(AppNavigation.ExploreScripts)
+                                    }
+                                    is ScriptsNav.Script -> {
+                                        appNav.navigate(AppNavigation.Script(it.script.id!!, it.script))
+                                    }
+                                    else -> {
+                                        script = it
+                                    }
+                                }
+                            }
                         },
                         onCreated = {
                             scope.launch {

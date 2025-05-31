@@ -29,6 +29,7 @@ import app.ailaai.api.updateScript
 import app.ailaai.api.updateScriptData
 import app.dialog.rememberChoosePhotoDialog
 import app.ailaai.shared.resources.ScriptsResources
+import app.components.PreventNavigation
 import app.components.TopBarSearch
 import app.dialog.categoryDialog
 import app.dialog.dialog
@@ -573,6 +574,9 @@ fun ScriptsPage(
             var isBackgroundLoading by remember { mutableStateOf(false) }
             val state = remember { MonacoEditorState() }
 
+            // Prevent navigation when script is edited
+            PreventNavigation(enabled = edited)
+
             LaunchedEffect(script) {
                 aiJob?.cancel()
             }
@@ -1014,6 +1018,7 @@ fun ScriptsPage(
                                                     id = script.id!!,
                                                     script = Script(source = editedScript)
                                                 ) {
+                                                    edited = false
                                                     onUpdate(it)
                                                 }
                                                 isSaving = false

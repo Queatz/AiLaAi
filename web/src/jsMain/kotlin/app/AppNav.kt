@@ -1,9 +1,11 @@
 package app
 
 import application
+import app.components.checkNavigationAllowed
 import com.queatz.db.Card
 import com.queatz.db.GameScene as GameSceneModel
 import com.queatz.db.GroupExtended
+import com.queatz.db.Script
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
@@ -14,6 +16,8 @@ sealed interface AppNavigation {
     data class Group(val id: String, val groupExtended: GroupExtended? = null) : AppNavigation
     data class Page(val id: String, val card: Card? = null) : AppNavigation
     data class GameScene(val id: String, val gameScene: GameSceneModel? = null) : AppNavigation
+    data class Script(val id: String, val script: com.queatz.db.Script? = null) : AppNavigation
+    data object ExploreScripts : AppNavigation
 }
 
 class AppNav {
@@ -26,7 +30,14 @@ class AppNav {
     suspend fun navigate(destination: AppNavigation) {
         if (application.me.value == null) {
             _route.emit("/signin")
-        } else {
+            return
+        }
+
+        // Check if navigation is allowed (will show confirmation dialog if needed)
+        val canProceed = checkNavigationAllowed()
+
+        // Only proceed with navigation if allowed
+        if (canProceed) {
             _navigate.emit(destination)
             _route.emit("/")
         }

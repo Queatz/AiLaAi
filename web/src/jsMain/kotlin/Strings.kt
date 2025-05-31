@@ -31,6 +31,9 @@ object Strings {
         vn = "Không có tập lệnh.",
         ru = "Нет скриптов."
     )
+    val noScenes = Translation(
+        en = "No scenes."
+    )
     val myQr = Translation(
         en = "My QR",
         vn = "Mã QR của tôi",

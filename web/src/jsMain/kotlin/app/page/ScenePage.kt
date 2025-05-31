@@ -15,6 +15,7 @@ import app.GamePage
 import app.ailaai.api.gameScene
 import app.ailaai.api.gameScenes
 import app.appNav
+import app.components.PreventNavigation
 import app.components.TopBarSearch
 import app.nav.SceneNav
 import appString
@@ -66,6 +67,14 @@ fun ScenePage(
     var scene by remember {
         mutableStateOf<GameScene?>(null)
     }
+
+    // Add state to track edits
+    var isEdited by remember {
+        mutableStateOf(false)
+    }
+
+    // Prevent navigation when scene is edited
+    PreventNavigation(enabled = isEdited)
 
     LaunchedEffect(nav) {
         scene = when (nav) {
@@ -193,7 +202,7 @@ fun ScenePage(
                                 padding(1.r)
                             }
                         }) {
-                            appText { noScripts }
+                            appText { noScenes }
                         }
                     } else {
                         Div({
@@ -205,7 +214,7 @@ fun ScenePage(
                                 padding(1.r)
                             }
                         }) {
-                            appText { noScripts }
+                            appText { noScenes }
                         }
                     }
                 }
@@ -227,6 +236,8 @@ fun ScenePage(
                 GamePage(
                     gameScene = scene,
                     onSceneDeleted = {
+                        // Reset edited flag when scene is deleted
+                        isEdited = false
                         onSceneSelected(SceneNav.None)
                     },
                     onScenePublished = {
@@ -237,11 +248,15 @@ fun ScenePage(
                             if (currentScene?.id != null) {
                                 api.gameScene(currentScene.id!!) { updatedScene ->
                                     scene = updatedScene
+                                    // Reset edited flag when scene is published
+                                    isEdited = false
                                 }
                             }
                         }
                     },
                     onSceneForked = { newScene ->
+                        // Reset edited flag when scene is forked
+                        isEdited = false
                         scope.launch {
                             appNav.navigate(
                                 AppNavigation.GameScene(
@@ -254,6 +269,8 @@ fun ScenePage(
                     onSceneUpdated = { updatedScene ->
                         scene = updatedScene
                         onSceneUpdated(updatedScene)
+                        // Mark as edited when scene is updated
+                        isEdited = true
                     }
                 )
             }
