@@ -2,12 +2,26 @@ package app.dialog
 
 import Configuration
 import LocalConfiguration
-import androidx.compose.runtime.*
-import app.nav.NavSearchInput
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import app.components.FlexInput
 import application
 import components.LazyColumn
 import components.Loading
-import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.css.div
+import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.maxWidth
+import org.jetbrains.compose.web.css.overflowX
+import org.jetbrains.compose.web.css.overflowY
+import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import r
 
@@ -41,7 +55,7 @@ suspend fun <T : Any> searchDialog(
     }
 
     CompositionLocalProvider(LocalConfiguration provides configuration) {
-        NavSearchInput(
+        FlexInput(
             value = value,
             onChange = {
                 value = it
@@ -55,10 +69,12 @@ suspend fun <T : Any> searchDialog(
             selectAll = true,
             onDismissRequest = {
                 resolve(false)
+            },
+            onSubmit = {
+                resolve(true)
+                true
             }
-        ) {
-            resolve(true)
-        }
+        )
 
         if (loading) {
             Div({

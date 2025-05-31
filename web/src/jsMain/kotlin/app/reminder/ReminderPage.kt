@@ -16,7 +16,7 @@ import app.PageTopBar
 import app.ailaai.api.deleteReminder
 import app.ailaai.api.profile
 import app.ailaai.api.updateReminder
-import app.components.EditField
+import app.components.FlexInput
 import app.dialog.dialog
 import app.dialog.inputDialog
 import app.dialog.photoDialog
@@ -330,7 +330,8 @@ fun ReminderPage(
                                 api.updateReminder(
                                     id = reminder.id!!,
                                     reminder = Reminder(
-                                        people = ((reminder.people ?: emptyList()) + selectedPeople.map { it.id!! }).distinct()
+                                        people = ((reminder.people
+                                            ?: emptyList()) + selectedPeople.map { it.id!! }).distinct()
                                     )
                                 ) {
                                     onUpdate(it)
@@ -370,21 +371,28 @@ fun ReminderPage(
             overflowX("hidden")
         }
     }) {
-        EditField(
-            value = reminder.note ?: "",
-            placeholder = appString { note },
-            styles = {
-                margin(1.r, 1.r, 0.r, 1.r)
-            }
-        ) {
-            var success = false
-            api.updateReminder(reminder.id!!, Reminder(note = it)) {
-                success = true
-                onUpdate(it)
-            }
-
-            success
+        var note by remember(reminder.note) {
+            mutableStateOf(reminder.note ?: "")
         }
+        FlexInput(
+            value = note,
+
+            onChange = {
+                note = it
+            },
+            initialValue = reminder.note.orEmpty(),
+            placeholder = appString { this.note },
+            defaultMargins = true,
+            showButtons = true,
+            onSubmit = {
+                var success = false
+                api.updateReminder(reminder.id!!, Reminder(note = note)) {
+                    onUpdate(it)
+                    success = true
+                }
+                success
+            }
+        )
 
         // Render people on the reminder if there are any
         val people = (reminder.people.orEmpty() + reminder.person!!).takeIf {

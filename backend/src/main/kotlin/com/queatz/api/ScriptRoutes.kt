@@ -75,7 +75,8 @@ fun Route.scriptRoutes() {
                         name = script.name,
                         description = script.description,
                         categories = script.categories,
-                        source = script.source
+                        source = script.source,
+                        photo = script.photo
                     )
                 )
             }
@@ -115,6 +116,10 @@ fun Route.scriptRoutes() {
 
                 if (scriptUpdated.background != null) {
                     script.background = scriptUpdated.background
+                }
+
+                if (scriptUpdated.photo != null) {
+                    script.photo = scriptUpdated.photo
                 }
 
                 db.update(script)

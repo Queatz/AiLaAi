@@ -27,16 +27,17 @@ import org.jetbrains.compose.web.css.boxSizing
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.Code
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Pre
 import org.jetbrains.compose.web.dom.Text
 import r
+import lib.jsObject
+import app.scripts.ReadOnlyMonacoEditor
 
 @Composable
 fun ScriptSourcePage(scriptId: String) {
@@ -96,7 +97,7 @@ fun ScriptSourcePage(scriptId: String) {
                                 )
                             }
                         }
-                        
+
                         scriptDetails?.description?.let {
                             Div({
                                 style {
@@ -106,7 +107,7 @@ fun ScriptSourcePage(scriptId: String) {
                                 Text(it)
                             }
                         }
-                        
+
                         scriptDetails?.author?.name?.let {
                             Div({
                                 style {
@@ -118,20 +119,15 @@ fun ScriptSourcePage(scriptId: String) {
                         }
 
                         scriptDetails?.source?.let { source ->
-                            Pre({
-                                style {
-                                    whiteSpace("pre-wrap")
-                                    padding(1.r)
+                            ReadOnlyMonacoEditor(
+                                initialValue = source,
+                                styles = {
+                                    padding(0.r)
                                     borderRadius(1.r)
-                                    border(1.px, LineStyle.Solid, Styles.colors.outline)
                                     width(100.percent)
-                                    boxSizing("border-box")
+                                    height(400.px) // Set a fixed height for the editor
                                 }
-                            }) {
-                                Code {
-                                    Text(source)
-                                }
-                            }
+                            )
                         } ?: run {
                             Text("No source code available")
                         }

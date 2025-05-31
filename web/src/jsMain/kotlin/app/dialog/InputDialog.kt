@@ -5,10 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.components.TextBox
-import app.nav.NavSearchInput
+import app.components.FlexInput
 import application
 import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.css.CSSSizeValue
+import org.jetbrains.compose.web.css.CSSUnit
 import org.jetbrains.compose.web.css.Position.Companion.Relative
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.css.margin
@@ -29,6 +30,7 @@ suspend fun inputDialog(
     maxLength: Int? = null,
     type: InputType<*>? = null,
     inputStyles: StyleScope.() -> Unit = {},
+    inputEndPadding: CSSSizeValue<CSSUnit.rem> = 3.r,
     extraButtons: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
     inputAction: (@Composable (resolve: (Boolean?) -> Unit, value: String, onValue: (String) -> Unit) -> Unit)? = null,
     actions: (@Composable (resolve: (Boolean?) -> Unit) -> Unit)? = null,
@@ -59,47 +61,35 @@ suspend fun inputDialog(
                 }
             }
         ) {
-            if (singleLine) {
-                NavSearchInput(
-                    value = value,
-                    onChange = {
-                        value = it.take(maxLength ?: Int.MAX_VALUE)
-                        text = it.take(maxLength ?: Int.MAX_VALUE)
-                    },
-                    placeholder = placeholder,
-                    selectAll = true,
-                    type = type,
-                    styles = {
-                        margin(0.r)
-                        maxWidth(100.percent)
-                        width(100.percent)
-                        inputStyles()
-                    },
-                    onDismissRequest = {
-                        resolve(false)
-                    }
-                ) {
-                    resolve(true)
-                }
-            } else {
-                TextBox(
-                    value = value,
-                    onValue = {
-                        value = it.take(maxLength ?: Int.MAX_VALUE)
-                        text = it.take(maxLength ?: Int.MAX_VALUE)
-                    },
-                    placeholder = placeholder,
-                    selectAll = false,
-                    styles = {
-                        margin(0.r)
+            FlexInput(
+                value = value,
+                onChange = {
+                    value = it.take(maxLength ?: Int.MAX_VALUE)
+                    text = it.take(maxLength ?: Int.MAX_VALUE)
+                },
+                placeholder = placeholder,
+                singleLine = singleLine,
+                selectAll = singleLine, // Only select all for single line inputs
+                inputType = type,
+                inputEndPadding = inputEndPadding,
+                styles = {
+                    margin(0.r)
+                    maxWidth(100.percent)
+                    if (!singleLine) {
                         width(32.r)
-                        maxWidth(100.percent)
-                        inputStyles()
-                    },
-                ) {
+                    } else {
+                        width(100.percent)
+                    }
+                    inputStyles()
+                },
+                onDismissRequest = {
+                    resolve(false)
+                },
+                onSubmit = {
                     resolve(true)
+                    true
                 }
-            }
+            )
 
             inputAction?.invoke(
                 resolve,

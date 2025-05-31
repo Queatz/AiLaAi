@@ -22,7 +22,7 @@ import app.dialog.inputDialog
 import app.dialog.inputSelectDialog
 import app.menu.Menu
 import app.messaages.inList
-import app.nav.NavSearchInput
+import app.components.FlexInput
 import app.softwork.routingcompose.Router
 import appString
 import application
@@ -643,7 +643,7 @@ fun PageTreeWidget(widgetId: String) {
         }
 
         if (cards.size > 5) {
-            NavSearchInput(
+            FlexInput(
                 value = search,
                 onChange = { search = it },
                 defaultMargins = false,

@@ -15,6 +15,7 @@ import app.ailaai.api.myTopReactions
 import app.ailaai.api.reactToMessage
 import app.ailaai.api.setMessageRating
 import app.appNav
+import app.components.FlexInput
 import app.components.LoadMore
 import app.components.LoadMoreState
 import app.dialog.replyInNewGroupDialog
@@ -23,7 +24,6 @@ import app.group.JoinGroupLayout
 import app.menu.Menu
 import app.messaages.MessageItem
 import app.messaages.preview
-import app.nav.NavSearchInput
 import app.rating.setRatingDialog
 import app.reaction.addReactionDialog
 import com.queatz.db.GroupExtended
@@ -211,7 +211,7 @@ fun GroupMessages(
                         null
                     }
                 }
-                NavSearchInput(
+                FlexInput(
                     value = search,
                     onChange = {
                         search = it
@@ -238,7 +238,7 @@ fun GroupMessages(
                     style {
                         height(1.r)
                     }
-                }) { }
+                })
             }
         } else if (!inCoverPage) {
             JoinGroupLayout(group)

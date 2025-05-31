@@ -16,7 +16,7 @@ import app.dialog.inputDialog
 import app.menu.Menu
 import app.nav.NavMenu
 import app.nav.NavMenuItem
-import app.nav.NavSearchInput
+import app.components.FlexInput
 import app.nav.NavTopBar
 import appString
 import application
@@ -148,10 +148,15 @@ fun ScriptsNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(searchQuery, { searchQuery = it }, onDismissRequest = {
-            searchQuery = ""
-            showSearch = false
-        })
+        FlexInput(
+            value = searchQuery,
+            onChange = { searchQuery = it },
+            defaultMargins = true,
+            onDismissRequest = {
+                searchQuery = ""
+                showSearch = false
+            }
+        )
     }
 
     NavMenu {

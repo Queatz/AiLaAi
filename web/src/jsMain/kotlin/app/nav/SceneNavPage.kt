@@ -12,6 +12,7 @@ import api
 import app.ailaai.api.createGameScene
 import app.ailaai.api.gameScenes
 import app.components.Empty
+import app.components.FlexInput
 import app.components.Spacer
 import app.dialog.inputDialog
 import app.menu.Menu
@@ -191,9 +192,10 @@ fun SceneNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(
+        FlexInput(
             value = searchText,
             onChange = { searchText = it },
+            defaultMargins = true,
             onDismissRequest = {
                 searchText = ""
                 showSearch = false

@@ -1,7 +1,7 @@
 package app.widget.form
 
 import androidx.compose.runtime.Composable
-import app.components.TextBox
+import app.components.FlexInput
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.width
 
@@ -12,12 +12,11 @@ fun FormFieldInput(
     placeholder: String,
     isEnabled: Boolean
 ) {
-
-    TextBox(
+    FlexInput(
         value = value,
-        onValue = onValue,
+        onChange = onValue,
         placeholder = placeholder,
-        disabled = !isEnabled,
+        enabled = isEnabled,
         styles = {
             width(100.percent)
         }

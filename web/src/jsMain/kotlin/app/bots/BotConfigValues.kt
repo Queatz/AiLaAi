@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.components.TextBox
+import app.components.FlexInput
 import com.queatz.db.BotConfigField
 import com.queatz.db.BotConfigValue
 import notBlank
@@ -15,7 +15,6 @@ import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.maxWidth
 import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
@@ -53,9 +52,9 @@ import r
                 }
             }
 
-            TextBox(
+            FlexInput(
                 value = value,
-                onValue = { value = it },
+                onChange = { value = it },
                 placeholder = field.placeholder ?: "",
                 styles = {
                     margin(0.r)

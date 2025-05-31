@@ -34,6 +34,7 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.paddingLeft
+import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
@@ -202,6 +203,7 @@ private suspend fun choosePhotoDialog(
         inputStyles = {
             width(32.r)
         },
+        inputEndPadding = 9.r,
         inputAction = { resolve, value, onValue ->
             val scope = rememberCoroutineScope()
 
@@ -209,7 +211,7 @@ private suspend fun choosePhotoDialog(
             Div({
                 style {
                     position(Absolute)
-                    right(3.r)
+                    right(5.r)
                     top(1.r)
                     bottom(1.r)
                     property("display", "flex")
@@ -228,7 +230,6 @@ private suspend fun choosePhotoDialog(
                             property("font-size", "0.75rem")
                         }
                     }) {
-                        Text("Count")
                         NumberInput(
                             value = count.collectAsState().value,
                             min = 1,
@@ -251,13 +252,8 @@ private suspend fun choosePhotoDialog(
             }
 
             IconButton("expand_more", appString { history }, styles = {
-                if (value.isNotBlank()) {
-                    opacity(0)
-                    property("pointer-events", "none")
-                }
-
                 position(Absolute)
-                right(0.5.r)
+                right(2.5.r)
                 top(1.r)
                 bottom(1.r)
             }) {

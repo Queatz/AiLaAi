@@ -1,5 +1,6 @@
 package app.game.editor
 
+import Styles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,7 +17,7 @@ import app.ailaai.api.createGameDiscussion
 import app.ailaai.api.gameDiscussion
 import app.ailaai.api.gameSceneDiscussions
 import app.ailaai.api.resolveGameDiscussion
-import app.components.EditField
+import app.components.FlexInput
 import app.dialog.inputDialog
 import application
 import com.queatz.db.Comment
@@ -30,8 +31,8 @@ import components.LinkifyText
 import components.ProfilePhoto
 import game.DiscussionMarkers
 import game.Map
-import stories.StoryComments
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lib.Color3
 import lib.CreateSphereOptions
@@ -41,18 +42,21 @@ import lib.KeyboardInfo
 import lib.Matrix
 import lib.Mesh
 import lib.MeshBuilder
-import lib.PickingInfo
 import lib.PointerEventTypes
 import lib.PointerInfo
-import lib.Ray
 import lib.StandardMaterial
 import lib.Vector3
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.css.AlignItems
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
-import org.jetbrains.compose.web.css.cursor
+import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flex
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.opacity
@@ -60,18 +64,11 @@ import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.rgba
 import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.css.StyleScope
-import org.jetbrains.compose.web.css.DisplayStyle
-import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.JustifyContent
-import org.jetbrains.compose.web.css.alignItems
-import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.flexDirection
-import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import r
+import stories.StoryComments
 
 @Composable
 fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = null) {
@@ -523,43 +520,56 @@ fun GameEditorTabDiscussion(engine: Engine, map: Map, gameScene: GameScene? = nu
                     }
 
                     // Comment input field
-                        EditField(
-                            placeholder = if (me == null) "Sign in to comment" else "Add a comment...",
-                            styles = {
-                                width(100.percent)
+                    var messageText by remember { mutableStateOf("") }
+
+                    Div({
+                        style {
+                            width(100.percent)
+                        }
+                    }) {
+                        FlexInput(
+                            value = messageText,
+                            onChange = { newText -> 
+                                messageText = newText
                             },
-                            buttonBarStyles = {
+                            initialValue = "",
+                            placeholder = if (me == null) "Sign in to comment" else "Add a comment...",
+                            showButtons = true,
+                            buttonText = "Post",
+                            buttonStyles = {
                                 width(100.percent)
                                 display(DisplayStyle.Flex)
                                 flexDirection(FlexDirection.RowReverse)
+                                margin(.5.r, 0.r)
                             },
-                            resetOnSubmit = true,
-                            button = "Post",
                             enabled = me != null,
-                        ) { commentText ->
-                            // Return true to indicate success and reset the input field
-                            discussion.discussion?.id?.let { discussionId ->
-                                scope.launch {
+                            onSubmit = {
+                                var success = false
+                                // Return true to indicate success and reset the input field
+                                discussion.discussion?.id?.let { discussionId ->
                                     try {
                                         api.commentOnGameDiscussion(
                                             discussionId,
-                                            Comment(comment = commentText)
+                                            Comment(comment = messageText)
                                         ) {
                                             // Reload the discussion after adding a new comment
                                             // Add a small delay to ensure the backend has processed the new comment
-                                            kotlinx.coroutines.delay(300)
+                                            delay(300)
                                             api.gameDiscussion(discussionId) {
                                                 selectedDiscussion = it
                                             }
+                                            // Reset the input field
+                                            messageText = ""
+                                            success = true
                                         }
                                     } catch (e: Exception) {
                                         console.error("Error posting comment: ${e.message}")
                                     }
                                 }
+                                success
                             }
-                            // Always return true to reset the input field
-                            true
-                        }
+                        )
+                    }
 
 
                     // Comments section

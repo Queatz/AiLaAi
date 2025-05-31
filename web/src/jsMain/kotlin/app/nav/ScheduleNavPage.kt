@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.newReminder
 import app.ailaai.api.reminders
+import app.components.FlexInput
 import app.components.Spacer
 import app.page.ScheduleView
 import app.page.ScheduleViewType
@@ -33,9 +34,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lib.rawTimeZones
 import lib.systemTimezone
-import org.jetbrains.compose.web.attributes.autoFocus
 import org.jetbrains.compose.web.attributes.disabled
-import org.jetbrains.compose.web.attributes.placeholder
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
 import org.jetbrains.compose.web.css.JustifyContent
@@ -44,20 +43,18 @@ import org.jetbrains.compose.web.css.div
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.flexShrink
 import org.jetbrains.compose.web.css.fontWeight
-import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
+import org.jetbrains.compose.web.css.marginBottom
 import org.jetbrains.compose.web.css.marginRight
-import org.jetbrains.compose.web.css.maxHeight
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.overflowY
 import org.jetbrains.compose.web.css.padding
+import org.jetbrains.compose.web.css.percent
+import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.TextArea
-import org.w3c.dom.events.Event
 import r
-import resize
 
 @Composable
 fun ScheduleNavPage(
@@ -206,10 +203,15 @@ fun ScheduleNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(searchText, { searchText = it }, onDismissRequest = {
-            searchText = ""
-            showSearch = false
-        })
+        FlexInput(
+            value = searchText,
+            onChange = { searchText = it },
+            defaultMargins = true,
+            onDismissRequest = {
+                searchText = ""
+                showSearch = false
+            }
+        )
     }
 
     Div({
@@ -224,54 +226,25 @@ fun ScheduleNavPage(
         val createReminder = appString { createReminder }
 
         if (!showSearch) {
-            // todo can be EditField
-            TextArea(newReminderTitle) {
-                classes(Styles.textarea)
-                style {
-                    margin(0.r, .5.r, .5.r, .5.r)
-                    height(3.5.r)
-                    maxHeight(6.5.r)
+            FlexInput(
+                value = newReminderTitle,
+                onChange = { 
+                    newReminderTitle = it
+                    onValueChange()
+                },
+                placeholder = createReminder,
+                autoFocus = true,
+                autoSize = true,
+                enabled = !isSavingReminder,
+                defaultMargins = true,
+                styles = {
+                    margin(0.r, .5.r, 1.r)
+                },
+                onSubmit = {
+                    addReminder(false)
+                    true
                 }
-
-                onKeyDown {
-                    if (it.key == "Enter" && !it.shiftKey) {
-                        it.preventDefault()
-                        it.stopPropagation()
-                        addReminder(it.ctrlKey)
-                    }
-                }
-
-                onInput {
-                    newReminderTitle = it.value
-                    it.target.resize()
-                }
-
-                onChange {
-                    it.target.resize()
-
-                    if (newReminderTitle.isEmpty()) {
-                        it.target.focus()
-                    }
-                }
-
-                if (isSavingReminder) {
-                    disabled()
-                }
-
-                placeholder(createReminder)
-
-                autoFocus()
-
-                ref { element ->
-                    element.focus()
-
-                    onValueChange = { element.dispatchEvent(Event("change")) }
-
-                    onDispose {
-                        onValueChange = {}
-                    }
-                }
-            }
+            )
 
             if (newReminderTitle.isNotBlank()) {
                 EditReminderSchedule(schedule)

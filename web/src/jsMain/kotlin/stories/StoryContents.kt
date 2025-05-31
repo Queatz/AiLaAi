@@ -13,8 +13,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.AppStyles
 import app.ailaai.api.group
-import app.components.EditField
-import app.components.TextBox
+import app.components.FlexInput
 import app.dialog.photoDialog
 import app.dialog.rememberChoosePhotoDialog
 import app.group.GroupInfo
@@ -48,12 +47,10 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import lib.isThisYear
 import notBlank
-import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.Color
-import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.Style
@@ -64,7 +61,6 @@ import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.fontSize
 import org.jetbrains.compose.web.css.fontWeight
-import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.margin
 import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.percent
@@ -182,30 +178,32 @@ fun StoryContents(
                     }
                 }) {
                     key(part.story) {
-                        EditField(
+                        var comment by remember {
+                            mutableStateOf("")
+                        }
+                        FlexInput(
+                            value = comment,
+                            onChange = {
+                                comment = it
+                            },
                             placeholder = appString { if (me == null) signInToComment else shareAComment },
                             styles = {
                                 width(100.percent)
                             },
-                            buttonBarStyles = {
-                                width(100.percent)
-                                justifyContent(JustifyContent.End)
-                            },
-                            showDiscard = false,
-                            resetOnSubmit = true,
+                            buttonText = appString { post },
                             enabled = me != null,
-                            button = appString { post }
-                        ) {
-                            var success = false
-                            api.commentOnStory(
-                                id = part.story,
-                                comment = Comment(comment = it)
-                            ) {
-                                success = true
+                            onSubmit = {
+                                var success = false
+                                api.commentOnStory(
+                                    id = part.story,
+                                    comment = Comment(comment = comment)
+                                ) {
+                                    success = true
+                                }
+                                reloadComments()
+                                success
                             }
-                            reloadComments()
-                            success
-                        }
+                        )
 
                         LoadingText(
                             comments != null,
@@ -222,23 +220,25 @@ fun StoryContents(
             is StoryContent.Section -> {
                 if (editable) {
                     var value by remember(content) { mutableStateOf(part.section) }
-                    TextBox(
+                    FlexInput(
                         value = value,
-                        onValue = {
+                        onChange = {
                             value = it
                             onEdited?.invoke(index, part.copy(section = it))
                         },
-                        inline = true,
+                        singleLine = true,
                         placeholder = appString { section },
                         styles = {
                             margin(0.r)
                             width(100.percent)
                             fontSize(24.px)
                             fontWeight("bold")
+                        },
+                        onSubmit = {
+                            onSave?.invoke(content)
+                            true
                         }
-                    ) {
-                        onSave?.invoke(content)
-                    }
+                    )
                 } else {
                     Div({
                         classes(StoryStyles.contentSection)
@@ -251,22 +251,24 @@ fun StoryContents(
             is StoryContent.Text -> {
                 if (editable) {
                     var value by remember(content) { mutableStateOf(part.text) }
-                    TextBox(
+                    FlexInput(
                         value = value,
-                        onValue = {
+                        onChange = {
                             value = it
                             onEdited?.invoke(index, part.copy(text = it))
                         },
-                        inline = true,
+                        singleLine = true,
                         placeholder = appString { write },
                         styles = {
                             margin(0.r)
                             width(100.percent)
                             fontSize(16.px)
+                        },
+                        onSubmit = {
+                            onSave?.invoke(content)
+                            true
                         }
-                    ) {
-                        onSave?.invoke(content)
-                    }
+                    )
                 } else {
                     Div({
                         classes(StoryStyles.contentText)
@@ -496,9 +498,9 @@ fun StoryContents(
 
                 when (part.inputType) {
                     InputType.Text -> {
-                        TextBox(
+                        FlexInput(
                             value = value,
-                            onValue = {
+                            onChange = {
                                 input = input + (part.key to it)
                                 value = it
                             },

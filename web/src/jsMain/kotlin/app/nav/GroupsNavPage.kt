@@ -19,6 +19,7 @@ import app.ailaai.api.groups
 import app.ailaai.api.myStatus
 import app.ailaai.api.recentStatuses
 import app.ailaai.api.updateGroup
+import app.components.FlexInput
 import app.components.Spacer
 import app.dialog.editStatusDialog
 import app.dialog.inputDialog
@@ -326,9 +327,10 @@ fun GroupsNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(
+        FlexInput(
             value = searchText,
             onChange = { searchText = it },
+            defaultMargins = true,
             onDismissRequest = {
                 searchText = ""
                 showSearch = false

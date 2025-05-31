@@ -479,6 +479,7 @@ class Script(
     var categories: List<String>? = null,
     var source: String? = null,
     var background: String? = null,
+    var photo: String? = null,
 
     var author: Person? = null,
     var pin: Boolean? = null

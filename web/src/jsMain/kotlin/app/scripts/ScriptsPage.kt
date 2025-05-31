@@ -105,10 +105,13 @@ import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.whiteSpace
 import org.jetbrains.compose.web.css.width
+import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.DOMRect
+import baseUrl
 import org.w3c.dom.HTMLElement
 import r
 import sortedDistinct
@@ -474,6 +477,19 @@ fun ScriptsPage(
                                         onScriptCreated(script)
                                     }
                                 }) {
+                                    // Display script photo if it exists
+                                    if (script.photo != null) {
+                                        Img(src = "$baseUrl${script.photo!!}", attrs = {
+                                            style {
+                                                width(100.percent)
+                                                property("aspect-ratio", "2")
+                                                property("object-fit", "cover")
+                                                marginBottom(.5.r)
+                                                borderRadius(.5.r)
+                                            }
+                                        })
+                                    }
+
                                     Div({
                                         style {
                                             fontSize(18.px)
@@ -668,6 +684,26 @@ fun ScriptsPage(
                                                 onSuccess = {}
                                             )
                                         }
+                                    }
+                                }
+                            }
+                        )
+                        item(
+                            title = "Photo",
+                            onClick = {
+                                menuTarget = null
+                                scope.launch {
+                                    try {
+                                        choosePhoto.launch { photo, _, _ ->
+                                            api.updateScript(
+                                                id = script.id!!,
+                                                script = Script(photo = photo)
+                                            ) {
+                                                onUpdate(it)
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        // Handle exception
                                     }
                                 }
                             }

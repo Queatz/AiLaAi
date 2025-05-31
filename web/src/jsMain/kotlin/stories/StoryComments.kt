@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.ailaai.api.comment
 import app.ailaai.api.replyToComment
-import app.components.EditField
+import app.components.FlexInput
 import appString
 import appText
 import application
@@ -23,14 +23,11 @@ import components.ProfilePhoto
 import format
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import time.formatDistanceToNow
 import lib.toLocaleString
 import notEmpty
 import org.jetbrains.compose.web.css.AlignSelf
-import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignSelf
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.marginRight
 import org.jetbrains.compose.web.css.marginTop
@@ -42,6 +39,7 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import r
+import time.formatDistanceToNow
 import kotlin.js.Date
 
 @Composable
@@ -148,37 +146,45 @@ fun StoryComments(
                                 classes(StoryStyles.commentRepliesLayout)
                             }) {
                                 if (showReply) {
-                                    EditField(
-                                        placeholder = if (me == null) appString {
-                                            signInToReply
-                                        } else "${appString { replyTo }} ${comment.person!!.name ?: appString { someone }}",
-                                        styles = {
+                                    var messageText by remember { mutableStateOf("") }
+
+                                    Div({
+                                        style {
                                             marginTop(.5.r)
                                             width(100.percent)
-                                        },
-                                        buttonBarStyles = {
-                                            justifyContent(JustifyContent.End)
-                                            width(100.percent)
-                                        },
-                                        autoFocus = true,
-                                        showDiscard = false,
-                                        resetOnSubmit = true,
-                                        enabled = me != null,
-                                        button = appString { post }
-                                    ) {
-                                        var success = false
-                                        api.replyToComment(
-                                            comment.comment!!.id!!,
-                                            Comment(comment = it)
-                                        ) {
-                                            success = true
-                                            if (loadRepliesInline) {
-                                                loadCommentReplies(comment)
-                                            }
-                                            onReply(it)
-                                            showReply = false
                                         }
-                                        success
+                                    }) {
+                                        FlexInput(
+                                            value = messageText,
+                                            onChange = { newText -> 
+                                                messageText = newText
+                                            },
+                                            placeholder = if (me == null) appString {
+                                                signInToReply
+                                            } else "${appString { replyTo }} ${comment.person!!.name ?: appString { someone }}",
+                                            autoFocus = true,
+                                            enabled = me != null,
+                                            showButtons = true,
+                                            buttonText = appString { post },
+                                            onSubmit = {
+                                                var success = false
+                                                api.replyToComment(
+                                                    comment.comment!!.id!!,
+                                                    Comment(comment = messageText)
+                                                ) {
+                                                    success = true
+                                                    if (loadRepliesInline) {
+                                                        loadCommentReplies(comment)
+                                                    }
+                                                    onReply(it)
+                                                    showReply = false
+                                                    if (success) {
+                                                        messageText = ""
+                                                    }
+                                                }
+                                                success
+                                            }
+                                        )
                                     }
                                 }
 

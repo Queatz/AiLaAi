@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.nav.NavSearchInput
+import app.components.FlexInput
 import appString
 import components.IconButton
 import org.jetbrains.compose.web.css.DisplayStyle
@@ -41,7 +41,7 @@ fun NewCardInput(
             styles()
         }
     }) {
-        NavSearchInput(
+        FlexInput(
             value = newCardTitle,
             onChange = { newCardTitle = it },
             placeholder = appString { newCard },
@@ -49,13 +49,15 @@ fun NewCardInput(
             defaultMargins = defaultMargins,
             styles = {
                 flexGrow(1)
+            },
+            onSubmit = {
+                if (newCardTitle.isNotBlank()) {
+                    onSubmit(newCardTitle, publishNow)
+                    newCardTitle = ""
+                }
+                true
             }
-        ) {
-            if (newCardTitle.isNotBlank()) {
-                onSubmit(it, publishNow)
-                newCardTitle = ""
-            }
-        }
+        )
 
         IconButton(
             name = if (publishNow) "toggle_on" else "toggle_off",

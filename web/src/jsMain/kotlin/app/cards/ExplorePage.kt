@@ -23,7 +23,7 @@ import app.ailaai.api.myCollaborations
 import app.ailaai.api.newCard
 import app.ailaai.api.updateCard
 import app.ailaai.api.uploadCardPhoto
-import app.components.EditField
+import app.components.FlexInput
 import app.dialog.categoryDialog
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -461,7 +461,10 @@ fun ExplorePage(
                                     }
                                 }
                             }
-                            item(appString { none }, selected = card.parent == null && card.group == null && card.offline != true && card.equipped != true && card.geo == null) {
+                            item(
+                                appString { none },
+                                selected = card.parent == null && card.group == null && card.offline != true && card.equipped != true && card.geo == null
+                            ) {
                                 scope.launch {
                                     api.updateCard(
                                         card.id!!,
@@ -755,15 +758,36 @@ fun ExplorePage(
 //                }
 //            }
 
-        EditField(
-            value = conversation.message,
-            placeholder = appString { details },
-            styles = {
+        var messageText by remember(conversation.message) { mutableStateOf(conversation.message) }
+        var messageChanged by remember(conversation.message) { mutableStateOf(false) }
+        var isSaving by remember(conversation.message) { mutableStateOf(false) }
+
+        Div({
+            style {
                 margin(.5.r, 1.r)
                 maxHeight(50.vh)
             }
-        ) {
-            saveConversation(it)
+        }) {
+            FlexInput(
+                value = messageText,
+                onChange = { newText ->
+                    messageText = newText
+                    messageChanged = true
+                },
+                placeholder = appString { details },
+                showButtons = true,
+                buttonText = appString { save },
+                onSubmit = {
+                    isSaving = true
+                    val result = saveConversation(messageText)
+                    if (result) {
+                        messageChanged = false
+                    }
+                    isSaving = false
+
+                    result
+                }
+            )
         }
 
         NewCardInput(

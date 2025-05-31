@@ -18,7 +18,7 @@ import app.ailaai.api.sendAppFeedback
 import app.ailaai.api.transferCode
 import app.ailaai.api.updateMe
 import app.ailaai.api.updateProfile
-import app.components.EditField
+import app.components.FlexInput
 import app.dialog.dialog
 import app.dialog.inputDialog
 import appString
@@ -65,7 +65,7 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * Shows a dialog for sending app feedback.
- * 
+ *
  * @param feedbackType The type of feedback (suggestion, issue, other)
  * @return True if feedback was successfully sent, false otherwise
  */
@@ -305,14 +305,26 @@ fun ProfileNavPage(
         }
 
         if (profile != null) {
-            EditField(
-                profile?.profile?.about ?: "",
-                placeholder = appString { introduceYourself },
-                styles = {
+            val profileAbout = profile?.profile?.about.orEmpty()
+            var messageText by remember(profileAbout) { mutableStateOf(profileAbout) }
+
+            Div({
+                style {
                     margin(.5.r)
                 }
-            ) {
-                saveAbout(it)
+            }) {
+                FlexInput(
+                    value = messageText,
+                    onChange = { newText ->
+                        messageText = newText
+                    },
+                    placeholder = appString { introduceYourself },
+                    showButtons = true,
+                    buttonText = appString { save },
+                    onSubmit = {
+                        saveAbout(messageText)
+                    }
+                )
             }
         }
 

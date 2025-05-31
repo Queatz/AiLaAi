@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import api
 import app.FullPageLayout
 import app.PageTopBar
-import app.components.EditField
+import app.components.FlexInput
 import app.components.TopBarSearch
 import app.dialog.dialog
 import app.dialog.inputDialog
@@ -37,14 +37,12 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.AlignItems
 import org.jetbrains.compose.web.css.DisplayStyle
 import org.jetbrains.compose.web.css.FlexDirection
-import org.jetbrains.compose.web.css.JustifyContent
 import org.jetbrains.compose.web.css.alignItems
 import org.jetbrains.compose.web.css.borderRadius
 import org.jetbrains.compose.web.css.color
 import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.css.flexDirection
 import org.jetbrains.compose.web.css.height
-import org.jetbrains.compose.web.css.justifyContent
 import org.jetbrains.compose.web.css.minHeight
 import org.jetbrains.compose.web.css.padding
 import org.jetbrains.compose.web.css.percent
@@ -117,6 +115,7 @@ fun StoriesPage(
                     }
                 }
             }
+
             is StoryNav.Saved -> {}
             is StoryNav.Selected -> {
                 storyContent = selected.story.full()
@@ -206,38 +205,50 @@ fun StoriesPage(
                             }
                         }
                     ) {
-                        EditField(
-                            value = newPostText,
-                            placeholder = appString { shareAThought },
-                            autoFocus = true,
-                            resetOnSubmit = true,
-                            showDiscard = false,
-                            button = appString { post },
-                            buttonBarStyles = {
-                                justifyContent(JustifyContent.End)
-                                width(100.percent)
-                            },
-                            styles = {
+                        var messageChanged by remember(newPostText) { mutableStateOf(false) }
+                        var isSaving by remember(newPostText) { mutableStateOf(false) }
+
+                        Div({
+                            style {
                                 width(100.percent)
                                 minHeight(9.r)
                             }
-                        ) { title ->
-                            var success = false
-                            api.createStory(
-                                Story(
-                                    title = title
-                                )
-                            ) { story ->
-                                api.updateStory(
-                                    id = story.id!!,
-                                    story = Story(published = true)
-                                ) {
-                                    reload()
-                                    onStoryUpdated(it)
-                                    success = true
+                        }) {
+                            FlexInput(
+                                value = newPostText,
+                                onChange = { text ->
+                                    newPostText = text
+                                    messageChanged = true
+                                },
+                                placeholder = appString { shareAThought },
+                                autoFocus = true,
+                                showButtons = true,
+                                buttonText = appString { post },
+                                onSubmit = {
+                                    isSaving = true
+                                    var success = false
+                                    api.createStory(
+                                        Story(
+                                            title = newPostText
+                                        )
+                                    ) { story ->
+                                        api.updateStory(
+                                            id = story.id!!,
+                                            story = Story(published = true)
+                                        ) {
+                                            reload()
+                                            onStoryUpdated(it)
+                                            success = true
+                                            if (success) {
+                                                newPostText = ""
+                                                messageChanged = false
+                                            }
+                                        }
+                                    }
+                                    isSaving = false
+                                    success
                                 }
-                            }
-                            success
+                            )
                         }
                     }
                 }
@@ -276,7 +287,7 @@ fun StoriesPage(
                         }
                     }
                     if (editable) {
-                       // todo: add section
+                        // todo: add section
                     }
                 }
             }

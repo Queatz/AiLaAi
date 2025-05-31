@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.nav.NavSearchInput
+import app.components.FlexInput
 import components.IconButton
 import components.Loading
 import org.jetbrains.compose.web.css.marginBottom
@@ -99,7 +99,7 @@ fun <T : Asset> AssetSection(
                 }
             }) {
                 if (showSearch) {
-                    NavSearchInput(
+                    FlexInput(
                         value = searchQuery,
                         onChange = { searchQuery = it },
                         onDismissRequest = {

@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import api
 import app.ailaai.api.myCards
 import app.ailaai.api.newCard
+import app.components.FlexInput
 import app.components.Spacer
 import app.dialog.inputDialog
 import app.menu.Menu
@@ -201,9 +202,10 @@ fun CardsNavPage(
     }
 
     if (showSearch) {
-        NavSearchInput(
+        FlexInput(
             value = searchText,
             onChange = { searchText = it },
+            defaultMargins = true,
             onDismissRequest = {
                 searchText = ""
                 showSearch = false

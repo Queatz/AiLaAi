@@ -1,18 +1,10 @@
 package app.nav
 
-import Styles
 import androidx.compose.runtime.Composable
+import app.components.FlexInput
 import appString
 import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.attributes.autoFocus
-import org.jetbrains.compose.web.attributes.placeholder
-import org.jetbrains.compose.web.attributes.type
 import org.jetbrains.compose.web.css.StyleScope
-import org.jetbrains.compose.web.css.margin
-import org.jetbrains.compose.web.css.percent
-import org.jetbrains.compose.web.css.width
-import org.jetbrains.compose.web.dom.TextInput
-import r
 
 @Composable
 fun NavSearchInput(
@@ -27,47 +19,22 @@ fun NavSearchInput(
     styles: StyleScope.() -> Unit = {},
     onSubmit: (String) -> Unit = {}
 ) {
-    TextInput(value) {
-        classes(Styles.textarea)
-
-        type?.let {
-            type(it)
-        }
-
-        style {
-            if (defaultMargins) margin(.5.r, 1.r, 0.r, 1.r)
+    FlexInput(
+        value = value,
+        onChange = onChange,
+        placeholder = placeholder,
+        singleLine = true,
+        autoFocus = autoFocus,
+        selectAll = selectAll,
+        inputType = type,
+        defaultMargins = defaultMargins,
+        styles = {
             styles()
+        },
+        onDismissRequest = onDismissRequest,
+        onSubmit = {
+            onSubmit(value)
+            true
         }
-        onKeyDown {
-            if (it.key == "Escape" || (it.key == "Backspace" && value.isEmpty())) {
-                it.preventDefault()
-                it.stopPropagation()
-                onDismissRequest()
-            } else if (it.key == "Enter") {
-                it.preventDefault()
-                it.stopPropagation()
-                onSubmit(value)
-            }
-        }
-
-        onInput {
-            onChange(it.value)
-        }
-
-        placeholder(placeholder)
-
-        if (autoFocus) {
-            autoFocus()
-        }
-
-        ref { element ->
-            if (autoFocus) {
-                element.focus()
-            }
-            if (selectAll) {
-                element.select()
-            }
-            onDispose {}
-        }
-    }
+    )
 }

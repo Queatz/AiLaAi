@@ -1,6 +1,5 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.web.attributes.SelectAttrsScope
-import api
 import app.ailaai.api.uploadPhotos
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -14,7 +13,15 @@ import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.cssRem
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
-import org.w3c.dom.*
+import org.w3c.dom.CanvasRenderingContext2D
+import org.w3c.dom.Element
+import org.w3c.dom.HTMLAnchorElement
+import org.w3c.dom.HTMLCanvasElement
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLImageElement
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLOptionElement
+import org.w3c.dom.asList
 import org.w3c.dom.url.URL
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
@@ -187,7 +194,7 @@ suspend fun HTMLImageElement.scaleToBlob(maxSize: Int): Blob? {
     return result.await()
 }
 
-suspend fun File.toScaledBlob(maxSize: Int): Blob {
+suspend fun File.toScaledImageBlob(maxSize: Int): Blob {
     val result = CompletableDeferred<HTMLImageElement>()
     val reader = FileReader()
     reader.onload = {
@@ -230,7 +237,7 @@ fun web.blob.Blob.downloadAsAudio() {
 
 
 suspend fun File.toScaledBytes(maxSize: Int = 1600) =
-    toScaledBlob(maxSize).toBytes()
+    toScaledImageBlob(maxSize).toBytes()
 
 /**
  * Scales and crops an image to create a game tile.
